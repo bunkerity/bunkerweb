@@ -205,6 +205,9 @@ msgstr "新版本"
 msgid "badge.no_template"
 msgstr "無範本"
 
+msgid "badge.redirect_candidate"
+msgstr "僅重新導向候選"
+
 msgid "badge.unread_news"
 msgstr "未讀新聞"
 
@@ -436,6 +439,9 @@ msgstr "收合"
 msgid "button.columns"
 msgstr "欄"
 
+msgid "button.confirm_service_mode"
+msgstr "確認"
+
 msgid "button.convert_configs"
 msgstr "轉換設定"
 
@@ -636,6 +642,12 @@ msgstr "選取頁面"
 
 msgid "button.service"
 msgstr "服務"
+
+msgid "button.service_mode_redirect_only"
+msgstr "宣告為僅重新導向"
+
+msgid "button.service_mode_standard"
+msgstr "還原為標準模式"
 
 msgid "button.set_1h"
 msgstr "設定 1 小時"
@@ -3007,6 +3019,9 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "您確定要刪除選定的外掛程式嗎？"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "確定要變更此服務宣告的模式嗎？"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "您確定要刪除範本 %(name)s 嗎？"
 
@@ -3130,6 +3145,9 @@ msgstr "確認轉換"
 
 msgid "modal.title.confirm_deletion"
 msgstr "確認刪除"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "確認服務模式"
 
 msgid "modal.title.confirm_unban"
 msgstr "確認解除封鎖"
@@ -4333,6 +4351,18 @@ msgstr "預設伺服器"
 
 msgid "service.default_server.single_site"
 msgstr "當 MULTISITE 設為 yes 時,預設伺服器會變成可設定;在單站台模式下,它會保留內建行為,並回應與任何已設定服務都不相符的請求。"
+
+msgid "service.mode.help"
+msgstr "僅重新導向的服務只執行重新導向：沒有反向代理、不提供檔案、沒有自訂 NGINX 片段、沒有範本，也沒有附加的 upstream 或工作流程。在其他方面它仍是完整的服務。此模式必須明確宣告，絕不會從重新導向設定推斷。一旦僅重新導向計費上線，它將不再佔用您的 PRO 服務配額。"
+
+msgid "service.mode.redirect_only"
+msgstr "僅重新導向"
+
+msgid "service.mode.standard"
+msgstr "標準"
+
+msgid "service.mode.title"
+msgstr "服務模式"
 
 msgid "service.resources.attach"
 msgstr "連結"
@@ -6091,6 +6121,9 @@ msgstr "IP 位址已成功解除封鎖！"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "是否自動請求 Let's Encrypt 憑證。"
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "此服務除了重新導向之外別無其他，因此可宣告為「僅重新導向」——一旦該計費上線，它將不再計入 PRO 服務數量。"
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "返回檔案上傳"

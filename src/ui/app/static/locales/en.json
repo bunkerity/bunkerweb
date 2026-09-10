@@ -78,6 +78,7 @@
     "managed_via_api": "Managed via API",
     "new_version": "New version",
     "no_template": "No Template",
+    "redirect_candidate": "Redirect-only candidate",
     "unread_news": "Unread news",
     "unread_notifications": "Unread notifications"
   },
@@ -268,7 +269,10 @@
     "retry": "Retry",
     "got_it": "Got it",
     "show_me": "Show me",
-    "see_all_releases": "See all releases"
+    "see_all_releases": "See all releases",
+    "service_mode_standard": "Revert to standard",
+    "service_mode_redirect_only": "Declare redirect-only",
+    "confirm_service_mode": "Confirm"
   },
   "cache": {
     "kpi_files": "Files",
@@ -1108,7 +1112,8 @@
       "update_duration_alert": "Select a new duration for the selected bans:",
       "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:",
       "enroll_shown_once": "This code is shown once. Copy it now — it cannot be displayed again.",
-      "enroll_description": "Start the instance with these variables. It redeems the code once at boot and receives its own credential."
+      "enroll_description": "Start the instance with these variables. It redeems the code once at boot and receives its own credential.",
+      "confirm_service_mode_conversion": "Are you sure you want to change this service's declared mode?"
     },
     "button": {
       "fetch_global_settings_confirm": "Apply global settings",
@@ -1145,7 +1150,8 @@
       "security_report_details": "Security Report Details",
       "server_name_not_unique": "Server Name Is Not Unique",
       "update_duration": "Update Ban Duration",
-      "enroll_instance": "Enroll instance"
+      "enroll_instance": "Enroll instance",
+      "confirm_service_mode_conversion": "Confirm service mode"
     }
   },
   "mode": {
@@ -2565,7 +2571,10 @@
     "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request.",
     "config_global_types_available": "You can now select global types for your custom configuration.",
     "instance_credential_age": "Credential last updated: {{updated}}",
-    "enroll_disabled_by_method": "{{hostname}} is sourced from its environment ({{method}}); enrollment only applies to instances the control plane owns"
+    "enroll_disabled_by_method": "{{hostname}} is sourced from its environment ({{method}}); enrollment only applies to instances the control plane owns",
+    "badge": {
+      "redirect_candidate": "This service carries nothing but a redirect, so it can be declared redirect-only — which will take it off the PRO service count once redirect-only billing goes live."
+    }
   },
   "totp": {
     "cant_access": "Can't access your authenticator?",
@@ -3183,6 +3192,12 @@
       "explainer": "Answers requests that match no configured service: unknown hostnames, raw IP access. Configure its certificate, TLS, headers and error pages here.",
       "name": "Default server",
       "single_site": "The default server becomes configurable when MULTISITE is set to yes; in single-site mode it keeps its built-in behaviour and answers requests that match no configured service."
+    },
+    "mode": {
+      "help": "A redirect-only service does nothing but redirect: no reverse proxy, no file serving, no custom NGINX snippet, no template and no attached upstream or workflow. Everywhere else it stays a full service. The declaration is explicit and is never inferred from the redirect settings. It will stop counting against your PRO service quota once redirect-only billing goes live.",
+      "redirect_only": "Redirect-only",
+      "standard": "Standard",
+      "title": "Service mode"
     },
     "resources": {
       "attach": "Attach",

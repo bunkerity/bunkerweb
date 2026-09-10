@@ -205,6 +205,9 @@ msgstr "新版本"
 msgid "badge.no_template"
 msgstr "无模板"
 
+msgid "badge.redirect_candidate"
+msgstr "仅重定向候选"
+
 msgid "badge.unread_news"
 msgstr "未读新闻"
 
@@ -436,6 +439,9 @@ msgstr "折叠"
 msgid "button.columns"
 msgstr "列"
 
+msgid "button.confirm_service_mode"
+msgstr "确认"
+
 msgid "button.convert_configs"
 msgstr "转换配置"
 
@@ -636,6 +642,12 @@ msgstr "选择页面"
 
 msgid "button.service"
 msgstr "服务"
+
+msgid "button.service_mode_redirect_only"
+msgstr "声明为仅重定向"
+
+msgid "button.service_mode_standard"
+msgstr "恢复为标准模式"
 
 msgid "button.set_1h"
 msgstr "设置 1 小时"
@@ -3007,6 +3019,9 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "您确定要删除选定的插件吗？"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "确定要更改该服务声明的模式吗？"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "您确定要删除模板 %(name)s 吗？"
 
@@ -3130,6 +3145,9 @@ msgstr "确认转换"
 
 msgid "modal.title.confirm_deletion"
 msgstr "确认删除"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "确认服务模式"
 
 msgid "modal.title.confirm_unban"
 msgstr "确认解禁"
@@ -4333,6 +4351,18 @@ msgstr "默认服务器"
 
 msgid "service.default_server.single_site"
 msgstr "当 MULTISITE 设置为 yes 时,默认服务器变为可配置;在单站点模式下,它保留内置行为,响应不匹配任何已配置服务的请求。"
+
+msgid "service.mode.help"
+msgstr "仅重定向服务只执行重定向：没有反向代理、不提供文件、没有自定义 NGINX 片段、没有模板，也没有附加的 upstream 或工作流。在其他方面它仍是完整的服务。该模式必须显式声明，绝不会从重定向设置中推断。一旦仅重定向计费上线，它将不再占用您的 PRO 服务配额。"
+
+msgid "service.mode.redirect_only"
+msgstr "仅重定向"
+
+msgid "service.mode.standard"
+msgstr "标准"
+
+msgid "service.mode.title"
+msgstr "服务模式"
 
 msgid "service.resources.attach"
 msgstr "附加"
@@ -6091,6 +6121,9 @@ msgstr "IP 地址已成功解禁！"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "是否自动请求 Let's Encrypt 证书。"
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "该服务除重定向外别无其他，因此可声明为「仅重定向」——一旦该计费上线，它将不再计入 PRO 服务数量。"
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "返回文件上传"

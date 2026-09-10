@@ -205,6 +205,9 @@ msgstr "새 버전"
 msgid "badge.no_template"
 msgstr "템플릿 없음"
 
+msgid "badge.redirect_candidate"
+msgstr "리디렉션 전용 후보"
+
 msgid "badge.unread_news"
 msgstr "읽지 않은 소식"
 
@@ -436,6 +439,9 @@ msgstr "접기"
 msgid "button.columns"
 msgstr "열"
 
+msgid "button.confirm_service_mode"
+msgstr "확인"
+
 msgid "button.convert_configs"
 msgstr "설정 전환"
 
@@ -636,6 +642,12 @@ msgstr "페이지 선택"
 
 msgid "button.service"
 msgstr "서비스"
+
+msgid "button.service_mode_redirect_only"
+msgstr "리디렉션 전용으로 선언"
+
+msgid "button.service_mode_standard"
+msgstr "표준으로 되돌리기"
 
 msgid "button.set_1h"
 msgstr "1시간 설정"
@@ -3007,6 +3019,9 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "선택한 플러그인을 삭제하시겠습니까?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "이 서비스의 선언된 모드를 변경하시겠습니까?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "템플릿 %(name)s을(를) 삭제하시겠습니까?"
 
@@ -3130,6 +3145,9 @@ msgstr "전환 확인"
 
 msgid "modal.title.confirm_deletion"
 msgstr "삭제 확인"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "서비스 모드 확인"
 
 msgid "modal.title.confirm_unban"
 msgstr "차단 해제 확인"
@@ -4333,6 +4351,18 @@ msgstr "기본 서버"
 
 msgid "service.default_server.single_site"
 msgstr "MULTISITE가 yes로 설정되면 기본 서버를 구성할 수 있게 됩니다. 단일 사이트 모드에서는 내장된 동작을 유지하며 구성된 서비스와 일치하지 않는 요청에 응답합니다."
+
+msgid "service.mode.help"
+msgstr "리디렉션 전용 서비스는 리디렉션만 수행합니다. 리버스 프록시도, 파일 제공도, 사용자 지정 NGINX 스니페도, 템플릿도, 연결된 업스트림이나 워크플로도 없습니다. 그 외 모든 면에서는 완전한 서비스로 남습니다. 이 선언은 명시적이며 리디렉션 설정으로부터 추론되지 않습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 할당량에서 제외됩니다."
+
+msgid "service.mode.redirect_only"
+msgstr "리디렉션 전용"
+
+msgid "service.mode.standard"
+msgstr "표준"
+
+msgid "service.mode.title"
+msgstr "서비스 모드"
 
 msgid "service.resources.attach"
 msgstr "연결"
@@ -6091,6 +6121,9 @@ msgstr "IP 주소 차단이 성공적으로 해제되었습니다!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "이 서비스에는 리디렉션 외에 아무것도 없으므로 리디렉션 전용으로 선언할 수 있습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 수에서 제외됩니다."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "파일 업로드로 돌아가기"

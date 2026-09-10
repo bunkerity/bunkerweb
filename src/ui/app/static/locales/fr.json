@@ -78,6 +78,7 @@
     "managed_via_api": "Géré via l'API",
     "new_version": "Nouvelle version",
     "no_template": "Aucun modèle",
+    "redirect_candidate": "Candidat redirection seule",
     "unread_news": "Actualités non lues",
     "unread_notifications": "Notifications non lues"
   },
@@ -268,7 +269,10 @@
     "retry": "Réessayer",
     "got_it": "J'ai compris",
     "show_me": "Montrez-moi",
-    "see_all_releases": "Voir toutes les versions"
+    "see_all_releases": "Voir toutes les versions",
+    "service_mode_standard": "Revenir au mode standard",
+    "service_mode_redirect_only": "Déclarer en redirection seule",
+    "confirm_service_mode": "Confirmer"
   },
   "cache": {
     "kpi_files": "Fichiers",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Voulez-vous vraiment lever les {{count}} bannissements correspondants ?",
       "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :",
       "enroll_description": "Démarrez l'instance avec ces variables. Elle utilise le code une seule fois au démarrage et reçoit son propre identifiant.",
-      "enroll_shown_once": "Ce code n'est affiché qu'une fois. Copiez-le maintenant — il ne pourra plus être affiché."
+      "enroll_shown_once": "Ce code n'est affiché qu'une fois. Copiez-le maintenant — il ne pourra plus être affiché.",
+      "confirm_service_mode_conversion": "Voulez-vous vraiment changer le mode déclaré de ce service ?"
     },
     "button": {
       "fetch_global_settings_confirm": "Appliquer les paramètres globaux",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Détails du rapport de sécurité",
       "server_name_not_unique": "Le nom du serveur n’est pas unique",
       "update_duration": "Modifier la durée du bannissement",
-      "enroll_instance": "Enrôler l'instance"
+      "enroll_instance": "Enrôler l'instance",
+      "confirm_service_mode_conversion": "Confirmer le mode du service"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL.",
     "config_global_types_available": "Vous pouvez maintenant sélectionner des types globaux pour votre configuration personnalisée.",
     "enroll_disabled_by_method": "{{hostname}} provient de son environnement ({{method}}) ; l'enrôlement ne s'applique qu'aux instances possédées par le plan de contrôle",
-    "instance_credential_age": "Identifiant mis à jour le : {{updated}}"
+    "instance_credential_age": "Identifiant mis à jour le : {{updated}}",
+    "badge": {
+      "redirect_candidate": "Ce service ne porte qu'une redirection : il peut être déclaré « redirection seule », ce qui le retirera du décompte des services PRO dès que cette facturation sera active."
+    }
   },
   "totp": {
     "cant_access": "Ne pouvez pas accéder à votre authentificateur ?",
@@ -3194,6 +3203,12 @@
       "explainer": "Répond aux requêtes qui ne correspondent à aucun service configuré : noms d'hôte inconnus, accès par IP brute. Configurez ici son certificat, son TLS, ses en-têtes et ses pages d'erreur.",
       "name": "Serveur par défaut",
       "single_site": "Le serveur par défaut devient configurable quand MULTISITE est réglé sur yes ; en mode mono-site, il conserve son comportement intégré et répond aux requêtes qui ne correspondent à aucun service configuré."
+    },
+    "mode": {
+      "help": "Un service en redirection seule ne fait que rediriger : pas de reverse proxy, pas de service de fichiers, pas de snippet NGINX personnalisé, pas de template, aucun upstream ni workflow attaché. Partout ailleurs il reste un service à part entière. La déclaration est explicite et n'est jamais déduite des paramètres de redirection. Il cessera de compter dans votre quota de services PRO dès que la facturation « redirection seule » sera active.",
+      "redirect_only": "Redirection seule",
+      "standard": "Standard",
+      "title": "Mode du service"
     }
   },
   "onboarding": {

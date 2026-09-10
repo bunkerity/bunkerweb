@@ -78,6 +78,7 @@
     "managed_via_api": "通过 API 管理",
     "new_version": "新版本",
     "no_template": "无模板",
+    "redirect_candidate": "仅重定向候选",
     "unread_news": "未读新闻",
     "unread_notifications": "未读通知"
   },
@@ -268,7 +269,10 @@
     "retry": "重试",
     "got_it": "知道了",
     "show_me": "带我看看",
-    "see_all_releases": "查看所有版本"
+    "see_all_releases": "查看所有版本",
+    "service_mode_standard": "恢复为标准模式",
+    "service_mode_redirect_only": "声明为仅重定向",
+    "confirm_service_mode": "确认"
   },
   "cache": {
     "kpi_files": "文件",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "确定要解除所有 {{count}} 个匹配的封禁吗？",
       "update_filtered_duration_alert": "为所有 {{count}} 个匹配的封禁选择新时长：",
       "enroll_description": "使用这些变量启动实例。它会在启动时使用一次该注册码,并获得自己的凭证。",
-      "enroll_shown_once": "此注册码仅显示一次。请立即复制——之后将无法再次显示。"
+      "enroll_shown_once": "此注册码仅显示一次。请立即复制——之后将无法再次显示。",
+      "confirm_service_mode_conversion": "确定要更改该服务声明的模式吗？"
     },
     "button": {
       "fetch_global_settings_confirm": "应用全局设置",
@@ -1121,7 +1126,8 @@
       "security_report_details": "安全报告详情",
       "server_name_not_unique": "服务器名称不是唯一的",
       "update_duration": "更新封禁期限",
-      "enroll_instance": "注册实例"
+      "enroll_instance": "注册实例",
+      "confirm_service_mode_conversion": "确认服务模式"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
     "config_global_types_available": "现在可以为自定义配置选择全局类型。",
     "enroll_disabled_by_method": "{{hostname}} 来自其环境({{method}});注册仅适用于控制平面拥有的实例",
-    "instance_credential_age": "凭证上次更新时间:{{updated}}"
+    "instance_credential_age": "凭证上次更新时间:{{updated}}",
+    "badge": {
+      "redirect_candidate": "该服务除重定向外别无其他，因此可声明为「仅重定向」——一旦该计费上线，它将不再计入 PRO 服务数量。"
+    }
   },
   "totp": {
     "cant_access": "无法访问您的身份验证器？",
@@ -3194,6 +3203,12 @@
       "explainer": "响应不匹配任何已配置服务的请求:未知主机名、直接 IP 访问。请在此处配置其证书、TLS、请求头和错误页面。",
       "name": "默认服务器",
       "single_site": "当 MULTISITE 设置为 yes 时,默认服务器变为可配置;在单站点模式下,它保留内置行为,响应不匹配任何已配置服务的请求。"
+    },
+    "mode": {
+      "help": "仅重定向服务只执行重定向：没有反向代理、不提供文件、没有自定义 NGINX 片段、没有模板，也没有附加的 upstream 或工作流。在其他方面它仍是完整的服务。该模式必须显式声明，绝不会从重定向设置中推断。一旦仅重定向计费上线，它将不再占用您的 PRO 服务配额。",
+      "redirect_only": "仅重定向",
+      "standard": "标准",
+      "title": "服务模式"
     }
   },
   "onboarding": {

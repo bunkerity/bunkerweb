@@ -78,6 +78,7 @@
     "managed_via_api": "透過 API 管理",
     "new_version": "新版本",
     "no_template": "無範本",
+    "redirect_candidate": "僅重新導向候選",
     "unread_news": "未讀新聞",
     "unread_notifications": "未讀通知"
   },
@@ -268,7 +269,10 @@
     "retry": "重試",
     "got_it": "知道了",
     "show_me": "帶我看看",
-    "see_all_releases": "查看所有版本"
+    "see_all_releases": "查看所有版本",
+    "service_mode_standard": "還原為標準模式",
+    "service_mode_redirect_only": "宣告為僅重新導向",
+    "confirm_service_mode": "確認"
   },
   "cache": {
     "kpi_files": "檔案",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "確定要解除所有 {{count}} 個相符的封鎖嗎？",
       "update_filtered_duration_alert": "為所有 {{count}} 個相符的封鎖選擇新時間：",
       "enroll_description": "使用這些變數啟動執行個體。它會在開機時使用一次此註冊碼,並取得專屬憑證。",
-      "enroll_shown_once": "此代碼僅顯示一次。請立即複製——之後將無法再次顯示。"
+      "enroll_shown_once": "此代碼僅顯示一次。請立即複製——之後將無法再次顯示。",
+      "confirm_service_mode_conversion": "確定要變更此服務宣告的模式嗎？"
     },
     "button": {
       "fetch_global_settings_confirm": "套用全域設定",
@@ -1121,7 +1126,8 @@
       "security_report_details": "安全報告詳細資訊",
       "server_name_not_unique": "伺服器名稱不是唯一的",
       "update_duration": "更新封鎖期限",
-      "enroll_instance": "註冊執行個體"
+      "enroll_instance": "註冊執行個體",
+      "confirm_service_mode_conversion": "確認服務模式"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。",
     "config_global_types_available": "現在可為自訂設定選取全域類型。",
     "enroll_disabled_by_method": "{{hostname}} 來自其環境({{method}});註冊僅適用於控制平面擁有的執行個體",
-    "instance_credential_age": "憑證上次更新時間:{{updated}}"
+    "instance_credential_age": "憑證上次更新時間:{{updated}}",
+    "badge": {
+      "redirect_candidate": "此服務除了重新導向之外別無其他，因此可宣告為「僅重新導向」——一旦該計費上線，它將不再計入 PRO 服務數量。"
+    }
   },
   "totp": {
     "cant_access": "無法使用您的驗證器嗎？",
@@ -3194,6 +3203,12 @@
       "explainer": "回應與任何已設定服務都不相符的請求:未知主機名稱、直接 IP 存取。請在此設定其憑證、TLS、標頭與錯誤頁面。",
       "name": "預設伺服器",
       "single_site": "當 MULTISITE 設為 yes 時,預設伺服器會變成可設定;在單站台模式下,它會保留內建行為,並回應與任何已設定服務都不相符的請求。"
+    },
+    "mode": {
+      "help": "僅重新導向的服務只執行重新導向：沒有反向代理、不提供檔案、沒有自訂 NGINX 片段、沒有範本，也沒有附加的 upstream 或工作流程。在其他方面它仍是完整的服務。此模式必須明確宣告，絕不會從重新導向設定推斷。一旦僅重新導向計費上線，它將不再佔用您的 PRO 服務配額。",
+      "redirect_only": "僅重新導向",
+      "standard": "標準",
+      "title": "服務模式"
     }
   },
   "onboarding": {

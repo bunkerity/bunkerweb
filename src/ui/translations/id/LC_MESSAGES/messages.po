@@ -205,6 +205,9 @@ msgstr "Versi baru"
 msgid "badge.no_template"
 msgstr "Tanpa Template"
 
+msgid "badge.redirect_candidate"
+msgstr "Kandidat hanya pengalihan"
+
 msgid "badge.unread_news"
 msgstr "Berita belum dibaca"
 
@@ -436,6 +439,9 @@ msgstr "Ciutkan"
 msgid "button.columns"
 msgstr "Kolom"
 
+msgid "button.confirm_service_mode"
+msgstr "Konfirmasi"
+
 msgid "button.convert_configs"
 msgstr "Konversi Konfigurasi"
 
@@ -636,6 +642,12 @@ msgstr "Pilih Halaman"
 
 msgid "button.service"
 msgstr "Layanan"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Deklarasikan hanya pengalihan"
+
+msgid "button.service_mode_standard"
+msgstr "Kembalikan ke standar"
 
 msgid "button.set_1h"
 msgstr "Atur 1 Jam"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Apakah Anda yakin ingin menghapus plugin yang dipilih?"
 msgstr[1] "Apakah Anda yakin ingin menghapus plugin yang dipilih?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Yakin ingin mengubah mode yang dideklarasikan untuk layanan ini?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Apakah Anda yakin ingin menghapus template %(name)s?"
 
@@ -3135,6 +3150,9 @@ msgstr "Konfirmasi Konversi"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Konfirmasi Penghapusan"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Konfirmasi mode layanan"
 
 msgid "modal.title.confirm_unban"
 msgstr "Konfirmasi Pembatalan Larangan"
@@ -4338,6 +4356,18 @@ msgstr "Server default"
 
 msgid "service.default_server.single_site"
 msgstr "Server default menjadi dapat dikonfigurasi ketika MULTISITE diatur ke yes; dalam mode situs tunggal ia mempertahankan perilaku bawaannya dan menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun."
+
+msgid "service.mode.help"
+msgstr "Layanan hanya pengalihan hanya melakukan pengalihan: tanpa proxy terbalik, tanpa penyajian berkas, tanpa cuplikan NGINX khusus, tanpa templat, dan tanpa upstream atau alur kerja yang terpasang. Di semua hal lain layanan ini tetap utuh. Deklarasi ini eksplisit dan tidak pernah disimpulkan dari pengaturan pengalihan. Layanan ini akan berhenti dihitung dalam kuota layanan PRO Anda begitu penagihan hanya pengalihan aktif."
+
+msgid "service.mode.redirect_only"
+msgstr "Hanya pengalihan"
+
+msgid "service.mode.standard"
+msgstr "Standar"
+
+msgid "service.mode.title"
+msgstr "Mode layanan"
 
 msgid "service.resources.attach"
 msgstr "Lampirkan"
@@ -6096,6 +6126,9 @@ msgstr "Alamat IP berhasil dibatalkan larangannya!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Apakah akan secara otomatis meminta sertifikat Let's Encrypt."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Layanan ini tidak memuat apa pun selain pengalihan, jadi dapat dideklarasikan sebagai hanya pengalihan — yang akan mengeluarkannya dari hitungan layanan PRO begitu penagihan tersebut aktif."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Kembali ke unggah file"

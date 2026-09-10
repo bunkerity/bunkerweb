@@ -78,6 +78,7 @@
     "managed_via_api": "Verwaltet über API",
     "new_version": "Neue Version",
     "no_template": "Keine Vorlage",
+    "redirect_candidate": "Kandidat für Nur-Weiterleitung",
     "unread_news": "Ungelesene Nachrichten",
     "unread_notifications": "Ungelesene Benachrichtigungen"
   },
@@ -268,7 +269,10 @@
     "retry": "Erneut versuchen",
     "got_it": "Verstanden",
     "show_me": "Zeigen",
-    "see_all_releases": "Alle Versionen ansehen"
+    "see_all_releases": "Alle Versionen ansehen",
+    "service_mode_standard": "Auf Standard zurücksetzen",
+    "service_mode_redirect_only": "Als Nur-Weiterleitung deklarieren",
+    "confirm_service_mode": "Bestätigen"
   },
   "cache": {
     "kpi_files": "Dateien",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Möchten Sie wirklich alle {{count}} passenden Sperren aufheben?",
       "update_filtered_duration_alert": "Wählen Sie eine neue Dauer für alle {{count}} passenden Sperren:",
       "enroll_description": "Starten Sie die Instanz mit diesen Variablen. Sie löst den Code beim Start einmalig ein und erhält ihre eigenen Anmeldedaten.",
-      "enroll_shown_once": "Dieser Code wird nur einmal angezeigt. Kopieren Sie ihn jetzt — er kann nicht erneut angezeigt werden."
+      "enroll_shown_once": "Dieser Code wird nur einmal angezeigt. Kopieren Sie ihn jetzt — er kann nicht erneut angezeigt werden.",
+      "confirm_service_mode_conversion": "Möchten Sie den deklarierten Modus dieses Dienstes wirklich ändern?"
     },
     "button": {
       "fetch_global_settings_confirm": "Globale Einstellungen anwenden",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Details des Sicherheitsprotokolls",
       "server_name_not_unique": "Servername ist nicht eindeutig",
       "update_duration": "Sperrdauer aktualisieren",
-      "enroll_instance": "Instanz registrieren"
+      "enroll_instance": "Instanz registrieren",
+      "confirm_service_mode_conversion": "Dienstmodus bestätigen"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage.",
     "config_global_types_available": "Sie können jetzt globale Typen für Ihre benutzerdefinierte Konfiguration auswählen.",
     "enroll_disabled_by_method": "{{hostname}} stammt aus seiner Umgebung ({{method}}); die Registrierung gilt nur für Instanzen, die der Kontrollebene gehören",
-    "instance_credential_age": "Anmeldedaten zuletzt aktualisiert: {{updated}}"
+    "instance_credential_age": "Anmeldedaten zuletzt aktualisiert: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Dieser Dienst enthält nichts außer einer Weiterleitung und kann als „Nur Weiterleitung“ deklariert werden – das nimmt ihn aus der PRO-Dienstanzahl heraus, sobald diese Abrechnung aktiv ist."
+    }
   },
   "totp": {
     "cant_access": "Kann Ihren Authenticator nicht erreichen?",
@@ -3194,6 +3203,12 @@
       "explainer": "Beantwortet Anfragen, die zu keinem konfigurierten Dienst passen: unbekannte Hostnamen, Zugriff über die reine IP. Hier werden Zertifikat, TLS, Header und Fehlerseiten konfiguriert.",
       "name": "Standardserver",
       "single_site": "Der Standardserver wird konfigurierbar, wenn MULTISITE auf yes gesetzt ist; im Single-Site-Modus behält er sein integriertes Verhalten und beantwortet Anfragen, die zu keinem konfigurierten Dienst passen."
+    },
+    "mode": {
+      "help": "Ein Dienst mit Nur-Weiterleitung leitet ausschließlich weiter: kein Reverse Proxy, keine Dateiauslieferung, kein eigenes NGINX-Snippet, keine Vorlage, kein angehängter Upstream und kein Workflow. Überall sonst bleibt er ein vollwertiger Dienst. Die Deklaration ist ausdrücklich und wird nie aus den Weiterleitungseinstellungen abgeleitet. Er zählt nicht mehr gegen Ihr PRO-Dienstkontingent, sobald die Abrechnung für Nur-Weiterleitung aktiv ist.",
+      "redirect_only": "Nur Weiterleitung",
+      "standard": "Standard",
+      "title": "Dienstmodus"
     }
   },
   "onboarding": {

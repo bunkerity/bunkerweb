@@ -78,6 +78,7 @@
     "managed_via_api": "Gestito tramite API",
     "new_version": "Nuova versione",
     "no_template": "Nessun Modello",
+    "redirect_candidate": "Candidato solo reindirizzamento",
     "unread_news": "Notizie non lette",
     "unread_notifications": "Notifiche non lette"
   },
@@ -268,7 +269,10 @@
     "retry": "Riprova",
     "got_it": "Ho capito",
     "show_me": "Mostrami",
-    "see_all_releases": "Vedi tutte le versioni"
+    "see_all_releases": "Vedi tutte le versioni",
+    "service_mode_standard": "Torna a standard",
+    "service_mode_redirect_only": "Dichiara solo reindirizzamento",
+    "confirm_service_mode": "Conferma"
   },
   "cache": {
     "kpi_files": "File",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Vuoi davvero rimuovere tutti i {{count}} ban corrispondenti?",
       "update_filtered_duration_alert": "Seleziona una nuova durata per tutti i {{count}} ban corrispondenti:",
       "enroll_description": "Avviare l'istanza con queste variabili. Consuma il codice una sola volta all'avvio e riceve una propria credenziale.",
-      "enroll_shown_once": "Questo codice viene mostrato una sola volta. Copiatelo ora — non potrà essere mostrato di nuovo."
+      "enroll_shown_once": "Questo codice viene mostrato una sola volta. Copiatelo ora — non potrà essere mostrato di nuovo.",
+      "confirm_service_mode_conversion": "Vuoi davvero cambiare la modalità dichiarata di questo servizio?"
     },
     "button": {
       "fetch_global_settings_confirm": "Applica impostazioni globali",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Dettagli del Report di Sicurezza",
       "server_name_not_unique": "Nome Server non è Unico",
       "update_duration": "Aggiorna Durata Blocco",
-      "enroll_instance": "Registra istanza"
+      "enroll_instance": "Registra istanza",
+      "confirm_service_mode_conversion": "Conferma la modalità del servizio"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Tempo totale massimo in secondi per ogni richiesta API ZeroSSL.",
     "config_global_types_available": "Ora puoi selezionare tipi globali per la configurazione personalizzata.",
     "enroll_disabled_by_method": "{{hostname}} proviene dal proprio ambiente ({{method}}); l'enrollment si applica solo alle istanze possedute dal control plane",
-    "instance_credential_age": "Credenziale aggiornata l'ultima volta: {{updated}}"
+    "instance_credential_age": "Credenziale aggiornata l'ultima volta: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Questo servizio non contiene altro che un reindirizzamento, quindi può essere dichiarato come solo reindirizzamento: ciò lo escluderà dal conteggio dei servizi PRO non appena tale fatturazione sarà attiva."
+    }
   },
   "totp": {
     "cant_access": "Non riesci ad accedere al tuo autenticatore?",
@@ -3194,6 +3203,12 @@
       "explainer": "Risponde alle richieste che non corrispondono a nessun servizio configurato: hostname sconosciuti, accesso diretto tramite IP. Configura qui il suo certificato, TLS, header e pagine di errore.",
       "name": "Server predefinito",
       "single_site": "Il server predefinito diventa configurabile quando MULTISITE è impostato su yes; in modalità a sito singolo mantiene il suo comportamento integrato e risponde alle richieste che non corrispondono a nessun servizio configurato."
+    },
+    "mode": {
+      "help": "Un servizio di solo reindirizzamento si limita a reindirizzare: nessun reverse proxy, nessun file servito, nessuno snippet NGINX personalizzato, nessun template e nessun upstream o workflow collegato. In tutto il resto resta un servizio completo. La dichiarazione è esplicita e non viene mai dedotta dalle impostazioni di reindirizzamento. Smetterà di incidere sulla quota di servizi PRO non appena la fatturazione per il solo reindirizzamento sarà attiva.",
+      "redirect_only": "Solo reindirizzamento",
+      "standard": "Standard",
+      "title": "Modalità del servizio"
     }
   },
   "onboarding": {

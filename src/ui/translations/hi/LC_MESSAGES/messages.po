@@ -205,6 +205,9 @@ msgstr "नया संस्करण"
 msgid "badge.no_template"
 msgstr "कोई टेम्पलेट नहीं"
 
+msgid "badge.redirect_candidate"
+msgstr "केवल-रीडायरेक्ट उम्मीदवार"
+
 msgid "badge.unread_news"
 msgstr "अपठित समाचार"
 
@@ -436,6 +439,9 @@ msgstr "संक्षिप्त करें"
 msgid "button.columns"
 msgstr "कॉलम"
 
+msgid "button.confirm_service_mode"
+msgstr "पुष्टि करें"
+
 msgid "button.convert_configs"
 msgstr "कॉन्फ़िग रूपांतरित करें"
 
@@ -636,6 +642,12 @@ msgstr "पृष्ठ चुनें"
 
 msgid "button.service"
 msgstr "सेवा"
+
+msgid "button.service_mode_redirect_only"
+msgstr "केवल-रीडायरेक्ट घोषित करें"
+
+msgid "button.service_mode_standard"
+msgstr "मानक पर लौटें"
 
 msgid "button.set_1h"
 msgstr "1 घंटा सेट करें"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?"
 msgstr[1] "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "क्या आप वाकई इस सेवा का घोषित मोड बदलना चाहते हैं?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "क्या आप वाकई टेम्पलेट %(name)s को हटाना चाहते हैं?"
 
@@ -3135,6 +3150,9 @@ msgstr "रूपांतरण की पुष्टि करें"
 
 msgid "modal.title.confirm_deletion"
 msgstr "हटाने की पुष्टि करें"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "सेवा मोड की पुष्टि करें"
 
 msgid "modal.title.confirm_unban"
 msgstr "प्रतिबंध हटाने की पुष्टि करें"
@@ -4338,6 +4356,18 @@ msgstr "डिफ़ॉल्ट सर्वर"
 
 msgid "service.default_server.single_site"
 msgstr "जब MULTISITE को yes पर सेट किया जाता है तो डिफ़ॉल्ट सर्वर कॉन्फ़िगर करने योग्य हो जाता है; सिंगल-साइट मोड में यह अपने बिल्ट-इन व्यवहार को बनाए रखता है और उन अनुरोधों का जवाब देता है जो किसी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते।"
+
+msgid "service.mode.help"
+msgstr "केवल-रीडायरेक्ट सेवा सिर्फ़ रीडायरेक्ट करती है: न रिवर्स प्रॉक्सी, न फ़ाइल सर्विंग, न कस्टम NGINX स्निपेट, न टेम्पलेट, और न कोई संलग्न upstream या वर्कफ़्लो। बाकी हर जगह यह पूरी सेवा बनी रहती है। यह घोषणा स्पष्ट होती है और रीडायरेक्ट सेटिंग्स से कभी अनुमानित नहीं की जाती। जैसे ही केवल-रीडायरेक्ट बिलिंग लागू होगी, यह आपके PRO सेवा कोटे में गिनना बंद कर देगी।"
+
+msgid "service.mode.redirect_only"
+msgstr "केवल रीडायरेक्ट"
+
+msgid "service.mode.standard"
+msgstr "मानक"
+
+msgid "service.mode.title"
+msgstr "सेवा मोड"
 
 msgid "service.resources.attach"
 msgstr "संलग्न करें"
@@ -6096,6 +6126,9 @@ msgstr "आईपी पते का प्रतिबंध सफलता�
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।"
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "इस सेवा में रीडायरेक्ट के अलावा कुछ नहीं है, इसलिए इसे केवल-रीडायरेक्ट घोषित किया जा सकता है — जो उस बिलिंग के लागू होते ही इसे PRO सेवा गणना से बाहर कर देगा।"
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "फ़ाइल अपलोड पर वापस जाएँ"

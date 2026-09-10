@@ -205,6 +205,9 @@ msgstr "إصدار جديد"
 msgid "badge.no_template"
 msgstr "لا يوجد قالب"
 
+msgid "badge.redirect_candidate"
+msgstr "مرشّح لوضع إعادة التوجيه فقط"
+
 msgid "badge.unread_news"
 msgstr "أخبار غير مقروءة"
 
@@ -436,6 +439,9 @@ msgstr "طي"
 msgid "button.columns"
 msgstr "الأعمدة"
 
+msgid "button.confirm_service_mode"
+msgstr "تأكيد"
+
 msgid "button.convert_configs"
 msgstr "تحويل الإعدادات"
 
@@ -636,6 +642,12 @@ msgstr "اختيار صفحة"
 
 msgid "button.service"
 msgstr "خدمة"
+
+msgid "button.service_mode_redirect_only"
+msgstr "إعلانها كإعادة توجيه فقط"
+
+msgid "button.service_mode_standard"
+msgstr "العودة إلى الوضع القياسي"
 
 msgid "button.set_1h"
 msgstr "تعيين ساعة واحدة"
@@ -3022,6 +3034,9 @@ msgstr[3] "هل أنت متأكد أنك تريد حذف الإضافات الم
 msgstr[4] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
 msgstr[5] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "هل تريد بالتأكيد تغيير الوضع المعلن لهذه الخدمة؟"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "هل أنت متأكد أنك تريد حذف القالب %(name)s؟"
 
@@ -3155,6 +3170,9 @@ msgstr "تأكيد التحويل"
 
 msgid "modal.title.confirm_deletion"
 msgstr "تأكيد الحذف"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "تأكيد وضع الخدمة"
 
 msgid "modal.title.confirm_unban"
 msgstr "تأكيد رفع الحظر"
@@ -4358,6 +4376,18 @@ msgstr "الخادم الافتراضي"
 
 msgid "service.default_server.single_site"
 msgstr "يصبح الخادم الافتراضي قابلاً للتهيئة عندما يُضبط MULTISITE على yes؛ في وضع الموقع الواحد يحافظ على سلوكه المدمج ويستجيب للطلبات التي لا تطابق أي خدمة مُهيَّأة."
+
+msgid "service.mode.help"
+msgstr "خدمة إعادة التوجيه فقط لا تقوم إلا بإعادة التوجيه: بلا وكيل عكسي، وبلا تقديم ملفات، وبلا مقطع NGINX مخصص، وبلا قالب، وبلا upstream أو سير عمل مرفق. وتبقى خدمة كاملة في كل ما عدا ذلك. الإعلان صريح ولا يُستنتج أبدًا من إعدادات إعادة التوجيه. وستتوقف عن الاحتساب ضمن حصة خدمات PRO فور تفعيل فوترة إعادة التوجيه فقط."
+
+msgid "service.mode.redirect_only"
+msgstr "إعادة توجيه فقط"
+
+msgid "service.mode.standard"
+msgstr "قياسي"
+
+msgid "service.mode.title"
+msgstr "وضع الخدمة"
 
 msgid "service.resources.attach"
 msgstr "ربط"
@@ -6116,6 +6146,9 @@ msgstr "تم رفع الحظر عن عنوان IP بنجاح!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "هل يجب طلب شهادة Let's Encrypt تلقائيًا."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "لا تحتوي هذه الخدمة على أي شيء سوى إعادة توجيه، لذا يمكن إعلانها كخدمة إعادة توجيه فقط — مما سيخرجها من عدد خدمات PRO فور تفعيل تلك الفوترة."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "العودة إلى تحميل الملف"

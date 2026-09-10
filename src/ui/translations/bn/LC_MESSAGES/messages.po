@@ -205,6 +205,9 @@ msgstr "নতুন সংস্করণ"
 msgid "badge.no_template"
 msgstr "কোনো টেমপ্লেট নেই"
 
+msgid "badge.redirect_candidate"
+msgstr "শুধু-রিডাইরেক্ট প্রার্থী"
+
 msgid "badge.unread_news"
 msgstr "অপঠিত সংবাদ"
 
@@ -436,6 +439,9 @@ msgstr "সংকুচিত করুন"
 msgid "button.columns"
 msgstr "কলাম"
 
+msgid "button.confirm_service_mode"
+msgstr "নিশ্চিত করুন"
+
 msgid "button.convert_configs"
 msgstr "কনফিগ রূপান্তর করুন"
 
@@ -636,6 +642,12 @@ msgstr "পৃষ্ঠা নির্বাচন করুন"
 
 msgid "button.service"
 msgstr "পরিষেবা"
+
+msgid "button.service_mode_redirect_only"
+msgstr "শুধু-রিডাইরেক্ট ঘোষণা করুন"
+
+msgid "button.service_mode_standard"
+msgstr "স্ট্যান্ডার্ডে ফিরে যান"
 
 msgid "button.set_1h"
 msgstr "১ ঘণ্টা সেট করুন"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইন মুছতে চান?"
 msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইনগুলি মুছতে চান?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "আপনি কি নিশ্চিতভাবে এই সার্ভিসের ঘোষিত মোড পরিবর্তন করতে চান?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "আপনি কি নিশ্চিত যে টেমপ্লেট %(name)s মুছে ফেলতে চান?"
 
@@ -3135,6 +3150,9 @@ msgstr "রূপান্তর নিশ্চিত করুন"
 
 msgid "modal.title.confirm_deletion"
 msgstr "মোছা নিশ্চিত করুন"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "সার্ভিস মোড নিশ্চিত করুন"
 
 msgid "modal.title.confirm_unban"
 msgstr "নিষেধাজ্ঞা অপসারণ নিশ্চিত করুন"
@@ -4338,6 +4356,18 @@ msgstr "ডিফল্ট সার্ভার"
 
 msgid "service.default_server.single_site"
 msgstr "MULTISITE yes-এ সেট করা হলে ডিফল্ট সার্ভার কনফিগারযোগ্য হয়ে যায়; সিঙ্গেল-সাইট মোডে এটি তার বিল্ট-ইন আচরণ বজায় রাখে এবং যেসব রিকোয়েস্ট কোনো কনফিগার করা সার্ভিসের সাথে মেলে না তাদের সাড়া দেয়।"
+
+msgid "service.mode.help"
+msgstr "শুধু-রিডাইরেক্ট সার্ভিস কেবল রিডাইরেক্ট করে: কোনও রিভার্স প্রক্সি নেই, ফাইল পরিবেশন নেই, কাস্টম NGINX স্নিপেট নেই, টেমপ্লেট নেই, এবং সংযুক্ত কোনও upstream বা ওয়ার্কফ্লো নেই। বাকি সবখানে এটি একটি পূর্ণ সার্ভিস হিসেবেই থাকে। ঘোষণাটি স্পষ্ট এবং কখনওই রিডাইরেক্ট সেটিংস থেকে অনুমান করা হয় না। শুধু-রিডাইরেক্ট বিলিং চালু হওয়ামাত্র এটি আপনার PRO সার্ভিস কোটায় গণনা হওয়া বন্ধ করবে।"
+
+msgid "service.mode.redirect_only"
+msgstr "শুধু রিডাইরেক্ট"
+
+msgid "service.mode.standard"
+msgstr "স্ট্যান্ডার্ড"
+
+msgid "service.mode.title"
+msgstr "সার্ভিস মোড"
 
 msgid "service.resources.attach"
 msgstr "সংযুক্ত করুন"
@@ -6096,6 +6126,9 @@ msgstr "আইপি ঠিকানা সফলভাবে নিষেধা
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।"
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "এই সার্ভিসে একটি রিডাইরেক্ট ছাড়া আর কিছুই নেই, তাই এটিকে শুধু-রিডাইরেক্ট ঘোষণা করা যায় — যা সেই বিলিং চালু হওয়ামাত্র এটিকে PRO সার্ভিস গণনা থেকে বাদ দেবে।"
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "ফাইল আপলোডে ফিরে যান"

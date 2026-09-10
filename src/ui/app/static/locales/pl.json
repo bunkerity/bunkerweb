@@ -78,6 +78,7 @@
     "managed_via_api": "Zarządzane przez API",
     "new_version": "Nowa wersja",
     "no_template": "Brak szablonu",
+    "redirect_candidate": "Kandydat do trybu tylko przekierowanie",
     "unread_news": "Nieprzeczytane wiadomości",
     "unread_notifications": "Nieprzeczytane powiadomienia"
   },
@@ -268,7 +269,10 @@
     "retry": "Ponów",
     "got_it": "Rozumiem",
     "show_me": "Pokaż",
-    "see_all_releases": "Zobacz wszystkie wydania"
+    "see_all_releases": "Zobacz wszystkie wydania",
+    "service_mode_standard": "Przywróć tryb standardowy",
+    "service_mode_redirect_only": "Zadeklaruj tylko przekierowanie",
+    "confirm_service_mode": "Potwierdź"
   },
   "cache": {
     "kpi_files": "Pliki",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Czy na pewno cofnąć wszystkie {{count}} pasujące blokady?",
       "update_filtered_duration_alert": "Wybierz nowy czas trwania dla wszystkich {{count}} pasujących blokad:",
       "enroll_description": "Uruchom instancję z tymi zmiennymi. Wykorzystuje kod jednorazowo podczas startu i otrzymuje własne dane uwierzytelniające.",
-      "enroll_shown_once": "Ten kod jest wyświetlany tylko raz. Skopiuj go teraz — nie będzie można go ponownie wyświetlić."
+      "enroll_shown_once": "Ten kod jest wyświetlany tylko raz. Skopiuj go teraz — nie będzie można go ponownie wyświetlić.",
+      "confirm_service_mode_conversion": "Czy na pewno chcesz zmienić zadeklarowany tryb tej usługi?"
     },
     "button": {
       "fetch_global_settings_confirm": "Zastosuj ustawienia globalne",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Szczegóły raportu bezpieczeństwa",
       "server_name_not_unique": "Nazwa serwera nie jest unikalna",
       "update_duration": "Aktualizacja czasu trwania blokady",
-      "enroll_instance": "Zarejestruj instancję"
+      "enroll_instance": "Zarejestruj instancję",
+      "confirm_service_mode_conversion": "Potwierdź tryb usługi"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL.",
     "config_global_types_available": "Możesz teraz wybierać typy globalne dla konfiguracji niestandardowej.",
     "enroll_disabled_by_method": "{{hostname}} pochodzi ze swojego środowiska ({{method}}); rejestracja dotyczy tylko instancji należących do płaszczyzny kontroli",
-    "instance_credential_age": "Dane uwierzytelniające ostatnio zaktualizowane: {{updated}}"
+    "instance_credential_age": "Dane uwierzytelniające ostatnio zaktualizowane: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Ta usługa nie zawiera niczego poza przekierowaniem, więc można ją zadeklarować jako „tylko przekierowanie” — co usunie ją z liczby usług PRO, gdy tylko to rozliczanie wejdzie w życie."
+    }
   },
   "totp": {
     "cant_access": "Nie możesz uzyskać dostępu do swojego kodu uwierzytelniania?",
@@ -3194,6 +3203,12 @@
       "explainer": "Odpowiada na żądania niezgodne z żadną skonfigurowaną usługą: nieznane nazwy hostów, dostęp przez bezpośredni adres IP. Skonfiguruj tutaj jego certyfikat, TLS, nagłówki i strony błędów.",
       "name": "Serwer domyślny",
       "single_site": "Serwer domyślny staje się konfigurowalny, gdy MULTISITE jest ustawiony na yes; w trybie jednej witryny zachowuje swoje wbudowane zachowanie i odpowiada na żądania niezgodne z żadną skonfigurowaną usługą."
+    },
+    "mode": {
+      "help": "Usługa w trybie tylko przekierowanie jedynie przekierowuje: bez odwrotnego proxy, bez serwowania plików, bez własnego fragmentu NGINX, bez szablonu i bez podłączonego upstreamu ani przepływu pracy. Pod każdym innym względem pozostaje pełnoprawną usługą. Deklaracja jest jawna i nigdy nie jest wywnioskowana z ustawień przekierowania. Przestanie obciążać limit usług PRO, gdy tylko rozliczanie trybu tylko przekierowanie wejdzie w życie.",
+      "redirect_only": "Tylko przekierowanie",
+      "standard": "Standardowy",
+      "title": "Tryb usługi"
     }
   },
   "onboarding": {

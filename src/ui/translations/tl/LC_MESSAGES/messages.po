@@ -205,6 +205,9 @@ msgstr "Bagong bersyon"
 msgid "badge.no_template"
 msgstr "Walang Template"
 
+msgid "badge.redirect_candidate"
+msgstr "Kandidato sa redirect lamang"
+
 msgid "badge.unread_news"
 msgstr "Hindi pa nababasang balita"
 
@@ -436,6 +439,9 @@ msgstr "I-collapse"
 msgid "button.columns"
 msgstr "Mga Hanay"
 
+msgid "button.confirm_service_mode"
+msgstr "Kumpirmahin"
+
 msgid "button.convert_configs"
 msgstr "I-convert ang Mga Config"
 
@@ -636,6 +642,12 @@ msgstr "Pumili ng Pahina"
 
 msgid "button.service"
 msgstr "Serbisyo"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Ideklarang redirect lamang"
+
+msgid "button.service_mode_standard"
+msgstr "Ibalik sa karaniwan"
 
 msgid "button.set_1h"
 msgstr "Itakda ng 1 Oras"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling plugin?"
 msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling plugin?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Sigurado ka bang gusto mong baguhin ang idineklarang mode ng serbisyong ito?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Sigurado ka bang gusto mong burahin ang template na %(name)s?"
 
@@ -3135,6 +3150,9 @@ msgstr "Kumpirmahin ang Conversion"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Kumpirmahin ang Pagbubura"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Kumpirmahin ang mode ng serbisyo"
 
 msgid "modal.title.confirm_unban"
 msgstr "Kumpirmahin ang Pag-unban"
@@ -4338,6 +4356,18 @@ msgstr "Default na Server"
 
 msgid "service.default_server.single_site"
 msgstr "Nagiging configurable ang default server kapag naka-set sa yes ang MULTISITE; sa single-site mode, pinapanatili nito ang built-in nitong behavior at sinasagot ang mga request na hindi tugma sa anumang naka-configure na service."
+
+msgid "service.mode.help"
+msgstr "Ang serbisyong redirect lamang ay nagre-redirect lang: walang reverse proxy, walang paghahain ng file, walang pasadyang NGINX snippet, walang template, at walang nakakabit na upstream o workflow. Sa lahat ng iba pa ay nananatili itong ganap na serbisyo. Tahasan ang deklarasyon at hindi kailanman hinuhulaan mula sa mga setting ng redirect. Titigil itong mabilang sa iyong kuota ng mga serbisyong PRO sa oras na umandar ang pagsingil para sa redirect lamang."
+
+msgid "service.mode.redirect_only"
+msgstr "Redirect lamang"
+
+msgid "service.mode.standard"
+msgstr "Karaniwan"
+
+msgid "service.mode.title"
+msgstr "Mode ng serbisyo"
 
 msgid "service.resources.attach"
 msgstr "Ikabit"
@@ -6096,6 +6126,9 @@ msgstr "Matagumpay na na-unban ang IP address!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Wala nang iba ang serbisyong ito kundi isang redirect, kaya maaari itong ideklarang redirect lamang — na mag-aalis dito sa bilang ng mga serbisyong PRO sa oras na umandar ang pagsingil na iyon."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Bumalik sa pag-upload ng file"

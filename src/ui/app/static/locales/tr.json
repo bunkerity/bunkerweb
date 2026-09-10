@@ -78,6 +78,7 @@
     "managed_via_api": "API aracılığıyla yönetilir",
     "new_version": "Yeni sürüm",
     "no_template": "Şablon Yok",
+    "redirect_candidate": "Yalnızca yönlendirme adayı",
     "unread_news": "Okunmamış haberler",
     "unread_notifications": "Okunmamış bildirimler"
   },
@@ -268,7 +269,10 @@
     "retry": "Yeniden dene",
     "got_it": "Anladım",
     "show_me": "Göster",
-    "see_all_releases": "Tüm sürümleri gör"
+    "see_all_releases": "Tüm sürümleri gör",
+    "service_mode_standard": "Standarda geri dön",
+    "service_mode_redirect_only": "Yalnızca yönlendirme olarak bildir",
+    "confirm_service_mode": "Onayla"
   },
   "cache": {
     "kpi_files": "Dosyalar",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünü kaldırmak istediğinizden emin misiniz?",
       "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni süre seçin:",
       "enroll_description": "Örneği bu değişkenlerle başlatın. Kodu önyüklemede bir kez kullanır ve kendi kimlik bilgisini alır.",
-      "enroll_shown_once": "Bu kod yalnızca bir kez gösterilir. Şimdi kopyalayın — bir daha gösterilemez."
+      "enroll_shown_once": "Bu kod yalnızca bir kez gösterilir. Şimdi kopyalayın — bir daha gösterilemez.",
+      "confirm_service_mode_conversion": "Bu hizmetin bildirilen modunu değiştirmek istediğinizden emin misiniz?"
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Güvenlik Raporu Detayları",
       "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
       "update_duration": "Yasaklama Süresini Güncelle",
-      "enroll_instance": "Örneği kaydet"
+      "enroll_instance": "Örneği kaydet",
+      "confirm_service_mode_conversion": "Hizmet modunu onayla"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
     "config_global_types_available": "Artık özel yapılandırmanız için genel türleri seçebilirsiniz.",
     "enroll_disabled_by_method": "{{hostname}} kendi ortamından ({{method}}) alınıyor; kayıt yalnızca kontrol düzleminin sahip olduğu örneklere uygulanır",
-    "instance_credential_age": "Kimlik bilgisi son güncelleme: {{updated}}"
+    "instance_credential_age": "Kimlik bilgisi son güncelleme: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Bu hizmet bir yönlendirmeden başka bir şey içermiyor, bu yüzden yalnızca yönlendirme olarak bildirilebilir — bu, ilgili faturalandırma devreye girdiğinde onu PRO hizmet sayımından çıkaracaktır."
+    }
   },
   "totp": {
     "cant_access": "Kimlik doğrulama kodunuza erişemiyor musunuz?",
@@ -3194,6 +3203,12 @@
       "explainer": "Yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar: bilinmeyen ana bilgisayar adları, doğrudan IP erişimi. Sertifikasını, TLS'sini, başlıklarını ve hata sayfalarını buradan yapılandırın.",
       "name": "Varsayılan sunucu",
       "single_site": "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
+    },
+    "mode": {
+      "help": "Yalnızca yönlendirme modundaki bir hizmet sadece yönlendirme yapar: ters vekil yok, dosya sunumu yok, özel NGINX parçacığı yok, şablon yok, bağlı upstream veya iş akışı yok. Diğer her yerde tam bir hizmet olarak kalır. Bildirim açıktır ve asla yönlendirme ayarlarından çıkarsanmaz. Yalnızca yönlendirme faturalandırması devreye girdiğinde PRO hizmet kotanıza sayılmayı bırakacaktır.",
+      "redirect_only": "Yalnızca yönlendirme",
+      "standard": "Standart",
+      "title": "Hizmet modu"
     }
   },
   "onboarding": {

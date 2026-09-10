@@ -78,6 +78,7 @@
     "managed_via_api": "Dikelola via API",
     "new_version": "Versi baru",
     "no_template": "Tanpa Template",
+    "redirect_candidate": "Kandidat hanya pengalihan",
     "unread_news": "Berita belum dibaca",
     "unread_notifications": "Notifikasi belum dibaca"
   },
@@ -268,7 +269,10 @@
     "retry": "Coba lagi",
     "got_it": "Mengerti",
     "show_me": "Tunjukkan",
-    "see_all_releases": "Lihat semua rilis"
+    "see_all_releases": "Lihat semua rilis",
+    "service_mode_standard": "Kembalikan ke standar",
+    "service_mode_redirect_only": "Deklarasikan hanya pengalihan",
+    "confirm_service_mode": "Konfirmasi"
   },
   "cache": {
     "kpi_files": "File",
@@ -1108,7 +1112,8 @@
       "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:",
       "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:",
       "enroll_description": "Mulai instans dengan variabel ini. Kode digunakan satu kali saat boot dan instans menerima kredensialnya sendiri.",
-      "enroll_shown_once": "Kode ini hanya ditampilkan sekali. Salin sekarang — kode tidak dapat ditampilkan lagi."
+      "enroll_shown_once": "Kode ini hanya ditampilkan sekali. Salin sekarang — kode tidak dapat ditampilkan lagi.",
+      "confirm_service_mode_conversion": "Yakin ingin mengubah mode yang dideklarasikan untuk layanan ini?"
     },
     "button": {
       "fetch_global_settings_confirm": "Terapkan pengaturan global",
@@ -1145,7 +1150,8 @@
       "security_report_details": "Detail Laporan Keamanan",
       "server_name_not_unique": "Nama Server Tidak Unik",
       "update_duration": "Perbarui Durasi Larangan",
-      "enroll_instance": "Daftarkan instans"
+      "enroll_instance": "Daftarkan instans",
+      "confirm_service_mode_conversion": "Konfirmasi mode layanan"
     }
   },
   "mode": {
@@ -2565,7 +2571,10 @@
     "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL.",
     "config_global_types_available": "Anda sekarang dapat memilih jenis global untuk konfigurasi kustom Anda.",
     "enroll_disabled_by_method": "{{hostname}} berasal dari environment-nya ({{method}}); pendaftaran hanya berlaku untuk instans yang dimiliki oleh control plane",
-    "instance_credential_age": "Kredensial terakhir diperbarui: {{updated}}"
+    "instance_credential_age": "Kredensial terakhir diperbarui: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Layanan ini tidak memuat apa pun selain pengalihan, jadi dapat dideklarasikan sebagai hanya pengalihan — yang akan mengeluarkannya dari hitungan layanan PRO begitu penagihan tersebut aktif."
+    }
   },
   "totp": {
     "cant_access": "Tidak dapat mengakses autentikator Anda?",
@@ -3224,6 +3233,12 @@
       "explainer": "Menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun: nama host yang tidak dikenal, akses IP langsung. Konfigurasikan sertifikat, TLS, header, dan halaman error di sini.",
       "name": "Server default",
       "single_site": "Server default menjadi dapat dikonfigurasi ketika MULTISITE diatur ke yes; dalam mode situs tunggal ia mempertahankan perilaku bawaannya dan menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun."
+    },
+    "mode": {
+      "help": "Layanan hanya pengalihan hanya melakukan pengalihan: tanpa proxy terbalik, tanpa penyajian berkas, tanpa cuplikan NGINX khusus, tanpa templat, dan tanpa upstream atau alur kerja yang terpasang. Di semua hal lain layanan ini tetap utuh. Deklarasi ini eksplisit dan tidak pernah disimpulkan dari pengaturan pengalihan. Layanan ini akan berhenti dihitung dalam kuota layanan PRO Anda begitu penagihan hanya pengalihan aktif.",
+      "redirect_only": "Hanya pengalihan",
+      "standard": "Standar",
+      "title": "Mode layanan"
     }
   },
   "timings": {

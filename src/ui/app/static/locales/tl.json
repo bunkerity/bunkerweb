@@ -78,6 +78,7 @@
     "managed_via_api": "Pinamamahalaan sa pamamagitan ng API",
     "new_version": "Bagong bersyon",
     "no_template": "Walang Template",
+    "redirect_candidate": "Kandidato sa redirect lamang",
     "unread_news": "Hindi pa nababasang balita",
     "unread_notifications": "Hindi pa nababasang mga abiso"
   },
@@ -268,7 +269,10 @@
     "retry": "Subukang muli",
     "got_it": "Naiintindihan ko",
     "show_me": "Ipakita sa akin",
-    "see_all_releases": "Tingnan ang lahat ng release"
+    "see_all_releases": "Tingnan ang lahat ng release",
+    "service_mode_standard": "Ibalik sa karaniwan",
+    "service_mode_redirect_only": "Ideklarang redirect lamang",
+    "confirm_service_mode": "Kumpirmahin"
   },
   "cache": {
     "kpi_files": "Mga file",
@@ -1084,7 +1088,8 @@
       "unban_filtered_confirmation": "Sigurado ka bang aalisin ang lahat ng {{count}} tumutugmang ban?",
       "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:",
       "enroll_description": "I-start ang instance gamit ang mga variable na ito. Ginagamit nito ang code isang beses sa boot at nakakakuha ito ng sariling credential.",
-      "enroll_shown_once": "Minsan lang ipapakita ang code na ito. Kopyahin ito ngayon — hindi na ito maipapakita ulit."
+      "enroll_shown_once": "Minsan lang ipapakita ang code na ito. Kopyahin ito ngayon — hindi na ito maipapakita ulit.",
+      "confirm_service_mode_conversion": "Sigurado ka bang gusto mong baguhin ang idineklarang mode ng serbisyong ito?"
     },
     "button": {
       "fetch_global_settings_confirm": "Ilapat ang mga pandaigdigang setting",
@@ -1121,7 +1126,8 @@
       "security_report_details": "Detalye ng Security Report",
       "server_name_not_unique": "Ang Pangalan ng Server ay Hindi Natatangi",
       "update_duration": "I-update ang Tagal ng Ban",
-      "enroll_instance": "I-enroll ang instance"
+      "enroll_instance": "I-enroll ang instance",
+      "confirm_service_mode_conversion": "Kumpirmahin ang mode ng serbisyo"
     }
   },
   "mode": {
@@ -2511,7 +2517,10 @@
     "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API.",
     "config_global_types_available": "Maaari ka nang pumili ng mga global na uri para sa iyong custom na configuration.",
     "enroll_disabled_by_method": "Galing sa sariling environment ang {{hostname}} ({{method}}); ang enrollment ay para lang sa mga instance na pag-aari ng control plane",
-    "instance_credential_age": "Huling na-update ang credential: {{updated}}"
+    "instance_credential_age": "Huling na-update ang credential: {{updated}}",
+    "badge": {
+      "redirect_candidate": "Wala nang iba ang serbisyong ito kundi isang redirect, kaya maaari itong ideklarang redirect lamang — na mag-aalis dito sa bilang ng mga serbisyong PRO sa oras na umandar ang pagsingil na iyon."
+    }
   },
   "totp": {
     "cant_access": "Hindi makakuha ng access sa iyong authenticator?",
@@ -3194,6 +3203,12 @@
       "explainer": "Sinasagot ang mga request na hindi tugma sa anumang naka-configure na service: hindi kilalang hostname, direktang pag-access sa IP. I-configure dito ang certificate, TLS, headers, at error pages nito.",
       "name": "Default na Server",
       "single_site": "Nagiging configurable ang default server kapag naka-set sa yes ang MULTISITE; sa single-site mode, pinapanatili nito ang built-in nitong behavior at sinasagot ang mga request na hindi tugma sa anumang naka-configure na service."
+    },
+    "mode": {
+      "help": "Ang serbisyong redirect lamang ay nagre-redirect lang: walang reverse proxy, walang paghahain ng file, walang pasadyang NGINX snippet, walang template, at walang nakakabit na upstream o workflow. Sa lahat ng iba pa ay nananatili itong ganap na serbisyo. Tahasan ang deklarasyon at hindi kailanman hinuhulaan mula sa mga setting ng redirect. Titigil itong mabilang sa iyong kuota ng mga serbisyong PRO sa oras na umandar ang pagsingil para sa redirect lamang.",
+      "redirect_only": "Redirect lamang",
+      "standard": "Karaniwan",
+      "title": "Mode ng serbisyo"
     }
   },
   "onboarding": {

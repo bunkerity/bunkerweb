@@ -205,6 +205,9 @@ msgstr "Nowa wersja"
 msgid "badge.no_template"
 msgstr "Brak szablonu"
 
+msgid "badge.redirect_candidate"
+msgstr "Kandydat do trybu tylko przekierowanie"
+
 msgid "badge.unread_news"
 msgstr "Nieprzeczytane wiadomości"
 
@@ -436,6 +439,9 @@ msgstr "Zwiń"
 msgid "button.columns"
 msgstr "Kolumny"
 
+msgid "button.confirm_service_mode"
+msgstr "Potwierdź"
+
 msgid "button.convert_configs"
 msgstr "Konwertuj konfiguracje"
 
@@ -636,6 +642,12 @@ msgstr "Wybierz stronę"
 
 msgid "button.service"
 msgstr "Usługa"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Zadeklaruj tylko przekierowanie"
+
+msgid "button.service_mode_standard"
+msgstr "Przywróć tryb standardowy"
 
 msgid "button.set_1h"
 msgstr "Ustaw 1 godzinę"
@@ -3013,6 +3025,9 @@ msgstr[0] "Czy na pewno chcesz usunąć wybraną wtyczkę?"
 msgstr[1] "Czy na pewno chcesz usunąć wybrane wtyczki?"
 msgstr[2] "Czy na pewno chcesz usunąć wybrane wtyczki?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Czy na pewno chcesz zmienić zadeklarowany tryb tej usługi?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Czy na pewno chcesz usunąć szablon %(name)s?"
 
@@ -3140,6 +3155,9 @@ msgstr "Potwierdź konwersję"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Potwierdź usunięcie"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Potwierdź tryb usługi"
 
 msgid "modal.title.confirm_unban"
 msgstr "Potwierdź odblokowanie"
@@ -4343,6 +4361,18 @@ msgstr "Serwer domyślny"
 
 msgid "service.default_server.single_site"
 msgstr "Serwer domyślny staje się konfigurowalny, gdy MULTISITE jest ustawiony na yes; w trybie jednej witryny zachowuje swoje wbudowane zachowanie i odpowiada na żądania niezgodne z żadną skonfigurowaną usługą."
+
+msgid "service.mode.help"
+msgstr "Usługa w trybie tylko przekierowanie jedynie przekierowuje: bez odwrotnego proxy, bez serwowania plików, bez własnego fragmentu NGINX, bez szablonu i bez podłączonego upstreamu ani przepływu pracy. Pod każdym innym względem pozostaje pełnoprawną usługą. Deklaracja jest jawna i nigdy nie jest wywnioskowana z ustawień przekierowania. Przestanie obciążać limit usług PRO, gdy tylko rozliczanie trybu tylko przekierowanie wejdzie w życie."
+
+msgid "service.mode.redirect_only"
+msgstr "Tylko przekierowanie"
+
+msgid "service.mode.standard"
+msgstr "Standardowy"
+
+msgid "service.mode.title"
+msgstr "Tryb usługi"
 
 msgid "service.resources.attach"
 msgstr "Dołącz"
@@ -6101,6 +6131,9 @@ msgstr "IP został pomyślnie odblokowany!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Czy automatycznie żądać certyfikatu Let's Encrypt."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Ta usługa nie zawiera niczego poza przekierowaniem, więc można ją zadeklarować jako „tylko przekierowanie” — co usunie ją z liczby usług PRO, gdy tylko to rozliczanie wejdzie w życie."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Wróć do przesyłania pliku"

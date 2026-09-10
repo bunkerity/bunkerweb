@@ -149,8 +149,11 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 2632 adds the 13 `bans.flash.*` keys of the bans page flash messages routed through translated().
     # 2634 adds the 2 `settings.header_rules.*` keys of the header-criterion cloner section, shared
     # by the antibot, blacklist, country, greylist and whitelist settings bodies.
+    # 2645 adds the 11 keys of the explicit redirect-only declaration (roadmap row 41, lot D): the
+    # services-list candidate badge and its tooltip, the `service.mode.*` card on the service
+    # settings page, its two action labels and confirm button, and the confirmation modal.
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2634
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2645
 
 
 @pytest.mark.parametrize("code", CODES)

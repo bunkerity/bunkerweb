@@ -205,6 +205,9 @@ msgstr "New version"
 msgid "badge.no_template"
 msgstr "No Template"
 
+msgid "badge.redirect_candidate"
+msgstr "Redirect-only candidate"
+
 msgid "badge.unread_news"
 msgstr "Unread news"
 
@@ -436,6 +439,9 @@ msgstr "Collapse"
 msgid "button.columns"
 msgstr "Columns"
 
+msgid "button.confirm_service_mode"
+msgstr "Confirm"
+
 msgid "button.convert_configs"
 msgstr "Convert Configs"
 
@@ -636,6 +642,12 @@ msgstr "Select Page"
 
 msgid "button.service"
 msgstr "Service"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Declare redirect-only"
+
+msgid "button.service_mode_standard"
+msgstr "Revert to standard"
 
 msgid "button.set_1h"
 msgstr "Set 1 Hour"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Are you sure you want to delete the selected plugin?"
 msgstr[1] "Are you sure you want to delete the selected plugins?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Are you sure you want to change this service's declared mode?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Are you sure you want to delete template %(name)s?"
 
@@ -3135,6 +3150,9 @@ msgstr "Confirm Conversion"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Confirm Deletion"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Confirm service mode"
 
 msgid "modal.title.confirm_unban"
 msgstr "Confirm Unban"
@@ -4338,6 +4356,18 @@ msgstr "Default server"
 
 msgid "service.default_server.single_site"
 msgstr "The default server becomes configurable when MULTISITE is set to yes; in single-site mode it keeps its built-in behaviour and answers requests that match no configured service."
+
+msgid "service.mode.help"
+msgstr "A redirect-only service does nothing but redirect: no reverse proxy, no file serving, no custom NGINX snippet, no template and no attached upstream or workflow. Everywhere else it stays a full service. The declaration is explicit and is never inferred from the redirect settings. It will stop counting against your PRO service quota once redirect-only billing goes live."
+
+msgid "service.mode.redirect_only"
+msgstr "Redirect-only"
+
+msgid "service.mode.standard"
+msgstr "Standard"
+
+msgid "service.mode.title"
+msgstr "Service mode"
 
 msgid "service.resources.attach"
 msgstr "Attach"
@@ -6096,6 +6126,9 @@ msgstr "IP address unbanned successfully!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Whether to automatically request a Let's Encrypt certificate."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "This service carries nothing but a redirect, so it can be declared redirect-only — which will take it off the PRO service count once redirect-only billing goes live."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Back to file upload"

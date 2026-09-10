@@ -205,6 +205,9 @@ msgstr "Nueva versión"
 msgid "badge.no_template"
 msgstr "Sin Plantilla"
 
+msgid "badge.redirect_candidate"
+msgstr "Candidato a solo redirección"
+
 msgid "badge.unread_news"
 msgstr "Noticias no leídas"
 
@@ -436,6 +439,9 @@ msgstr "Contraer"
 msgid "button.columns"
 msgstr "Columnas"
 
+msgid "button.confirm_service_mode"
+msgstr "Confirmar"
+
 msgid "button.convert_configs"
 msgstr "Convertir Configs"
 
@@ -636,6 +642,12 @@ msgstr "Seleccionar Página"
 
 msgid "button.service"
 msgstr "Servicio"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Declarar como solo redirección"
+
+msgid "button.service_mode_standard"
+msgstr "Volver a estándar"
 
 msgid "button.set_1h"
 msgstr "Establecer 1 Hora"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "¿Estás seguro de que quieres eliminar el plugin seleccionado?"
 msgstr[1] "¿Estás seguro de que quieres eliminar los plugins seleccionados?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "¿Seguro que quiere cambiar el modo declarado de este servicio?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "¿Estás seguro de que quieres eliminar la plantilla %(name)s?"
 
@@ -3135,6 +3150,9 @@ msgstr "Confirmar Conversión"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Confirmar Eliminación"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Confirmar el modo del servicio"
 
 msgid "modal.title.confirm_unban"
 msgstr "Confirmar Desbloqueo"
@@ -4338,6 +4356,18 @@ msgstr "Servidor por defecto"
 
 msgid "service.default_server.single_site"
 msgstr "El servidor por defecto se vuelve configurable cuando MULTISITE está en yes; en modo de sitio único conserva su comportamiento integrado y responde a las solicitudes que no coinciden con ningún servicio configurado."
+
+msgid "service.mode.help"
+msgstr "Un servicio de solo redirección no hace más que redirigir: sin proxy inverso, sin servir archivos, sin fragmento NGINX personalizado, sin plantilla y sin upstream ni flujo de trabajo adjunto. En todo lo demás sigue siendo un servicio completo. La declaración es explícita y nunca se deduce de los ajustes de redirección. Dejará de contar para su cuota de servicios PRO en cuanto se active la facturación de solo redirección."
+
+msgid "service.mode.redirect_only"
+msgstr "Solo redirección"
+
+msgid "service.mode.standard"
+msgstr "Estándar"
+
+msgid "service.mode.title"
+msgstr "Modo del servicio"
 
 msgid "service.resources.attach"
 msgstr "Adjuntar"
@@ -6096,6 +6126,9 @@ msgstr "¡Dirección IP desbloqueada con éxito!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Si se debe solicitar automáticamente un certificado Let's Encrypt."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Este servicio no contiene más que una redirección, por lo que puede declararse como solo redirección: eso lo excluirá del recuento de servicios PRO en cuanto se active esa facturación."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Volver a la carga de archivos"

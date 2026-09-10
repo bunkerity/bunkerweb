@@ -205,6 +205,9 @@ msgstr "Новая версия"
 msgid "badge.no_template"
 msgstr "Нет шаблона"
 
+msgid "badge.redirect_candidate"
+msgstr "Кандидат на режим «только перенаправление»"
+
 msgid "badge.unread_news"
 msgstr "Непрочитанные новости"
 
@@ -436,6 +439,9 @@ msgstr "Свернуть"
 msgid "button.columns"
 msgstr "Столбцы"
 
+msgid "button.confirm_service_mode"
+msgstr "Подтвердить"
+
 msgid "button.convert_configs"
 msgstr "Преобразовать конфиги"
 
@@ -636,6 +642,12 @@ msgstr "Выбрать страницу"
 
 msgid "button.service"
 msgstr "Сервис"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Объявить «только перенаправление»"
+
+msgid "button.service_mode_standard"
+msgstr "Вернуть стандартный режим"
 
 msgid "button.set_1h"
 msgstr "Установить 1 час"
@@ -3013,6 +3025,9 @@ msgstr[0] "Вы уверены, что хотите удалить выбран�
 msgstr[1] "Вы уверены, что хотите удалить выбранные плагины?"
 msgstr[2] "Вы уверены, что хотите удалить выбранные плагины?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Вы действительно хотите изменить объявленный режим этого сервиса?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Вы уверены, что хотите удалить шаблон %(name)s?"
 
@@ -3140,6 +3155,9 @@ msgstr "Подтвердить конвертацию"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Подтвердить удаление"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Подтвердите режим сервиса"
 
 msgid "modal.title.confirm_unban"
 msgstr "Подтвердить разбан"
@@ -4343,6 +4361,18 @@ msgstr "Сервер по умолчанию"
 
 msgid "service.default_server.single_site"
 msgstr "Сервер по умолчанию становится настраиваемым, когда MULTISITE установлен в yes; в односайтовом режиме он сохраняет встроенное поведение и отвечает на запросы, не соответствующие ни одной настроенной службе."
+
+msgid "service.mode.help"
+msgstr "Сервис в режиме «только перенаправление» лишь перенаправляет: без обратного прокси, без раздачи файлов, без собственных фрагментов NGINX, без шаблона и без прикреплённых upstream или workflow. Во всём остальном он остаётся полноценным сервисом. Режим объявляется явно и никогда не выводится из настроек перенаправления. Он перестанет расходовать квоту сервисов PRO, как только заработает соответствующая тарификация."
+
+msgid "service.mode.redirect_only"
+msgstr "Только перенаправление"
+
+msgid "service.mode.standard"
+msgstr "Стандартный"
+
+msgid "service.mode.title"
+msgstr "Режим сервиса"
 
 msgid "service.resources.attach"
 msgstr "Прикрепить"
@@ -6101,6 +6131,9 @@ msgstr "IP-адрес успешно разбанен!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Автоматически запрашивать сертификат Let's Encrypt."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Этот сервис содержит только перенаправление, поэтому его можно объявить «только перенаправление» — это исключит его из количества сервисов PRO, как только заработает эта тарификация."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Вернуться к загрузке файла"

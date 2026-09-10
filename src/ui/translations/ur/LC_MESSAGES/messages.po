@@ -205,6 +205,9 @@ msgstr "نیا ورژن"
 msgid "badge.no_template"
 msgstr "کوئی ٹیمپلیٹ نہیں"
 
+msgid "badge.redirect_candidate"
+msgstr "صرف ری ڈائریکٹ کا امیدوار"
+
 msgid "badge.unread_news"
 msgstr "غیر پڑھی ہوئی خبریں"
 
@@ -436,6 +439,9 @@ msgstr "سمیٹیں"
 msgid "button.columns"
 msgstr "کالم"
 
+msgid "button.confirm_service_mode"
+msgstr "تصدیق کریں"
+
 msgid "button.convert_configs"
 msgstr "کنفیگریشن تبدیل کریں"
 
@@ -636,6 +642,12 @@ msgstr "صفحہ منتخب کریں"
 
 msgid "button.service"
 msgstr "سروس"
+
+msgid "button.service_mode_redirect_only"
+msgstr "صرف ری ڈائریکٹ قرار دیں"
+
+msgid "button.service_mode_standard"
+msgstr "معیاری پر واپس جائیں"
 
 msgid "button.set_1h"
 msgstr "1 گھنٹہ سیٹ کریں"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟"
 msgstr[1] "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "کیا آپ واقعی اس سروس کا اعلان کردہ موڈ تبدیل کرنا چاہتے ہیں؟"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "کیا آپ واقعی ٹیمپلیٹ %(name)s کو حذف کرنا چاہتے ہیں؟"
 
@@ -3135,6 +3150,9 @@ msgstr "تبدیلی کی تصدیق کریں"
 
 msgid "modal.title.confirm_deletion"
 msgstr "حذف کرنے کی تصدیق کریں"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "سروس موڈ کی تصدیق کریں"
 
 msgid "modal.title.confirm_unban"
 msgstr "پابندی ہٹانے کی تصدیق کریں"
@@ -4338,6 +4356,18 @@ msgstr "ڈیفالٹ سرور"
 
 msgid "service.default_server.single_site"
 msgstr "جب MULTISITE کو yes پر سیٹ کیا جائے تو ڈیفالٹ سرور قابل تشکیل ہو جاتا ہے؛ سنگل سائٹ موڈ میں یہ اپنا بلٹ اِن طرزِ عمل برقرار رکھتا ہے اور ان درخواستوں کا جواب دیتا ہے جو کسی تشکیل شدہ سروس سے میل نہیں کھاتیں۔"
+
+msgid "service.mode.help"
+msgstr "صرف ری ڈائریکٹ سروس محض ری ڈائریکٹ کرتی ہے: نہ ریورس پراکسی، نہ فائل سرونگ، نہ حسبِ ضرورت NGINX سنپٹ، نہ ٹیمپلیٹ، اور نہ کوئی منسلک upstream یا ورک فلو۔ باقی ہر جگہ یہ ایک مکمل سروس رہتی ہے۔ یہ اعلان واضح ہوتا ہے اور کبھی ری ڈائریکٹ سیٹنگز سے اخذ نہیں کیا جاتا۔ جونہی صرف ری ڈائریکٹ بلنگ نافذ ہوگی، یہ آپ کے PRO سروس کوٹے میں شمار ہونا بند کر دے گی۔"
+
+msgid "service.mode.redirect_only"
+msgstr "صرف ری ڈائریکٹ"
+
+msgid "service.mode.standard"
+msgstr "معیاری"
+
+msgid "service.mode.title"
+msgstr "سروس موڈ"
 
 msgid "service.resources.attach"
 msgstr "منسلک کریں"
@@ -6096,6 +6126,9 @@ msgstr "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔"
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "اس سروس میں ایک ری ڈائریکٹ کے سوا کچھ نہیں، اس لیے اسے صرف ری ڈائریکٹ قرار دیا جا سکتا ہے — جو اس بلنگ کے نافذ ہوتہی اسے PRO سروس شمار سے نکال دے گی۔"
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "فائل اپ لوڈ پر واپس جائیں"

@@ -205,6 +205,9 @@ msgstr "Nouvelle version"
 msgid "badge.no_template"
 msgstr "Aucun modèle"
 
+msgid "badge.redirect_candidate"
+msgstr "Candidat redirection seule"
+
 msgid "badge.unread_news"
 msgstr "Actualités non lues"
 
@@ -436,6 +439,9 @@ msgstr "Replier"
 msgid "button.columns"
 msgstr "Colonnes"
 
+msgid "button.confirm_service_mode"
+msgstr "Confirmer"
+
 msgid "button.convert_configs"
 msgstr "Convertir les configurations"
 
@@ -636,6 +642,12 @@ msgstr "Sélectionner une page"
 
 msgid "button.service"
 msgstr "Service"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Déclarer en redirection seule"
+
+msgid "button.service_mode_standard"
+msgstr "Revenir au mode standard"
 
 msgid "button.set_1h"
 msgstr "Définir à 1 heure"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Êtes-vous sûr de vouloir supprimer le plugin sélectionné ?"
 msgstr[1] "Êtes-vous sûr de vouloir supprimer les plugins sélectionnés ?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Voulez-vous vraiment changer le mode déclaré de ce service ?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Êtes-vous sûr de vouloir supprimer le modèle %(name)s ?"
 
@@ -3135,6 +3150,9 @@ msgstr "Confirmer la conversion"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Confirmer la suppression"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Confirmer le mode du service"
 
 msgid "modal.title.confirm_unban"
 msgstr "Confirmer le débannissement"
@@ -4338,6 +4356,18 @@ msgstr "Serveur par défaut"
 
 msgid "service.default_server.single_site"
 msgstr "Le serveur par défaut devient configurable quand MULTISITE est réglé sur yes ; en mode mono-site, il conserve son comportement intégré et répond aux requêtes qui ne correspondent à aucun service configuré."
+
+msgid "service.mode.help"
+msgstr "Un service en redirection seule ne fait que rediriger : pas de reverse proxy, pas de service de fichiers, pas de snippet NGINX personnalisé, pas de template, aucun upstream ni workflow attaché. Partout ailleurs il reste un service à part entière. La déclaration est explicite et n'est jamais déduite des paramètres de redirection. Il cessera de compter dans votre quota de services PRO dès que la facturation « redirection seule » sera active."
+
+msgid "service.mode.redirect_only"
+msgstr "Redirection seule"
+
+msgid "service.mode.standard"
+msgstr "Standard"
+
+msgid "service.mode.title"
+msgstr "Mode du service"
 
 msgid "service.resources.attach"
 msgstr "Associer"
@@ -6096,6 +6126,9 @@ msgstr "Adresse IP débannie avec succès !"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Indique s'il faut demander automatiquement un certificat Let's Encrypt."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Ce service ne porte qu'une redirection : il peut être déclaré « redirection seule », ce qui le retirera du décompte des services PRO dès que cette facturation sera active."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Revenir au téléversement de fichier"

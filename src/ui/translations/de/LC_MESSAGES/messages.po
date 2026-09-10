@@ -205,6 +205,9 @@ msgstr "Neue Version"
 msgid "badge.no_template"
 msgstr "Keine Vorlage"
 
+msgid "badge.redirect_candidate"
+msgstr "Kandidat für Nur-Weiterleitung"
+
 msgid "badge.unread_news"
 msgstr "Ungelesene Nachrichten"
 
@@ -436,6 +439,9 @@ msgstr "Einklappen"
 msgid "button.columns"
 msgstr "Spalten"
 
+msgid "button.confirm_service_mode"
+msgstr "Bestätigen"
+
 msgid "button.convert_configs"
 msgstr "Konfigurationen konvertieren"
 
@@ -636,6 +642,12 @@ msgstr "Seite auswählen"
 
 msgid "button.service"
 msgstr "Dienst"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Als Nur-Weiterleitung deklarieren"
+
+msgid "button.service_mode_standard"
+msgstr "Auf Standard zurücksetzen"
 
 msgid "button.set_1h"
 msgstr "1 Stunde einstellen"
@@ -3010,6 +3022,9 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Sind Sie sicher, dass Sie das ausgewählte Plugin löschen möchten?"
 msgstr[1] "Sind Sie sicher, dass Sie die ausgewählten Plugins löschen möchten?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Möchten Sie den deklarierten Modus dieses Dienstes wirklich ändern?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Sind Sie sicher, dass Sie die Vorlage %(name)s löschen möchten?"
 
@@ -3135,6 +3150,9 @@ msgstr "Konvertierung bestätigen"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Löschung bestätigen"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Dienstmodus bestätigen"
 
 msgid "modal.title.confirm_unban"
 msgstr "Entsperrung bestätigen"
@@ -4338,6 +4356,18 @@ msgstr "Standardserver"
 
 msgid "service.default_server.single_site"
 msgstr "Der Standardserver wird konfigurierbar, wenn MULTISITE auf yes gesetzt ist; im Single-Site-Modus behält er sein integriertes Verhalten und beantwortet Anfragen, die zu keinem konfigurierten Dienst passen."
+
+msgid "service.mode.help"
+msgstr "Ein Dienst mit Nur-Weiterleitung leitet ausschließlich weiter: kein Reverse Proxy, keine Dateiauslieferung, kein eigenes NGINX-Snippet, keine Vorlage, kein angehängter Upstream und kein Workflow. Überall sonst bleibt er ein vollwertiger Dienst. Die Deklaration ist ausdrücklich und wird nie aus den Weiterleitungseinstellungen abgeleitet. Er zählt nicht mehr gegen Ihr PRO-Dienstkontingent, sobald die Abrechnung für Nur-Weiterleitung aktiv ist."
+
+msgid "service.mode.redirect_only"
+msgstr "Nur Weiterleitung"
+
+msgid "service.mode.standard"
+msgstr "Standard"
+
+msgid "service.mode.title"
+msgstr "Dienstmodus"
 
 msgid "service.resources.attach"
 msgstr "Zuordnen"
@@ -6096,6 +6126,9 @@ msgstr "IP-Adresse erfolgreich entsperrt!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Dieser Dienst enthält nichts außer einer Weiterleitung und kann als „Nur Weiterleitung“ deklariert werden – das nimmt ihn aus der PRO-Dienstanzahl heraus, sobald diese Abrechnung aktiv ist."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Zurück zum Datei-Upload"

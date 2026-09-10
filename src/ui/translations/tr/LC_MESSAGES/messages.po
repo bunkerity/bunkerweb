@@ -205,6 +205,9 @@ msgstr "Yeni sürüm"
 msgid "badge.no_template"
 msgstr "Şablon Yok"
 
+msgid "badge.redirect_candidate"
+msgstr "Yalnızca yönlendirme adayı"
+
 msgid "badge.unread_news"
 msgstr "Okunmamış haberler"
 
@@ -436,6 +439,9 @@ msgstr "Daralt"
 msgid "button.columns"
 msgstr "Sütunlar"
 
+msgid "button.confirm_service_mode"
+msgstr "Onayla"
+
 msgid "button.convert_configs"
 msgstr "Yapılandırmaları dönüştür"
 
@@ -636,6 +642,12 @@ msgstr "Sayfa Seç"
 
 msgid "button.service"
 msgstr "Servis"
+
+msgid "button.service_mode_redirect_only"
+msgstr "Yalnızca yönlendirme olarak bildir"
+
+msgid "button.service_mode_standard"
+msgstr "Standarda geri dön"
 
 msgid "button.set_1h"
 msgstr "1 Saat Ayarla"
@@ -3007,6 +3019,9 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Seçili eklentiyi silmek istediğinizden emin misiniz?"
 
+msgid "modal.body.confirm_service_mode_conversion"
+msgstr "Bu hizmetin bildirilen modunu değiştirmek istediğinizden emin misiniz?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "%(name)s şablonunu silmek istediğinizden emin misiniz?"
 
@@ -3130,6 +3145,9 @@ msgstr "Dönüştürmeyi Onayla"
 
 msgid "modal.title.confirm_deletion"
 msgstr "Silme İşlemini Onayla"
+
+msgid "modal.title.confirm_service_mode_conversion"
+msgstr "Hizmet modunu onayla"
 
 msgid "modal.title.confirm_unban"
 msgstr "Yasağı Kaldırmayı Onayla"
@@ -4333,6 +4351,18 @@ msgstr "Varsayılan sunucu"
 
 msgid "service.default_server.single_site"
 msgstr "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
+
+msgid "service.mode.help"
+msgstr "Yalnızca yönlendirme modundaki bir hizmet sadece yönlendirme yapar: ters vekil yok, dosya sunumu yok, özel NGINX parçacığı yok, şablon yok, bağlı upstream veya iş akışı yok. Diğer her yerde tam bir hizmet olarak kalır. Bildirim açıktır ve asla yönlendirme ayarlarından çıkarsanmaz. Yalnızca yönlendirme faturalandırması devreye girdiğinde PRO hizmet kotanıza sayılmayı bırakacaktır."
+
+msgid "service.mode.redirect_only"
+msgstr "Yalnızca yönlendirme"
+
+msgid "service.mode.standard"
+msgstr "Standart"
+
+msgid "service.mode.title"
+msgstr "Hizmet modu"
 
 msgid "service.resources.attach"
 msgstr "Bağla"
@@ -6091,6 +6121,9 @@ msgstr "IP adresinin yasağı başarıyla kaldırıldı!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği."
+
+msgid "tooltip.badge.redirect_candidate"
+msgstr "Bu hizmet bir yönlendirmeden başka bir şey içermiyor, bu yüzden yalnızca yönlendirme olarak bildirilebilir — bu, ilgili faturalandırma devreye girdiğinde onu PRO hizmet sayımından çıkaracaktır."
 
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Dosya yüklemeye dön"
