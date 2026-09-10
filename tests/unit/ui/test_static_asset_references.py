@@ -31,11 +31,23 @@ TEMPLATES, STATIC = _UI / "templates", _UI / "static"
 #   img/flags/           language-selector.html:11,35  `'img/flags/' + lang.flag`
 #   img/flags            plugin_page.html:40, bans.html:58, threatmap.html:158 -- a base URL the
 #                        page's JS appends a country code to
+#   libs/ace/src-min/theme-cloud9_
+#                        cache_view.html, config_edit.html, global_settings.html, logs.html,
+#                        service_settings.html, template_edit.html, template_settings_page.html --
+#                        `'libs/ace/src-min/theme-cloud9_' ~ ('night' if theme == 'dark' else 'day') ~ '.js'`,
+#                        both `theme-cloud9_night.js` and `theme-cloud9_day.js` exist on disk
+#                        (asserted by tests/unit/ui/test_ace_editor_theme_preload.py, not here)
 #
 # Listed explicitly rather than pattern-matched. "Any reference that resolves to a directory" would
-# have covered all four automatically and would also silently absolve a genuinely deleted file whose
+# have covered all five automatically and would also silently absolve a genuinely deleted file whose
 # parent directory happens to survive.
-CONCATENATED_PREFIXES = {"img/plugins/plugin-", "img/plugins/", "img/flags/", "img/flags"}
+CONCATENATED_PREFIXES = {
+    "img/plugins/plugin-",
+    "img/plugins/",
+    "img/flags/",
+    "img/flags",
+    "libs/ace/src-min/theme-cloud9_",
+}
 
 _URL_FOR_STATIC = re.compile(r"""url_for\(\s*['"]static['"]\s*,\s*filename\s*=\s*['"]([^'"]+)['"]""")
 

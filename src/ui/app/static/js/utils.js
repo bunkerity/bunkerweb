@@ -626,8 +626,9 @@ $(document).ready(() => {
     updateNotificationsBadge();
   });
 
-  // Debounced clear notifications logic
-  const clearNotifications = debounce((rootUrl) => {
+  // Clear notifications logic (see saveTheme below: no debounce, keepalive request -- a
+  // debounced click action is dropped the same way a debounced theme write is).
+  const clearNotifications = (rootUrl) => {
     const csrfToken = $("#csrf_token").val();
     const data = new FormData();
     data.append("csrf_token", csrfToken);
@@ -640,6 +641,7 @@ $(document).ready(() => {
       method: "POST",
       credentials: "same-origin",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
@@ -661,13 +663,57 @@ $(document).ready(() => {
           error,
         );
       });
-  }, 300);
+  };
 
   $(document).on("click", "#clear-notifications-btn", function () {
     clearNotifications($(this).data("root-url"));
   });
 
-  const saveTheme = debounce((rootUrl, theme, mode) => {
+  // Per-tab record of a mode choice whose /set_theme write has not been acknowledged yet.
+  // sessionStorage: it must survive the navigation that causes the race, and it must not leak
+  // into other tabs or outlive the tab. Only a fresh marker is replayed: the race it covers
+  // resolves in milliseconds, while a stale one left by another tab would fight that tab for
+  // the stored mode on every navigation.
+  const PENDING_THEME_TTL = 15000;
+  const PENDING_THEME_MODES = ["light", "dark", "system"];
+
+  const readPendingTheme = () => {
+    try {
+      const [mode, at] = (sessionStorage.getItem("pendingTheme") || "").split(
+        "|",
+      );
+      if (!PENDING_THEME_MODES.includes(mode)) return null;
+      if (!(Date.now() - Number(at) < PENDING_THEME_TTL)) {
+        sessionStorage.removeItem("pendingTheme");
+        return null;
+      }
+      return mode;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const setPendingTheme = (mode) => {
+    try {
+      sessionStorage.setItem("pendingTheme", `${mode}|${Date.now()}`);
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  const clearPendingTheme = () => {
+    try {
+      sessionStorage.removeItem("pendingTheme");
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  // One-shot user action: post it right away and mark the request keepalive so a navigation
+  // started just after the toggle cannot cancel it. A debounce here dropped the write entirely
+  // when the user clicked a link within a second of toggling, and the next page then re-derived
+  // its paint from the stale DB theme with no client-side path left to reconcile or resave it.
+  const saveTheme = (rootUrl, theme, mode) => {
     const csrfToken = $("#csrf_token").val();
 
     const data = new FormData();
@@ -681,17 +727,20 @@ $(document).ready(() => {
     fetch(rootUrl, {
       method: "POST",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        // Handle success, redirect, etc.
+        // Not cleared here: a page whose render started before this write committed can
+        // still be showing the old mode. The marker is dropped by the next render that
+        // agrees with it (or when it expires).
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
       });
-  }, 1000);
+  };
 
   // Theme mode: "system" follows the OS and keeps following it, so a machine that flips at
   // dusk flips the UI with it, without a reload (#3820). The mode is what the user chose;
@@ -736,11 +785,22 @@ $(document).ready(() => {
 
   const isAuthenticated = $("body").attr("data-authenticated") === "true";
 
+  // A toggle followed immediately by a navigation leaves /set_theme in flight while the next
+  // page is already being rendered, so that page can still read the previous mode from the
+  // database -- there is no anti-FOUC script to catch it either, since that only runs for
+  // anonymous or system-mode pages (base.html). The tab remembers the intent until the write
+  // is acknowledged; whatever is left over is replayed here.
+  const pendingMode = readPendingTheme();
+  const replayPending = pendingMode !== null && pendingMode !== serverMode;
+  if (pendingMode !== null && !replayPending) {
+    clearPendingTheme(); // the database caught up on its own
+  }
+
   if (isAuthenticated) {
     try {
       // The MODE, not the painted value: caching a resolved light|dark under "system" is
       // exactly how the OS stops being followed at the next load.
-      localStorage.setItem("theme", serverMode); // sync cache with DB
+      localStorage.setItem("theme", replayPending ? pendingMode : serverMode); // sync cache with DB
     } catch (e) {
       // Storage unavailable (private mode): non-fatal.
     }
@@ -748,7 +808,12 @@ $(document).ready(() => {
   // Anon pages: only an explicit toggle may persist; an OS-resolved write here
   // would masquerade as a choice and freeze live OS tracking (base.html).
 
-  if (desiredTheme !== serverTheme) {
+  if (replayPending) {
+    // An unacknowledged choice from the previous page: repaint it and re-send the write
+    // (rootUrl passed), so the database stops disagreeing with the tab instead of dropping
+    // it a second time. `applyTheme` itself stamps `window.__bwThemeMode` from this argument.
+    applyTheme(pendingMode, $("#dark-mode-toggle").data("root-url"));
+  } else if (desiredTheme !== serverTheme) {
     // <html> already fixed pre-paint; reconcile body assets only.
     //
     // Pass the MODE, not the resolved value. `applyTheme` stamps whatever it is given onto
@@ -863,6 +928,7 @@ $(document).ready(() => {
     if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
+    setPendingTheme(mode);
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme, mode);
   }
 

@@ -417,8 +417,12 @@ function initializeDataTable(config) {
       dataTable.column(key).visible(value);
     });
 
-    // Save column preferences
-    const saveColumnsPreferences = debounce(() => {
+    // Save column preferences. The debounce batches a run of column toggles, so a pending
+    // write is flushed on pagehide -- otherwise navigating within a second of the last toggle
+    // silently discarded it.
+    let columnsPreferencesPending = false;
+    const postColumnsPreferences = () => {
+      columnsPreferencesPending = false;
       const data = new FormData();
       data.append("csrf_token", $("#csrf_token").val().trim());
       data.append("table_name", tableName);
@@ -432,6 +436,7 @@ function initializeDataTable(config) {
       fetch(savePreferencesUrl, {
         method: "POST",
         body: data,
+        keepalive: true,
       })
         .then((response) => {
           if (!response.ok) {
@@ -441,7 +446,21 @@ function initializeDataTable(config) {
         .catch((error) => {
           console.error("There was a problem with the fetch operation:", error);
         });
-    }, 1000);
+    };
+
+    const debouncedPostColumnsPreferences = debounce(
+      postColumnsPreferences,
+      1000,
+    );
+
+    const saveColumnsPreferences = () => {
+      columnsPreferencesPending = true;
+      debouncedPostColumnsPreferences();
+    };
+
+    $(window).on("pagehide", () => {
+      if (columnsPreferencesPending) postColumnsPreferences();
+    });
 
     if (typeof i18next !== "undefined") {
       i18next.on("languageChanged", (lng) => {
