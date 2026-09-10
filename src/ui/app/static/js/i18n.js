@@ -236,9 +236,14 @@ function saveLanguage(rootUrl, language) {
   data.append("language", language);
   data.append("csrf_token", csrfToken);
 
+  // keepalive: the request must survive a navigation started right after the language is
+  // picked (a nav link clicked during the request's RTT, not the reload changeLanguage()
+  // itself triggers once this promise resolves), otherwise the preference never reaches the
+  // database.
   return fetch(rootUrl, {
     method: "POST",
     body: data,
+    keepalive: true,
   })
     .then((response) => {
       if (!response.ok) {
