@@ -39,6 +39,20 @@ actions:
     log: '[ver "OWASP_CRS/3'
     config:
       MODSECURITY_CRS_VERSION: "3"
+  # Kubernetes pins the plugin by direct archive URL instead of the registry name: a fresh
+  # cluster has no warm cache, and download-crs-plugins.py's registry/releases lookup then hits
+  # api.github.com, which a shared-runner IP can get rate-limited on (403, 4 attempts) -- empty
+  # cache, exclusion plugin missing, request blocked with 403 instead of 405. An entry starting
+  # with "http" skips the registry and releases lookup entirely (download-crs-plugins.py:425,
+  # :347) -- keep the ".tar.gz" suffix: extraction picks the tar branch by extension
+  # (download-crs-plugins.py:582), libmagic reports this archive as "application/gzip", not
+  # "application/x-tar". The pinned URL is the exact archive get_download_url() already resolves
+  # the bare name to today (coreruleset/wordpress-rule-exclusions-plugin, latest non-prerelease
+  # release v1.2.0 -- verified with `curl -sI`, 302 -> 200), so the loaded plugin is identical
+  # either way and the 405 Kubernetes has expected since 71247ab38 still holds. Other arms keep
+  # the NAME form so registry resolution stays exercised there -- though they resolve the same
+  # NAME through the same unauthenticated api.github.com call, so they remain exposed to the
+  # same rate limit; this pin closes the observed Kubernetes flake, not the underlying exposure.
   crs_plugins:
     type: status
     url: "http://www.example.com/post/wp-login.php?pass1=<script>"
@@ -49,6 +63,8 @@ actions:
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
     Kubernetes:
       status: 405
+      config:
+        MODSECURITY_CRS_PLUGINS: "https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz"
     All-in-one:
       restart_stack: false
   crs_plugins_scheduler_logs:
@@ -88,6 +104,9 @@ actions:
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
     Kubernetes:
       status: 405
+      # Direct-URL pin, same reasoning and same archive as crs_plugins above.
+      config:
+        MODSECURITY_CRS_PLUGINS: "https://github.com/coreruleset/wordpress-rule-exclusions-plugin/archive/refs/tags/v1.2.0.tar.gz"
     All-in-one:
       restart_stack: false
   crs_plugins_global_scheduler_logs:
