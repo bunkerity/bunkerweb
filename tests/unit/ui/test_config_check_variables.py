@@ -178,6 +178,46 @@ def test_valid_edit_still_applies():
     assert _flashed(cfg) == []
 
 
+# --- `refused`: the caller-owned list report_error appends to (config.py:205-206) -----------
+# Mocking check_variables (as test_service_save_flash_type.py does) never exercises this two-line
+# branch, so it is covered here against the real function instead.
+
+
+def test_refused_collects_one_message_for_a_pop_refusal():
+    # An unknown key is dropped outright (`variables.pop`), never reverted -- the "pop" shape.
+    variables = {"UNKNOWN_KEY": "x"}
+    cfg = _config(SETTINGS)
+    refused: list = []
+
+    out = cfg.check_variables(variables, config={}, to_check=variables.copy(), new=True, threaded=True, refused=refused)
+
+    assert out == {}
+    assert refused == ["Variable UNKNOWN_KEY is not valid."]
+
+
+def test_refused_collects_one_message_for_a_revert_refusal():
+    # A regex refusal goes through `reject_value`, reverting to the stored value -- the "revert" shape.
+    variables = {"SSL_PROTOCOLS": ""}
+    cfg = _config(SETTINGS)
+    refused: list = []
+
+    out = cfg.check_variables(variables, config=_STORED, to_check=variables.copy(), threaded=True, refused=refused)
+
+    assert out == {"SSL_PROTOCOLS": "TLSv1.3"}
+    assert refused == ["Variable SSL_PROTOCOLS is not valid."]
+
+
+def test_refused_stays_empty_when_nothing_is_refused():
+    variables = {"SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"}
+    cfg = _config(SETTINGS)
+    refused: list = []
+
+    out = cfg.check_variables(variables, config=_STORED, to_check=variables.copy(), threaded=True, refused=refused)
+
+    assert out == {"SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"}
+    assert refused == []
+
+
 # --- USE_TEMPLATE: the referential gate the regex cannot provide -------------------
 
 

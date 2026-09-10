@@ -1344,7 +1344,22 @@ def update_service(
             has_file_name_changes = True
             break
 
-    variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
+    # check_variables reports every refusal -- blacklisted, invalid, not editable, unknown
+    # template layer, newline, regex failure, empty greylist -- whether the key ends up reverted
+    # to its stored value or dropped outright, and a refusal count is exactly what decides
+    # whether this save gets an unconditional "success" or a "some values were refused" warning.
+    # `refused` is a plain list this call alone appends to, not DATA["TO_FLASH"]: that queue is
+    # reset from disk by check_variables's own `load_from_file()` call (models/config.py:183,
+    # UIData.load_from_file replaces the list wholesale), so a length taken before the call and
+    # one taken after can belong to two different list objects -- comparing them over- or
+    # under-counts depending on what happened to be on disk. A value compare has its own false
+    # positive besides: check_variables canonicalizes a *valid* value (trim, list rejoin, case),
+    # so a legitimate no-op edit can come back equal to the stored value with nothing refused at
+    # all (global_settings.py:78-81 documents the same canonicalization fact for its own,
+    # unrelated comparison).
+    refused: List[str] = []
+    variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True, refused=refused)
+    refused_count = len(refused)
 
     no_removed_settings = True
     blacklist = get_blacklisted_settings()
@@ -1476,10 +1491,14 @@ def update_service(
         operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
 
     if operation:
-        if operation.startswith(("Can't", "The database is read-only")):
+        if error:
             DATA["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
-            DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+            if refused_count:
+                operation = f"{operation.replace('successfully ', '', 1).removesuffix('.')}, but {refused_count} value(s) were refused."
+                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+            else:
+                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will attempt to apply the changes.", "type": "success", "save": False})
 
     DATA["RELOADING"] = False

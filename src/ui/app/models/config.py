@@ -164,7 +164,17 @@ class Config:
 
         return services
 
-    def check_variables(self, variables: dict, config: dict, to_check: dict, *, global_config: bool = False, new: bool = False, threaded: bool = False) -> dict:
+    def check_variables(
+        self,
+        variables: dict,
+        config: dict,
+        to_check: dict,
+        *,
+        global_config: bool = False,
+        new: bool = False,
+        threaded: bool = False,
+        refused: Optional[List[str]] = None,
+    ) -> dict:
         """
         Validate and filter variables based on allowed settings and patterns.
 
@@ -179,12 +189,21 @@ class Config:
 
         Error messages are either flashed immediately (non-threaded) or appended to
         self.__data["TO_FLASH"] (threaded).
+
+        `refused`, if given, collects one message per refusal made during this call -- a plain
+        list owned by the caller, not `self.__data["TO_FLASH"]`: that queue is reset from disk by
+        the `load_from_file()` call right below (`UIData.load_from_file` replaces the in-memory
+        list with whatever was last persisted), so a length taken before this call and one taken
+        after can belong to two different list objects. A caller that wants to know how many
+        values this call refused passes its own list instead of trying to diff the shared one.
         """
         self.__data.load_from_file()
         plugins_settings = self.get_plugins_settings()
         blacklisted_settings = get_blacklisted_settings(global_config)
 
         def report_error(message: str) -> None:
+            if refused is not None:
+                refused.append(message)
             if threaded:
                 self.__data["TO_FLASH"].append({"content": message, "type": "error"})
             else:
