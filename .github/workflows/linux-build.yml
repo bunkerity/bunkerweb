@@ -147,6 +147,9 @@ jobs:
       - name: Generate package (ARM)
         if: startsWith(env.ARCH, 'arm') == true
         run: |
+          # Without pipefail the transfer reports only ssh's status, so a truncated `docker save`
+          # can hand the ARM node a partial image and still look successful.
+          set -o pipefail
           # Transfer image and generate package
           docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
           scp ./src/linux/package.sh root@arm:/opt/package_${{ inputs.LINUX }}.sh

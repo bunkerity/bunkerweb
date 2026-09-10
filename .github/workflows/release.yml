@@ -254,6 +254,9 @@ jobs:
       packages: write
     needs: [prepare, create-arm]
     strategy:
+      # One distribution failing must not cancel the other legs: every failure of the run
+      # should be visible in it, not discovered one full rebuild at a time.
+      fail-fast: false
       matrix:
         linux:
           [
@@ -405,6 +408,8 @@ jobs:
       packages: write
     needs: [prepare, candidates, push-gh]
     strategy:
+      # Cancelling the siblings only makes a partial publication smaller, never safer.
+      fail-fast: false
       matrix:
         image:
           [
@@ -443,6 +448,7 @@ jobs:
   push-packages:
     needs: [prepare, candidates, push-gh]
     strategy:
+      fail-fast: false
       matrix:
         linux:
           [
