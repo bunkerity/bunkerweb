@@ -117,29 +117,6 @@
     und vermittelt deren Jobs über ein dediziertes eingebettetes Redis. Der Austausch des Containers
     unter Beibehaltung von `/data` reicht für das Upgrade aus; weitere Komponenten sind nicht nötig.
 
-!!! warning "PostgreSQL: Bei Datenbanken von vor 1.6.0 zuerst auf 1.6.x wechseln"
-
-    Eine **PostgreSQL**-Datenbank, die vor 1.6.0 erstellt oder zuletzt migriert wurde, kann nicht
-    direkt auf 1.7 wechseln. Die gesamte Migrationskette läuft in einer einzigen Transaktion. Die
-    Revision für 1.6.1 öffnet eine *zweite* Verbindung, um eine Constraint einer Tabelle zu löschen,
-    auf der die erste Verbindung bereits eine exklusive Sperre hält. Die zweite Verbindung wartet
-    auf deren Freigabe beim Ende der Migration; diese kann wiederum erst enden, wenn die zweite
-    Verbindung fertig ist. PostgreSQL erkennt keinen Deadlock, weil der Sperrinhaber auf einen
-    Client-Socket statt auf eine Sperre wartet. Es gibt weder Timeout noch Fehler: Der Scheduler
-    beendet seinen Start einfach nie.
-
-    Betroffen sind Installationen, die noch nie eine 1.6.x-Version ausgeführt haben. Lesen Sie den
-    Versionsstempel mit:
-
-    ```bash
-    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
-    ```
-
-    `f85e36780e55` ist die Revision von 1.6.0; alle vorher erreichten Revisionen sind betroffen.
-    Installieren Sie zuerst 1.6.14 und lassen Sie den Scheduler starten und seine Migration
-    abschließen. Wechseln Sie danach auf 1.7. SQLite, MariaDB und MySQL sind nicht betroffen:
-    Nur die PostgreSQL-Revision öffnet diese zweite Verbindung.
-
 !!! danger "Location-Werte mit Leerraum, `;`, `{` oder `}` werden jetzt abgelehnt — mit Rückfall auf `/`"
 
     `REVERSE_PROXY_URL`, `GRPC_URL` und `REDIRECT_FROM` akzeptierten in 1.6 beliebige Werte. Jetzt
@@ -278,6 +255,14 @@ Die folgenden Änderungen verhindern das Upgrade nicht und verlangen keine Schri
     und [Registrierte Instanz startet nicht](troubleshooting.md#lost-instance-credential): Fehlt die
     Zugangsdaten-Datei bei erhaltenem restlichem Zustand, verweigert sie bis zur erneuten Registrierung
     den Start.
+
+!!! info "`REDIS_KEEPALIVE_POOL` hat jetzt den Standardwert 64 (statt 10)"
+
+    `REDIS_KEEPALIVE_POOL` gilt pro NGINX-Worker: Die Verbindungen im stationären Betrieb liegen
+    etwa bei `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x Instanzen`; dieselbe Einstellung begrenzt
+    auch den eigenen Redis-Pool des API-Rate-Limiters. Ein bereits explizit gesetzter Wert bleibt
+    unverändert — prüfen Sie vor dem Upgrade einer größeren Flotte, dass `maxclients` Ihres
+    Redis/Valkey über dieser Summe liegt.
 
 !!! info "Neue Funktionen in 1.7 zum Ausprobieren"
 

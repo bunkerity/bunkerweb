@@ -120,28 +120,6 @@
     container and brokers their jobs through a dedicated embedded Redis, so replacing the container —
     keeping `/data` — is the whole upgrade, with nothing to add to it.
 
-!!! warning "PostgreSQL: reach 1.6.x first if the database predates 1.6.0"
-
-    A **PostgreSQL** database that was created — or last migrated — before 1.6.0 cannot go straight
-    to 1.7. The whole migration chain runs inside a single transaction, and the revision that brings
-    a database to 1.6.1 opens a *second* connection to drop a constraint on a table the first one
-    already holds an exclusive lock on. The second connection waits for a lock that is only released
-    when the migration returns, and the migration cannot return until the second connection
-    finishes. PostgreSQL's deadlock detector never sees it, because the holder is not waiting on a
-    lock — it is waiting on a client socket. There is no timeout and no error: the Scheduler simply
-    never finishes starting.
-
-    You are affected if this installation has never run a 1.6.x release. The stamp is readable with:
-
-    ```bash
-    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
-    ```
-
-    `f85e36780e55` is the 1.6.0 revision; anything the chain reaches before it is affected. Install
-    1.6.14 first, let the Scheduler come up and finish its migration, then upgrade to 1.7. SQLite,
-    MariaDB and MySQL are not affected — the second connection is opened only by the PostgreSQL
-    revision.
-
 !!! danger "A location value carrying whitespace, `;`, `{` or `}` is now refused — and falls back to `/`"
 
     `REVERSE_PROXY_URL`, `GRPC_URL` and `REDIRECT_FROM` accepted any value in 1.6. They now reject
@@ -283,6 +261,13 @@ you see once 1.7 is running.
     [An enrolled instance refuses to start](troubleshooting.md#lost-instance-credential) for the one
     way it bites: an enrolled instance whose credential file has been lost while the rest of its
     state survived refuses to boot until you re-enrol it.
+
+!!! info "`REDIS_KEEPALIVE_POOL` now defaults to 64 (was 10)"
+
+    `REDIS_KEEPALIVE_POOL` is per NGINX worker, so steady-state connections are roughly
+    `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`; it also caps the API rate limiter's own
+    Redis pool. An explicit value you already set is unaffected — check that your Redis/Valkey
+    `maxclients` sits above that count before upgrading a large fleet.
 
 !!! info "New in 1.7 and worth a look once you are running"
 

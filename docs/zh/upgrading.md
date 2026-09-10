@@ -74,18 +74,6 @@
 
     **All-In-One 镜像不受此影响**：它在单个容器内管理 API、Worker 和专用内嵌 Redis 任务代理。保留 `/data` 并替换容器即可完成升级，无需新增组件。
 
-!!! warning "PostgreSQL：早于 1.6.0 的数据库必须先升级到 1.6.x"
-
-    在 1.6.0 之前创建或最后迁移的 **PostgreSQL** 数据库不能直接升级到 1.7。整个迁移链在一个事务中运行，而升级到 1.6.1 的修订会打开第二个连接，在第一个连接已持有排他锁的表上删除约束。第二个连接等待迁移返回才会释放的锁，迁移又等待第二个连接完成。持锁方等待的是客户端套接字而不是锁，因此 PostgreSQL 的死锁检测器无法发现它。没有超时，也没有错误：调度器始终无法完成启动。
-
-    如果此安装从未运行过 1.6.x，就会受到影响。可读取版本标记：
-
-    ```bash
-    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
-    ```
-
-    `f85e36780e55` 是 1.6.0 修订，迁移链中在它之前的版本均受影响。先安装 1.6.14，等待调度器启动并完成迁移，然后升级到 1.7。SQLite、MariaDB 和 MySQL 不受影响；仅 PostgreSQL 修订会打开第二个连接。
-
 !!! danger "含空白、`;`、`{` 或 `}` 的 location 值现在会被拒绝，并回退到 `/`"
 
     `REVERSE_PROXY_URL`、`GRPC_URL` 和 `REDIRECT_FROM` 在 1.6 接受任意值，现在会拒绝可能让值逃出所生成 `location` 块的字符。开头的 `~ `、`~* `、`^~ ` 或 `= ` 仍可用作 NGINX location 修饰符，但其后的这一个空格是整个值中唯一允许的空白字符，尾部空格也不允许；`;`、`{`、`}` 一律不允许。
@@ -168,6 +156,11 @@
 !!! info "实例注册可选"
 
     实例可兑换有时限的一次性代码，取得自己的控制平面凭据。未注册的实例继续使用全局 `API_TOKEN`，与 1.6 相同；注册后只接受自己的凭据，永不回退。原地降级会销毁存储的凭据。请在回滚前让实例恢复使用共享 `API_TOKEN`，或在回滚后重新注册。参见[实例注册](web-ui.md#instance-enrollment)。如果其他状态仍在而凭据文件丢失，已注册实例会拒绝启动，直到重新注册；详见[已注册实例拒绝启动](troubleshooting.md#lost-instance-credential)。
+
+!!! info "`REDIS_KEEPALIVE_POOL` 默认值改为 64（原为 10）"
+
+    `REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 计算，稳态连接数约为
+    `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`；同一设置也限制了 API 限流器自身的 Redis 连接池上限。已显式设置该值的部署不受影响——升级大规模集群前，请确认 Redis/Valkey 的 `maxclients` 高于这个总数。
 
 !!! info "1.7 新功能"
 

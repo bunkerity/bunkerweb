@@ -99,18 +99,6 @@ Si le Worker est absent ou inactif, consultez [Les jobs ne s'exécutent jamais](
 
     **L'image All-In-One contient déjà ces composants** : elle supervise API et Worker dans le même conteneur, avec un Redis dédié aux jobs. Remplacez simplement le conteneur en conservant `/data`.
 
-!!! warning "PostgreSQL : passer d'abord par 1.6.x si la base précède 1.6.0"
-
-    Une base **PostgreSQL** créée ou migrée pour la dernière fois avant 1.6.0 ne peut pas passer directement à 1.7. La chaîne de migrations s'exécute dans une transaction unique, mais la révision vers 1.6.1 ouvre une deuxième connexion pour supprimer une contrainte sur une table verrouillée par la première. La seconde attend un verrou libéré seulement à la fin de la migration, qui attend elle-même cette connexion. Le détecteur d'interblocage PostgreSQL ne le voit pas : le détenteur attend une socket cliente, pas un verrou. Sans délai ni erreur, le Scheduler ne termine jamais son démarrage.
-
-    Cela concerne les installations n'ayant jamais exécuté une version 1.6.x. Lisez la révision avec :
-
-    ```bash
-    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
-    ```
-
-    `f85e36780e55` est la révision 1.6.0 ; les révisions antérieures dans la chaîne sont concernées. Installez d'abord 1.6.14 et laissez le Scheduler terminer la migration avant 1.7. SQLite, MariaDB et MySQL ne sont pas concernés : seule la révision PostgreSQL ouvre cette deuxième connexion.
-
 !!! danger "Les espaces, `;`, `{` et `}` dans une location sont refusés, avec repli sur `/`"
 
     `REVERSE_PROXY_URL`, `GRPC_URL` et `REDIRECT_FROM` acceptaient toute valeur en 1.6. Ils refusent désormais les caractères permettant de sortir du bloc `location`. Un préfixe `~ `, `~* `, `^~ ` ou `= ` reste accepté comme modificateur NGINX, avec cette seule espace autorisée. Tout autre blanc, même final, et tout `;`, `{` ou `}` est interdit.
@@ -200,6 +188,14 @@ Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pou
 !!! info "L'enrôlement des instances est disponible et facultatif"
 
     Une instance peut échanger un code à usage unique et limité dans le temps contre son propre identifiant. Sans enrôlement, l'`API_TOKEN` global fonctionne comme en 1.6. Après enrôlement, l'instance n'accepte que son identifiant propre, sans repli. Une rétrogradation sur place détruit les identifiants stockés. Rétablissez l’utilisation de l’`API_TOKEN` partagé sur l’instance avant de revenir en arrière, ou réenregistrez-la après la rétrogradation. Voir [Enrôlement](web-ui.md#instance-enrollment) et [Instance enrôlée refusant de démarrer](troubleshooting.md#lost-instance-credential) : si son fichier d'identifiant disparaît mais son marqueur subsiste, elle refuse de démarrer jusqu'à réenrôlement.
+
+!!! info "`REDIS_KEEPALIVE_POOL` vaut désormais 64 par défaut (au lieu de 10)"
+
+    `REDIS_KEEPALIVE_POOL` s'applique par worker NGINX : le nombre de connexions en régime établi
+    est environ `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances` ; ce même réglage plafonne
+    aussi le pool Redis propre au limiteur de débit de l'API. Une valeur déjà définie explicitement
+    n'est pas affectée — vérifiez que `maxclients` sur votre Redis/Valkey dépasse ce total avant de
+    mettre à jour une flotte importante.
 
 !!! info "Nouveautés à découvrir en 1.7"
 

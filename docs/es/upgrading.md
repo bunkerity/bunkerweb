@@ -114,27 +114,6 @@
     y transporta sus jobs mediante un Redis integrado dedicado. Basta con sustituir el contenedor
     conservando `/data`, sin añadir componentes.
 
-!!! warning "PostgreSQL: pasa primero por 1.6.x si la base de datos es anterior a 1.6.0"
-
-    Una base de datos **PostgreSQL** creada o migrada por última vez antes de 1.6.0 no puede pasar
-    directamente a 1.7. Toda la cadena de migraciones se ejecuta en una sola transacción, y la
-    revisión que lleva la base a 1.6.1 abre una *segunda* conexión para eliminar una restricción de
-    una tabla sobre la que la primera ya tiene un bloqueo exclusivo. La segunda espera un bloqueo
-    que solo se libera al terminar la migración, y esta no puede terminar hasta que lo haga la
-    segunda conexión. El detector de interbloqueos de PostgreSQL no lo detecta porque el titular
-    espera un socket de cliente, no un bloqueo. No hay tiempo límite ni error: el Scheduler nunca
-    termina de arrancar.
-
-    Te afecta si esta instalación nunca ha ejecutado una versión 1.6.x. Puedes leer la revisión con:
-
-    ```bash
-    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
-    ```
-
-    `f85e36780e55` es la revisión 1.6.0; cualquier revisión anterior en la cadena está afectada.
-    Instala primero 1.6.14, deja que el Scheduler arranque y termine la migración y después actualiza
-    a 1.7. SQLite, MariaDB y MySQL no están afectados: solo la revisión PostgreSQL abre esa segunda conexión.
-
 !!! danger "Una ubicación con espacios en blanco, `;`, `{` o `}` se rechaza y vuelve a `/`"
 
     `REVERSE_PROXY_URL`, `GRPC_URL` y `REDIRECT_FROM` aceptaban cualquier valor en 1.6. Ahora rechazan
@@ -287,6 +266,14 @@ que verás con 1.7 en ejecución.
     compartido antes de revertir, o vuelve a registrarla después. Consulta [Registro de instancias](web-ui.md#instance-enrollment) y
     [Una instancia registrada no arranca](troubleshooting.md#lost-instance-credential): si pierde
     su archivo de credencial pero conserva el resto del estado, se niega a arrancar hasta registrarse de nuevo.
+
+!!! info "`REDIS_KEEPALIVE_POOL` ahora vale 64 por defecto (antes 10)"
+
+    `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: las conexiones en régimen estable rondan
+    `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`; el mismo ajuste también limita el pool
+    Redis propio del limitador de tasa de la API. Un valor ya establecido explícitamente no se ve
+    afectado — comprueba que `maxclients` de tu Redis/Valkey queda por encima de ese total antes de
+    actualizar una flota grande.
 
 !!! info "Novedades de 1.7 que conviene revisar"
 
