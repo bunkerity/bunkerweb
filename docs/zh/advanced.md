@@ -2582,7 +2582,7 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 服务日志由 `LOG_TYPES` 设置控制，支持以空格分隔的多个值（例如 `LOG_TYPES="stderr syslog"`）。
 
 | 值       | 描述                                                                                                                                                                                                                                          |
-| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `file`   | 将日志写入普通文件。在 Linux 安装中，外部轮转由 `logrotate` 负责。在容器中，没有任何组件会为服务自己写入的文件做轮转：保留策略由运维方自行负责，请将该文件挂载到卷并自行轮转，或在容器中改用 `stderr`/`syslog`。Web UI 的日志查看器需要此项。 |
 | `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。                                                                                                                                                                      |
 | `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。                                                                                                                                                                         |
@@ -3812,6 +3812,8 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 
 Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默认服务器页面和反机器人挑战页面）替换为您自己的自定义 HTML 或 Lua 模板。这使您能够在 BunkerWeb 提供的所有面向用户的页面上保持一致的品牌形象。
 
+有关 Maintenance 行为和自定义的信息，请参阅[Maintenance 高级指南](advanced.md#maintenance-pro)。
+
 ### 功能
 
 - **每个服务的自定义错误页面**和**反机器人挑战页面**（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha、Cap.js）。
@@ -3831,6 +3833,7 @@ Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默�
 
 | 设置                             | 默认 | 上下文    | 描述                                           |
 | -------------------------------- | ---- | --------- | ---------------------------------------------- |
+| `CUSTOM_MAINTENANCE_PAGE`        |      | multisite | 自定义维护页面模板的绝对路径。                 |
 | `CUSTOM_ERROR_PAGE`              |      | multisite | 自定义错误页面模板的绝对路径。                 |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |      | global    | 自定义默认服务器页面模板的绝对路径。           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |      | multisite | 自定义反机器人验证码挑战页面的绝对路径。       |
@@ -4335,6 +4338,64 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
 - **CSP 合规**：始终对内联脚本和样式使用 `nonce_script` 和 `nonce_style` 变量，以确保正确的内容安全策略处理。
 - **测试模板**：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。
 
+## 维护 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#maintenance-pro}
+
+当应用程序不可用时，维护功能会将标准反向代理位置的响应替换为维护页面。它按服务选择启用，返回 `503 Service Unavailable`，并且永远不会到达上游。多站点设置的默认值为 `no`。
+
+### 启用并应用维护模式
+
+在使用标准反向代理的现有多站点服务上，将 `USE_MAINTENANCE` 设置为 `yes`。以下片段展示相关环境变量；请将其合并到调度器配置中，不要将其当作完整的 Compose 文件：
+
+```yaml
+# 单个反向代理服务的调度器环境片段
+environment:
+  app.example.com_USE_REVERSE_PROXY: "yes"
+  app.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+  app.example.com_USE_MAINTENANCE: "yes"
+```
+
+请通过常规 BunkerWeb 集成应用。调度器会生成服务配置并重新加载 worker。将 `app.example.com_USE_MAINTENANCE` 设置为 `no` 并再次应用，即可恢复代理。如果反向代理设置已经存在，则只需要这一项设置。
+
+Web UI 提供两个快速开关：服务页面 **Maintenance** 列中的扳手图标按钮，以及服务编辑页面上的浮动扳手按钮。两者都会更新服务设置，并在不重新加载页面的情况下应用。编辑表单会保持同步，包括 Easy/Advanced 模式和原始编辑器；无关的未保存编辑仍会保留。
+
+这些开关需要可写数据库和服务写入权限。对于只读用户、只读数据库以及 `USE_UI=yes` 服务，开关会被禁用，以便内置 UI 保持可用。开关不会覆盖由外部管理的 `USE_MAINTENANCE` 值；请通过其所有者进行更改。应用正在进行时，开关会被拒绝。
+
+### 请求行为和范围
+
+维护功能仅适用于由 BunkerWeb 标准反向代理配置生成的位置，包括 `REVERSE_PROXY_HOST` 及其编号变体。它不会添加代理位置、修改自定义位置，也不会接管手动 rewrite 处理程序。如果自定义配置替换了这些处理程序或后端变量，请自行集成维护响应。
+
+维护功能会保留现有 HTTPS 策略，因此启用的 HTTP 到 HTTPS 重定向会先发生。在实际的 HTTPS origin 上，它返回 `503`，并带有 `Cache-Control: no-store`、限制性 Content Security Policy 和 `X-Content-Type-Options: nosniff`。
+
+GET、POST、OPTIONS 和 WebSocket 握手会收到维护页面。BunkerWeb 会丢弃请求正文，因此 POST 正文不会被转发或重放。HEAD 会收到相同的状态和请求头，但不带正文。现有 WebSocket 不会被显式关闭；重新加载期间会执行正常的 worker 关闭。
+
+维护功能在身份验证、反机器人和其他访问检查之前运行，因此加入白名单的客户端和检测模式服务也会收到维护页面。本地 NGINX 位置、内部 API 和健康检查端点保持正常行为。`/.well-known/acme-challenge/` 以及已配置的 Let's Encrypt 透传也一样。维护功能保留此例外；它既不会签发证书，也不会创建 ACME 处理程序。
+
+### 自定义维护页面
+
+随附页面无需 Custom Pages 即可工作。要使用 Custom Pages 自定义它，请打开 Custom Pages 编辑器并选择 **Maintenance**。**Easy Mode** 可以编辑维护标题和消息、favicon、页脚徽标/文本以及 SVG 插图。标题会更新浏览器标题和页面标题；空标题或空插图会保留默认值。请保留 SVG 插图的 `maintenance-top` 和 `maintenance-tool` 类，以维持插图动画。
+
+在 **Advanced Mode** 中编辑完整的 HTML/Lua 模板。可用变量如下：
+
+| 变量           | 用途                                             |
+| -------------- | ------------------------------------------------ |
+| `title`        | `Site under maintenance`，由插件提供的页面标题。 |
+| `nonce_style`  | 用于内联 `<style>` 元素的每个响应 CSP nonce。    |
+| `nonce_script` | 用于内联 `<script>` 元素的每个响应 CSP nonce。   |
+
+在每个内联样式和脚本中使用 nonce 值，例如 `nonce="{* nonce_style *}"`。响应通过 `data:` URL 允许嵌入式图像、SVG 和字体，并阻止其他 origin。请将资源内联或作为数据 URL；应用资源 URL 也会收到维护页面，无法加载依赖项。
+
+对于文件管理的页面，将 `CUSTOM_MAINTENANCE_PAGE` 设置为调度器可读取的绝对路径。它优先于 UI 模板，并锁定编辑器中的该作用域。如果未设置，服务会使用自己的 UI 模板或继承全局模板。**Delete** 会删除服务覆盖并恢复继承。**Reset** 会删除 UI 模板并强制使用随附页面，即使存在全局自定义。保存新的服务覆盖会清除其重置标记。使用 `USE_MAINTENANCE` 单独启用或禁用维护功能。
+
+Custom Pages 作业会在缓存前验证 HTML，并防护已知的 Lua 模板编译风险。无效源文件会保留上一次接受的缓存。活动页面不可用或失败时，会回退到随附页面，然后回退到最小紧急页面。渲染失败绝不会恢复代理流量。
+
+### 维护故障排除
+
+- **开关被禁用或遭到拒绝：**检查写入权限、`USE_UI` 以及 `USE_MAINTENANCE` 的外部所有权；通过其所有者更改由外部管理的值。
+- **应用程序仍然响应：**确认标准反向代理位置同时具有 `USE_REVERSE_PROXY=yes` 和 `USE_MAINTENANCE=yes`。本地和 ACME 路径是例外。
+- **收到重定向而不是 `503`：**现有 HTTPS 策略会先重定向；请访问 HTTPS URL。
+- **显示的是随附页面：**检查调度器可读取的文件、模板验证和调度器日志；文件设置会锁定 UI 模板。
+- **内联资源或脚本缺失：**将其嵌入，并使用 `nonce_style` 或 `nonce_script`；应用 URL 不可用。
+
 ## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openid-connect-pro}
 
 <p align="center">
@@ -4546,6 +4607,196 @@ Discovery/JWKS 数据会缓存在 NGINX shared dict 中。如果您有很多租�
 - **时钟偏差 / "token not yet valid"**：确保启用 NTP；必要时调整 `OPENIDC_IAT_SLACK`。
 - **未注入用户 header**：确认 `OPENIDC_USER_HEADER_CLAIM` 指定的 claim 在 ID token/userinfo 中存在。
 - **多实例部署**：启用 `USE_REDIS=yes` 并配置 `REDIS_HOST`（或 Sentinel）以共享会话。
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#saml-pro}
+
+**SAML** 插件（PRO）使 BunkerWeb 成为用于浏览器 SSO 的 SAML 2.0 服务提供商（SP）。它接受断言由受信任签名覆盖的 IdP 响应，创建会话，并可将选定属性作为请求头暴露给受保护的上游。支持 BunkerWeb 1.6.14 及之后的 1.6.x 版本。
+
+### 前提条件和信任材料
+
+为每个受保护服务使用公开 HTTPS origin，例如 `https://app.example.com`，且不带尾部斜杠、路径或查询字符串。允许使用非标准 HTTPS 端口。SAML 需要三份 PEM 材料：
+
+- 用于 SP 的**未加密 RSA 私钥**；
+- 匹配的 SP PEM 格式证书；以及
+- IdP 的 PEM 签名证书，BunkerWeb 在验证断言时信任该证书。
+
+SP 密钥和证书必须匹配，并且必须是至少 2048 位的 RSA 密钥。IdP SSO URL 以及（如果提供）IdP SLO URL 必须使用 HTTPS。请保密私钥；BunkerWeb 使用它来签署身份验证和注销请求。
+
+### 在 UI 中配置 SAML
+
+为目标服务打开 **SAML** 并选择其作用域。表单将设置分为 IdP、SP、会话、身份请求头和 ACL 部分。按以下顺序操作：
+
+1. 为服务启用 `USE_SAML`。
+2. 输入公开 SP origin、SP entity ID、SP 证书以及未加密的 RSA 私钥。
+3. 输入 IdP entity ID、HTTPS SSO URL、受信任的 PEM 签名证书以及可选的 HTTPS SLO URL。SLO URL 为空时使用 SSO URL。
+4. 除非与现有路由冲突，否则保留默认本地路径。保存并应用配置。
+5. 使用 **Export metadata** 下载或显示 BunkerWeb 的 SP 元数据，然后向 IdP 注册这些元数据以及确切的 ACS/SLO URL。
+6. 配置身份属性和 ACL 规则，然后再次保存并应用。
+
+BunkerWeb 会导出 SP 元数据，但不会导入或自动刷新 IdP 元数据。请先配置 IdP 字段和证书，然后导出元数据，以避免循环配置。
+
+### 浏览器请求流程
+
+SP 发起的登录使用 SP 私钥对 AuthnRequest 签名，并通过 HTTP-Redirect 发送给 IdP。IdP 通过 HTTP-POST 将断言由其签名覆盖的响应返回给 ACS。在创建会话之前，BunkerWeb 会验证关联关系、目标、签发者、断言时间戳、签名和重放状态。原始请求正文不会被重放。
+
+```mermaid
+sequenceDiagram
+  participant B as 浏览器
+  participant BW as BunkerWeb (SAML SP)
+  participant IdP as 身份提供商
+  participant Up as 上游
+
+  B->>BW: GET /protected
+  BW-->>B: 302 已签名的 HTTP-Redirect AuthnRequest
+  B->>IdP: GET 带 SAMLRequest 的 SSO URL
+  IdP-->>B: 200/POST 带签名保护断言的 SAMLResponse
+  B->>BW: POST 带 SAMLResponse 的 ACS
+  BW->>BW: 验证签名、签发者、目标、过期时间和重放
+  BW-->>B: 带会话 Cookie 的 302 /protected
+  B->>BW: GET /protected
+  BW->>Up: 请求及已配置的身份请求头
+  Up-->>BW: 响应
+  BW-->>B: 响应
+```
+
+### 端点
+
+所有端点路径都是公开 SP origin 上的本地路径。默认值是多站点设置，在服务允许时可以更改。
+
+| 端点                  | 设置                 | 默认值           | 方法和用途                                                          |
+| --------------------- | -------------------- | ---------------- | ------------------------------------------------------------------- |
+| SP 元数据             | `SAML_METADATA_PATH` | `/saml/metadata` | `GET` 或 `HEAD`；发布 SP entity、ACS、SLO 和签名证书元数据。        |
+| 断言使用者服务（ACS） | `SAML_ACS_PATH`      | `/saml/acs`      | `POST`；接收断言由其签名覆盖的 IdP 响应。                           |
+| 本地注销              | `SAML_LOGOUT_PATH`   | `/saml/logout`   | 启动本地注销；经过身份验证的会话会触发发送给 IdP 的已签名注销请求。 |
+| 单点注销服务（SLS）   | `SAML_SLS_PATH`      | `/saml/sls`      | `GET` 或 `POST`；接收 IdP 的注销请求或响应。                        |
+
+`SAML_LOGOUT_REDIRECT`（默认值为 `/`）是注销后使用的本地路径。请保持四个端点路径互不相同，并且不包含查询字符串、片段、反斜杠、空白或路径遍历片段。
+
+### Keycloak 26.5.2 注册
+
+[Keycloak 26.5.2 SAML 客户端指南](https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc)使用客户端的 **Settings**、**Keys** 和 **Advanced** 选项卡。对于 BunkerWeb 的默认端点布局，请使用以下值。将 `https://app.example.com` 替换为准确的 `SAML_SP_BASE_URL`。
+
+使用这些注册值创建已启用的 SAML 客户端。在 Keycloak UI 中，**Enabled** 和 **Front channel logout** 已开启（`true`）；客户端协议为 `SAML`。
+
+| 客户端设置     | 值                                                                       |
+| -------------- | ------------------------------------------------------------------------ |
+| 客户端 ID      | `https://app.example.com/saml/metadata`                                  |
+| 协议           | `SAML`                                                                   |
+| 已启用         | `true`                                                                   |
+| 前端通道注销   | `true`                                                                   |
+| 有效重定向 URI | `https://app.example.com/saml/acs` 和 `https://app.example.com/saml/sls` |
+
+在客户端设置中，要求签名断言和文档、要求客户端签名、选择 **RSA_SHA256**，并启用 **Force POST Binding**。关闭 **Encrypt Assertions**：BunkerWeb 要求断言由受信任的 IdP 签名覆盖，可以是断言上的签名，也可以是整个响应上的签名，并且不接受加密断言。在 **Keys** 中启用 **Client Signature Required**。将 **Use metadata descriptor URL** 设置为 **OFF**，并手动提供 SP 证书，这样 Keycloak 就能验证 BunkerWeb 的已签名请求，而无需导入 IdP 元数据。在 **Advanced** 中，将 **Assertion Consumer Service POST Binding URL** 设置为公开 origin 上的 `/saml/acs`，并将 **Logout Service POST Binding URL** 和 **Logout Service Redirect Binding URL** 都设置为 `/saml/sls`。将 Name ID 格式设置为 `username`，并强制使用该格式。
+
+对应的客户端属性如下：
+
+```yaml
+saml.assertion.signature: "true"
+saml.server.signature: "true"
+saml.client.signature: "true"
+saml.encrypt: "false"
+saml.force.post.binding: "true"
+saml.authnstatement: "true"
+saml.signature.algorithm: "RSA_SHA256"
+saml_name_id_format: "username"
+saml_force_name_id_format: "true"
+saml.signing.certificate: "SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"
+saml_assertion_consumer_url_post: "https://app.example.com/saml/acs"
+saml_single_logout_service_url_post: "https://app.example.com/saml/sls"
+saml_single_logout_service_url_redirect: "https://app.example.com/saml/sls"
+```
+
+为 `email`、`groups` 和 `name` 添加协议映射器。对每个映射器，使用 `protocol: "saml"`、`protocolMapper: "saml-user-attribute-mapper"` 和 `consentRequired: false`；将 `config.user.attribute` 和 `config.attribute.name` 设置为同一属性，并将 `config.attribute.nameformat` 设置为 `Basic`。确保 IdP 用户确实具有这些属性；缺少声明时不会生成相应的上游请求头。
+
+### 设置（说明）
+
+以下默认值来自 SAML 插件设置。空默认值显示为 `empty`。
+
+#### 启用、信任和路径
+
+| 设置                   | 默认值           | 用途                                 |
+| ---------------------- | ---------------- | ------------------------------------ |
+| `USE_SAML`             | `no`             | 为服务启用 SAML。                    |
+| `SAML_SP_ENTITY_ID`    | `empty`          | SP 发行者和客户端标识符。            |
+| `SAML_SP_BASE_URL`     | `empty`          | 不带路径或查询的公开 HTTPS origin。  |
+| `SAML_IDP_ENTITY_ID`   | `empty`          | 受信任的 IdP 发行者。                |
+| `SAML_IDP_SSO_URL`     | `empty`          | HTTPS IdP 登录端点。                 |
+| `SAML_IDP_SLO_URL`     | `empty`          | HTTPS IdP 注销端点；为空时使用 SSO。 |
+| `SAML_SP_CERT`         | `empty`          | 匹配的 SP PEM 格式证书。             |
+| `SAML_SP_PRIVATE_KEY`  | `empty`          | 匹配且未加密的 RSA PEM 格式私钥。    |
+| `SAML_IDP_CERT`        | `empty`          | 受信任的 IdP PEM 格式签名证书。      |
+| `SAML_ACS_PATH`        | `/saml/acs`      | 本地 ACS 路径。                      |
+| `SAML_LOGOUT_PATH`     | `/saml/logout`   | 本地注销路径。                       |
+| `SAML_SLS_PATH`        | `/saml/sls`      | 本地 SLS 回调路径。                  |
+| `SAML_METADATA_PATH`   | `/saml/metadata` | 本地 SP 元数据路径。                 |
+| `SAML_LOGOUT_REDIRECT` | `/`              | 注销后的本地路径。                   |
+
+#### 会话和身份请求头
+
+| 设置                            | 默认值   | 用途                                          |
+| ------------------------------- | -------- | --------------------------------------------- |
+| `SAML_CLOCK_SKEW`               | `60`     | 允许的断言时钟偏差（秒）；有效范围为 0–300。  |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`    | 空闲会话生命周期（秒）；有效范围为 1–86400。  |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`   | 最大会话生命周期（秒）；有效范围为 1–86400。  |
+| `SAML_USER_HEADER`              | `X-User` | 用于用户值的上游请求头；为空时禁用。          |
+| `SAML_USER_ATTRIBUTE`           | `NameID` | 用户值对应的属性；`NameID` 表示主体标识符。   |
+| `SAML_EMAIL_HEADER`             | `empty`  | 用于电子邮件的上游请求头；为空时禁用。        |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`  | 电子邮件对应的属性；`NameID` 表示主体标识符。 |
+| `SAML_GROUPS_HEADER`            | `empty`  | 用于群组的上游请求头；为空时禁用。            |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups` | 群组对应的属性；`NameID` 表示主体标识符。     |
+| `SAML_NAME_HEADER`              | `empty`  | 用于显示名称的上游请求头；为空时禁用。        |
+| `SAML_NAME_ATTRIBUTE`           | `name`   | 显示名称对应的属性；`NameID` 表示主体标识符。 |
+| `SAML_GROUPS_SEPARATOR`         | `,`      | 在请求头中连接多个值。                        |
+
+在身份验证之前，BunkerWeb 会从传入请求中清除每个已配置的 SAML 身份请求头。只有在响应有效且映射属性存在时才添加请求头。请求头名称必须唯一、语法有效，且不能使用路由或安全敏感前缀，例如 `X-Forwarded-*`、`Proxy-*` 或 `Sec-*`。这些请求头会将身份传递给受保护的上游；它们不会让用户登录 BunkerWeb Web UI。
+
+#### 属性 ACL
+
+| 设置                  | 默认值  | 用途                                   |
+| --------------------- | ------- | -------------------------------------- |
+| `SAML_ACL_RULE_COUNT` | `empty` | 显式编号规则数；`0` 会清除列表。       |
+| `SAML_USE_ACL`        | `no`    | 在 SAML 验证后启用基于属性的访问控制。 |
+| `SAML_ACL_MATCH_MODE` | `all`   | 使用 `all` 或 `any` 组合规则。         |
+| `SAML_ACL_DENIED_URL` | `empty` | 被拒绝时重定向；为空时返回拒绝状态。   |
+| `SAML_ACL_ATTRIBUTE`  | `empty` | ACL 规则的属性名称。                   |
+| `SAML_ACL_VALUE`      | `empty` | ACL 规则所需的值。                     |
+
+例如，此服务要求同时属于 `engineering` 群组并具有管理员电子邮件：
+
+```yaml
+app.example.com_USE_SAML: "yes"
+app.example.com_SAML_USE_ACL: "yes"
+app.example.com_SAML_ACL_RULE_COUNT: "2"
+app.example.com_SAML_ACL_MATCH_MODE: "all"
+app.example.com_SAML_ACL_ATTRIBUTE_1: "groups"
+app.example.com_SAML_ACL_VALUE_1: "engineering"
+app.example.com_SAML_ACL_ATTRIBUTE_2: "email"
+app.example.com_SAML_ACL_VALUE_2: "admin@example.com"
+```
+
+第一对为 `_1`，第二对为 `_2`；UI 从 1 开始为规则编号。显式计数为 `2` 时，两对都必须存在；属性缺失会拒绝访问，而配置的值为空也会拒绝访问。使用 `all` 时每条规则都必须匹配；使用 `any` 时匹配一条规则即可。没有规则时，所有已认证用户都可以访问。在服务作用域中，UI 会继承全局规则列表，直到您选择服务规则列表；保存服务规则列表会替换继承的列表，即使替换列表被明确设置为空。将 `SAML_ACL_RULE_COUNT` 留空可发现前 100 个槽位中的编号规则。将其设置为 `0` 可清除所有规则。无效模式或格式错误的显式列表会默认拒绝。设置 `SAML_ACL_DENIED_URL` 时会进行重定向；否则 BunkerWeb 返回其拒绝状态。
+
+#### 重放防护
+
+| 设置                    | 默认值 | 上下文 | 用途                                   |
+| ----------------------- | ------ | ------ | -------------------------------------- |
+| `SAML_REPLAY_DICT_SIZE` | `10m`  | global | 单个实例上用于重放防护的共享内存容量。 |
+
+每个已接受的断言 ID 都会以原子方式加入重放存储，并保留到它仍可能被接受的时间结束。待处理 AuthnRequest ID 是单独的会话关联值。在单个实例上，如果共享字典太小，请增大 `SAML_REPLAY_DICT_SIZE`。对于副本，启用核心的 `USE_REDIS=yes` 会话模式，并让每个实例指向同一个 Redis 服务，以便重放密钥使用共享存储。同时让每个副本的核心 `SESSIONS_SECRET` 保持一致；否则一个 worker 创建的会话无法被另一个 worker 读取。默认情况下，会话使用安全且仅限主机的 Cookie，并带有 `HttpOnly`、`Secure` 和 `SameSite=None`。启用 Redis 后，会话数据会转移到带命名空间的 Redis 存储，而不是 Cookie。IdP 的 `SessionNotOnOrAfter` 可能会让会话早于配置的超时结束。如果后续回调步骤失败，已消费的断言仍会保持已消费状态。
+
+### 注销
+
+请求 `SAML_LOGOUT_PATH` 会清除已认证状态，保存待处理的注销关联值，并启动前端 SLO。BunkerWeb 会发送已签名的 Redirect-binding 注销请求。收到有效且已签名的 LogoutResponse 后，它会销毁本地会话，并将浏览器重定向到 `SAML_LOGOUT_REDIRECT`。IdP 发起的 LogoutRequest 可以到达 `SAML_SLS_PATH`；SLS 会验证签发者、目标、NameID、会话索引和重放状态，销毁本地会话，并向 IdP 返回已签名响应。如果不存在本地会话，注销路由会销毁空会话并在本地重定向。
+
+### 限制和故障排除
+
+SAML 目前支持 SP 发起的浏览器登录，使用已签名的 Redirect AuthnRequest 和 POST ACS 响应。它不支持 IdP 发起的登录、加密断言，也不支持自动导入和刷新 IdP 元数据。请让 IdP 配置为签署文档/断言，并使用 POST binding 发送响应。身份验证和注销 POST 正文限制为 256 KiB；超大请求会在处理前被拒绝。
+
+- **UI 不会启用 SAML：**检查 HTTPS origin、全部三个证书/密钥、匹配的 RSA 密钥和证书、IdP entity/SSO 值以及四个互不相同的本地路径。无效配置会被拒绝，且请求以 `503` 失败关闭；请求不会到达上游。
+- **IdP 拒绝 AuthnRequest：**比较 SP entity ID、准确的 ACS/SLS URL、SP 证书、RSA-SHA256 设置和客户端签名要求。在 Keycloak 中，检查 **Use metadata descriptor URL** 已关闭，并确认手动提供的 SP 证书是最新的。
+- **ACS 返回错误或 `503`：**检查 IdP 签名证书、断言签名覆盖范围、签发者、目标、时钟同步、响应 binding、待处理请求关联，以及断言 ID 是否已经被消费。确认 IdP 发送了映射的属性。
+- **用户完成身份验证但收到拒绝：**启用预期的 ACL 属性，确认编号对和 `SAML_ACL_RULE_COUNT`，并检查 `all` 与 `any`。属性值为空或声明缺失可能会按设计拒绝访问。
+- **负载均衡器后会话消失：**在每个副本上使用相同的 Redis 存储和核心会话密钥。当 `USE_REDIS=yes` 时 Redis 必须可用；重放防护和会话不会静默回退到每个 worker 的状态。
 
 ## LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ldap-sso-pro}
 
