@@ -55,6 +55,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
         "serial_number": [],
         "fingerprint": [],
         "version": [],
+        "preferred_profile": [],
         "challenge": [],
         "authenticator": [],
         "key_type": [],

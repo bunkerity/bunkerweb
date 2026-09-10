@@ -2,6 +2,7 @@
 
 ## v1.6.15~rc3 - 2026/09/??
 
+- [BUGFIX] `letsencrypt`: prevent `preferred_profile` errors in the legacy certificate-list helper. (Refs #3839)
 - [PERFORMANCE] `errors`: reduce inline SVG whitespace without changing error-page artwork. (Refs #3892)
 - [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Refs #3867)
 
