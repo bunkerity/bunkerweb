@@ -434,6 +434,26 @@ class Templator:
                     f"{DEFAULT_SERVER_ID!r} has been a reserved service name since 1.7 and will collide if you switch MULTISITE on."
                 )
 
+        # DISABLE_DEFAULT_SERVER_STRICT_SNI only has a default server to enforce it on (MULTISITE=yes,
+        # or DISABLE_DEFAULT_SERVER=yes in single-site) -- SNI is negotiated before NGINX picks a
+        # server{} block, so with neither, the operator's own single-site block answers every request
+        # regardless of what this setting says, and it is silently inert (`core/misc/README.md:49`
+        # documents the same two-condition rule; `customcert/jobs/custom-cert.py`'s own `servable`
+        # check agrees). Deliberately NOT a third condition on IS_LOADING: `http.conf` also renders
+        # the default server block while IS_LOADING=yes, but that is a transient boot state, not
+        # something an operator sets STRICT_SNI against -- ignored here on purpose, same as `servable`.
+        # No behaviour change, generation-time echo only.
+        if (
+            config.get("DISABLE_DEFAULT_SERVER_STRICT_SNI", "no") == "yes"
+            and config.get("MULTISITE", "no") != "yes"
+            and config.get("DISABLE_DEFAULT_SERVER", "no") != "yes"
+        ):
+            logger.warning(
+                "DISABLE_DEFAULT_SERVER_STRICT_SNI is 'yes' but has no effect here: this single-site deployment renders no "
+                "default server block to enforce it on (SNI is negotiated before NGINX picks a server{} block). Set "
+                "MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes to activate it."
+            )
+
         if config.get("MULTISITE", "no") == "yes":
             server_names = config.get("SERVER_NAME", "www.example.com").strip().split()
             self._server_prefixes = frozenset(f"{s}_" for s in server_names)
