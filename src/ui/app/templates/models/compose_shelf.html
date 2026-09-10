@@ -469,7 +469,7 @@
    body so a rendered enabled control (the `ui` plugin's switch IS USE_UI) wins on
    first-value-wins, and emitted even when readonly, because a hidden input is not disabled by
    a readonly page. #}
-{% set control_defaults = {"SERVER_NAME": service_id, "OLD_SERVER_NAME": service_id, "IS_DRAFT": "no", "USE_TEMPLATE": "", "USE_UI": "no"} %}
+{% set control_defaults = {"SERVER_NAME": service_id, "OLD_SERVER_NAME": service_id, "IS_DRAFT": "no", "USE_TEMPLATE": "", "USE_UI": "no", "SERVICE_MODE": "standard"} %}
 {% for control_key in control_keys(global_page) %}
     <input type="hidden"
            name="{{ control_key }}"

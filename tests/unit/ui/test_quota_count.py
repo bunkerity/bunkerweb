@@ -114,21 +114,25 @@ def test_service_mode_is_not_editable_from_the_generic_form():
     assert "SERVICE_MODE" in get_blacklisted_settings(True)
 
 
-def test_an_ordinary_service_save_drops_an_env_set_service_mode():
-    """KNOWN HAZARD, pinned so Lot C flips a red test instead of finding it live.
+def test_an_ordinary_service_save_preserves_an_env_set_service_mode():
+    """The inverse of the hazard lot D closed. Read the two halves together.
 
-    Blacklisting SERVICE_MODE closes the generic per-plugin form (check_variables
-    drops it), but the same set is the service page's `restore_skip`, and a stored
+    SERVICE_MODE is blacklisted (it decides whether a service is FREE, so it is not a knob on the
+    generic per-plugin form), and the same set is the service page's `restore_skip`: a stored
     setting that is neither posted nor restored has its row DELETED
-    (db_methods/config_save.py). So a SERVICE_MODE that env or the API set is lost
-    on the next ordinary save from the UI.
+    (db_methods/config_save.py). So a SERVICE_MODE that env, the API or the conversion action set
+    was lost on the next ordinary save from the UI -- the declaration reverted to `standard` with
+    no error anywhere.
 
-    Accepted for now because it is money-inert: the exemption is gated off, so a
-    dropped row reverts the service to `standard` -- billable, fail closed.
+    The fix is NOT to un-blacklist it. It joins `_SERVICE_CONTROL_KEYS`
+    (src/ui/app/models/save_scope.py), so the service form emits it as a hidden input carrying the
+    STORED value: it is posted, therefore not deleted, and because it equals `db_config` it is
+    dropped from `variables_to_check` before check_variables reaches its blacklist branch --
+    preserved without becoming editable. `test_service_mode_is_not_editable_from_the_generic_form`
+    above is the other half and must keep passing.
 
-    **Lot C must add SERVICE_MODE to `_SERVICE_CONTROL_KEYS` in
-    src/ui/app/models/save_scope.py and render its hidden input, in the same change
-    that opens the gate.** When it does, this test goes red and should be inverted.
+    Still asserted with the exemption gated off: losing an explicit operator declaration is a
+    defect whether or not it currently costs money.
     """
     from app.models.save_scope import control_keys, restore_unowned_settings  # type: ignore
     from app.utils import get_blacklisted_settings  # type: ignore
@@ -137,10 +141,31 @@ def test_an_ordinary_service_save_drops_an_env_set_service_mode():
         "SERVICE_MODE": {"value": "redirect_only", "method": "manual", "template": None},
         "REDIRECT_TO": {"value": "https://app.example.com", "method": "manual", "template": None},
     }
-    posted = {"SERVER_NAME": "old.example.com", "OLD_SERVER_NAME": "old.example.com"}
+    # What the form really posts now: the control keys ride along with the stored value.
+    posted = {"SERVER_NAME": "old.example.com", "OLD_SERVER_NAME": "old.example.com", "SERVICE_MODE": "redirect_only"}
 
     restored = restore_unowned_settings(posted, stored, restore_skip=get_blacklisted_settings() | set(control_keys()))
 
     assert "REDIRECT_TO" in restored, "an ordinary setting must survive a save that did not post it"
-    assert "SERVICE_MODE" not in restored, "the hazard changed shape -- re-read this docstring"
-    assert "SERVICE_MODE" not in control_keys(), "Lot C landed: invert this test and delete the hazard note"
+    assert restored["SERVICE_MODE"] == "redirect_only", "the declaration the form posted must reach save_config"
+    assert "SERVICE_MODE" in control_keys(), "the form only posts it because it is a control key -- see save_scope.py"
+
+
+def test_a_service_mode_that_the_form_omits_is_still_destroyed():
+    """Why the hidden input is load-bearing, stated as a fact rather than a comment.
+
+    `restore_unowned_settings` never restores a `restore_skip` key. SERVICE_MODE is in that set
+    from the blacklist alone, so a page that stops rendering the hidden input silently goes back
+    to deleting the row -- and nothing else in the suite would notice.
+    """
+    from app.models.save_scope import control_keys, restore_unowned_settings  # type: ignore
+    from app.utils import get_blacklisted_settings  # type: ignore
+
+    stored = {"SERVICE_MODE": {"value": "redirect_only", "method": "manual", "template": None}}
+    restored = restore_unowned_settings(
+        {"SERVER_NAME": "old.example.com", "OLD_SERVER_NAME": "old.example.com"},
+        stored,
+        restore_skip=get_blacklisted_settings() | set(control_keys()),
+    )
+
+    assert "SERVICE_MODE" not in restored

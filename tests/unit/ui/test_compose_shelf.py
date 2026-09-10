@@ -582,6 +582,31 @@ def test_service_page_posts_every_control_key_after_the_shelf_body(render_shelf)
     assert min(outside.values()) > last_row_position
 
 
+def test_the_service_mode_control_key_carries_the_stored_declaration(render_shelf):
+    """The hidden input has to carry the STORED value, not an empty string.
+
+    SERVICE_MODE is blacklisted, so `check_variables` drops it from `variables_to_check` ONLY
+    because the posted value equals `db_config` (routes/services.py compares them before the
+    call). An empty or wrong value would take the other branch and be refused as "not editable"
+    on every ordinary save -- and the row would be deleted, which is the defect this key was
+    added to `control_keys()` to fix.
+    """
+    html = render_shelf(config={"SERVICE_MODE": {"value": "redirect_only"}})
+    emitted = re.search(r'<input type="hidden"\s+name="SERVICE_MODE"\s+value="([^"]*)"', html)
+    assert emitted, "the service form no longer posts SERVICE_MODE -- an ordinary save now deletes the declaration"
+    assert emitted.group(1) == "redirect_only"
+
+
+def test_the_service_mode_control_key_falls_back_to_standard(render_shelf):
+    """A service that never declared a mode posts the setting's own default, not "".
+
+    `get_config(full=True)` always materialises SERVICE_MODE from `misc/plugin.json`, so this is
+    what an ordinary service renders.
+    """
+    emitted = re.search(r'<input type="hidden"\s+name="SERVICE_MODE"\s+value="([^"]*)"', render_shelf())
+    assert emitted and emitted.group(1) == "standard"
+
+
 def test_global_page_posts_no_control_keys(render_shelf):
     """At global scope SERVER_NAME is the service LIST -- posting it would rewrite it."""
     parser = parse_shelf(render_shelf(global_page=True))

@@ -467,8 +467,8 @@ def test_the_fold_matches_the_loop_it_replaces(db_config, template_unchanged):
 # need different lists and a shared partial emitting one would be wrong on both.
 
 
-def test_the_service_page_posts_the_five_keys_that_destroy_themselves_by_omission():
-    assert control_keys() == ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_TEMPLATE", "USE_UI")
+def test_the_service_page_posts_the_six_keys_that_destroy_themselves_by_omission():
+    assert control_keys() == ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_TEMPLATE", "USE_UI", "SERVICE_MODE")
 
 
 def test_the_global_page_gets_a_different_list():
@@ -485,12 +485,10 @@ def test_the_service_restore_skip_is_unchanged_by_being_derived():
 
     SERVICE_MODE is the one deliberate addition (2026-08-24, PRO quota chantier). It decides
     whether a service is billable, so it must not be a knob on the generic per-plugin form --
-    same reason IS_DRAFT is here. It is NOT yet in `control_keys()`, which means an ordinary
-    service save drops a SERVICE_MODE row that env or the API had set. That hazard is known,
-    accepted and pinned in `tests/unit/ui/test_quota_count.py`: it is money-inert while the
-    exemption is gated off (a dropped row reverts the service to standard, i.e. billable, i.e.
-    fail closed). **Lot C must add SERVICE_MODE to `_SERVICE_CONTROL_KEYS` and render its hidden
-    input in the same change that opens the gate.**
+    same reason IS_DRAFT is here. Since lot D it is ALSO in `control_keys()`, so the service page
+    posts it back as a hidden input instead of dropping the row: the two sets overlap on it, which
+    is why this union is asserted rather than either half. The set itself is unchanged -- adding a
+    key that was already blacklisted adds nothing to `restore_skip`.
     """
     assert get_blacklisted_settings() | set(control_keys()) == {
         "IS_LOADING",

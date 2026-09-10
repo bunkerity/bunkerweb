@@ -53,10 +53,18 @@ from app.utils import is_editable_method
 #     it, and global_settings.py:55 passes exactly that). It is also the `ui` plugin's tier-3
 #     activation key, so it is a control key and a shelf switch at once; the ordering rule above
 #     resolves that collision.
+#   * SERVICE_MODE -- blacklisted (app/utils.py) like IS_DRAFT, hence never restored, so an
+#     ordinary save that did not post it DELETED the row: a `redirect_only` declaration written by
+#     the conversion action, by the API or by the environment silently reverted to `standard` on
+#     the next save of that service's page. It is a commercial classification, so it must not
+#     become editable from the generic form -- it stays blacklisted and rides here instead, exactly
+#     the arrangement IS_DRAFT already has. The hidden input carries the STORED value, so it equals
+#     `db_config` and is dropped from `variables_to_check` before check_variables reaches its
+#     blacklist branch: it is preserved, not re-editable.
 #
 # `OVERRIDE_NON_GLOBAL_SERVICES` is deliberately absent: it is a form control, not a setting, and
 # it is popped before any of this runs (global_settings.py:148).
-_SERVICE_CONTROL_KEYS: Tuple[str, ...] = ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_TEMPLATE", "USE_UI")
+_SERVICE_CONTROL_KEYS: Tuple[str, ...] = ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_TEMPLATE", "USE_UI", "SERVICE_MODE")
 
 
 def control_keys(global_page: bool = False) -> Tuple[str, ...]:
