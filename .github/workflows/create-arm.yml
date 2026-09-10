@@ -100,6 +100,17 @@ jobs:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Install Docker
-        run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; chmod +x test-docker.sh ; sh test-docker.sh ; echo 'ClientAliveInterval 15' >> /etc/ssh/sshd_config ; echo 'ClientAliveCountMax 60' >> /etc/ssh/sshd_config ; echo 'MaxSessions 50' >> /etc/ssh/sshd_config ; echo 'MaxStartups 50:30:100' >> /etc/ssh/sshd_config ; systemctl restart ssh"
+        # Chaining with `;` returned the exit code of the last command, so a node without Docker
+        # still passed this step and every ARM build failed on `docker: command not found`
+        # instead. `docker version` is the assertion the builds actually depend on.
+        run: |
+          ssh root@$SSH_IP 'for attempt in 1 2 3; do
+            curl -fsSL https://test.docker.com -o test-docker.sh && sh test-docker.sh && break
+            echo "Docker install attempt $attempt failed, retrying" >&2
+            sleep 15
+          done
+          docker version &&
+          printf "%s\n" "ClientAliveInterval 15" "ClientAliveCountMax 60" "MaxSessions 50" "MaxStartups 50:30:100" >> /etc/ssh/sshd_config &&
+          systemctl restart ssh'
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
