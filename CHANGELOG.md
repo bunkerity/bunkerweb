@@ -2,6 +2,7 @@
 
 ## v1.6.15~rc3 - 2026/09/??
 
+- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Refs #3896)
 - [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)
 - [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
 - [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Refs #3891)
