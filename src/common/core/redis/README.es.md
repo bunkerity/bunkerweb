@@ -37,7 +37,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
+| `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX. |
 
 !!! info "CA privada: cómo se confía en `REDIS_SSL_CA`"
     Con `REDIS_SSL_VERIFY: "yes"` (predeterminado), se usa el almacén del sistema/certifi, que no
@@ -162,7 +162,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 #### Optimización del Rendimiento
 
-- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica. `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: en régimen estable, las conexiones son aproximadamente `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`. Dimensione el límite `maxclients` de Redis/Valkey por encima, porque una conexión rechazada impide comprobar en esa petición los baneos que solo están en Redis
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
 - **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos

@@ -391,9 +391,11 @@ function _M.connect_to_host(self, host)
         -- pool. A pooled socket is already authenticated as this user and parked on
         -- this DB: the cosocket pool is keyed by host:port, and every BunkerWeb
         -- REDIS_* setting is context:global, so one worker only ever speaks one
-        -- logical Redis config. The other consumer of this same pool,
-        -- lua-resty-session's redis backend, guards AUTH the same way and always
-        -- SELECTs the same DB. get_reused_times() returns nil on an uninitialised
+        -- logical Redis config. The other consumer of this same pool is
+        -- lua-resty-session, which BunkerWeb always drives through its sentinel
+        -- backend (sessions.lua sets sentinels unconditionally), and that backend
+        -- requires this very connector, so it takes this same guard. get_reused_times()
+        -- returns nil on an uninitialised
         -- socket, which falls back to authenticating -- the safe direction.
         -- A REDIS_* change regenerates the NGINX config and reloads, which kills the
         -- worker and its pools, so pooled sockets cannot outlive their credentials.

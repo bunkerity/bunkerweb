@@ -119,6 +119,24 @@ def test_the_parser_still_matches_the_lua_one_it_mirrors():
 
 
 # --------------------------------------------------------------------------------------
+# The fallback
+# --------------------------------------------------------------------------------------
+# Port of dev c58b69e07 lowered it from 100000 to the shipped `10k`: a failed config read must
+# not authorise a scan ten times wider than the operator ever configured. Read from the
+# manifest rather than restated, so the two cannot drift apart again.
+_FALLBACK = 10000
+
+
+def test_the_fallback_is_the_shipped_default_not_a_wider_scan(instance_module):
+    from json import loads
+
+    manifest = loads((_SRC / "common" / "core" / "metrics" / "plugin.json").read_text(encoding="utf-8"))
+
+    assert instance_module.InstancesUtils._DEFAULT_MAX_BLOCKED_REQUESTS_REDIS == _FALLBACK
+    assert instance_module._parse_count(manifest["settings"]["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]["default"], 0) == _FALLBACK
+
+
+# --------------------------------------------------------------------------------------
 # The narrowed `except`
 # --------------------------------------------------------------------------------------
 def test_an_unreachable_api_still_falls_back_rather_than_five_hundred_ing(instance_module):
@@ -127,7 +145,7 @@ def test_an_unreachable_api_still_falls_back_rather_than_five_hundred_ing(instan
 
     utils = _utils(instance_module, FakeClient(raises=ApiUnavailableError("api down")))
 
-    assert utils._get_max_blocked_requests_redis() == 100000
+    assert utils._get_max_blocked_requests_redis() == _FALLBACK
 
 
 def test_an_unexpected_error_is_no_longer_swallowed(instance_module):
@@ -144,11 +162,11 @@ def test_an_unexpected_error_is_no_longer_swallowed(instance_module):
 def test_a_missing_setting_falls_back(instance_module):
     utils = _utils(instance_module, FakeClient({}))
 
-    assert utils._get_max_blocked_requests_redis() == 100000
+    assert utils._get_max_blocked_requests_redis() == _FALLBACK
 
 
 def test_a_negative_result_is_clamped(instance_module):
     """`max(0, ...)` is pre-existing behaviour and the Redis scan relies on it."""
     utils = _utils(instance_module, FakeClient({"METRICS_MAX_BLOCKED_REQUESTS_REDIS": "-1"}))
 
-    assert utils._get_max_blocked_requests_redis() == 100000
+    assert utils._get_max_blocked_requests_redis() == _FALLBACK

@@ -149,7 +149,7 @@
       "name": "lua-resty-redis-connector v0.11.0",
       "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
       "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979",
-      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t"
+      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
     },
     {
       "id": "lua-resty-session",

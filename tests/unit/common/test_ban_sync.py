@@ -285,7 +285,15 @@ package.preload["bunkerweb.clusterstore"] = function()
                     local arguments = { ... }
                     redis_calls[#redis_calls + 1] = arguments
                     if arguments[1] == "eval" then
-                        return redis_lookup_results[arguments[4]] or { ngx.null, ngx.null }
+                        -- The ban script takes every scope at once now and reports which key
+                        -- hit as an index into the keys it was given. arguments[3] is the
+                        -- declared key count, so the keys themselves start at 4. A single-key
+                        -- EVAL is just the one-iteration case of the same walk.
+                        for index = 4, 3 + (arguments[3] or 1) do
+                            local hit = redis_lookup_results[arguments[index]]
+                            if hit then return { hit[1], hit[2], index - 3 } end
+                        end
+                        return { ngx.null, ngx.null, 0 }
                     end
                     if arguments[1] == "scan" then
                         if redis_scan_error then return nil, redis_scan_error end

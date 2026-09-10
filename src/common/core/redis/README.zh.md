@@ -37,7 +37,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! info "私有 CA：`REDIS_SSL_CA` 如何受信任"
     `REDIS_SSL_VERIFY: "yes"`（默认）使用系统/certifi 信任库，其中没有私有 CA，即使证书有效也会出现 `CERTIFICATE_VERIFY_FAILED`。`REDIS_SSL_CA` 指定受信任的 PEM CA 包，通过两条路径作用于产品：
@@ -146,7 +146,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 
 #### 性能优化
 
-- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践。`REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 生效：稳态下的连接数约为 `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`。请将 Redis/Valkey 的 `maxclients` 上限设置在该值之上，否则被拒绝的连接会使该请求无法检查仅保存在 Redis 中的封禁
 - **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
 - **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
 - **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式

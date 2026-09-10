@@ -68,6 +68,13 @@ local INTERNAL_API_TIMEOUT = 1000
 -- Short TTL for locally cached HTTP bans so unbans propagate from Redis.
 local BAN_LOCAL_CACHE_TTL = 30
 
+-- Stream reads its own bans from a snapshot, so a Redis fallback hit must not be written
+-- back under the bare bans_* name: those entries are the legacy shared-memory ones a live
+-- upgrade leaves behind. Keep the fallback cache in its own bounded namespace.
+local function local_ban_key(key)
+	return subsystem == "stream" and "ban_redis_cache_" .. key or key
+end
+
 -- Bad Behavior's per-IP abuse counters, purged by remove_ban along with the ban they produced
 -- (issue #3818). The same state is spelled differently in the two stores, so both prefixes have
 -- to be known here : handling one shape only fixes the deployments that use that store.
@@ -1400,13 +1407,12 @@ utils.is_banned = function(ip, server_name)
 	end
 	use_redis = use_redis == "yes"
 
-	local clusterstore
-	local function check_ban(key, local_only)
+	-- Check local bans before opening a Redis connection.
+	local function check_ban(key)
 		-- Ignore legacy Stream bans_* entries left in shared memory across a live
 		-- upgrade. Redis fallback hits use a fresh, bounded cache namespace.
-		local local_key = subsystem == "stream" and "ban_redis_cache_" .. key or key
 		local value
-		value, err = datastore:get(local_key)
+		value, err = datastore:get(local_ban_key(key))
 		if value and err ~= "not found" then
 			local reason = value
 			local reason_data
@@ -1417,7 +1423,7 @@ utils.is_banned = function(ip, server_name)
 			end
 
 			local ttl
-			ok, ttl = datastore:ttl(local_key)
+			ok, ttl = datastore:ttl(local_ban_key(key))
 			if ok and ban_data and ban_data.permanent then
 				ttl = 0
 			end
@@ -1426,82 +1432,90 @@ utils.is_banned = function(ip, server_name)
 			return nil, "datastore:get() error: " .. tostring(err), nil, nil
 		end
 
-		if local_only or not use_redis then
-			return false, "not banned", nil, nil
-		end
-
-		local redis_script = [[
-			local ret_get = redis.pcall("GET", KEYS[1])
-			if type(ret_get) == "table" and ret_get["err"] ~= nil then
-				return {err = ret_get["err"]}
-			end
-			local ret_ttl = nil
-			if ret_get ~= nil then
-				ret_ttl = redis.pcall("TTL", KEYS[1])
-				if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
-					return {err = ret_ttl["err"]}
-				end
-			end
-			return {ret_get, ret_ttl}
-		]]
-
-		local data, script_err = clusterstore:call("eval", redis_script, 1, key)
-		if not data then
-			return nil, "redis call error: " .. script_err, nil, nil
-		elseif data.err then
-			return nil, "redis script error: " .. data.err, nil, nil
-		elseif data[1] ~= null then
-			local redis_ttl = data[2]
-			local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
-			local ok_cache, cache_err = datastore:set_with_retries(local_key, data[1], cache_ttl)
-			if not ok_cache then
-				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
-			end
-
-			local reason = data[1]
-			local reason_data
-			local ok, ban_data = pcall(decode, data[1])
-			if ok and type(ban_data) == "table" then
-				reason = ban_data.reason or reason
-				reason_data = ban_data.reason_data
-			end
-			return true, reason, math_max(redis_ttl, 0), reason_data
-		end
-
 		return false, "not banned", nil, nil
 	end
 
-	local service_key = server_name and "bans_service_" .. server_name .. "_ip_" .. ip
-	local global_key = "bans_ip_" .. ip
-	if service_key then
-		local banned, reason, ttl, reason_data = check_ban(service_key, true)
+	local keys = {}
+	local banned, local_reason, ttl, local_reason_data
+	if server_name then
+		keys[1] = "bans_service_" .. server_name .. "_ip_" .. ip
+	end
+	keys[#keys + 1] = "bans_ip_" .. ip
+	local local_misses = 0
+	for _, key in ipairs(keys) do
+		banned, local_reason, ttl, local_reason_data = check_ban(key)
 		if banned or banned == nil then
-			return banned, reason, ttl, reason_data
+			break
 		end
+		local_misses = local_misses + 1
+	end
+	-- Redis is consulted only when no scope answered locally at all. Deliberately narrower
+	-- than dev's ordering, which asks Redis for the higher-priority scopes even after a
+	-- lower-priority local hit: here a cached ban stays authoritative through a Redis
+	-- outage instead of turning the whole check into an error, which is what
+	-- tests/unit/common/test_ban_sync.py's local-cache-before-outage cases pin.
+	if not use_redis or local_misses < #keys then
+		return banned, local_reason, ttl, local_reason_data
 	end
 
-	local banned, reason, ttl, reason_data = check_ban(global_key, true)
-	if banned or banned == nil or not use_redis then
-		return banned, reason, ttl, reason_data
-	end
-
-	clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, connect_err = clusterstore:connect(true)
-	if not ok then
+	local clusterstore = require "bunkerweb.clusterstore":new()
+	local connected, connect_err = clusterstore:connect(true)
+	if not connected then
 		return nil, "can't connect to redis: " .. connect_err, nil, nil
 	end
-
-	if service_key then
-		banned, reason, ttl, reason_data = check_ban(service_key)
-		if banned or banned == nil then
-			clusterstore:close()
-			return banned, reason, ttl, reason_data
+	-- One EVAL for both scopes instead of one per key: the service ban wins because the
+	-- script walks KEYS in the order they were given, which is the same priority order the
+	-- local pass above used.
+	local redis_script = [[
+		for i, key in ipairs(KEYS) do
+			local ret_get = redis.pcall("GET", key)
+			if type(ret_get) == "table" and ret_get["err"] ~= nil then
+				return {err = ret_get["err"]}
+			end
+			local ret_ttl = redis.pcall("TTL", key)
+			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+				return {err = ret_ttl["err"]}
+			end
+			if ret_get ~= false then
+				return {ret_get, ret_ttl, i}
+			end
 		end
+		return {false, -2, 0}
+	]]
+	local data, script_err = clusterstore:call("eval", redis_script, #keys, unpack(keys))
+	clusterstore:close()
+	if not data then
+		return nil, "redis call error: " .. script_err, nil, nil
+	elseif data.err then
+		return nil, "redis script error: " .. data.err, nil, nil
+	elseif data[1] ~= null then
+		-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
+		-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
+		local redis_ttl = data[2]
+		local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
+		-- The script reports which key hit as an index into the keys it was given; never
+		-- trust it blindly, a nil key would be written as the cache entry.
+		local hit_key = keys[data[3]]
+		if hit_key then
+			local ok_cache, cache_err = datastore:set_with_retries(local_ban_key(hit_key), data[1], cache_ttl)
+			if not ok_cache then
+				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
+			end
+		else
+			logger:log(WARN, "ban script returned an unknown key index: " .. tostring(data[3]))
+		end
+
+		local reason = data[1]
+		local reason_data
+		local ok, ban_data = pcall(decode, data[1])
+		if ok and type(ban_data) == "table" then
+			reason = ban_data.reason or reason
+			reason_data = ban_data.reason_data
+		end
+		return true, reason, math_max(redis_ttl, 0), reason_data
 	end
 
-	banned, reason, ttl, reason_data = check_ban(global_key)
-	clusterstore:close()
-	return banned, reason, ttl, reason_data
+	return banned, local_reason, ttl, local_reason_data
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data, not_after)
