@@ -216,6 +216,11 @@ local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reas
 -- every writer uses bare SET/RPUSH/HINCRBY. Later cycles would be pure round trips.
 local persisted_redis = false
 
+-- Consecutive cycles that found the reports list gone and refilled it from this worker's
+-- buffer. Reset by any cycle that finds the list still there.
+local MAX_RECLAIM_ATTEMPTS = 12
+local reclaim_attempts = 0
+
 -- Bounded set of nginx $upstream_cache_status values counted per served request
 -- (reverseproxy proxy_cache). Distinct axis from the blocked-request facets above;
 -- keeps the cache-status counter cardinality fixed and skips nil/unknown statuses.
@@ -439,6 +444,65 @@ local function enforce_redis_requests_cap(self)
 	end
 end
 
+-- Redis can lose the list wholesale: a burst past maxmemory evicts it as one key, and an
+-- operator DEL or a restart with no persistence does the same. Reports already pushed stay
+-- latched synced forever, so nothing ever refilled it and the window restarted from zero
+-- while every instance still held its own buffer. An empty list with synced rows still
+-- buffered is exactly that condition, so unlatch them and let the normal sync path refill.
+-- ponytail: workers race, so in practice one worker's buffer comes back and the others see
+-- a list a peer already refilled and stay latched until the next wipe. Recovering them too
+-- means re-pushing into a list that is no longer empty, which only PUSH_SCRIPT's ARGV[10]
+-- replay path makes safe, at one full LRANGE scan per row. An empty list is the one trigger
+-- that needs no scan and can never duplicate a report.
+local function reclaim_wiped_requests(self, requests)
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
+	-- Cap 0 means the operator wants no report in Redis at all: the trim deletes the list
+	-- every cycle, and re-pushing into it here would fight that forever. An unreadable cap
+	-- still leaves reports being pushed, so it must not disable their recovery.
+	if max_requests and max_requests <= 0 then
+		return
+	end
+	-- Captured before tonumber: redis_call also returns an error string, which would land
+	-- in tonumber's base argument.
+	local raw = self:redis_call("llen", "requests")
+	local llen = tonumber(raw)
+	if llen ~= 0 then
+		-- Only a list seen alive clears the ceiling; an unreadable reply proves nothing.
+		if llen then
+			reclaim_attempts = 0
+		end
+		return
+	end
+	-- A Redis too small to hold the list re-evicts it every cycle, and eviction raises no
+	-- error, so the OOM breaker never trips on it. Without a ceiling the refill becomes a
+	-- permanent push storm. One surviving cycle clears it.
+	if reclaim_attempts >= MAX_RECLAIM_ATTEMPTS then
+		self:log_throttled(
+			WARN,
+			"requests_reclaim_giveup",
+			"Redis keeps losing the requests list, giving up on refilling it: raise its maxmemory"
+				.. " or lower METRICS_MAX_BLOCKED_REQUESTS_REDIS"
+		)
+		return
+	end
+	reclaim_attempts = reclaim_attempts + 1
+	local reclaimed = 0
+	for _, request in ipairs(requests) do
+		if request.synced then
+			request.synced = false
+			reclaimed = reclaimed + 1
+		end
+	end
+	if reclaimed > 0 then
+		-- No dedup replay flag: an empty list cannot already hold them.
+		self:log_throttled(
+			WARN,
+			"requests_reclaim",
+			"Redis lost the requests list, re-syncing " .. reclaimed .. " buffered reports"
+		)
+	end
+end
+
 -- Read-only probes (never denyoom), so they run even under OOM. Every stored request contributes
 -- all eight facets (using N/A when absent) and one ID; any missing index triggers a full rebuild.
 local function self_heal_request_facets(self)
@@ -519,11 +583,8 @@ end
 -- documented behaviour true on an instance that ran with a TTL before.
 local function refresh_request_ttls(self, ttl, wid)
 	local persist = ttl <= 0
-	if persist then
-		if persisted_redis then
-			return
-		end
-		persisted_redis = true
+	if persist and persisted_redis then
+		return
 	end
 	-- While buffering, every call returns nil with no error, so `healthy` cannot be
 	-- falsely poisoned; only commit_pipeline reports a real socket failure.
@@ -550,7 +611,38 @@ local function refresh_request_ttls(self, ttl, wid)
 			end
 		end
 	end
-	self.clusterstore:call("commit_pipeline")
+	local replies, commit_err = self.clusterstore:call("commit_pipeline")
+	-- Silence here is a deferred loss: the key keeps the TTL it already carries, expires a full
+	-- period later and stays evictable under volatile-lru until it does. The buffered touches
+	-- above return nil with no error by construction, so the whole pass is judged on the commit:
+	-- a socket failure comes back as a nil reply set, a per-command Redis error as a
+	-- {false, err} entry inside it.
+	local failed = not replies
+	local first_err = commit_err
+	if replies then
+		for _, reply in ipairs(replies) do
+			if type(reply) == "table" and reply[1] == false then
+				failed = true
+				first_err = first_err or reply[2]
+				break
+			end
+		end
+	end
+	if failed then
+		self:log_throttled(
+			ERR,
+			"requests_ttl",
+			"Can't "
+				.. (persist and "persist" or "refresh the TTL of")
+				.. " the request keys: "
+				.. (first_err or "unknown error")
+		)
+	end
+	-- Latched only once a pass ran with no error: a half-done pass has to run again. Redis
+	-- answers 0 for a key that has no TTL or does not exist, which is a completed strip.
+	if persist and not failed then
+		persisted_redis = true
+	end
 end
 
 function metrics:initialize(ctx)
@@ -1088,6 +1180,7 @@ function metrics:timer()
 					-- batch is the sole Redis owner, preventing the same report being pushed once
 					-- before handover and again after it.
 					if subsystem == "http" then
+						reclaim_wiped_requests(self, value)
 						sync_request_buffer(self, value)
 						-- Update LRU cache
 						lru:set(key, value)

@@ -135,6 +135,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 - **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
 - **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如通用场景使用 `volatile-lru`，缓存密集型场景使用 `allkeys-lru`）
 - **All-in-One 默认值：** AIO Docker 镜像默认将 Redis 配置为 `maxmemory=256mb` 和 `maxmemory-policy=volatile-lru`；可通过环境变量 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。在 `volatile-lru` 策略下，瞬时计数器（速率限制、不良行为）会先于会话和限时封禁等带 TTL 的关键键被淘汰，而无过期时间的键（永久封禁）则免于被淘汰。建议为 BunkerWeb 使用的外部 Redis 或 Valkey 服务器采用同样的策略。
+- **让安全报告远离驱逐池：** 使用 `METRICS_REDIS_TTL` 的默认值时，被阻止请求的报告带有过期时间，正是该过期时间使它们在 `volatile-lru` 下成为可驱逐对象。该列表是保存整个保留窗口的单个键，因此一次驱逐会清除全部内容，而不是最旧的报告。请在共享同一服务器的每个实例上设置 `METRICS_REDIS_TTL=0`，否则仍使用默认值的实例会在数秒内重新设置过期时间。在 `allkeys-lru` 下这不起作用，那里没有键是免疫的；它也不会降低内存压力，只会把压力转移到仍会过期的键上，其中包括限时封禁、会话和缓存的判定结果。请按需要保留的报告数量规划 `maxmemory`，而不是依赖驱逐：`METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设定该上限。
 - **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
 
 #### 数据持久性
