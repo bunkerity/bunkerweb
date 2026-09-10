@@ -99,6 +99,7 @@ jobs:
 
             # Find the line number of the current version header
             start_line=$(grep -n "^## v${BASE_VERSION}" CHANGELOG.md | head -1 | cut -d: -f1)
+            [ -n "$start_line" ] || { echo "::error::CHANGELOG.md has no '## v${BASE_VERSION}' section"; exit 1; }
 
             # Find the line number of the next different version (not rc/beta of current version)
             end_line=$(awk -v start="$start_line" -v base="$BASE_VERSION" '
@@ -125,6 +126,7 @@ jobs:
             # For RC/beta releases, extract only the specific section
             # Find the line number of the specific version header
             start_line=$(grep -n "^## v${VERSION}" CHANGELOG.md | head -1 | cut -d: -f1)
+            [ -n "$start_line" ] || { echo "::error::CHANGELOG.md has no '## v${VERSION}' section"; exit 1; }
 
             # Find the line number of the next version header
             end_line=$(awk -v start="$start_line" 'NR > start && /^## v/ {print NR; exit}' CHANGELOG.md)
@@ -137,9 +139,14 @@ jobs:
             fi
           fi
 
-          echo "DECODED_CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$content" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          [ -n "$content" ] || { echo "::error::changelog section for v${VERSION} is empty"; exit 1; }
+
+          delimiter="CHANGELOG_$(date +%s%N)"
+          {
+            echo "DECODED_CHANGELOG<<$delimiter"
+            echo "$content"
+            echo "$delimiter"
+          } >> "$GITHUB_ENV"
       - name: Claim draft and upload candidate assets
         id: claim
         if: inputs.VERSION != 'testing'

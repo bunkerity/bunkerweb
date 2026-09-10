@@ -6,12 +6,15 @@ from json import dumps, loads
 from os import environ
 from pathlib import Path
 from subprocess import run
+from time import sleep
 from urllib.parse import urlencode
 
 from release_artifacts import command, load_manifest, require
 
 MARKER = "<!-- bunkerweb-release-claim: "
 PUBLISH_JOB_NAME = "Publish GitHub release"
+CLAIM_LOOKUPS = 6
+CLAIM_DELAY = 5
 
 
 def api(endpoint, payload=None, paginated=False):
@@ -28,6 +31,19 @@ def matching_releases(repo, tag):
     pages = api(f"repos/{repo}/releases?per_page=100", paginated=True)
     require(isinstance(pages, list) and all(isinstance(page, list) for page in pages), "invalid releases response")
     return [release for page in pages for release in page if release["tag_name"] == tag]
+
+
+def require_unique_claim(repo, tag, release_id):
+    """The releases list trails a create by a few seconds, and a draft missing from it is not a rival claim."""
+    for lookup in range(CLAIM_LOOKUPS):
+        ids = [row["id"] for row in matching_releases(repo, tag)]
+        if ids == [release_id]:
+            return
+        # Anything else already claiming the tag is a real conflict: our own create never reads back as another id.
+        require(not ids, "release claim is not unique; refusing publication")
+        if lookup + 1 < CLAIM_LOOKUPS:
+            sleep(CLAIM_DELAY)
+    require(False, "created draft never appeared in the releases list")
 
 
 def body_with_claim(body, binding):
@@ -87,7 +103,7 @@ def publish(manifest, manifest_hash, body, files, prerelease):
         }
         release = api(f"repos/{repo}/releases", payload=payload)
         require(release.get("draft") is True and release.get("body") == payload["body"], "created draft does not match its candidate claim")
-        require([row["id"] for row in matching_releases(repo, tag)] == [release["id"]], "release claim is not unique; refusing publication")
+        require_unique_claim(repo, tag, release["id"])
     release_id = release["id"]
     pages = api(f"repos/{repo}/releases/{release_id}/assets?per_page=100", paginated=True)
     assets = list(chain.from_iterable(pages))
