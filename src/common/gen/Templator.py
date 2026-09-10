@@ -32,6 +32,7 @@ from default_server import (  # type: ignore
     DEFAULT_SERVER_STREAM_TLS_SETTINGS,
     blocked_stream_ports,
     default_server_stream_listeners,
+    strip_default_server_unless_alone,
 )
 from ports import (  # type: ignore
     HTTPS_PORT_SETTING,
@@ -408,8 +409,12 @@ class Templator:
         # gives it a second meaning.
         if config.get("MULTISITE", "no") != "yes":
             declared = str(config.get("SERVER_NAME", "")).split()
-            names = [server for server in declared if server != DEFAULT_SERVER_ID]
-            if names and len(names) != len(declared):
+            # `strip_default_server_unless_alone` IS the rule this block enforces (strip the
+            # reserved id, except when nothing else would remain): it returns `declared` UNCHANGED
+            # in the alone case, so the two branches below tell "stripped" from "kept" by comparing
+            # its result against `declared` rather than by re-deriving the bare strip themselves.
+            names = strip_default_server_unless_alone(declared)
+            if names != declared:
                 # Never silently: dropping a name changes which hostnames are served. Not reachable
                 # through a shipped integration (both `gen/main.py --variables` call sites hand it a
                 # SERVER_NAME they built themselves), but a hand-invoked generator deserves to be
@@ -421,7 +426,7 @@ class Templator:
                 for target_config in (self._config, self._full_config):
                     if "SERVER_NAME" in target_config:
                         target_config["SERVER_NAME"] = " ".join(names)
-            elif declared and not names:
+            elif DEFAULT_SERVER_ID in declared:
                 logger.warning(
                     f"{DEFAULT_SERVER_ID!r} is the only server name of this single-site deployment, so it is KEPT and served as "
                     "usual: the reserved default server is a MULTISITE-only feature, it does not exist here, and dropping the "

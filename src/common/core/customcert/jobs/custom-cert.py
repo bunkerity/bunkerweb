@@ -14,7 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from certificate_utils import certificate_status, parse_certificate  # type: ignore
 from common_utils import bytes_hash  # type: ignore
-from default_server import DEFAULT_SERVER_ID  # type: ignore
+from default_server import DEFAULT_SERVER_ID, strip_default_server, strip_default_server_unless_alone  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -387,8 +387,10 @@ try:
     # USE_CUSTOM_SSL ; keeping it blind would do the same thing to `default-server www.example.com`,
     # where the Templator strips it and this job would then cache under a directory nobody reads.
     default_server_seeded = multisite and DEFAULT_SERVER_ID in all_domains
-    kept = [domain for domain in all_domains if domain != DEFAULT_SERVER_ID]
-    all_domains = kept if multisite else (kept or all_domains)
+    # Multisite: a plain strip, always -- the reserved row renders into its own block regardless of
+    # what else is in the roster. Single-site: `strip_default_server_unless_alone` is the same rule
+    # `Templator.__init__` and `config_read` enforce (strip unless nothing else would remain).
+    all_domains = strip_default_server(all_domains) if multisite else strip_default_server_unless_alone(all_domains)
 
     # Before the roster check on purpose : the default server exists whether or not any service
     # does, so its override must be evaluated even when SERVER_NAME is empty.
