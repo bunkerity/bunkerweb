@@ -179,13 +179,13 @@ class ReleaseArtifactsTest(TestCase):
             needs = jobs[job].get("needs", [])
             return set(needs).union(*(ancestors(need) for need in needs))
 
-        self.assertEqual(set(jobs["validate-tests"]["needs"]), release.REQUIRED_JOBS)
+        self.assertEqual(set(jobs["validate-candidates"]["needs"]), release.REQUIRED_JOBS)
         self.assertEqual(set(jobs["rm-arm"]["needs"]), {"create-arm", "build-containers-arm", "build-packages"})
         self.assertIn("always()", jobs["rm-arm"]["if"])
         self.assertEqual(jobs["gate"]["environment"], "release")
         for name in ("push-images", "push-packages", "push-gh", "push-doc"):
             self.assertIn("gate", ancestors(name))
-            self.assertIn("validate-tests", ancestors(name))
+            self.assertIn("validate-candidates", ancestors(name))
         for name in ("push-images", "push-packages"):
             self.assertEqual(jobs[name]["with"]["MANIFEST_SHA256"], "${{ needs.push-gh.outputs.manifest_sha256 }}")
         # Integration suites and their cloud infrastructure belong to the staging branch only.

@@ -6,17 +6,19 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 以下是我们维护的“官方”插件列表（更多信息请参阅 [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) 仓库）：
 
-|      名称      | 版本 | 描述                                                                                           |                                                链接                                                 |
-| :------------: | :--: | :--------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-| **Authentik**  | 1.11 | 使用 Authentik 转发认证（auth_request）为您的 Web 服务提供单点登录（SSO）保护。                |  [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)  |
-|   **ClamAV**   | 1.11 | 使用 ClamAV 杀毒引擎自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                       |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Cloudflare** | 1.11 | 配置 Cloudflare 的可信 IP，管理 Origin CA 证书，并将 BunkerWeb 封禁同步到 Cloudflare IP 列表。 | [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare) |
-|   **Coraza**   | 1.11 | 使用 Coraza WAF（ModSecurity 的替代品）检查请求。                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **Discord**   | 1.11 | 使用 Webhook 将安全通知发送到 Discord 频道。                                                   |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Matrix**   | 1.11 | 使用 Matrix API 将安全通知发送到 Matrix 房间。                                                 |     [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)     |
-|   **Slack**    | 1.11 | 使用 Webhook 将安全通知发送到 Slack 频道。                                                     |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** | 1.11 | 使用 VirusTotal API 自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                       | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   | 1.11 | 使用 Webhook 将安全通知发送到自定义 HTTP 端点。                                                |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|      名称       | 版本  | 描述                                                                                                     |                                                 链接                                                  |
+| :-------------: | :---: | :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|  **Authentik**  | 1.12  | 使用 Authentik 转发认证（auth_request）为您的 Web 服务提供单点登录（SSO）保护。                          |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    | 1.12  | 使用 ClamAV 杀毒引擎自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  | 1.12  | 配置 Cloudflare 的可信 IP，管理 Origin CA 证书，并将 BunkerWeb 封禁同步到 Cloudflare IP 列表。           |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    | 1.12  | 使用 Coraza WAF（ModSecurity 的替代品）检查请求。                                                        |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   | 1.12  | 使用 Webhook 将安全通知发送到 Discord 频道。                                                             |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    | 1.12  | 使用 Matrix API 将安全通知发送到 Matrix 房间。                                                           |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **SentinelOne** | 1.12  | 使用 SentinelOne API 检查上传文件的哈希值和客户端 IP，并根据哈希信誉或威胁情报指标拒绝请求。             | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    | 1.12  | 使用 Webhook 将安全通知发送到 Slack 频道。                                                               |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  | 1.12  | 将 BunkerWeb 封禁同步到 SysWarden，通过 nftables 在内核层面阻止流量，并导入 SysWarden 的黑名单和白名单。 |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  | 1.12  | 使用 VirusTotal API 检查上传文件的哈希值和客户端 IP，并在超过配置的信誉阈值时拒绝请求。                  |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   | 1.12  | 使用 Webhook 将安全通知发送到自定义 HTTP 端点。                                                          |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## 如何使用插件
 
@@ -24,7 +26,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 如果您想快速安装外部插件，可以使用 `EXTERNAL_PLUGIN_URLS` 设置。它接受一个以空格分隔的 URL 列表，每个 URL 指向一个包含一个或多个插件的压缩（zip 格式）存档。
 
-如果您想自动安装官方插件，可以使用以下值：`EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip`
+如果您想自动安装官方插件，可以使用以下值：`EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.12.zip`
 
 ### 手动
 
