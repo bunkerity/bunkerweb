@@ -346,7 +346,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  validate-tests:
+  validate-candidates:
     if: ${{ always() }}
     needs: [prepare, plumber, codeql, candidates]
     runs-on: ubuntu-latest
@@ -365,13 +365,13 @@ jobs:
           MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
         run: python3 .github/scripts/release_artifacts.py gate
 
-  # Required reviewers on the existing release environment approve only tested
+  # Required reviewers on the existing release environment approve only scanned
   # candidates. Every public image/package/GitHub/docs publication descends here.
   gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: release
-    needs: [prepare, validate-tests]
+    needs: [prepare, validate-candidates]
     permissions:
       contents: read
       actions: read
