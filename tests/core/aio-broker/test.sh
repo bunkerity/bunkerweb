@@ -4,6 +4,22 @@ set -Eeuo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
 container="bunkerweb-all-in-one"
+
+# run.sh sources utils.sh in its own shell and exports BW_VERSION there, but this probe runs as
+# a `script` action (tests/core_handlers/script_handler.py's subprocess.run, no env= override) --
+# on CI that export never reaches this process, so `docker compose up/down` recreates the
+# container from an empty tag ("invalid reference format"). Resolve it ourselves.
+if [ -z "${BW_VERSION:-}" ]; then
+	if [ -r /tmp/bw_version.txt ]; then
+		BW_VERSION="$(cat /tmp/bw_version.txt)"
+	else
+		image="$(docker inspect --format '{{.Config.Image}}' "$container" 2>/dev/null || true)"
+		BW_VERSION="${image##*:}"
+	fi
+fi
+[ -n "${BW_VERSION:-}" ] || { echo "aio-broker: unable to resolve BW_VERSION (not set, /tmp/bw_version.txt unreadable, and no running '$container' container to read the image tag from)" >&2; exit 1; }
+export BW_VERSION
+
 compose_file="${AIO_BROKER_COMPOSE_FILE:-${root}/tests/docker/docker-compose.all-in-one.yml}"
 compose=(docker compose -p docker -f "$compose_file")
 
