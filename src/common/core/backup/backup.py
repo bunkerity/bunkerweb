@@ -535,10 +535,11 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         sys_exit(1)
 
     # Clear the database before replaying the dump, and clear ALL of it. `Base.metadata` names only
-    # the tables the CURRENT model declares, which is not what the database holds: a table an older
-    # release created and this one dropped (`bw_ui_user_columns_preferences` -- no 1.7 migration
-    # removes it, so every database upgraded from 1.6 still carries it), a table a plugin extension
-    # created, or `alembic_version`, which is not in the model at all.
+    # the tables the CURRENT model declares, which is not what the database holds: a table from an
+    # older release that a later migration renamed or dropped and that is not in today's model under
+    # any name -- `bw_ui_user_columns_preferences` used to be exactly that, until the 1.7 migration
+    # renamed it to `bw_ui_user_preferences`, which the model DOES declare now -- a table a plugin
+    # extension created, or `alembic_version`, which is not in the model at all.
     #
     # Dropping only the model's tables does not merely leave those behind. On an engine that
     # enforces foreign keys it FAILS, because a leftover table's FK into a model table blocks that
