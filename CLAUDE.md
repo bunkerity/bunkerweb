@@ -176,7 +176,7 @@ Two tiers, both documented in [tests/AGENTS.md](tests/AGENTS.md): integration te
 .venv-unit/bin/pytest --db-engines=sqlite,postgresql,mariadb
 ```
 
-The legacy harness (`tests/main.py`, the `*Test.py` classes, `tests/examples/`) was deleted once the Swarm arm and Linux example mode closed its last two gaps. `staging-tests.yml`, its only caller, no longer runs anything.
+The legacy harness (`tests/main.py`, the `*Test.py` classes, `tests/examples/`) was deleted once the Swarm arm and Linux example mode closed its last two gaps. `staging-tests.yml`, its only caller, was deleted too; `staging.yml` gained its own `parse-tests-*`/`run-*-tests-*` jobs in its place.
 
 A fresh install builds its schema from the model and always looks healthy; only an upgrade runs migrations. Exercise the upgrade path explicitly.
 
