@@ -47,6 +47,182 @@ function enable_broker_now() {
     return 0
 }
 
+# Upgrade/fresh discriminators dropped by the packaging scripts, and where the resolved
+# install type is recorded. Overridable so the unit tests can drive this script against a
+# scratch tree instead of the real, root-owned locations.
+BW_UPGRADE_FLAG="${BW_UPGRADE_FLAG:-/var/tmp/bunkerweb_upgrade}"
+BW_ENABLE_SCHEDULER_FLAG="${BW_ENABLE_SCHEDULER_FLAG:-/var/tmp/bunkerweb_enable_scheduler}"
+INSTALL_TYPE_MARKER="${INSTALL_TYPE_MARKER:-/usr/share/bunkerweb/INSTALL_TYPE}"
+
+# True when this host actually runs the scheduler — enabled at boot, or currently up.
+# The Celery worker and its broker are peers of the scheduler: a host that runs no
+# scheduler runs neither. Used on the upgrade leg, where the invocation declares nothing.
+function host_runs_scheduler() {
+    systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null && return 0
+    systemctl is-active --quiet bunkerweb-scheduler && return 0
+    return 1
+}
+
+# A bare `apt`/`dnf` upgrade re-runs this script with none of the installer's
+# WORKER_MODE/MANAGER_MODE/SERVICE_* in its environment: dpkg/rpm do not persist them.
+# Without this, a BunkerWeb-instance-only node would look standalone and get a broker plus
+# a Celery worker enabled on it. Recover the install type a declared run recorded — the
+# same six values the installer reads back in detect_install_type_from_state. Recorded in
+# a variable of its own and never folded into the MANAGER_MODE/WORKER_MODE/SERVICE_* view:
+# the marker is stale by construction (only a declared run rewrites it), and rewriting that
+# view would arm the `disable --now` legs of every service section against it — an upgrade
+# could then stop a data plane the operator added by hand after the last installer run.
+function read_recorded_install_type() {
+    RECOVERED_INSTALL_TYPE=""
+    [ -r "$INSTALL_TYPE_MARKER" ] || return 0
+    local marker
+    marker="$(tr -d '[:space:]' < "$INSTALL_TYPE_MARKER" 2>/dev/null)"
+    case "$marker" in
+        full|manager|worker|scheduler|ui|api)
+            RECOVERED_INSTALL_TYPE="$marker"
+            echo "ℹ️ No topology declared this run; recorded install type is ${marker}."
+            ;;
+    esac
+    return 0
+}
+
+# Does the scheduler's Celery worker (and therefore its broker) belong on this host, on a
+# leg that declared no topology? The recorded install type decides whenever there is one;
+# a legacy host predating the marker has none, so fall back to whether it runs a scheduler.
+function upgrade_leg_runs_worker() {
+    case "$RECOVERED_INSTALL_TYPE" in
+        full|manager|scheduler) return 0 ;;
+        worker|ui|api) return 1 ;;
+    esac
+    host_runs_scheduler
+}
+
+# Scheduler, its Celery worker and their broker, as one unit: the worker executes every
+# job the scheduler dispatches, so the three are enabled, restarted and torn down
+# together. Extracted so the unit tests can drive exactly this decision.
+function manage_scheduler_and_worker() {
+    # Enable scheduler if: (standalone mode OR manager-only mode) AND service not disabled
+    if {
+        # Standalone mode (no manager or worker specified)
+        { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+        # Manager-only mode (manager enabled, worker disabled)
+        { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
+    } && [ "$SERVICE_SCHEDULER" != "no" ]; then
+        # The worker (Celery) executes every job the scheduler dispatches, so it is a peer of
+        # the scheduler: enabled in the same topology, restarted/disabled on the same legs.
+        # Fresh installation or explicit scheduler enablement
+        if [[ -f "${BW_ENABLE_SCHEDULER_FLAG}" || ! -f "${BW_UPGRADE_FLAG}" ]]; then
+            # The broker must be up before the worker; enable it first (best-effort).
+            enable_broker_now
+
+            echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-scheduler
+
+            echo "🚀 Enabling and starting the BunkerWeb Worker service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-worker
+
+            # Clean up scheduler enablement flag if it exists
+            if [ -f "${BW_ENABLE_SCHEDULER_FLAG}" ]; then
+                echo "ℹ️ Removing scheduler enablement flag..."
+                do_and_check_cmd rm -f "${BW_ENABLE_SCHEDULER_FLAG}"
+            fi
+        # Upgrade scenario
+        else
+            # Should this host gain the control plane's daemons? A bare `apt`/`dnf` upgrade
+            # declares no topology and the mode view above defaults to standalone, so without
+            # this a BunkerWeb-instance-only node (the 1.6 → 1.7 path, before the install-type
+            # marker existed) gets a broker and the Celery worker enabled on it — including a
+            # distro Redis the operator may have disabled on purpose, since detect_broker_unit
+            # falls through to redis-server/valkey/redis. This gates *enabling* only; see below.
+            local enable_new_units="yes"
+            if [ "$TOPOLOGY_DECLARED" = "no" ] && ! upgrade_leg_runs_worker; then
+                enable_new_units="no"
+                echo "ℹ️ No topology declared and the recorded install type is ${RECOVERED_INSTALL_TYPE:-absent, with no scheduler on this host}; not enabling a broker or the BunkerWeb Worker service here."
+            fi
+
+            # Make sure the broker is available before (re)starting the worker.
+            [ "$enable_new_units" = "yes" ] && enable_broker_now
+
+            # Restart whatever is already running here — never gated. dpkg/rpm just replaced
+            # the code under these units, and the scheduler runs its database migration at
+            # startup; a unit that is up is a fact about this host, not a guess from a marker
+            # that only a declared run ever rewrites.
+            if systemctl is-active --quiet bunkerweb-scheduler; then
+                echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
+                do_and_check_cmd systemctl restart bunkerweb-scheduler
+            fi
+            # The worker unit is new in this release: enable+start it where it belongs.
+            # `enable --now` on a unit that is somehow already up only enables it — the start
+            # is a no-op, not a restart — which is what this branch has always done; the elif
+            # restarts an already-enabled, already-running one.
+            if [ "$enable_new_units" = "yes" ] && ! systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; then
+                echo "🚀 Enabling and starting the BunkerWeb Worker service..."
+                do_and_check_cmd systemctl enable --now bunkerweb-worker
+            elif systemctl is-active --quiet bunkerweb-worker; then
+                echo "📋 Restarting the BunkerWeb Worker service after upgrade..."
+                do_and_check_cmd systemctl restart bunkerweb-worker
+            fi
+        fi
+    # Disable scheduler if it shouldn't be running but is still active, or — only when the
+    # topology was declared this run — enabled-but-stopped. An enabled-but-stopped scheduler
+    # left over from a prior full install would otherwise make this worker look like a full
+    # stack on the next upgrade; but on a bare upgrade we leave the operator's units alone.
+    elif systemctl is-active --quiet bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
+        echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
+        do_and_check_cmd systemctl disable --now bunkerweb-scheduler
+        # Tear the worker down alongside the scheduler (same self-heal gating).
+        if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
+            echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+            do_and_check_cmd systemctl disable --now bunkerweb-worker
+        fi
+    else
+        echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
+        # Self-heal a leftover-enabled worker when the scheduler isn't running here either.
+        if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
+            echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+            do_and_check_cmd systemctl disable --now bunkerweb-worker
+        fi
+    fi
+}
+
+# Resolve this run's topology into the globals every service branch below reads.
+function resolve_topology() {
+    # Resolve whether the topology was DECLARED this run — either a fresh install or an
+    # explicit mode/service signal from the installer. On a bare `apt upgrade` (no signal)
+    # the operator's intent is unknown, so we mutate no persistent state: we neither
+    # self-heal leftover-enabled units nor stamp an install-type marker, and let the
+    # upgrade-time detector keep inferring. This is the single gate behind Part A (marker)
+    # and the enabled-but-stopped leg of Part C (self-heal).
+    FRESH_INSTALL="no"
+    [ ! -f "${BW_UPGRADE_FLAG}" ] && FRESH_INSTALL="yes"
+    RESOLVED_INSTALL_TYPE=""
+    EXPLICIT_TOPOLOGY="no"
+    if [ "${WORKER_MODE:-no}" = "yes" ] && [ "${MANAGER_MODE:-no}" != "yes" ]; then
+        RESOLVED_INSTALL_TYPE="worker"; EXPLICIT_TOPOLOGY="yes"
+    elif [ "${MANAGER_MODE:-no}" = "yes" ] && [ "${WORKER_MODE:-no}" != "yes" ]; then
+        RESOLVED_INSTALL_TYPE="manager"; EXPLICIT_TOPOLOGY="yes"
+    elif [ "${SERVICE_API:-no}" = "yes" ] && [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+        RESOLVED_INSTALL_TYPE="api"; EXPLICIT_TOPOLOGY="yes"
+    elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-no}" = "yes" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
+        RESOLVED_INSTALL_TYPE="scheduler"; EXPLICIT_TOPOLOGY="yes"
+    elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_UI:-no}" = "yes" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ]; then
+        RESOLVED_INSTALL_TYPE="ui"; EXPLICIT_TOPOLOGY="yes"
+    else
+        RESOLVED_INSTALL_TYPE="full"
+    fi
+    TOPOLOGY_DECLARED="no"
+    RECOVERED_INSTALL_TYPE=""
+    { [ "$FRESH_INSTALL" = "yes" ] || [ "$EXPLICIT_TOPOLOGY" = "yes" ]; } && TOPOLOGY_DECLARED="yes"
+    # Nothing declared → recover what the last declared run recorded. Runs after
+    # TOPOLOGY_DECLARED so the marker is neither re-stamped nor re-read as a declaration.
+    [ "$TOPOLOGY_DECLARED" = "no" ] && read_recorded_install_type
+    return 0
+}
+
+# The unit tests source this script to drive the functions above against a fake
+# systemctl; nothing below it is safe to run outside a real package install.
+[ -n "${BW_POSTINSTALL_LIB_ONLY:-}" ] && return 0
+
 # Decompress deps directory with pigz for fastest decompression
 echo "Decompressing deps directory with pigz..."
 cd /usr/share/bunkerweb || exit 1
@@ -89,8 +265,8 @@ function migrate_file() {
 
     if [ -f "$old_path" ]; then
         echo "Old file $old_path found!"
-        if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
-            touch /var/tmp/bunkerweb_upgrade
+        if [ ! -f "${BW_UPGRADE_FLAG}" ]; then
+            touch "${BW_UPGRADE_FLAG}"
         fi
         echo "Copying old file to new location: $new_path..."
         # Gate the copy: a failed cp must NOT delete the source, and must return non-zero so
@@ -159,31 +335,7 @@ systemctl daemon-reload
 echo "🛑 Stopping and disabling the nginx service..."
 do_and_check_cmd systemctl disable --now nginx
 
-# Resolve whether the topology was DECLARED this run — either a fresh install or an
-# explicit mode/service signal from the installer. On a bare `apt upgrade` (no signal)
-# the operator's intent is unknown, so we mutate no persistent state: we neither
-# self-heal leftover-enabled units nor stamp an install-type marker, and let the
-# upgrade-time detector keep inferring. This is the single gate behind Part A (marker)
-# and the enabled-but-stopped leg of Part C (self-heal).
-FRESH_INSTALL="no"
-[ ! -f /var/tmp/bunkerweb_upgrade ] && FRESH_INSTALL="yes"
-RESOLVED_INSTALL_TYPE=""
-EXPLICIT_TOPOLOGY="no"
-if [ "${WORKER_MODE:-no}" = "yes" ] && [ "${MANAGER_MODE:-no}" != "yes" ]; then
-    RESOLVED_INSTALL_TYPE="worker"; EXPLICIT_TOPOLOGY="yes"
-elif [ "${MANAGER_MODE:-no}" = "yes" ] && [ "${WORKER_MODE:-no}" != "yes" ]; then
-    RESOLVED_INSTALL_TYPE="manager"; EXPLICIT_TOPOLOGY="yes"
-elif [ "${SERVICE_API:-no}" = "yes" ] && [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
-    RESOLVED_INSTALL_TYPE="api"; EXPLICIT_TOPOLOGY="yes"
-elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_SCHEDULER:-no}" = "yes" ] && [ "${SERVICE_UI:-yes}" = "no" ]; then
-    RESOLVED_INSTALL_TYPE="scheduler"; EXPLICIT_TOPOLOGY="yes"
-elif [ "${SERVICE_BUNKERWEB:-yes}" = "no" ] && [ "${SERVICE_UI:-no}" = "yes" ] && [ "${SERVICE_SCHEDULER:-yes}" = "no" ]; then
-    RESOLVED_INSTALL_TYPE="ui"; EXPLICIT_TOPOLOGY="yes"
-else
-    RESOLVED_INSTALL_TYPE="full"
-fi
-TOPOLOGY_DECLARED="no"
-{ [ "$FRESH_INSTALL" = "yes" ] || [ "$EXPLICIT_TOPOLOGY" = "yes" ]; } && TOPOLOGY_DECLARED="yes"
+resolve_topology
 
 # Manage the BunkerWeb service
 echo "Configuring BunkerWeb service..."
@@ -197,7 +349,7 @@ if {
     { [ -z "$MANAGER_MODE" ] || [ "${MANAGER_MODE:-yes}" = "no" ] && [ "${WORKER_MODE:-no}" != "no" ]; }
 } && [ "$SERVICE_BUNKERWEB" != "no" ]; then
     # Upgrade scenario
-    if [ -f /var/tmp/bunkerweb_upgrade ]; then
+    if [ -f "${BW_UPGRADE_FLAG}" ]; then
         if systemctl is-active --quiet bunkerweb; then
             echo "📋 Reloading the BunkerWeb service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb
@@ -220,73 +372,7 @@ fi
 
 # Manage the BunkerWeb Scheduler service
 echo "Configuring BunkerWeb Scheduler service..."
-
-# Enable scheduler if: (standalone mode OR manager-only mode) AND service not disabled
-if {
-    # Standalone mode (no manager or worker specified)
-    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
-    # Manager-only mode (manager enabled, worker disabled)
-    { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
-} && [ "$SERVICE_SCHEDULER" != "no" ]; then
-    # The worker (Celery) executes every job the scheduler dispatches, so it is a peer of
-    # the scheduler: enabled in the same topology, restarted/disabled on the same legs.
-    # Fresh installation or explicit scheduler enablement
-    if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
-        # The broker must be up before the worker; enable it first (best-effort).
-        enable_broker_now
-
-        echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
-        do_and_check_cmd systemctl enable --now bunkerweb-scheduler
-
-        echo "🚀 Enabling and starting the BunkerWeb Worker service..."
-        do_and_check_cmd systemctl enable --now bunkerweb-worker
-
-        # Clean up scheduler enablement flag if it exists
-        if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
-            echo "ℹ️ Removing scheduler enablement flag..."
-            do_and_check_cmd rm -f /var/tmp/bunkerweb_enable_scheduler
-        fi
-    # Upgrade scenario
-    else
-        # Make sure the broker is available before (re)starting the worker.
-        enable_broker_now
-
-        # Restart the scheduler service only if it's already running
-        if systemctl is-active --quiet bunkerweb-scheduler; then
-            echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
-            do_and_check_cmd systemctl restart bunkerweb-scheduler
-        fi
-        # The worker unit is new in this release: enable+start it if absent, restart if active.
-        if systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; then
-            if systemctl is-active --quiet bunkerweb-worker; then
-                echo "📋 Restarting the BunkerWeb Worker service after upgrade..."
-                do_and_check_cmd systemctl restart bunkerweb-worker
-            fi
-        else
-            echo "🚀 Enabling and starting the BunkerWeb Worker service..."
-            do_and_check_cmd systemctl enable --now bunkerweb-worker
-        fi
-    fi
-# Disable scheduler if it shouldn't be running but is still active, or — only when the
-# topology was declared this run — enabled-but-stopped. An enabled-but-stopped scheduler
-# left over from a prior full install would otherwise make this worker look like a full
-# stack on the next upgrade; but on a bare upgrade we leave the operator's units alone.
-elif systemctl is-active --quiet bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
-    echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
-    do_and_check_cmd systemctl disable --now bunkerweb-scheduler
-    # Tear the worker down alongside the scheduler (same self-heal gating).
-    if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
-        echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
-        do_and_check_cmd systemctl disable --now bunkerweb-worker
-    fi
-else
-    echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
-    # Self-heal a leftover-enabled worker when the scheduler isn't running here either.
-    if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
-        echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
-        do_and_check_cmd systemctl disable --now bunkerweb-worker
-    fi
-fi
+manage_scheduler_and_worker
 
 # Manage the BunkerWeb UI service
 echo "Configuring BunkerWeb UI service..."
@@ -300,7 +386,7 @@ if {
     { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
 } && [ "$SERVICE_UI" != "no" ]; then
     # Fresh installation or explicit UI enablement
-    if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
+    if [ ! -f "${BW_UPGRADE_FLAG}" ]; then
         if [ "${UI_WIZARD:-yes}" != "no" ]; then
             echo "🧙 Setting up BunkerWeb UI with wizard..."
 
@@ -382,7 +468,7 @@ if [ "${SERVICE_API:-}" = "yes" ] || { {
     { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
 } && [ "${SERVICE_SCHEDULER:-yes}" != "no" ] && [ "${SERVICE_API:-yes}" != "no" ]; }; then
     # Fresh installation or explicit API enablement
-    if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
+    if [ ! -f "${BW_UPGRADE_FLAG}" ]; then
         echo "🚀 Enabling and starting the BunkerWeb API service..."
         do_and_check_cmd systemctl enable --now bunkerweb-api
     else
@@ -404,15 +490,14 @@ fi
 # declared this run (fresh install, or explicit mode/service signal) — a bare
 # `apt upgrade` carries no intent, so we must NOT stamp the standalone "full" default
 # onto a legacy worker/scheduler/ui/api host and have it override inference forever.
-INSTALL_TYPE_MARKER="/usr/share/bunkerweb/INSTALL_TYPE"
 if [ "$TOPOLOGY_DECLARED" = "yes" ] && [ -n "$RESOLVED_INSTALL_TYPE" ]; then
     echo "$RESOLVED_INSTALL_TYPE" > "$INSTALL_TYPE_MARKER" 2>/dev/null \
         && chmod 0644 "$INSTALL_TYPE_MARKER" 2>/dev/null \
         || echo "ℹ️ Note: could not persist install-type marker at $INSTALL_TYPE_MARKER"
 fi
 
-if [ -f /var/tmp/bunkerweb_upgrade ]; then
-    rm -f /var/tmp/bunkerweb_upgrade
+if [ -f "${BW_UPGRADE_FLAG}" ]; then
+    rm -f "${BW_UPGRADE_FLAG}"
     echo "BunkerWeb has been successfully upgraded! 🎉"
 else
     echo "BunkerWeb has been successfully installed! 🎉"
