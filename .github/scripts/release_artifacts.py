@@ -7,6 +7,7 @@ from os import environ
 from pathlib import Path
 from re import fullmatch
 from subprocess import CalledProcessError, run
+from sys import stderr
 from time import sleep
 
 IMAGES = ("bunkerweb", "scheduler", "autoconf", "ui", "api", "all-in-one")
@@ -35,7 +36,13 @@ def require(condition, message):
 
 
 def command(args):
-    return run(args, check=True, capture_output=True).stdout
+    result = run(args, capture_output=True)
+    if result.returncode:
+        # check=True leaves the tool's own message in an attribute nothing prints, so a rejected
+        # push reads as an exit code and costs another release run to explain.
+        print(result.stderr.decode(errors="replace").strip(), file=stderr)
+        raise CalledProcessError(result.returncode, args, result.stdout, result.stderr)
+    return result.stdout
 
 
 def registry(args):
@@ -142,12 +149,23 @@ def write_json(file, value):
     Path(file).write_text(dumps(value, indent=2, sort_keys=True) + "\n")
 
 
+def require_publishable_layers(repository, platforms):
+    """The candidate index is promoted byte for byte: a layer Docker Hub refuses only surfaces
+    after the packages are already public, so refuse it here, in the build that produced it."""
+    for value in platforms.values():
+        manifest = inspect_index(f"{repository}@{value}")
+        for layer in manifest.get("layers", []):
+            require(not layer["mediaType"].endswith("+zstd"), f"candidate layer is not publishable: {layer['mediaType']}")
+
+
 def record_image(args):
     digest(args.digest)
     require(args.image in IMAGES and args.platform in PLATFORMS, "unknown candidate image/platform")
-    ref = f"ghcr.io/bunkerity/{args.image}-tests@{args.digest}"
+    repository = f"ghcr.io/bunkerity/{args.image}-tests"
+    ref = f"{repository}@{args.digest}"
     platforms = platform_digests(inspect_index(ref))
     require(set(platforms) == {args.platform}, "built image platform differs from matrix")
+    require_publishable_layers(repository, platforms)
     write_json(args.output, identity() | {"kind": "image", "image": args.image, "ref": ref, "platforms": platforms})
 
 
