@@ -296,8 +296,10 @@ for entry in "${db_entries[@]}"; do
   docker compose stop bw-scheduler bunkerweb || true
 
   export ONLY_UPDATE="$has_target_migration"
-  # Strip +psycopg to use psycopg2 — psycopg3 opens two connections during
-  # bulk 'alembic upgrade head' which deadlocks on PostgreSQL table locks.
+  # Strip +psycopg so the migration container runs on psycopg2. The original reason — "psycopg3
+  # opens two connections during bulk 'alembic upgrade head' and deadlocks" — was wrong: the deadlock
+  # was revision 8c096ca1beb8's own second connection, removed in 1.7. The strip stays only until the
+  # generator is re-validated on psycopg (the driver BunkerWeb ships); see 1.8 notes.
   export DATABASE_URI="${database_uri//+psycopg}"
 
   # Run the migration (applies existing migrations in bulk + generates new one)
