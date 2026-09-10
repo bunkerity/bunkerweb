@@ -155,6 +155,9 @@
 - [BUGFIX] `healthcheck`: `/healthz` answers `loading` while the instance is loading or reloading instead of always `ok`, and the container healthcheck matches the status exactly.
 - [FEATURE] `reverseproxy`: `REVERSE_PROXY_MAX_CLIENT_SIZE` sets the body size, and the ModSecurity body limit, per URL.
 - [FEATURE] `antibot`, `blacklist`, `whitelist`, `greylist`, `dnsbl`, `country`: match on a request header, name plus an optional PCRE regex on the value, as an ignore or list criterion. The value is a shared secret: it is stored as a password setting, never logged, and never cached.
+- [BUGFIX] `linux`: a bare package upgrade no longer enables a broker and the Celery worker on a BunkerWeb-instance-only node.
+- [BUGFIX] `ui`: a refused or partially-reverted service save no longer always flashes success; the flash type now follows the outcome.
+- [BUGFIX] `ui`: a refused global-settings or PRO-key save no longer flashes success either; the flash follows the outcome like the service page.
 
 ## v1.6.14~rc1 - 2026/07/??
 
