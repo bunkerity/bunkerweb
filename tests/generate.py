@@ -210,9 +210,15 @@ if ARGS.integration in ("Autoconf", "Swarm", "Kubernetes"):
         config["variables"].pop("HTTP_PORT", None)
         config["variables"].pop("HTTPS_PORT", None)
 
-        # kube-dns on stock clusters, coredns on Scaleway Kapsule (port of dev 41c48e58c's intent,
-        # applied here too: this generator hardcodes the same resolver name as tests/utils/bunkerweb.yml).
-        config["variables"]["DNS_RESOLVERS"] = "coredns.kube-system.svc.cluster.local"
+        # The DNS Service name is distribution-dependent: kube-dns on stock clusters (minikube,
+        # this CI), coredns on Scaleway Kapsule (port of dev 41c48e58c's intent). build.sh
+        # detects which one exists on the cluster it just built and drops it here; default to
+        # kube-dns, the stock name, when the marker is missing (e.g. a non-harness invocation).
+        dns_service = "kube-dns"
+        dns_service_marker = Path("/tmp/k8s_dns_service.txt")
+        if dns_service_marker.is_file():
+            dns_service = dns_service_marker.read_text(encoding="utf-8").strip() or dns_service
+        config["variables"]["DNS_RESOLVERS"] = f"{dns_service}.kube-system.svc.cluster.local"
         config["variables"]["API_WHITELIST_IP"] = "127.0.0.0/8 10.0.0.0/8"
         config["variables"]["USE_REDIS"] = "yes"
         config["variables"]["REDIS_HOST"] = "svc-bunkerweb-redis.bunkerweb.svc.cluster.local"

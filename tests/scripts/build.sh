@@ -401,6 +401,20 @@ else
     exit 1
   fi
 
+  # The DNS Service name is distribution-dependent even though the pods behind it are always
+  # CoreDNS: stock clusters (minikube, this CI) name it kube-dns, Scaleway Kapsule names it
+  # coredns. generate.py reads this marker to set DNS_RESOLVERS to whichever one actually
+  # exists, instead of hardcoding a name that only matches one distribution.
+  if kubectl get svc kube-dns -n kube-system >/dev/null 2>&1 ; then
+    k8s_dns_service="kube-dns"
+  elif kubectl get svc coredns -n kube-system >/dev/null 2>&1 ; then
+    k8s_dns_service="coredns"
+  else
+    k8s_dns_service="kube-dns"
+  fi
+  log "BUILD" "ℹ️ " "🗺️ DNS Service detected: ${k8s_dns_service}"
+  echo "$k8s_dns_service" > /tmp/k8s_dns_service.txt
+
   log "BUILD" "ℹ️ " "🗺️ Editing coredns configmap ..."
   kubectl get configmap coredns -n kube-system -o yaml > /tmp/coredns-configmap.yaml
   # shellcheck disable=SC2181

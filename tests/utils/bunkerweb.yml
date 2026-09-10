@@ -67,9 +67,11 @@ spec:
             # nginx resolves this once, when it parses its configuration, and keeps the
             # address until the next reload. Use the cluster DNS Service name, whose
             # ClusterIP is stable, and never a pod IP. The Service name depends on the
-            # distribution: kube-dns on stock clusters, coredns on Scaleway Kapsule.
+            # distribution: kube-dns on stock clusters (minikube included), coredns on
+            # Scaleway Kapsule -- this manifest is a static reference, not templated, so
+            # it hardcodes the stock name; tests/generate.py detects the real one instead.
             - name: DNS_RESOLVERS
-              value: "coredns.kube-system.svc.cluster.local"
+              value: "kube-dns.kube-system.svc.cluster.local"
             - name: USE_API
               value: "yes"
             - name: API_WHITELIST_IP
