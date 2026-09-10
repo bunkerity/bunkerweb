@@ -422,7 +422,8 @@ TLS 信任也按实例存储：
   - `POST /services`: 创建服务（draft 或 online），设置变量，并原子更新 `SERVER_NAME` 清单。
   - `PATCH /services/{service}`: 重命名、更新变量、切换 draft。
   - `DELETE /services/{service}`: 删除服务及派生的配置键。
-  - `POST /services/{service}/convert?convert_to=online|draft`: 快速切换 draft/online。
+  - `POST /services/{service}/convert?convert_to=online|draft&mode=standard|redirect_only`: 切换 draft/online 和/或声明服务模式——两个轴相互独立，至少需传一个，两者都不传时返回 `400`（此前 `convert_to` 为必填参数时返回 `422`）。`mode=redirect_only` 在服务仍带有 redirect-only 白名单禁止的内容时返回 `409` 及 `reasons` 数组；`mode=standard` 始终被接受。对保留的 `default-server` 返回 `403`，与该服务上的其他转换操作一致。
+  - `GET /services/redirect-candidates`（需要 `service_read`）：返回除保留的 `default-server` 外、尚未声明为 `redirect_only` 的每个非草稿服务，各自带有 `would_qualify` 和 `blocking_reasons`（符合条件时为空），格式为 `{"status": "success", "candidates": [{"service": ..., "would_qualify": ..., "blocking_reasons": [...]}]}`。只读接口，不改变任何内容，也不产生计费。
   - 保留服务 `default-server` 仅在 `MULTISITE=yes` 时由 `GET /services` 返回，并标记 `reserved: true`；`MULTISITE=no` 时无此行，默认服务器与 1.6 相同。它处理不匹配任何服务的请求，并允许配置证书、TLS、响应头和错误页。创建同名服务、`DELETE /services/default-server`、改名（包括把另一服务改为此名）、设为草稿或调用 `POST /services/default-server/convert?convert_to=draft` 均返回 `403`。用 `PATCH /services/default-server` 的 `variables` 配置它；它不占 PRO 服务配额。两种变量返回 `400`：任何值的 `SERVER_TYPE`（包括已存值；读取后回写的客户端须移除该键，因为保留 ID 没有可切换的 `server{}` 块），以及未包含在 `DEFAULT_SERVER_STREAM_PORTS` 中的 `DEFAULT_SERVER_STREAM_PORTS_SSL` 端口。
 - **Custom configs**
   - `GET /configs`: 列出片段（默认服务 `global`）；`with_data=true` 内嵌可打印内容。
