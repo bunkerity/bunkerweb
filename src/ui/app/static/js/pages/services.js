@@ -40,6 +40,13 @@ $(document).ready(function () {
     /\/$/,
     "",
   );
+  // Which services would qualify as redirect-only. Read ONCE from the document rather than off
+  // every table draw: the audit behind it is a whole-fleet read and `/services/fetch` runs per
+  // keystroke. Advisory, so an empty set just means no badges.
+  const redirectCandidates = new Set(
+    ($("#redirect_candidates").val() || "").trim().split(/\s+/).filter(Boolean),
+  );
+
   const escapeAttr = (value) =>
     String(value)
       .replace(/&/g, "&amp;")
@@ -64,10 +71,20 @@ $(document).ready(function () {
            ? escapeAttr(t("service.default_server.name", "Default server"))
            : safeId
        }</a>`;
+    // Advisory badge: this service carries nothing the redirect-only allowlist forbids, so
+    // declaring it `redirect_only` WILL take it off the PRO billable count once that billing is
+    // live (`EXEMPTION_ENABLED` is still False, so today it changes no number at all). It says a
+    // saving is available, never that anything changed — a redirect-only service is still a full
+    // service everywhere else. The declaration itself is made on the service's own page.
+    const candidate = redirectCandidates.has(id)
+      ? `&nbsp;<span data-value="redirect-candidate" class="badge rounded-pill bg-label-info d-inline-flex align-items-center"
+       data-bs-toggle="tooltip" data-bs-placement="bottom"
+       data-bs-original-title="${escapeAttr(t("tooltip.badge.redirect_candidate", "This service carries nothing but a redirect, so it can be declared redirect-only — which will take it off the PRO service count once redirect-only billing goes live."))}"><i class="bx bx-trending-down me-1" aria-hidden="true"></i><span>${escapeAttr(t("badge.redirect_candidate", "Redirect-only candidate"))}</span></span>`
+      : "";
     // The reserved default server is not a hostname anybody typed, so it is shown by its label with
     // the one line that says what it answers — otherwise "default-server" in a list of real domains
     // reads like a service somebody created by mistake.
-    if (!(row && row.reserved)) return link;
+    if (!(row && row.reserved)) return link + candidate;
     return `${link}<small class="text-muted d-block" data-i18n="service.default_server.explainer">${escapeAttr(
       t(
         "service.default_server.explainer",

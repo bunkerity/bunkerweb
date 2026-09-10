@@ -76,6 +76,13 @@
         {# The template column links here; the JS renderer needs the blueprint's base URL for the
            same reason the services one does. #}
         <input type="hidden" id="templates_url" value="{{ url_for('templates') }}" />
+        {# Which services would qualify as redirect-only, read ONCE here rather than on every table
+           draw: the audit is a whole-fleet read and `/services/fetch` runs per keystroke. Same
+           space-separated shape as `services_with_configs` above -- a service id cannot contain a
+           space (SERVER_NAME's own separator), so there is nothing to quote. #}
+        <input type="hidden"
+               id="redirect_candidates"
+               value="{{ redirect_candidates|join(' ') }}" />
         {% call table_toolbar(id="services", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_services", loading_default="Loading services...", number=services|length) %}
             <thead>
                 <tr>

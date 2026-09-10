@@ -25,6 +25,7 @@ from default_server import (  # type: ignore
     is_reserved_default_server,
 )
 from ports import collect_ports  # type: ignore
+from service_classification import MODE_REDIRECT_ONLY, MODE_STANDARD, SERVICE_MODE_SETTING  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -152,6 +153,12 @@ def services_page():
         single_site=single_site,
         services=services_list,
         services_with_configs=services_with_configs,
+        # Advisory: services that would qualify as `redirect_only` and, once redirect-only billing
+        # goes live, stop consuming a PRO slot -- `EXEMPTION_ENABLED` is still False, so today the
+        # declaration changes no number at all. It changes NOTHING else about them either: a
+        # redirect-only service is a full service everywhere except that one count (PO ruling
+        # 2026-09-10).
+        redirect_candidates=_redirect_candidate_names(),
     )
 
 
@@ -205,6 +212,92 @@ def _reserved_default_server(service: str) -> bool:
         return any(is_reserved_default_server(row) for row in API_CLIENT.get_services(with_drafts=True))
     except (ApiClientError, ApiUnavailableError):
         return True
+
+
+# What a clone must NOT inherit from the service it was cloned from, and the value it starts at.
+#
+#   * SERVER_NAME -- the clone needs its own hostname; keeping the source's would rename it.
+#   * USE_UI -- the `ui` plugin's activation key. A clone is not the UI's own service.
+#   * SERVICE_MODE -- a control key AND blacklisted, so the form posts it back but `check_variables`
+#     refuses any value that DIFFERS from `db_config` (models/config.py, the blacklist branch pops
+#     the key and reports "Variable SERVICE_MODE is not editable"). On the "new" page `db_config` is
+#     the GLOBAL settings, where SERVICE_MODE is the plain default -- so carrying a cloned
+#     `redirect_only` over answers a perfectly ordinary save with a refusal the operator did nothing
+#     to earn. A clone starts standard and is declared explicitly afterwards, like every service.
+#
+# `clone: False` on each: the flag drives the "differs from the source" highlight, and a value the
+# page reset is not something the operator changed.
+_CLONE_RESET: Tuple[Tuple[str, str], ...] = (("SERVER_NAME", ""), ("USE_UI", "no"), (SERVICE_MODE_SETTING, MODE_STANDARD))
+
+
+def neutralize_clone(db_config: Dict[str, Any]) -> Dict[str, Any]:
+    """Reset the keys a cloned service must not inherit. Mutates and returns ``db_config``."""
+    for key, value in _CLONE_RESET:
+        if key in db_config:
+            db_config[key].update({"value": value, "clone": False})
+    return db_config
+
+
+def _redirect_candidate_names() -> List[str]:
+    """The services that would qualify as `redirect_only`, for the list's advisory badge.
+
+    Read ONCE per page load, on the GET, and handed to `services.js` in the document -- NOT from
+    `/services/fetch`. The table is `serverSide`, so that endpoint runs on every draw: every search
+    keystroke, every sort, every page change. The audit is a whole-fleet read (a config snapshot,
+    the custom configs, and the four resource families), and putting it there would have undone
+    what perf Lot D spent a chantier buying back on exactly this page. The badge is advisory and a
+    page reload refreshes it, which is the right trade for a saving that is not urgent.
+
+    Degrades to no badges rather than to an error. A service missing from the list is simply not
+    badged -- which is also what a service already declared `redirect_only` gets, since the
+    endpoint skips those: there is nothing left to convert.
+    """
+    try:
+        return sorted(str(row["service"]) for row in API_CLIENT.get_redirect_candidates() if row.get("service") and row.get("would_qualify"))
+    except Exception as e:  # noqa: B902
+        # Deliberately broader than the two API errors: the badge is advisory, so an audit that
+        # cannot be read costs the badges and never the page.
+        LOGGER.warning(f"Could not fetch redirect-only candidates: {e}")
+        return []
+
+
+def _service_mode_context(service: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    """What the settings page needs to offer -- or refuse -- an explicit mode conversion.
+
+    ``blocking_reasons`` comes from the API's candidate audit, i.e. from the SAME `explain()` call
+    the conversion endpoint will make, so the modal cannot promise a conversion the write path then
+    refuses. They are shown VERBATIM: they are already human-readable sentences naming the setting,
+    the snippet count or the attachment type that forbids the declaration.
+
+    The audit is a WHOLE-FLEET read and this asks it about one service, so it costs one such read
+    per settings-page render. Affordable here, and deliberately NOT on `/services/fetch`, which the
+    `serverSide` table runs on every draw -- see `_redirect_candidate_names`.
+
+    Empty dict in two different cases, and the card renders not at all in both:
+
+    * the audit could not be read (a degraded API) -- a button whose outcome is unknown is worse
+      than no button;
+    * the service is absent from the audit, which for a `standard` service means it is a DRAFT (the
+      audit lists `with_drafts=False`: a draft is never counted either way, so offering to convert
+      one would be offering a saving that does not exist). The API still converts a draft if asked
+      directly -- it judges the service's real settings -- so this is a UI choice, not a rule.
+    """
+    current = (config.get(SERVICE_MODE_SETTING) or {}).get("value") or MODE_STANDARD
+    if current == MODE_REDIRECT_ONLY:
+        # Always allowed: an ordinary service carries no capability restriction, so there is
+        # nothing to refuse and nothing to explain.
+        return {"current": MODE_REDIRECT_ONLY, "target": MODE_STANDARD, "blocking_reasons": []}
+    try:
+        rows = list(API_CLIENT.get_redirect_candidates())
+    except Exception as e:  # noqa: B902
+        # Broad on purpose, like `_redirect_candidates`: the card is an optional action, and an
+        # audit that cannot be read must cost the card, never the settings page it sits on.
+        LOGGER.warning(f"Could not fetch the redirect-only audit for {service}: {e}")
+        return {}
+    row = next((item for item in rows if item.get("service") == service), None)
+    if row is None:
+        return {}
+    return {"current": MODE_STANDARD, "target": MODE_REDIRECT_ONLY, "blocking_reasons": list(row.get("blocking_reasons") or [])}
 
 
 def _service_rows(services_list) -> List[Dict[str, Any]]:
@@ -622,6 +715,88 @@ def services_convert():
             "loading",
             next=url_for("services.services_page"),
             message=f"Converting service{'s' if len(services) > 1 else ''} {', '.join(services)} to {convert_to}",
+        )
+    )
+
+
+@services.route("/services/<string:service>/mode", methods=["POST"])
+@login_required
+def services_mode_convert(service: str):
+    """Declare ONE service `standard` or `redirect_only`, explicitly.
+
+    Deliberately not a row on the settings shelf: SERVICE_MODE is a commercial classification, not
+    a knob (it is blacklisted from the generic form for that reason), and the ADR asks for an
+    explicit action rather than a setting that a save can flip by accident.
+
+    Mirrors `services_convert` -- same executor, same loading page, same reload accounting -- but
+    single-service and mode-scoped, and it goes through the API's convert endpoint rather than
+    writing the row itself: that endpoint owns the refusal, judged by the SHARED classifier on the
+    real persisted config plus this service's real snippets and attached resources. A UI that wrote
+    the row directly would be a second, weaker copy of that rule.
+
+    What it does NOT do: touch any other setting, or any non-PRO count. A `redirect_only` service
+    is a full service everywhere except the PRO billable count (PO ruling 2026-09-10) -- it stays
+    in the roster, keeps its own page, its metrics and its quotas.
+    """
+    # BOTH halves, unlike `services_convert`/`services_delete`, which only check the database.
+    # `is_readonly_request` (app/utils.py) also covers a user without the `write` permission, and it
+    # is what the settings page dims the button on -- a state-changing action reachable by POST from
+    # a user the page told "you cannot write" is not a dim, it is a hole. Closing the two older
+    # routes' version of the same gap is not this lane's change.
+    if API_CLIENT.readonly:
+        return handle_error("Database is in read-only mode", "services")
+    if is_readonly_request(API_CLIENT.readonly):
+        # Split from the check above on purpose: the database is fine here, the permission is not,
+        # and one message for both sends an operator looking at the wrong thing.
+        return handle_error("You do not have the permission to change a service's mode", "services")
+
+    # The return value is load-bearing: `verify_data_in_form` RETURNS a Response, it does not
+    # abort (routes/utils.py:74-93). Discarding it -- which the two older sibling routes do -- lets
+    # a payload with no `mode` fall through to `request.form["mode"]` and raise a bare 400 page,
+    # so the `err_message` right below would never reach anyone.
+    invalid = verify_data_in_form(
+        data={"mode": None},
+        err_message=f"Missing mode parameter on /services/{service}/mode.",
+        redirect_url="services",
+        next=True,
+    )
+    if invalid is not True:
+        return invalid
+
+    mode = request.form["mode"]
+    if mode not in (MODE_STANDARD, MODE_REDIRECT_ONLY):
+        return handle_error("Invalid mode parameter.", "services", True)
+
+    # Same refusal as the API's, said here so the operator gets it on the page they clicked from
+    # rather than as a 403 body. The reserved default server is the block that answers requests
+    # matching no service: it is neither billed nor exemptible, so it has no mode to declare.
+    if _reserved_default_server(service):
+        return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services", True)
+
+    DATA.load_from_file()
+
+    def convert_mode(service: str, mode: str):
+        wait_applying()
+        try:
+            API_CLIENT.convert_service(service, mode=mode)
+        except (ApiClientError, ApiUnavailableError) as e:
+            # A 409 body carries the classifier's reasons; `base_api_client` surfaces its message.
+            # The modal has already shown the reasons it knew about, so this is the race -- the
+            # configuration changed between the page render and the click.
+            DATA["TO_FLASH"].append({"content": getattr(e, "message", None) or str(e), "type": "error"})
+            DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+            return
+        DATA["TO_FLASH"].append({"content": f'Service {service} is now declared "{mode}".', "type": "success"})
+        DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    CONFIG_TASKS_EXECUTOR.submit(convert_mode, service, mode)
+
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("services.services_service_page", service=service),
+            message=f"Declaring service {service} {mode}",
         )
     )
 
@@ -1749,10 +1924,7 @@ def services_service_page(service: str):
             for key, setting in clone_service_data.items():
                 original_value = db_config.get(key, {}).get("value")
                 db_config[key] = setting | {"clone": original_value != setting.get("value")}
-            if "SERVER_NAME" in db_config:
-                db_config["SERVER_NAME"].update({"value": "", "clone": False})
-            if "USE_UI" in db_config:
-                db_config["USE_UI"].update({"value": "no", "clone": False})
+            neutralize_clone(db_config)
             for key, value in list(db_custom_configs.items()):
                 if key.startswith(f"{clone}_"):
                     db_custom_configs[key.replace(f"{clone}_", f"{service}_", 1)] = value
@@ -1807,6 +1979,9 @@ def services_service_page(service: str):
         attachments=attachments,
         attach_candidates=attach_candidates,
         service_id=service_id,
+        # The explicit `standard` <-> `redirect_only` declaration (ADR open item 3). Empty on the
+        # "new" page and on the reserved default server: neither has a mode to declare.
+        service_mode=_service_mode_context(service_id, db_config) if service_id and not default_server else {},
         # The compose shelf's required context (models/compose_shelf.html documents why none of
         # it is defaulted): the scope function ITSELF, so the row's markup and the save path can
         # never derive it differently, and the activation map read once here rather than per row

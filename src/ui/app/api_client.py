@@ -228,8 +228,26 @@ class ApiClient(BaseApiClient):
     def delete_service(self, service_id):
         return self._delete(f"/services/{service_id}")
 
-    def convert_service(self, service_id, convert_to):
-        return self._post(f"/services/{service_id}/convert", params={"convert_to": convert_to})
+    def convert_service(self, service_id, convert_to=None, mode=None):
+        """Draft/online status and/or service mode -- two independent axes on one endpoint.
+
+        `mode` is additive: the existing two-argument call shape produces exactly the request it
+        produced before, because the parameter is only sent when it is given.
+        """
+        params = {}
+        if convert_to is not None:
+            params["convert_to"] = convert_to
+        if mode is not None:
+            params["mode"] = mode
+        return self._post(f"/services/{service_id}/convert", params=params)
+
+    def get_redirect_candidates(self):
+        """Standard services that would qualify as `redirect_only`, with the reasons they do not.
+
+        Read-only and memoised with every other GET for the span of one request, so the services
+        page pays for it once however many rows it renders.
+        """
+        return self._get("/services/redirect-candidates").get("candidates", [])
 
     # Resource groups
 

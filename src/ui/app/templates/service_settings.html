@@ -1,4 +1,7 @@
 {% extends "dashboard.html" %}
+{% from "components/modal.html" import modal %}
+{% from "components/button.html" import button %}
+{% from "components/alert.html" import alert %}
 {% block content %}
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings() %}
@@ -48,6 +51,65 @@
         </div>
     {% else %}
         {% include "models/service_resources_band.html" %}
+    {% endif %}
+    {% if service_mode %}
+        {% set is_redirect_only = service_mode.current == "redirect_only" %}
+        {# A read-only page must not offer an action whose only outcome is a flash. `is_readonly`
+           (injected on every page by main.py) covers BOTH halves -- a read-only database and a
+           user without `write` -- and `services_mode_convert` refuses both as well, through
+           `is_readonly_request`. The dim is the courtesy; the route is the guard. The button macro
+           adds the native `disabled` attribute too, so this is not merely cosmetic. #}
+        {% set blocked = service_mode.blocking_reasons %}
+        {% set mode_disabled = blocked|length > 0 or is_readonly %}
+        {# The explicit mode declaration (ADR "Explicit conversion"). NOT a row on the shelf below:
+           SERVICE_MODE is what decides whether this service consumes a PRO slot, so it is
+           blacklisted from the generic form and only ever changes through this deliberate action.
+           A redirect-only service stays a full service everywhere else -- same list, same page,
+           same metrics, same quotas (PO ruling 2026-09-10); only the PRO billable count differs. #}
+        <div class="card mb-3" id="service-mode-card">
+            <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h6 class="mb-1">
+                        {{ _("service.mode.title") }}
+                        <span class="badge rounded-pill bg-label-{{ "info" if is_redirect_only else "primary" }} ms-1"
+                              id="service-mode-current">{{ _("service.mode.redirect_only") if is_redirect_only else _("service.mode.standard") }}</span>
+                    </h6>
+                    <small class="text-muted d-block">{{ _("service.mode.help") }}</small>
+                    {% if blocked %}
+                        {# Verbatim: `explain()` already answers in whole sentences naming the setting,
+                           the snippet count or the attachment type that forbids the declaration. #}
+                        <ul class="mb-0 mt-2 small text-muted" id="service-mode-blocking-reasons">
+                            {% for reason in blocked %}<li>{{ reason }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {{ button(id="service-mode-btn",
+                                    label="Revert to standard" if is_redirect_only else "Declare redirect-only",
+                                    i18n_key="button.service_mode_standard" if is_redirect_only else "button.service_mode_redirect_only",
+                                    variant="outline-primary",
+                                    modal_target="modal-service-mode",
+                                    disabled=mode_disabled) }}
+            </div>
+        </div>
+        {% call modal(id="modal-service-mode", title_key="modal.title.confirm_service_mode_conversion", title="Confirm service mode") %}
+            <form action="{{ url_for('services.services_mode_convert', service=service_id) }}"
+                  method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="mode" value="{{ service_mode.target }}" />
+                    {{ alert(message="Are you sure you want to change this service's declared mode?", message_key="modal.body.confirm_service_mode_conversion", variant="warning", classes="text-center") }}
+                    {% if blocked %}
+                        <ul class="small mb-0">
+                            {% for reason in blocked %}<li>{{ reason }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="modal-footer justify-content-center">
+                    {{ button(label="Confirm", i18n_key="button.confirm_service_mode", variant="outline-primary", type="submit", classes="me-2", disabled=mode_disabled) }}
+                    {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
+                </div>
+            </form>
+        {% endcall %}
     {% endif %}
     <div class="tab-content p-0 position-relative">
         {# Compose is this page's default pane, so `mode` is anything-but-raw here. The easy and
