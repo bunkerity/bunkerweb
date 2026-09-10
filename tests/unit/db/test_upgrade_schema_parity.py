@@ -41,10 +41,11 @@ nullability halves of this become measurable. Run them with
 `--db-engines sqlite,postgresql,mariadb` and the two URIs from `tests/unit/README.md`; an engine
 that is unconfigured or unreachable skips rather than silently passing.
 
-**One exception, and it is the product's, not the test's: the `v1.5.0-beta` full-chain start cannot
-run on PostgreSQL** (`START_ENGINES`, which carries the mechanism and the revision line numbers).
-There it does not red, it deadlocks with itself and hangs for ever. The skip is explicit and says so;
-it is never a silent engine skip.
+**One exception, and it is the product's, not the test's: the `v1.5.0-beta` full-chain start is not
+compared on PostgreSQL** (`START_ENGINES`, which carries the measured shapes). It used to hang there
+for ever; since the `8c096ca1beb8` second-connection fix it completes, and what it then leaves is
+1.5.x-chain drift this file cannot yet record. The skip is explicit and says which; it is never a
+silent engine skip.
 
 That start DOES run on MariaDB, and has to: **the MariaDB chain produces drift the SQLite chain does
 not**, so a run without it would report a clean upgrade that is not clean. `KNOWN_LEGACY_DRIFT`
@@ -157,21 +158,34 @@ STARTING_POINTS = {
 }
 
 # The engines each start may run on. The 1.6.13 one runs everywhere. The 1.5.0-beta one runs
-# everywhere EXCEPT PostgreSQL, where it cannot be run at all: it does not fail, it HANGS FOR EVER.
-# `alembic/env.py:803-804` wraps the whole chain in ONE transaction, so by 1.6.0 that transaction
-# holds `AccessExclusiveLock` on `bw_jobs` (`postgresql_versions/0b08c406d820:176`), and
-# `postgresql_versions/8c096ca1beb8:22-38` then opens a SECOND connection to run
-# `ALTER TABLE bw_jobs DROP CONSTRAINT` on that same table. The second waits for a lock the first
-# will not release until `upgrade()` returns, and `upgrade()` cannot return until the second
-# finishes -- a self-deadlock the server cannot detect, because the holder is waiting on its client
-# socket rather than on a lock, so there is no cycle in the lock graph. Measured: the upgrade sat on
-# `pg_blocking_pids` for as long as it was left running, with both backends on `bw_jobs`.
+# everywhere EXCEPT PostgreSQL, and the reason changed on 2026-09-10.
 #
-# `bw_jobs` is not even the only way in. `8c096ca1beb8:68` runs `UPDATE bw_metadata SET version …
-# WHERE id = 1` on that same second connection, and every revision from 1.6.0-rc2 to 1.6.0
-# (`b56eb8d8dbf2:50`, `c975711f7afa:24`, `7939f7165327:24`, `f85e36780e55:24`) updates that one row
-# inside the outer transaction -- so a chain that touches `bw_jobs` nowhere still deadlocks on a
-# single row. Only a database already stamped at `f85e36780e55` (1.6.0) escapes both.
+# It used to be that it could not be run there at all: it did not fail, it HUNG FOR EVER.
+# `alembic/env.py:803-804` wraps the whole chain in ONE transaction, so by 1.6.0 that transaction
+# held `AccessExclusiveLock` on `bw_jobs` (`postgresql_versions/0b08c406d820:176`), and
+# `postgresql_versions/8c096ca1beb8` then opened a SECOND connection to run
+# `ALTER TABLE bw_jobs DROP CONSTRAINT` on that same table. `8c096ca1beb8` no longer does that --
+# it runs everything on `op.get_bind()` (wave 19, port of dev `d3f0244d1`), and
+# `test_migrations_use_one_connection.py` is the guard that keeps every dialect that way. Measured
+# on a throwaway `postgres:16-alpine`: the same chain that sat on `pg_blocking_pids` until a
+# `timeout 180` killed it now reaches head in 0.5 s.
+#
+# What keeps it out now is the drift the hang was hiding. With PostgreSQL added here the chain
+# completes and SIX of this file's comparisons red, in four dimensions:
+#   types      bw_custom_configs.type / bw_template_custom_configs.type: VARCHAR(21) vs VARCHAR(19)
+#   indexes    EXTRA unique on bw_settings(id) and bw_ui_users(username)
+#   unique     the same two, as constraints
+#   defaults   nine `.id` columns still on `nextval('..._id_seq'::regclass)` where fresh has none
+#   primary    bw_settings (id, name) vs (id); bw_ui_users none vs (username)
+#   enums      labels differing between an upgraded and a fresh type
+# The two primary-key shapes are the SAME product defect KNOWN_LEGACY_DRIFT already records for
+# MariaDB, which is the evidence that this is 1.5.x-chain drift and not something the deadlock fix
+# introduced. Recording the rest is not a line in that table: `types` and `defaults` are the two
+# comparisons in this file that have no exemption mechanism at all, so admitting PostgreSQL here
+# means extending `_forgive` to two more dimensions and forgiving eleven shapes of frozen-tree
+# defect. That is a 1.8 change, filed with the full run in
+# `.cache/wave19-2026-09-10/finding-ALB-pg-legacy-parity-drift.txt`. Until then the skip stays
+# explicit and says which of the two reasons applies -- it is never a silent engine skip.
 #
 # MariaDB runs, and it is the engine that pays for this variant: it is the only one that reports the
 # three drifts recorded in KNOWN_LEGACY_DRIFT below, because its chain alters those tables in place
@@ -216,9 +230,9 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch, baseline_start):
     allowed = START_ENGINES.get(tag)
     if allowed is not None and db_engine not in allowed:
         pytest.skip(
-            f"the {tag} full-chain start cannot run on {db_engine} — it self-deadlocks and hangs there rather than failing "
-            f"(alembic runs the whole chain in one transaction; 8c096ca1beb8 then opens a SECOND connection onto rows that "
-            f"transaction already holds). It runs on {'/'.join(allowed)}. Mechanism: see START_ENGINES in this file."
+            f"the {tag} full-chain start is not compared on {db_engine} — it completes there since the 8c096ca1beb8 "
+            f"second-connection fix, but the schema it leaves carries 1.5.x-chain drift in four dimensions, two of which "
+            f"this file has no exemption mechanism for. It runs on {'/'.join(allowed)}. Shapes: see START_ENGINES here."
         )
     if (db_engine, tag) in _DESCRIPTIONS:
         return _DESCRIPTIONS[(db_engine, tag)]
