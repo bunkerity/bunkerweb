@@ -18,8 +18,11 @@ actions:
   # inventory, so the material an operator can see and manage is the material actually in use.
   # `check_ssl` above proves the certificate is served; these prove the inventory learned about the
   # same act of issuance -- a provider that stopped mirroring would leave `check_ssl` green and the
-  # certificates page empty. Docker only: the assertions dial the API on loopback:8888, which is
-  # where the Docker arm publishes it.
+  # certificates page empty. Docker only for now -- not evaluated for Autoconf/Kubernetes as part of
+  # the wave-19 default-server pass below (out of that lane's 8-action scope); loopback:8888 is
+  # NOT Docker-exclusive (see the reserved-default-server actions' comment further down), so if
+  # these stay Docker-only the real reason is something else about the assertions (single-service
+  # `?source=` scoping? single-site-only `service_id`?) and needs its own look, not an assumption.
   the_certificate_is_mirrored_into_the_inventory:
     type: string
     integrations:
@@ -115,12 +118,28 @@ actions:
   # 23:10:28, "Restarting current stack" 23:10:29). What it really pins is the no-SNI fallback to
   # the internal leaf. Making it assert the refusal needs `restart_stack: false` on the action
   # above, which is a behavioural spec change and a harness run: deliberately not done here.
+  #
+  # KUBERNETES ADDED (wave 19): the internal leaf is generated unconditionally at boot by
+  # `generate_default_server_cert` (`src/bw/entrypoint.sh:103`), the same entrypoint every arm's
+  # BunkerWeb image runs. Unlike the sibling action below this one IS multisite-gated on
+  # Autoconf/Kubernetes -- the no-SNI handshake still goes through `default-server-http.conf`
+  # (`confs/http.conf:117-118`, included under `MULTISITE=yes`) -- but the fallback certificate it
+  # serves is the same static directive on both paths: `/var/lib/bunkerweb/default-server-cert.pem`
+  # on `ssl_certificate` in both `default-server-http.conf:71-72` (multisite) and
+  # `server-http/ssl-certificate-lua.conf:1-2` (single-site). No provider resolves a certificate
+  # without SNI, so the runner returns without calling `set_cert` and NGINX falls back to that same
+  # directive either way -- single-site vs. multisite changes which template renders it, not which
+  # certificate comes back, so it is not a distinguishing precondition for this assertion. Not
+  # All-in-one: its default answer is the `/setup` wizard page (see the sibling
+  # `default_server_override_refused_unknown_sni`'s `All-in-one:` override above), which this
+  # action has no override for.
   default_server_override_refused_without_sni:
     type: ssl
     integrations:
       - "Linux"
       - "Docker"
       - "Autoconf"
+      - "Kubernetes"
     url: "https://127.0.0.1"
     verify_ssl: false
     ssl_expiration: 3650
@@ -174,12 +193,15 @@ actions:
   # certificate can be chosen (`confs/default-server-http.conf`), so the override is inert by
   # construction -- there is no handshake left to serve a certificate into.
   #
-  # AUTOCONF ONLY, and for the same reason the accepted-override action above is: that lua block is
-  # in `default-server-http.conf` and nowhere else, so `DISABLE_DEFAULT_SERVER_STRICT_SNI` has
-  # nothing to run in on a single-site deployment and the handshake simply completes. The code path:
-  # `core/misc/misc.lua:ssl_client_hello_default` is called from `default-server-http.conf` and from
-  # no other template, and `confs/http.conf` includes that file only under `MULTISITE=yes`,
-  # `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. Measured too, on the Docker arm before this
+  # AUTOCONF AND KUBERNETES, for the same reason the accepted-override action above is: that lua
+  # block is in `default-server-http.conf` and nowhere else, so `DISABLE_DEFAULT_SERVER_STRICT_SNI`
+  # has nothing to run in on a single-site deployment and the handshake simply completes. The code
+  # path: `core/misc/misc.lua:ssl_client_hello_default` is called from `default-server-http.conf`
+  # and from no other template, and `confs/http.conf` includes that file only under
+  # `MULTISITE=yes`, `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. Kubernetes sets
+  # `MULTISITE=yes` exactly like Autoconf (`tests/generate.py:186`), and `ssl_client_hello_by_lua_block`
+  # runs before `ssl_certificate_by_lua_block` regardless of integration (NGINX phase order, not
+  # config), so the same code path applies unmodified. Measured too, on the Docker arm before this
   # restriction: "SSL connection succeeded but was expected to fail" -- it had never been reached
   # there before, because the accepted-override action ahead of it stopped the run first (that log
   # was overwritten by the green re-run; the excerpt is quoted in `report-CI-1.md`).
@@ -187,6 +209,7 @@ actions:
     type: ssl
     integrations:
       - "Autoconf"
+      - "Kubernetes"
     url: "https://localhost"
     verify_ssl: false
     success: false
@@ -200,13 +223,21 @@ actions:
   # above is stored against once the API has seeded it, so it belongs in this file rather than in a
   # spec of its own.
   #
-  # AUTOCONF ONLY, and for two reasons at once. The row is multisite-only (PO ruling 2026-09-06):
-  # `seed_default_server_service` skips it once the scheduler has completed a pass with
-  # `MULTISITE != yes`, and `GET /services` hides it anyway (`api/app/routers/services.py`), so on
-  # the single-site Docker and Linux arms all four assertions below would fail on a row that is
-  # correctly absent. Autoconf is a multisite arm AND runs the same
-  # `tests/docker/docker-compose.api.yml` the Docker arm does, publishing the control-plane API on
-  # the same 127.0.0.1:8888 these dial -- Kubernetes does not, which is why it is not in the list.
+  # AUTOCONF AND KUBERNETES, for two reasons at once. The row is multisite-only (PO ruling
+  # 2026-09-06): `seed_default_server_service` skips it once the scheduler has completed a pass
+  # with `MULTISITE != yes`, and `GET /services` hides it anyway (`api/app/routers/services.py`),
+  # so on the single-site Docker and Linux arms all four assertions below would fail on a row that
+  # is correctly absent. Autoconf and Kubernetes are both multisite arms, and both publish the
+  # control-plane API on 127.0.0.1:8888 -- Autoconf via `tests/docker/docker-compose.api.yml`,
+  # Kubernetes via `tests/k8s/bunkerweb-api.yml`'s `svc-bunkerweb-api-nodeport` (nodePort 30088) --
+  # that manifest is applied unconditionally for every Kubernetes run (`tests/scripts/start.sh:551`,
+  # `tests/scripts/utils.sh:1889`) -- plus the host-side `8888:30088` mapping in
+  # `tests/scripts/minikube-ports.sh:6`, applied once at cluster creation (`minikube start --ports`,
+  # `tests/scripts/build.sh:349,382`, `.github/workflows/integration-tests.yml:230-231`), not per
+  # run. Same loopback URL, same runner-side reachability either way; the
+  # `plugin_stats_api` action in `tests/core/bunkernet.yml` already dials 127.0.0.1:8888
+  # unmodified on Kubernetes, proving the path. (Wave-12 note this corrects: "Kubernetes does not"
+  # publish the API on 127.0.0.1:8888 was true of the compose file it named, not of the arm.)
   the_reserved_default_server_is_seeded_and_flagged:
     # Seeding happens in the API's own startup, on every boot and idempotently -- never in a
     # migration -- so a stack that has come up at all must already have the row. `"reserved":true`
@@ -215,6 +246,7 @@ actions:
     type: string
     integrations:
       - "Autoconf"
+      - "Kubernetes"
     url: "http://127.0.0.1:8888/services"
     auth:
       - "admin"
@@ -225,6 +257,7 @@ actions:
     type: string
     integrations:
       - "Autoconf"
+      - "Kubernetes"
     url: "http://127.0.0.1:8888/services"
     auth:
       - "admin"
