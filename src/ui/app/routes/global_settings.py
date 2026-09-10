@@ -1,6 +1,6 @@
 from contextlib import suppress
 from time import time
-from typing import Dict, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -74,7 +74,13 @@ def update_global_config(
             has_file_name_changes = True
             break
 
-    variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True)
+    # Same shape as services.py's `update_service`: a fresh, caller-owned list so a refusal
+    # (reverted or dropped, either shape) decides the final flash instead of an unconditional
+    # success -- see models/config.py:check_variables's own docstring for why this can't be a
+    # before/after diff of DATA["TO_FLASH"] (its own load_from_file() reload hazard).
+    refused: List[str] = []
+    variables = BW_CONFIG.check_variables(variables, config, variables_to_check, global_config=True, threaded=True, refused=refused)
+    refused_count = len(refused)
     # `variables_to_check` says "the user posted something for this key", not "the global value
     # changed". check_variables restores a rejected value to the stored one instead of dropping it
     # (models/config.py:reject_value), and it also canonicalizes values, so a key can come back out
@@ -121,10 +127,14 @@ def update_global_config(
         operation = "Global settings successfully saved."
 
     if operation:
-        if operation.startswith(("Can't", "The database is read-only")):
+        if error:
             DATA["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
-            DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+            if refused_count:
+                operation = f"{operation.replace('successfully ', '', 1).removesuffix('.')}, but {refused_count} value(s) were refused."
+                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+            else:
+                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will attempt to apply the changes.", "type": "success", "save": False})
 
     DATA["RELOADING"] = False

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from time import time
+from typing import List
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
@@ -85,12 +86,19 @@ def pro_key():
 
     global_config = BW_CONFIG.get_config(global_only=True, methods=False)
     global_config_methods = BW_CONFIG.get_config(global_only=True, methods=True)
+    # Same shape as services.py's `update_service`: a fresh, caller-owned list so a refusal
+    # (reverted or dropped, either shape) decides the final flash instead of an unconditional
+    # success -- see models/config.py:check_variables's own docstring for why this can't be a
+    # before/after diff of DATA["TO_FLASH"] (its own load_from_file() reload hazard).
+    refused: List[str] = []
     variables = BW_CONFIG.check_variables(
         global_config | {"PRO_LICENSE_KEY": license_key},
         global_config_methods,
         {"PRO_LICENSE_KEY": license_key},
         global_config=True,
+        refused=refused,
     )
+    refused_count = len(refused)
 
     if not variables:
         flash("The license key is the same as the current one.", "warning")
@@ -98,7 +106,7 @@ def pro_key():
 
     DATA.load_from_file()
 
-    def update_license_key(variables: dict):
+    def update_license_key(variables: dict, refused_count: int):
         wait_applying()
 
         operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
@@ -107,13 +115,23 @@ def pro_key():
             operation = "The PRO license key was updated successfully."
 
         if operation:
-            if operation.startswith(("Can't", "The database is read-only")):
+            if error:
                 DATA["TO_FLASH"].append({"content": operation, "type": "error"})
             else:
-                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-                DATA["TO_FLASH"].append(
-                    {"content": "The Scheduler will attempt to apply the changes and download the PRO plugins.", "type": "success", "save": False}
-                )
+                if refused_count:
+                    # Unlike services.py/global_settings.py, this route checks exactly one
+                    # variable (PRO_LICENSE_KEY): a refusal here IS the whole save, not a partial
+                    # one -- reject_value reverts it to the stored value, so the payload that
+                    # just went to edit_global_conf is byte-identical to what was already there.
+                    # Neither "the key was updated" nor "the Scheduler will apply changes and
+                    # download PRO plugins" is true; say only what happened.
+                    operation = "The PRO license key was not updated: the value was refused."
+                    DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+                else:
+                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+                    DATA["TO_FLASH"].append(
+                        {"content": "The Scheduler will attempt to apply the changes and download the PRO plugins.", "type": "success", "save": False}
+                    )
 
         DATA["RELOADING"] = False
 
@@ -126,7 +144,7 @@ def pro_key():
         }
     )
     flash("Checking license key.")
-    CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables)
+    CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables, refused_count)
     return redirect(
         url_for(
             "loading",
