@@ -2832,7 +2832,7 @@ class Database:
                 custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
                 custom_config["is_draft"] = bool(custom_config.get("is_draft", False))
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
-                custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
+                custom_config["checksum"] = custom_config.get("checksum") or bytes_hash(custom_config["data"], algorithm="sha256")  # type: ignore
 
                 service_id = custom_config.get("service_id") or None
                 filters = {
@@ -3458,7 +3458,7 @@ class Database:
             custom_config = session.query(Custom_configs).filter_by(**filters).first()
 
             data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
-            checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+            checksum = config.get("checksum") or bytes_hash(data, algorithm="sha256")
             is_draft = bool(config.get("is_draft", False))
 
             if not custom_config:
