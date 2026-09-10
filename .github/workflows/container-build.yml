@@ -154,7 +154,9 @@ jobs:
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
           tags: ghcr.io/bunkerity/${{ inputs.IMAGE }}-tests:${{ inputs.CANDIDATE }}-${{ inputs.CACHE_SUFFIX }}
-          outputs: type=registry,oci-mediatypes=true,compression=zstd
+          # The candidate index is what gets promoted byte for byte, so its layers must be
+          # pullable everywhere: Docker Hub refuses tar+zstd, and older clients cannot read it.
+          outputs: type=registry,oci-mediatypes=true
           provenance: true
           sbom: true
           labels: ${{ steps.meta.outputs.labels }}
