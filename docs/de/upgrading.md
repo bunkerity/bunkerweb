@@ -184,8 +184,9 @@
       verworfen und fallen auf den Standard zurück — deshalb ist die obige Suche wichtig.
     - **Wenn die UI das Feld prüft**, weil Sie es bearbeitet haben, lehnt sie das Speichern nicht ab.
       Sie setzt dieses Feld auf den gespeicherten Wert zurück, zeigt `Variable <key> is not valid.`,
-      speichert den Rest und meldet weiterhin Erfolg. Lesen Sie die Meldungen: Neben der grünen
-      Erfolgsmeldung steht eine einzelne rote Fehlermeldung.
+      speichert den Rest und meldet das Speichern jetzt selbst mit einer passenden orangefarbenen
+      Meldung, die die Anzahl der abgelehnten Werte nennt, statt einer bedingungslosen
+      Erfolgsmeldung.
 
     Keiner dieser Schritte findet gespeicherte Werte automatisch. Prüfen Sie `REVERSE_PROXY_URL`,
     `GRPC_URL` und `REDIRECT_FROM` Ihrer UI-verwalteten Dienste von Hand.

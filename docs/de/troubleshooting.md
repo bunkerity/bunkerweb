@@ -323,14 +323,19 @@ setzen Sie den Stack anhand der Referenz Ihrer Integration neu auf.
     Installers, also „Instanz ohne Control Plane“ — ist `disabled` richtig und beabsichtigt:
     Dieser Host besitzt keine Jobs. Aktivieren Sie ihn dort nicht.
 
-    !!! warning "Jedes Paket-Upgrade aktiviert ihn auf einem reinen Instanzknoten erneut"
+    !!! info "Upgrades vor 1.7.0 können ihn auf einem reinen Instanzknoten aktiviert gelassen haben"
         Das Paket entscheidet anhand von `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` in seiner eigenen
-        Umgebung über die Host-Rolle. **Kein Upgrade setzt diese Variablen**: weder ein direktes
+        Umgebung über die Host-Rolle, und kein Upgrade setzt diese Variablen: weder ein direktes
         `apt install bunkerweb=...` noch `install-bunkerweb.sh`, dessen Upgrade-Pfad vorher endet.
-        Deshalb behandelt jedes Upgrade den Host als Einzelinstallation und **aktiviert und startet**
-        `bunkerweb-worker` sowie die erste gefundene Redis-Unit. Auf einem Instanzknoten ist dies
-        das Distributions-`redis-server` (oder `valkey`/`redis`), da dort kein `bunkerweb-broker`
-        bereitgestellt wird.
+        Seit 1.7.0 ermittelt das Paket die Topologie selbst: Es liest den bei der letzten deklarierten
+        Installation hinterlegten Installationstyp, und auf einem Host, der älter als diese Markierung
+        ist, fällt es zurück auf die Frage „läuft auf diesem Host `bunkerweb-scheduler`?“. Auf einem
+        Knoten, der das verneint, wird weder ein Broker noch `bunkerweb-worker` aktiviert. Frühere
+        Upgrades behandelten einen solchen Host als Einzelinstallation und **aktivierten und starteten**
+        `bunkerweb-worker` sowie die erste gefundene Redis-Unit — auf einem Knoten wie diesem das
+        Distributions-`redis-server` (oder `valkey`/`redis`), da dort kein `bunkerweb-broker`
+        bereitgestellt wird. Ist Ihr Knoten von einem solchen Upgrade betroffen, räumen Sie ihn
+        einmalig mit den folgenden Befehlen auf.
 
         Für Jobs ist das zunächst harmlos: Der Worker fällt auf `redis://127.0.0.1:6379/0` zurück,
         an das keine Control Plane Aufträge sendet. Eine Ausnahme besteht, wenn `CELERY_BROKER_URL`
@@ -338,9 +343,9 @@ setzen Sie den Stack anhand der Referenz Ihrer Integration neu auf.
         `--broker-url`-Installation kopiert oder von Hand. Dann übernimmt der verbliebene Worker
         tatsächlich Jobs. Eine vom Installer bereitgestellte URL tut dies nicht: Der dedizierte Broker
         bindet `127.0.0.1`, und die URL zeigt dort auf den eigenen Loopback des Knotens. Der Worker
-        wiederholt lediglich erfolglose Verbindungsversuche. Entfernen können Sie ihn mit
-        `systemctl disable --now bunkerweb-worker`, nach **jedem** Upgrade erneut. Nur eine frische
-        Installation oder ein ausdrücklicher Installer-Lauf mit `--worker` erledigt das automatisch.
+        wiederholt lediglich erfolglose Verbindungsversuche. Wenn er weg soll:
+        `systemctl disable --now bunkerweb-worker`. Ab 1.7.0 genügt das einmal — das nächste Upgrade
+        sieht einen Host ohne Scheduler und lässt ihn in Ruhe.
 
         **Lassen Sie die Redis-Unit unangetastet, solange nicht feststeht, dass sie kein WAF-Datastore
         ist.** `USE_REDIS` und `REDIS_HOST` sind *flottenweite* Einstellungen auf der Control Plane:

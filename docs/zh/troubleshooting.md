@@ -309,10 +309,10 @@ curl -H "Authorization: Bearer $API_TOKEN" http://bw-api:8888/jobs
 
     **仅运行 BunkerWeb 实例的节点**（安装器 `--worker`，意为运行实例而非控制平面）应保持 `disabled`：此主机不负责执行任务，不要在这里启用它。
 
-    !!! warning "每次软件包升级都会在仅实例节点上重新启用 Worker"
-        软件包依据自身环境中的 `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` 判断主机角色，但所有升级路径都没有设置这些变量，包括普通 `apt install bunkerweb=...` 和在导出变量前就退出升级路径的 `install-bunkerweb.sh`。因此每次升级都会把主机当作独立安装，启用并启动 `bunkerweb-worker`，以及找到的第一个 Redis 单元。仅实例安装不配置 `bunkerweb-broker`，所以通常启动的是发行版 `redis-server`（或 `valkey`/`redis`）。
+    !!! info "1.7.0 之前的升级可能在仅实例节点上遗留了已启用的 Worker"
+        软件包依据自身环境中的 `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` 判断主机角色，但所有升级路径都不会设置这些变量，包括普通 `apt install bunkerweb=...` 和在导出变量前就退出升级路径的 `install-bunkerweb.sh`。自 1.7.0 起，软件包会自行恢复拓扑：它读取上一次声明式安装时记录的安装类型，在早于该标记的主机上则回退为判断“该主机是否运行 `bunkerweb-scheduler`？”。回答为否的节点上，broker 和 `bunkerweb-worker` 均不会启用。早期升级确实会把这样的主机当作独立安装，**启用并启动** `bunkerweb-worker` 以及找到的第一个 Redis 单元——像这样的节点上，就是发行版的 `redis-server`（或 `valkey`/`redis`），因为仅实例安装不配置 `bunkerweb-broker`。如果您的节点经历过这类升级，用下面的命令一次性清理即可。
 
-        通常不会影响任务：Worker 回退到 `redis://127.0.0.1:6379/0`，没有控制平面向这里派发任务。但如果该节点的 `CELERY_BROKER_URL` 指向**可路由的**任务代理（来自 `--broker-url` 安装或手动配置），残留 Worker 就真的会消费任务。复制安装器生成的本地代理 URL 不属于这种情况：它绑定 `127.0.0.1`，在此节点仍指向自己的回环地址，只会因连接被拒绝而不断重试。需要关闭时，执行 `systemctl disable --now bunkerweb-worker`，并在**每次**升级后重复；只有全新安装或显式运行 `--worker` 安装器才会自动处理。
+        通常不会影响任务：Worker 回退到 `redis://127.0.0.1:6379/0`，没有控制平面向这里派发任务。但如果该节点的 `CELERY_BROKER_URL` 指向**可路由的**任务代理（来自 `--broker-url` 安装或手动配置），残留 Worker 就真的会消费任务。复制安装器生成的本地代理 URL 不属于这种情况：它绑定 `127.0.0.1`，在此节点仍指向自己的回环地址，只会因连接被拒绝而不断重试。如需移除：`systemctl disable --now bunkerweb-worker`。自 1.7.0 起执行一次即可 — 下次升级会发现该主机没有 scheduler，不再启用它。
 
         **除非已确认 Redis 不是 WAF 数据存储，否则不要停用它。** `USE_REDIS` 和 `REDIS_HOST` 是集群设置，位于控制平面：Web UI → **全局设置** → Redis，或调度器主机的 `/etc/bunkerweb/variables.env`。实例节点自己的同名文件会忽略这些键，搜索它不能证明任何事情。至少接收过一次配置推送的节点可查询已渲染配置：
 

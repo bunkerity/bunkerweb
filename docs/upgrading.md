@@ -188,8 +188,8 @@
       setting falls back to its default — which is why the grep above matters.)
     - **When the UI does look at it** — because you edited that field — it does not refuse the
       save. It reverts that one field to its stored value, flashes `Variable <key> is not
-      valid.`, saves the rest, and still reports the save as successful. The error is one red
-      flash next to a green one, so read the flashes, not the outcome.
+      valid.`, saves the rest, and now reports the save itself with a matching orange flash naming
+      how many values were refused, instead of an unconditional success flash.
 
     None of this finds a stored value for you. Audit `REVERSE_PROXY_URL`, `GRPC_URL` and
     `REDIRECT_FROM` on your UI-managed services by eye.

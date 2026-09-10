@@ -104,7 +104,7 @@
 
     - **JSON 设置载荷会整体验证。** `POST`/`PATCH /services` 和 `PATCH /global_settings` 检查发送的每个键，无论是否修改；读取后原样回写旧值也会返回 `400` 并指出键名。这些路由使用不带服务前缀的键：`REVERSE_PROXY_URL_1`，不是 `www.example.com_REVERSE_PROXY_URL_1`。`MULTISITE=no` 时三项设置是全局设置，适用 `PATCH /global_settings`。
     - **保存完整配置时，会与数据库比较并跳过未变化的键**：包括 Web UI 服务和全局设置页、autoconf、调度器环境同步、`PUT /global_settings/config`。打开服务页再保存不会发现原有无效值。来自标签或 `variables.env` 的值不同：autoconf 和 Configurator 每次完整读取各自来源，非法值会被丢弃并记录日志，然后回退到默认值，因此上面的文件检查很重要。
-    - **UI 实际检查某字段时**（因为您修改了它），不会拒绝整次保存。它将此字段恢复到数据库原值，显示 `Variable <key> is not valid.`，保存其余设置，仍报告保存成功。请查看红色和绿色提示，而不只看操作结果。
+    - **UI 实际检查某字段时**（因为您修改了它），不会拒绝整次保存。它将此字段恢复到数据库原值，显示 `Variable <key> is not valid.`，保存其余设置，现在会用与之匹配的橙色提示说明被拒绝的值的数量，来报告保存结果本身，而不是无条件显示成功提示。
 
     这些行为都不会主动帮您找出旧值。请人工核查 UI 管理服务中的 `REVERSE_PROXY_URL`、`GRPC_URL` 和 `REDIRECT_FROM`。
 

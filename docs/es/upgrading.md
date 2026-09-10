@@ -176,7 +176,8 @@
       valor no válido con un mensaje y usan el predeterminado. Por eso importa la búsqueda anterior.
     - **Cuando la interfaz sí valida el campo**, porque lo editaste, no rechaza todo el guardado.
       Restaura ese campo al valor almacenado, muestra `Variable <key> is not valid.`, guarda el resto
-      y sigue indicando éxito. El error aparece en rojo junto al mensaje verde: lee los mensajes.
+      y ahora informa el propio guardado con un mensaje naranja a juego que indica cuántos valores
+      se rechazaron, en lugar de un mensaje de éxito incondicional.
 
     Nada de esto localiza los valores almacenados. Revisa manualmente `REVERSE_PROXY_URL`, `GRPC_URL`
     y `REDIRECT_FROM` en los servicios gestionados desde la interfaz.

@@ -322,22 +322,27 @@ etiquetas deja el stack sin `bw-api`, `bw-worker` ni `bw-jobs-broker`. Consulta
     **En un nodo que solo ejecuta la instancia BunkerWeb**, una instalación `--worker` en el
     sentido del instalador, `disabled` es correcto: ese host no tiene jobs. No lo habilites ahí.
 
-    !!! warning "Cada actualización del paquete lo vuelve a habilitar en un nodo de solo instancia"
+    !!! info "Las actualizaciones anteriores a 1.7.0 pueden haberlo dejado habilitado en un nodo de solo instancia"
         El paquete determina el perfil a partir de `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` en su
-        propio entorno y **ninguna actualización los define**, ni `apt install bunkerweb=...` ni
-        `install-bunkerweb.sh`, cuya ruta de actualización termina antes de exportarlos. Cada
-        actualización trata ese host como autónomo y **habilita e inicia** `bunkerweb-worker` y
-        la primera unidad Redis encontrada: `redis-server`, `valkey` o `redis`, porque una
-        instalación de solo instancia no aprovisiona `bunkerweb-broker`.
+        propio entorno, y ninguna actualización los define: ni `apt install bunkerweb=...` ni
+        `install-bunkerweb.sh`, cuya ruta de actualización termina antes de exportarlos. Desde la
+        1.7.0 el paquete recupera la topología por sí mismo: lee el tipo de instalación registrado
+        en la última instalación declarada, y en un host anterior a esa marca recurre a «¿este host
+        ejecuta `bunkerweb-scheduler`?». En un nodo que responde que no, ni el broker ni
+        `bunkerweb-worker` se habilitan. Las actualizaciones anteriores sí tomaban ese host por
+        autónomo y **habilitaban e iniciaban** `bunkerweb-worker` junto con la primera unidad Redis
+        encontrada — en un nodo como este, el `redis-server` de la distribución (o `valkey`/`redis`),
+        porque una instalación de solo instancia no aprovisiona `bunkerweb-broker`. Si tu nodo pasó
+        por una de esas actualizaciones, límpialo una vez con los comandos de abajo.
 
         Normalmente no recibe jobs: su worker usa `redis://127.0.0.1:6379/0`, donde ningún plano de
         control envía trabajo. La excepción es que su `CELERY_BROKER_URL` apunte a un broker
         **accesible por red**, por ejemplo copiada desde una instalación `--broker-url` o definida
         manualmente: entonces sí consume jobs. Una URL del broker dedicado del instalador usa
         `127.0.0.1`; copiada en otro nodo apunta al loopback de ese nodo y solo reintenta una
-        conexión rechazada. Para quitar el worker: `systemctl disable --now bunkerweb-worker`,
-        después de **cada** actualización. Solo una instalación nueva o una ejecución explícita
-        del instalador con `--worker` lo hace automáticamente.
+        conexión rechazada. Si quiere eliminarlo: `systemctl disable --now bunkerweb-worker`.
+        Desde 1.7.0 basta con hacerlo una vez: la siguiente actualización ve un host sin scheduler
+        y no lo toca.
 
         **No desactives Redis sin confirmar que no es tu almacén WAF.** `USE_REDIS` y `REDIS_HOST`
         son ajustes de la *flota*, configurados en la interfaz → **Global settings** → Redis o
