@@ -158,6 +158,17 @@
 - [BUGFIX] `linux`: a bare package upgrade no longer enables a broker and the Celery worker on a BunkerWeb-instance-only node.
 - [BUGFIX] `ui`: a refused or partially-reverted service save no longer always flashes success; the flash type now follows the outcome.
 - [BUGFIX] `ui`: a refused global-settings or PRO-key save no longer flashes success either; the flash follows the outcome like the service page.
+- [BUGFIX] Security reports are refilled from the instances after Redis loses its list, instead of restarting the window from zero
+- [PERF] Fewer Redis round trips per request and per Web UI call: one shared client, batched ban lookups and report scans
+- [PERF] `REDIS_KEEPALIVE_POOL` now defaults to 64 and is documented as per NGINX worker; size Redis `maxclients` above workers x pool x instances
+- [BUGFIX] `METRICS_MAX_BLOCKED_REQUESTS_REDIS=0` keeps reports out of Redis without blanking the reports page: the instances are read instead
+- [BUGFIX] `ui`: a theme, language or DataTable column-visibility change is no longer dropped when a link is followed right after it.
+- [BUGFIX] `ui`: a brief flash of the wrong ACE code-editor color scheme on the config/cache/logs/service editor pages is gone.
+- [BUGFIX] `modsecurity`: a config save no longer trips the Web UI's CRS rules when the pasted content looks like an XSS pattern.
+- [MISC] `bunkerweb`: the reserved `default-server` id strip now routes through one shared helper everywhere (internal refactor, no behaviour change).
+- [MISC] `bunkerweb`: a startup warning is logged when `DISABLE_DEFAULT_SERVER_STRICT_SNI` is enabled but has no default server to apply it to.
+- [BUGFIX] PostgreSQL databases from before 1.6.0 can upgrade straight to 1.7 again instead of hanging
+- [BUGFIX] Upgrading from a database a 1.5.6 release created no longer fails on a missing foreign key
 
 ## v1.6.14~rc1 - 2026/07/??
 
