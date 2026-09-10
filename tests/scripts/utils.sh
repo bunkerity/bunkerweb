@@ -1988,29 +1988,36 @@ function restart_stack () {
                 log "UTILS" "❌" "☸️ Failed to restart BunkerWeb UI"
                 return 1
             fi
-        elif [ "$type" == "api" ] ; then
-            if echo "$secrets" | grep -q "bw-api-secret" ; then
-                kubectl delete -f /tmp/secrets-api.yml
-                # shellcheck disable=SC2181
-                if [ $? -ne 0 ] ; then
-                    log "UTILS" "❌" "☸️ Failed to delete API secrets"
-                    return 1
-                fi
-            fi
+        fi
 
-            kubectl apply -f /tmp/secrets-api.yml
+        # Unlike the UI secret, this is NOT gated on `type == "api"`: since 1.7 the API
+        # deployment is applied for every type (bunkerweb-api.yml, :1889, and the equivalent
+        # start.sh block -- neither carries a stack_has_worker/version gate, so the API pod
+        # exists on every BW_VERSION). generate.py writes /tmp/secrets-api.yml on every action
+        # too (tests/generate.py:562), so any action that changes the database engine -- not
+        # only an `api`-typed one -- leaves the API pod on the previous engine's DATABASE_URI
+        # unless its secret and Deployment are re-applied here every time.
+        if echo "$secrets" | grep -q "bw-api-secret" ; then
+            kubectl delete -f /tmp/secrets-api.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "☸️ Failed to apply API secrets"
+                log "UTILS" "❌" "☸️ Failed to delete API secrets"
                 return 1
             fi
+        fi
 
-            kubectl rollout restart -n bunkerweb deployment bunkerweb-api
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "☸️ Failed to restart BunkerWeb API"
-                return 1
-            fi
+        kubectl apply -f /tmp/secrets-api.yml
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "☸️ Failed to apply API secrets"
+            return 1
+        fi
+
+        kubectl rollout restart -n bunkerweb deployment bunkerweb-api
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "☸️ Failed to restart BunkerWeb API"
+            return 1
         fi
 
         if [ -f /tmp/services.yml ] ; then
