@@ -152,7 +152,8 @@
         border-color: var(--color-bw);
         box-shadow: 0 0 4px rgba(11, 85, 119, 0.5);
       }
-      article div.content form button {
+      article div.content form button,
+      #challenge-retry {
         background-color: var(--color-bw-green);
         color: #fff;
         padding: 0.75rem 1.5rem;
@@ -162,7 +163,8 @@
         cursor: pointer;
         transition: background-color 0.3s ease;
       }
-      article div.content form button:hover {
+      article div.content form button:hover,
+      #challenge-retry:hover {
         background-color: #27a060;
       }
       .lds-roller {
@@ -356,7 +358,16 @@
   <body>
     <article>
       <div class="content">
-        <h3 class="message">Please wait while we check if you are a Human</h3>
+        <h3 class="message" role="status" aria-live="polite">
+          Please wait while we check if you are a Human
+        </h3>
+        <p id="challenge-error" role="alert"></p>
+        <p class="subtitle">
+          Having trouble? Check your connection and allow this site's challenge
+          to load.
+          <button type="button" id="challenge-retry">Reload challenge</button>
+          If the problem continues, contact the website administrator.
+        </p>
         {-raw-}
         <form class="hidden" method="POST" action="{*antibot_uri*}" id="form">
           <input type="hidden" name="token" id="token" />
@@ -372,6 +383,9 @@
           data-size="normal"
           data-sitekey="{*turnstile_sitekey*}"
           data-callback="send_challenge"
+          data-error-callback="challenge_error"
+          data-expired-callback="challenge_error"
+          data-timeout-callback="challenge_error"
           data-before-interactive-callback="interactive_mode"
         ></div>
         <div class="lds-roller">
@@ -431,13 +445,9 @@
       </p>
     </footer>
     {-raw-}
-    <script
-      defer="defer"
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-      nonce="{*nonce_script*}"
-    ></script>
     <script nonce="{*nonce_script*}">
       function send_challenge(e) {
+        document.getElementById("challenge-error").textContent = "";
         ((document.getElementById("token").value = e),
           document.getElementById("form").submit());
       }
@@ -446,7 +456,37 @@
           (document.querySelector(".message").textContent =
             "Please prove that you are Human before accessing this website"));
       }
+      function challenge_error() {
+        document.querySelector(".lds-roller").classList.add("hidden");
+        document.querySelector(".message").textContent =
+          "Verification could not complete";
+        document.getElementById("challenge-error").textContent =
+          "The verification service is unavailable or could not load. Reload the challenge to try again.";
+      }
+      document
+        .getElementById("challenge-retry")
+        .addEventListener("click", function () {
+          window.location.reload();
+        });
+      document.addEventListener(
+        "error",
+        function (event) {
+          if (
+            event.target.tagName === "SCRIPT" &&
+            event.target.hasAttribute("data-challenge-script")
+          ) {
+            challenge_error();
+          }
+        },
+        true,
+      );
     </script>
+    <script
+      data-challenge-script
+      defer="defer"
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      nonce="{*nonce_script*}"
+    ></script>
     {-raw-}
   </body>
 </html>

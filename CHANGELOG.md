@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.15~rc3 - 2026/09/??
+
+- [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Refs #3867)
+
 ## v1.6.15~rc2 - 2026/09/??
 
 - [FEATURE] `crowdsec`: investigate IPs, inspect allowlists, and remove decisions through the Web UI and API, with richer report details and on-page allowlist guidance.
