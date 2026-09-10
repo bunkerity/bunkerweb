@@ -1,4 +1,5 @@
 from contextlib import suppress
+from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
@@ -15,6 +16,14 @@ from default_server import (  # type: ignore
     is_reserved_default_server,
 )
 from ports import collect_ports  # type: ignore
+from service_classification import (  # type: ignore
+    MODE_REDIRECT_ONLY,
+    MODE_STANDARD,
+    SERVICE_MODE_SETTING,
+    explain,
+    setting_value,
+    split_services,
+)
 
 from ..auth.guard import guard
 from ..http01 import http01_refusals_for
@@ -46,6 +55,127 @@ def _iso(dt) -> Optional[str]:
     with suppress(Exception):
         return dt.astimezone().isoformat()
     return None
+
+
+# --------------------------------------------------------------------------
+# redirect_only mode -- candidate audit and explicit conversion.
+#
+# `explain()` is the SHARED rule (src/common/utils/service_classification.py); nothing here
+# re-implements any part of it. What this section owns is the EVIDENCE: the classifier judges a
+# service on its persisted settings *plus* its custom NGINX snippets and its attached resources,
+# and a caller that omits either gets a verdict that trusts the settings alone -- which is exactly
+# the gap the ADR (§3bis) says makes the exemption unsafe to bill on. So both are gathered here,
+# for real, before anything is answered.
+# --------------------------------------------------------------------------
+
+# The resource accessors clamp `limit` to 500 and report the unpaged `total`, so ONE call per
+# family is not evidence on a large fleet -- and a MISSING attachment reads as "would qualify",
+# the fail-OPEN direction. Page instead of trusting the first page.
+_RESOURCE_PAGE = 500
+
+# family -> (accessor name, key holding the attached services in each row). Certificates report
+# theirs under "attachments"; the other three under "services". Rows are either bare service ids
+# (redirect, workflow) or mappings carrying `service_id` (certificate, upstream).
+_RESOURCE_FAMILIES = (
+    ("redirect", "get_redirects", "services"),
+    ("upstream", "get_upstreams", "services"),
+    ("certificate", "get_certificates", "attachments"),
+    ("workflow", "get_workflows", "services"),
+)
+
+
+def _all_resources(accessor: str) -> List[Dict[str, Any]]:
+    """Every row of one resource family, paged past the accessors' 500-row clamp."""
+    rows: List[Dict[str, Any]] = []
+    offset = 0
+    while True:
+        page = getattr(get_db(), accessor)(offset=offset, limit=_RESOURCE_PAGE)
+        items = page.get("items") or []
+        rows.extend(items)
+        offset += len(items)
+        if not items or offset >= int(page.get("total") or 0):
+            return rows
+
+
+def _attachments_by_service() -> Dict[str, List[Dict[str, str]]]:
+    """``{service: [{"type": <family>}, ...]}`` -- what `explain()` reads from an attachment.
+
+    All four families are fetched, not just the two that are forbidden today:
+    ``ALLOWED_ATTACHMENT_TYPES`` is data the classifier owns, and a caller that pre-filters on it
+    would be holding a second copy of the allowlist that drifts the day the set widens.
+    """
+    attachments: Dict[str, List[Dict[str, str]]] = {}
+    for kind, accessor, rows_key in _RESOURCE_FAMILIES:
+        for resource in _all_resources(accessor):
+            for entry in resource.get(rows_key) or ():
+                service = entry.get("service_id") if isinstance(entry, dict) else entry
+                if service:
+                    attachments.setdefault(str(service), []).append({"type": kind})
+    return attachments
+
+
+def _custom_configs_by_service() -> Dict[str, List[Dict[str, Any]]]:
+    """``{service: [snippet, ...]}`` -- only snippets ATTACHED TO A SERVICE.
+
+    A GLOBAL snippet is deliberately not counted against any service: the ADR forbids "any custom
+    config attached to a `redirect_only` service" (§4), and charging every redirect service for one
+    fleet-wide snippet would make the exemption unreachable on any real deployment. Drafts are
+    included -- a draft snippet on a live service is still a snippet the moment it is published,
+    and this is the fail-closed direction.
+    """
+    by_service: Dict[str, List[Dict[str, Any]]] = {}
+    for config in get_db().get_custom_configs(with_drafts=True, with_data=False) or ():
+        service = config.get("service_id")
+        if service:
+            by_service.setdefault(str(service), []).append(config)
+    return by_service
+
+
+def _redirect_only_refusal(service: str, service_config: Dict[str, Any]) -> List[str]:
+    """Why ``service`` cannot be declared ``redirect_only`` -- empty list means it can.
+
+    ``service_config`` is that service's slice of the NON-DEFAULT snapshot, already carrying
+    ``SERVICE_MODE=redirect_only`` (the counterfactual): `explain()` is only meaningful on a
+    declaration, so the caller states one before asking why it would be refused.
+    """
+    return explain(
+        service_config,
+        custom_configs=_custom_configs_by_service().get(service, ()),
+        attachments=_attachments_by_service().get(service, ()),
+    )
+
+
+@router.get("/redirect-candidates", dependencies=[Depends(guard)])
+def redirect_candidates() -> JSONResponse:
+    """Which standard services would pass `explain()` if they were declared ``redirect_only``.
+
+    Read-only, and money-inert on its own: it neither converts anything nor changes what is
+    billed. It answers the one question the operator cannot answer by looking -- "which of these
+    am I paying for without needing to" -- and, when the answer is no, *why* not.
+
+    Declared BEFORE ``GET /{service}``: FastAPI matches routes in declaration order, so the
+    literal path has to come first or it is swallowed as a service named "redirect-candidates".
+
+    Drafts are excluded (``with_drafts=False``): a draft is never counted either way, so offering
+    to convert one is offering a saving that does not exist. Services already declared
+    ``redirect_only`` are excluded too -- there is nothing to convert.
+    """
+    snapshot = get_db().get_non_default_settings(global_only=False, methods=False, with_drafts=False)
+    custom_configs = _custom_configs_by_service()
+    attachments = _attachments_by_service()
+
+    candidates = []
+    for service, service_config in split_services(snapshot).items():
+        mode = setting_value(service_config.get(SERVICE_MODE_SETTING, MODE_STANDARD)) or MODE_STANDARD
+        if mode == MODE_REDIRECT_ONLY:
+            continue
+        counterfactual = dict(service_config)
+        counterfactual[SERVICE_MODE_SETTING] = MODE_REDIRECT_ONLY
+        reasons = explain(counterfactual, custom_configs=custom_configs.get(service, ()), attachments=attachments.get(service, ()))
+        candidates.append({"service": service, "would_qualify": not reasons, "blocking_reasons": reasons})
+
+    candidates.sort(key=itemgetter("service"))
+    return JSONResponse(status_code=200, content={"status": "success", "candidates": candidates})
 
 
 @router.get("", dependencies=[Depends(guard)])
@@ -409,26 +539,69 @@ def delete_service(service: str) -> JSONResponse:
 
 
 @router.post("/{service}/convert", dependencies=[Depends(guard)])
-def convert_service(service: str, convert_to: str = Query(..., pattern="^(online|draft)$")) -> JSONResponse:
-    """Convert a service between online and draft status.
+def convert_service(
+    service: str,
+    convert_to: Optional[str] = Query(None, pattern="^(online|draft)$"),
+    mode: Optional[str] = Query(None, pattern="^(standard|redirect_only)$"),
+) -> JSONResponse:
+    """Convert a service between online/draft status and/or between service modes.
+
+    The two are INDEPENDENT axes stored as two settings (``IS_DRAFT``, ``SERVICE_MODE``), so a
+    call may carry either or both; at least one is required. They share this route and its
+    ``service_convert`` permission because they are the same kind of act -- an explicit,
+    operator-initiated change of what a service *is*, never a side effect of an ordinary save.
+
+    ``mode=redirect_only`` is the only direction that can be refused: the service must currently
+    hold nothing the redirect-only allowlist forbids, judged by the SHARED classifier on the real
+    persisted config plus this service's real custom snippets and attached resources. A refusal is
+    409 with the reasons -- the request is well formed, the STATE forbids it. Going back to
+    ``standard`` is always allowed: an ordinary service has no capability restriction.
+
+    Nothing else is written. A conversion never rewrites the capabilities it refused (the ADR's
+    "explicit, never a side-effecting rewrite"), so the operator drops them and asks again.
 
     Args:
         service: Service identifier
         convert_to: Target status ("online" or "draft")
+        mode: Target service mode ("standard" or "redirect_only")
     """
     if _is_reserved(service):
         # Drafting it is deletion by another name: a draft row drops out of SERVER_NAME, the default
         # server falls silently back to the global-only rendering and every setting on its page stops
         # applying with no error anywhere. The reserved row only, for the same reason as the rename
-        # and the delete above.
+        # and the delete above. It is refused a MODE too: the block that answers unmatched requests
+        # is not a service an operator created, so it is neither billed nor exemptible.
         return _reserved_refusal()
+
+    if not convert_to and not mode:
+        return JSONResponse(status_code=400, content={"status": "error", "message": "Nothing to convert: pass convert_to and/or mode"})
 
     conf = _full_config_snapshot()
     services_list = (conf.get("SERVER_NAME", "") or "").split()
-    to_convert = [s for s in (service,) if s in services_list]
-    if not to_convert:
+    if service not in services_list:
         return JSONResponse(status_code=400, content={"status": "error", "message": "No valid services to convert"})
-    to_val = "no" if convert_to == "online" else "yes"
-    for s in to_convert:
-        conf[f"{s}_IS_DRAFT"] = to_val
+
+    if mode == MODE_REDIRECT_ONLY:
+        # Judged on the NON-DEFAULT snapshot, not on `conf`: `_full_config_snapshot` is already
+        # that snapshot, but drafts ride along in it and the classifier's input contract is what
+        # the database holds for THIS service. `split_services` slices it the one way the two
+        # read-time counters do -- but only the SLICING agrees with them, not the EVIDENCE: both
+        # `src/ui/app/utils.py:billable_service_count` and
+        # `src/common/core/pro/jobs/download-pro-plugins.py` still call `count_snapshot` with no
+        # custom configs and no attachments (ADR §3bis, still open). A service this endpoint 409s
+        # WOULD therefore read as valid there the day the gate opens, which is why the flip and
+        # that evidence plumbing have to ship in one commit. Not this endpoint's to fix.
+        counterfactual = dict(split_services(conf).get(service, {}))
+        counterfactual[SERVICE_MODE_SETTING] = MODE_REDIRECT_ONLY
+        reasons = _redirect_only_refusal(service, counterfactual)
+        if reasons:
+            return JSONResponse(
+                status_code=409,
+                content={"status": "error", "message": f"Service {service} cannot be converted to redirect-only", "reasons": reasons},
+            )
+
+    if convert_to is not None:
+        conf[f"{service}_IS_DRAFT"] = "no" if convert_to == "online" else "yes"
+    if mode is not None:
+        conf[f"{service}_{SERVICE_MODE_SETTING}"] = mode
     return _persist_config(conf)

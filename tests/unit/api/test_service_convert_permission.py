@@ -54,6 +54,26 @@ class TestConvertPermission:
         assert resolve_services("/services/export", "GET") == ("services", "service_export")
 
 
+class TestRedirectCandidates:
+    """`GET /services/redirect-candidates` is a fleet-wide read, and it resolves like one.
+
+    It lands on `service_read` through the two-segment branch, and -- unlike `/services/export` and
+    `/services/{id}/convert` -- it is deliberately NOT added to `_extract_resource_id`'s skip set.
+    The literal path segment therefore becomes the resource id, so a token scoped to one service is
+    refused. That is the wanted outcome: the endpoint answers for EVERY service, and skipping the
+    id would let a single-service grant read the whole fleet's names back.
+    """
+
+    def test_it_asks_for_service_read(self):
+        assert resolve_services("/services/redirect-candidates", "GET") == ("services", "service_read")
+
+    def test_a_service_scoped_grant_does_not_reach_it(self):
+        assert extract_resource_id("/services/redirect-candidates", "services") == "redirect-candidates"
+
+    def test_it_is_a_read_only_route(self):
+        assert resolve_services("/services/redirect-candidates", "POST")[1] != "service_read"
+
+
 class TestResourceId:
     """The `>= 2` -> `== 2` tightening ported alongside the fix above.
 
