@@ -2638,10 +2638,11 @@ For a more detailed guide, see the [advanced usages](advanced.md#custom-pages-pr
 
 STREAM support :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | Setting                          | Default | Context   | Multiple | Description                                                                                                        |
 | -------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |         | multisite | no       | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |         | multisite | no       | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |         | global    | no       | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |         | multisite | no       | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -4310,6 +4311,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+For a more detailed guide, see the [advanced usages](advanced.md#maintenance-pro) documentation.
+
+STREAM support :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| Setting           | Default | Context   | Multiple | Description                                                                                                                                                                                               |
+| ----------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`    | multisite | no       | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 STREAM support :warning:
@@ -5775,7 +5789,7 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker. |
 
 !!! info "Private CA: how `REDIS_SSL_CA` is trusted"
     With `REDIS_SSL_VERIFY: "yes"` (the default), verification uses the system/certifi trust store, which never contains a private CA — a perfectly valid certificate still fails `CERTIFICATE_VERIFY_FAILED`, and the only escape used to be turning verification off for every consumer at once. `REDIS_SSL_CA` names a PEM CA bundle to trust instead. It reaches both halves of the product, by two different routes:
@@ -5876,6 +5890,7 @@ When using Redis or Valkey with BunkerWeb, consider these best practices to ensu
 - **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
 - **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` for general use or `allkeys-lru` for cache-heavy workloads) appropriate for your use case
 - **All-in-one defaults:** The AIO Docker image ships Redis with `maxmemory=256mb` and `maxmemory-policy=volatile-lru`; override via the `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` environment variables. With `volatile-lru`, transient counters (rate-limit, bad-behavior) are evicted before keys with TTLs that matter for sessions and timed bans, and keys without an expiry (permanent bans) are immune. The same policy is recommended for external Redis or Valkey servers used by BunkerWeb.
+- **Keep the security reports out of the eviction pool:** with the default `METRICS_REDIS_TTL` the blocked request reports carry an expiry, and that expiry is what makes them eligible for eviction under `volatile-lru` at all. The list is a single key holding the whole retained window, so one eviction takes all of it rather than the oldest reports. Set `METRICS_REDIS_TTL=0` on every instance sharing the server, otherwise an instance still on the default re-arms the expiry within seconds. It changes nothing under `allkeys-lru`, where no key is immune, and it does not lower memory pressure, it moves it onto the keys that still expire, which include timed bans, sessions and cached verdicts. Size `maxmemory` for the reports you retain instead of relying on eviction: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` sets that ceiling.
 - **Avoid large keys:** Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation
 
 #### Data Persistence
@@ -5884,7 +5899,7 @@ When using Redis or Valkey with BunkerWeb, consider these best practices to ensu
 - **Backup strategy:** Implement regular Redis backups as part of your disaster recovery plan
 
 #### Performance Optimization
-- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice
+- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice. `REDIS_KEEPALIVE_POOL` is per NGINX worker, so steady-state connections are roughly `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`: size the Redis/Valkey `maxclients` limit above that, because a refused connection means that request is not checked against the bans held only in Redis
 - **Pipelining:** When possible, use pipelining for bulk operations to reduce network overhead
 - **Avoid expensive operations:** Be cautious with commands like KEYS in production environments
 - **Benchmark your workload:** Use redis-benchmark to test your specific workload patterns
@@ -6501,6 +6516,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
+
+## SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+For a more detailed guide, see the [advanced usages](advanced.md#saml-pro) documentation.
+
+STREAM support :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| Setting                         | Default          | Context   | Multiple | Description                                                                                                                                                |
+| -------------------------------- | ---------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_SAML`                      | `no`             | multisite | no       | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | no       | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | no       | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | no       | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | no       | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | no       | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | no       | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | no       | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | no       | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | no       | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | no       | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | no       | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | no       | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | no       | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | no       | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | no       | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | no       | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | no       | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | no       | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | no       | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | no       | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | no       | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | no       | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | no       | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | no       | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | no       | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | no       | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | no       | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | no       | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | no       | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | yes      | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | yes      | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | no       | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Security workflows
 

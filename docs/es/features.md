@@ -2560,10 +2560,11 @@ Para una guía más detallada, consulta la documentación de [usos avanzados](ad
 
 Compatibilidad con STREAM :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | Parámetro                        | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                        |
 | -------------------------------- | -------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |                      | multisite | no       | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |                      | multisite | no       | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |                      | global    | no       | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |                      | multisite | no       | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -4212,6 +4213,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`                | global   | sí       | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |                      | global   | sí       | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Para una guía más detallada, consulta la documentación de [usos avanzados](advanced.md#maintenance-pro).
+
+Compatibilidad con STREAM :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| Parámetro         | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                               |
+| ----------------- | -------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`                 | multisite | no       | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 Compatibilidad con STREAM :warning:
@@ -5684,7 +5698,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
+| `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX. |
 
 !!! info "CA privada: cómo se confía en `REDIS_SSL_CA`"
     Con `REDIS_SSL_VERIFY: "yes"` (predeterminado), se usa el almacén del sistema/certifi, que no
@@ -5798,6 +5812,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 - **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
 - **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` para uso general o `allkeys-lru` para cargas de trabajo de caché intensivo) apropiada para su caso de uso
 - **Valores predeterminados del all-in-one:** La imagen Docker AIO configura Redis con `maxmemory=256mb` y `maxmemory-policy=volatile-lru`; sobrescriba estos valores mediante las variables de entorno `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY`. Con `volatile-lru`, los contadores transitorios (límite de tasa, mal comportamiento) se desalojan antes que las claves con TTL importantes para las sesiones y los baneos temporales, y las claves sin expiración (baneos permanentes) quedan exentas. Se recomienda la misma política para servidores Redis o Valkey externos utilizados por BunkerWeb.
+- **Mantenga los informes de seguridad fuera del grupo de desalojo:** con el valor predeterminado de `METRICS_REDIS_TTL`, los informes de peticiones bloqueadas llevan una expiración, y es esa expiración la que los hace candidatos al desalojo bajo `volatile-lru`. La lista es una sola clave que contiene toda la ventana conservada: un desalojo se lleva el conjunto, no los informes más antiguos. Establezca `METRICS_REDIS_TTL=0` en cada instancia que comparta el servidor; de lo contrario, una instancia que siga con el valor predeterminado vuelve a fijar la expiración en segundos. No cambia nada bajo `allkeys-lru`, donde ninguna clave es inmune, y no reduce la presión de memoria, la traslada a las claves que siguen expirando, entre ellas los baneos temporales, las sesiones y los veredictos en caché. Dimensione `maxmemory` para los informes que conserva en lugar de confiar en el desalojo: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` fija ese tope.
 - **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
@@ -5808,7 +5823,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 #### Optimización del Rendimiento
 
-- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica. `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: en régimen estable, las conexiones son aproximadamente `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`. Dimensione el límite `maxclients` de Redis/Valkey por encima, porque una conexión rechazada impide comprobar en esa petición los baneos que solo están en Redis
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
 - **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
@@ -6425,6 +6440,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 Para más información, consulte la [documentación de robots.txt](https://www.robotstxt.org/robotstxt.html).
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Para una guía más detallada, consulta la documentación de [usos avanzados](advanced.md#saml-pro).
+
+Compatibilidad con STREAM :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| Parámetro                       | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                |
+| -------------------------------- | ---------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_SAML`                      | `no`             | multisite | no       | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | no       | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | no       | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | no       | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | no       | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | no       | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | no       | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | no       | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | no       | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | no       | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | no       | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | no       | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | no       | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | no       | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | no       | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | no       | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | no       | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | no       | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | no       | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | no       | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | no       | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | no       | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | no       | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | no       | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | no       | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | no       | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | no       | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | no       | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | no       | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | no       | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | sí       | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | sí       | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | no       | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Workflows de seguridad
 

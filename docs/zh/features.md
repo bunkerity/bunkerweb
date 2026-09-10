@@ -2487,10 +2487,11 @@ CrowdSec 的裁决可以由你自己的**安全工作流**来回应，而不是�
 
 STREAM 支持 :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | 参数                             | 默认值 | 上下文    | 可重复 | 描述                                                                                                               |
 | -------------------------------- | ------ | --------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |        | multisite | 否     | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |        | multisite | 否     | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | 否     | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | 否     | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -4114,6 +4115,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global | 是     | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global | 是     | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+如需更详细的指南，请参阅[高级用法](advanced.md#maintenance-pro)文档。
+
+STREAM 支持 :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| 参数              | 默认值 | 上下文    | 可重复 | 描述                                                                                                                                                                                                      |
+| ----------------- | ------ | --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`   | multisite | 否     | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 STREAM 支持 :warning:
@@ -5579,7 +5593,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! info "私有 CA：`REDIS_SSL_CA` 如何受信任"
     `REDIS_SSL_VERIFY: "yes"`（默认）使用系统/certifi 信任库，其中没有私有 CA，即使证书有效也会出现 `CERTIFICATE_VERIFY_FAILED`。`REDIS_SSL_CA` 指定受信任的 PEM CA 包，通过两条路径作用于产品：
@@ -5677,6 +5691,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 - **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
 - **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如通用场景使用 `volatile-lru`，缓存密集型场景使用 `allkeys-lru`）
 - **All-in-One 默认值：** AIO Docker 镜像默认将 Redis 配置为 `maxmemory=256mb` 和 `maxmemory-policy=volatile-lru`；可通过环境变量 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。在 `volatile-lru` 策略下，瞬时计数器（速率限制、不良行为）会先于会话和限时封禁等带 TTL 的关键键被淘汰，而无过期时间的键（永久封禁）则免于被淘汰。建议为 BunkerWeb 使用的外部 Redis 或 Valkey 服务器采用同样的策略。
+- **让安全报告远离驱逐池：** 使用 `METRICS_REDIS_TTL` 的默认值时，被阻止请求的报告带有过期时间，正是该过期时间使它们在 `volatile-lru` 下成为可驱逐对象。该列表是保存整个保留窗口的单个键，因此一次驱逐会清除全部内容，而不是最旧的报告。请在共享同一服务器的每个实例上设置 `METRICS_REDIS_TTL=0`，否则仍使用默认值的实例会在数秒内重新设置过期时间。在 `allkeys-lru` 下这不起作用，那里没有键是免疫的；它也不会降低内存压力，只会把压力转移到仍会过期的键上，其中包括限时封禁、会话和缓存的判定结果。请按需要保留的报告数量规划 `maxmemory`，而不是依赖驱逐：`METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设定该上限。
 - **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
 
 #### 数据持久性
@@ -5687,7 +5702,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 
 #### 性能优化
 
-- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践。`REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 生效：稳态下的连接数约为 `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`。请将 Redis/Valkey 的 `maxclients` 上限设置在该值之上，否则被拒绝的连接会使该请求无法检查仅保存在 Redis 中的封禁
 - **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
 - **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
 - **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式
@@ -6304,6 +6319,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 更多信息，请参阅 [robots.txt 文档](https://www.robotstxt.org/robotstxt.html)。
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+如需更详细的指南，请参阅[高级用法](advanced.md#saml-pro)文档。
+
+STREAM 支持 :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| 参数                            | 默认值           | 上下文    | 可重复 | 描述                                                                                                                                                       |
+| ------------------------------- | ---------------- | --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_SAML`                      | `no`             | multisite | 否     | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | 否     | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | 否     | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | 否     | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | 否     | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | 否     | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | 否     | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | 否     | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | 否     | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | 否     | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | 否     | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | 否     | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | 否     | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | 否     | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | 否     | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | 否     | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | 否     | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | 否     | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | 否     | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | 否     | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | 否     | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | 否     | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | 否     | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | 否     | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | 否     | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | 否     | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | 否     | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | 否     | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | 否     | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | 否     | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | 是     | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | 是     | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | 否     | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## 安全工作流
 
