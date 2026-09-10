@@ -24,6 +24,28 @@ ZIP_ALLOWED_MEMBERS = frozenset({"services_export.env", "configs_export.json"})
 ZIP_MAX_UNCOMPRESSED_BYTES = 20 * 1024 * 1024  # 20 MB aggregate cap guards against zip bombs.
 
 
+def _submit_service_task(task, *args):
+    def completed(future):
+        try:
+            future.result()
+        except Exception:
+            LOGGER.exception("Service operation failed")
+            DATA["TO_FLASH"].append(
+                {"content": "An unexpected error occurred during the service operation. Please check the UI logs for more information.", "type": "error"}
+            )
+            DATA["CONFIG_CHANGED"] = False
+        finally:
+            DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    try:
+        future = CONFIG_TASKS_EXECUTOR.submit(task, *args)
+    except Exception:
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+        raise
+    future.add_done_callback(completed)
+
+
 def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
     services_map: Dict[str, Dict[str, str]] = {}
     errors: List[str] = []
@@ -137,10 +159,8 @@ def services_convert():
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
         DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}", "type": "success"})
-        DATA["RELOADING"] = False
 
-    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(convert_services, services, convert_to)
+    _submit_service_task(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -226,10 +246,8 @@ def services_delete():
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
         DATA["TO_FLASH"].append({"content": f"Deleted service{'s' if len(services_to_delete) > 1 else ''}: {', '.join(services_to_delete)}", "type": "success"})
-        DATA["RELOADING"] = False
 
-    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(delete_services, services)
+    _submit_service_task(delete_services, services)
 
     return redirect(
         url_for(
@@ -371,7 +389,7 @@ def services_service_page(service: str):
                                 }
                             )
                             continue
-                        elif value == db_custom_config["data"].strip():
+                        elif db_custom_config["data"] is not None and value == db_custom_config["data"].strip():
                             continue
 
                         configs_changed = True
@@ -486,9 +504,6 @@ def services_service_page(service: str):
                     return
                 variables["SERVER_NAME"] = old_server_name
 
-            operation = None
-            error = None
-
             # Build the final custom config map taking into account removals and additions
             new_server_name = variables.get("SERVER_NAME", "").split(" ")[0]
             old_server_name_splitted = old_server_name.split()
@@ -532,8 +547,14 @@ def services_service_page(service: str):
                     file_name_map=file_setting_names,
                 )
 
+            if error:
+                DATA["TO_FLASH"].append({"content": operation, "type": "warning" if operation.endswith("already exists.") else "error"})
+                DATA["CONFIG_CHANGED"] = False
+                return
+
             # Save custom configs after the service edit so the new service id exists
             if new_configs or configs_changed:
+                config_error = None
                 if renamed_service:
                     # Use per-config upsert to avoid bulk delete when renaming services
                     for custom_config in final_custom_configs.values():
@@ -545,41 +566,30 @@ def services_service_page(service: str):
                             "checksum": custom_config.get("checksum"),
                             "method": custom_config.get("method"),
                         }
-                        error = DB.upsert_custom_config(
+                        config_error = DB.upsert_custom_config(
                             custom_conf_data["type"],
                             custom_conf_data["name"],
                             custom_conf_data,
                             service_id=custom_conf_data["service_id"],
                         )
-                        if error:
-                            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+                        if config_error:
                             break
                 else:
-                    error = DB.save_custom_configs(
+                    config_error = DB.save_custom_configs(
                         final_custom_configs.values(),
                         override_method,
                         changed=service != "new" and (was_draft != is_draft or not is_draft),
                     )
-                    if error:
-                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
+                if config_error:
+                    DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {config_error}", "type": "error"})
+                    DATA["CONFIG_CHANGED"] = False
+                    return
 
-            if operation.endswith("already exists."):
-                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
-                operation = None
-            elif not error:
-                operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
+            operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
+            DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+            DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
-            if operation:
-                if operation.startswith(("Can't", "The database is read-only")):
-                    DATA["TO_FLASH"].append({"content": operation, "type": "error"})
-                else:
-                    DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-                    DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
-
-            DATA["RELOADING"] = False
-
-        DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
+        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
 
         new_service = False
         if service == "new":
@@ -606,7 +616,7 @@ def services_service_page(service: str):
                     if new_service or variables.get("SERVER_NAME", "").split(" ")[0] == variables.get("OLD_SERVER_NAME", "").split(" ")[0]
                     else url_for("services.services_page")
                 ),
-                message=f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
+                message=f"{'Creating' if new_service else 'Saving'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )
 
@@ -858,8 +868,7 @@ def services_service_import():
         config_changed = bool(created) or bool(configs_results and (configs_results["created"] or configs_results["overwritten"]))
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": config_changed})
 
-    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(
+    _submit_service_task(
         import_services,
         services_map,
         parse_errors,
