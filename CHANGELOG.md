@@ -169,6 +169,9 @@
 - [MISC] `bunkerweb`: a startup warning is logged when `DISABLE_DEFAULT_SERVER_STRICT_SNI` is enabled but has no default server to apply it to.
 - [BUGFIX] PostgreSQL databases from before 1.6.0 can upgrade straight to 1.7 again instead of hanging
 - [BUGFIX] Upgrading from a database a 1.5.6 release created no longer fails on a missing foreign key
+- [FEATURE] `api`/`ui`: services can now be declared `redirect_only` from their settings page, and the services list flags every service that could become one.
+- [FEATURE] `api`/`ui`: a `redirect_only` service will stop consuming a PRO service slot once redirect-only billing goes live; it stays a full service everywhere else.
+- [BUGFIX] `ui`: a service's declared mode was silently reset to `standard` by the next ordinary save of its settings page.
 
 ## v1.6.14~rc1 - 2026/07/??
 
