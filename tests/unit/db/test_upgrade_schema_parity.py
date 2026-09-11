@@ -62,7 +62,18 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
 
-from db.alembic_baseline import ALEMBIC, BASELINE_TAG, BASELINE_VERSION, LEGACY_TAG, baseline_metadata, product_uri, revision_for, wipe
+from db.alembic_baseline import (
+    ALEMBIC,
+    BASELINE_TAG,
+    BASELINE_VERSION,
+    LEGACY_TAG,
+    PRERELEASE_TAG,
+    PRERELEASE_VERSION,
+    baseline_metadata,
+    product_uri,
+    revision_for,
+    wipe,
+)
 from model import Base  # type: ignore
 
 
@@ -147,14 +158,30 @@ def _describe(engine):
 # never carried those defaults, so nothing on either side could disagree about them.
 #
 # The 1.5.0-beta one is the answer to that. It creates the schema the oldest supported release
-# really shipped and then runs the WHOLE chain -- all 78 revisions, root included, no stamp -- so
+# really shipped and then runs the WHOLE chain -- every revision, root included, no stamp -- so
 # every column, default, index and constraint on the upgraded side is one a migration actually
 # produced rather than one `create_all` handed it for free. It is the shape that would have caught
 # that class in the first place, which is why it is here rather than in a comment.
+#
+# The 1.6.15-rc2 one is neither, and what it adds is NOT extra schema coverage. rc2 sits below the
+# head on every route into it, so all three starts execute rc2's own `add_column` -- when the head
+# still added `bw_ui_users.totp_last_counter` too, the duplicate reddened this file from ALL THREE
+# starting points, not just this one. Do not read this start as the guard for that; the 1.6.13 one
+# catches it just as hard and is cheaper.
+#
+# What is unique here is the VERSION LOOKUP. `entrypoint.sh` resolves a stamped
+# `bw_metadata.version` to a revision by filename and hard-exits when nothing matches, so a released
+# version absent from the chain is an unbootable upgrade with a perfectly correct schema --
+# invisible to every comparison in this file. Only a start whose tag IS that version exercises it,
+# through the same `revision_for` the product mirrors. rc2 is the version the integration harness
+# upgrades from (`tests/scripts/before/upgrade.sh` resolves the latest pre-release dynamically),
+# which is how its absence from the chain was found, and pinning it here is what keeps a future
+# release from going missing the same way.
 STARTING_POINTS = {
     # tag -> the version to stamp before upgrading, or None to run the chain from its root.
     BASELINE_TAG: BASELINE_VERSION,
     LEGACY_TAG: None,
+    PRERELEASE_TAG: PRERELEASE_VERSION,
 }
 
 # The engines each start may run on. The 1.6.13 one runs everywhere. The 1.5.0-beta one runs
@@ -204,7 +231,7 @@ def baseline_start(request):
 # The fixture below has to be function-scoped -- `tmp_path` and `monkeypatch` are -- so without this
 # every one of the ten comparisons rebuilt the whole thing from scratch. That was already ten
 # upgrades per engine before this file was parametrised; with the 1.5.0-beta start added it becomes
-# ten more, and each of those runs all 78 revisions rather than stamping past 60 of them. Measured
+# ten more, and each of those runs the whole chain rather than stamping past most of it. Measured
 # on this workstation the SQLite run of this whole file is 4.75s with the memo, against 53s without
 # it (re-measured 2026-09-07; an earlier 8.65s and an independent 12.63s were taken on the same host
 # under different load, so treat the order of magnitude as the claim, not the digits). The
@@ -282,7 +309,7 @@ def test_the_baseline_really_is_older_than_the_model(tag):
     a `git show` that silently returned the working tree — every assertion below passes for free.
 
     Takes no engine and no fixture: it is a property of the two `model.py` revisions, so paying for
-    a database (and a 78-revision upgrade) to assert it would only make it slower.
+    a database (and a whole-chain upgrade) to assert it would only make it slower.
     """
     baseline = baseline_metadata(tag)
 

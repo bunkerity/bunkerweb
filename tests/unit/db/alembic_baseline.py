@@ -32,8 +32,30 @@ BASELINE_VERSION = BASELINE_TAG.lstrip("v")
 # `upgrade()` drops a column from an existing `bw_plugins`, so the chain does not build the schema
 # — it expects a database some 1.5.0-beta install already created, which is exactly what
 # `misc/migration/create.sh` boots a 1.5.0-beta scheduler to produce. A parity run from here is the
-# one that executes all 78 revisions instead of stamping past 60 of them. L-G follow-up 6.
+# one that executes EVERY revision in the chain instead of stamping past most of them. Count-free
+# on purpose: the number moves every time a 1.6.x release is ported in, and a stale one reads as a
+# measurement. L-G follow-up 6.
 LEGACY_TAG = "v1.5.0-beta"
+
+# The THIRD starting point, and the newest: the latest 1.6 PRE-RELEASE, which is what the
+# integration harness resolves dynamically as the version to upgrade *from*
+# (`tests/scripts/before/upgrade.sh`) — so it is a starting point real operators and real CI runs
+# both take, however short-lived the tag is.
+#
+# What only a start from HERE proves is the VERSION LOOKUP: `entrypoint.sh` resolves a stamped
+# `bw_metadata.version` to a revision by filename and hard-exits when none matches, so a released
+# version with no `*_upgrade_to_version_<v>.py` is an unbootable upgrade whatever the schema holds.
+# That is `revision_for` below, and it is the whole reason this tag is here — it is what red-flagged
+# the missing `1.6.15~rc2` revision. The SCHEMA half of rc2 (it adds `bw_ui_users.totp_last_counter`,
+# the same column the 1.7 head used to add) is NOT unique to this start and must not be described as
+# if it were: rc2 now sits below the head on every route, so the 1.6.13 start and the 1.5.0-beta
+# chain execute it too, and a duplicate `add_column` reds all three.
+#
+# `-rc2` rather than the `~rc2` the product stores in `bw_metadata.version`: `revision_for`
+# normalises `.`, `-` and `~` to `_` alike, so both spellings resolve to the same file, and the tag
+# form is what `baseline_metadata` needs to read `model.py` out of git.
+PRERELEASE_TAG = "v1.6.15-rc2"
+PRERELEASE_VERSION = PRERELEASE_TAG.lstrip("v")
 
 
 def baseline_metadata(tag=None):

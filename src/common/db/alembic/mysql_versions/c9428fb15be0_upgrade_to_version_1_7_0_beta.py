@@ -1,7 +1,7 @@
 """Upgrade to version 1.7.0~beta
 
 Revision ID: c9428fb15be0
-Revises: 82bf69b29509
+Revises: d10f1615a002
 Create Date: 2026-09-06 23:01:53.712329
 
 """
@@ -15,7 +15,7 @@ import model
 
 # revision identifiers, used by Alembic.
 revision: str = "c9428fb15be0"
-down_revision: Union[str, None] = "82bf69b29509"
+down_revision: Union[str, None] = "d10f1615a002"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -436,7 +436,6 @@ def upgrade() -> None:
         ),
         existing_nullable=False,
     )
-    op.add_column("bw_ui_users", sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
     op.alter_column(
         "bw_ui_users",
         "method",
@@ -540,7 +539,6 @@ def downgrade() -> None:
         existing_nullable=False,
         existing_server_default=sa.text("'manual'"),
     )
-    op.drop_column("bw_ui_users", "totp_last_counter")
     op.alter_column(
         "bw_template_custom_configs",
         "type",

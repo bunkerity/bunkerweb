@@ -1,7 +1,7 @@
 """Upgrade to version 1.7.0~beta
 
 Revision ID: 404a6ed42a31
-Revises: 292f91a16c0d
+Revises: d10f1615a004
 Create Date: 2026-09-06 23:03:48.063471
 
 """
@@ -16,7 +16,7 @@ import model
 
 # revision identifiers, used by Alembic.
 revision: str = "404a6ed42a31"
-down_revision: Union[str, None] = "292f91a16c0d"
+down_revision: Union[str, None] = "d10f1615a004"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -324,7 +324,6 @@ def upgrade() -> None:
     op.add_column("bw_plugins", sa.Column("enabled", sa.Boolean(), server_default=sa.text("true"), nullable=False))
     op.add_column("bw_plugins", sa.Column("icon", sa.String(length=256), nullable=True))
     op.add_column("bw_settings", sa.Column("case_insensitive", sa.Boolean(), server_default=sa.text("false"), nullable=False))
-    op.add_column("bw_ui_users", sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
     op.alter_column("bw_instances", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
     op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
     op.alter_column("bw_instances", "last_seen", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
@@ -454,7 +453,6 @@ def downgrade() -> None:
     op.alter_column(
         "bw_instances", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
     )
-    op.drop_column("bw_ui_users", "totp_last_counter")
     op.drop_column("bw_settings", "case_insensitive")
     op.drop_column("bw_plugins", "icon")
     op.drop_column("bw_plugins", "enabled")

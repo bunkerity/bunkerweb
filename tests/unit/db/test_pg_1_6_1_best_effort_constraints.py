@@ -7,7 +7,7 @@ was printed and dropped, which is also what made the whole chain self-deadlock o
 
 Removing the second connection is the fix. Removing the tolerance with it is not: alembic runs the
 entire chain in ONE transaction (`alembic/env.py:803-804`) and PostgreSQL poisons a transaction on any
-error, so one orphan row would roll back all 78 revisions and the scheduler would never start.
+error, so one orphan row would roll back the entire chain and the scheduler would never start.
 Measured, on a throwaway `postgres:16` stamped `f85e36780e55` -- the population that upgrades fine
 today: without the SAVEPOINT the chain aborts with `ForeignKeyViolation` / `UniqueViolation`
 (`.cache/wave19-2026-09-10/red-ALB-data-abort.txt`); with it, it completes and warns
@@ -137,7 +137,7 @@ def test_every_constraint_the_revision_adds_goes_through_the_helper():
 
     assert not unguarded, (
         "a constraint is added outside add_constraint_if_the_data_allows(), so a legacy database that "
-        "refuses it would abort the whole 78-revision chain:\n  " + "\n  ".join(unguarded)
+        "refuses it would abort the whole migration chain:\n  " + "\n  ".join(unguarded)
     )
 
 

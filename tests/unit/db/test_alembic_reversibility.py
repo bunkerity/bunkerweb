@@ -60,13 +60,21 @@ TABLES_ADDED_BY_1_7 = set(model_metadata().tables) - set(baseline_metadata().tab
 COLUMNS_ADDED_BY_1_7 = columns_added_since_baseline()
 
 
-# ── The head-anchored half: what `downgrade()` itself says it drops ────────────────────────────
+# ── The migration-anchored half: what `downgrade()` itself says it drops ──────────────────────
 #
 # `COLUMNS_ADDED_BY_1_7` above is anchored to the MODEL, which is sound only while
 # `test_upgrade_schema_parity` is green and is blind to one engine's head diverging from the other
 # three -- the manifest says "dropped by the downgrade on every engine" and the model cannot see
-# "every engine" at all. So the artifact is read too: each head's own `downgrade()` body, parsed,
-# and compared to the same manifest map. Two independent anchors, one shipped claim.
+# "every engine" at all. So the artifact is read too: the `downgrade()` bodies, parsed, and compared
+# to the same manifest map. Two independent anchors, one shipped claim.
+#
+# EVERY revision the downgrade runs, not just the head. The manifest describes one operation --
+# `from_revision` down to `to_revision` -- and alembic runs the `downgrade()` of every revision in
+# between, so which of them holds a given `drop_column` is an implementation detail of the chain and
+# not something the operator-facing claim depends on. Reading the head alone made that detail
+# load-bearing, and it moved: `bw_ui_users.totp_last_counter` is added by `1.6.15~rc2` (port of dev
+# `d10f1615a00x`) and dropped by ITS downgrade, so the head neither adds nor drops it any more while
+# the column is still lost on the way to 1.6.14, exactly as the manifest says.
 
 
 def _attr(func):
@@ -102,20 +110,27 @@ def _walk(node, table, columns, dropped):
         _walk(child, table, columns, dropped)
 
 
-def head_column_drops(engine):
-    """`{table: [column, ...]}` the head's `downgrade()` drops from tables it does NOT drop whole.
+def downgrade_column_drops(engine):
+    """`{table: [column, ...]}` the downgrade to the manifest target drops from tables it does NOT
+    drop whole.
 
+    Every revision from `from_revision` down to -- but not including -- `to_revision`, because that
+    is the set alembic executes: `walk_back` returns the stop as its last element, so it is dropped.
     A column on a table that is dropped wholesale is not a per-column loss -- the operator loses the
     table, which `data_loss_detail.tables` classifies -- so those are subtracted, exactly as
-    `downgrade.py`'s renderer words it ("that otherwise survive").
+    `downgrade.py`'s renderer words it ("that otherwise survive"), and across the whole path rather
+    than per file: a table dropped by one revision cannot be a surviving table for another.
     """
     row = next(row for row in ROWS if row["engine"] == engine)
-    path = chain(engine)[row["alembic"]["from_revision"]][1]
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    body = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "downgrade")
+    links = chain(engine)
+    executed = walk_back(engine, row["alembic"]["from_revision"], stop=row["alembic"]["to_revision"])[:-1]
+    assert executed, f"{engine}: no revisions between {row['alembic']['from_revision']} and {row['alembic']['to_revision']}"
 
     columns, dropped = {}, set()
-    _walk(body, None, columns, dropped)
+    for revision in executed:
+        tree = ast.parse(links[revision][1].read_text(encoding="utf-8"))
+        body = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "downgrade")
+        _walk(body, None, columns, dropped)
     return {table: sorted(names) for table, names in columns.items() if table not in dropped}
 
 
@@ -260,22 +275,23 @@ def test_the_manifest_classifies_every_table_1_7_adds():
 
 
 @pytest.mark.parametrize("engine", sorted({row["engine"] for row in ROWS}))
-def test_every_head_really_drops_the_columns_the_manifest_declares(engine):
-    """The head-anchored guard, on all four engines, not just the one the round trip runs.
+def test_every_engine_really_drops_the_columns_the_manifest_declares(engine):
+    """The migration-anchored guard, on all four engines, not just the one the round trip runs.
 
     `columns_why` claims the drop happens "on every engine". The model-anchored assertion above
-    cannot check that -- there is one model and four heads -- and it is only sound while
-    `test_upgrade_schema_parity` is green. This reads the artifact the claim is about: the head's own
-    `downgrade()` body. The two disagree exactly when a head is hand-edited, when one engine's head
-    diverges, or when model and migrations drift; all three are silent today.
+    cannot check that -- there is one model and four chains -- and it is only sound while
+    `test_upgrade_schema_parity` is green. This reads the artifacts the claim is about: the
+    `downgrade()` bodies alembic really executes on the way to the target. The two disagree exactly
+    when a migration is hand-edited, when one engine's chain diverges, or when model and migrations
+    drift; all three are silent today.
     """
-    assert head_column_drops(engine) == MANIFEST_COLUMNS, f"{engine}: the head's downgrade() does not drop what the manifest declares"
+    assert downgrade_column_drops(engine) == MANIFEST_COLUMNS, f"{engine}: the downgrade to the manifest target does not drop what it declares"
 
 
-def test_the_head_walk_finds_something_to_walk():
+def test_the_downgrade_walk_finds_something_to_walk():
     """Anti-vacuity: an AST walk that resolves nothing compares {} to {} and passes for free."""
     for engine in sorted({row["engine"] for row in ROWS}):
-        drops = head_column_drops(engine)
+        drops = downgrade_column_drops(engine)
         expected = sum(len(names) for names in MANIFEST_COLUMNS.values())
         assert sum(len(names) for names in drops.values()) == expected, f"{engine}: expected {expected} resolved column drops, found {drops}"
 
