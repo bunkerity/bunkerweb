@@ -190,6 +190,12 @@ from jobs import (  # type: ignore # noqa: E402
 
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
+# push-configs' own lease, held for its WHOLE run -- render, push, reload (its LOCK_KEY,
+# src/common/core/jobs/jobs/push-configs.py:70). Read here, never written: it is the only signal a
+# job's reload has that a push is rewriting the configuration tree underneath it. Kept pinned to
+# the job's literal by tests/unit/worker/test_reload_defers_to_push_in_flight.py, because a rename
+# on either side would disarm the guard below in silence.
+PUSH_CONFIGS_LOCK_KEY = "bw:push_configs_inflight"
 # A push that is owed but was not delivered: no instance was reachable when a job asked for one, or
 # the push itself failed. Distinct from RELOAD_DIRTY_KEY, which only says "more files landed while
 # this reload was running" and is therefore only ever read by the holder of the reload lock -- with
@@ -392,8 +398,11 @@ def _apply_deferred_acks(client, claimed, logger) -> None:
         logger.info(f"Acknowledged {entry.get('keys')} now that the push reached the instances")
 
 
-def _mark_reload_owed(broker_url: str, logger) -> None:
+def _mark_reload_owed(broker_url: str, logger, client=None) -> None:
     """Remember that the cache tree still has to be pushed, for the next run that can push it.
+
+    `client` lets a caller that already holds a broker connection reuse it: opening a second one
+    here doubles the connect cost and, on a broker that is refusing, doubles the wait too.
 
     The value is a fresh token, not a flag, so that whoever settles the debt can tell it apart from
     one raised afterwards (SETTLE_OWED_IF_UNCHANGED). Overwriting an existing token is deliberate:
@@ -405,13 +414,28 @@ def _mark_reload_owed(broker_url: str, logger) -> None:
     life in the slow window (~14 job runs of delay on a cold boot).
     """
     try:
-        client = _broker_client(broker_url)
+        client = client if client is not None else _broker_client(broker_url)
         client.set(RELOAD_OWED_KEY, uuid4().hex)
         client.delete(RELOAD_OWED_ATTEMPTS_KEY)
     except BaseException as exc:
         # The warning above already told the operator; losing the marker only costs the recovery,
         # and the job's own change flags (if it raised any) are still pending for the scheduler.
         logger.error(f"Could not record that a cache push is still owed: {exc}")
+
+
+def _push_configs_in_flight(client, logger) -> bool:
+    """Whether push-configs holds its lease, i.e. a render may be rewriting the live config tree.
+
+    Fails OPEN, deliberately the opposite way round from `_reload_is_owed` below. A broker we
+    cannot read is not evidence of a push in flight, and holding on a read error would turn a
+    Redis hiccup into "nothing ever reloads again" -- far worse than the narrow race this closes,
+    and the instance still refuses a reload that overlaps the /confs swap on its own.
+    """
+    try:
+        return bool(client.exists(PUSH_CONFIGS_LOCK_KEY))
+    except BaseException as exc:
+        logger.error(f"Could not check whether a configuration push is in flight: {exc}")
+        return False
 
 
 def _reload_is_owed(broker_url: str, logger) -> bool:
@@ -493,6 +517,35 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
 
     client = _broker_client(broker_url)
     test = "no" if os.getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
+
+    # Never reload on top of a configuration push. push-configs renders with
+    # `gen/main.py --output /etc/nginx`, and gen/main.py EMPTIES its output directory before
+    # rendering into it; on a co-located deployment (All-in-one, the Linux package) that directory
+    # is the running instance's live configuration, so for the length of a render there is no
+    # variables.env on disk. A reload landing there brings the new cycle up with an empty
+    # internalstore -- the variables live in a per-Lua-VM LRU, so init_by_lua's "keeping previous
+    # LRU data" branch keeps nothing -- and api.lua's IP whitelist comes from that store, so the
+    # instance then refuses EVERY control-plane request, POST /confs included. That is the one
+    # request that could repair it, so the instance never recovers: CI run 34576775876 spent five
+    # minutes answering `ping` and 444 to everything else after exactly this interleaving.
+    #
+    # The instance already refuses a reload that overlaps the /confs SWAP (the swap lock in
+    # api.lua). The render happens here, on the worker, outside anything the instance can observe,
+    # which is why the guard has to live on this side.
+    #
+    # Holding costs no reload: the push ends with its own `_trigger_reload`. A lease left behind by
+    # a killed worker holds reloads for its TTL, but that same lease already blocks every further
+    # push-configs run, so this adds no stall class that was not there already.
+    if _push_configs_in_flight(client, logger):
+        # Owed, not dropped, and NOT via RELOAD_DIRTY_KEY: that flag is only ever read by the
+        # holder of the reload lock, so raising it on a path that returns without taking the lock
+        # just lets it expire with the material still on this worker. The push ships the whole
+        # cache tree, but it may already have pushed /cache before this job wrote its files -- the
+        # lease covers the reload too -- so the durable marker is what guarantees the next run
+        # carries them. Same marker and same reasoning as the no-instance branch in `execute_job`.
+        logger.info("A configuration push is in flight; leaving the reload to it and recording the cache push as owed")
+        _mark_reload_owed(broker_url, logger, client=client)
+        return
 
     # Announce the files BEFORE bidding for the lock. The holder cannot release while this flag
     # stands, so whoever ends up holding it either claims the flag and pushes after we set it, or

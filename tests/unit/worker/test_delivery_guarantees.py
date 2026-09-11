@@ -214,7 +214,18 @@ class TestBrokerClient:
         """``_request_reload_debounced`` had the same bare client and the same exposure. Pin
         that it shares the helper rather than growing its own connection again."""
         seen = []
-        monkeypatch.setattr(TASKS, "_broker_client", lambda url: seen.append(url) or Mock())
+
+        def _client(url):
+            seen.append(url)
+            client = Mock()
+            # A bare Mock answers every `exists` truthily, which reads as "a configuration push is
+            # in flight" and sends `_request_reload_debounced` down its early-return branch. Say no
+            # explicitly so this keeps pinning the push-and-reload path, which is the one that grew
+            # its own unguarded connection.
+            client.exists = Mock(return_value=0)
+            return client
+
+        monkeypatch.setattr(TASKS, "_broker_client", _client)
         apis = Mock()
         apis.send_files = Mock(return_value=True)
         apis.send_to_apis = Mock(return_value=(True, {}))
