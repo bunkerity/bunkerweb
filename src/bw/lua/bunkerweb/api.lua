@@ -99,6 +99,9 @@ local ENOENT = 2
 -- Set by the entrypoint when a restart kept its configuration: the instance serves and enforces
 -- normally but still owes the scheduler a fresh push. Cleared by POST /confs.
 local NEEDS_CONFIG_PATH = "/var/tmp/bunkerweb_needs_config"
+-- The file init_by_lua loads the internalstore from (init-lua.conf:114). Named here because the
+-- control plane has to be able to fall back to it; see control_plane_variables_from_disk() below.
+local VARIABLES_PATH = "/etc/nginx/variables.env"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -392,13 +395,65 @@ function api:is_allowed_token()
 	return true, "ok"
 end
 
+-- Last-resort read of a control-plane setting straight out of the rendered configuration.
+--
+-- init_by_lua loads VARIABLES_PATH into the per-worker LRU, and that LRU belongs to the Lua VM
+-- (datastore.lua:39). A reload builds a NEW VM, so init-lua.conf:116's "keeping previous LRU data"
+-- branch keeps nothing at all: a reload that ran while the file was missing -- a push rendering
+-- into the live tree, a half-restored volume, a truncated write -- leaves every worker of the new
+-- cycle with an empty internalstore. is_allowed_ip() below then fails closed on every request,
+-- POST /confs included, and POST /confs is the only thing that can put the variables back. The
+-- instance answers `ping`, serves nothing, and never recovers on its own (CI run 34576775876:
+-- five minutes of 444 after one badly-timed reload).
+--
+-- Reading the file here is not a second source of truth: it is the same file init_by_lua reads,
+-- and it is whole again by the time a push arrives. Nothing else in the request path falls back --
+-- only the two settings that gate the control plane, and only when the store has nothing.
+local function control_plane_variables_from_disk()
+	local file = open(VARIABLES_PATH, "r")
+	if not file then
+		return {}
+	end
+	local found = {}
+	-- One pass for both settings: api.conf builds this object twice per request, so a read per
+	-- setting would scan a variables.env carrying every service's PEM blocks four times over.
+	-- Last occurrence wins and the pattern is character-for-character init-lua.conf:121-126, so a
+	-- value recovered here is the value that init_by_lua would have stored.
+	for line in file:lines() do
+		local key, raw = line:match("^([^=]+)=(.*)$")
+		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			found[key] = raw
+		end
+	end
+	file:close()
+	return found
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
+	local recovered = nil
+	-- API_WHITELIST_IP is written on every render (Templator dumps the whole resolved config), so
+	-- a miss here means the store itself is unreadable, not that the setting is unset. That makes
+	-- it the discriminator for the whole fallback: a healthy instance never reaches the file.
+	if not data then
+		recovered = control_plane_variables_from_disk()
+		data = recovered.API_WHITELIST_IP
+		if data then
+			logger:log(
+				ERR,
+				"API_WHITELIST_IP is missing from the internalstore ("
+					.. tostring(err)
+					.. "), falling back to "
+					.. VARIABLES_PATH
+					.. " so a configuration push can repair this instance"
+			)
+		end
+	end
 	self.ips = {}
 	self.api_token = nil
 	if not data then
-		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. tostring(err))
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -407,6 +462,13 @@ function api:initialize(ctx)
 
 	-- Load optional API token (from internalstore variables, same pattern as whitelist)
 	local tok = get_variable("API_TOKEN", false)
+	-- It falls back with the whitelist, and it has to: is_allowed_token() above treats "no token
+	-- configured" as "allow", so repairing only the whitelist would turn a control plane that is
+	-- merely DEAD into one that accepts any bearer from a whitelisted IP. The two reads are one
+	-- fix, and they come from the one file pass above.
+	if not tok and recovered then
+		tok = recovered.API_TOKEN
+	end
 	if tok and tok ~= "" then
 		self.api_token = tok
 	end
