@@ -3861,3 +3861,17 @@ code.bad-behavior-event__value {
   outline: 2px solid var(--bs-primary);
   outline-offset: 2px;
 }
+
+/* RAW setting drafts remain editable and distinct from method-locked rows. */
+.raw-config-editor .ace_marker-layer .raw-draft-line {
+  position: absolute;
+  /* Mute draft text while retaining readable syntax colors. */
+  backdrop-filter: grayscale(0.65);
+}
+
+.raw-config-editor .ace_marker-layer .raw-draft-line::before {
+  content: "#";
+  position: absolute;
+  left: 4px;
+  color: var(--bs-secondary-color);
+}

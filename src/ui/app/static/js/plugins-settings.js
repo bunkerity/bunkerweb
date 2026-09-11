@@ -1,3 +1,4 @@
+import { parseRawSettings } from "./modules/raw-settings.js";
 import { initCertificateValidation } from "./modules/certificate-validation.js";
 
 $(document).ready(() => {
@@ -1264,38 +1265,8 @@ $(document).ready(() => {
       // capable, so ordinary single-line settings can never absorb stray lines.
       // Split once on the first "=" (indexOf, not split) so base64 "==" padding
       // and "=" inside values survive untouched.
-      const parseRawConfig = (rawText) => {
-        const pairs = [];
-        if (!rawText) return pairs;
-        let current = null;
-        const flush = () => {
-          if (!current) return;
-          // Single-line values keep the historical trim(); multiline (file)
-          // values are preserved verbatim because PEM/base64 are byte-sensitive.
-          if (!isMultilineKey(current.key))
-            current.value = current.value.trim();
-          pairs.push(current);
-          current = null;
-        };
-        rawText
-          .replace(/\r\n?/g, "\n")
-          .split("\n")
-          .forEach((line) => {
-            const eq = line.indexOf("=");
-            const candidateKey = eq === -1 ? null : line.slice(0, eq).trim();
-            if (candidateKey !== null && isKnownSettingKey(candidateKey)) {
-              flush();
-              current = { key: candidateKey, value: line.slice(eq + 1) };
-            } else if (current && isMultilineKey(current.key)) {
-              current.value += "\n" + line;
-            }
-            // Otherwise: a stray/blank/comment line under a single-line setting,
-            // or content before the first key -> ignore (generated config never
-            // produces these).
-          });
-        flush();
-        return pairs;
-      };
+      const parseRawConfig = (rawText) =>
+        parseRawSettings(rawText, { isKnownSettingKey, isMultilineKey });
 
       // Helper to fold a raw config blob into a {key: value} object.
       const parseConfig = (selector) => {
@@ -1319,7 +1290,27 @@ $(document).ready(() => {
       const rawConfigSource = rawEditor
         ? rawEditor.getValue()
         : $("#raw-config").val();
-      parseRawConfig(rawConfigSource).forEach(({ key, value }) => {
+      const seenRawKeys = new Set();
+      const rawEntries = parseRawConfig(rawConfigSource).filter(({ key }) => {
+        if (seenRawKeys.has(key)) return false;
+        seenRawKeys.add(key);
+        return true;
+      });
+      appendHiddenInput(
+        form,
+        "RAW_PRESENT_SETTINGS",
+        JSON.stringify([...seenRawKeys]),
+      );
+      appendHiddenInput(
+        form,
+        "RAW_DRAFT_SETTINGS",
+        JSON.stringify(
+          rawEntries
+            .filter((entry) => rawDraftSettings.has(entry.key))
+            .map((entry) => entry.key),
+        ),
+      );
+      rawEntries.forEach(({ key, value }) => {
         if (!key) return;
         if (key === "IS_DRAFT") {
           skippedKeys.add(key);
@@ -2585,6 +2576,9 @@ $(document).ready(() => {
   const AceRange = ace.require("ace/range").Range;
   var editors = [];
   var editorRegistry = {};
+  const rawDraftSettings = new Set(
+    JSON.parse($("#raw-draft-settings").val() || "[]"),
+  );
   const triggerRawConfigSave = () => {
     const $saveBtn = $(".raw-config-save-btn").not(".disabled");
     if ($saveBtn.length) {
@@ -2700,6 +2694,71 @@ $(document).ready(() => {
     editor.on("change", refreshDisabledIndicators);
   };
 
+  const setupRawDraftActions = (editor) => {
+    // Reserve space for a visual comment prefix without changing setting values.
+    editor.renderer.setPadding(24);
+    const predicates = makeRawKeyPredicates();
+    const locked = new Set(
+      ($("#raw-config-disabled").val() || "")
+        .split(/\r?\n/)
+        .map((line) => line.split("::")[0]),
+    );
+    const controls = new Set([
+      "SERVER_NAME",
+      "OLD_SERVER_NAME",
+      "MULTISITE",
+      "IS_DRAFT",
+      "USE_TEMPLATE",
+      "DATABASE_URI",
+      "DATABASE_URI_READONLY",
+      "USE_UI",
+      "OVERRIDE_NON_GLOBAL_SERVICES",
+    ]);
+    let markers = [];
+    const selected = () => {
+      const row = editor.getCursorPosition().row;
+      return parseRawSettings(editor.getValue(), predicates).find(
+        (entry) => entry.start === row,
+      );
+    };
+    const refresh = () => {
+      markers.forEach((id) => editor.session.removeMarker(id));
+      markers = parseRawSettings(editor.getValue(), predicates)
+        .filter((entry) => rawDraftSettings.has(entry.key))
+        .map((entry) =>
+          editor.session.addMarker(
+            new AceRange(entry.start, 0, entry.end, Infinity),
+            "raw-draft-line",
+            "fullLine",
+            true,
+          ),
+        );
+    };
+    // Handle the visual prefix separately from RAW text, especially multiline values.
+    editor.commands.on("exec", (event) => {
+      if (
+        editor.getReadOnly() ||
+        !editor.selection.isEmpty() ||
+        editor.getCursorPosition().column !== 0
+      )
+        return;
+      const entry = selected();
+      if (!entry) return;
+      const toggle =
+        event.command.name === "insertstring" && event.args === "#";
+      const activate =
+        event.command.name === "backspace" && rawDraftSettings.has(entry.key);
+      if (!toggle && !activate) return;
+      event.preventDefault();
+      if (locked.has(entry.key) || controls.has(entry.key)) return;
+      if (rawDraftSettings.has(entry.key)) rawDraftSettings.delete(entry.key);
+      else rawDraftSettings.add(entry.key);
+      refresh();
+    });
+    editor.on("change", refresh);
+    refresh();
+  };
+
   $(".ace-editor").each(function () {
     const $editorElement = $(this);
     const sourceSelector = $editorElement.data("source");
@@ -2762,6 +2821,7 @@ $(document).ready(() => {
       // KEY= header. The fold predicates come from the SAME #raw-known-keys the
       // save-time parser uses (issue #3651) and are stashed on the session so
       // the (schema-agnostic) FoldMode can read them.
+      setupRawDraftActions(editor);
       const rawFoldPreds = makeRawKeyPredicates();
       const lineKeyMatches = (line, test) => {
         const key = rawFoldPreds.keyOfLine(line || "");

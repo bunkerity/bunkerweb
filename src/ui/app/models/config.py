@@ -6,7 +6,7 @@ from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
-from typing import List, Literal, Optional, Set, Tuple, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 from app.utils import get_blacklisted_settings, is_editable_method
 
@@ -63,6 +63,7 @@ class Config:
         changed_service: Optional[str] = None,
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -104,7 +105,10 @@ class Config:
             conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
-        return self.__db.save_config(conf, override_method, changed=check_changes, file_names=file_name_map)
+        save_kwargs = {"changed": check_changes, "file_names": file_name_map}
+        if draft_settings is not None:
+            save_kwargs["draft_settings"] = draft_settings
+        return self.__db.save_config(conf, override_method, **save_kwargs)
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -149,6 +153,8 @@ class Config:
         methods: bool = True,
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+        *,
+        with_setting_drafts: bool = False,
     ) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
@@ -157,7 +163,13 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_non_default_settings(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
+        return self.__db.get_non_default_settings(
+            global_only=global_only,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=filtered_settings,
+            with_setting_drafts=with_setting_drafts,
+        )
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
@@ -254,6 +266,7 @@ class Config:
         override_method: str = "ui",
         check_changes: bool = True,
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
@@ -285,6 +298,7 @@ class Config:
             check_changes=False if not check_changes else not is_draft,
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1
@@ -299,6 +313,7 @@ class Config:
         is_draft: bool = False,
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Edits a service
 
@@ -342,13 +357,20 @@ class Config:
             changed_service=server_name_splitted[0],
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
     def edit_global_conf(
-        self, variables: dict, *, check_changes: bool = True, override_method: str = "ui", file_name_map: Optional[dict[str, str]] = None
+        self,
+        variables: dict,
+        *,
+        check_changes: bool = True,
+        override_method: str = "ui",
+        file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Edits the global conf
 
@@ -368,6 +390,7 @@ class Config:
             check_changes=check_changes,
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1

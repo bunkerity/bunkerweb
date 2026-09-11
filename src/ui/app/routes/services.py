@@ -13,6 +13,14 @@ from regex import sub
 from certificate_validation import normalize_pem, uncovered_server_names, validate_certificate_pair  # type: ignore
 
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
+from app.raw_drafts import (
+    RAW_DRAFT_SETTINGS,
+    RAW_PRESENT_SETTINGS,
+    STRUCTURAL_SETTINGS,
+    RawDraftSettingsError,
+    existing_draft_keys,
+    parse_raw_draft_settings,
+)
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
@@ -22,6 +30,15 @@ services = Blueprint("services", __name__)
 
 ZIP_ALLOWED_MEMBERS = frozenset({"services_export.env", "configs_export.json"})
 ZIP_MAX_UNCOMPRESSED_BYTES = 20 * 1024 * 1024  # 20 MB aggregate cap guards against zip bombs.
+
+
+def _first_service_id(value: object) -> str:
+    return next(iter(str(value or "").split()), "")
+
+
+def _settings_catalog() -> dict:
+    settings = BW_CONFIG.get_plugins_settings()
+    return settings if isinstance(settings, dict) else {}
 
 
 def _submit_service_task(task, *args):
@@ -316,23 +333,77 @@ def services_service_page(service: str):
 
         mode = request.args.get("mode", "easy")
         clone = request.args.get("clone", "")
+        raw_draft_value = variables.pop(RAW_DRAFT_SETTINGS, None)
+        raw_present_value = variables.pop(RAW_PRESENT_SETTINGS, None)
+
+        if mode != "raw" and (raw_draft_value is not None or raw_present_value is not None):
+            return handle_error("Setting draft metadata is only accepted in raw mode.", "services", True)
 
         if mode == "raw":
-            server_name = variables.get("SERVER_NAME", variables.get("OLD_SERVER_NAME", "")).split(" ")[0]
+            if raw_present_value is None:
+                return handle_error("Missing RAW_PRESENT_SETTINGS metadata.", "services", True)
+            server_name = _first_service_id(variables.get("SERVER_NAME", variables.get("OLD_SERVER_NAME", "")))
             for variable, value in variables.copy().items():
                 if variable.endswith("_SERVER_NAME") and variable != "OLD_SERVER_NAME":
-                    server_name = value.split(" ")[0]
+                    server_name = _first_service_id(value)
+            if service != "new":
+                server_name = _first_service_id(variables.get("SERVER_NAME", "")) or service
+            source_services = tuple(dict.fromkeys(filter(None, (service, variables.get("OLD_SERVER_NAME", ""), server_name))))
             for variable in variables.copy():
-                if variable.startswith(f"{server_name}_"):
-                    variables[variable.replace(f"{server_name}_", "", 1)] = variables.pop(variable)
+                for source_service in source_services:
+                    prefix = f"{source_service}_"
+                    if variable.startswith(prefix):
+                        variables[variable.replace(prefix, "", 1)] = variables.pop(variable)
+                        break
+            source_service = clone if service == "new" and clone else service if service != "new" else ""
+            saved_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=source_service) if source_service else {}
+            saved_draft_keys = existing_draft_keys(saved_draft_config if isinstance(saved_draft_config, dict) else {})
+        else:
+            source_services = ()
+            saved_draft_keys = ()
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str, clone: str, file_setting_names: Dict[str, str]):
+        draft_settings = None
+        if mode == "raw":
+            target_service = _first_service_id(variables.get("SERVER_NAME", "")) or (service if service != "new" else "")
+            try:
+                draft_settings = parse_raw_draft_settings(
+                    raw_draft_value,
+                    posted_keys=set(variables),
+                    service=target_service or None,
+                    source_services=source_services,
+                    present_value=raw_present_value,
+                    existing_draft_keys=saved_draft_keys,
+                    settings=_settings_catalog(),
+                )
+            except RawDraftSettingsError as error:
+                return handle_error(str(error), "services", True)
+
+        def update_service(
+            service: str,
+            variables: Dict[str, str],
+            is_draft: bool,
+            mode: str,
+            clone: str,
+            file_setting_names: Dict[str, str],
+            draft_settings: Optional[Dict[str, Optional[bool]]],
+        ):
             wait_applying()
 
+            continuity_draft_settings: Dict[str, bool] = {}
+            source_draft_config: Dict[str, dict] = {}
+            preserved_draft_edits: set[str] = set()
             if clone and service == "new":
-                cloned_service_config = {k: v for k, v in DB.get_config(methods=False, with_drafts=True, service=clone).items()}
+                source_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=clone)
+                cloned_service_config = {
+                    k: v
+                    for k, v in DB.get_config(
+                        methods=False,
+                        with_drafts=True,
+                        service=clone,
+                    ).items()
+                }
                 clone_prefix = f"{clone}_"
 
                 for key, value in cloned_service_config.items():
@@ -341,7 +412,14 @@ def services_service_page(service: str):
                     if stripped_key in variables or stripped_key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
                         continue
 
-                    variables[stripped_key] = value
+                    variables[stripped_key] = value.get("value", "") if isinstance(value, dict) else value
+
+                for key, setting in source_draft_config.items():
+                    if isinstance(setting, dict) and setting.get("is_draft") and key not in STRUCTURAL_SETTINGS:
+                        continuity_draft_settings[key] = True
+                        retained_file_name = str(setting.get("file_name", "") or "").strip()
+                        if retained_file_name:
+                            file_setting_names.setdefault(key, retained_file_name)
 
             # Edit check fields and remove already existing ones
             if service != "new":
@@ -349,12 +427,59 @@ def services_service_page(service: str):
             else:
                 db_config = DB.get_config(global_only=True, methods=True)
 
+            if service != "new":
+                source_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=service)
+                for key, setting in source_draft_config.items():
+                    if isinstance(setting, dict) and setting.get("is_draft") and key not in STRUCTURAL_SETTINGS:
+                        continuity_draft_settings[key] = True
+                        retained_file_name = str(setting.get("file_name", "") or "").strip()
+                        if retained_file_name:
+                            file_setting_names.setdefault(key, retained_file_name)
+
+            effective_draft_config = db_config
+            if clone and service == "new":
+                effective_draft_config = DB.get_config(methods=True, with_drafts=True, service=clone)
+
+            def _entry_value(config: dict, key: str):
+                value = config.get(key, {"value": None})
+                return value.get("value") if isinstance(value, dict) else value
+
+            def _is_draft(config: dict, key: str) -> bool:
+                value = config.get(key, {})
+                return isinstance(value, dict) and bool(value.get("is_draft"))
+
             service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
             override_method = service_method if is_editable_method(service_method) else "ui"
 
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
+
+            def _draft_setting_name(full_key: str) -> str:
+                setting = full_key
+                for candidate in filter(None, (_first_service_id(variables.get("SERVER_NAME", "")), service, old_server_name)):
+                    prefix = f"{candidate}_"
+                    if setting.startswith(prefix):
+                        return setting.removeprefix(prefix)
+                return setting
+
+            if mode != "raw":
+                for setting, metadata in source_draft_config.items():
+                    if not isinstance(metadata, dict) or not metadata.get("is_draft") or setting in STRUCTURAL_SETTINGS:
+                        continue
+                    if setting in variables:
+                        if variables[setting] != _entry_value(effective_draft_config, setting):
+                            preserved_draft_edits.add(setting)
+                    variables[setting] = metadata.get("value", "")
+                    if setting in file_setting_names:
+                        effective_file_name = str(effective_draft_config.get(setting, {}).get("file_name", "") or "").strip()
+                        if file_setting_names[setting] != effective_file_name:
+                            preserved_draft_edits.add(setting)
+                    if setting in file_setting_names or metadata.get("file_name") is not None:
+                        # Preserve the draft row's filename even when the form
+                        # posted the effective fallback filename. This matters
+                        # when a clone/rename creates the replacement row.
+                        file_setting_names[setting] = str(metadata.get("file_name", "") or "").strip()
             db_custom_configs = {}
             all_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
             removed_custom_configs: set[str] = set()
@@ -462,16 +587,68 @@ def services_service_page(service: str):
             has_file_name_changes = False
 
             for variable, value in variables.items():
-                if value == db_config.get(variable, {"value": None})["value"]:
+                # Simple/Advanced values are rendered from the effective config. A
+                # saved draft is intentionally kept out of the ordinary change set
+                # after its attempted edit was restored above; otherwise the
+                # retained draft value would look like a new edit on every save.
+                if mode != "raw" and _is_draft(source_draft_config, variable):
+                    del variables_to_check[variable]
+                    continue
+                comparison_config = source_draft_config if mode == "raw" and _is_draft(source_draft_config, variable) else db_config
+                if value == _entry_value(comparison_config, variable):
                     del variables_to_check[variable]
 
             for setting_name, file_name in file_setting_names.items():
-                current_file_name = str(db_config.get(setting_name, {}).get("file_name", "") or "").strip()
+                if mode != "raw" and _is_draft(source_draft_config, setting_name):
+                    continue
+                file_config = source_draft_config if _is_draft(source_draft_config, setting_name) else db_config
+                current_file_name = str(file_config.get(setting_name, {}).get("file_name", "") or "").strip()
                 if file_name != current_file_name:
                     has_file_name_changes = True
                     break
 
-            variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True)
+            validation_variables = variables_to_check.copy()
+            draft_value_keys = set()
+            if mode == "raw":
+                for full_key, desired in (draft_settings or {}).items():
+                    setting = _draft_setting_name(full_key)
+                    current_is_draft = _is_draft(source_draft_config, setting)
+                    state_changed = (desired is None and current_is_draft) or (desired is not None and bool(desired) != current_is_draft)
+                    metadata = source_draft_config.get(setting, {})
+                    if state_changed and isinstance(metadata, dict) and not is_editable_method(metadata.get("method"), allow_default=True):
+                        DATA["TO_FLASH"].append(
+                            {
+                                "content": f"Setting {setting} cannot change draft state because it is managed by the {metadata.get('method')} method.",
+                                "type": "error",
+                            }
+                        )
+                        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                        return
+
+                    value_changed = setting in variables and variables[setting] != _entry_value(source_draft_config, setting)
+                    needs_value_validation = (desired is True and (state_changed or value_changed)) or (desired is False and current_is_draft)
+                    if needs_value_validation:
+                        draft_value_keys.add(setting)
+                        if setting in variables:
+                            validation_variables.setdefault(setting, variables[setting])
+
+            variables = BW_CONFIG.check_variables(variables, db_config, validation_variables, new=service == "new", threaded=True)
+
+            invalid_draft_values = []
+            for full_key in draft_settings or {}:
+                setting = _draft_setting_name(full_key)
+                if setting in draft_value_keys and setting not in variables:
+                    invalid_draft_values.append(setting)
+            if invalid_draft_values:
+                DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                return
+
+            draft_state_changed = False
+            for full_key, desired in (draft_settings or {}).items():
+                setting = _draft_setting_name(full_key)
+                current = _is_draft(source_draft_config, setting)
+                if (desired is None and current) or (desired is not None and bool(desired) != current):
+                    draft_state_changed = True
 
             no_removed_settings = True
             blacklist = get_blacklisted_settings()
@@ -485,12 +662,16 @@ def services_service_page(service: str):
                 and service != "new"
                 and was_draft == is_draft
                 and not variables_to_check
+                and not draft_state_changed
                 and not configs_changed
                 and not has_file_name_changes
             ):
+                draft_notice = " Draft settings remain unchanged; activate or edit them in Raw mode." if preserved_draft_edits else ""
                 DATA["TO_FLASH"].append(
                     {
-                        "content": f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.",
+                        "content": (
+                            f"The service {service} was not edited because no values{' or custom configs' if mode == 'easy' else ''} were changed.{draft_notice}"
+                        ),
                         "type": "warning",
                     }
                 )
@@ -534,9 +715,24 @@ def services_service_page(service: str):
                     configs_changed = True
                 final_custom_configs[target_key] = target_data
 
+            save_draft_settings = dict(draft_settings) if draft_settings is not None else None
+            if continuity_draft_settings and (renamed_service or (service == "new" and clone)):
+                continuity = {f"{new_server_name}_{key}": state for key, state in continuity_draft_settings.items()}
+                if save_draft_settings is None:
+                    save_draft_settings = continuity
+                else:
+                    continuity.update(save_draft_settings)
+                    save_draft_settings = continuity
+
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
-                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names)
+                operation, error = BW_CONFIG.new_service(
+                    variables,
+                    is_draft=is_draft,
+                    override_method=override_method,
+                    file_name_map=file_setting_names,
+                    draft_settings=save_draft_settings,
+                )
             else:
                 operation, error = BW_CONFIG.edit_service(
                     old_server_name,
@@ -545,6 +741,7 @@ def services_service_page(service: str):
                     is_draft=is_draft,
                     override_method=override_method,
                     file_name_map=file_setting_names,
+                    draft_settings=save_draft_settings,
                 )
 
             if error:
@@ -587,9 +784,11 @@ def services_service_page(service: str):
 
             operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
             DATA["TO_FLASH"].append({"content": operation, "type": "success"})
+            if preserved_draft_edits:
+                DATA["TO_FLASH"].append({"content": "Draft settings remain unchanged; activate or edit them in Raw mode.", "type": "warning"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
-        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names)
+        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
 
         new_service = False
         if service == "new":
@@ -642,6 +841,7 @@ def services_service_page(service: str):
 
     db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
     clone = None
+    raw_draft_config = None
     if service == "new":
         clone = request.args.get("clone", "")
         db_config = DB.get_config(global_only=True, methods=True)
@@ -654,8 +854,15 @@ def services_service_page(service: str):
             for key, value in DB.get_custom_configs(with_drafts=True, as_dict=True).items():
                 if key.startswith(f"{clone}_"):
                     db_custom_configs[key.replace(f"{clone}_", f"{service}_", 1)] = value
+            raw_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=clone)
+        else:
+            # A new service has no service-owned rows yet. Use effective global
+            # values as its RAW baseline so a global draft is not accidentally
+            # materialized as a service override during cloning/creation.
+            raw_draft_config = DB.get_config(global_only=True, methods=True, with_drafts=True)
     else:
         db_config = DB.get_config(methods=True, with_drafts=True, service=service)
+        raw_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=service)
 
     return render_template(
         "service_settings.html",
@@ -666,6 +873,7 @@ def services_service_page(service: str):
         mode=mode,
         type=search_type,
         current_template=template,
+        raw_draft_config=raw_draft_config,
     )
 
 

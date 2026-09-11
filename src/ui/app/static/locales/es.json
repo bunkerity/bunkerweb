@@ -927,7 +927,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Bloqueado ({{method}})",
-    "locked_settings_hint": "La configuración bloqueada está resaltada"
+    "locked_settings_hint": "La configuración bloqueada está resaltada",
+    "raw_setting_drafts": "Al principio de un parámetro, pulse # para alternar el estado de borrador o Retroceso para activarlo. Guarde para aplicar. Los borradores conservan sus valores mientras se aplican los valores heredados o predeterminados."
   },
   "link": {
     "back_to_login": "Volver al Inicio de Sesión",

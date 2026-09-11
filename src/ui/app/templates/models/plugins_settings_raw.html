@@ -1,3 +1,4 @@
+{% set config = raw_draft_config | default(config, true) %}
 <input type="hidden"
        id="csrf_token"
        name="csrf_token"
@@ -6,6 +7,7 @@
 {% set entire_config = config_lines|list %}
 {% set default_settings = ["IS_DRAFT=no"] if (current_endpoint != "global-config" and current_endpoint != "global-settings") else [] %}
 {% set disabled_settings = namespace(items=[]) %}
+{% set draft_settings = namespace(keys=[]) %}
 {# Canonical set of valid keys (+ multiple base-prefixes) for this editor, built
    from the SAME settings walk that produces the raw config text below. The
    client parser uses it to tell a real `KEY=value` line apart from a
@@ -30,10 +32,11 @@
             {% if disabled %}
                 {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
             {% endif %}
+            {% if setting_config.get("is_draft", false) %}{% if draft_settings.keys.append(setting) %}{% endif %}{% endif %}
             {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
             {% if known_keys.keys.append(setting) %}{% endif %}
             {% if setting_data.get("type") == "file" and known_keys.multiline.append(setting) %}{% endif %}
-            {% if setting_value != setting_default %}
+            {% if setting_value != setting_default or setting_config.get("is_draft", false) %}
                 {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                 {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
             {% endif %}
@@ -52,11 +55,12 @@
                     {% if disabled %}
                         {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
                     {% endif %}
-                    {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+                    {% if setting_config.get("is_draft", false) %}{% if draft_settings.keys.append(setting) %}{% endif %}{% endif %}
+            {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
                     {% if known_keys.keys.append(setting) %}{% endif %}
                     {% if setting_data.get("setting_no_suffix") %}{% if known_keys.bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}
                     {% if setting_data.get("type") == "file" %}{% if known_keys.multiline.append(setting) %}{% endif %}{% if setting_data.get("setting_no_suffix") %}{% if known_keys.multiline_bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}{% endif %}
-                    {% if setting_value != setting_default %}
+                    {% if setting_value != setting_default or setting_config.get("is_draft", false) %}
                         {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                         {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
                     {% endif %}
@@ -83,6 +87,7 @@
 <input type="hidden"
        id="raw-config-disabled"
        value="{{ disabled_settings.items | join('\r\n') }}">
+<input type="hidden" id="raw-draft-settings" value='{{ draft_settings.keys | unique | list | tojson }}'>
 <input type="hidden"
        id="raw-known-keys"
        value='{{ {"keys": known_keys.keys | unique | list, "bases": known_keys.bases | unique | list, "multiline": known_keys.multiline | unique | list, "multilineBases": known_keys.multiline_bases | unique | list} | tojson }}'>
@@ -94,6 +99,7 @@
             <div class="raw-config-toolbar__legend text-white-50 small d-flex align-items-center gap-2 mt-2">
                 <span class="raw-config-legend-chip"></span>
                 <span data-i18n="legend.locked_settings_hint">Locked settings are highlighted</span>
+                <span class="ms-2"><code class="text-reset" aria-hidden="true">#</code> <span data-i18n="status.draft">Draft</span></span>
             </div>
         </div>
         <div class="raw-config-toolbar__actions d-flex flex-wrap align-items-center gap-2">
@@ -129,6 +135,7 @@
         </div>
     </div>
     <div class="card-body raw-config-editor-shell">
+        <p class="small text-body-secondary mb-2" data-i18n="legend.raw_setting_drafts">At the start of a setting, press # to toggle draft or Backspace to activate it. Save to apply. Drafts keep their values while inherited or default values take effect.</p>
         <div id="raw-config-editor"
              class="ace-editor border rounded position-relative w-100 raw-config-editor courier-prime"
              data-method="ui"

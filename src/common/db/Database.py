@@ -739,7 +739,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.15~rc2"
+                return "1.6.15~rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -773,7 +773,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.15~rc2",
+            "version": "1.6.15~rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1713,6 +1713,7 @@ class Database:
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
@@ -1736,6 +1737,11 @@ class Database:
                            set. None or empty means the scheduler never touches
                            ui/api-owned rows (the incoming config is treated as
                            default-filled, not user-declared).
+            draft_settings: Explicit raw-editor state changes keyed by the unprefixed
+                             global setting id or the full ``<service>_<setting>`` key.
+                             ``True``/``False`` updates the row state; ``None`` explicitly
+                             deletes an existing draft row. A missing map preserves the
+                             existing per-setting draft state.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
@@ -1751,6 +1757,7 @@ class Database:
         # removed, never a value mutated in place.
         retry_config = config
         config = config.copy()
+        draft_settings = {key: value for key, value in (draft_settings or {}).items() if isinstance(key, str) and (isinstance(value, bool) or value is None)}
         to_put = []
         to_update = []
         to_delete = []
@@ -1777,6 +1784,17 @@ class Database:
             explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
 
         explicit_env_keys = frozenset(explicit_keys or ())
+        protected_draft_setting_ids = frozenset({"SERVER_NAME", "MULTISITE", "IS_DRAFT", "USE_TEMPLATE", "DATABASE_URI"})
+
+        def draft_state_for(full_key: str, setting_id: str) -> Optional[bool]:
+            """Return an explicitly posted setting-draft state, excluding structural keys."""
+            if setting_id in protected_draft_setting_ids:
+                return None
+            return draft_settings.get(full_key)
+
+        def draft_state_is_posted(full_key: str, setting_id: str) -> bool:
+            """Return whether a raw map explicitly addresses this non-structural key."""
+            return setting_id not in protected_draft_setting_ids and full_key in draft_settings
 
         def scheduler_can_override(full_key: str, incoming_value: Any) -> bool:
             if full_key not in explicit_env_keys:
@@ -1866,10 +1884,16 @@ class Database:
             global_settings_to_delete = []
             global_method_total = 0
             for db_global_config in session.query(Global_values).filter_by(method=method).all():
-                global_method_total += 1
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
+
+                # Draft rows are retained across normal effective-config saves. An explicit
+                # state map is also a declaration that the row is being handled below, so the
+                # cleanup pass must not delete it before that state update is applied.
+                if db_global_config.is_draft or key in draft_settings:
+                    continue
+                global_method_total += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -1918,10 +1942,15 @@ class Database:
                 # so they can be re-published when the orchestration object returns.
                 if db_service_config.service_id in drafted_service_ids:
                     continue
-                service_method_total[db_service_config.service_id] += 1
                 key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
+
+                # See the global cleanup guard above: a stored setting draft must survive a
+                # default-filled round-trip, while a map entry is handled explicitly later.
+                if db_service_config.is_draft or key in draft_settings:
+                    continue
+                service_method_total[db_service_config.service_id] += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -2153,12 +2182,14 @@ class Database:
                         Services_settings.value,
                         Services_settings.file_name,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     ).all()
                     existing_service_settings_dict = {
                         (s.service_id, s.setting_id, s.suffix or 0): {
                             "value": self._empty_if_none(s.value),
                             "file_name": self._empty_if_none(s.file_name),
                             "method": s.method,
+                            "is_draft": bool(s.is_draft),
                         }
                         for s in existing_service_settings
                     }
@@ -2265,16 +2296,55 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            full_key = f"{server_name}_{original_key}"
+                            draft_state_posted = draft_state_is_posted(full_key, key)
+                            explicit_draft_state = draft_state_for(full_key, key)
+
+                            # ``None`` is an explicit raw-editor deletion. It may remove only
+                            # an already-drafted row owned by a compatible method; it must not
+                            # create a row or turn an effective value into a draft.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    service_setting
+                                    and service_setting["is_draft"]
+                                    and self._methods_are_compatible(
+                                        method,
+                                        service_setting["method"],
+                                        allow_scheduler_override=scheduler_can_override(full_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append(
+                                        {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
+                                    )
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # Effective-config callers receive the stored value through the
+                            # normal fallback path. Keep an existing setting draft completely
+                            # opaque to those callers; only the raw editor's explicit map may
+                            # activate, deactivate, or rewrite it.
+                            if service_setting and service_setting["is_draft"] and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = (
+                                explicit_draft_state if explicit_draft_state is not None else bool(service_setting and service_setting["is_draft"])
+                            )
                             current_file_name = service_setting["file_name"] if service_setting else ""
                             value_changed = bool(service_setting and service_setting["value"] != value)
-                            should_update_value = (
-                                value_changed
+                            method_can_update = bool(
+                                service_setting
                                 and self._methods_are_compatible(
                                     method,
                                     service_setting["method"],
-                                    allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value),
+                                    allow_scheduler_override=scheduler_can_override(full_key, value),
                                 )
-                            ) or (bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf")
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
+                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            state_changed = bool(
+                                service_setting and explicit_draft_state is not None and desired_is_draft != service_setting["is_draft"] and method_can_update
+                            )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2287,9 +2357,9 @@ class Database:
                             )
                             # A default sibling of a kept-alive slot (anchor row or template) is spurious round-trip
                             # material: drop it (and clean any stale row) so the field stays editable; the slot survives.
-                            if is_spurious_default_sibling:
+                            if is_spurious_default_sibling and not desired_is_draft:
                                 if service_setting and self._methods_are_compatible(
-                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value)
+                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(full_key, value)
                                 ):
                                     self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
                                     local_to_delete.append(
@@ -2303,7 +2373,11 @@ class Database:
                             if not service_setting:
                                 # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
                                 # the entire user-declared all-default slot would never materialise (vanish).
-                                if check_value(key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -2316,6 +2390,7 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
                                 # Update Services.last_update
@@ -2324,17 +2399,20 @@ class Database:
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
                                     local_changed_plugins.add(setting["plugin_id"])
 
                                 # Editing a value down to its default removes the row (defaults are implicit) —
                                 # EXCEPT for a member of an anchorless slot, where dropping the last rows would vanish
                                 # the whole user-declared slot; there we persist the default value instead.
                                 if (
-                                    should_update_value
+                                    (should_update_value or state_changed)
                                     and check_value(key, value, setting, template_setting_default, suffix)
                                     and not is_anchorless_multiple_member
+                                    and not desired_is_draft
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
@@ -2343,8 +2421,11 @@ class Database:
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else service_setting["is_draft"]
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
@@ -2383,18 +2464,52 @@ class Database:
                                 continue
 
                             global_value = (
-                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                                 .filter_by(setting_id=key, suffix=suffix)
                                 .first()
                             )
+                            draft_state_posted = draft_state_is_posted(original_key, key)
+                            explicit_draft_state = draft_state_for(original_key, key)
+
+                            # ``None`` explicitly deletes a saved draft and never acts as a
+                            # request to save the fallback value that accompanied the form post.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    global_value
+                                    and global_value.is_draft
+                                    and self._methods_are_compatible(
+                                        method,
+                                        global_value.method,
+                                        allow_scheduler_override=scheduler_can_override(original_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # A draft global value must not be rewritten by the effective
+                            # configuration pass. It is only visible to the raw editor, which
+                            # supplies an explicit state map when it intends to edit the row.
+                            if global_value and global_value.is_draft and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                             value_changed = bool(global_value and global_value.value != value)
-                            should_update_value = (
-                                value_changed
+                            method_can_update = bool(
+                                global_value
                                 and self._methods_are_compatible(
-                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
                                 )
-                            ) or (bool(global_value) and method == "autoconf" and global_value.method != "autoconf")
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
+                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            state_changed = bool(
+                                global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
+                            )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2407,7 +2522,7 @@ class Database:
                             )
                             # A default sibling of a kept-alive global multiple slot (anchor row or template) is
                             # spurious round-trip material: drop it so the field stays editable on the global page.
-                            if is_spurious_default_sibling:
+                            if is_spurious_default_sibling and not desired_is_draft:
                                 if global_value and self._methods_are_compatible(
                                     method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
                                 ):
@@ -2420,7 +2535,11 @@ class Database:
                             if not global_value:
                                 # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
                                 # the entire user-declared all-default slot would never materialise (vanish).
-                                if check_value(key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix, True)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -2432,26 +2551,33 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
                                     local_changed_plugins.add(setting["plugin_id"])
 
                                 # Editing a value down to its default removes the row — except for a member of an
                                 # anchorless slot, where that would vanish the whole user-declared slot; persist instead.
                                 if (
-                                    should_update_value
+                                    (should_update_value or state_changed)
                                     and check_value(key, value, setting, template_setting_default, suffix, True)
                                     and not is_anchorless_multiple_member
+                                    and not desired_is_draft
                                 ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
@@ -2567,16 +2693,43 @@ class Database:
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        draft_state_posted = draft_state_is_posted(original_key, key)
+                        explicit_draft_state = draft_state_for(original_key, key)
+                        if draft_state_posted and explicit_draft_state is None:
+                            if (
+                                global_value
+                                and global_value.is_draft
+                                and self._methods_are_compatible(
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
+                                )
+                            ):
+                                to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                changed_plugins.add(setting.plugin_id)
+                            continue
+
+                        if global_value and global_value.is_draft and explicit_draft_state is None:
+                            continue
+
+                        desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                         current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                         value_changed = bool(global_value and global_value.value != value)
-                        should_update_value = bool(
+                        method_can_update = bool(
                             global_value
-                            and self._methods_are_compatible(method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value))
-                            and value_changed
+                            and self._methods_are_compatible(
+                                method,
+                                global_value.method,
+                                allow_scheduler_override=scheduler_can_override(original_key, value),
+                            )
+                        )
+                        should_update_value = bool(global_value and method_can_update and value_changed)
+                        state_changed = bool(
+                            global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
                         )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
@@ -2598,7 +2751,7 @@ class Database:
 
                         if not global_value:
                             # An anchorless slot's default member must be persisted, else the whole slot vanishes.
-                            if value == nm_default and not nm_is_anchorless:
+                            if value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -2610,20 +2763,26 @@ class Database:
                                     file_name=target_file_name if setting.type == "file" else None,
                                     suffix=suffix,
                                     method=method,
+                                    is_draft=desired_is_draft,
                                 )
                             )
-                        elif should_update_value or file_name_changed:
+                        elif should_update_value or file_name_changed or state_changed:
                             if should_update_value:
                                 changed_plugins.add(setting.plugin_id)
+                            if state_changed:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if should_update_value and value == nm_default and not nm_is_anchorless:
+                            if (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
-                            setting_values = {"value": self._empty_if_none(value), "method": method}
-                            if setting.type == "file" and (file_name_changed or value_changed):
+                            persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                            setting_values = {"is_draft": persisted_is_draft}
+                            if should_update_value:
+                                setting_values.update({"value": self._empty_if_none(value), "method": method})
+                            if setting.type == "file" and method_can_update and (file_name_changed or value_changed):
                                 setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
@@ -2632,6 +2791,44 @@ class Database:
                                     "values": setting_values,
                                 }
                             )
+
+            # A removed RAW line is represented by ``None`` and may not be present in the
+            # effective payload. Resolve only those explicit deletions here; True/False states
+            # are handled alongside their unchanged posted values in the save branches above.
+            draft_deletion_keys = {key for key, state in draft_settings.items() if state is None}
+            if draft_deletion_keys:
+                for target_row in session.query(Global_values).filter(Global_values.is_draft == True):  # noqa: E712
+                    row_key = target_row.setting_id + (f"_{target_row.suffix}" if target_row.suffix else "")
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append({"model": Global_values, "filter": {"setting_id": target_row.setting_id, "suffix": target_row.suffix}})
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
+
+                for target_row in session.query(Services_settings).filter(Services_settings.is_draft == True):  # noqa: E712
+                    row_key = f"{target_row.service_id}_{target_row.setting_id}"
+                    if target_row.suffix:
+                        row_key = f"{row_key}_{target_row.suffix}"
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append(
+                        {
+                            "model": Services_settings,
+                            "filter": {"service_id": target_row.service_id, "setting_id": target_row.setting_id, "suffix": target_row.suffix},
+                        }
+                    )
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
 
             if changed_services:
                 changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
@@ -2696,6 +2893,7 @@ class Database:
                 skip_service_management=skip_service_management,
                 disable_cleanup=disable_cleanup,
                 explicit_keys=explicit_keys,
+                draft_settings=draft_settings,
                 retry_on_conflict=False,
             )
 
@@ -2900,6 +3098,7 @@ class Database:
         service: Optional[str] = None,
         original_config: Optional[Dict[str, Any]] = None,
         original_multisite: Optional[Set[str]] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -2910,6 +3109,9 @@ class Database:
         with self._db_session() as session:
             config = original_config or {}
             multisite = original_multisite or set()
+            # Keep a separate effective global map while optionally exposing draft rows in
+            # ``config``. Service fallback values must never inherit a global setting draft.
+            effective_global_config = {key: value for key, value in config.items() if isinstance(value, dict) and value.get("global", True)}
 
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
@@ -2926,6 +3128,7 @@ class Database:
                     Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
+                    Global_values.is_draft,
                 )
                 .select_from(j)
                 .order_by(Settings.order)
@@ -2933,6 +3136,8 @@ class Database:
 
             if filtered_settings:
                 stmt = stmt.where(Settings.id.in_(filtered_settings))
+            if not with_setting_drafts:
+                stmt = stmt.where(Global_values.is_draft == False)  # noqa: E712
 
             # Execute the query and fetch all results
             results = session.execute(stmt).fetchall()
@@ -2946,7 +3151,11 @@ class Database:
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
                     "template": None,
+                    "is_draft": bool(global_value.is_draft),
                 }
+
+                if not global_value.is_draft:
+                    effective_global_config[setting_id] = config[setting_id]
 
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
@@ -2978,7 +3187,18 @@ class Database:
 
                 # Pre-build multisite defaults mapping for efficient lookup
                 # Share the same dictionary objects instead of creating copies
-                multisite_defaults = {key: config[key] for key in multisite if key in config}
+                # Use the effective global map, rather than the optionally raw-visible
+                # config, so a global draft's stored value is never inherited by services
+                # while the setting still receives its ordinary global/default fallback.
+                multisite_defaults = {
+                    key: (
+                        effective_global_config[key] | {"is_draft": False}
+                        if with_setting_drafts and isinstance(effective_global_config[key], dict)
+                        else effective_global_config[key]
+                    )
+                    for key in multisite
+                    if key in effective_global_config
+                }
 
                 # Populate service-specific entries using shared references
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
@@ -3003,6 +3223,7 @@ class Database:
                         Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     )
                     .select_from(j)
                     .order_by(Services.id, Settings.order)
@@ -3010,6 +3231,8 @@ class Database:
 
                 if not with_drafts:
                     stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+                if not with_setting_drafts:
+                    stmt = stmt.where(Services_settings.is_draft == False)  # noqa: E712
 
                 if filtered_settings:
                     stmt = stmt.where(Settings.id.in_(filtered_settings))
@@ -3032,8 +3255,9 @@ class Database:
                         "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
-                        "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
+                        "default": self._empty_if_none(effective_global_config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
                         "template": None,
+                        "is_draft": bool(result.is_draft),
                     }
             else:
                 servers = " ".join(db_service.id for db_service in services)
@@ -3071,6 +3295,7 @@ class Database:
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         *,
         service: Optional[str] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -3117,6 +3342,7 @@ class Database:
             service=service,
             original_config=config,
             original_multisite=multisite,
+            with_setting_drafts=with_setting_drafts,
         )
 
         template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
