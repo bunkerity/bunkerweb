@@ -1965,6 +1965,33 @@ function restart_stack () {
             return 1
         fi
 
+        # The worker reads `bw-secret` through envFrom at pod start (tests/k8s/bunkerweb.yml), exactly
+        # like the scheduler above, so a database-engine change that re-applied the secret leaves a
+        # surviving worker pod on the previous engine's DATABASE_URI (CI ac60a8b28, Kubernetes
+        # `upgrade` mariadb → mysql: `[WORKER] MySQL version 9.7.1 is not a MariaDB variant` until the
+        # harness gave up). Gated on the Deployment really existing rather than on the version:
+        # stack_has_worker is meant to drop it for pre-1.7 targets, but in that same run the delete
+        # patch left the Deployment in place ("predates the worker, restarting without it" with no
+        # deletion, then "unchanged" on the next apply), so only a live lookup matches the cluster.
+        # A lookup failure other than not-found aborts, like every other kubectl call here.
+        local worker_deployment
+        worker_deployment=$(kubectl get deployment bunkerweb-worker -n bunkerweb --ignore-not-found -o name 2>&1)
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "☸️ Failed to look up the BunkerWeb Worker deployment: $worker_deployment"
+            return 1
+        fi
+        case "$worker_deployment" in
+        *deployment.apps/bunkerweb-worker*)
+            kubectl rollout restart -n bunkerweb deployment bunkerweb-worker
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "☸️ Failed to restart BunkerWeb Worker"
+                return 1
+            fi
+            ;;
+        esac
+
         if [ "$type" == "ui" ] ; then
             if echo "$secrets" | grep -q "bw-ui-secret" ; then
                 kubectl delete -f /tmp/secrets-ui.yml
