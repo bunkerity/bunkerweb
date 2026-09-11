@@ -1,7 +1,8 @@
 # Changelog
 
-## v1.6.15~rc3 - 2026/09/??
+## v1.6.15~rc3 - 2026/09/11
 
+- [FEATURE] `ui`: retain individual settings as drafts in the RAW editor, with explicit activation and inherited or default effective values. (Refs #3631)
 - [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Refs #3905)
 - [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Refs #3896)
 - [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)

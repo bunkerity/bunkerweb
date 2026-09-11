@@ -18,7 +18,7 @@ Diese Schnellstart-Anleitung hilft Ihnen, BunkerWeb schnell zu installieren und 
 
 Der Schutz bestehender Webanwendungen, die bereits über das HTTP(S)-Protokoll erreichbar sind, ist das Hauptziel von BunkerWeb: Es fungiert als klassischer [Reverse-Proxy](https://de.wikipedia.org/wiki/Reverse_Proxy) mit zusätzlichen Sicherheitsfunktionen.
 
-Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples) des Repositorys finden Sie Beispiele aus der Praxis.
+Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc3/examples) des Repositorys finden Sie Beispiele aus der Praxis.
 
 ## Grundlegende Einrichtung
 
@@ -33,7 +33,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
     ```
 
     Standardmäßig stellt der Container Folgendes bereit:
@@ -51,8 +51,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
 
     ```bash
     # Laden Sie das Skript und seine Prüfsumme herunter
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc3/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc3/install-bunkerweb.sh.sha256
 
     # Überprüfen Sie die Prüfsumme
     sha256sum -c install-bunkerweb.sh.sha256
@@ -93,7 +93,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -106,7 +106,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -123,7 +123,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc2
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *bw-env
         volumes:
@@ -193,7 +193,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -209,7 +209,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -227,7 +227,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
         depends_on:
           - bw-docker
         environment:
@@ -250,7 +250,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc2
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
@@ -348,7 +348,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - published: 80
             target: 8080
@@ -378,7 +378,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -396,7 +396,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -425,7 +425,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/exam
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc2
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
@@ -613,6 +613,8 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
           <figcaption>Weboberfläche Dienst erstellen ROH</figcaption>
         </figure>
 
+        Drücken Sie am Anfang einer Einstellungszeile `#`, um ihren Entwurfsstatus umzuschalten. Entwürfe zeigen ein gedämpftes visuelles `#`-Präfix; drücken Sie am Zeilenanfang die **Rücktaste**, um sie wieder zu aktivieren. Das Präfix ist eine Editor-Metadatenangabe und verändert den Einstellungswert nicht. Klicken Sie auf **Speichern**, um die Änderung zu speichern. Für Entwürfe gilt der geerbte oder Standardwert. Entwürfe werden nur im RAW-Modus verwaltet und bleiben beim Speichern im einfachen oder erweiterten Modus erhalten. Dies ist vom Entwurfsstatus des gesamten Dienstes getrennt. Gesperrte Einstellungen und Einstellungen zur Dienstidentität können nicht als Entwurf markiert werden.
+
         * Wenn Sie mit der Konfiguration des Dienstes fertig sind, können Sie auf die Schaltfläche `💾 Speichern` klicken, um die Konfiguration zu speichern.
 
     🚀 Sobald Sie die Konfiguration gespeichert haben, sollten Sie Ihren neuen Dienst in der Liste der Dienste sehen.
@@ -649,7 +651,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Fügen Sie alle anderen vorhandenen Umgebungsvariablen für UI, Redis, CrowdSec usw. hinzu ---
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
     ```
 
     Ihr Anwendungscontainer (`myapp`) und der `bunkerweb-aio`-Container müssen sich im selben Docker-Netzwerk befinden, damit BunkerWeb ihn über den Hostnamen `myapp` erreichen kann.
@@ -671,7 +673,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (alle anderen relevanten Umgebungsvariablen wie im Hauptbeispiel oben gezeigt) ...
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
     ```
 
     Stellen Sie sicher, dass Sie `myapp` durch den tatsächlichen Namen oder die IP Ihres Anwendungscontainers und `http://myapp:8080` durch dessen korrekte Adresse und Port ersetzen.
