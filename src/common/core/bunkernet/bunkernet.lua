@@ -201,8 +201,8 @@ function bunkernet:log(bypass_checks)
 	if not reason then
 		return self:ret(true, "ip is not blocked")
 	end
-	if reason == "bunkernet" then
-		return self:ret(true, "skipping report because the reason is bunkernet")
+	if reason == "bunkernet" or reason == "modsecurity-body" then
+		return self:ret(true, "skipping report because the reason is " .. reason)
 	end
 
 	-- Check if IP is global

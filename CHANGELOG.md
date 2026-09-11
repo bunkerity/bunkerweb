@@ -2,6 +2,7 @@
 
 ## v1.6.15~rc3 - 2026/09/??
 
+- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Refs #3905)
 - [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Refs #3896)
 - [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)
 - [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
