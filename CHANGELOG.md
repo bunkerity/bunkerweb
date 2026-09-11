@@ -151,6 +151,8 @@
 - [BUGFIX] `db`: a custom-config commit that fails without an error message is reported as a failure instead of as a successful write.
 - [BUGFIX] `db`: upgrading from 1.6.15-rc2 failed at startup with "No migration file found for database version"; that release is now in the chain.
 - [MISC] `db`: upgrading to 1.7 now expires 2FA codes valid before the migration (a fresh code works, at most 33 s later) and forces a PRO re-check.
+- [BUGFIX] `bunkerweb`: an instance that reloaded without its settings refused every configuration push forever; it now recovers on the next push.
+- [BUGFIX] `worker`: a scheduled job could reload the instances while a configuration push was still rendering, leaving an instance unable to start.
 - [BUGFIX] `api`: a failed plugin or export download carries the reason the API states, instead of the bare status with the body thrown away.
 - [BUGFIX] `installer`: a Docker upgrade is verified by image identity, health and stability, and .env is read last-wins as Compose reads it.
 - [BUGFIX] `services`: a single-site deployment named only `default-server` reached its instances with an empty `SERVER_NAME` and served nothing.
