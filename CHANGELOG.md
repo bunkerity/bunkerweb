@@ -2,6 +2,8 @@
 
 ## v1.6.15~rc3 - 2026/09/11
 
+- [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
+- [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.
 - [FEATURE] `ui`: retain individual settings as drafts in the RAW editor, with explicit activation and inherited or default effective values. (Refs #3631)
 - [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Refs #3905)
 - [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Refs #3896)
