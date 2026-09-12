@@ -79,7 +79,7 @@
                             </span>
                             <small class="text-body-secondary toast-datetime">{{ datetime }}</small>
                         </div>
-                        <div class="toast-body">{{ content|safe }}</div>
+                        <div class="toast-body" data-flash-html="{{ content }}">{{ content }}</div>
                     </div>
                 {% endfor %}
             </div>

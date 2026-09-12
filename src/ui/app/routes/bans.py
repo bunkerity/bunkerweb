@@ -720,7 +720,7 @@ def bans_ban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(ip)}", "error")
+            flash(f"Invalid IP address: {ip}", "error")
             continue
 
         # Check for permanent ban
@@ -794,7 +794,7 @@ def bans_unban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(str(ip))}", "error")
+            flash(f"Invalid IP address: {ip}", "error")
             continue
 
         # Normalize Web UI and default services to global scope
@@ -876,14 +876,14 @@ def bans_update_duration():
         service = update.get("service", "")
 
         if duration not in ("permanent", "1h", "24h", "1w", "custom"):
-            flash(f"Invalid ban duration: {escape(str(duration))}", "error")
+            flash(f"Invalid ban duration: {duration}", "error")
             continue
 
         # Validate IP address
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(ip)}", "error")
+            flash(f"Invalid IP address: {ip}", "error")
             continue
 
         # Calculate new expiration time based on duration
@@ -901,7 +901,7 @@ def bans_update_duration():
                 try:
                     new_exp = max(0, int(custom_exp))
                 except (TypeError, ValueError):
-                    flash(f"Invalid custom ban duration for {escape(ip)}", "error")
+                    flash(f"Invalid custom ban duration for {ip}", "error")
                     continue
             else:
                 custom_end_date = update.get("end_date")
@@ -912,10 +912,10 @@ def bans_update_duration():
                             end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
                         new_exp = max(0, int(end_dt.timestamp() - time()))
                     except (TypeError, ValueError):
-                        flash(f"Invalid custom ban end date for {escape(ip)}", "error")
+                        flash(f"Invalid custom ban end date for {ip}", "error")
                         continue
                 else:
-                    flash(f"Missing custom ban end date for {escape(ip)}", "error")
+                    flash(f"Missing custom ban end date for {ip}", "error")
                     continue
 
         # Validate service name for service-specific bans

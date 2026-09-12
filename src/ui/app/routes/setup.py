@@ -7,13 +7,13 @@ from os import environ, getenv
 from re import escape, match
 from time import sleep
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
 
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
@@ -187,7 +187,7 @@ def setup_page():
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
-            flash("The admin user was created successfully")
+            flash("The admin user was created successfully", save=False)
 
         if not ui_reverse_proxy:
             server_names = db_config["SERVER_NAME"].split()

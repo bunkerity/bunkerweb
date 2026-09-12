@@ -403,11 +403,15 @@ const showMissingConfigsModal = (missingConfigs, templateData = null) => {
       const li = document.createElement("li");
       li.className = "list-group-item d-flex align-items-center gap-2";
       li.setAttribute("data-config-ref", config);
-      li.innerHTML = `
-        <i class="bx bx-file text-muted"></i>
-        <code class="flex-grow-1">${config}</code>
-        <span class="badge bg-warning text-dark">Missing</span>
-      `;
+      const icon = document.createElement("i");
+      icon.className = "bx bx-file text-muted";
+      const code = document.createElement("code");
+      code.className = "flex-grow-1";
+      code.textContent = config;
+      const missingBadge = document.createElement("span");
+      missingBadge.className = "badge bg-warning text-dark";
+      missingBadge.textContent = "Missing";
+      li.replaceChildren(icon, code, missingBadge);
       dom.missingConfigsList.appendChild(li);
     });
   }
@@ -573,7 +577,12 @@ const handleMissingConfigsUpload = async (files) => {
         const item = document.createElement("li");
         item.className =
           "list-group-item d-flex justify-content-between align-items-center";
-        item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+        const nameEl = document.createElement("span");
+        nameEl.textContent = name;
+        const typeEl = document.createElement("span");
+        typeEl.className = "badge bg-label-primary text-uppercase";
+        typeEl.textContent = type;
+        item.replaceChildren(nameEl, typeEl);
         dom.rawConfigsUploadList.prepend(item);
       });
     }
@@ -4461,7 +4470,12 @@ const importRawConfigFiles = (files) => {
           const item = document.createElement("li");
           item.className =
             "list-group-item d-flex justify-content-between align-items-center";
-          item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+          const nameEl = document.createElement("span");
+          nameEl.textContent = name;
+          const typeEl = document.createElement("span");
+          typeEl.className = "badge bg-label-primary text-uppercase";
+          typeEl.textContent = type;
+          item.replaceChildren(nameEl, typeEl);
           dom.rawConfigsUploadList.prepend(item);
         });
       }

@@ -14,6 +14,7 @@ from urllib.parse import unquote
 from bcrypt import checkpw, gensalt, hashpw
 from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import current_app, flash as flask_flash, session
+from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
@@ -377,9 +378,14 @@ def get_latest_stable_release():
     return latest_release
 
 
-def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+def flash(message: Union[str, Markup], category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+    # Flash bodies are rendered as HTML. Everything that is not explicitly
+    # marked safe is escaped here, so a service name, an IP or a config name
+    # echoed back into a message can never carry markup. Callers that really
+    # mean to send markup wrap it in Markup(...).
+    message = message if isinstance(message, Markup) else escape(message)
     if i18n_key:
-        message = f'<span data-i18n="{i18n_key}">{message}</span>'
+        message = Markup('<span data-i18n="{}">{}</span>').format(i18n_key, message)
 
     if category != "success":
         flask_flash(message, category)
@@ -387,7 +393,7 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
         flask_flash(message)
 
     if save and "flash_messages" in session:
-        session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
+        session["flash_messages"].append((str(message), category, datetime.now().astimezone().isoformat()))
         session.modified = True
 
 

@@ -1,7 +1,8 @@
 from datetime import datetime
 from os import getenv
 
-from flask import Blueprint, current_app, flash as flask_flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
@@ -61,7 +62,7 @@ def login_page():
             # No remember= on purpose: the Flask-Login remember cookie is disabled (see main.py).
             # "Remember me" is session.permanent above, i.e. a persistent server-side session.
             if not login_user(ui_user):
-                flask_flash("Couldn't log you in, please try again", "error")
+                flash("Couldn't log you in, please try again", "error", save=False)
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
             # Generate and add Biscuit token to session
@@ -98,7 +99,9 @@ def login_page():
 
             if not ui_user.totp_secret:
                 flash(
-                    f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>',
+                    Markup('Please enable two-factor authentication to secure your account <a href="{}">here</a>').format(
+                        url_for("profile.profile_page", _anchor="security")
+                    ),
                     "warning",
                 )
 
@@ -115,7 +118,7 @@ def login_page():
 
             return redirect(url_for("loading", next=safe_next))
         else:
-            flask_flash("Invalid username or password", "error")
+            flash("Invalid username or password", "error", save=False)
             fail = True
 
     kwargs = {

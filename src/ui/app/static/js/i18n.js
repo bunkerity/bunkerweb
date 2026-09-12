@@ -22,11 +22,7 @@ function applyTranslations() {
         );
       }
     }
-    // Prevent i18next from escaping single quotes to HTML entities
-    const translation = i18next.t(key, {
-      ...options,
-      interpolation: { escapeValue: false },
-    });
+    const translation = i18next.t(key, options);
     if (element.is("[placeholder]")) {
       element.attr("placeholder", translation);
     } else if (element.is("[title]")) {
@@ -274,6 +270,9 @@ $(document).ready(function () {
       {
         fallbackLng: "en",
         debug: false,
+        // Translations are inserted as text, never as HTML: escaping here only
+        // turns characters like / and ' into visible entities.
+        interpolation: { escapeValue: false },
         ns: ["messages"],
         defaultNS: "messages",
         backend: {

@@ -2,13 +2,12 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from os import getenv, sep
-from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
 from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
-from app.utils import get_blacklisted_settings, is_editable_method
+from app.utils import flash, get_blacklisted_settings, is_editable_method
 
 
 class Config:
@@ -205,7 +204,7 @@ class Config:
             if threaded:
                 self.__data["TO_FLASH"].append({"content": message, "type": "error"})
             else:
-                flash(message, "error")
+                flash(message, "error", save=False)
 
         # Iterate over a copy of the items to safely modify the dictionary.
         for key, value in to_check.items():

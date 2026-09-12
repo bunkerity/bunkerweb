@@ -1,3 +1,33 @@
+// Markup a flash message is allowed to carry. Everything else - scripts, event
+// handlers, forms, embedded content - is dropped by DOMPurify before the toast
+// body is filled in.
+const FLASH_ALLOWED_TAGS = [
+  "a",
+  "b",
+  "br",
+  "code",
+  "div",
+  "em",
+  "h5",
+  "h6",
+  "i",
+  "li",
+  "ol",
+  "p",
+  "span",
+  "strong",
+  "ul",
+];
+const FLASH_ALLOWED_ATTR = [
+  "class",
+  "href",
+  "rel",
+  "role",
+  "target",
+  "aria-pressed",
+  "aria-label",
+];
+
 function throttle(func, limit, ...throttleArgs) {
   let inThrottle;
   return function (...args) {
@@ -816,6 +846,23 @@ $(document).ready(() => {
   if (extraPagesCollapse === "hide") {
     $("#extraPagesCollapse").collapse("hide");
   }
+
+  // Flash messages are authored as HTML (a link, a heading) but interpolate
+  // user-controlled values (service names, IPs, config names), so the server
+  // delivers them escaped in data-flash-html and they are sanitised here
+  // instead of being trusted as markup.
+  $("[data-flash-html]").each(function () {
+    const raw = this.dataset.flashHtml || "";
+    if (typeof DOMPurify === "undefined") {
+      this.textContent = raw;
+    } else {
+      this.innerHTML = DOMPurify.sanitize(raw, {
+        ALLOWED_TAGS: FLASH_ALLOWED_TAGS,
+        ALLOWED_ATTR: FLASH_ALLOWED_ATTR,
+      });
+    }
+    this.removeAttribute("data-flash-html");
+  });
 
   $("#feedback-toast-container .bs-toast").each(function () {
     const toast = new bootstrap.Toast(this);

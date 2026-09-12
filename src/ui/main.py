@@ -23,7 +23,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from app.models.safe_session_cache import SafeFileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -850,12 +851,13 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+            flash(
+                Markup("""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>here</a>
+</div>""").format(url_for("profile.profile_page")),
                 "error",
+                save=False,
             )
 
     return ui_user
@@ -1182,7 +1184,7 @@ def before_request():
         DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash("Database connection is in read-only mode : no modifications possible.", "error", save=False)
 
         if current_user.is_authenticated:
             passed = True
@@ -1253,16 +1255,20 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                flash(
+                    Markup(
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
+                    ),
                     "error",
+                    save=False,
                 )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
+                flash(
+                    Markup("""<div class='d-flex flex-column'>
                         <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
-                    </div>""",
+                        <p class='p-0 m-0 fst-italic'>{}</p>
+                    </div>""").format(metadata["failover_message"]),
                     "error",
+                    save=False,
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
                 flash("The last changes have been applied successfully.")
@@ -1547,7 +1553,7 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash("Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})
