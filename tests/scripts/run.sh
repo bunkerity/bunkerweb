@@ -123,10 +123,18 @@ for test in $tests ; do
 
         chmod +x "tests/scripts/before/$category.sh"
 
+        # The before-script runs in this shell so its `export`s reach the run, which also means any
+        # `set -euo pipefail` it declares (before/upgrade.sh) would stay armed for the rest of run.sh,
+        # including the EXIT trap, and turn every tolerated non-zero status in utils.sh into an abort.
+        # Snapshot the shell options and restore them right after. `set +o` never reports `errexit`
+        # (bash clears it inside command substitutions), so this restores nounset/pipefail only;
+        # errexit is off here to begin with.
+        _before_opts=$(set +o)
         # shellcheck disable=SC1090
         source ./tests/scripts/before/"$category".sh "$integration" "$release" "$category"
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
+        _before_ret=$?
+        eval "$_before_opts"
+        if [ "$_before_ret" -ne 0 ] ; then
             exit 1
         fi
         run_before=true
