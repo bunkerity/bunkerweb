@@ -14,20 +14,17 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import get_integration, get_version  # type: ignore
+from custom_configs_validation import build_env_style_key_rx, validate as validate_custom_config  # type: ignore
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from Configurator import Configurator
 from API import API  # type: ignore
 
-# `\Z`, not `$`: `$` also matches immediately before a trailing newline, so an environment key
-# `CUSTOM_CONF_HTTP_x\n` matches here. `.` never matches a newline, so `name` is captured as `x`
-# either way -- what `$` buys is that the dirty key matches *at all* and then produces the same
-# custom config as the clean one, silently aliasing two environment variables onto one file.
-# The twin of this pattern lives in `src/ui/app/routes/utils.py`; the two have already drifted once.
-CUSTOM_CONF_RX = re_compile(
-    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)\Z"
-)
+# Built by the shared validator so this stays in lockstep with its twin in
+# `src/ui/app/routes/utils.py` -- the two have already drifted once (see
+# `custom_configs_validation.build_env_style_key_rx`'s docstring).
+CUSTOM_CONF_RX = build_env_style_key_rx(with_service_prefix=True)
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 
 
@@ -110,20 +107,25 @@ if __name__ == "__main__":
                 custom_conf = CUSTOM_CONF_RX.search(k)
                 if not custom_conf:
                     continue
+                conf_service = custom_conf.group("service")
+                conf_type = custom_conf.group("type")
+                conf_name = custom_conf.group("name").replace(".conf", "")
                 custom_confs.append(
                     {
                         "value": f"# CREATED BY ENV\n{v}",
-                        "exploded": (
-                            custom_conf.group("service"),
-                            custom_conf.group("type"),
-                            custom_conf.group("name").replace(".conf", ""),
-                        ),
+                        "exploded": (conf_service, conf_type, conf_name),
                         "is_draft": False,
                     }
                 )
                 LOGGER.info(
-                    f"Found custom conf env var {'for service ' + custom_conf.group('service') if custom_conf.group('service') else 'without service'} with type {custom_conf.group('type')} and name {custom_conf.group('name')}"
+                    f"Found custom conf env var {'for service ' + conf_service if conf_service else 'without service'} with type {conf_type} and name {conf_name}"
                 )
+                # WARN-only: an env-only install must keep accepting exactly what it accepts
+                # today (design AC 6). Refusing a name the unified regex would reject is the
+                # 1.8 flip -- see followup-CC-2.md.
+                result = validate_custom_config(conf_type, conf_name, v, service_id=conf_service or None, source="env")
+                if result.warning:
+                    LOGGER.warning(result.warning)
                 continue
 
         db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
