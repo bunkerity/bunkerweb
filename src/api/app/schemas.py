@@ -9,28 +9,18 @@ from pydantic import (
     BeforeValidator,
 )
 from typing import Optional, List, Dict, Union, Literal, Annotated, Any
-from re import compile as re_compile
 from urllib.parse import urlsplit
 
-# Shared helpers for Configs
-# `\Z`, not `$`: Python's `$` also matches *before* a trailing newline, so `"name\n"` passed
-# validation and became a filename that breaks the line-based directory listing used when
-# pushing configs. Proven: re.match(r"^[\\w_-]{1,255}$", "name\\n") is True, `\\Z` is False.
-NAME_RX = re_compile(r"^[\w_-]{1,255}\Z")
+from custom_configs_validation import (  # type: ignore  # noqa: F401
+    CUSTOM_CONFIG_TYPES,
+    NAME_RX as NAME_RX,  # re-exported: tests/unit/api pins schemas.NAME_RX is the shared object
+    normalize_type as normalize_config_type,
+    TYPE_ERROR_MESSAGE,
+    validate_name as validate_config_name,
+)
 
-
-def normalize_config_type(t: str) -> str:
-    return t.strip().replace("-", "_").lower()
-
-
-def validate_config_name(name: str) -> Optional[str]:
-    if not name or not NAME_RX.match(name):
-        return "Invalid name: must match ^[\\w_-]{1,255}\\Z (letters, digits, underscore and hyphen only)"
-    return None
-
-
-# Accepted config types - Literal includes both underscore and hyphen variants for OpenAPI docs
-# Normalized form uses underscores internally
+# Accepted config types - Literal includes both underscore and hyphen variants for OpenAPI docs.
+# Normalized form (CUSTOM_CONFIG_TYPES, shared with every other write source) uses underscores.
 ConfigTypeLiteral = Literal[
     # HTTP-level
     "http",
@@ -53,22 +43,8 @@ ConfigTypeLiteral = Literal[
     "crs-plugins-after",
 ]
 
-# Set of normalized config types for validation
-CONFIG_TYPES = {
-    # HTTP-level
-    "http",
-    "server_http",
-    "default_server_http",
-    # ModSecurity
-    "modsec_crs",
-    "modsec",
-    # Stream
-    "stream",
-    "server_stream",
-    # CRS plugins
-    "crs_plugins_before",
-    "crs_plugins_after",
-}
+# Kept for callers that still import the API's own name for the canonical set.
+CONFIG_TYPES = set(CUSTOM_CONFIG_TYPES)
 
 
 def _normalize_and_validate_config_type(v: str) -> str:
@@ -76,8 +52,11 @@ def _normalize_and_validate_config_type(v: str) -> str:
     if not isinstance(v, str):
         raise ValueError("type must be a string")
     normalized = normalize_config_type(v)
-    if normalized not in CONFIG_TYPES:
-        raise ValueError(f"Invalid type: must be one of {', '.join(sorted(CONFIG_TYPES))}")
+    if normalized is None:
+        # Same string every source uses (design AC 2) -- this used to be a locally-sorted
+        # re-derivation of the same verdict, which drifted from the CLI's copy of this exact
+        # message the moment a sibling lane started reusing TYPE_ERROR_MESSAGE verbatim.
+        raise ValueError(TYPE_ERROR_MESSAGE)
     return normalized
 
 
