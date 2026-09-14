@@ -10,9 +10,11 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from model import (  # type: ignore
     Custom_configs,
     Global_values,
+    Jobs_cache,
     Metadata,
     Multiselects,
     Plugins,
+    ResourceAttachments,
     Selects,
     Services,
     Services_settings,
@@ -28,7 +30,7 @@ from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import is_rule_key, kind_for_key, validate_resource_group_refs  # type: ignore
 from ports import list_moved, port_list_setting  # type: ignore
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 
 from .common import EDITABLE_METHODS, DatabaseMixinBase, canonicalize_setting_value, delete_service_rows
@@ -77,6 +79,14 @@ def _is_reserved(service: Any) -> bool:
     it here made both the API and the UI answer success while the row survived.
     """
     return is_reserved_default_server({"id": service.id, "method": service.method})
+
+
+def _may_remove(ctx_method: str, row_method: str) -> bool:
+    """May a save running under ``ctx_method`` take a ``row_method``-owned service off the
+    roster? DELETION ownership, deliberately narrower than ``EDITABLE_METHODS`` -- widening it
+    would make the undeletable wizard service deletable by a save that simply omits it. Shared
+    by the removal list and the rename detection so the two can never drift apart."""
+    return row_method == ctx_method or (row_method in ("ui", "api") and ctx_method in ("ui", "api"))
 
 
 def _scheduler_can_override(ctx: _SaveConfigContext, full_key: str, incoming_value: Any) -> bool:
@@ -475,6 +485,23 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 if not success:
                     return f"Invalid setting {key}: {error}"
 
+            # As early as the save's own validation allows, and BEFORE every validator that reads
+            # the database keyed by service id: a rename is applied as an UPDATE of
+            # `bw_services.id`, so everything after it sees a service that has always had the new
+            # name (see `_sc_apply_service_rename` for the heuristic and its limits). Placing it
+            # after `server_type_attachment_conflict` or the location-namespace checks below would
+            # let a rename walk straight past them -- both are keyed by
+            # `bw_resource_attachments.service_id`, which still held the OLD id, so a PATCH that
+            # renames AND flips SERVER_TYPE to stream, or that claims a path an attached redirect
+            # already serves, validated clean and then had the attachment carried onto it.
+            # Nothing is committed until the end of the block, so every `return` below -- a
+            # validator's error string, a data-loss guard's refusal -- rolls this back with the
+            # rest of the save. The two degraded paths that call `session.rollback()` and carry on
+            # (an unreadable `bw_resources` / `bw_redirects`) also discard it, and the save then
+            # falls back to the pre-1.7 delete+insert for that pass.
+            if self._sc_apply_service_rename(session, ctx, skip_service_management):
+                changed_services = True
+
             if error := server_type_attachment_conflict(session, config):
                 return error
 
@@ -762,6 +789,100 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         return changed_plugins
 
+    def _sc_apply_service_rename(self, session, ctx: _SaveConfigContext, skip_service_management: bool) -> Optional[Tuple[str, str]]:
+        """save_config phase: a one-in / one-out SERVER_NAME change is a RENAME, not a delete
+        plus a create. Returns ``(old, new)`` when one was applied, else ``None``.
+
+        A save carries a *set* of names, so a rename is indistinguishable from "delete a,
+        create b" at the payload level: the old id simply drops out of SERVER_NAME. Taken
+        literally that sends the old id down the removal path below, which hard-deletes the row
+        and every child hanging off it -- ``bw_custom_configs`` above all. The
+        ``onupdate="cascade"`` written on all four FKs to ``bw_services.id``
+        (``model.py:214,258,439,769``) had therefore never fired once, because nothing ever
+        UPDATEd that key. Only the UI hid the loss, behind a private re-key of its own
+        (the ``renamed_service`` per-config re-save in ``ui/app/routes/services.py``'s
+        ``update_service``, deleted once this fix made it dead weight); the API and autoconf lost
+        the configs.
+
+        HEURISTIC, AND ITS LIMIT: under method ``ui``, ``api`` or ``scheduler`` only, exactly ONE
+        dropped id and exactly ONE added id, with the dropped row owned by this method
+        (``_may_remove``, the same rule the removal list applies), is the only unambiguous signal. Two dropped and two added cannot be paired,
+        so two renames in one save still delete+insert and still lose the configs; a drop with
+        no add, or an add with no drop, is untouched. The accepted false positive is the
+        mirror image: a genuine "delete a, create b" sent as ONE save now carries a's settings
+        and custom configs onto b instead of starting b empty. The two curated front doors
+        (`PATCH /services/{s}` and the UI service editor) send a full snapshot and change one
+        name at a time, the operator sees a warning-free INFO line naming both ids, and the
+        alternative is proven data loss on every API rename.
+
+        Two exposures this accepts rather than solves, both on the false-positive side:
+        `PUT /global_settings/config` (`api/app/routers/global_settings.py:200`) hands a
+        CALLER-SUPPLIED `method` and a caller-supplied whole config straight to `save_config`, so
+        the pairing is reachable from a raw config push that was never a rename; and `scheduler`
+        is in the set although a templated `variables.env` is machine-rebuilt in the same way
+        autoconf's state is. In both cases the carried-over `bw_resource_attachments` -- the
+        certificate, the upstream pools, the attached redirects -- is the part that matters, and
+        nothing re-derives it the way `save_custom_configs` re-derives the configs. Accepted for
+        1.7 because the alternative is the proven loss; the surrogate service id (1.8) removes the
+        pairing and with it both exposures.
+
+        Runs before the settings cleanup and before the removal path so the rest of the save
+        sees a database in which the service has simply always been called ``new``: nothing
+        downstream needs to know a rename happened, and every data-loss guard keeps its
+        meaning (the ui/api whole-wipe guard now even covers the renamed service). The DML is
+        rolled back with the rest of the save if one of those guards refuses it -- the session
+        is only committed at the very end.
+        """
+        # `autoconf` is deliberately OUT. It rebuilds the whole SERVER_NAME set from cluster state
+        # on every reconcile (`src/autoconf/Config.py`), so one-dropped-one-added is ordinary churn
+        # -- two unrelated ingress edits landing in the same pass, a blue/green swap, a Helm release
+        # rename -- and carries no rename intent at all. Reading it as a rename would move the old
+        # service's `bw_resource_attachments` (its certificate, its upstream pools, its redirects)
+        # onto an unrelated new service, and would silently defeat `AUTOCONF_DISABLE_CLEANUP`, whose
+        # entire contract is "never remove a service that dropped out, draft it". Autoconf therefore
+        # keeps its existing draft-or-delete behaviour byte for byte. The cost -- a ui/api-made
+        # custom config on an autoconf-managed service still dies when the ingress is renamed -- is
+        # the price of not having a surrogate service id, and is noted for 1.8.
+        if skip_service_management or ctx.method not in ("ui", "api", "scheduler"):
+            return None
+
+        services = ctx.config.get("SERVER_NAME", [])
+        if isinstance(services, str):
+            services = services.strip().split()
+        services = [service for service in services if service]
+        if not services:
+            return None
+
+        db_services = session.execute(select(Services.id, Services.method)).all()
+        if not db_services:
+            return None
+
+        db_ids = {service.id for service in db_services}
+        dropped = [
+            service.id for service in db_services if not _is_reserved(service) and _may_remove(ctx.method, service.method) and service.id not in services
+        ]
+        # The reserved default server is never *created* by a save either -- seed_default_server_service
+        # owns that row -- so it can never be the new half of a pair.
+        added = [service for service in services if service not in db_ids and service != DEFAULT_SERVER_ID]
+        if len(dropped) != 1 or len(added) != 1:
+            return None
+
+        old, new = dropped[0], added[0]
+        current_time = datetime.now().astimezone()
+        session.execute(
+            update(Services).filter_by(id=old).values({Services.id: new, Services.last_update: current_time}).execution_options(synchronize_session=False)
+        )
+        # SQLite runs with the foreign_keys pragma OFF (that is why `delete_service_rows`
+        # deletes the children by hand), so ON UPDATE CASCADE only fires on PostgreSQL and
+        # MariaDB. Re-key the four children explicitly, AFTER the parent so the new id already
+        # exists on the engines that do enforce the FK; there the cascade has already moved the
+        # rows and these statements match nothing.
+        for model in (Services_settings, Custom_configs, Jobs_cache, ResourceAttachments):
+            session.execute(update(model).filter_by(service_id=old).values({model.service_id: new}).execution_options(synchronize_session=False))
+        session.execute(update(Metadata).filter_by(id=1).values({Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: current_time}))
+        self.logger.info(f"Service {old} renamed to {new}; its settings, custom configs, job caches and attached resources follow the new name")
+        return old, new
+
     def _sc_compute_drafted_service_ids(
         self,
         session,
@@ -1044,9 +1165,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # 200 while the row survived, which is the recovery path the ruling exists to open. It
             # also has to count as a foreign service, or autoconf's empty-`SERVER_NAME` teardown
             # would delete somebody's `ui` row on the strength of its name.
-            method_services = [
-                s for s in db_services if not _is_reserved(s) and (s.method == ctx.method or (s.method in ("ui", "api") and ctx.method in ("ui", "api")))
-            ]
+            method_services = [s for s in db_services if not _is_reserved(s) and _may_remove(ctx.method, s.method)]
             if not services and method_services and (ctx.method == "autoconf" or "SERVER_NAME" not in ctx.config):
                 if ctx.method == "autoconf":
                     foreign_services = [s for s in db_services if not _is_reserved(s) and s.method not in ("autoconf", "scheduler")]
@@ -1091,9 +1210,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     # The reserved default-server row is excluded outright: it is never deleted by a
                     # save that omits it, whatever method saves. By ROW, not by id -- see the
                     # method_services comment above.
-                    if not _is_reserved(service)
-                    and (service.method == ctx.method or (service.method in ("ui", "api") and ctx.method in ("ui", "api")))
-                    and service.id not in services
+                    if not _is_reserved(service) and _may_remove(ctx.method, service.method) and service.id not in services
                 ]
 
             if missing_ids:
@@ -1139,6 +1256,18 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         service_template_change = True
 
                 if hard_delete_ids:
+                    # Whatever brought these ids here -- a deliberate DELETE /services/{s}, an
+                    # autoconf teardown, or a rename `_sc_apply_service_rename` could not pair (two
+                    # renames in one save, a concurrent writer adding a second id) -- their custom
+                    # configs go with them. Deliberate or not, that is a destructive write worth one
+                    # line: it used to be entirely silent, and the un-pairable rename is the case
+                    # where the operator did not ask for it at all.
+                    doomed_configs = session.scalar(select(func.count()).select_from(Custom_configs).where(Custom_configs.service_id.in_(hard_delete_ids))) or 0
+                    if doomed_configs:
+                        self.logger.warning(
+                            f"Removing {len(hard_delete_ids)} service(s) {sorted(hard_delete_ids)} also destroys "
+                            f"{doomed_configs} custom config(s) attached to them"
+                        )
                     self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
                     delete_service_rows(session, hard_delete_ids)
                     session.execute(
