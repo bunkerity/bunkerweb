@@ -479,25 +479,29 @@ def list_misconfigured(services: Dict[str, Dict[str, Union[str, bool, int, Dict[
 
 
 def extract_wildcard_groups(domains: List[str], service: str, rejected_services: Optional[Set[str]] = None) -> Dict[str, List[str]]:
-    cleaned_labels: List[List[str]] = []
+    cleaned_labels: List[Tuple[List[str], bool]] = []
 
     for domain in domains:
-        cleaned = domain.strip().removeprefix("*.").lower()
+        domain = domain.strip()
+        cleaned = domain.removeprefix("*.").lower()
         if not cleaned:
             continue
         labels = [part for part in cleaned.split(".") if part]
         if labels:
-            cleaned_labels.append(labels)
+            cleaned_labels.append((labels, domain.startswith("*.")))
 
     if not cleaned_labels:
         return {}
 
+    explicit_bases = {".".join(labels) for labels, explicit in cleaned_labels if explicit}
+    groups: Dict[str, Set[str]] = {base: {f"*.{base}", base} for base in explicit_bases}
     grouped: Dict[str, List[List[str]]] = defaultdict(list)
-    for labels in cleaned_labels:
+    for labels, explicit in cleaned_labels:
+        if explicit or ".".join(labels) in explicit_bases or ".".join(labels[1:]) in explicit_bases:
+            continue
         key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
         grouped[key].append(labels)
 
-    groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
         bases = _determine_wildcard_bases(labels_list, service)
         if not bases and rejected_services is not None:

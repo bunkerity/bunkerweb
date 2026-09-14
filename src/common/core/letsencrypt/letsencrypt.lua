@@ -47,6 +47,7 @@ local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
 		return nil
 	end
+	local explicit = domain:sub(1, 2) == "*."
 	local cleaned = lower(gsub(domain, "^%*%.", ""))
 	cleaned = gsub(cleaned, "%.+$", "")
 	local labels = {}
@@ -58,7 +59,7 @@ local function sanitize_domain_labels(domain)
 	if #labels == 0 then
 		return nil
 	end
-	return labels
+	return labels, explicit
 end
 
 local function determine_wildcard_bases(labels_list)
@@ -95,6 +96,11 @@ local function determine_wildcard_bases(labels_list)
 		insert(common_suffix, 1, label)
 	end
 	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
+		for _, labels in ipairs(labels_list) do
+			if #labels > #common_suffix + 1 then
+				return {}
+			end
+		end
 		return { table.concat(common_suffix, ".") }
 	end
 	local bases = {}
@@ -115,12 +121,29 @@ local function determine_wildcard_bases(labels_list)
 end
 
 local function build_wildcard_groups(domains)
-	local grouped = {}
-	local has_entries = false
+	local cleaned_labels = {}
+	local explicit_bases = {}
 	for _, domain in ipairs(domains) do
-		local labels = sanitize_domain_labels(domain)
+		local labels, explicit = sanitize_domain_labels(domain)
 		if labels then
-			has_entries = true
+			insert(cleaned_labels, { labels = labels, explicit = explicit })
+			if explicit then
+				explicit_bases[table.concat(labels, ".")] = true
+			end
+		end
+	end
+	if #cleaned_labels == 0 then
+		return {}
+	end
+	local groups = {}
+	for base, _ in pairs(explicit_bases) do
+		groups[base] = { ["*." .. base] = true, [base] = true }
+	end
+	local grouped = {}
+	for _, entry in ipairs(cleaned_labels) do
+		local labels = entry.labels
+		local base = table.concat(labels, ".")
+		if not entry.explicit and not explicit_bases[base] and not explicit_bases[table.concat(labels, ".", 2)] then
 			local len = #labels
 			local key
 			if len >= 2 then
@@ -132,10 +155,6 @@ local function build_wildcard_groups(domains)
 			insert(grouped[key], labels)
 		end
 	end
-	if not has_entries then
-		return {}
-	end
-	local groups = {}
 	for _, labels_list in pairs(grouped) do
 		local bases = determine_wildcard_bases(labels_list)
 		for _, base in ipairs(bases) do
