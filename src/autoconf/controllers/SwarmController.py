@@ -10,6 +10,7 @@ from base64 import b64decode
 from docker.models.services import Service
 from docker.errors import DockerException
 from controllers.Controller import Controller
+from custom_configs_validation import validate as validate_custom_config  # type: ignore
 
 
 class SwarmController(Controller):
@@ -23,6 +24,7 @@ class SwarmController(Controller):
         self.__swarm_services = []
         self.__swarm_configs = []
         self.__warned_custom_conf_services = set()
+        self.__warned_invalid_custom_conf_names = set()
         self.__warned_non_global_instances = set()
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
@@ -237,7 +239,18 @@ class SwarmController(Controller):
                     )
                     continue
                 config_site = f"{labels['bunkerweb.CONFIG_SITE']}/"
-            configs[config_type][f"{config_site}{config_name}"] = b64decode(config.attrs["Spec"]["Data"])
+            data = b64decode(config.attrs["Spec"]["Data"])
+            # `Config.py` strips a trailing `.conf` before persisting (out of this lane's
+            # glob); validate the name the same way it will eventually be stored.
+            # WARN-only (design AC 6): a Swarm-config-labelled install keeps accepting
+            # exactly what it accepts today; refusing an invalid name is the 1.8 flip.
+            verdict = validate_custom_config(
+                config_type, config_name.replace(".conf", ""), data, service_id=config_site.rstrip("/") or None, source="swarm_config"
+            )
+            if verdict.warning and config.id not in self.__warned_invalid_custom_conf_names:
+                self.__warned_invalid_custom_conf_names.add(config.id)
+                self._logger.warning(verdict.warning)
+            configs[config_type][f"{config_site}{config_name}"] = data
             self.__swarm_configs.append(config.id)
         return configs
 
