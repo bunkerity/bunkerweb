@@ -20,6 +20,12 @@ import pytest
 from jobs import ATOMIC_TMP_GRACE_SECONDS, ATOMIC_TMP_SUFFIX, Job, _write_atomic
 
 
+@pytest.fixture(autouse=True)
+def cache_publication_root(tmp_path, monkeypatch):
+    # Partial Job fixtures bypass the constructor's cache-root setup; keep real flock behavior.
+    monkeypatch.setattr("jobs.CACHE_PATH", tmp_path)
+
+
 @pytest.fixture
 def job(tmp_path):
     """A Job whose database knows about no cache files, so the sweep considers everything stale.

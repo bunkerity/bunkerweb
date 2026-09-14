@@ -183,6 +183,7 @@ from jobs import (  # type: ignore # noqa: E402
     JOB_REQUEUE_COUNT_ENV,
     MAX_JOB_REQUEUES,
     RELOAD_ACK_PENDING_KEY as ACK_PENDING_KEY,
+    cache_publication_lock,
     drain_deferral_reason,
     drain_pending_acks,
     drain_requeue_request,
@@ -577,8 +578,23 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # with every file already built. The floor stays at that same 30s, so a small install
             # behaves exactly as before. `send_files` derives the body-write budget from the read
             # one; it reaches the socket only once `API.request` accepts it (dev 7a6bf2c70).
-            if not apis.send_files("/var/cache/bunkerweb", "/cache", timeout=folder_push_timeout(30, _push_service_count(logger))):
-                raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
+            #
+            # Under the publication lock, and only the push: `POST /cache` publishes by replacing
+            # every top-level entry of the destination with this tar's copy, and on a co-located
+            # deployment (the Linux package, all-in-one) that destination is the very directory the
+            # jobs write into. A `cache_file` landing between the tar and the instance's swap was
+            # renamed into `.bw-trash` and deleted -- row in the database, no file on disk, job
+            # recorded a success. `send_files` returns only once the instance has swapped, so
+            # holding it here is what covers that whole window -- for the three `jobs.Job` methods
+            # that take the lock (`cache_file`, `del_cache`, `restore_cache`). A job writing into
+            # its cache directory directly, as certbot does through `--config-dir`, is not covered.
+            # The reload below is deliberately OUTSIDE it: it touches no file, and a job blocked
+            # behind a 30 s reload buys nothing.
+            # Acquisition failure raises before send_files; the existing failure path retains
+            # reload debt and deferred acknowledgements for a later attempt.
+            with cache_publication_lock(logger):
+                if not apis.send_files("/var/cache/bunkerweb", "/cache", timeout=folder_push_timeout(30, _push_service_count(logger))):
+                    raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
 
             if not apis.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]:
                 raise RuntimeError("Failed to request BunkerWeb reload")

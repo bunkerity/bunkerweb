@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
+from fcntl import LOCK_EX, LOCK_NB, LOCK_UN, flock
 from gzip import GzipFile
 from json import dumps as json_dumps
 from inspect import currentframe, getframeinfo
 from io import BytesIO
 from logging import Logger
-from os import getenv
+from os import O_CREAT, O_RDWR, close as os_close, getenv, open as os_open
 from os.path import sep
 from pathlib import Path
 from shutil import rmtree
@@ -15,7 +17,7 @@ from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
-from time import time
+from time import monotonic, sleep, time
 
 from common_utils import bytes_hash, file_hash
 from cache_restore import (  # type: ignore
@@ -45,6 +47,89 @@ EXPIRE_TIME = {
 # than someone else's write in progress. A leaked temporary is not harmless: the cache is shipped to
 # instances as a tar of this directory, so it would travel with it.
 ATOMIC_TMP_GRACE_SECONDS = 300
+
+# The root of the cache tree, and the lock that keeps it still while it is being published.
+#
+# `POST /cache` publishes by REPLACING every top-level entry of the destination with the archive's
+# copy (`api.lua`'s /confs handler -> `pushswap.swap`), and on a co-located deployment -- the Linux
+# package, all-in-one -- that destination IS this directory. A job write that lands between the tar
+# being built and the swap completing is therefore renamed into `.bw-trash` and deleted: the row is
+# in the database, the file is gone from disk, and the job reported success. Seen live on the Linux
+# `customcert` action, where `customcert/default-server/cert.pem` was written at 11:10:51 into an
+# in-flight push; the swap rolled the directory back, the three reloads that followed all logged
+# "No such file or directory", and the instance served the internal self-signed certificate instead
+# of the operator's -- `custom-cert` is `every: day`, so until the next run or the next restore.
+#
+# `cache_file`, `del_cache` and `restore_cache` take this lock, and
+# `src/worker/tasks.py::_request_reload_debounced` holds it across `send_files` -- which returns
+# only once the instance has swapped -- so no write THROUGH THIS API can land inside that window.
+# It is the cache API that is covered, not the cache tree: a job writing into its `job_path`
+# directly is still exposed, and the live example is Let's Encrypt, whose certbot runs are handed
+# `--config-dir /var/cache/bunkerweb/letsencrypt/etc` (`core/letsencrypt/jobs/letsencrypt_utils.py:35-36`,
+# `certbot-new.py:690`) and write there for minutes at a time. Co-location is what makes the loss
+# permanent, and it is also what makes a plain `flock` enough: the only writers a swap can destroy
+# are the ones on the pushing host.
+#
+# Reserved `.bw-` prefix on purpose: `pushswap.is_reserved` skips those entries, so the swap never
+# replaces this file and every process keeps flocking the same inode. The counter-example is in the
+# tree already: `letsencrypt_consistency.py`'s `.letsencrypt-cache-write.lock` carries no reserved
+# prefix, so every co-located `/cache` swap renames the archive's copy over it and its holders end
+# up on different inodes.
+CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
+CACHE_PUBLICATION_LOCK_NAME = ".bw-cache-publish.lock"
+# A bounded wait, not a promise to outlast a push: the network phases alone can take
+# 3 * (5 s connect + 120 s body write + 120 s read) + 4 s retries = 739 s, before tar
+# creation. If the 600 s deadline expires, callers must fail without writing or publishing.
+CACHE_PUBLICATION_LOCK_WAIT = 600
+
+
+class CachePublicationLockError(RuntimeError):
+    """The cache must not be written or published without its publication lock."""
+
+
+def _open_cache_publication_lock(logger: Optional[Logger]):
+    try:
+        # A missing publication source must stay missing: creating an empty tree here
+        # would let send_files replace the instance's cache with an empty archive.
+        return os_open(CACHE_PATH.joinpath(CACHE_PUBLICATION_LOCK_NAME).as_posix(), O_CREAT | O_RDWR, 0o660)
+    except InterruptedError:
+        raise
+    except (OSError, ValueError) as e:
+        raise CachePublicationLockError(f"Could not open the cache publication lock: {e}") from e
+
+
+@contextmanager
+def cache_publication_lock(logger: Optional[Logger] = None, *, timeout: Optional[float] = None):
+    """Serialise cooperating cache writers and worker reload pushes, or fail closed."""
+    budget = CACHE_PUBLICATION_LOCK_WAIT if timeout is None else timeout
+    fd = _open_cache_publication_lock(logger)
+    held = False
+    try:
+        deadline = monotonic() + max(budget, 0)
+        while True:
+            try:
+                flock(fd, LOCK_EX | LOCK_NB)
+                held = True
+                break
+            except BlockingIOError as e:
+                if monotonic() >= deadline:
+                    raise CachePublicationLockError(f"Could not take the cache publication lock within {budget}s") from e
+                sleep(0.05)
+            except InterruptedError:
+                raise
+            except OSError as e:
+                raise CachePublicationLockError(f"Could not take the cache publication lock: {e}") from e
+        yield True
+    except CachePublicationLockError as e:
+        if logger:
+            logger.warning(str(e))
+        raise
+    finally:
+        if held:
+            with suppress(OSError):
+                flock(fd, LOCK_UN)
+        with suppress(OSError):
+            os_close(fd)
 
 
 # The Redis set the worker drains. Defined here and imported by src/worker/tasks.py rather than
@@ -268,7 +353,19 @@ class Job:
                 self.logger.error(f"Exception while auto-restoring cache in Job.__init__ for plugin '{self.job_path.name}': {e}")
 
     def restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
-        """Restore job cache files from database."""
+        """Restore job cache files from database.
+
+        Under the publication lock like every other writer here: a restore rewrites the whole plugin
+        directory, and a `/cache` push landing in the middle of it rolls the tree back to the copy
+        its tar holds (see `cache_publication_lock`).
+        """
+        try:
+            with cache_publication_lock(self.logger):
+                return self._restore_cache(job_name=job_name, plugin_id=plugin_id, manual=manual)
+        except CachePublicationLockError:
+            return False
+
+    def _restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
         ret = True
         job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name)  # type: ignore
 
@@ -479,21 +576,28 @@ class Job:
             assert isinstance(file_cache, Path)
             content = file_cache.read_bytes()
 
-        if not name.startswith("folder:") and (overwrite_file or not cache_path.is_file()):
-            _write_atomic(cache_path, content)
-
         if not checksum:
             checksum = bytes_hash(content)
 
+        # The lock covers the disk write AND the row, because a push that rolls the file back while
+        # the row already carries the new checksum leaves the instance without the material and the
+        # job's next run believing it is already current.
         try:
-            err = self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum)  # type: ignore
-            if err:
-                ret = False
+            with cache_publication_lock(self.logger):
+                if not name.startswith("folder:") and (overwrite_file or not cache_path.is_file()):
+                    _write_atomic(cache_path, content)
 
-            if ret and isinstance(file_cache, Path) and delete_file and file_cache.resolve() != cache_path:
-                file_cache.unlink(missing_ok=True)
-        except:
-            return False, f"exception :\n{format_exc()}"
+                try:
+                    err = self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum)  # type: ignore
+                    if err:
+                        ret = False
+
+                    if ret and isinstance(file_cache, Path) and delete_file and file_cache.resolve() != cache_path:
+                        file_cache.unlink(missing_ok=True)
+                except:
+                    return False, f"exception :\n{format_exc()}"
+        except CachePublicationLockError as e:
+            return False, str(e)
         return ret, err
 
     def cache_dir(self, dir_path: Union[str, Path], *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
@@ -528,20 +632,26 @@ class Job:
         except ValueError as error:
             return False, str(error)
 
-        if cache_path.is_file():
-            cache_path.unlink(missing_ok=True)
-
-        if job_path.is_dir() and not list(job_path.iterdir()):
-            rmtree(job_path, ignore_errors=True)
-
+        # Mirrors `cache_file`: a withdrawal a push rolls back is a retired certificate the instance
+        # keeps serving, with the row already gone.
         try:
-            err = self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
-            if err:
-                # The local file is already gone; reporting success here left the caller believing
-                # the row went with it.
-                return False, err
-        except:
-            return False, f"exception :\n{format_exc()}"
+            with cache_publication_lock(self.logger):
+                if cache_path.is_file():
+                    cache_path.unlink(missing_ok=True)
+
+                if job_path.is_dir() and not list(job_path.iterdir()):
+                    rmtree(job_path, ignore_errors=True)
+
+                try:
+                    err = self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
+                    if err:
+                        # The local file is already gone; reporting success here left the caller believing
+                        # the row went with it.
+                        return False, err
+                except:
+                    return False, f"exception :\n{format_exc()}"
+        except CachePublicationLockError as e:
+            return False, str(e)
         return ret, err
 
     def cache_hash(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:

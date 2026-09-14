@@ -24,6 +24,12 @@ from cache_restore import recover_directory
 from jobs import Job
 
 
+@pytest.fixture(autouse=True)
+def cache_publication_root(tmp_path, monkeypatch):
+    # Partial Job fixtures bypass the constructor's cache-root setup; keep real flock behavior.
+    monkeypatch.setattr("jobs.CACHE_PATH", tmp_path)
+
+
 def _archive(entries, symlinks=None) -> bytes:
     """A .tgz payload holding ``{name: content}`` plus optional ``{name: target}`` symlinks."""
     raw = BytesIO()
