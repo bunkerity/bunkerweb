@@ -677,11 +677,13 @@ with app.app_context():
     # Same helper the routes use, so the worker ends up with one memoised client and one
     # connection pool instead of a session pool plus a per-request one.
     redis_client = get_ui_redis_client()
+    session_fallback_cache = None
     if redis_client:
         LOGGER.debug("Using Redis as session backend")
         app.config["SESSION_TYPE"] = "redis"
         app.config["SESSION_REDIS"] = redis_client
         app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        session_fallback_cache = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     else:
         # get_redis_client returns None for both "disabled" and "unreachable"; only the second
         # is worth a WARNING, because this worker is now pinned to file sessions for its life.
@@ -692,6 +694,27 @@ with app.app_context():
         app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+    # dies or fills up after this point makes every request raise. Same parameters as the
+    # interface it replaces, plus the local cache it falls back to.
+    if session_fallback_cache is not None:
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it. This branch only runs once a Redis
+        # client exists.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=session_fallback_cache,
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
 
     # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
     # every request, so an untouched session is rewritten to the store even for a static
@@ -1024,14 +1047,9 @@ def _delete_session_store_entry(sid: str) -> None:
         return
     interface = app.session_interface
     try:
-        client = getattr(interface, "client", None)
-        key_prefix = getattr(interface, "key_prefix", None)
-        if client is not None and key_prefix is not None:
-            client.delete(f"{key_prefix}{sid}")
-            return
-        cache = getattr(interface, "cache", None)
-        if cache is not None:
-            cache.delete(sid)
+        # The interface's own delete already covers whichever store backs it, including the
+        # local one a failing Redis falls back to.
+        interface._delete_session(interface._get_store_id(sid))
     except Exception:
         LOGGER.exception("Failed to delete session store entry during rotation/expiry")
 
@@ -1171,13 +1189,17 @@ def before_request():
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
-        if app.config.get("SESSION_TYPE") == "cachelib":
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0).
+        # Covers the Redis fallback cache too, which fills up during an outage and prunes no more than the other.
+        session_file_cache = (
+            app.config["SESSION_CACHELIB"] if app.config.get("SESSION_TYPE") == "cachelib" else getattr(app.session_interface, "fallback", None)
+        )
+        if session_file_cache is not None:
             global _session_cleanup_last_run
             now_ts = time()
             if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
                 _session_cleanup_last_run = now_ts
-                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
+                _periodic_tasks_executor.submit(session_file_cache._remove_expired, now_ts)
 
         schedule_database_state_check(request.method, request.path)
 

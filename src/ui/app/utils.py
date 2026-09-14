@@ -504,8 +504,8 @@ def _revoked_session_ttl_seconds():
 def _session_store_backend():
     """``(redis_client, key_prefix)`` or ``(cachelib_cache, None)``, whichever backs Flask-Session.
 
-    Same two-branch shape as main.py's ``_delete_session_store_entry``. ``(None, None)`` if the
-    session interface exposes neither, which only happens if the backend failed to initialise.
+    ``(None, None)`` if the session interface exposes neither, which only happens if the
+    backend failed to initialise.
     """
     interface = getattr(current_app, "session_interface", None)
     client = getattr(interface, "client", None)
@@ -516,6 +516,16 @@ def _session_store_backend():
 
 def _revoked_session_key(session_id, prefix) -> str:
     return f"{prefix}revoked:{session_id}" if prefix is not None else f"revoked:{session_id}"
+
+
+def _session_store_fallback():
+    """The local cache the Redis session interface falls back to, or ``None`` outside that setup."""
+    return getattr(getattr(current_app, "session_interface", None), "fallback", None)
+
+
+def _session_store_redis_available() -> bool:
+    """False while the session interface is skipping a Redis it cannot reach."""
+    return getattr(getattr(current_app, "session_interface", None), "redis_available", True)
 
 
 def revoke_sessions(ids) -> str:
@@ -533,6 +543,18 @@ def revoke_sessions(ids) -> str:
         return "No session backend available to record the revocation"
 
     ttl = _revoked_session_ttl_seconds()
+
+    # Mirrored locally on every revocation, not only when Redis fails. The session it names can
+    # be served from the local store during any later outage, and the check consults that store
+    # too, so a marker held only by Redis would stop applying exactly when Redis goes away.
+    fallback = _session_store_fallback()
+    if fallback is not None:
+        try:
+            for sid in ids:
+                fallback.set(_revoked_session_key(sid, prefix), True, timeout=ttl)
+        except Exception:
+            LOGGER.exception("Couldn't record revoked session ids in the local session store")
+
     try:
         for sid in ids:
             key = _revoked_session_key(sid, prefix)
@@ -541,6 +563,7 @@ def revoke_sessions(ids) -> str:
             else:
                 backend.set(key, True, timeout=ttl)
     except BaseException as e:
+        # Still returned: it is what tells the caller the revocation did not reach the other replicas.
         LOGGER.exception("Couldn't record revoked session ids")
         return str(e)
 
@@ -550,9 +573,9 @@ def revoke_sessions(ids) -> str:
 def is_session_revoked(session_id) -> bool:
     """Whether this session id has been revoked. Checked on every authenticated request.
 
-    Fails open on a backend error, which is safe here: the same backend stores the sessions
-    themselves, so if it is unreachable the session cannot be loaded and the request is
-    unauthenticated long before this check runs.
+    Both stores are consulted. A session served from the local fallback while Redis is
+    unavailable would otherwise outlive its own revocation, since the marker for it never
+    reached Redis either.
     """
     if not session_id:
         return False
@@ -562,12 +585,24 @@ def is_session_revoked(session_id) -> bool:
         return False
 
     key = _revoked_session_key(session_id, prefix)
+    # Skipped while the interface has given up on Redis, since this runs on every authenticated
+    # request and would otherwise pay REDIS_TIMEOUT each time. Every revocation is mirrored
+    # locally, so the check below still sees it.
+    if _session_store_redis_available():
+        try:
+            if bool(backend.exists(key)) if prefix is not None else bool(backend.get(key)):
+                return True
+        except Exception:
+            LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+
+    fallback = _session_store_fallback()
+    if fallback is None:
+        return False
+
     try:
-        if prefix is not None:
-            return bool(backend.exists(key))
-        return bool(backend.get(key))
+        return bool(fallback.get(key))
     except BaseException:
-        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked in the local session store")
         return False
 
 

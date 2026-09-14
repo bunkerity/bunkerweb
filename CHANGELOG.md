@@ -2,7 +2,7 @@
 
 ## v1.6.15~rc3 - 2026/09/11
 
-- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
+- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery; with several UI replicas the others stop seeing a session that moved and ask for a login. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
 - [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
 - [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.

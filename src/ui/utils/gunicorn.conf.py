@@ -623,8 +623,9 @@ def on_starting(server):
     set_secure_permissions(UI_DATA_FILE)
 
     # Check if Redis is enabled via environment variable or database before closing DB
-    use_redis = getenv("USE_REDIS", "no").lower() == "yes"
-    if not use_redis:
+    ui_redis_enabled = getenv_bool("UI_USE_REDIS", "yes")
+    use_redis = ui_redis_enabled and getenv("USE_REDIS", "no").lower() == "yes"
+    if ui_redis_enabled and not use_redis:
         db_config = DB.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",))
         use_redis = db_config.get("USE_REDIS", "no") == "yes"
 

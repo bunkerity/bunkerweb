@@ -13,7 +13,7 @@ from regex import compile as re_compile
 from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, flash
 
-from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, getenv_bool  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
@@ -174,6 +174,15 @@ def get_redis_client():
     """
     if has_request_context() and "bw_redis_client" in g:
         return g.bw_redis_client
+
+    # Per-container opt-out, read from the environment so it works when the shared Redis is
+    # the thing that is broken: sessions go to the local store and every other Redis branch
+    # falls back to the instances API, without taking Redis away from the rest of the stack
+    # the way the global USE_REDIS setting does.
+    if not getenv_bool("UI_USE_REDIS", "yes"):
+        if has_request_context():
+            g.bw_redis_client = None
+        return None
 
     db_config = BW_CONFIG.get_config(
         global_only=True,
