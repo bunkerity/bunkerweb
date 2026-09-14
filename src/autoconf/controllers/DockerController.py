@@ -4,11 +4,16 @@ from os import getenv
 from typing import Any, Dict, List
 from threading import Lock
 from docker import DockerClient
-from re import compile as re_compile, split as re_split
+from re import split as re_split
 
 from docker.models.containers import Container
 from docker.errors import DockerException
 from controllers.Controller import Controller
+from custom_configs_validation import (  # type: ignore
+    CUSTOM_CONFIG_TYPES,
+    build_docker_label_key_rx,
+    validate as validate_custom_config,
+)
 
 
 class DockerController(Controller):
@@ -18,7 +23,13 @@ class DockerController(Controller):
         self.__internal_lock = Lock()
         # Protected alias so the base-class settings recheck worker shares the same lock object.
         self._internal_lock = self.__internal_lock
-        self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
+        self.__custom_confs_rx = build_docker_label_key_rx()
+        # Broader pattern (all nine types) used only to detect a label naming one of the
+        # three fleet-global types, so it can be refused with a diagnostic instead of
+        # silently falling through `__custom_confs_rx`'s six-type non-match.
+        self.__custom_confs_rx_all_types = build_docker_label_key_rx(CUSTOM_CONFIG_TYPES)
+        self.__warned_global_custom_conf_labels = set()
+        self.__warned_invalid_custom_conf_names = set()
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
         ignore_labels = getenv("DOCKER_IGNORE_LABELS", "")
@@ -185,8 +196,29 @@ class DockerController(Controller):
                     continue
                 result = self.__custom_confs_rx.search(variable)
                 if result is None:
+                    # Might still be a fleet-global type (http/stream/default_server_http),
+                    # which `__custom_confs_rx` never matches by design (report-CC-A.md
+                    # §4.3): surface that as an explicit, logged refusal instead of the
+                    # previous silent non-match, once per container rather than every pass.
+                    global_result = self.__custom_confs_rx_all_types.search(variable)
+                    if global_result is not None and (container.id, variable) not in self.__warned_global_custom_conf_labels:
+                        self.__warned_global_custom_conf_labels.add((container.id, variable))
+                        verdict = validate_custom_config(global_result.group("type"), global_result.group("name"), source="docker_label")
+                        if verdict.error:
+                            self._logger.warning(f"Ignoring label {variable!r} on container {getattr(container, 'name', container.id)}: {verdict.error}")
                     continue
-                configs[result.group(1).lower().replace("_", "-")][f"{server_name}/{result.group(2)}"] = value
+                config_type = result.group("type").lower().replace("_", "-")
+                config_name = result.group("name")
+                # `Config.py` strips a trailing `.conf` before persisting (out of this lane's
+                # glob); validate the name the same way it will eventually be stored, not the
+                # raw label suffix, so a conventional `foo.conf` name doesn't warn every pass.
+                # WARN-only (design AC 6): a Docker-labelled install keeps accepting exactly
+                # what it accepts today; refusing an invalid name is the 1.8 flip.
+                verdict = validate_custom_config(result.group("type"), config_name.replace(".conf", ""), value, service_id=server_name, source="docker_label")
+                if verdict.warning and (container.id, variable) not in self.__warned_invalid_custom_conf_names:
+                    self.__warned_invalid_custom_conf_names.add((container.id, variable))
+                    self._logger.warning(verdict.warning)
+                configs[config_type][f"{server_name}/{config_name}"] = value
         return configs
 
     def apply_config(self, force: bool = False) -> bool:
