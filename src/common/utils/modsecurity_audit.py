@@ -28,18 +28,23 @@ def validate_audit_log_settings(config: dict, *, check_storage: bool = False, pa
             raise ValueError(f"{prefix}{storage_key} must be an absolute directory path without traversal or special characters")
         if log_type == "Serial":
             continue
-        if partial and not storage:
-            # A template may supply the directory after raw variables have been checked.
-            continue
-        if not storage:
-            raise ValueError(f"{prefix}{storage_key} is required for Concurrent audit logging")
         if config.get("USE_MODSECURITY_GLOBAL_CRS") == "yes":
             active_scope = not prefix
             enabled = global_crs_enabled
         else:
             active_scope = prefix in http_prefixes
             enabled = config.get(prefix + "USE_MODSECURITY", config.get("USE_MODSECURITY", "yes")) == "yes"
-        if check_storage and active_scope and enabled:
+        # An inactive scope is only a fallback for services that override it. Requiring a storage
+        # directory there rejects a global Concurrent whose services each set their own, and a
+        # service that has ModSecurity disabled entirely.
+        if not (active_scope and enabled):
+            continue
+        if partial and not storage:
+            # A template may supply the directory after raw variables have been checked.
+            continue
+        if not storage:
+            raise ValueError(f"{prefix}{storage_key} is required for Concurrent audit logging")
+        if check_storage:
             # The standalone process runs with the same credentials as the nginx worker.
             if not Path(storage).is_dir() or not access(storage, W_OK | X_OK):
                 raise ValueError(f"{prefix}{storage_key} must already exist and be writable/searchable by the nginx worker: {storage}")
