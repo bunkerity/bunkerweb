@@ -5,6 +5,7 @@ local internal_api = require "bunkerweb.internal_api"
 local lrucache = require "resty.lrucache"
 local plugin = require "bunkerweb.plugin"
 local resty_lock = require "resty.lock"
+local signal = require "resty.signal"
 local utils = require "bunkerweb.utils"
 
 local metrics = class("metrics", plugin)
@@ -27,6 +28,14 @@ if not lru then
 end
 -- Security reports have their own bounded queue: they must not compete with metric keys.
 local stream_requests = {}
+-- The batch push_stream_reports() has detached and is currently POSTing. Held here rather than
+-- only in that closure so persist_stream_reports() can still write it to SHM: a worker that dies
+-- mid-POST must not lose reports that were durable a moment earlier.
+local inflight_stream_requests = nil
+local stream_snapshot_key = nil
+local stream_snapshot_nonce = nil
+local stream_snapshot_sequence = 0
+local stream_restore_pending = false
 
 -- Fold one duration sample (seconds) into a running aggregate. Kept pure and module-level
 -- so the arithmetic can be exercised on its own.
@@ -186,6 +195,7 @@ local worker_id = worker.id
 local worker_pid = worker.pid
 
 local crc32_short = ngx.crc32_short
+local ngx_now = ngx.now
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
@@ -723,6 +733,155 @@ function metrics:redis_call(method, ...)
 	return res, call_err
 end
 
+-- Writing the stream buffer through to its SHM is the only thing that makes a report survive
+-- the worker that produced it: a reload disables the recurrent timer (premature) instead of
+-- letting it flush, so anything still Lua-local at that moment dies with the worker. Called
+-- from log() as well as from timer(), hence its position above both.
+local function persist_stream_reports(self)
+	local key = stream_requests_key()
+	-- Concatenated without de-duplicating by id, and safe only because keep_for_next_tick() puts the
+	-- batch back into the buffer and clears the slot in one block with no yield in between: a report
+	-- is in exactly one of the two at any moment this can run. Move that clear below a yield and this
+	-- key silently doubles every report in it.
+	local queue = stream_requests
+	if inflight_stream_requests then
+		queue = {}
+		for _, request in ipairs(inflight_stream_requests) do
+			queue[#queue + 1] = request
+		end
+		for _, request in ipairs(stream_requests) do
+			queue[#queue + 1] = request
+		end
+	end
+	local encoded, reports = pcall(encode, queue)
+	if not encoded then
+		return false, reports, key
+	end
+	local previous_key = stream_snapshot_key
+	if subsystem == "stream" then
+		-- A published snapshot is immutable. A sibling may adopt/delete it while we log
+		-- another session; publishing under a fresh key keeps that session out of its claim.
+		stream_snapshot_nonce = stream_snapshot_nonce or utils.rand(32)
+		stream_snapshot_sequence = stream_snapshot_sequence + 1
+		key = key .. "_" .. stream_snapshot_nonce .. "_" .. tostring(stream_snapshot_sequence)
+	end
+	local ok, err = self.stream_reports_datastore:set(key, reports)
+	if ok then
+		if subsystem == "stream" then
+			stream_snapshot_key = key
+			self.stream_reports_datastore:delete(stream_requests_key())
+			if previous_key then
+				self.stream_reports_datastore:delete(previous_key)
+			end
+		end
+		self.metrics_datastore:delete(stream_requests_key())
+	end
+	return ok, err, key
+end
+
+-- Budget for the log-time write-through below. The whole bounded queue is re-encoded on every
+-- call, so a saturated buffer turns each newly blocked session into ~METRICS_MAX_BLOCKED_REQUESTS
+-- serializations plus a zone-wide locked SHM write -- on a path a spoofed UDP datagram can reach.
+-- A ration per short window keeps the case this exists for exact (a burst of blocked sessions,
+-- then a reload) and puts a ceiling on the rest. Read the ceiling honestly: a flood does NOT fall
+-- back to the 5 s tick, it falls back to BUDGET/WINDOW = 40 whole-queue re-encodes plus 40
+-- safe_set calls per second per worker, with the queue at METRICS_MAX_BLOCKED_REQUESTS. That is
+-- survivable -- datastore:set uses safe_set, so a full zone fails this write rather than evicting
+-- another worker's queue -- but it is ~200x the tick rate, which is why the budget is small.
+-- Why 8 and not the 2 the integration probes need: a real stack blocks sessions on several
+-- services at once, and 8 per 200 ms keeps an ordinary burst durable across a 4-worker instance
+-- without moving the flood ceiling into a range that matters. Not a plain interval, which would
+-- drop the second of two probes landing in the same window.
+local STREAM_PERSIST_BUDGET = 8
+local STREAM_PERSIST_WINDOW = 0.2
+local persist_window_start = 0
+local persist_window_writes = 0
+
+local function claim_persist_budget()
+	-- ngx.now() is wall clock, not monotonic: an NTP step backwards would otherwise leave the
+	-- window open-ended and the ration spent until the clock caught up.
+	local now = ngx_now()
+	if now < persist_window_start or now - persist_window_start >= STREAM_PERSIST_WINDOW then
+		persist_window_start = now
+		persist_window_writes = 0
+	end
+	if persist_window_writes >= STREAM_PERSIST_BUDGET then
+		return false
+	end
+	persist_window_writes = persist_window_writes + 1
+	return true
+end
+
+-- Adopt every Stream queue left in SHM by a previous generation of workers -- a reload replaces
+-- the Lua VM but not the shared dicts -- and merge them, de-duplicated by report id, into this
+-- worker's live buffer. Retry while legacy writers are still alive or a claim failed.
+local function restore_stream_reports(self)
+	local restored = {}
+	local seen = {}
+	local function remember(requests)
+		if type(requests) ~= "table" then
+			return
+		end
+		for _, request in ipairs(requests) do
+			if type(request) == "table" and type(request.id) == "string" and not seen[request.id] then
+				seen[request.id] = true
+				table_insert(restored, request)
+			end
+		end
+	end
+	local current_key = stream_requests_key()
+	local stale_keys = {}
+	stream_restore_pending = false
+	for _, store in ipairs({ self.metrics_datastore, self.stream_reports_datastore }) do
+		for _, key in ipairs(store:keys()) do
+			local legacy_pid = key:match("^stream_requests_([0-9]+)$")
+			local snapshot = key:match("^stream_requests_[0-9]+_%w+_[0-9]+$")
+			local readable = legacy_pid or snapshot
+			if subsystem == "stream" and legacy_pid and key ~= current_key then
+				-- Old code can still overwrite PID keys during a graceful reload. Only
+				-- ESRCH proves that writer is gone; alive/permission errors defer adoption.
+				local alive, probe_err = signal.kill(tonumber(legacy_pid), 0)
+				if alive or probe_err ~= "No such process" then
+					readable = false
+					stream_restore_pending = true
+				end
+			end
+			if readable then
+				local persisted = store:get(key)
+				if persisted then
+					local ok, decoded = pcall(decode, persisted)
+					if ok and type(decoded) == "table" then
+						remember(decoded)
+						if subsystem == "stream" and key ~= current_key then
+							table_insert(stale_keys, { store = store, key = key })
+						end
+					end
+				end
+			end
+		end
+	end
+	remember(stream_requests)
+	for index = #stream_requests, 1, -1 do
+		stream_requests[index] = nil
+	end
+	for index, request in ipairs(restored) do
+		stream_requests[index] = request
+	end
+	-- Persist before retiring immutable snapshots: concurrent claimants can duplicate a
+	-- batch, but no writer can replace the exact key we retire with a newer batch.
+	-- HTTP generations remain owned by api_ingest_stream_reports() and its ingest lock.
+	local claimed, claim_err, claim_key = persist_stream_reports(self)
+	if not claimed then
+		stream_restore_pending = true
+		self:log_throttled(ERR, "stream_reports_store", "can't set " .. claim_key .. " : " .. tostring(claim_err))
+		return false
+	end
+	for _, stale in ipairs(stale_keys) do
+		stale.store:delete(stale.key)
+	end
+	return true
+end
+
 function metrics:log(bypass_checks)
 	-- Don't go further if metrics is not enabled
 	if not bypass_checks and self.variables["USE_METRICS"] == "no" then
@@ -799,6 +958,23 @@ function metrics:log(bypass_checks)
 
 		if subsystem ~= "stream" then
 			lru:set("requests", requests)
+		else
+			-- Write through to SHM now rather than waiting for the next timer tick. The tick only
+			-- comes every 5 s and refuses to run at all when the worker is exiting, so a reload --
+			-- which BunkerWeb performs on every config and job-cache push -- silently dropped every
+			-- session blocked since the last tick. Rationed: see claim_persist_budget().
+			-- ponytail: whole-buffer re-encode, O(n) per persisted report; one SHM key per report
+			-- would make it O(1) and retire the budget, at the cost of a keyspace to reap.
+			if claim_persist_budget() then
+				local stream_ok, stream_err, stream_key = persist_stream_reports(self)
+				if not stream_ok then
+					self:log_throttled(
+						ERR,
+						"stream_reports_store",
+						"can't set " .. stream_key .. " : " .. tostring(stream_err)
+					)
+				end
+			end
 		end
 	end
 	-- Count proxy_cache hit/miss for served requests. Distinct axis from the
@@ -967,6 +1143,7 @@ local function push_stream_reports(max_requests)
 	local batch = requests
 	local count = #batch
 	stream_requests = {}
+	inflight_stream_requests = batch
 
 	local function keep_for_next_tick()
 		local pending = stream_requests
@@ -977,6 +1154,7 @@ local function push_stream_reports(max_requests)
 		while #pending > (max_requests or 1000) do
 			table_remove(pending, 1)
 		end
+		inflight_stream_requests = nil
 	end
 
 	local call_ok, res, err = pcall(internal_api.request, "/metrics/stream-reports", {
@@ -1008,20 +1186,8 @@ local function push_stream_reports(max_requests)
 		return false, "API returned an invalid stream reports acknowledgement"
 	end
 
+	inflight_stream_requests = nil
 	return true, "pushed " .. count .. " stream reports"
-end
-
-local function persist_stream_reports(self)
-	local key = stream_requests_key()
-	local encoded, reports = pcall(encode, stream_requests)
-	if not encoded then
-		return false, reports, key
-	end
-	local ok, err = self.stream_reports_datastore:set(key, reports)
-	if ok then
-		self.metrics_datastore:delete(key)
-	end
-	return ok, err, key
 end
 
 local function sync_request_buffer(self, value)
@@ -1102,40 +1268,10 @@ function metrics:timer()
 				end
 			end
 		end
-		local restored_stream_requests = {}
-		local seen = {}
-		local function remember_stream_requests(requests)
-			if type(requests) ~= "table" then
-				return
-			end
-			for _, request in ipairs(requests) do
-				if type(request) == "table" and type(request.id) == "string" and not seen[request.id] then
-					seen[request.id] = true
-					table_insert(restored_stream_requests, request)
-				end
-			end
-		end
-		for _, store in ipairs({ self.metrics_datastore, self.stream_reports_datastore }) do
-			for _, key in ipairs(store:keys()) do
-				if key:match("^stream_requests_[0-9]+$") then
-					local persisted = store:get(key)
-					if persisted then
-						local ok, decoded = pcall(decode, persisted)
-						if ok and type(decoded) == "table" then
-							remember_stream_requests(decoded)
-						end
-					end
-				end
-			end
-		end
-		remember_stream_requests(stream_requests)
-		for index = #stream_requests, 1, -1 do
-			stream_requests[index] = nil
-		end
-		for index, request in ipairs(restored_stream_requests) do
-			stream_requests[index] = request
-		end
 		lru:set("setup", true)
+	end
+	if not setup or stream_restore_pending then
+		restore_stream_reports(self)
 	end
 
 	self.redis_ok = nil
