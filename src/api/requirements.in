@@ -8,6 +8,6 @@ pydantic==2.13.5
 pydantic_settings==2.15.0
 python-multipart==0.0.32
 PyYAML==6.0.3
-regex==2026.9.3
+regex==2026.9.10
 slowapi==0.1.10
 uvicorn[standard]==0.52.4
