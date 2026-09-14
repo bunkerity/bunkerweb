@@ -30,6 +30,15 @@ import redis  # type: ignore
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from Database import Database  # type: ignore
+from custom_configs_drift import (  # type: ignore
+    DRIFT_SETTING,
+    custom_config_path,
+    get_drift_policy,
+    log_drift,
+    log_refusal,
+    read_projection,
+    write_projection,
+)
 from logger import setup_logger  # type: ignore
 from jobs import _write_atomic, note_deferral  # type: ignore
 
@@ -179,11 +188,54 @@ def may_acknowledge_without_pushing(registered_instances) -> bool:
     return not registered_instances
 
 
-def _materialize_custom_configs(db: Database) -> None:
+def _drift_policy_value(db: Database) -> str:
+    """``CUSTOM_CONFIGS_DRIFT`` as this process can see it: environment first, database second.
+
+    Same shape as `_api_token` in `worker/tasks.py`, and for the same reason. Under the Celery
+    worker the environment already holds the stored value -- `tasks.py` clears the job environment
+    and overlays `db.get_config()` (defaults included) before every job -- so `getenv` alone is
+    right there. It is NOT right for a push run outside that overlay (bwcli, a diagnostic run),
+    where the environment carries nothing and the setting would silently fall back to the default
+    while the scheduler, which reads the same setting from the same database, used the stored one.
+    """
+    raw = getenv(DRIFT_SETTING, "").strip()
+    if raw:
+        return raw
+    # `suppress(Exception)` and not BaseException: a SIGTERM landing inside the query must still
+    # stop the push rather than be absorbed into "use the default".
+    with suppress(Exception):
+        return db.get_config(global_only=True, methods=False, with_drafts=False, filtered_settings=(DRIFT_SETTING,)).get(DRIFT_SETTING) or ""
+    return ""
+
+
+def _materialize_custom_configs(db: Database) -> bool:
     LOGGER.info("Materializing custom configs from DB ...")
     CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
     for sub in CUSTOM_CONFIGS_DIRS:
         CUSTOM_CONFIGS_PATH.joinpath(sub).mkdir(parents=True, exist_ok=True)
+
+    # Read before the wipe, same reason as the scheduler's `generate_custom_configs`: the drift
+    # report needs the on-disk half and the database half at the same time. On the split
+    # Docker/Kubernetes layout this folder lives inside the worker container and nobody edits it,
+    # but all-in-one (supervisord, one container) and Linux (two systemd units, one host) share it
+    # with the scheduler -- and this wipe runs before every push, whereas the scheduler only
+    # rescans the folder on boot and on SIGHUP.
+    configs = db.get_custom_configs()
+
+    # Measured against the manifest the last projection left behind, not against the current rows:
+    # the rows move on their own and a folder that has not caught up is a pending update, not an
+    # operator edit. Both writers share the manifest on all-in-one and Linux, where they share the
+    # folder, which is exactly right -- whichever wrote it last is the one whose output is on disk.
+    policy = get_drift_policy(_drift_policy_value(db))
+    drifts = log_drift(LOGGER, CUSTOM_CONFIGS_PATH, configs, policy, read_projection())
+    if drifts and policy == "refuse":
+        # False, and the caller must not acknowledge on it: NOTHING was materialized here, not
+        # just the drifted file, so a custom config the operator added elsewhere is still owed to
+        # the instances. Acknowledging would clear `custom_configs_changed` with nothing left to
+        # re-raise it, and the change would be lost until an unrelated one happened along -- the
+        # exact failure `may_acknowledge_without_pushing` above exists to describe.
+        log_refusal(LOGGER, CUSTOM_CONFIGS_PATH, drifts)
+        return False
 
     for sub_dir in CUSTOM_CONFIGS_PATH.iterdir():
         if sub_dir.is_dir():
@@ -194,26 +246,26 @@ def _materialize_custom_configs(db: Database) -> None:
                     with suppress(OSError):
                         entry.unlink()
 
-    configs = db.get_custom_configs()
     if not configs:
-        return
+        write_projection(CUSTOM_CONFIGS_PATH)
+        return True
 
     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
     for cc in configs:
         if cc.get("is_draft") or not cc.get("data"):
             continue
         try:
-            tmp_path = CUSTOM_CONFIGS_PATH.joinpath(
-                cc["type"].replace("_", "-"),
-                cc["service_id"] or "",
-                f"{Path(cc['name']).stem}.conf",
-            )
+            tmp_path = custom_config_path(CUSTOM_CONFIGS_PATH, cc)
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             _write_atomic(tmp_path, cc["data"])
             if tmp_path.stat().st_mode & 0o777 != desired_perms:
                 tmp_path.chmod(desired_perms)
         except BaseException as e:
             LOGGER.error(f"Failed to materialize custom config {cc.get('name')!r}: {e}")
+
+    # After the write, never before: the manifest must describe what is actually on disk.
+    write_projection(CUSTOM_CONFIGS_PATH)
+    return True
 
 
 def _materialize_plugins(db: Database, target: Path, *, pro: bool) -> None:
@@ -571,7 +623,7 @@ try:
 
     snapshot = _snapshot_failover()
 
-    _materialize_custom_configs(db)
+    custom_configs_materialized = _materialize_custom_configs(db)
     _materialize_plugins(db, EXTERNAL_PLUGINS_PATH, pro=False)
     _materialize_plugins(db, PRO_PLUGINS_PATH, pro=True)
     _materialize_caches(db)
@@ -593,10 +645,18 @@ try:
         # exit 0 having pushed nothing (the lease skip, no live instances, no target match, and
         # a failed push whose reload still succeeded), and `Jobs_runs.success` is likewise true
         # for all of them -- neither is a statement that instances took the new configuration.
-        if push_ok:
-            acknowledge_changes(db, metadata_snapshot, "pushed and reloaded")
-        else:
+        if not push_ok:
             LOGGER.warning("Not acknowledging the changes: at least one artifact push failed, so a re-push is still owed")
+        elif not custom_configs_materialized:
+            # CUSTOM_CONFIGS_DRIFT=refuse wrote NOTHING from the database into the custom configs
+            # folder -- not merely the drifted file -- so whatever raised `custom_configs_changed`
+            # has not reached the instances. Acknowledging here would clear the flag with nothing
+            # left to re-raise it and the change would be lost until an unrelated one came along.
+            reason = "custom configs were held back by CUSTOM_CONFIGS_DRIFT=refuse; resolve the drift reported above, a re-push is still owed"
+            LOGGER.warning(f"Not acknowledging the changes: {reason}")
+            note_deferral(reason)
+        else:
+            acknowledge_changes(db, metadata_snapshot, "pushed and reloaded")
     else:
         LOGGER.error("Reload failed on at least one instance")
         if snapshot is not None and _restore_from_snapshot(snapshot, api_caller, instances):

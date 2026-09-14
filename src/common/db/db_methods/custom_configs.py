@@ -147,6 +147,31 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                         custom_conf.is_draft = custom_config["is_draft"]
                         custom_conf.method = method
                     custom_conf.is_draft = custom_config["is_draft"]
+                elif custom_config["checksum"] != custom_conf.checksum:
+                    # The submission loses the arbitration and is dropped. This was entirely
+                    # silent, and it is the branch an operator's hand edit lands on:
+                    # `check_configs_changes` re-submits every file under /etc/bunkerweb/configs
+                    # as `manual` on boot and on SIGHUP, so an edit of a file whose row came from
+                    # CUSTOM_CONF_* (method `scheduler`) or from an orchestrator (`autoconf`) was
+                    # discarded here and then overwritten by the projection, with nothing logged
+                    # anywhere and `""` -- which every caller reads as success -- returned.
+                    #
+                    # Still returns "": refusing the write here would make the scheduler's
+                    # regeneration guard (`main.py`, the `refused` branch) fire on this, and the
+                    # policy that decides whether the file survives is CUSTOM_CONFIGS_DRIFT, read
+                    # by the projection itself. The line names why the edit did not stick; the
+                    # projection names what happens to the file.
+                    #
+                    # Gated on the checksum, and the gate is load-bearing: that re-submission
+                    # happens on EVERY boot for EVERY env-origin config, so logging the no-op
+                    # would put a WARNING per config per boot into an install that changed nothing.
+                    self.logger.warning(
+                        f"Custom config {custom_config['type']}/{f'{service_id}/' if service_id else ''}{custom_config['name']} was submitted by "
+                        f"method {method!r} but the stored one is owned by method {custom_conf.method!r}: the submitted content is DROPPED "
+                        f"(submitted sha256={str(custom_config['checksum'])[:12]}, stored sha256={str(custom_conf.checksum)[:12]}). "
+                        f"Change it at its source (the CUSTOM_CONF_* variable, the orchestrator label, or the template): "
+                        f"a config owned by one of those cannot be taken over from the API or the web UI."
+                    )
 
             if disable_cleanup:
                 # Mark autoconf custom configs that are no longer emitted by the orchestrator as draft

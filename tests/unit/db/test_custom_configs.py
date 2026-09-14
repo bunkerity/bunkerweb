@@ -370,3 +370,55 @@ class TestAFailedCommitNeverReadsAsALandedWrite:
         err = cdb.save_custom_configs([{"type": "http", "name": "n", "data": "# x", "method": "manual"}], "manual")
 
         assert err == "disk is full"
+
+
+class TestIncompatibleMethodIsNoLongerSilent:
+    """The arbitration branch that drops a submission used to say nothing at all.
+
+    ``check_configs_changes`` re-submits every file under ``/etc/bunkerweb/configs`` as ``manual``
+    on boot and on SIGHUP. When the row it lands on was written by ``CUSTOM_CONF_*`` (method
+    ``scheduler``) or by an orchestrator (``autoconf``), ``_methods_are_compatible`` says no and
+    the loop body is skipped: no update, no log, and ``""`` returned -- which every caller reads as
+    success, right before the projection overwrites the operator's file. See ``proof-CC-A.txt``
+    proof 2.
+
+    The line is gated on the checksum, and that gate is load-bearing rather than cosmetic: the
+    same re-submission happens on EVERY boot for EVERY env-origin config, so logging the no-op
+    would put a WARNING per config per boot into an install that changed nothing (AC 6)."""
+
+    @staticmethod
+    def _env_row(cdb):
+        cdb.logger = Mock()
+        assert cdb.save_custom_configs([{"type": "http", "name": "envcfg", "data": "# CREATED BY ENV\n# from env", "method": "scheduler"}], "scheduler") == ""
+        cdb.logger.reset_mock()
+
+    @staticmethod
+    def _resubmit(cdb, content):
+        return cdb.save_custom_configs([{"value": content, "exploded": (None, "http", "envcfg"), "is_draft": False}], "manual")
+
+    def test_a_dropped_edit_is_named_with_both_methods_and_both_checksums(self, cdb):
+        self._env_row(cdb)
+
+        assert self._resubmit(cdb, "# CREATED BY ENV\n# OPERATOR EDIT") == ""
+        assert cdb.get_custom_config("http", "envcfg")["data"] == b"# CREATED BY ENV\n# from env", "the drop itself is unchanged"
+
+        warnings = [call.args[0] for call in cdb.logger.warning.call_args_list]
+        assert len(warnings) == 1, f"expected exactly one warning, got {warnings}"
+        assert "envcfg" in warnings[0]
+        assert "manual" in warnings[0] and "scheduler" in warnings[0]
+
+    def test_an_unchanged_resubmission_stays_silent(self, cdb):
+        self._env_row(cdb)
+
+        assert self._resubmit(cdb, "# CREATED BY ENV\n# from env") == ""
+        cdb.logger.warning.assert_not_called()
+
+    def test_an_autoconf_row_is_covered_too(self, cdb):
+        cdb.logger = Mock()
+        cdb.save_custom_configs([{"type": "http", "name": "acfg", "data": "# from autoconf", "method": "autoconf"}], "autoconf")
+        cdb.logger.reset_mock()
+
+        cdb.save_custom_configs([{"value": "# edited", "exploded": (None, "http", "acfg"), "is_draft": False}], "manual")
+
+        warnings = [call.args[0] for call in cdb.logger.warning.call_args_list]
+        assert len(warnings) == 1 and "acfg" in warnings[0] and "autoconf" in warnings[0]

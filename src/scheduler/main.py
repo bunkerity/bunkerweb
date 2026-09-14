@@ -32,6 +32,15 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 from schedule import every as schedule_every, run_pending
 
 from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude  # type: ignore
+from custom_configs_drift import (  # type: ignore
+    DRIFT_SETTING,
+    custom_config_path,
+    get_drift_policy,
+    log_drift,
+    log_refusal,
+    read_projection,
+    write_projection,
+)
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import _write_atomic  # type: ignore
@@ -327,9 +336,50 @@ def stop(status):
     _exit(status)
 
 
+def _drift_policy_value() -> str:
+    """``CUSTOM_CONFIGS_DRIFT`` as this process can see it: environment first, database second.
+
+    The database half is not optional. The worker reads the same setting from the database on
+    every job -- `worker/tasks.py` clears the job environment and overlays `db.get_config()`,
+    defaults included, before running one -- so reading only `getenv` here would let the two
+    projections of the SAME folder disagree: a value set in the web UI would apply in the worker
+    and be ignored here, which on all-in-one and Linux means the two writers of one directory
+    follow different policies.
+    """
+    raw = getenv(DRIFT_SETTING, "").strip()
+    if raw:
+        return raw
+    if API_CLIENT is None:
+        return ""
+    # `suppress(Exception)` and not BaseException: a SIGTERM landing inside the HTTP call must stop
+    # the scheduler rather than be absorbed into "use the default".
+    with suppress(Exception):
+        return API_CLIENT.get_config().get(DRIFT_SETTING) or ""
+    return ""
+
+
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
+
+    # Fetched BEFORE the removal, not after it as it used to be: the drift report compares what is
+    # on disk with what is about to replace it, so it needs both halves while both still exist.
+    if configs is None:
+        assert API_CLIENT is not None
+        configs = API_CLIENT.get_custom_configs()
+
+    # The folder is a projection of bw_custom_configs and this is where an operator's hand edit
+    # used to disappear without a trace. Drift is measured against the manifest this projection
+    # left behind, NOT against the current rows: the rows move on their own, and a folder that has
+    # not caught up with them yet is a pending update rather than an edit. `overwrite` (the
+    # default) keeps today's behaviour and only names it; `refuse` writes nothing at all and leaves
+    # the resolution to the operator -- deliberately the whole folder and not just the drifted
+    # file, so the tree is never left in a state neither side asked for.
+    policy = get_drift_policy(_drift_policy_value())
+    drifts = log_drift(LOGGER, original_path, configs, policy, read_projection())
+    if drifts and policy == "refuse":
+        log_refusal(LOGGER, original_path, drifts)
+        return
 
     # Remove old custom configs files
     LOGGER.info("Removing old custom configs files ...")
@@ -341,10 +391,6 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
             elif file.is_dir():
                 rmtree(file, ignore_errors=True)
 
-    if configs is None:
-        assert API_CLIENT is not None
-        configs = API_CLIENT.get_custom_configs()
-
     if configs:
         LOGGER.info("Generating new custom configs ...")
         original_path.mkdir(parents=True, exist_ok=True)
@@ -353,11 +399,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                 if custom_config.get("is_draft"):
                     continue
                 if custom_config["data"]:
-                    tmp_path = original_path.joinpath(
-                        custom_config["type"].replace("_", "-"),
-                        custom_config["service_id"] or "",
-                        f"{Path(custom_config['name']).stem}.conf",
-                    )
+                    tmp_path = custom_config_path(original_path, custom_config)
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     _write_atomic(tmp_path, custom_config["data"])
                     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
@@ -374,6 +416,10 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                 LOGGER.error(
                     f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
                 )
+
+    # Record surviving on-disk bytes after the projection attempt, including files left behind
+    # by a failed deletion or write.
+    write_projection(original_path)
 
 
 def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
