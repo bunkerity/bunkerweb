@@ -2,17 +2,20 @@
 
 ## v1.6.15~rc3 - 2026/09/11
 
+- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
+- [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
 - [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.
 - [FEATURE] `ui`: retain individual settings as drafts in the RAW editor, with explicit activation and inherited or default effective values. (Refs #3631)
-- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Refs #3905)
-- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Refs #3896)
+- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Fixes #3905)
+- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Fixes #3896)
 - [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)
 - [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
-- [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Refs #3891)
+- [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Fixes #3891)
 - [BUGFIX] `letsencrypt`: prevent `preferred_profile` errors in the legacy certificate-list helper. (Refs #3839)
 - [PERFORMANCE] `errors`: reduce inline SVG whitespace without changing error-page artwork. (Refs #3892)
-- [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Refs #3867)
+- [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Fixes #3867)
+- [BUGFIX] `errors`: keep the blocking plugin reason on reports when a custom error page is configured, instead of `unknown`. (Fixes #3916)
 
 ## v1.6.15~rc2 - 2026/09/??
 
