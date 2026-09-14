@@ -16,6 +16,7 @@
 - [PERFORMANCE] `errors`: reduce inline SVG whitespace without changing error-page artwork. (Refs #3892)
 - [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Fixes #3867)
 - [BUGFIX] `errors`: keep the blocking plugin reason on reports when a custom error page is configured, instead of `unknown`. (Fixes #3916)
+- [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
 
 ## v1.6.15~rc2 - 2026/09/??
 

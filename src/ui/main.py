@@ -738,6 +738,8 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session so a form left open is not rejected before the session expires
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
