@@ -11,6 +11,13 @@ log "START" "ℹ️ " "Building BunkerWeb stack for integration \"$integration\"
 BW_VERSION="$(cat /tmp/bw_version.txt)"
 export BW_VERSION
 
+if [ "$integration" == "Kubernetes" ] ; then
+    # Sync once before any fixture consumer starts. Replacing a hostPath directory later
+    # leaves existing bind mounts on the old inode; Sentinel also loads its ACL only at boot.
+    # Includes fixtures written by generate.py and the category's before-script.
+    sync_minikube_fixtures || exit 1
+fi
+
 if [ "$integration" == "Swarm" ] ; then
     # Before anything else on this arm: the database compose, dnsmasq and every other helper
     # below attach to bw-universe / bw-services / bw-db, and on Swarm those have to already
@@ -525,12 +532,6 @@ elif [ "$integration" == "All-in-one" ] ; then
         fi
     fi
 elif [ "$integration" == "Kubernetes" ] ; then
-    # Re-deliver the hostPath fixtures before every apply. The build phase syncs them once, but the
-    # before-script for a category (customcert, for one) runs afterwards and writes certificates
-    # into /tmp/output -- with the old 9p mount those appeared on the node for free, and with a copy
-    # they only arrive if something copies them. Cheap and idempotent, so it runs on every action.
-    sync_minikube_fixtures || exit 1
-
     # Apply manifests via Kustomize for dynamic image tags
     KZ_DIR="/tmp/kustomize-bunkerweb"
     rm -rf "$KZ_DIR"
