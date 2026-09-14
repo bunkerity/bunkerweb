@@ -19,6 +19,7 @@
 - [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
 - [BUGFIX] `bunkernet`: back off failed registration retries with an exponential delay capped at 24 hours, retaining the previous exit status while waiting. Registration still depends on the BunkerNet API; HTTP 429 and 403 remain non-fatal. (Refs #3636)
 - [BUGFIX] `letsencrypt`: preserve the full base of explicit wildcard names and keep separate wildcard scopes aligned between certificate issuance and loading. Affected services request a new certificate after upgrading; old certificates remain on disk unless `LETS_ENCRYPT_CLEAR_OLD_CERTS=yes`. (Refs #3326)
+- [BUGFIX] `scheduler`, `ui`: validate manual plugins before database updates and preserve rejected plugin folders and stored configuration during scanning and restoration. Keep unchanged sibling plugins and log config-saver exit codes. (Refs #3303)
 
 ## v1.6.15~rc2 - 2026/09/??
 

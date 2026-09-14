@@ -3971,6 +3971,7 @@ class Database:
         delete_missing: bool = True,
         only_clear_metadata: bool = False,
         per_plugin_commit: bool = True,
+        preserve_ids: Optional[Set[str]] = None,
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
@@ -4060,7 +4061,7 @@ class Database:
             if delete_missing and db_plugins:
                 db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
-                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+                missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in (preserve_ids or ())]
 
                 # Never cascade-delete a pro plugin just because it's absent from the incoming list
                 # (a transient disk/glob gap during re-ingest); that wipes UI-set values via
