@@ -43,6 +43,8 @@ from pathlib import Path
 
 import pytest
 
+import custom_configs_validation as shared  # type: ignore  (src/common/utils on sys.path via root conftest)
+
 _SRC = Path(__file__).resolve().parents[3] / "src"
 
 # (file, constant) - every name-shaped validator that guards a value which becomes a path segment.
@@ -70,14 +72,48 @@ WIDER_GUARDS = [
 ]
 
 
+# CC-2 (custom-config validator unification) ported four of these guards off a local literal
+# and onto the shared `custom_configs_validation` module: `NAME_RX`/`CONFIG_NAME_RX` are now a
+# re-export of `shared.NAME_RX`, and the two `CUSTOM_CONF_RX` copies are now both built by
+# `shared.build_env_style_key_rx(...)` -- the exact drift this file's own docstring flags (the
+# tenth guard) is now impossible because there is only one definition left. There is no literal
+# `r"..."` left to grep for any of the four, so resolve them against the real object instead:
+# still a behavioural check against the pattern that actually runs, not a rewrite of the test.
+#
+# Each entry pairs the resolver with an `expected_snippet`: a resolver alone would keep answering
+# for a guard whose declaration line was later deleted, renamed, or rebound to something else in
+# its file -- decoupling the check from the file it claims to be reading (Criticos round 1, R3).
+# The snippet re-anchors it: if `expected_snippet` is gone from `relative_path`, the guard is
+# gone too, and `_pattern` must fail loudly instead of quietly answering from the shared module.
+_SHARED_RESOLVERS = {
+    ("api/app/schemas.py", "NAME_RX"): ("NAME_RX as NAME_RX", lambda: shared.NAME_RX.pattern),
+    ("ui/app/routes/configs.py", "CONFIG_NAME_RX"): ("CONFIG_NAME_RX = NAME_RX", lambda: shared.NAME_RX.pattern),
+    ("ui/app/routes/utils.py", "CUSTOM_CONF_RX"): (
+        "CUSTOM_CONF_RX = build_env_style_key_rx(with_service_prefix=False)",
+        lambda: shared.build_env_style_key_rx(with_service_prefix=False).pattern,
+    ),
+    ("common/gen/save_config.py", "CUSTOM_CONF_RX"): (
+        "CUSTOM_CONF_RX = build_env_style_key_rx(with_service_prefix=True)",
+        lambda: shared.build_env_style_key_rx(with_service_prefix=True).pattern,
+    ),
+}
+
+
 def _pattern(relative_path, constant):
-    """The regex literal assigned to `constant` at the top level of `relative_path`."""
+    """The regex literal assigned to `constant` at the top level of `relative_path`, or -- for a
+    guard ported to the shared validator (`_SHARED_RESOLVERS`) -- the real compiled pattern it
+    now delegates to."""
     source = (_SRC / relative_path).read_text(encoding="utf-8")
     # `\s*` after the opening paren: `CUSTOM_CONF_RX` is long enough that black wraps it onto its
     # own line, and a pattern that only matched the single-line form would silently skip it.
     match = re.search(rf'^{re.escape(constant)} = (?:re_compile\(\s*)?r"([^"]+)"', source, re.M)
-    assert match, f'{relative_path}: no top-level `{constant} = r"..."` assignment found'
-    return match.group(1)
+    if match:
+        return match.group(1)
+    resolved = _SHARED_RESOLVERS.get((relative_path, constant))
+    assert resolved, f'{relative_path}: no top-level `{constant} = r"..."` assignment found'
+    expected_snippet, resolver = resolved
+    assert expected_snippet in source, f"{relative_path}: `{constant}` no longer reads `{expected_snippet}` -- the guard is gone, not just ported"
+    return resolver()
 
 
 def test_the_guard_lists_are_not_empty():
