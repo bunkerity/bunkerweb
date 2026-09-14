@@ -195,13 +195,16 @@ def test_the_config_routes_do_not_re_inline_the_pattern_they_have_a_constant_for
     ignores it -- and the declaration in that file even carries a comment explaining why `$` is
     wrong, four hundred lines above two uses of `$`.
 
-    So this asserts the *shape* rather than the anchor: the pattern is written out exactly once,
-    in the `CONFIG_NAME_RX` assignment. That catches a re-inlined `$` (the defect), a re-inlined
-    `\Z` (the same drift, correct today), and the constant being deleted (count drops to zero).
+    So this asserted the *shape* rather than the anchor: the pattern used to be written out
+    exactly once, in the `CONFIG_NAME_RX` assignment. CC-2 (custom-config validator unification)
+    replaced that assignment with `CONFIG_NAME_RX = NAME_RX`, a re-export of the shared
+    `custom_configs_validation.NAME_RX` object -- the literal is gone from this file entirely, so
+    the expected count is now zero, not one. A re-inlined `$` or `\Z` at a call site still pushes
+    the count above zero and still fails here.
     """
     source = (_SRC / "ui/app/routes/configs.py").read_text(encoding="utf-8")
     literals = re.findall(r'r"\^\[\\w_-\]\{1,255\}\\?[Z$]"', source)
-    assert len(literals) == 1, f"the config-name pattern is spelled out {len(literals)}x; only the CONFIG_NAME_RX assignment should"
+    assert len(literals) == 0, f"the config-name pattern is spelled out {len(literals)}x locally; it must only live in custom_configs_validation.NAME_RX"
     # And the call sites really do route through it, so the count above cannot be satisfied by
     # deleting the validation entirely.
     assert source.count("match(CONFIG_NAME_RX,") >= 3, "the config routes stopped validating through CONFIG_NAME_RX"
