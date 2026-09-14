@@ -105,6 +105,7 @@ def stop_progress_monitor() -> None:
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
+PROFILE_NAME_LIMITS = {"classic": 100, "tlsserver": 25, "shortlived": 25}
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
@@ -117,6 +118,20 @@ STALE_ACCOUNT_PURGED = Event()
 def normalize_server_names(server_names: str) -> Set[str]:
     """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
     return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def warn_profile_name_limit(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> None:
+    if config.get("acme_server") != "letsencrypt":
+        return
+    profile = str(config.get("profile") or "")
+    max_names = PROFILE_NAME_LIMITS.get(profile)
+    if max_names is None:
+        return
+    names_count = len(normalize_server_names(str(config.get("server_names") or "")))
+    if names_count > max_names:
+        LOGGER.warning(
+            f"[Service: {service}] Let's Encrypt profile '{profile}' supports at most {max_names} names, but {names_count} were requested; continuing."
+        )
 
 
 def unissuable_names(names: List[str]) -> List[str]:
@@ -781,6 +796,7 @@ def certbot_new(
         else:
             LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
 
+    warn_profile_name_limit(service, config)
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     # Watch certbot output for a stale-account JWS rejection. When the ACME server

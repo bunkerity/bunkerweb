@@ -28,9 +28,9 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! tip "Certificate Profiles"
     Let's Encrypt provides different certificate profiles for different use cases:
 
-    - **classic**: General-purpose certificates with 90-day validity (default)
-    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
-    - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **classic**: General-purpose certificates with 90-day validity and up to 100 names (default)
+    - **tlsserver**: Optimized for TLS server authentication with 45-day validity, up to 25 names, and smaller payload
+    - **shortlived**: Enhanced security with 160-hour validity and up to 25 names for automated environments
     - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
@@ -58,7 +58,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                                                                                                              |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose, up to 100 names), `tlsserver` (optimized for TLS servers, 45-day validity, up to 25 names), or `shortlived` (160-hour certificates, up to 25 names).                            |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Maximum Certbot Log Backups:** Number of rotated `letsencrypt.log` backups certbot keeps per job. Certbot's own default of 1000 piles up quickly; `50` is a sensible cap. Set to `0` to keep only the live log.                                                              |
