@@ -194,9 +194,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260824",
+      "name": "LuaJIT v2.1-20260914",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "fbfc558aacd57a54623df0ced4c31a28f81f8ff2",
+      "commit": "ae3d1eecfdbe70b54040779f7b4655e132b9d875",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

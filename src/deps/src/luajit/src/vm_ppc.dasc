@@ -2700,11 +2700,11 @@ static void build_subroutines(BuildCtx *ctx)
   |  checkstr CARG3
   |   la SBUF:CARG1, DISPATCH_GL(tmpbuf)(DISPATCH)
   |  bne ->fff_fallback
-  |   lwz TMP0, SBUF:CARG1->b
+  |   lp TMP0, SBUF:CARG1->b
   |  stw L, SBUF:CARG1->L
   |  stp BASE, L->base
   |  stw PC, SAVE_PC
-  |   stw TMP0, SBUF:CARG1->w
+  |   stp TMP0, SBUF:CARG1->w
   |  bl extern lj_buf_putstr_ .. name
   |  bl extern lj_buf_tostr
   |  b ->fff_resstr
