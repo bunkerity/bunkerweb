@@ -832,14 +832,44 @@ class Templator:
         return dropped
 
     def _write_config(self) -> None:
-        """Write the configuration to a variables.env file."""
+        """Write the configuration to a variables.env file.
+
+        Written beside the target and renamed onto it, never written through: on All-in-one and on
+        the Linux package the output directory IS the live `/etc/nginx`, and this file is read
+        outside the render by readers nothing coordinates with -- `bw/entrypoint.sh` feeds it back
+        to `gen/main.py --variables`, `init_by_lua` parses it at reload, and `api.lua` reads
+        `API_TOKEN` and the whitelist out of it when the internalstore comes up empty. `write_text`
+        truncates first, so those readers had a window where the file parses cleanly and is simply
+        missing its tail. rename(2) has no such window. (A failed write leaves the PREVIOUS file
+        intact only for a caller that does not wipe first -- not the shipped paths, where
+        `gen/main.py:258-263` has already unlinked it and the residual failure mode is absence,
+        which `api.lua:412-416` answers fail-CLOSED.)
+
+        The temporary name is a dotfile and is unlinked on failure: nothing globs for it, no
+        `*.conf` rule picks it up, and `gen/main.py` wipes whatever is left on the next render
+        (its `iterdir()` is deliberately dotfile-inclusive).
+
+        Not `cache_restore.write_atomic`, which does the same job for cache entries, for one
+        reason that holds on shipped code: it RAISES on failure, and `gen/main.py`'s bare `except:`
+        turns any raise into `sys_exit(1)` -- so a `variables.env` that could not be written would
+        stop the whole render, and push-configs would then ship nothing to anyone. Logging and
+        continuing degrades one file instead of the fleet's configuration. (Secondarily, its
+        `_check_path` rejects a target whose path traverses a symlink; no shipped image symlinks
+        `/etc/nginx`, so that one is hypothetical. Its mode preservation is moot either way: the
+        wipe above means this file is created fresh under the process umask every render --
+        `UMask=027` in the systemd units -- so both spellings produce the same mode.)
+        """
         real_path = self._output / "variables.env"
+        tmp_path = real_path.with_name(".variables.env.tmp")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
             inherited_ports = frozenset(self._inherited_port_keys())
             config_lines = [f"{k}={v}\n" for k, v in self._full_config.items() if k not in inherited_ports]
-            real_path.write_text("".join(config_lines))
+            tmp_path.write_text("".join(config_lines))
+            tmp_path.replace(real_path)
         except IOError as e:
+            with suppress(OSError):
+                tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
 
     def _get_server_config(self, server: str, global_only_config: Dict[str, Any], server_specific_config: Dict[str, Any]) -> Dict[str, Any]:
