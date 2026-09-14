@@ -974,12 +974,10 @@ function cleanup_stack () {
                 redis_cli del minikube_cmd_pids > /dev/null
             fi
 
-            minikube_mount_logs=$(ls /tmp/minikube_mount_*.log)
-            if [ -n "$minikube_mount_logs" ] ; then
-                for log_file in $minikube_mount_logs ; do
-                    rm -f "$log_file"
-                done
-            fi
+            for log_file in /tmp/minikube_mount_*.log ; do
+                [ -e "$log_file" ] || continue
+                rm -f "$log_file"
+            done
         else
             docker compose -f tests/misc/docker/custom-api.yml down -v
             # shellcheck disable=SC2181
@@ -2546,13 +2544,11 @@ function log_stack () {
             kubectl logs -n misc -l app=custom-api --tail=-1
         fi
 
-        minikube_mount_logs=$(ls /tmp/minikube_mount_*.log)
-        if [ -n "$minikube_mount_logs" ] ; then
-            for log_file in $minikube_mount_logs ; do
-                log "UTILS" "ℹ️ " "Showing minikube $(echo "$log_file" | sed 's@/tmp/minikube_mount_\(.*\).log@\1@g' | tr '_' '/') mount logs ..."
-                cat "$log_file"
-            done
-        fi
+        for log_file in /tmp/minikube_mount_*.log ; do
+            [ -e "$log_file" ] || continue
+            log "UTILS" "ℹ️ " "Showing minikube $(echo "$log_file" | sed 's@/tmp/minikube_mount_\(.*\).log@\1@g' | tr '_' '/') mount logs ..."
+            cat "$log_file"
+        done
     else
         containers=$(docker ps -a --format "{{.Names}}")
         if echo "$containers" | grep -qx "bw-db" ; then
@@ -2609,6 +2605,10 @@ function log_stack () {
 
 function exit_wrapper() {
     exit_code=$?
+    # Teardown tolerates non-zero statuses by design (`cmd; if [ $? -ne 0 ]`): never run it under a
+    # before-script's `set -euo pipefail`, which reaches this trap when that script exits early.
+    # Must stay AFTER `exit_code=$?`: `set` returns 0 and would clobber it.
+    set +e +u +o pipefail
     if [ "$exit_code" -eq 0 ] && [ "$(basename "$0")" != "run.sh" ] ; then
         return 0
     fi
