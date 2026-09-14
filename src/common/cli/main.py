@@ -69,6 +69,25 @@ if __name__ == "__main__":
         parser_plugin.add_argument("plugin_command", type=str, help="the command to execute on the plugin")
         parser_plugin.add_argument("-d", "--debug", action="store_true", help="sets the LOG_LEVEL env variable to DEBUG")
 
+        # Custom configs subparser (talks to the control-plane API, see BWCLI_API_URL/API_URL)
+        parser_cc = subparsers.add_parser("custom-configs", help="manage custom configs through the control-plane API")
+        cc_subparsers = parser_cc.add_subparsers(help="custom-configs command", dest="custom_configs_command")
+
+        parser_cc_import = cc_subparsers.add_parser("import", help="import custom configs from a directory")
+        parser_cc_import.add_argument("directory", type=str, help="directory laid out as <type>/[<service>/]<name>.conf")
+        parser_cc_import.add_argument("--draft", action="store_true", help="mark imported custom configs as draft")
+        parser_cc_import.add_argument(
+            "--method",
+            choices=("manual", "api"),
+            default="api",
+            help="api (default): per-config upserts, never deletes, sets changed per config; manual: full replace of method=manual rows, mirrors scheduler folder adoption",
+        )
+        parser_cc_import.add_argument("--dry-run", action="store_true", help="validate and print without writing")
+
+        parser_cc_list = cc_subparsers.add_parser("list", help="list custom configs")
+        parser_cc_list.add_argument("--service", type=str, default=None, help="filter by service id")
+        parser_cc_list.add_argument("--type", dest="config_type", type=str, default=None, help="filter by config type")
+
         # Parse args
         args, unknown_args = parser.parse_known_args()
 
@@ -107,6 +126,13 @@ if __name__ == "__main__":
             if args.debug:
                 logger.setLevel("DEBUG")
             ret, err = cli.custom(args.plugin_id, args.plugin_command, debug=args.debug, extra_args=unknown_args)
+        elif args.command == "custom-configs":
+            if args.custom_configs_command == "import":
+                ret, err = cli.custom_configs_import(args.directory, draft=args.draft, method=args.method, dry_run=args.dry_run)
+            elif args.custom_configs_command == "list":
+                ret, err = cli.custom_configs_list(service=args.service, config_type=args.config_type)
+            else:
+                ret, err = False, "unknown custom-configs command, use 'import' or 'list'"
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")

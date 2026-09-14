@@ -13,7 +13,7 @@ from socket import create_connection
 from subprocess import DEVNULL, STDOUT, run
 from sys import argv as sys_argv, exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -21,9 +21,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
+from base_api_client import ApiClientError, ApiUnavailableError, BaseApiClient  # type: ignore
+from custom_configs_validation import TYPE_ERROR_MESSAGE, normalize_type as normalize_custom_config_type, validate_name as validate_custom_config_name  # type: ignore
 from logger import getLogger  # type: ignore
 
-from common_utils import get_redis_client, handle_docker_secrets, parse_host  # type: ignore
+from common_utils import bytes_hash, get_redis_client, handle_docker_secrets, parse_host  # type: ignore
 from env_file import parse_env_file  # type: ignore
 
 # bwcli has to resolve the database the running scheduler resolved, so it reads the operator's
@@ -184,6 +186,50 @@ def format_remaining_time(seconds):
         time_parts[-1] = f"and {time_parts[-1]}"
 
     return " ".join(time_parts)
+
+
+class CustomConfigsApiClient(BaseApiClient):
+    """Client for the control-plane API's `/configs` routes, used by `bwcli custom-configs`.
+
+    Distinct from `ApiCaller`/`self.apis` below, which push bans/reloads straight to each
+    BunkerWeb instance's own embedded API: custom configs live in the control-plane API service
+    (src/api/), reachable from any host with network access to it -- no shared /etc/bunkerweb
+    volume required. The BWCLI_API_URL -> API_URL -> default precedence matches the convention
+    src/common/core/backup/downgrade.py:api_url() already established for reaching that service
+    from bwcli.
+    """
+
+    DEFAULT_URL = "http://127.0.0.1:8888"
+
+    def __init__(self, api_token: str):
+        base_url = getenv("BWCLI_API_URL", "").strip() or getenv("API_URL", "").strip() or self.DEFAULT_URL
+        super().__init__(base_url, api_token, logger_name="CLI")
+
+    def list_configs(self, *, service: Optional[str] = None, config_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        params: Dict[str, str] = {"with_drafts": "true"}
+        if service:
+            params["service"] = service
+        if config_type:
+            params["type"] = config_type
+        return self._get("/configs", params=params).get("configs", [])
+
+    def list_services(self) -> List[str]:
+        return [s["id"] for s in self._get("/services").get("services", []) if s.get("id")]
+
+    def bulk_save(self, custom_configs: List[Dict[str, Any]], method: str) -> str:
+        """Full replace of every config tagged `method`. Returns '' on success, or the API's
+        advisory message (a write that landed with a caveat, e.g. an unknown service_id)."""
+        payload = self._put("/configs/bulk", json={"custom_configs": custom_configs, "method": method, "changed": True})
+        return (payload or {}).get("message", "")
+
+    def create_config(self, *, service: Optional[str], config_type: str, name: str, data: str, is_draft: bool) -> None:
+        self._post("/configs", json={"service": service, "type": config_type, "name": name, "data": data, "is_draft": is_draft})
+
+    def update_config(self, *, service: Optional[str], config_type: str, name: str, data: str, is_draft: bool) -> None:
+        # The API reads the new scope from the BODY, not the URL, and an absent `service` there
+        # means "global" (api/app/schemas.py:253-263) -- omitting it would re-scope a per-service
+        # config to global on every update. Same fix as src/ui/app/api_client.py:487-493.
+        self._patch(f"/configs/{service or 'global'}/{config_type}/{name}", json={"service": service, "data": data, "is_draft": is_draft})
 
 
 class CLI(ApiCaller):
@@ -654,6 +700,198 @@ class CLI(ApiCaller):
             cli_str += f"{self.BLUE}{'─' * width}{self.RESET}\n"
 
         return True, cli_str
+
+    @staticmethod
+    def __summarize_import(lines: List[str]) -> str:
+        counts = {"created": 0, "updated": 0, "unchanged": 0, "refused": 0, "deleted": 0}
+        for line in lines:
+            verdict = line.split(" ", 1)[0]
+            if verdict in counts:
+                counts[verdict] += 1
+        return "Summary: " + ", ".join(f"{count} {label}" for label, count in counts.items())
+
+    def custom_configs_list(self, *, service: Optional[str] = None, config_type: Optional[str] = None) -> Tuple[bool, str]:
+        """Table of the control-plane API's current custom configs (GET /configs)."""
+        client = CustomConfigsApiClient(self.__get_variable("API_TOKEN") or "")
+        try:
+            configs = client.list_configs(service=service, config_type=config_type)
+        except (ApiClientError, ApiUnavailableError) as e:
+            return False, self.__format_error(f"Failed to list custom configs: {e}")
+
+        if not configs:
+            return True, f"{self.YELLOW}{self.ICON_INFO} No custom configs found{self.RESET}"
+
+        configs.sort(key=lambda c: (c.get("service") or "global", c.get("type", ""), c.get("name", "")))
+        headers = ("SERVICE", "TYPE", "NAME", "METHOD", "DRAFT", "CHECKSUM")
+        rows = [
+            (
+                c.get("service") or "global",
+                c.get("type", ""),
+                c.get("name", ""),
+                c.get("method", ""),
+                "yes" if c.get("is_draft") else "no",
+                (c.get("checksum") or "")[:12],
+            )
+            for c in configs
+        ]
+        widths = [max(len(headers[i]), *(len(row[i]) for row in rows)) for i in range(len(headers))]
+        table = ["  ".join(headers[i].ljust(widths[i]) for i in range(len(headers)))]
+        table.append("  ".join("-" * w for w in widths))
+        table.extend("  ".join(row[i].ljust(widths[i]) for i in range(len(headers))) for row in rows)
+        return True, "\n".join(table)
+
+    def custom_configs_import(self, directory: str, *, draft: bool = False, method: str = "api", dry_run: bool = False) -> Tuple[bool, str]:
+        """Explicit, portable version of the scheduler's own adoption of manually-placed configs
+        (`check_configs_changes` in src/scheduler/main.py): walk `directory` with the same
+        canonical layout (`<type>/[<service>/]<name>.conf`) and push it through the control-plane
+        API instead of relying on a shared /etc/bunkerweb/configs volume.
+        """
+        if method not in ("manual", "api"):
+            return False, self.__format_error(f"Unknown --method {method!r}: must be 'manual' or 'api'")
+
+        root = Path(directory)
+        if not root.is_dir():
+            return False, self.__format_error(f"{directory} is not a directory")
+
+        entries: List[Dict[str, Any]] = []
+        for file in sorted(root.rglob("*.conf")):
+            parts = file.relative_to(root).parts
+            rel = "/".join(parts)
+
+            if len(parts) not in (2, 3):
+                entries.append({"path": rel, "refusal": f"{rel} is not in the correct path"})
+                continue
+
+            ctype = normalize_custom_config_type(parts[0])
+            if ctype is None:
+                entries.append({"path": rel, "refusal": TYPE_ERROR_MESSAGE})
+                continue
+
+            name = Path(parts[-1]).stem
+            name_error = validate_custom_config_name(name)
+            if name_error:
+                entries.append({"path": rel, "refusal": name_error})
+                continue
+
+            try:
+                content = file.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as e:
+                entries.append({"path": rel, "refusal": f"could not read file: {e}"})
+                continue
+
+            entries.append(
+                {
+                    "path": rel,
+                    "service_id": parts[1] if len(parts) == 3 else None,
+                    "type": ctype,
+                    "name": name,
+                    "content": content,
+                }
+            )
+
+        if not entries:
+            return True, f"{self.YELLOW}{self.ICON_INFO} No .conf files found under {directory}{self.RESET}"
+
+        client = CustomConfigsApiClient(self.__get_variable("API_TOKEN") or "")
+        try:
+            current = client.list_configs()
+            known_services = set(client.list_services())
+        except (ApiClientError, ApiUnavailableError) as e:
+            return False, self.__format_error(f"Failed to reach the API: {e}")
+
+        current_index = {(None if c.get("service") in (None, "", "global") else c.get("service"), c.get("type"), c.get("name")): c for c in current}
+
+        lines: List[str] = []
+        had_refusal = False
+        valid: List[Dict[str, Any]] = []
+
+        for entry in entries:
+            if "refusal" in entry:
+                lines.append(f"refused {entry['path']}: {entry['refusal']}")
+                had_refusal = True
+                continue
+            # Pre-checked so one bad reference cannot abort the whole batch: `/configs/bulk`
+            # commits `custom_configs` in a single transaction (src/common/db/db_methods/
+            # custom_configs.py), and service_id is a FOREIGN KEY -- a dangling one would fail
+            # the commit and roll back every other config in this run, not just this one.
+            if entry["service_id"] and entry["service_id"] not in known_services:
+                lines.append(f"refused {entry['path']}: Service {entry['service_id']} not found, please check your config")
+                had_refusal = True
+                continue
+            existing = current_index.get((entry["service_id"], entry["type"], entry["name"]))
+            if method == "manual" and existing and existing.get("method") not in {"manual", "ui", "api"}:
+                lines.append(
+                    f"refused {entry['path']}: existing config is owned by {existing.get('method')}; import it through the API or change it at its source"
+                )
+                had_refusal = True
+                continue
+            valid.append(entry)
+
+        for entry in valid:
+            key = (entry["service_id"], entry["type"], entry["name"])
+            checksum = bytes_hash(entry["content"], algorithm="sha256")
+            existing = current_index.get(key)
+            if existing and existing.get("checksum") == checksum and bool(existing.get("is_draft", False)) == draft:
+                entry["verdict"] = "unchanged"
+            else:
+                entry["verdict"] = "updated" if existing else "created"
+
+        # `method == "manual"` is a full replace of every existing method="manual" row: any such
+        # row whose key is not in `valid` is about to be deleted (and, downstream, unlinked from
+        # disk by the scheduler's regeneration) -- surface that explicitly rather than silently,
+        # in both dry-run and the real write.
+        deleted_keys = []
+        if method == "manual":
+            valid_keys = {(entry["service_id"], entry["type"], entry["name"]) for entry in valid}
+            deleted_keys = [key for key, c in current_index.items() if c.get("method") == "manual" and key not in valid_keys]
+
+        # A refusal under `--method manual` means `valid` does not carry every config that should
+        # survive this import: a full replace with an incomplete set would delete the refused
+        # files' existing rows, not just skip them. Checked BEFORE dry-run too, so the preview
+        # never promises a deletion that a real run would then refuse to perform.
+        if method == "manual" and had_refusal:
+            abort_note = "import aborted: refusals present, no changes were written (a full replace with an incomplete set would delete the refused configs' existing rows)"
+            lines.extend((abort_note, self.__summarize_import(lines)))
+            return False, "\n".join(lines)
+
+        if dry_run:
+            lines.extend(f"{entry['verdict']} {entry['path']} (dry-run)" for entry in valid)
+            lines.extend(f"deleted {key[0] or 'global'}/{key[1]}/{key[2]} (dry-run)" for key in deleted_keys)
+            lines.append(self.__summarize_import(lines))
+            return not had_refusal, "\n".join(lines)
+
+        if method == "manual":
+            # Full replace of every method="manual" row (matches the scheduler's own adoption of
+            # /etc/bunkerweb/configs): `valid` must carry every config that should survive this
+            # import, unchanged ones included, or they would be deleted as no longer present.
+            if valid:
+                payload = [{"value": entry["content"], "exploded": (entry["service_id"], entry["type"], entry["name"]), "is_draft": draft} for entry in valid]
+                try:
+                    message = client.bulk_save(payload, "manual")
+                except (ApiClientError, ApiUnavailableError) as e:
+                    return False, self.__format_error(f"Import failed: {e}")
+                if message:
+                    had_refusal = True
+                    lines.append(f"note: {message}")
+            lines.extend(f"{entry['verdict']} {entry['path']}" for entry in valid)
+            lines.extend(f"deleted {key[0] or 'global'}/{key[1]}/{key[2]}" for key in deleted_keys)
+        else:  # api
+            for entry in valid:
+                if entry["verdict"] == "unchanged":
+                    lines.append(f"unchanged {entry['path']}")
+                    continue
+                try:
+                    if entry["verdict"] == "updated":
+                        client.update_config(service=entry["service_id"], config_type=entry["type"], name=entry["name"], data=entry["content"], is_draft=draft)
+                    else:
+                        client.create_config(service=entry["service_id"], config_type=entry["type"], name=entry["name"], data=entry["content"], is_draft=draft)
+                    lines.append(f"{entry['verdict']} {entry['path']}")
+                except (ApiClientError, ApiUnavailableError) as e:
+                    lines.append(f"refused {entry['path']}: {e}")
+                    had_refusal = True
+
+        lines.append(self.__summarize_import(lines))
+        return not had_refusal, "\n".join(lines)
 
     def plugin_list(self) -> Tuple[bool, str]:
         if not self.__db:

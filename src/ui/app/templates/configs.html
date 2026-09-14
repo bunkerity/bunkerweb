@@ -134,7 +134,19 @@
                                 {{ config["type"]|upper }}
                             </div>
                         </td>
-                        <td>{{ config["method"] }}</td>
+                        <td>
+                            {{ config["method"] }}
+                            {% if config["method"] == "scheduler" %}
+                                {# method="scheduler" custom configs are produced exclusively by
+                                   src/common/gen/save_config.py parsing CUSTOM_CONF_* environment
+                                   variables (default --method there, and the only call site that
+                                   passes another value is --method scheduler itself) -- so the
+                                   originating variable name is fully derivable, no DB column or
+                                   route change needed. A raw variable name is not user-facing
+                                   prose, so it is shown as-is rather than through the i18n catalogs. #}
+                                <small class="text-muted d-block">{{ (config['service'] ~ '_' if config['service'] != 'global' else '') ~ 'CUSTOM_CONF_' ~ normalized_config_type|upper ~ '_' ~ config['name'] }}</small>
+                            {% endif %}
+                        </td>
                         <td id="service-{{ config_id }}">
                             {% if config['service'] != 'global' %}
                                 <a href="{{ url_for("services") }}/{{ config['service'] }}"
