@@ -1,4 +1,4 @@
-FROM nginx:1.30.4@sha256:09cc2702709e6388d979d8030e3ab4eb1ceb699b2dced26d7543e872a822e823 AS builder
+FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c AS builder
 
 # glibc base (was Alpine): certbot-dns-multi's Go/CGO bridge cannot load on musl, so the image set
 # is standardizing on glibc. nginx:1.30.4 is the official Debian image: nginx + the nginx user are
@@ -97,7 +97,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.4@sha256:09cc2702709e6388d979d8030e3ab4eb1ceb699b2dced26d7543e872a822e823
+FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -118,7 +118,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #     CVE-2025-68431 (libheif1 + its dav1d/libde265 plugins),
 #     libexpat1 CVE-2026-72522 2.8.2-1~deb13u1 -> 2.8.3-1~deb13u1 (the pre-refresh digest
 #     carried 2.7.1-2 / CVE-2025-59375; refreshing the base moved it to the newer pair)
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+#   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
+#   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
+#   sqlite (libsqlite3-0) 3.46.1-7+deb13u1 -> +deb13u2: CVE-2026-11822 CVE-2026-11824
+#   perl-base 5.40.1-6 -> 5.40.1-6+deb13u1: CVE-2026-13221 CVE-2026-42496 CVE-2026-8376
+#     CVE-2026-42497 CVE-2026-12087 CVE-2026-48959 CVE-2026-48961 CVE-2026-48962 CVE-2026-57432
+#     CVE-2026-57433 CVE-2025-15649 CVE-2026-7010 CVE-2026-7017
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libsqlite3-0 perl-base && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

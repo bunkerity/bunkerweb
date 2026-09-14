@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83 AS builder
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -40,7 +40,7 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83 AS bwcli
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6 AS bwcli
 
 # Reuse the Scheduler dependency build; only the direct CLI runtime is added here.
 # PostgreSQL client 18 (PGDG). Debian trixie only ships 17 and pg_dump refuses any server newer
@@ -62,6 +62,12 @@ RUN . /etc/os-release && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 101 bwcli && \
   useradd -u 101 -g bwcli -d /usr/share/bunkerweb/cli -s /usr/sbin/nologin -M bwcli
+
+# Fix CVEs. This target has no other runtime deps re-installing these, so each maps to a finding
+# of this image's own pre-fix Trivy scan:
+#   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
+#   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
+RUN apt-get update && apt-get install -y --no-install-recommends gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
@@ -89,7 +95,7 @@ ENV BWCLI_RESTORE_SAFETY_DIRECTORY=/var/lib/bunkerweb/backups/restore-safety
 
 ENTRYPOINT ["bwcli"]
 
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -119,9 +125,12 @@ RUN . /etc/os-release && \
 # Fix CVEs
 RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
 # util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by python:3.14-slim.
-# Every package maps to a finding of this image's own pre-fix Trivy scan:
+# gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, still
+# shipped vulnerable by the refreshed base too. Every package maps to a finding of this image's
+# own pre-fix Trivy scan:
 #   CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux && rm -rf /var/lib/apt/lists/*
+#   CVE-2026-41992 CVE-2026-41991 (gzip) CVE-2026-5450 CVE-2026-5928 (glibc)
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

@@ -1,4 +1,4 @@
-FROM nginx:1.30.4@sha256:09cc2702709e6388d979d8030e3ab4eb1ceb699b2dced26d7543e872a822e823 AS builder
+FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -186,7 +186,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.4@sha256:09cc2702709e6388d979d8030e3ab4eb1ceb699b2dced26d7543e872a822e823
+FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -224,7 +224,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #     CVE-2025-68431 (libheif1 + its dav1d/libde265 plugins),
 #     libexpat1 CVE-2026-72522 2.8.2-1~deb13u1 -> 2.8.3-1~deb13u1 (the pre-refresh digest
 #     carried 2.7.1-2 / CVE-2025-59375; refreshing the base moved it to the newer pair)
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+#   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
+#   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

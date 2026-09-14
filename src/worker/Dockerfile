@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83 AS builder
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6 AS builder
 
 ARG TARGETPLATFORM
 
@@ -54,7 +54,7 @@ COPY src/common/utils utils
 COPY src/worker worker
 COPY src/VERSION VERSION
 
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
 
 RUN umask 027
 
@@ -79,7 +79,7 @@ RUN . /etc/os-release && \
   useradd -u 101 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker
 
 # Fix CVEs
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-41992 CVE-2026-41991 CVE-2026-5450 CVE-2026-5928
 
 # 101:101, the same ids the scheduler, API and UI images use, so a stack backed by SQLite can
 # hand all of them the one /data volume holding the database file. The all-in-one image already

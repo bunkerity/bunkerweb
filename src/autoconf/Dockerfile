@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83 AS builder
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -30,7 +30,7 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/VERSION VERSION
 
-FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83
+FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -42,8 +42,22 @@ RUN apt-get update && \
   groupadd -g 101 autoconf && \
   useradd -u 101 -g autoconf -d /usr/share/bunkerweb/autoconf -s /usr/sbin/nologin -M autoconf
 
-# Fix CVEs
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount openssl util-linux && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and openssl 3.5.6-1~deb13u2 -> 3.5.7-1~deb13u2 (openssl drags libssl3t64 + openssl-provider-legacy with it), both still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+# Fix CVEs. This image has no other runtime deps re-installing these, so each maps to a finding
+# of this image's own pre-fix Trivy scan:
+#   util-linux 2.41-5 -> 2.41.5-0+deb13u1: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456
+#     CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
+#   openssl 3.5.6-1~deb13u2 -> 3.5.7-1~deb13u2 (drags libssl3t64 + openssl-provider-legacy):
+#     CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073
+#     CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+#   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
+#   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
+#   pcre2 (libpcre2-8-0) 10.46-1~deb13u1 -> ~deb13u2: CVE-2026-86145 CVE-2026-89156 CVE-2026-89157
+#     CVE-2026-89158 CVE-2026-89160 CVE-2026-89161 CVE-2026-89162
+#   sqlite (libsqlite3-0) 3.46.1-7+deb13u1 -> +deb13u2: CVE-2026-11822 CVE-2026-11824
+#   perl-base 5.40.1-6 -> 5.40.1-6+deb13u1: CVE-2026-13221 CVE-2026-42496 CVE-2026-8376
+#     CVE-2026-42497 CVE-2026-12087 CVE-2026-48959 CVE-2026-48961 CVE-2026-48962 CVE-2026-57432
+#     CVE-2026-57433 CVE-2025-15649 CVE-2026-7010 CVE-2026-7017
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount openssl util-linux gzip libc-bin libc6 libpcre2-8-0 libsqlite3-0 perl-base && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
