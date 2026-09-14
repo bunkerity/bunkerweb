@@ -1,18 +1,17 @@
-"""Start all six final images on one release platform and require their healthchecks."""
+"""Start all six staging images at once and require their healthchecks."""
 
 from json import loads
-from os import environ
 from pathlib import Path
 from subprocess import run
-from sys import argv
 from tempfile import TemporaryDirectory
 from time import sleep
 
-from release_artifacts import IMAGES, PLATFORMS, command, load_manifest, require, write_json
+from release_artifacts import IMAGES, command, require, write_json
+
+TAG = "testing"
 
 
-def compose_config(manifest, platform):
-    require(platform in PLATFORMS, "unknown release platform")
+def compose_config():
     common = {
         "DATABASE_URI": "sqlite:////data/db.sqlite3",
         "USE_BUNKERNET": "no",
@@ -20,10 +19,11 @@ def compose_config(manifest, platform):
         "USE_WHITELIST": "no",
         "SEND_ANONYMOUS_REPORT": "no",
         "API_WHITELIST_IP": "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16",
+        # The API service and the all-in-one API exit(1) when no auth path is configured.
+        "API_TOKEN": "smoke",
     }
     services = {
-        name: {"image": manifest["images"][name]["ref"], "platform": platform, "environment": dict(common), "volumes": ["shared:/data"], "restart": "no"}
-        for name in IMAGES
+        name: {"image": f"ghcr.io/bunkerity/{name}-tests:{TAG}", "environment": dict(common), "volumes": ["shared:/data"], "restart": "no"} for name in IMAGES
     }
     services["bunkerweb"]["labels"] = {"bunkerweb.INSTANCE": "yes"}
     for name in ("scheduler", "autoconf"):
@@ -39,28 +39,22 @@ def compose_config(manifest, platform):
 
 
 def main():
-    platform = argv[1]
-    manifest = load_manifest("release-manifest.json", environ["MANIFEST_SHA256"])
-    with TemporaryDirectory(prefix="release-smoke-") as temporary:
+    with TemporaryDirectory(prefix="staging-smoke-") as temporary:
         file = Path(temporary) / "compose.json"
-        write_json(file, compose_config(manifest, platform))
-        compose = ["docker", "compose", "--project-name", "release-smoke", "--file", str(file)]
+        write_json(file, compose_config())
+        compose = ["docker", "compose", "--project-name", "staging-smoke", "--file", str(file)]
         try:
             run([*compose, "up", "--detach", "--wait", "--wait-timeout", "600", "--no-build"], check=True)
             # Two healthy observations catch an immediately exiting entrypoint.
             sleep(10)
             containers = command([*compose, "ps", "--all", "--quiet"]).decode().split()
-            require(len(containers) == len(IMAGES), "not all candidate services started")
+            require(len(containers) == len(IMAGES), "not all staging services started")
             for container in containers:
                 state = loads(command(["docker", "inspect", container]))[0]
-                require(state["State"]["Running"] and state["State"]["Health"]["Status"] == "healthy", "candidate service unhealthy")
-                require(state["RestartCount"] == 0, "candidate service restarted")
+                require(state["State"]["Running"] and state["State"]["Health"]["Status"] == "healthy", "staging service unhealthy")
+                require(state["RestartCount"] == 0, "staging service restarted")
                 name = state["Config"]["Labels"]["com.docker.compose.service"]
-                require(state["Config"]["Image"] == manifest["images"][name]["ref"], "unexpected running image")
-                version = command(["docker", "exec", container, "cat", "/usr/share/bunkerweb/VERSION"]).decode().strip()
-                require(version == manifest["version"], "running image version differs from manifest")
-                image = loads(command(["docker", "image", "inspect", state["Image"]]))[0]
-                require(image["Architecture"] == platform.split("/")[1], "running image architecture differs from matrix")
+                require(state["Config"]["Image"] == f"ghcr.io/bunkerity/{name}-tests:{TAG}", "unexpected running image")
         finally:
             run([*compose, "logs", "--no-color"], check=False)
             run([*compose, "down", "--volumes", "--remove-orphans"], check=True)

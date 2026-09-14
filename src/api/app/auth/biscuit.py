@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, Request
-from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact
+from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact, Rule
 
 from common_utils import get_version  # type: ignore
 
@@ -345,6 +345,11 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     first = parts[0].lower()
     method_u = method.upper()
 
+    if first == "crowdsec":
+        # Reuse the persisted bans resource enum, with independent permissions.
+        # Existing ban_delete grants must not gain authority over a shared engine.
+        return "bans", "crowdsec_delete" if method_u == "DELETE" else "crowdsec_read"
+
     # Bans category
     if first == "bans" or p.startswith("/bans"):
         return _resolve_bans(p, method_u)
@@ -548,7 +553,11 @@ class BiscuitGuard:
 
             _raise_time_budget(az)
             self._logger.debug("Biscuit phase2: authorizing route access")
-            az.build(token).authorize()
+            authorized = az.build(token)
+            authorized.authorize()
+            if path.startswith("/crowdsec") and hasattr(request, "state"):
+                subjects = authorized.query(Rule("subject($name) <- user($name) trusting authority"))
+                request.state.auth_subject = str(subjects[0].terms[0]) if subjects else "biscuit"
             self._logger.debug("Biscuit phase2: authorization success")
         except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase2: authorization failed (AuthorizationError):\n{format_exc()}")

@@ -37,16 +37,21 @@ The following settings are shared across all challenge mechanisms:
 
 BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
 
-| Setting                     | Default | Context   | Multiple | Description                                                                                                                            |
-| --------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
-| `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                            |
-| `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                           |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                          |
-| `ANTIBOT_IGNORE_ASN`        |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                           |
-| `ANTIBOT_IGNORE_USER_AGENT` |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                      |
-| `ANTIBOT_IGNORE_COUNTRY`    |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                 |
-| `ANTIBOT_ONLY_COUNTRY`      |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped. |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                           |
+| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
+| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                           |
+| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                          |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                         |
+| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                          |
+| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                     |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                        |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                      |
+| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                |
+| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                |
+
+!!! warning "A header rule is a shared secret"
+    Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 !!! note "Behavior of Country-Based Settings"
       - When both `ANTIBOT_IGNORE_COUNTRY` and `ANTIBOT_ONLY_COUNTRY` are set, the ignore list takes precedence—countries listed in both will bypass the challenge.

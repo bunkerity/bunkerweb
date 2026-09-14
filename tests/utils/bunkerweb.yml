@@ -67,9 +67,10 @@ spec:
             # replace with your DNS resolvers
             # nginx resolves this once, when it parses its configuration, and keeps the
             # address until the next reload. Use the cluster DNS Service name, whose
-            # ClusterIP is stable, and never a pod IP.
+            # ClusterIP is stable, and never a pod IP. The Service name depends on the
+            # distribution: kube-dns on stock clusters, coredns on Scaleway Kapsule.
             - name: DNS_RESOLVERS
-              value: "kube-dns.kube-system.svc.cluster.local"
+              value: "coredns.kube-system.svc.cluster.local"
             - name: USE_API
               value: "yes"
             - name: API_WHITELIST_IP

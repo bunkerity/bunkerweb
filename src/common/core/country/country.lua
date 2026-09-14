@@ -8,6 +8,9 @@ local country = class("country", plugin)
 local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
 local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local decode = cjson.decode
 local encode = cjson.encode
 local WARN = ngx.WARN
@@ -179,6 +182,27 @@ function country:initialize(ctx)
 			table.insert(self.ignore_uri, pattern)
 		end
 	end
+
+	-- Only request phases have a server name to look the rules up with.
+	self.header_rules = {}
+	if self.is_request then
+		local header_rules = self.internalstore:get("plugin_country_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
+	end
+end
+
+function country:init()
+	-- COUNTRY_IGNORE_HEADER_NAME/_VALUE are numbered pairs : resolve them once here instead of
+	-- walking every scoped variable on every request.
+	local rules, err = get_header_rules("COUNTRY_IGNORE_HEADER")
+	if not rules then
+		return self:ret(false, err)
+	end
+	local ok, store_err = self.internalstore:set("plugin_country_header_rules", rules, nil, true)
+	if not ok then
+		return self:ret(false, store_err)
+	end
+	return self:ret(true, "successfully loaded country ignore header rules")
 end
 
 function country:is_ignored_uri()
@@ -210,6 +234,13 @@ function country:access()
 		if ignored then
 			return self:ret(true, "URI " .. self.ctx.bw.uri .. " is ignored (pattern = " .. pattern .. ")")
 		end
+	end
+
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "COUNTRY_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
 	end
 
 	-- Check if IP is in cache

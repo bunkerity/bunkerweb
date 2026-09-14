@@ -9,7 +9,7 @@ from pathlib import Path
 from subprocess import PIPE, run
 from shutil import which
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
+from time import monotonic, sleep, time
 from typing import Literal
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -64,10 +64,17 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
 
 def acquire_db_lock():
     """Acquire the database lock to prevent concurrent access to the database."""
-    current_time = datetime.now().astimezone()
-    while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
+    try:
+        # A lock is stale 30s after its creation, whatever happened to its holder.
+        # The deadline is monotonic so that an NTP step can't extend the wait.
+        deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
+    except OSError:
+        deadline = monotonic()
+
+    while DB_LOCK_FILE.is_file() and monotonic() < deadline:
         LOGGER.warning("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
         sleep(1)
+
     DB_LOCK_FILE.unlink(missing_ok=True)
     DB_LOCK_FILE.touch()
 

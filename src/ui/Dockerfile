@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:3f818d6811ff5f3f2b5e5d836df3d25c2dd2e588d3b4981338a8ba17e422f74f AS builder
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -65,7 +65,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.14-alpine@sha256:3f818d6811ff5f3f2b5e5d836df3d25c2dd2e588d3b4981338a8ba17e422f74f
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -77,7 +77,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
+RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata libjpeg-turbo && \
   addgroup -g 101 ui && \
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
@@ -105,7 +105,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.15~rc1"
+LABEL version="1.6.15~rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

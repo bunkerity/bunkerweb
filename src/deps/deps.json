@@ -38,9 +38,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.13.3",
+      "name": "libmaxminddb v1.14.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3",
+      "commit": "0077fd76d00a1656b9cb3028d467736504794f41",
       "post_install": "rm -rf src/deps/src/libmaxminddb/t/libtap src/deps/src/libmaxminddb/t/maxmind-db"
     },
     {
@@ -122,7 +122,7 @@
       "name": "lua-resty-mlcache v2.7.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
       "commit": "b4d0aed5adf74b118238efdcd971224278ec7d26",
-      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t"
+      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-skip-evicted.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej"
     },
     {
       "id": "lua-resty-openssl",
@@ -149,7 +149,7 @@
       "name": "lua-resty-redis-connector v0.11.0",
       "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
       "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979",
-      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t"
+      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
     },
     {
       "id": "lua-resty-session",
@@ -194,9 +194,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260824",
+      "name": "LuaJIT v2.1-20260914",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "fbfc558aacd57a54623df0ced4c31a28f81f8ff2",
+      "commit": "ae3d1eecfdbe70b54040779f7b4655e132b9d875",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

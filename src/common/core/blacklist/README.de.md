@@ -113,6 +113,19 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                 |
     | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
 
+=== "Header"
+    **Was dies bewirkt:** Blockiert Anfragen mit einem bestimmten Request-Header — oder nimmt sie umgekehrt aus —, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert. Eine Ignore-Regel schlägt jeden Blacklist-Treffer, auch zwischengespeicherte.
+
+    | Einstellung                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                             |
+    | ------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Blacklist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `BLACKLIST_HEADER_VALUE`        |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Blacklist zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.    |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
+
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 

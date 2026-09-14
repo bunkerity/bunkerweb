@@ -154,7 +154,9 @@ jobs:
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
           tags: ghcr.io/bunkerity/${{ inputs.IMAGE }}-tests:${{ inputs.CANDIDATE }}-${{ inputs.CACHE_SUFFIX }}
-          outputs: type=registry,oci-mediatypes=true,compression=zstd
+          # The candidate index is what gets promoted byte for byte, so its layers must be
+          # pullable everywhere: Docker Hub refuses tar+zstd, and older clients cannot read it.
+          outputs: type=registry,oci-mediatypes=true
           provenance: true
           sbom: true
           labels: ${{ steps.meta.outputs.labels }}
@@ -195,7 +197,7 @@ jobs:
       - name: Upload Trivy SARIF report
         if: ${{ always() && (inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false) }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
-        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           sarif_file: trivy-results.sarif
           category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}

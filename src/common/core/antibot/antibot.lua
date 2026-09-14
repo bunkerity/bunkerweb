@@ -32,6 +32,9 @@ local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local get_country = utils.get_country
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local regex_match = utils.regex_match
 local ipmatcher_new = ipmatcher.new
 local upper = string.upper
@@ -194,7 +197,23 @@ function antibot:initialize(ctx)
 			self.country_only_active = next(self.country_only) ~= nil
 		end
 		self.country_filter_enabled = self.country_ignore_active or self.country_only_active
+		local header_rules = self.internalstore:get("plugin_antibot_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
 	end
+end
+
+function antibot:init()
+	-- ANTIBOT_IGNORE_HEADER_NAME/_VALUE are numbered pairs : resolve them once here instead of
+	-- walking every scoped variable on every request.
+	local rules, err = get_header_rules("ANTIBOT_IGNORE_HEADER")
+	if not rules then
+		return self:ret(false, err)
+	end
+	local ok, store_err = self.internalstore:set("plugin_antibot_header_rules", rules, nil, true)
+	if not ok then
+		return self:ret(false, store_err)
+	end
+	return self:ret(true, "successfully loaded antibot ignore header rules")
 end
 
 function antibot:header()
@@ -328,6 +347,13 @@ function antibot:access()
 	-- Check if access is needed
 	if self.variables["USE_ANTIBOT"] == "no" then
 		return self:ret(true, "antibot not activated")
+	end
+
+	-- Ignore headers are matched per request and never cached : the cache is keyed by client
+	-- attribute, so a cached hit would exempt later requests that carry no header at all.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "ANTIBOT_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
 	end
 
 	-- Check the caches and ignore lists

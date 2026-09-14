@@ -228,6 +228,10 @@ function start() {
     done
 
     # Start nginx
+    if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env; then
+        log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+        exit 1
+    fi
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
     if [ "$(uname)" = "FreeBSD" ]; then
         "$NGINX_BIN" -e /var/log/bunkerweb/error.log
@@ -244,7 +248,9 @@ function start() {
     while [ $count -lt 10 ] ; do
         check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
         # shellcheck disable=SC2181
-        if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
+        # The temp config carries IS_LOADING=yes, so the endpoint answers "loading" here :
+        # either state means nginx is up and answering.
+        if [ $? -eq 0 ] && [[ "$check" =~ ^(ok|loading)$ ]] ; then
             break
         fi
         count=$((count + 1))
@@ -340,6 +346,10 @@ function reload()
     if [ -f "$pid_file" ] ; then
         pid="$(cat "$pid_file" 2>/dev/null)"
         if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env; then
+                log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+                return 1
+            fi
             log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
             "$NGINX_BIN" -s reload
             # shellcheck disable=SC2181

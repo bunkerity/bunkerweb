@@ -27,7 +27,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_PORT`              | `6379`     | global | 否   | **Redis/Valkey 端口：** Redis/Valkey 服务器的端口号。                            |
 | `REDIS_DATABASE`          | `0`        | global | 否   | **Redis/Valkey 数据库：** 在 Redis/Valkey 服务器上使用的数据库编号 (0-15)。      |
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。    |
-| `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
+| `REDIS_SSL_VERIFY`        | `no`       | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
@@ -36,7 +36,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
     对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
@@ -124,6 +124,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 - **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
 - **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如通用场景使用 `volatile-lru`，缓存密集型场景使用 `allkeys-lru`）
 - **All-in-One 默认值：** AIO Docker 镜像默认将 Redis 配置为 `maxmemory=256mb` 和 `maxmemory-policy=volatile-lru`；可通过环境变量 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。在 `volatile-lru` 策略下，瞬时计数器（速率限制、不良行为）会先于会话和限时封禁等带 TTL 的关键键被淘汰，而无过期时间的键（永久封禁）则免于被淘汰。建议为 BunkerWeb 使用的外部 Redis 或 Valkey 服务器采用同样的策略。
+- **让安全报告远离驱逐池：** 使用 `METRICS_REDIS_TTL` 的默认值时，被阻止请求的报告带有过期时间，正是该过期时间使它们在 `volatile-lru` 下成为可驱逐对象。该列表是保存整个保留窗口的单个键，因此一次驱逐会清除全部内容，而不是最旧的报告。请在共享同一服务器的每个实例上设置 `METRICS_REDIS_TTL=0`，否则仍使用默认值的实例会在数秒内重新设置过期时间。在 `allkeys-lru` 下这不起作用，那里没有键是免疫的；它也不会降低内存压力，只会把压力转移到仍会过期的键上，其中包括限时封禁、会话和缓存的判定结果。请按需要保留的报告数量规划 `maxmemory`，而不是依赖驱逐：`METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设定该上限。
 - **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
 
 #### 数据持久性
@@ -134,7 +135,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 
 #### 性能优化
 
-- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践。`REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 生效：稳态下的连接数约为 `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`。请将 Redis/Valkey 的 `maxclients` 上限设置在该值之上，否则被拒绝的连接会使该请求无法检查仅保存在 Redis 中的封禁
 - **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
 - **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
 - **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式

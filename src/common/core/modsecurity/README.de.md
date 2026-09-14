@@ -34,7 +34,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                                                                                        |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                                                                                               |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                                                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                                                                                        |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                                                                                        |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein     | **Audit-Protokoll-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist. Der Pfad muss auf `.log` enden. Die Rotation über diese Endung gilt nur dort, wo logrotate installiert ist (die Linux-Pakete und das All-In-One-Image); bei Docker, Swarm und Kubernetes wird ein abweichender Name weder gestreamt noch rotiert und wächst unbegrenzt im Container, da nur `modsec_audit.log` in den Log-Stream des Containers verlinkt ist.                                   |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`).                                                                      |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                                                                                      |
@@ -176,7 +176,7 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Erweiterte Konfiguration mit Plugins"
@@ -217,3 +217,16 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
 
 !!! note "Menschenlesbare Größenwerte"
     Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Concurrent-Auditprotokolle
+
+| Einstellung | Standard | Beschreibung |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
+
+Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` und `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Erstellen Sie das Verzeichnis vorher auf jeder BunkerWeb-Instanz mit Schreib- und Suchrechten für den nginx-Worker. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab und erstellt das Verzeichnis nicht. Im globalen CRS-Modus (`USE_MODSECURITY_GLOBAL_CRS=yes`) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.
+
+`MODSECURITY_SEC_AUDIT_LOG` bleibt eine normale, sperrbare `.log`-Datei: Bei `Serial` enthält sie vollständige Datensätze, bei `Concurrent` einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.
+
+Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit `MODSECURITY_SEC_AUDIT_LOG_PARTS` ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.

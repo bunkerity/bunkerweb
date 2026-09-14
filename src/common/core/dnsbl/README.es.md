@@ -28,10 +28,15 @@ Siga estos pasos para configurar y usar la función DNSBL:
 
 **Listas de Omisión**
 
-| Ajuste                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                      |
-| ---------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                         |
-| `DNSBL_IGNORE_IP_URLS` | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`. |
+| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                        |
+| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DNSBL_IGNORE_IP`           | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
+| `DNSBL_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir las comprobaciones DNSBL. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+| `DNSBL_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                       |
+| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
+
+!!! warning "Una regla de cabecera es un secreto compartido"
+    Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 !!! tip "Elección de Servidores DNSBL"
     Elija proveedores de DNSBL de buena reputación para minimizar los falsos positivos. La lista predeterminada incluye servicios bien establecidos que son adecuados para la mayoría de los sitios web:

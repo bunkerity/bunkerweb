@@ -46,6 +46,10 @@ function trap_reload() {
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
 	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
+		if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+			log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+			return 1
+		fi
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
@@ -149,6 +153,10 @@ for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
 done
 
 # start nginx
+if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+	log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+	exit 1
+fi
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &
 pid="$!"

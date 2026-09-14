@@ -113,6 +113,19 @@
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
 
+=== "请求头"
+    **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
+
+    | 设置                              | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ------------------------------- | --- | --------- | --- | --------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |     | multisite | 是   | **请求头名称：** 使请求加入黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_HEADER_VALUE`        |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
+
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 

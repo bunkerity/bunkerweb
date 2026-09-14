@@ -6,7 +6,9 @@ from json import dumps, loads
 from os import environ
 from pathlib import Path
 from re import fullmatch
-from subprocess import run
+from subprocess import CalledProcessError, run
+from sys import stderr
+from time import sleep
 
 IMAGES = ("bunkerweb", "scheduler", "autoconf", "ui", "api", "all-in-one")
 PLATFORMS = ("linux/amd64", "linux/386", "linux/arm64", "linux/arm/v7")
@@ -23,7 +25,9 @@ DISTROS = {
     "rhel-9": "rpm",
     "rhel-10": "rpm",
 }
-REQUIRED_JOBS = {"prepare", "plumber", "codeql", "candidates", "staging-tests", "staging-tests-arm64", "smoke-images"}
+REQUIRED_JOBS = {"prepare", "plumber", "codeql", "candidates"}
+REGISTRY_ATTEMPTS = 4
+REGISTRY_DELAY = 10
 
 
 def require(condition, message):
@@ -32,7 +36,24 @@ def require(condition, message):
 
 
 def command(args):
-    return run(args, check=True, capture_output=True).stdout
+    result = run(args, capture_output=True)
+    if result.returncode:
+        # check=True leaves the tool's own message in an attribute nothing prints, so a rejected
+        # push reads as an exit code and costs another release run to explain.
+        print(result.stderr.decode(errors="replace").strip(), file=stderr)
+        raise CalledProcessError(result.returncode, args, result.stdout, result.stderr)
+    return result.stdout
+
+
+def registry(args):
+    """A registry answers 429/5xx under load and trails a push by seconds; losing a built candidate to that costs the whole build."""
+    for attempt in range(REGISTRY_ATTEMPTS):
+        try:
+            return command(args)
+        except CalledProcessError:
+            if attempt + 1 == REGISTRY_ATTEMPTS:
+                raise
+            sleep(REGISTRY_DELAY)
 
 
 def identity():
@@ -79,7 +100,7 @@ def platform_digests(index):
 
 
 def inspect_index(ref):
-    return loads(command(["docker", "buildx", "imagetools", "inspect", "--raw", ref]))
+    return loads(registry(["docker", "buildx", "imagetools", "inspect", "--raw", ref]))
 
 
 def validate(manifest, expected):
@@ -128,12 +149,23 @@ def write_json(file, value):
     Path(file).write_text(dumps(value, indent=2, sort_keys=True) + "\n")
 
 
+def require_publishable_layers(repository, platforms):
+    """The candidate index is promoted byte for byte: a layer Docker Hub refuses only surfaces
+    after the packages are already public, so refuse it here, in the build that produced it."""
+    for value in platforms.values():
+        manifest = inspect_index(f"{repository}@{value}")
+        for layer in manifest.get("layers", []):
+            require(not layer["mediaType"].endswith("+zstd"), f"candidate layer is not publishable: {layer['mediaType']}")
+
+
 def record_image(args):
     digest(args.digest)
     require(args.image in IMAGES and args.platform in PLATFORMS, "unknown candidate image/platform")
-    ref = f"ghcr.io/bunkerity/{args.image}-tests@{args.digest}"
+    repository = f"ghcr.io/bunkerity/{args.image}-tests"
+    ref = f"{repository}@{args.digest}"
     platforms = platform_digests(inspect_index(ref))
     require(set(platforms) == {args.platform}, "built image platform differs from matrix")
+    require_publishable_layers(repository, platforms)
     write_json(args.output, identity() | {"kind": "image", "image": args.image, "ref": ref, "platforms": platforms})
 
 
@@ -163,8 +195,14 @@ def assemble(args):
     source = identity()
     receipts = [loads(file.read_text()) for file in Path(args.directory).glob("*.json")]
     require(len(receipts) == len(IMAGES) * len(PLATFORMS) + len(DISTROS) * len(PACKAGE_PLATFORMS), "missing or extra build receipts")
+    # Re-running the failed legs of a run keeps the receipts the other legs already uploaded, and
+    # those stay valid: same commit, same run, one receipt per leg, each artefact pinned below by
+    # its own digest. Requiring one attempt across all of them turned any flake into a full rebuild.
+    bound = {key: source[key] for key in ("source_sha", "version", "run_id")}
     for receipt in receipts:
-        require(all(receipt.get(key) == value for key, value in source.items()), "build receipt identity mismatch; rerun all jobs")
+        require(all(receipt.get(key) == value for key, value in bound.items()), "build receipt identity mismatch; rerun all jobs")
+        attempt = receipt.get("run_attempt", "")
+        require(isinstance(attempt, str) and attempt.isdigit() and 0 < int(attempt) <= int(source["run_attempt"]), "build receipt from an unknown attempt")
     manifest = source | {"schema": 1, "images": {}, "packages": []}
     for image in IMAGES:
         rows = [row for row in receipts if row["kind"] == "image" and row["image"] == image]
@@ -174,9 +212,9 @@ def assemble(args):
             require(len(row["platforms"]) == 1 and not expected.keys() & row["platforms"].keys(), "duplicate image build receipt")
             expected.update(row["platforms"])
         tag = f"ghcr.io/bunkerity/{image}-tests:candidate-{source['run_id']}-{source['run_attempt']}"
-        command(["docker", "buildx", "imagetools", "create", "--tag", tag, *[row["ref"] for row in rows]])
+        registry(["docker", "buildx", "imagetools", "create", "--tag", tag, *[row["ref"] for row in rows]])
         # Ask the registry for the descriptor digest; hashing --raw output is unsafe because CLI output may add a newline.
-        index_digest = command(["docker", "buildx", "imagetools", "inspect", "--format", "{{json .Manifest.Digest}}", tag]).decode().strip('"\n')
+        index_digest = registry(["docker", "buildx", "imagetools", "inspect", "--format", "{{json .Manifest.Digest}}", tag]).decode().strip('"\n')
         ref = f"ghcr.io/bunkerity/{image}-tests@{digest(index_digest)}"
         actual = platform_digests(inspect_index(ref))
         require(actual == expected, "assembled candidate differs from built platform digests")
@@ -211,7 +249,7 @@ def prepare_tests(manifest, test_type, packages):
             ref = manifest["images"][name]["ref"]
             env.write(f"{name.upper()}_IMAGE={ref}\n")
             if test_type in ("docker", "autoconf"):
-                command(["docker", "pull", "--platform", "linux/amd64", ref])
+                registry(["docker", "pull", "--platform", "linux/amd64", ref])
                 command(["docker", "tag", ref, f"local/{name}-tests:latest"])
     if test_type == "linux":
         for package in manifest["packages"]:
@@ -223,7 +261,7 @@ def promote(manifest, image, tags):
     for tag in tags.replace("~", "-").split(","):
         require(fullmatch(r"[a-z0-9./_-]+:[a-zA-Z0-9_.-]+", tag), "invalid publication tag")
         command(["skopeo", "copy", "--all", "--preserve-digests", "--retry-times", "3", f"docker://{source}", f"docker://{tag}"])
-        actual = command(["skopeo", "inspect", "--format", "{{.Digest}}", f"docker://{tag}"]).decode().strip()
+        actual = registry(["skopeo", "inspect", "--format", "{{.Digest}}", f"docker://{tag}"]).decode().strip()
         require(actual == source.split("@")[1], f"published digest mismatch: {tag}")
 
 

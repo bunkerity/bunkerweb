@@ -33,7 +33,7 @@
                                     aria-label="Close"
                                     data-i18n="aria.label.close"></button>
                         </div>
-                        <div class="toast-body">{{ message|safe }}</div>
+                        <div class="toast-body" data-flash-html="{{ message }}">{{ message }}</div>
                     </div>
                 {% else %}
                     <div class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border{% if category == 'error' %} border-danger{% elif category == 'warning' %} border-warning{% else %} border-primary{% endif %}"
@@ -57,7 +57,7 @@
                                     aria-label="Close"
                                     data-i18n="aria.label.close"></button>
                         </div>
-                        <div class="toast-body">{{ message|safe }}</div>
+                        <div class="toast-body" data-flash-html="{{ message }}">{{ message }}</div>
                     </div>
                 {% endif %}
             {% endif %}

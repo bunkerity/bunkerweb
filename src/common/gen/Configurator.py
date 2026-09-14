@@ -18,6 +18,7 @@ if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
 
 from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 from env_file import make_key_predicate, parse_env_file  # type: ignore
+from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
 
 class Configurator:
@@ -280,6 +281,10 @@ class Configurator:
                     if server_id and server_id not in self.__servers:
                         self.__servers[server_id] = [server_id]
 
+        # Reject known audit candidates before regex fallbacks, including DB-supplemented service scopes.
+        audit_variables = self.__variables | {"SERVER_NAME": " ".join(self.__servers)} if self.__multisite else self.__variables
+        validate_audit_log_settings(audit_variables, partial=True)
+
         config = {}
         template = self.__variables.get("USE_TEMPLATE", "")
 
@@ -357,6 +362,7 @@ class Configurator:
                             elif setting in config:
                                 config[key] = service_template_settings.get(setting, config[setting])
 
+        validate_audit_log_settings(config)
         return config
 
     @staticmethod

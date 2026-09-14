@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -169,6 +169,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
+- 会话存储：当 `USE_REDIS=yes` 时会话存放在 Redis 中，否则存放在 `/var/lib/bunkerweb` 下的本地缓存中。Redis 停止响应，或因达到 `maxmemory` 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存，并在 Redis 恢复响应后回到 Redis；每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 `maxmemory`。当 Redis 拒绝一次更新时，该会话转入本地存储，并删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本将不再看到已转移的会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而本地持有的会话可能在 `SESSION_LIFETIME_HOURS` 内继续存在，即使另一个副本已将其删除。`UI_USE_REDIS=no` 只让 Web UI 停用 Redis，而全局的 `USE_REDIS` 还会停止在各实例之间共享封禁与报告。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
 
 !!! warning "重建容器后 2FA 消失"
@@ -233,6 +234,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 | `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                                            | `yes` 或 `no`                | `no`           |
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                                              | `yes` 或 `no`                | `yes`          |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                                                   | 整数                         | `1`            |
+| `UI_USE_REDIS`                              | 仅让 Web UI 停用 Redis，不改动全局 `USE_REDIS`                                     | `yes` 或 `no`                | `yes`          |
 
 ### 日志
 

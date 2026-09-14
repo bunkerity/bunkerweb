@@ -32,6 +32,24 @@
       "regex": "^.*$",
       "type": "password"
     },
+    "CROWDSEC_MANAGEMENT_LOGIN": {
+      "context": "multisite",
+      "default": "",
+      "help": "Dedicated CrowdSec machine login for alert investigation and decision removal. Leave empty for read-only bouncer access.",
+      "id": "crowdsec-management-login",
+      "label": "CrowdSec management login",
+      "regex": "^[^\\r\\n]*$",
+      "type": "text"
+    },
+    "CROWDSEC_MANAGEMENT_PASSWORD": {
+      "context": "multisite",
+      "default": "",
+      "help": "Password of the dedicated CrowdSec management machine. Required with the management login; never use the bouncer API key here.",
+      "id": "crowdsec-management-password",
+      "label": "CrowdSec management password",
+      "regex": "^[^\\r\\n]*$",
+      "type": "password"
+    },
     "CROWDSEC_MODE": {
       "context": "multisite",
       "default": "live",

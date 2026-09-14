@@ -35,7 +35,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Utilisez les images publiées et le layout du [guide de démarrage rapide](quickstart-guide.md#__tabbed_1_3) pour monter la stack, puis terminez la configuration dans le navigateur.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Ouvrez le nom d’hôte du scheduler (par ex. `https://www.example.com/changeme`) et lancez l’assistant `/setup` pour configurer l’UI, le scheduler et l’instance.
@@ -52,7 +52,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -169,6 +169,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     Les codes de récupération sont affichés une seule fois dans l’UI ; perdre les clés de chiffrement supprime les secrets TOTP stockés.
 - Sessions : durée d’inactivité par défaut 12 h (`SESSION_LIFETIME_HOURS`), rafraîchie à chaque requête. Un plafond absolu est imposé par `SESSION_ABSOLUTE_HOURS` (par défaut `168` = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (`SESSION_ROLLING_HOURS`, par défaut `0` = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; `CHECK_PRIVATE_IP=no` relâche le contrôle d’IP pour les plages privées uniquement. `ALWAYS_REMEMBER=yes` force les cookies persistants.
+- Stockage des sessions : les sessions vivent dans Redis quand `USE_REDIS=yes`, sinon dans un cache local sous `/var/lib/bunkerweb`. Un Redis qui cesse de répondre, ou qui refuse les écritures parce qu'il a atteint `maxmemory`, ne casse plus l'interface : les sessions concernées basculent sur ce cache local et reviennent vers Redis dès qu'il répond de nouveau, et chaque révocation est enregistrée dans les deux stockages afin de s'appliquer dans les deux cas. Une éviction n'est pas couverte, Redis signalant un succès et cessant simplement de détenir la clé, donc dimensionnez `maxmemory` pour les clés que vous conservez. Quand Redis refuse une mise à jour, la session concernée passe au stockage local et la copie que Redis détenait encore est supprimée, afin que la modification ne soit pas masquée par l'ancienne version et qu'un parcours en plusieurs étapes comme la 2FA ne boucle pas sur son état antérieur. Ce cache local est propre à chaque hôte, ce qui compte si vous exécutez plusieurs réplicas de l'interface : les autres réplicas cessent de voir une session qui a basculé, une révocation émise pendant une indisponibilité de Redis n'est appliquée que par le réplica qui l'a émise, et une session détenue localement peut survivre à une suppression effectuée sur un autre réplica pendant `SESSION_LIFETIME_HOURS`. `UI_USE_REDIS=no` retire l'interface de Redis à elle seule, contrairement au `USE_REDIS` global qui cesse aussi de partager les bannissements et les rapports entre instances.
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
 
 !!! warning "Le 2FA disparaît après une recréation du conteneur"
@@ -233,6 +234,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 | `ALWAYS_REMEMBER`                           | Toujours activer le cookie “remember me”                                                                                 | `yes` ou `no`             | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Lier la session à l’IP (relâchement sur plages privées si `no`)                                                          | `yes` ou `no`             | `yes`                     |
 | `PROXY_NUMBERS`                             | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*`                                                             | Entier                    | `1`                       |
+| `UI_USE_REDIS`                              | Retire l'interface web de Redis sans toucher au `USE_REDIS` global                                                       | `yes` ou `no`             | `yes`                     |
 
 ### Journalisation
 

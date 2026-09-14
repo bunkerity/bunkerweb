@@ -1,4 +1,5 @@
 local config = {}
+local json = require "cjson.safe"
 
 function config.file_exists(file)
     local f = io.open(file, "rb")
@@ -39,7 +40,7 @@ function config.loadConfig(file)
         return nil, "File ".. file .." doesn't exist"
     end
     local conf = {}
-    local valid_params = {'ENABLED', 'ENABLE_INTERNAL', 'API_URL', 'API_KEY', 'BOUNCING_ON_TYPE', 'MODE', 'SECRET_KEY', 'SITE_KEY', 'BAN_TEMPLATE_PATH' ,'CAPTCHA_TEMPLATE_PATH', 'REDIRECT_LOCATION', 'RET_CODE', 'EXCLUDE_LOCATION', 'FALLBACK_REMEDIATION', 'CAPTCHA_PROVIDER', 'APPSEC_URL', 'APPSEC_FAILURE_ACTION', 'ALWAYS_SEND_TO_APPSEC', 'SSL_VERIFY'}
+    local valid_params = {'ENABLED', 'ENABLE_INTERNAL', 'API_URL', 'API_KEY', 'MANAGEMENT_LOGIN', 'MANAGEMENT_PASSWORD', 'BOUNCING_ON_TYPE', 'MODE', 'SECRET_KEY', 'SITE_KEY', 'BAN_TEMPLATE_PATH' ,'CAPTCHA_TEMPLATE_PATH', 'REDIRECT_LOCATION', 'RET_CODE', 'EXCLUDE_LOCATION', 'FALLBACK_REMEDIATION', 'CAPTCHA_PROVIDER', 'APPSEC_URL', 'APPSEC_FAILURE_ACTION', 'ALWAYS_SEND_TO_APPSEC', 'SSL_VERIFY'}
     local valid_int_params = {'CACHE_EXPIRATION', 'CACHE_SIZE', 'REQUEST_TIMEOUT', 'UPDATE_FREQUENCY', 'CAPTCHA_EXPIRATION', 'APPSEC_CONNECT_TIMEOUT', 'APPSEC_SEND_TIMEOUT', 'APPSEC_PROCESS_TIMEOUT', 'STREAM_REQUEST_TIMEOUT'}
     local valid_bouncing_on_type_values = {'ban', 'captcha', 'all'}
     local valid_truefalse_values = {'false', 'true'}
@@ -83,7 +84,13 @@ function config.loadConfig(file)
             local key = trim(line:sub(1, sep_pos - 1))
         local value = trim(line:sub(sep_pos + 1))
         if has_value(valid_params, key) then
-            if key == "ENABLED" then
+            if key == "MANAGEMENT_LOGIN" or key == "MANAGEMENT_PASSWORD" then
+                local decoded = json.decode(value)
+                if type(decoded) ~= "string" then
+                    return nil, "Invalid CrowdSec management credential encoding"
+                end
+                value = decoded
+            elseif key == "ENABLED" then
                 if not has_value(valid_truefalse_values, value) then
                     ngx.log(ngx.ERR, "unsupported value '" .. value .. "' for variable '" .. key .. "'. Using default value 'true' instead")
                     value = "true"

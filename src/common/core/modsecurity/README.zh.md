@@ -34,7 +34,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。路径必须以 `.log` 结尾。通过该后缀实现的轮转仅适用于安装了 logrotate 的场景（Linux 软件包和 All-In-One 镜像）；在 Docker、Swarm 和 Kubernetes 上，非默认名称既不会被流式传输也不会被轮转，会在容器内无限增长，因为容器的日志流仅链接了 `modsec_audit.log`。                |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
@@ -176,7 +176,7 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "带插件的高级配置"
@@ -217,3 +217,16 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
 
 !!! note "人类可读的大小值"
     对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。
+
+### Concurrent 审计日志
+
+| 设置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | 写入模式：`Serial`（默认）或 `Concurrent`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | 默认为空；`Concurrent` 必须使用绝对存储目录。 |
+
+设置 `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` 和 `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`。请预先在每个 BunkerWeb 实例上创建该目录，并授予 nginx worker 写入和目录访问权限。需要保留日志时请使用持久化挂载。BunkerWeb 会在应用之前拒绝无效配置，不会创建此目录。在全局 CRS 模式（`USE_MODSECURITY_GLOBAL_CRS=yes`）下，这两个设置必须在全局配置；服务级覆盖不会选择独立的写入模式。
+
+`MODSECURITY_SEC_AUDIT_LOG` 仍为可加锁的普通 `.log` 文件：`Serial` 写入完整记录，`Concurrent` 写入指向各事务文件的索引。索引路径及其轮转规则保持不变。操作员负责磁盘容量、访问权限以及按日期创建的子目录的递归保留策略。轮转索引不会删除事务文件。切换之前请确认日志读取工具能够处理 Concurrent 索引，而非仅支持 Serial 记录。
+
+Concurrent 改变记录的存储方式；它不会对请求进行采样，也不会减少 `MODSECURITY_SEC_AUDIT_LOG_PARTS` 选择的审计数据。请根据请求速率、所选记录部分和保留时间规划存储容量，并使用有代表性的流量测量记录大小，而不是假设每个被阻止的请求都有固定的开销。

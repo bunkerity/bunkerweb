@@ -19,6 +19,7 @@ local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
 local HTTP_CLOSE = ngx.HTTP_CLOSE or 444
 local null = ngx.null
 local re_match = ngx.re.match
+local get_headers = ngx.req and ngx.req.get_headers
 local subsystem = ngx.config.subsystem
 local get_phase = ngx.get_phase
 local kill = ngx.thread.kill
@@ -163,6 +164,146 @@ utils.get_multiple_variables = function(vars)
 		end
 	end
 	return result
+end
+
+-- Pair <PREFIX>_NAME_<n> with <PREFIX>_VALUE_<n> once, during init. Resolving the numeric
+-- suffixes per request would mean walking every scoped variable on every request.
+-- Returns { [server_name] = { { name = "x-internal-auth", value = "^s3cr3t$" }, ... } } where
+-- a nil value means "match on the header being present, whatever it carries".
+utils.get_header_rules = function(prefix)
+	local variables, err = utils.get_multiple_variables({ prefix .. "_NAME", prefix .. "_VALUE" })
+	if not variables then
+		return nil, err
+	end
+	local global_vars = variables["global"] or {}
+	local name_pattern = "^" .. prefix .. "_NAME(_?%d*)$"
+
+	-- Same effective-value rule as get_variable : a service inherits the global value for every
+	-- key its own table does not carry. Without the fallback a non-multisite setup, which only
+	-- ever has the "global" scope, would silently match nothing.
+	local function build(vars, server)
+		local keys = {}
+		for variable in pairs(global_vars) do
+			keys[variable] = true
+		end
+		for variable in pairs(vars) do
+			keys[variable] = true
+		end
+		local rules = {}
+		for variable in pairs(keys) do
+			local suffix = variable:match(name_pattern)
+			if suffix then
+				local name = vars[variable]
+				if name == nil then
+					name = global_vars[variable]
+				end
+				local value_key = prefix .. "_VALUE" .. suffix
+				local value = vars[value_key]
+				if value == nil then
+					value = global_vars[value_key]
+				end
+				if value == "" then
+					value = nil
+				end
+				if name and name ~= "" then
+					local keep = true
+					if value then
+						-- Compile here so a broken pattern is caught once, at init. It must never reach
+						-- the request path : that error log echoes the pattern, and the pattern holds the
+						-- operator's shared secret. An empty subject isolates compile failure exactly.
+						local _, compile_err = re_match("", value, "o")
+						if compile_err then
+							logger:log(
+								ERR,
+								"ignoring "
+									.. prefix
+									.. " rule for header "
+									.. name
+									.. " on server "
+									.. server
+									.. " : its value is not a valid regex"
+							)
+							keep = false
+						end
+					end
+					if keep then
+						rules[#rules + 1] = { name = name:lower(), value = value }
+					end
+				end
+			end
+		end
+		return rules
+	end
+
+	-- Every scope is stored, empty ones included : an empty service table means "this service
+	-- has no header rules", which must not fall back to the global scope in pick_header_rules.
+	local result = {}
+	for server, vars in pairs(variables) do
+		result[server] = build(vars, server)
+	end
+	return result
+end
+
+-- Pick the rule set that applies to this request. A service falls back to the global scope,
+-- which is the only scope a non-multisite setup ever has.
+utils.pick_header_rules = function(stored, server_name)
+	if not stored then
+		return {}
+	end
+	return (server_name and stored[server_name]) or stored["global"] or {}
+end
+
+-- Deliberately not utils.regex_match : its failure path logs the pattern, which here is the
+-- shared secret. Errors are reported with the header name only.
+local function header_value_matches(value, rule, source)
+	local match, match_err = re_match(value, rule.value, "o")
+	if match_err then
+		logger:log(
+			ERR,
+			"error while matching " .. (source or "header rule") .. " on header " .. rule.name .. " : " .. match_err
+		)
+		return false
+	end
+	return match ~= nil
+end
+
+-- Request-time counterpart of get_header_rules. Returns the name of the header that matched,
+-- never its value, so callers can log the reason without leaking the secret.
+utils.match_header_rules = function(ctx, rules, source)
+	if not rules or #rules == 0 then
+		return nil
+	end
+	-- The stream subsystem has no request headers at all, and no ngx.req.get_headers to call.
+	if not get_headers then
+		return nil
+	end
+	local headers = ctx.bw.http_headers
+	if not headers then
+		-- Without the explicit cap get_headers() silently stops at 100, so raising MAX_HEADERS
+		-- would let a client push the matching header out of reach - and a padded request would
+		-- slip past a blacklist rule entirely.
+		headers = get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+		ctx.bw.http_headers = headers
+	end
+	for _, rule in ipairs(rules) do
+		local value = headers[rule.name]
+		if value ~= nil then
+			if not rule.value then
+				return rule.name
+			end
+			if type(value) == "table" then
+				-- A repeated header arrives as a list : any occurrence may carry the secret.
+				for _, one in ipairs(value) do
+					if header_value_matches(one, rule, source) then
+						return rule.name
+					end
+				end
+			elseif header_value_matches(value, rule, source) then
+				return rule.name
+			end
+		end
+	end
+	return nil
 end
 
 utils.is_ip_in_networks = function(ip, networks)
@@ -347,7 +488,14 @@ utils.get_reason = function(ctx)
 		return var_reason, reason_data, security_mode
 	end
 	-- ngx.var / modsecurity
-	if ngx.var.modsecurity_reason == "modsecurity" then
+	local modsecurity_reason = ngx.var.modsecurity_reason
+	-- Keep parser IDs separate from CRS's accumulated IDs and matched request data.
+	-- A later CRS summary takes precedence in DetectionOnly without mixing metadata.
+	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(20000[25])$")
+	if body_rule_id then
+		return "modsecurity-body", { ids = { body_rule_id } }, security_mode
+	end
+	if modsecurity_reason == "modsecurity" then
 		local reason_data = {}
 
 		-- Handle IDs
@@ -920,16 +1068,7 @@ utils.is_banned = function(ip, server_name)
 	end
 	use_redis = use_redis == "yes"
 
-	local clusterstore
-	if use_redis then
-		clusterstore = require "bunkerweb.clusterstore":new()
-		local ok, connect_err = clusterstore:connect(true)
-		if not ok then
-			return nil, "can't connect to redis: " .. connect_err, nil, nil
-		end
-	end
-
-	-- Helper function to check ban in datastore and Redis
+	-- Check local bans before opening a Redis connection.
 	local function check_ban(key)
 		-- Check local datastore first
 		local value
@@ -963,80 +1102,87 @@ utils.is_banned = function(ip, server_name)
 			return nil, "datastore:get() error: " .. tostring(err), nil, nil
 		end
 
-		-- Check Redis if enabled
-		if not use_redis then
-			return false, "not banned", nil, nil
-		end
-
-		-- Redis atomic script for GET+TTL
-		local redis_script = [[
-			local ret_get = redis.pcall("GET", KEYS[1])
-			if type(ret_get) == "table" and ret_get["err"] ~= nil then
-				return {err = ret_get["err"]}
-			end
-			local ret_ttl = nil
-			if ret_get ~= nil then
-				ret_ttl = redis.pcall("TTL", KEYS[1])
-				if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
-					return {err = ret_ttl["err"]}
-				end
-			end
-			return {ret_get, ret_ttl}
-		]]
-
-		-- Execute Redis script
-		local data, script_err = clusterstore:call("eval", redis_script, 1, key)
-		if not data then
-			return nil, "redis call error: " .. script_err, nil, nil
-		elseif data.err then
-			return nil, "redis script error: " .. data.err, nil, nil
-		elseif data[1] ~= null then
-			-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
-			-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
-			local redis_ttl = data[2]
-			local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
-			local ok_cache, cache_err = datastore:set_with_retries(key, data[1], cache_ttl)
-			if not ok_cache then
-				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
-			end
-
-			-- Parse ban data to extract reason and optional reason_data
-			local reason = data[1]
-			local reason_data
-			local ok, ban_data = pcall(decode, data[1])
-			if ok and type(ban_data) == "table" then
-				reason = ban_data.reason or reason
-				reason_data = ban_data.reason_data
-			end
-
-			-- Redis TTL for permanent keys is -1; normalize to 0
-			return true, reason, math_max(redis_ttl, 0), reason_data
-		end
-
 		return false, "not banned", nil, nil
 	end
 
-	-- Check for service-specific ban first if server_name is provided
+	local keys = {}
+	local banned, local_reason, ttl, local_reason_data
 	if server_name then
-		local service_key = "bans_service_" .. server_name .. "_ip_" .. ip
-		local banned, reason, ttl, reason_data = check_ban(service_key)
+		keys[1] = "bans_service_" .. server_name .. "_ip_" .. ip
+	end
+	keys[#keys + 1] = "bans_ip_" .. ip
+	local missing = {}
+	for _, key in ipairs(keys) do
+		banned, local_reason, ttl, local_reason_data = check_ban(key)
 		if banned or banned == nil then
-			if clusterstore then
-				clusterstore:close()
-			end
-			return banned, reason, ttl, reason_data
+			-- Earlier Redis misses must resolve before a lower-priority local verdict.
+			break
 		end
+		missing[#missing + 1] = key
+	end
+	if not use_redis or #missing == 0 then
+		return banned, local_reason, ttl, local_reason_data
+	end
+	keys = missing
+
+	local clusterstore = require "bunkerweb.clusterstore":new()
+	local connected, connect_err = clusterstore:connect(true)
+	if not connected then
+		return nil, "can't connect to redis: " .. connect_err, nil, nil
+	end
+	local redis_script = [[
+		for i, key in ipairs(KEYS) do
+			local ret_get = redis.pcall("GET", key)
+			if type(ret_get) == "table" and ret_get["err"] ~= nil then
+				return {err = ret_get["err"]}
+			end
+			local ret_ttl = redis.pcall("TTL", key)
+			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+				return {err = ret_ttl["err"]}
+			end
+			if ret_get ~= false then
+				return {ret_get, ret_ttl, i}
+			end
+		end
+		return {false, -2, 0}
+	]]
+	local data, script_err = clusterstore:call("eval", redis_script, #keys, unpack(keys))
+	clusterstore:close()
+	if not data then
+		return nil, "redis call error: " .. script_err, nil, nil
+	elseif data.err then
+		return nil, "redis script error: " .. data.err, nil, nil
+	elseif data[1] ~= null then
+		-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
+		-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
+		local redis_ttl = data[2]
+		local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
+		-- The script reports which key hit as an index into the keys it was given; never
+		-- trust it blindly, a nil key would be written as the cache entry.
+		local hit_key = keys[data[3]]
+		if hit_key then
+			local ok_cache, cache_err = datastore:set_with_retries(hit_key, data[1], cache_ttl)
+			if not ok_cache then
+				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
+			end
+		else
+			logger:log(WARN, "ban script returned an unknown key index: " .. tostring(data[3]))
+		end
+
+		-- Parse ban data to extract reason and optional reason_data
+		local reason = data[1]
+		local reason_data
+		local ok, ban_data = pcall(decode, data[1])
+		if ok and type(ban_data) == "table" then
+			reason = ban_data.reason or reason
+			reason_data = ban_data.reason_data
+		end
+
+		-- Redis TTL for permanent keys is -1; normalize to 0
+		return true, reason, math_max(redis_ttl, 0), reason_data
 	end
 
-	-- Always check for global ban regardless of scope
-	local banned, reason, ttl, reason_data = check_ban("bans_ip_" .. ip)
-
-	-- Close Redis connection if opened
-	if clusterstore then
-		clusterstore:close()
-	end
-
-	return banned, reason, ttl, reason_data
+	return banned, local_reason, ttl, local_reason_data
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)

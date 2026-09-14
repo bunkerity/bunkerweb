@@ -105,6 +105,7 @@ def stop_progress_monitor() -> None:
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 CHALLENGE_TYPES = ("http", "dns")
 PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
+PROFILE_NAME_LIMITS = {"classic": 100, "tlsserver": 25, "shortlived": 25}
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
@@ -117,6 +118,20 @@ STALE_ACCOUNT_PURGED = Event()
 def normalize_server_names(server_names: str) -> Set[str]:
     """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
     return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
+
+
+def warn_profile_name_limit(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> None:
+    if config.get("acme_server") != "letsencrypt":
+        return
+    profile = str(config.get("profile") or "")
+    max_names = PROFILE_NAME_LIMITS.get(profile)
+    if max_names is None:
+        return
+    names_count = len(normalize_server_names(str(config.get("server_names") or "")))
+    if names_count > max_names:
+        LOGGER.warning(
+            f"[Service: {service}] Let's Encrypt profile '{profile}' supports at most {max_names} names, but {names_count} were requested; continuing."
+        )
 
 
 def unissuable_names(names: List[str]) -> List[str]:
@@ -479,25 +494,29 @@ def list_misconfigured(services: Dict[str, Dict[str, Union[str, bool, int, Dict[
 
 
 def extract_wildcard_groups(domains: List[str], service: str, rejected_services: Optional[Set[str]] = None) -> Dict[str, List[str]]:
-    cleaned_labels: List[List[str]] = []
+    cleaned_labels: List[Tuple[List[str], bool]] = []
 
     for domain in domains:
-        cleaned = domain.strip().removeprefix("*.").lower()
+        domain = domain.strip()
+        cleaned = domain.removeprefix("*.").lower()
         if not cleaned:
             continue
         labels = [part for part in cleaned.split(".") if part]
         if labels:
-            cleaned_labels.append(labels)
+            cleaned_labels.append((labels, domain.startswith("*.")))
 
     if not cleaned_labels:
         return {}
 
+    explicit_bases = {".".join(labels) for labels, explicit in cleaned_labels if explicit}
+    groups: Dict[str, Set[str]] = {base: {f"*.{base}", base} for base in explicit_bases}
     grouped: Dict[str, List[List[str]]] = defaultdict(list)
-    for labels in cleaned_labels:
+    for labels, explicit in cleaned_labels:
+        if explicit or ".".join(labels) in explicit_bases or ".".join(labels[1:]) in explicit_bases:
+            continue
         key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
         grouped[key].append(labels)
 
-    groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
         bases = _determine_wildcard_bases(labels_list, service)
         if not bases and rejected_services is not None:
@@ -777,6 +796,7 @@ def certbot_new(
         else:
             LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
 
+    warn_profile_name_limit(service, config)
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
     # Watch certbot output for a stale-account JWS rejection. When the ACME server

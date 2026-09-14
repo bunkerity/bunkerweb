@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -190,6 +190,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
+- Session storage: sessions live in Redis when `USE_REDIS=yes`, otherwise in a local cache under `/var/lib/bunkerweb`. A Redis that stops answering, or that refuses writes because it hit `maxmemory`, no longer breaks the UI: the affected sessions fall back to that local cache and return to Redis once it answers again, and every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size `maxmemory` for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a session held locally can survive a deletion performed on another replica for up to `SESSION_LIFETIME_HOURS`. `UI_USE_REDIS=no` takes the UI off Redis on its own, unlike the global `USE_REDIS` which also stops bans and reports being shared between instances.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! warning "2FA is gone after recreating the container"
@@ -254,6 +255,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `UI_USE_REDIS`                              | Take the web UI off Redis without touching the global `USE_REDIS`                                        | `yes` or `no`            | `yes`                     |
 
 ### Logging
 
