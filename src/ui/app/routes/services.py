@@ -1568,6 +1568,10 @@ def update_service(
     old_server_name_splitted = old_server_name.split()
     old_server_id = old_server_name_splitted[0] if old_server_name_splitted and old_server_name_splitted[0] else service
     renamed_service = service != "new" and new_server_name and new_server_name != old_server_id
+    # Snapshot BEFORE the re-key loop below, which sets `configs_changed` on a rename whether or not
+    # the operator touched a config. Only this value answers "did this submission carry config work
+    # of its own", which is what the refused-rename warning further down has to report on.
+    submitted_config_changes = configs_changed
 
     final_custom_configs: dict[str, dict] = {}
     for key, data in all_custom_configs.items():
@@ -1606,58 +1610,54 @@ def update_service(
             file_name_map=file_setting_names,
         )
 
-    # Save custom configs after the service edit so the new service id exists
-    if new_configs or configs_changed:
-        if renamed_service:
-            # Use per-config create/update to avoid bulk delete when renaming services
-            for custom_config in final_custom_configs.values():
-                conf_data = custom_config.get("data")
-                if isinstance(conf_data, bytes):
-                    conf_data = conf_data.decode("utf-8", errors="replace")
-                try:
-                    API_CLIENT.create_config(
-                        service=custom_config.get("service_id"),
-                        type=custom_config.get("type"),
-                        name=custom_config.get("name"),
-                        data=conf_data or "",
-                        is_draft=custom_config.get("is_draft", False),
-                    )
-                except Exception as create_err:
-                    if "already exists" in str(create_err):
-                        try:
-                            API_CLIENT.update_config(
-                                custom_config.get("service_id"),
-                                custom_config.get("type"),
-                                custom_config.get("name"),
-                                data=conf_data or "",
-                                is_draft=custom_config.get("is_draft", False),
-                            )
-                        except Exception as update_err:
-                            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {update_err}", "type": "error"})
-                            break
-                    else:
-                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {create_err}", "type": "error"})
-                        break
-        else:
-            serializable_configs = []
-            for cfg in final_custom_configs.values():
-                cfg_copy = cfg.copy()
-                if isinstance(cfg_copy.get("data"), bytes):
-                    cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
-                serializable_configs.append(cfg_copy)
-            try:
-                saved = API_CLIENT.bulk_save_configs(
-                    serializable_configs,
-                    override_method,
-                    changed=service != "new" and (was_draft != is_draft or not is_draft),
-                )
-                # The configs ARE saved; the API only answers with a message when it has something
-                # to report about them (a referenced service that does not exist). Swallowing it
-                # left the operator with a green "saved" and a config that matches nothing.
-                if message := (saved or {}).get("message"):
-                    DATA["TO_FLASH"].append({"content": message, "type": "warning"})
-            except Exception as e:
-                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
+    # Save custom configs after the service edit so the new service id exists. A rename that the
+    # service edit REFUSED is the one case the bulk path must not run for: `PUT /configs/bulk`
+    # replaces every row of the submitted method from a payload already re-keyed to the new name,
+    # while the database still holds the OLD service. Two outcomes, both bad: on SQLite, where the
+    # foreign-keys pragma is off, the real rows are deleted and re-inserted against a service that
+    # was never created, invisible from then on; and when the refusal is "that name already exists"
+    # the target service DOES exist, so on every engine the configs are quietly re-homed onto
+    # somebody else's service. The gate is deliberately narrow: a failed NON-rename edit still
+    # saves its configs, exactly as it always has, and its payload only ever names services that
+    # exist.
+    if (new_configs or configs_changed) and not (renamed_service and error):
+        # One path for every submission, rename included. The rename used to take a private
+        # per-config create/update loop here, to work around `save_config` hard-deleting the
+        # renamed service and its `bw_custom_configs` rows with it. The shared layer now renames
+        # the row instead (`db_methods/config_save.py`, `_sc_apply_service_rename`), so that loop
+        # bought nothing and cost two things: the `create` answered "already exists" for every
+        # surviving config, and the `update` fallback then hit the API's "No values were changed"
+        # 400 for any config this submission did not actually change -- which flashed an error on
+        # a rename that had fully succeeded and `break`ed out of the loop, silently dropping every
+        # remaining entry, including edits made in the same form post.
+        serializable_configs = []
+        for cfg in final_custom_configs.values():
+            cfg_copy = cfg.copy()
+            if isinstance(cfg_copy.get("data"), bytes):
+                cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
+            serializable_configs.append(cfg_copy)
+        try:
+            saved = API_CLIENT.bulk_save_configs(
+                serializable_configs,
+                override_method,
+                changed=service != "new" and (was_draft != is_draft or not is_draft),
+            )
+            # The configs ARE saved; the API only answers with a message when it has something
+            # to report about them (a referenced service that does not exist). Swallowing it
+            # left the operator with a green "saved" and a config that matches nothing.
+            if message := (saved or {}).get("message"):
+                DATA["TO_FLASH"].append({"content": message, "type": "warning"})
+        except Exception as e:
+            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
+        skipped_config_changes = False
+    else:
+        # Reachable only when the gate above refused a rename -- the `if`'s first conjunct is
+        # repeated verbatim in it. Worth a word ONLY if the submission carried config work of its
+        # own: on a rename `configs_changed` is also set by the re-key loop, so testing it here
+        # would warn about dropped configs on every refused rename, including the ones that posted
+        # no config at all. The refusal itself is flashed below; nothing else says the operator's
+        # config edits went with it.
+        skipped_config_changes = submitted_config_changes
 
     if operation.endswith("already exists."):
         DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
@@ -1675,6 +1675,10 @@ def update_service(
             else:
                 DATA["TO_FLASH"].append({"content": operation, "type": "success"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will attempt to apply the changes.", "type": "success", "save": False})
+
+    if skipped_config_changes:
+        # After the refusal, not before it: the operator reads the cause, then its consequence.
+        DATA["TO_FLASH"].append({"content": "The custom configs were not saved because the rename was refused.", "type": "warning"})
 
     DATA["RELOADING"] = False
 

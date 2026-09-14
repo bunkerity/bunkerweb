@@ -484,7 +484,13 @@ class ApiClient(BaseApiClient):
         return self._post("/configs", json=kwargs)
 
     def update_config(self, service, type, name, body=None, **kwargs):
-        return self._patch(f"/configs/{service or 'global'}/{type}/{name}", json=body if body is not None else kwargs)
+        # The kwargs form is a CONTENT edit, never a move, so it has to restate the service the
+        # config already belongs to. `service` travels in the URL only; the API reads the new scope
+        # from the BODY, and an absent `service` there means "global" (`api/app/schemas.py:253-263`),
+        # so omitting it re-scoped the config to global on save -- injecting a per-service snippet
+        # into every server block. Callers that deliberately MOVE a config pass an explicit `body`
+        # (`routes/configs.py`'s `configs_edit`) and are untouched by this.
+        return self._patch(f"/configs/{service or 'global'}/{type}/{name}", json=body if body is not None else {"service": service} | kwargs)
 
     def delete_configs(self, configs: list):
         return self._delete("/configs", json={"configs": configs})
