@@ -17,6 +17,7 @@
 - [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Fixes #3867)
 - [BUGFIX] `errors`: keep the blocking plugin reason on reports when a custom error page is configured, instead of `unknown`. (Fixes #3916)
 - [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
+- [BUGFIX] `bunkernet`: back off failed registration retries with an exponential delay capped at 24 hours, retaining the previous exit status while waiting. Registration still depends on the BunkerNet API; HTTP 429 and 403 remain non-fatal. (Refs #3636)
 
 ## v1.6.15~rc2 - 2026/09/??
 
