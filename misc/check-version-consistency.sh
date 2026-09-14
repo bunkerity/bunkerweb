@@ -46,7 +46,6 @@ check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: 1\.[0-9][^ ]*'
 #   src/common/db/alembic/            revision ids and down_revision chains
 #   .github/RELEASING.md              worked examples of the tag convention
 #   misc/install-bunkerweb.sh         ~rc vs -rc comparison examples in comments
-#   tests/unit/test_installer_versions.sh   version-parsing fixtures
 CORE="${VERSION%%[~-]*}"
 mapfile -t stale < <(
     git grep -nE "${CORE//./\\.}[~-]rc[0-9]+" -- \
@@ -56,7 +55,6 @@ mapfile -t stale < <(
         ':!.github/scripts/**' \
         ':!docs/superpowers/**' \
         ':!misc/install-bunkerweb.sh' \
-        ':!tests/unit/test_installer_versions.sh' \
         ':!misc/check-version-consistency.sh' 2>/dev/null |
         grep -vF "$VERSION" | grep -vF "$TAG_VERSION" || true
 )
