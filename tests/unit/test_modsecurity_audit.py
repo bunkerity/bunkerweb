@@ -22,8 +22,10 @@ from modsecurity_audit import validate_audit_log_settings
 
 
 class TestConcurrentAuditScopes(unittest.TestCase):
+    """Guards which scopes Concurrent audit validation applies to."""
+
     def test_global_concurrent_with_per_service_storage_dirs_is_accepted(self):
-        # The global scope is only a fallback here; every real service sets its own directory.
+        """A global Concurrent is allowed when every service supplies its own storage directory."""
         validate_audit_log_settings(
             {
                 "MULTISITE": "yes",
@@ -35,7 +37,7 @@ class TestConcurrentAuditScopes(unittest.TestCase):
         )
 
     def test_service_with_modsecurity_disabled_does_not_need_a_storage_dir(self):
-        # ModSecurity never runs for this service, so a missing directory must not block startup.
+        """A service with ModSecurity disabled must not be blocked by a missing storage directory."""
         validate_audit_log_settings(
             {
                 "MULTISITE": "yes",
@@ -46,7 +48,7 @@ class TestConcurrentAuditScopes(unittest.TestCase):
         )
 
     def test_service_inheriting_concurrent_without_a_storage_dir_is_rejected(self):
-        # b.example.com inherits the global Concurrent and has no directory of its own.
+        """A service inheriting Concurrent without a directory is rejected, and the error names it."""
         with self.assertRaises(ValueError) as ctx:
             validate_audit_log_settings(
                 {
@@ -59,10 +61,12 @@ class TestConcurrentAuditScopes(unittest.TestCase):
         self.assertIn("b.example.com_MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR", str(ctx.exception))
 
     def test_single_site_concurrent_still_requires_a_storage_dir(self):
+        """Single-site Concurrent still requires a storage directory."""
         with self.assertRaises(ValueError):
             validate_audit_log_settings({"MULTISITE": "no", "MODSECURITY_SEC_AUDIT_LOG_TYPE": "Concurrent"})
 
     def test_global_crs_mode_still_requires_a_storage_dir(self):
+        """Global CRS mode still requires a storage directory on the global scope."""
         with self.assertRaises(ValueError):
             validate_audit_log_settings(
                 {
@@ -74,6 +78,7 @@ class TestConcurrentAuditScopes(unittest.TestCase):
             )
 
     def test_storage_dir_is_checked_on_disk_for_an_active_scope(self):
+        """An active scope's storage directory is still checked on disk when requested."""
         config = {"MULTISITE": "no", "MODSECURITY_SEC_AUDIT_LOG_TYPE": "Concurrent"}
         with TemporaryDirectory() as storage:
             config["MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR"] = storage
