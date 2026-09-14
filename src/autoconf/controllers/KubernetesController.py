@@ -16,6 +16,7 @@ from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
 from controllers.Controller import Controller
+from custom_configs_validation import validate as validate_custom_config  # type: ignore
 
 # Written by main.py once the event loop starts (:104), removed on exit (:111), cleared at boot by
 # entrypoint.sh, and checked by src/common/helpers/healthcheck-autoconf.sh. Dropping it is how a
@@ -53,6 +54,7 @@ class KubernetesController(Controller):
         self._pending_backends: Dict[Tuple[str, str], Dict[str, float]] = {}
         self._pending_backends_max_attempts = 5
         self._pending_backends_base_delay = 1.0  # seconds; doubles each attempt (1, 2, 4, 8, 16 → max ~31s)
+        self._warned_invalid_custom_conf_names = set()
         super().__init__("kubernetes", api_client=api_client)
         config.load_incluster_config()
         self._managed_configmaps = set()
@@ -469,6 +471,22 @@ class KubernetesController(Controller):
                     config[config_name] = config_data
             else:
                 for config_name, config_data in configmap.data.items():
+                    # `Config.py` strips a trailing `.conf` before persisting (out of this
+                    # lane's glob); validate the name the same way it will eventually be
+                    # stored. WARN-only (design AC 6): a ConfigMap-labelled install keeps
+                    # accepting exactly what it accepts today; refusing an invalid name is
+                    # the 1.8 flip.
+                    warn_key = f"{configmap.metadata.namespace}/{configmap.metadata.name}/{config_name}"
+                    verdict = validate_custom_config(
+                        config_type,
+                        config_name.replace(".conf", ""),
+                        config_data,
+                        service_id=config_site.rstrip("/") or None,
+                        source="configmap",
+                    )
+                    if verdict.warning and warn_key not in self._warned_invalid_custom_conf_names:
+                        self._warned_invalid_custom_conf_names.add(warn_key)
+                        self._logger.warning(verdict.warning)
                     configs[config_type][f"{config_site}{config_name}"] = config_data
 
         self._managed_configmaps = managed_configmaps
