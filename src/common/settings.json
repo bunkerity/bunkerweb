@@ -409,6 +409,16 @@
     "regex": "^(yes|no)$",
     "type": "check"
   },
+  "CUSTOM_CONFIGS_DRIFT": {
+    "context": "global",
+    "default": "overwrite",
+    "help": "What happens when a projected .conf file changes since the last recorded projection or was absent from it. Files matching the current database row are ignored; without readable projection history, no drift is reported. 'overwrite' logs each detected drift and rewrites the file from the database, or deletes it if no active row replaces it. 'refuse' writes nothing there from the database until the drift is resolved, logs an error, and leaves the pending custom config change unacknowledged so it is retried.",
+    "id": "custom-configs-drift",
+    "label": "Custom configs drift policy",
+    "regex": "^(overwrite|refuse)$",
+    "type": "select",
+    "select": ["overwrite", "refuse"]
+  },
   "TIMERS_LOG_LEVEL": {
     "context": "global",
     "default": "debug",
