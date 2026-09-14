@@ -38,9 +38,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.13.3",
+      "name": "libmaxminddb v1.14.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3",
+      "commit": "0077fd76d00a1656b9cb3028d467736504794f41",
       "post_install": "rm -rf src/deps/src/libmaxminddb/t/libtap src/deps/src/libmaxminddb/t/maxmind-db"
     },
     {
