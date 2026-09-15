@@ -38,13 +38,20 @@ def compose_config():
     return {"services": services, "volumes": {"shared": {}, "aio": {}}}
 
 
+def start_services(compose):
+    # Docker populates an empty named volume from the image at container creation.
+    # Seed shared:/data once so concurrent service creation cannot race during copy-up.
+    run([*compose, "create", "--no-build", "scheduler"], check=True)
+    run([*compose, "up", "--detach", "--wait", "--wait-timeout", "600", "--no-build"], check=True)
+
+
 def main():
     with TemporaryDirectory(prefix="staging-smoke-") as temporary:
         file = Path(temporary) / "compose.json"
         write_json(file, compose_config())
         compose = ["docker", "compose", "--project-name", "staging-smoke", "--file", str(file)]
         try:
-            run([*compose, "up", "--detach", "--wait", "--wait-timeout", "600", "--no-build"], check=True)
+            start_services(compose)
             # Two healthy observations catch an immediately exiting entrypoint.
             sleep(10)
             containers = command([*compose, "ps", "--all", "--quiet"]).decode().split()
