@@ -9,11 +9,11 @@ from pathlib import Path
 from subprocess import CalledProcessError, run
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import release_artifacts as release
 import release_integration as integration
-from release_smoke import compose_config
+from release_smoke import compose_config, start_services
 from yaml import safe_load
 
 
@@ -170,6 +170,20 @@ class ReleaseArtifactsTest(TestCase):
             self.assertFalse(any("/usr/share/bunkerweb" in volume for volume in service["volumes"]))
             # The API and the all-in-one API refuse to start without an auth path.
             self.assertTrue(service["environment"]["API_TOKEN"])
+
+    @patch("release_smoke.run")
+    def test_smoke_seeds_shared_volume_before_starting_services(self, mocked_run):
+        compose = ["docker", "compose", "--project-name", "staging-smoke", "--file", "compose.json"]
+
+        start_services(compose)
+
+        self.assertEqual(
+            mocked_run.call_args_list,
+            [
+                call([*compose, "create", "--no-build", "scheduler"], check=True),
+                call([*compose, "up", "--detach", "--wait", "--wait-timeout", "600", "--no-build"], check=True),
+            ],
+        )
 
     def test_workflow_graph_has_no_publication_bypass(self):
         root = Path(__file__).resolve().parents[1] / "workflows"
