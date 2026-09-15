@@ -2096,6 +2096,19 @@ Se te pedirá que tomes las siguientes decisiones:
 !!! info "Instalaciones de Gestor y Programador"
     Si eliges el tipo de instalación **Gestor** o **Solo Programador**, también se te pedirá que proporciones las direcciones IP o los nombres de host de tus instancias de trabajador de BunkerWeb.
 
+#### Registros locales de la interfaz web con Docker Compose
+
+En instalaciones **Full Docker** (estándar o con `--autoconf`), el instalador puede recopilar registros localmente para la interfaz web. Las instalaciones interactivas nuevas usan **Sí** de forma predeterminada; en instalaciones desatendidas, elige explícitamente `--syslog` o `--no-syslog`:
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+Al activarlo, la pila generada añade un recolector `bw-syslog` en la red interna `bw-universe`, sin publicar su puerto syslog en el host. Los registros se guardan en el volumen persistente `bw-logs` y se montan en `bw-ui`; `syslog-ng.conf` se genera junto a `docker-compose.yml`. Los componentes de BunkerWeb también siguen registrando en la salida de error estándar, por lo que `docker compose logs` continúa disponible. La configuración generada usa nombres de archivo fijos y una rotación limitada (aproximadamente 100 MB por archivo con 7 rotaciones).
+
+La elección se guarda como `BW_INSTALL_SYSLOG=yes|no` en `.env` y se conserva durante actualizaciones y nuevas ejecuciones salvo que se sobrescriba explícitamente. Al desactivarla, solo se elimina el recolector administrado por el instalador después de que la pila actualizada esté lista; se conservan el historial de `bw-logs` y el archivo de configuración. Los archivos de Compose y syslog-ng modificados por el operador no se sustituyen silenciosamente.
+
 #### Opciones de línea de comandos
 
 Para configuraciones no interactivas o automatizadas, el script se puede controlar con indicadores de línea de comandos:

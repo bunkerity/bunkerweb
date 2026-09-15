@@ -2095,6 +2095,19 @@ Sie werden gebeten, die folgenden Entscheidungen zu treffen:
 !!! info "Manager- und Scheduler-Installationen"
     Wenn Sie den Installationstyp **Manager** oder **Nur Scheduler** wählen, werden Sie auch aufgefordert, die IP-Adressen oder Hostnamen Ihrer BunkerWeb-Worker-Instanzen anzugeben.
 
+#### Lokale Web-UI-Protokolle mit Docker Compose
+
+Bei **vollständigen Docker-Installationen** (Standard oder `--autoconf`) kann der Installer Protokolle lokal für die Web-UI sammeln. Bei neuen interaktiven Installationen ist **Ja** voreingestellt; bei unbeaufsichtigten Installationen wählen Sie ausdrücklich `--syslog` oder `--no-syslog`:
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+Wenn aktiviert, ergänzt der erzeugte Stack einen `bw-syslog`-Collector im internen Netzwerk `bw-universe`, ohne dessen Syslog-Port auf dem Host zu veröffentlichen. Die Protokolle werden im persistenten Volume `bw-logs` gespeichert und in `bw-ui` eingebunden; `syslog-ng.conf` wird neben `docker-compose.yml` erzeugt. Die BunkerWeb-Komponenten protokollieren weiterhin auch nach Standardfehler, sodass `docker compose logs` verfügbar bleibt. Die erzeugte Konfiguration verwendet feste Dateinamen und eine begrenzte Rotation (etwa 100 MB pro Datei mit 7 Rotationen).
+
+Die Auswahl wird als `BW_INSTALL_SYSLOG=yes|no` in `.env` gespeichert und bei Upgrades und erneuten Ausführungen beibehalten, sofern sie nicht ausdrücklich überschrieben wird. Beim Deaktivieren wird nur der vom Installer verwaltete Collector entfernt, nachdem der aktualisierte Stack bereit ist; der Verlauf in `bw-logs` und die Konfigurationsdatei bleiben erhalten. Vom Betreiber bearbeitete Compose- und syslog-ng-Dateien werden nicht stillschweigend ersetzt.
+
 #### Befehlszeilenoptionen
 
 Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszeilen-Flags gesteuert werden:
