@@ -7,7 +7,7 @@ from os import replace, walk
 from pathlib import Path
 from shutil import rmtree
 from stat import S_IMODE
-from tarfile import data_filter, open as tar_open
+from tarfile import open as tar_open
 from tempfile import NamedTemporaryFile, mkdtemp
 
 from common_utils import safe_tar_extractall
@@ -213,9 +213,7 @@ class StagedDirectory:
 def restore_directory(target: Path, data: bytes, companion: Path = None, companion_data: bytes = None) -> None:
     with StagedDirectory(target, companion) as staged:
         with tar_open(fileobj=BytesIO(data), mode="r:gz") as tar:
-            # A callable retains the helper's link-aware metadata checks while
-            # Python's data filter also validates resolved symlink/hardlink targets.
-            safe_tar_extractall(tar, staged.path, tar_filter=data_filter)
+            safe_tar_extractall(tar, staged.path, tar_filter="data")
         staged.publish(companion_data)
         staged.commit()
 
