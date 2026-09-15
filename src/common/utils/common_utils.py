@@ -2,6 +2,7 @@ from contextlib import suppress
 from gzip import GzipFile
 from hashlib import new as new_hash
 from ipaddress import ip_address
+from inspect import signature
 from io import BytesIO
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
 from os.path import join as path_join, normpath
@@ -9,6 +10,7 @@ from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from re import compile as re_compile
+import tarfile
 from tarfile import open as tar_open
 from threading import Lock
 from time import monotonic
@@ -369,13 +371,31 @@ def _validate_tar_members(members, *, allow_symlinks=False):
             if Path(member.linkname).is_absolute():
                 raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
             # Normalize to collapse valid .. segments, then check if any remain (= escaping)
-            normalized = normpath(path_join(str(Path(member.name).parent), member.linkname))
+            # TarFile resolves symlinks relative to the member's parent but hardlinks relative
+            # to the extraction root.
+            link_parent = Path(member.name).parent if member.issym() else Path()
+            normalized = normpath(path_join(str(link_parent), member.linkname))
             if ".." in Path(normalized).parts:
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
 
 
+def _native_tar_filter(tar_filter):
+    if callable(tar_filter):
+        return tar_filter
+    if isinstance(tar_filter, str) and tar_filter in ("data", "tar"):
+        return getattr(tarfile, f"{tar_filter}_filter", None)
+    raise ValueError(f"Unsupported tar filter: {tar_filter!r}")
+
+
+def _supports_tar_filter(tar) -> bool:
+    try:
+        return "filter" in signature(tar.extractall).parameters
+    except (TypeError, ValueError):
+        return False
+
+
 def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
-    """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
+    """Extract a tar archive safely with pre-validation and a native filter when available.
 
     Pre-validates all members before extraction to defend against CVE-2025-4517
     (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
@@ -387,6 +407,10 @@ def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
     and fall back to the stricter "data" filter otherwise — useful for
     restoring trusted cache archives that may or may not contain links
     depending on the plugin.
+
+    Native filters are selected by their runtime attributes and the actual
+    extractall signature; older or partially backported runtimes use the
+    pre-validated extraction path without retrying unrelated errors.
     """
     members_to_check = kwargs.get("members")
     if members_to_check is None:
@@ -394,9 +418,12 @@ def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
     if tar_filter == "auto":
         tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
     _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
-    try:
-        tar.extractall(path, filter=tar_filter, **kwargs)
-    except TypeError:
+    native_filter = _native_tar_filter(tar_filter)
+    if native_filter is not None and _supports_tar_filter(tar):
+        tar.extractall(path, filter=native_filter, **kwargs)
+    elif callable(tar_filter):
+        raise TypeError("Custom tar filter requires native tar filter support")
+    else:
         tar.extractall(path, **kwargs)
 
 
