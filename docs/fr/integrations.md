@@ -2101,6 +2101,19 @@ Il vous sera demandé de faire les choix suivants :
 !!! info "Installations du gestionnaire et du Scheduler"
     Si vous choisissez le type d'installation **Manager** ou **Scheduler Only**, vous serez également invité à fournir les adresses IP ou les noms d'hôte de vos instances de travail BunkerWeb.
 
+#### Journaux locaux de l'interface Web avec Docker Compose
+
+Pour les installations **Docker complètes** (standard ou `--autoconf`), l'installateur peut collecter les journaux localement pour l'interface Web. Les nouvelles installations interactives utilisent **Oui** par défaut ; pour une installation sans assistance, choisissez explicitement `--syslog` ou `--no-syslog` :
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+Lorsque cette option est activée, la stack générée ajoute un collecteur `bw-syslog` sur le réseau interne `bw-universe`, sans publier son port syslog sur l'hôte. Les journaux sont stockés dans le volume persistant `bw-logs` et montés dans `bw-ui` ; `syslog-ng.conf` est généré à côté de `docker-compose.yml`. Les composants BunkerWeb continuent également à écrire sur la sortie d'erreur standard, donc `docker compose logs` reste disponible. La configuration générée utilise des noms de fichiers fixes et une rotation limitée (environ 100 Mo par fichier avec 7 rotations).
+
+Le choix est enregistré sous la forme `BW_INSTALL_SYSLOG=yes|no` dans `.env` et conservé lors des mises à niveau et des nouvelles exécutions, sauf remplacement explicite. La désactivation supprime uniquement le collecteur géré par l'installateur après que la stack mise à jour est prête ; l'historique `bw-logs` et le fichier de configuration sont conservés. Les fichiers Compose et syslog-ng modifiés par l'opérateur ne sont pas remplacés silencieusement.
+
 #### Options de ligne de commande
 
 Pour les configurations non interactives ou automatisées, le script peut être contrôlé à l'aide d'indicateurs de ligne de commande :

@@ -2095,6 +2095,19 @@ sudo ./install-bunkerweb.sh
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
 
+#### 使用 Docker Compose 收集 Web UI 本地日志
+
+对于**完整 Docker 安装**（标准模式或 `--autoconf`），安装程序可以在本地收集日志供 Web UI 使用。全新的交互式安装默认选择**是**；无人值守安装请通过 `--syslog` 或 `--no-syslog` 明确选择：
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+启用后，生成的堆栈会在内部 `bw-universe` 网络上添加 `bw-syslog` 收集器，不会将其 syslog 端口发布到主机。日志保存在持久化 `bw-logs` 卷中并挂载到 `bw-ui`；`syslog-ng.conf` 会生成在 `docker-compose.yml` 旁边。BunkerWeb 组件仍会同时向标准错误输出日志，因此 `docker compose logs` 仍然可用。生成的配置使用固定文件名和有限轮转（每个文件约 100 MB，保留 7 次轮转）。
+
+该选择以 `BW_INSTALL_SYSLOG=yes|no` 保存到 `.env` 中，并在升级和重新运行时保留，除非显式覆盖。禁用时，只有安装程序管理的收集器会在更新后的堆栈就绪后被删除；`bw-logs` 历史记录和配置文件会保留。操作员编辑过的 Compose 和 syslog-ng 文件不会被静默替换。
+
 #### 命令行选项
 
 对于非交互式或自动化设置，可以使用命令行标志来控制脚本：
