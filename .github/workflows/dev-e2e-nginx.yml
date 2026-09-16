@@ -11,8 +11,16 @@ concurrency:
   cancel-in-progress: false
 jobs:
   nginx-compatibility:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -30,6 +38,8 @@ jobs:
           password: ${{ github.token }}
       - name: Resolve published fixed base and matching upstream source
         working-directory: source
+        env:
+          AUDIT_ARCH: ${{ matrix.arch }}
         run: |
           set -euo pipefail
           mkdir -p audit-results
@@ -42,14 +52,12 @@ jobs:
           rm -rf src/deps/src/nginx
           cp -a "$RUNNER_TEMP/nginx-audit-export" src/deps/src/nginx
           python3 - <<'PY'
-          import json
-          import re
+          import json, os, re
           from pathlib import Path
           image = json.loads(Path('audit-results/nginx-base.json').read_text())[0]
           digest = next(ref.split('@', 1)[1] for ref in image['RepoDigests'] if 'nginx@' in ref)
           file = Path('src/bw/Dockerfile')
-          old = file.read_text()
-          new, count = re.subn(r'nginx:1\.30\.4-alpine-slim@sha256:[0-9a-f]{64}', 'nginx:1.30.5-alpine-slim@' + digest, old)
+          new, count = re.subn(r'nginx:1\.30\.4-alpine-slim@sha256:[0-9a-f]{64}', 'nginx:1.30.5-alpine-slim@' + digest, file.read_text())
           assert count == 2, count
           file.write_text(new)
           file = Path('src/deps/deps.json')
@@ -59,36 +67,51 @@ jobs:
           nginx['commit'] = '4556c714d1cfa587f92c7c0365c09209d42d148b'
           file.write_text(json.dumps(deps, indent=2) + '\n')
           Path('src/VERSION').write_text('dev\n')
-          Path('audit-results/variant.json').write_text(json.dumps({'bunkerweb_source': '5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f', 'nginx_source': nginx['commit'], 'nginx_base_digest': digest, 'platform': 'linux/amd64', 'published': False}, indent=2))
+          Path('audit-results/variant.json').write_text(json.dumps({'bunkerweb_source': '5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f', 'nginx_source': nginx['commit'], 'nginx_base_digest': digest, 'platform': 'linux/' + os.environ['AUDIT_ARCH'], 'published': False}, indent=2))
           PY
           git diff -- src/bw/Dockerfile src/deps/deps.json src/VERSION > audit-results/variant.patch
-      - name: Build complete worker image with recompiled dynamic modules
+      - name: Build worker with recompiled dynamic modules
+        id: build
         working-directory: source
         run: |
           set -o pipefail
           docker build --progress plain --file src/bw/Dockerfile --tag audit-bunkerweb:nginx-1.30.5 . 2>&1 | tee audit-results/nginx-build.log
           docker image inspect audit-bunkerweb:nginx-1.30.5 > audit-results/worker-image.json
           docker run --rm --entrypoint sh audit-bunkerweb:nginx-1.30.5 -c 'nginx -V 2>&1; openssl version -a' > audit-results/runtime-versions.txt
+          cp ../harness/audit_runtime*.py ../harness/audit_tls.py ./
       - name: Exercise rebuilt NGINX through the live scheduler and API
         working-directory: source
         env:
           AUDIT_WORKER_IMAGE: audit-bunkerweb:nginx-1.30.5
         run: |
           set -o pipefail
-          cp ../harness/audit_runtime*.py ./
           python3 -u audit_runtime_launch.py 2>&1 | tee audit-results/runtime-driver.log
+      - name: Exercise HTTP2, HTTP3 and mTLS even if another runtime contract fails
+        if: always() && steps.build.outcome == 'success'
+        working-directory: source
+        env:
+          AUDIT_WORKER_IMAGE: audit-bunkerweb:nginx-1.30.5
+        run: |
+          set -o pipefail
+          python3 -m venv "$RUNNER_TEMP/audit-client"
+          "$RUNNER_TEMP/audit-client/bin/pip" install aioquic==1.3.0
+          "$RUNNER_TEMP/audit-client/bin/pip" freeze > audit-results/client-packages.txt
+          curl --version > audit-results/curl-version.txt
+          "$RUNNER_TEMP/audit-client/bin/python" -u audit_tls.py 2>&1 | tee audit-results/tls-driver.log
       - name: Emergency cleanup of audit project only
         if: always()
         working-directory: source
         run: |
-          if [ -f audit-results/compose.json ]; then
-            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
-            rm -f audit-results/compose.json
-          fi
+          for file in audit-results/compose.json audit-results/tls/compose.json; do
+            if [ -f "$file" ]; then
+              docker compose --project-name bw-audit-runtime --file "$file" down --volumes --remove-orphans || true
+              rm -f "$file"
+            fi
+          done
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: audit-nginx-1.30.5
+          name: audit-nginx-1.30.5-${{ matrix.arch }}
           path: source/audit-results/
           retention-days: 1
           if-no-files-found: error
