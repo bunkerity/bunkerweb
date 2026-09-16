@@ -1,0 +1,169 @@
+name: Final isolated verification and candidate controls
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-final.yml, audit_finalize.py]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: audit-final-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode: runtime
+            variant: original
+            ui_patch: '0'
+          - mode: tls
+            variant: original
+            ui_patch: '0'
+          - mode: browser
+            variant: original
+            ui_patch: '0'
+          - mode: browser
+            variant: proposed-ui-fix
+            ui_patch: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Assert source and install isolated client tools
+        env:
+          MODE: ${{ matrix.mode }}
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          git diff --exit-code 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f HEAD -- src
+          python3 -m py_compile audit_finalize.py audit_runtime.py audit_runtime_launch.py audit_tls.py
+          python3 -m venv "$RUNNER_TEMP/audit-client"
+          if [ "$MODE" = tls ]; then "$RUNNER_TEMP/audit-client/bin/pip" install aioquic==1.3.0; fi
+          if [ "$MODE" = browser ]; then
+            "$RUNNER_TEMP/audit-client/bin/pip" install playwright==1.55.0
+            "$RUNNER_TEMP/audit-client/bin/playwright" install --with-deps chromium
+          fi
+          "$RUNNER_TEMP/audit-client/bin/pip" freeze > audit-results/client-packages.txt
+      - name: Execute real network and browser assertions
+        env:
+          AUDIT_UI_PATCH: ${{ matrix.ui_patch }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/audit-client/bin/python" -u audit_finalize.py "$MODE" 2>&1 | tee audit-results/final-driver.log
+      - name: Cleanup only this audit project
+        if: always()
+        run: |
+          for file in audit-results/compose.json audit-results/tls/compose.json; do
+            if [ -f "$file" ]; then
+              docker compose --project-name bw-audit-runtime --file "$file" down --volumes --remove-orphans || true
+              rm -f "$file"
+            fi
+          done
+          cp audit_finalize.py audit-results/
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: audit-final-${{ matrix.mode }}-${{ matrix.variant }}
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  native-nginx:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+            auxiliary: ''
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+            auxiliary: linux/amd64
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          path: harness
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+          path: source
+      - uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a
+        if: matrix.arch == 'arm64'
+        with:
+          platforms: amd64
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build native worker with matching patched server and recompiled modules
+        id: build
+        env:
+          AUDIT_ARCH: ${{ matrix.arch }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/build-client"
+          "$RUNNER_TEMP/build-client/bin/pip" install pyyaml==6.0.2
+          "$RUNNER_TEMP/build-client/bin/python" - <<'PY'
+          import pathlib, subprocess, yaml
+          workflow = yaml.safe_load(pathlib.Path('harness/.github/workflows/dev-e2e-nginx.yml').read_text())
+          selected = {'Resolve published fixed base and matching upstream source', 'Build worker with recompiled dynamic modules'}
+          executed = 0
+          for step in workflow['jobs']['nginx-compatibility']['steps']:
+              if step.get('name') in selected:
+                  subprocess.run(['bash', '-euo', 'pipefail', '-c', step['run']], cwd='source', check=True)
+                  executed += 1
+          assert executed == 2
+          PY
+          cp harness/audit_finalize.py source/
+      - name: Run native worker traffic with explicit auxiliary architecture
+        working-directory: source
+        env:
+          AUDIT_WORKER_IMAGE: audit-bunkerweb:nginx-1.30.5
+          AUDIT_AUX_PLATFORM: ${{ matrix.auxiliary }}
+        run: |
+          set -o pipefail
+          python3 -u audit_finalize.py runtime 2>&1 | tee audit-results/final-runtime.log
+      - name: Verify native TLS HTTP2 HTTP3 and mTLS after automatic reload
+        if: always() && steps.build.outcome == 'success'
+        working-directory: source
+        env:
+          AUDIT_WORKER_IMAGE: audit-bunkerweb:nginx-1.30.5
+          AUDIT_AUX_PLATFORM: ${{ matrix.auxiliary }}
+        run: |
+          set -o pipefail
+          python3 -m venv "$RUNNER_TEMP/tls-client"
+          "$RUNNER_TEMP/tls-client/bin/pip" install aioquic==1.3.0
+          "$RUNNER_TEMP/tls-client/bin/python" -u audit_finalize.py tls 2>&1 | tee audit-results/final-tls.log
+      - name: Cleanup only this audit project
+        if: always()
+        working-directory: source
+        run: |
+          for file in audit-results/compose.json audit-results/tls/compose.json; do
+            if [ -f "$file" ]; then
+              docker compose --project-name bw-audit-runtime --file "$file" down --volumes --remove-orphans || true
+              rm -f "$file"
+            fi
+          done
+          cp ../harness/audit_finalize.py audit-results/
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: audit-final-nginx-${{ matrix.arch }}
+          path: source/audit-results/
+          retention-days: 3
+          if-no-files-found: error
