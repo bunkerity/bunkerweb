@@ -28,28 +28,28 @@ jobs:
           ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
           fetch-depth: 0
           persist-credentials: false
-      - name: Record source and commit inventory
+      - name: Record source and inventory
         run: |
           mkdir -p audit-results
           git rev-parse HEAD > audit-results/source-sha.txt
-          git rev-parse HEAD^{tree} > audit-results/source-tree.txt
           git log --reverse --format='%H%x09%cI%x09%s' v1.6.14..HEAD > audit-results/commits.tsv
           git diff --numstat v1.6.14 HEAD > audit-results/changed-files.tsv
-          git diff --stat v1.6.14 HEAD > audit-results/diff-stat.txt
-          tar --exclude=.git --exclude=audit-results --exclude=src/deps/src --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$RUNNER_TEMP/audit-source.tar.gz" .
-          mv "$RUNNER_TEMP/audit-source.tar.gz" audit-results/
-      - name: Existing release harness regression tests
+      - name: Existing release harness tests (unmodified)
         run: |
           set -o pipefail
           python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v 2>&1 | tee audit-results/release-harness-tests.log
-      - name: Retain verification evidence
+      - name: Check actual tree version consistency
         if: always()
+        run: |
+          set -o pipefail
+          bash misc/check-version-consistency.sh 2>&1 | tee audit-results/version-consistency.log
+      - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: audit-source-and-tests
           path: audit-results/
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1
 
   six-image-smoke:
     runs-on: ubuntu-latest
@@ -59,12 +59,17 @@ jobs:
         with:
           ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
           persist-credentials: false
+      - name: Authenticate registry read
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Pull and verify exact-source dev images
         run: |
           set -euo pipefail
           mkdir -p audit-results
           docker version > audit-results/docker-version.txt
-          docker compose version > audit-results/compose-version.txt
           for image in bunkerweb scheduler autoconf ui api all-in-one; do
             ref="ghcr.io/bunkerity/${image}-tests:dev"
             docker pull "$ref"
@@ -83,11 +88,67 @@ jobs:
           release_smoke.TAG = 'dev'
           release_smoke.main()
           PY
-      - name: Retain verification evidence
-        if: always()
+      - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: audit-six-image-smoke
           path: audit-results/
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1
+
+  existing-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        suite: [antibot, blacklist, whitelist, greylist, reverseproxy, modsecurity, sessions, redis, customcert, errors]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+      - name: Authenticate registry read
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Pull pinned-source images
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            docker image inspect "$ref" > "audit-results/image-${image}.json"
+            revision=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")
+            test "$revision" = "$AUDIT_SOURCE_SHA" || { echo "Refusing mismatched image $ref: $revision"; exit 1; }
+            docker tag "$ref" "${image}-tests"
+          done
+      - name: Execute existing core integration test
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          set -euo pipefail
+          cd "tests/core/$SUITE"
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb:.*@bunkerweb-tests@' {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@' {} \;
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1200 ./test.sh docker "$SUITE" 2>&1 | tee "$GITHUB_WORKSPACE/audit-results/core-$SUITE.log"
+      - name: Capture surviving container diagnostics
+        if: always()
+        run: |
+          mkdir -p audit-results
+          docker ps -a > audit-results/containers.txt
+          for id in $(docker ps -aq); do
+            docker logs "$id" > "audit-results/container-$id.log" 2>&1 || true
+          done
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-core-${{ matrix.suite }}
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 1
