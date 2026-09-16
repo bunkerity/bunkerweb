@@ -4,7 +4,7 @@ Requires Docker on an ephemeral runner. It creates only the bw-audit-runtime Com
 project, binds client ports to loopback, generates throwaway credentials, collects
 results, and removes its own containers and volumes in finally.
 """
-import http.client
+from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
 import json
@@ -22,7 +22,7 @@ import traceback
 import urllib.parse
 import urllib.request
 import urllib.error
-import http.cookiejar
+from http.cookiejar import CookieJar
 
 SHA = '5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f'
 RESULTS = []
@@ -56,7 +56,7 @@ def record(name, fn):
 
 
 def http(port, path='/', method='GET', host='app.audit.test', headers=None, body=None):
-    conn = http.client.HTTPConnection('127.0.0.1', port, timeout=8)
+    conn = HTTPConnection('127.0.0.1', port, timeout=8)
     supplied = {'Host': host, 'User-Agent': 'BunkerWeb-audit', 'X-Forwarded-For': '8.8.4.4'}
     supplied.update(headers or {})
     try:
@@ -89,7 +89,7 @@ def await_http(port, host, status=200, path='/', headers=None, timeout=100):
             last = http(port, path, host=host, headers=headers)
             if last[0] == status:
                 return last
-        except Exception as exc:
+        except (OSError, TimeoutError) as exc:
             last = str(exc)
         time.sleep(2)
     raise AssertionError(f'{host}:{port}{path}: expected {status}, last={str(last)[:900]}')
@@ -274,7 +274,7 @@ def run_scenarios():
     for port in (18880, 18881):
         record(f'unban.propagates.{port}', lambda port=port: await_http(port, 'app.audit.test', 200)[0])
     def ui_login_logout():
-        jar = http.cookiejar.CookieJar()
+        jar = CookieJar()
         client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
         client.addheaders = [('User-Agent', 'BunkerWeb-audit-ui')]
         login_url = 'http://127.0.0.1:18700/login'
