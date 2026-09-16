@@ -1,0 +1,53 @@
+name: Isolated SQLite and recovery contracts
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-contracts.yml, audit_components.py]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: audit-recovery-contracts-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  recovery-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Verify source of installed scheduler image
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          chmod 777 audit-results
+          python3 -m py_compile audit_components.py
+          docker pull ghcr.io/bunkerity/scheduler-tests:dev
+          docker image inspect ghcr.io/bunkerity/scheduler-tests:dev > audit-results/scheduler-image.json
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/scheduler-tests:dev)" = 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+      - name: Execute local SQLite and process-exclusion contracts
+        run: |
+          set -uo pipefail
+          result=0
+          for backend in sqlite lock; do
+            docker run --rm --network none --entrypoint python3 \
+              -e DATABASE_URI=sqlite:////tmp/audit.db \
+              -v "$PWD/audit_components.py:/audit_components.py:ro" \
+              -v "$PWD/audit-results:/audit-results" \
+              ghcr.io/bunkerity/scheduler-tests:dev /audit_components.py "$backend" \
+              2>&1 | tee "audit-results/components-$backend.log" || result=1
+          done
+          exit "$result"
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-recovery-contracts
+          path: audit-results/
+          retention-days: 1
+          if-no-files-found: error
