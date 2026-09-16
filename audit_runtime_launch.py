@@ -1,4 +1,5 @@
 """Audit fixture corrections and extra scenarios; no production code is patched."""
+from http.client import HTTPConnection
 import json
 import os
 import sys
@@ -9,10 +10,31 @@ original_compose = audit.build_compose
 original_scenarios = audit.run_scenarios
 
 
+def control_api(path, method='GET', payload=None, authenticated=True):
+    """Management requests originate locally and must not impersonate WAF client IPs."""
+    headers = {'Content-Type': 'application/json', 'User-Agent': 'BunkerWeb-audit-control'}
+    if authenticated:
+        headers['Authorization'] = 'Bearer ' + audit.TOKEN
+    conn = HTTPConnection('127.0.0.1', 18888, timeout=12)
+    try:
+        conn.request(method, path, body=json.dumps(payload).encode() if payload is not None else None, headers=headers)
+        response = conn.getresponse()
+        code, raw = response.status, response.read()
+    finally:
+        conn.close()
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        data = raw.decode(errors='replace')[:1200]
+    # Stop a broken setup at its cause, rather than spending many minutes polling
+    # services which were never created. Negative-auth GET tests still see their status.
+    if authenticated and method in ('POST', 'PATCH', 'PUT') and not 200 <= code < 300:
+        raise AssertionError(f'Management API {method} {path} failed {code}: {data}')
+    return code, data
+
+
 def compose():
     config = original_compose()
-    # Compose --wait sees a disabled inherited image healthcheck as an error.
-    # Probe the actual fixture HTTP server rather than suppressing readiness.
     config['services']['backend']['healthcheck'] = {
         'test': ['CMD', 'python3', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/', timeout=2).read()"],
         'interval': '2s', 'timeout': '3s', 'retries': 30, 'start_period': '3s'
@@ -76,6 +98,7 @@ def extra_scenarios():
     audit.record('api.service_rename_preserves_custom_config_and_enforcement', rename_keeps_config)
 
 
+audit.api = control_api
 audit.build_compose = compose
 audit.run_scenarios = extra_scenarios
 if __name__ == '__main__':
