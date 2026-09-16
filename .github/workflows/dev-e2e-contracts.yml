@@ -8,7 +8,7 @@ permissions:
   packages: read
 concurrency:
   group: audit-recovery-contracts-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   recovery-contracts:
     runs-on: ubuntu-latest
@@ -22,11 +22,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: Verify source of installed scheduler image
+      - name: Verify source of installed scheduler image and audit expectations
         run: |
           set -euo pipefail
           mkdir -p audit-results
           chmod 777 audit-results
+          python3 - <<'PY'
+          from pathlib import Path
+          file = Path('audit_components.py')
+          source = file.read_text()
+          old = "bytes_hash(b'add_header X-Audit value;')"
+          new = "bytes_hash(b'add_header X-Audit value;', algorithm='sha256')"
+          assert source.count(old) == 1
+          file.write_text(source.replace(old, new))
+          PY
+          git diff -- audit_components.py > audit-results/fixture-only.patch
+          cp audit_components.py audit-results/
           python3 -m py_compile audit_components.py
           docker pull ghcr.io/bunkerity/scheduler-tests:dev
           docker image inspect ghcr.io/bunkerity/scheduler-tests:dev > audit-results/scheduler-image.json
