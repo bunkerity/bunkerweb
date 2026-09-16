@@ -24,7 +24,7 @@ jobs:
           git log --reverse --format='%H%x09%cI%x09%s' v1.6.14..5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f > audit-evidence/history/commits.tsv
           git show v1.6.14:src/ui/app/utils.py > audit-evidence/history/baseline-ui-utils.py
           git show v1.6.14:src/api/app/routers/services.py > audit-evidence/history/baseline-api-services.py
-      - name: Collect bounded audit run evidence
+      - name: Collect audit run inventory
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -32,13 +32,12 @@ jobs:
           import json, os, pathlib, urllib.request
           out = pathlib.Path('audit-evidence')
           base = 'https://api.github.com/repos/bunkerity/bunkerweb'
-          def request(path):
-              return urllib.request.Request(base + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
           def get(path):
-              with urllib.request.urlopen(request(path), timeout=45) as response:
+              req = urllib.request.Request(base + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=45) as response:
                   return json.load(response)
           runs = get('/actions/runs?branch=audit%2Fdev-e2e-20260916&per_page=100')['workflow_runs']
-          summary, seen = [], set()
+          summary = []
           for run in runs:
               if run['head_branch'] != 'audit/dev-e2e-20260916':
                   raise RuntimeError('Unexpected branch')
@@ -47,19 +46,6 @@ jobs:
               row['artifacts'] = get(f"/actions/runs/{run['id']}/artifacts?per_page=100").get('artifacts', [])
               summary.append(row)
               (out/'runs.json').write_text(json.dumps(summary, indent=2))
-              if run['path'] in seen or 'evidence' in run['path'] or run['status'] != 'completed':
-                  continue
-              seen.add(run['path'])
-              target = out/'latest-artifacts'/str(run['id'])
-              target.mkdir(parents=True, exist_ok=True)
-              for artifact in row['artifacts']:
-                  if artifact['expired'] or artifact['size_in_bytes'] > 12000000 or '.dockerbuild' in artifact['name']:
-                      continue
-                  with urllib.request.urlopen(request(f"/actions/artifacts/{artifact['id']}/zip"), timeout=60) as response:
-                      data = response.read(12000001)
-                  if len(data) > 12000000:
-                      raise RuntimeError('Artifact exceeded bounded download')
-                  (target/f"{artifact['id']}.zip").write_bytes(data)
           dev = get('/branches/dev')
           (out/'dev-ref.json').write_text(json.dumps({'sha':dev['commit']['sha'],'tree':dev['commit']['commit']['tree']['sha']},indent=2))
           print('\n'.join(f"{r['id']} {r['name']} {r['status']} {r['conclusion']}" for r in summary))
