@@ -8,7 +8,7 @@ permissions:
   packages: read
 concurrency:
   group: audit-tls-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   tls-and-mtls:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
             docker compose --project-name bw-audit-runtime --file audit-results/tls/compose.json down --volumes --remove-orphans || true
             rm -f audit-results/tls/compose.json
           fi
-          cp audit_tls.py audit-results/
+          cp audit_tls.py audit_runtime*.py audit-results/
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
