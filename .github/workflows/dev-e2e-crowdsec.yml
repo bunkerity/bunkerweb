@@ -1,0 +1,44 @@
+name: Isolated CrowdSec management and enforcement
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-crowdsec.yml, audit_crowdsec_e2e.py]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  crowdsec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Exercise private CrowdSec through actual BunkerWeb components
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          git diff --exit-code 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f HEAD -- src
+          python3 -m py_compile audit_crowdsec_e2e.py audit_finalize.py
+          python3 -u audit_crowdsec_e2e.py 2>&1 | tee audit-results/crowdsec-driver.log
+      - name: Cleanup only this audit project
+        if: always()
+        run: |
+          if [ -f audit-results/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
+            rm -f audit-results/compose.json
+          fi
+          cp audit_crowdsec_e2e.py audit-results/
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: audit-crowdsec-live
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 3
