@@ -1,0 +1,56 @@
+name: Isolated audit evidence inventory
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-evidence.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export audit source and bounded run inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p audit-evidence/harness audit-evidence/history
+          cp -a tests/audit audit-evidence/harness/
+          mkdir audit-evidence/harness/workflows
+          cp .github/workflows/dev-e2e-*.yml audit-evidence/harness/workflows/
+          git diff v1.6.14 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f -- src ':!src/deps/src' ':!src/ui/app/static/libs' ':!src/bw/misc/*.mmdb' > audit-evidence/history/application.patch
+          git log --reverse --format='%H%x09%cI%x09%s' v1.6.14..5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f > audit-evidence/history/commits.tsv
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          out = pathlib.Path('audit-evidence')
+          base = 'https://api.github.com/repos/bunkerity/bunkerweb'
+          def get(path):
+              req = urllib.request.Request(base + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          runs = get('/actions/runs?branch=audit%2Fdev-e2e-20260916&per_page=100')['workflow_runs']
+          summary = []
+          for run in runs:
+              if run['head_branch'] != 'audit/dev-e2e-20260916':
+                  raise RuntimeError('Unexpected branch')
+              row = {k: run[k] for k in ('id','name','head_sha','path','status','conclusion','created_at','html_url')}
+              row['jobs'] = get(f"/actions/runs/{run['id']}/jobs?per_page=100").get('jobs', [])
+              row['artifacts'] = get(f"/actions/runs/{run['id']}/artifacts?per_page=100").get('artifacts', [])
+              summary.append(row)
+          (out/'runs.json').write_text(json.dumps(summary, indent=2))
+          dev = get('/branches/dev')
+          (out/'dev-ref.json').write_text(json.dumps({'sha':dev['commit']['sha'],'tree':dev['commit']['commit']['tree']['sha']},indent=2))
+          print('\n'.join(f"{r['id']} {r['name']} {r['status']} {r['conclusion']}" for r in summary))
+          PY
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: audit-evidence-inventory
+          path: audit-evidence/
+          if-no-files-found: error
+          retention-days: 3
