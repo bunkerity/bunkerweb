@@ -1,0 +1,71 @@
+name: Isolated browser UI verification
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-ui.yml]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: audit-browser-ui-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        page: [services_page.py, global_config_page.py, configs_page.py, account_page.py, plugins_page.py]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Verify image provenance and isolate fixture ports
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler ui; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            docker image inspect "$ref" > "audit-results/image-${image}.json"
+            test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+            docker tag "$ref" "${image}-tests"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          file = Path('tests/ui/docker-compose.yml')
+          source = file.read_text().replace('      - 80:80', '      - 127.0.0.1:80:80').replace('      - 443:443', '      - 127.0.0.1:443:443')
+          file.write_text(source)
+          PY
+          git diff -- tests/ui/docker-compose.yml > audit-results/fixture-only.patch
+      - name: Run existing browser suite without changing its assertions
+        env:
+          PAGE: ${{ matrix.page }}
+          MODE: dev
+        run: |
+          set -euo pipefail
+          cd tests/ui
+          chmod +x tests.sh
+          timeout --signal=TERM --kill-after=30s 1200 ./tests.sh docker "$PAGE" 2>&1 | tee "$GITHUB_WORKSPACE/audit-results/browser-$PAGE.log"
+      - name: Preserve residual diagnostics and remove audit containers
+        if: always()
+        run: |
+          docker ps -a > audit-results/containers.txt
+          for id in $(docker ps -aq); do docker logs "$id" > "audit-results/container-$id.log" 2>&1 || true; done
+          cd tests/ui
+          docker compose down --volumes --remove-orphans || true
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-browser-${{ matrix.page }}
+          path: audit-results/
+          retention-days: 1
+          if-no-files-found: error
