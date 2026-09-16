@@ -8,11 +8,11 @@ permissions:
   packages: read
 concurrency:
   group: audit-nginx-upgrade-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   nginx-compatibility:
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 55
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
