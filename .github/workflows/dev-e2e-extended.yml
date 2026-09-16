@@ -1,0 +1,126 @@
+name: Isolated extended runtime verification
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-extended.yml, audit_sessions.py]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: audit-extended-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  session-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Exercise installed session interface against private test Redis
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          chmod 777 audit-results
+          docker pull ghcr.io/bunkerity/ui-tests:dev
+          docker image inspect ghcr.io/bunkerity/ui-tests:dev > audit-results/ui-image.json
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/ui-tests:dev)" = 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          docker network create audit-session-network
+          docker run -d --name audit-session-redis --network audit-session-network redis:8-alpine redis-server --save '' --appendonly no
+          for attempt in $(seq 1 30); do
+            if docker exec audit-session-redis redis-cli ping; then break; fi
+            sleep 1
+          done
+          docker run --rm --network audit-session-network --entrypoint python3 \
+            -v "$PWD/audit_sessions.py:/audit_sessions.py:ro" \
+            -v "$PWD/audit-results:/audit-results" \
+            ghcr.io/bunkerity/ui-tests:dev /audit_sessions.py 2>&1 | tee audit-results/sessions.log
+      - if: always()
+        name: Remove dedicated fault-injection fixture
+        run: |
+          docker logs audit-session-redis > audit-results/redis.log 2>&1 || true
+          docker rm -f audit-session-redis || true
+          docker network rm audit-session-network || true
+          cp audit_sessions.py audit-results/
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-session-recovery
+          path: audit-results/
+          retention-days: 1
+          if-no-files-found: error
+
+  extended-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        suite: [authbasic, backup, badbehavior, brotli, clientcache, cors, gzip, headers, inject, limit, misc, redirect, selfsigned, reverseproxy, redis]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Verify images and prepare test-only fixture compatibility correction
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            docker image inspect "$ref" > "audit-results/image-${image}.json"
+            test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+            docker tag "$ref" "${image}-tests"
+          done
+          if [ "$SUITE" = reverseproxy ] || [ "$SUITE" = redis ]; then
+            docker pull python:3.12-alpine
+            docker image inspect python:3.12-alpine > audit-results/test-python-image.json
+            python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          data = json.loads(Path('audit-results/test-python-image.json').read_text())[0]
+          digest = next(ref.split('@', 1)[1] for ref in data['RepoDigests'] if 'python@' in ref)
+          for file in (Path('tests/core') / os.environ['SUITE']).rglob('Dockerfile'):
+              source = file.read_text()
+              source = re.sub(r'(?m)^FROM python:3\.13\.0-alpine@sha256:[0-9a-f]+$', 'FROM python:3.12-alpine@' + digest, source)
+              file.write_text(source)
+          PY
+            git diff -- "tests/core/$SUITE" > audit-results/fixture-only.patch
+          fi
+      - name: Execute existing core suite against unmodified BunkerWeb images
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          set -euo pipefail
+          cd "tests/core/$SUITE"
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb:.*@bunkerweb-tests@' {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@' {} \;
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1200 ./test.sh docker "$SUITE" 2>&1 | tee "$GITHUB_WORKSPACE/audit-results/core-$SUITE.log"
+      - if: always()
+        name: Preserve diagnostics
+        run: |
+          mkdir -p audit-results
+          docker ps -a > audit-results/containers.txt
+          for id in $(docker ps -aq); do docker logs "$id" > "audit-results/container-$id.log" 2>&1 || true; done
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-extended-${{ matrix.suite }}
+          path: audit-results/
+          retention-days: 1
+          if-no-files-found: error
