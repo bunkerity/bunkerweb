@@ -1,0 +1,93 @@
+name: Isolated dev verification (no publish)
+
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths:
+      - .github/workflows/dev-e2e-audit.yml
+      - tests/audit/**
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: isolated-dev-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AUDIT_SOURCE_SHA: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+
+jobs:
+  source-and-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record source and commit inventory
+        run: |
+          mkdir -p audit-results
+          git rev-parse HEAD > audit-results/source-sha.txt
+          git rev-parse HEAD^{tree} > audit-results/source-tree.txt
+          git log --reverse --format='%H%x09%cI%x09%s' v1.6.14..HEAD > audit-results/commits.tsv
+          git diff --numstat v1.6.14 HEAD > audit-results/changed-files.tsv
+          git diff --stat v1.6.14 HEAD > audit-results/diff-stat.txt
+          tar --exclude=.git --exclude=audit-results --exclude=src/deps/src --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$RUNNER_TEMP/audit-source.tar.gz" .
+          mv "$RUNNER_TEMP/audit-source.tar.gz" audit-results/
+      - name: Existing release harness regression tests
+        run: |
+          set -o pipefail
+          python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v 2>&1 | tee audit-results/release-harness-tests.log
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-source-and-tests
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 3
+
+  six-image-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+      - name: Pull and verify exact-source dev images
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          docker version > audit-results/docker-version.txt
+          docker compose version > audit-results/compose-version.txt
+          for image in bunkerweb scheduler autoconf ui api all-in-one; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            docker image inspect "$ref" > "audit-results/image-${image}.json"
+            revision=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")
+            test "$revision" = "$AUDIT_SOURCE_SHA" || { echo "Refusing mismatched image $ref: $revision"; exit 1; }
+          done
+          docker run --rm --entrypoint sh ghcr.io/bunkerity/bunkerweb-tests:dev -c 'nginx -V 2>&1; openssl version -a; cat /usr/share/bunkerweb/VERSION' > audit-results/runtime-versions.txt
+      - name: Run actual six-service smoke harness
+        run: |
+          set -o pipefail
+          python3 - <<'PY' 2>&1 | tee audit-results/smoke.log
+          import sys
+          sys.path.insert(0, '.github/scripts')
+          import release_smoke
+          release_smoke.TAG = 'dev'
+          release_smoke.main()
+          PY
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-six-image-smoke
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 3
