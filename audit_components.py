@@ -79,7 +79,7 @@ def database_checks():
 
     def custom_checksum():
         ret = db.save_custom_configs([{'service_id': 'audit.test', 'type': 'server_http', 'name': 'audit_conf',
-                                      'data': b'add_header X-Audit value;', 'is_draft': False}], 'api', changed=False)
+                                      'data': b'add_header X-Audit value;', 'is_draft': False, 'method': 'api'}], 'api', changed=False)
         need(not ret, f'custom config without checksum failed: {ret}')
         configs = db.get_custom_configs(with_data=True)
         row = next(row for row in configs if row['name'] == 'audit_conf')
@@ -136,7 +136,6 @@ def database_checks():
 
 def extraction_safety_checks():
     from cache_restore import restore_directory
-    from common_utils import safe_tar_extractall
     base = Path(tempfile.mkdtemp(prefix='bw-audit-safe-', dir='/var/cache/bunkerweb'))
     target = base / 'published'
     target.mkdir()
