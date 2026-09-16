@@ -1,0 +1,96 @@
+name: Isolated NGINX 1.30.5 compatibility verification
+on:
+  push:
+    branches: [audit/dev-e2e-20260916]
+    paths: [.github/workflows/dev-e2e-nginx.yml]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: audit-nginx-upgrade-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  nginx-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          path: harness
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f
+          persist-credentials: false
+          path: source
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Resolve published fixed base and matching upstream source
+        working-directory: source
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          docker pull nginx:1.30.5-alpine-slim
+          docker image inspect nginx:1.30.5-alpine-slim > audit-results/nginx-base.json
+          git clone --depth 1 --branch release-1.30.5 https://github.com/nginx/nginx.git "$RUNNER_TEMP/nginx-audit"
+          test "$(git -C "$RUNNER_TEMP/nginx-audit" rev-parse HEAD)" = 4556c714d1cfa587f92c7c0365c09209d42d148b
+          cp -a "$RUNNER_TEMP/nginx-audit" "$RUNNER_TEMP/nginx-audit-export"
+          rm -rf "$RUNNER_TEMP/nginx-audit-export/.git" "$RUNNER_TEMP/nginx-audit-export/docs"
+          rm -rf src/deps/src/nginx
+          cp -a "$RUNNER_TEMP/nginx-audit-export" src/deps/src/nginx
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          image = json.loads(Path('audit-results/nginx-base.json').read_text())[0]
+          digest = next(ref.split('@', 1)[1] for ref in image['RepoDigests'] if 'nginx@' in ref)
+          file = Path('src/bw/Dockerfile')
+          old = file.read_text()
+          new, count = re.subn(r'nginx:1\.30\.4-alpine-slim@sha256:[0-9a-f]{64}', 'nginx:1.30.5-alpine-slim@' + digest, old)
+          assert count == 2, count
+          file.write_text(new)
+          file = Path('src/deps/deps.json')
+          deps = json.loads(file.read_text())
+          nginx = next(dep for dep in deps['git_repository'] if dep['id'] == 'nginx')
+          nginx['name'] = 'Nginx v1.30.5'
+          nginx['commit'] = '4556c714d1cfa587f92c7c0365c09209d42d148b'
+          file.write_text(json.dumps(deps, indent=2) + '\n')
+          # Match the VERSION used by the already-built official dev companion images.
+          Path('src/VERSION').write_text('dev\n')
+          Path('audit-results/variant.json').write_text(json.dumps({'bunkerweb_source': '5d91090c3c42a4bc2b0a57adce37f9c04b9d7b5f', 'nginx_source': nginx['commit'], 'nginx_base_digest': digest, 'platform': 'linux/amd64', 'published': False}, indent=2))
+          PY
+          git diff -- src/bw/Dockerfile src/deps/deps.json src/VERSION > audit-results/variant.patch
+      - name: Build complete worker image with recompiled dynamic modules
+        working-directory: source
+        run: |
+          set -o pipefail
+          docker build --progress plain --file src/bw/Dockerfile --tag audit-bunkerweb:nginx-1.30.5 . 2>&1 | tee audit-results/nginx-build.log
+          docker image inspect audit-bunkerweb:nginx-1.30.5 > audit-results/worker-image.json
+          docker run --rm --entrypoint sh audit-bunkerweb:nginx-1.30.5 -c 'nginx -V 2>&1; openssl version -a' > audit-results/runtime-versions.txt
+      - name: Exercise the rebuilt NGINX workers through the live scheduler and API
+        working-directory: source
+        run: |
+          set -o pipefail
+          cp ../harness/audit_runtime.py ./audit_runtime.py
+          python3 -u - <<'PY' 2>&1 | tee audit-results/runtime-driver.log
+          import sys
+          import audit_runtime as audit
+          original = audit.build_compose
+          def variant():
+              config = original()
+              for worker in ('bw', 'bw2'):
+                  config['services'][worker]['image'] = 'audit-bunkerweb:nginx-1.30.5'
+              return config
+          audit.build_compose = variant
+          sys.exit(audit.main())
+          PY
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: audit-nginx-1.30.5
+          path: source/audit-results/
+          retention-days: 1
+          if-no-files-found: error
