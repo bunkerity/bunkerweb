@@ -2,7 +2,7 @@ name: Isolated two-worker end-to-end scenarios
 on:
   push:
     branches: [audit/dev-e2e-20260916]
-    paths: [.github/workflows/dev-e2e-runtime.yml, audit_runtime.py]
+    paths: [.github/workflows/dev-e2e-runtime.yml, audit_runtime.py, audit_runtime_launch.py]
 permissions:
   contents: read
   packages: read
@@ -26,8 +26,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p audit-results
-          python3 -m py_compile audit_runtime.py
-          python3 -u audit_runtime.py 2>&1 | tee audit-results/runtime-driver.log
+          python3 -m py_compile audit_runtime.py audit_runtime_launch.py
+          python3 -u audit_runtime_launch.py 2>&1 | tee audit-results/runtime-driver.log
       - name: Emergency cleanup of audit project only
         if: always()
         run: |
@@ -35,7 +35,7 @@ jobs:
             docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
             rm -f audit-results/compose.json
           fi
-          cp audit_runtime.py audit-results/
+          cp audit_runtime*.py audit-results/
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
