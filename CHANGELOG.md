@@ -9,6 +9,7 @@
 - [BUGFIX] `backup`: the database lock is a real `flock` now; a second backup, restore or scheduler tick waits up to 30 s then reports busy instead of taking the lock away from a live holder.
 - [BUGFIX] `ui`: a setting that was never set before can be drafted from the RAW editor.
 - [BUGFIX] `ui`: a session updated or ended while Redis was unavailable is no longer replaced by the older copy Redis still held once it answers again; the local copy is read first and written back to Redis on recovery.
+- [BUGFIX] `api`: renaming a service through `PATCH /services/{service}` moves its custom configs, per-service settings and job cache to the new name and stops serving the old hostname, instead of dropping them as a deleted service; a service defined by the environment, autoconf or the wizard is refused there since its owner would recreate the old name.
 - [SECURITY] `jobs`: verify the ASN and country MMDB downloads against the checksum DB-IP publishes, over a host and size bounded transfer, and keep the database already in place when verification fails instead of caching an unchecked file.
 - [FEATURE] `installer`: Docker Full installs can optionally configure a local syslog-ng collector with persistent log storage, making BunkerWeb and component logs available in the Web UI while keeping normal Docker logs.
 - [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
