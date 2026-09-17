@@ -17,7 +17,7 @@
     "LETS_ENCRYPT_PASSTHROUGH": {
       "context": "multisite",
       "default": "no",
-      "help": "Pass through Let's Encrypt requests to the web server.",
+      "help": "Pass through Let's Encrypt requests to the web server. A GET or HEAD of a single ACME token is then whitelisted and reaches the web server without any other check, including the ban check.",
       "id": "lets-encrypt-passthrough",
       "label": "Pass Through Let's Encrypt",
       "regex": "^(yes|no)$",
