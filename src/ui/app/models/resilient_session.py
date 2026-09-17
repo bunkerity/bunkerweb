@@ -10,6 +10,10 @@ from redis.exceptions import ConnectionError as RedisConnectionError, RedisError
 # still served, so skipping them would hide live sessions and leave logged-out ones behind.
 UNREACHABLE_ERRORS = (RedisConnectionError, RedisTimeoutError)
 
+# Marks a fallback entry as a delete that has not reached Redis yet, so a read never resurrects
+# the stale copy Redis still holds. Reconciled (and dropped) the next time Redis is available.
+_TOMBSTONE_KEY = "__bw_deleted__"
+
 
 def _total_seconds(lifetime) -> int:
     return int(lifetime.total_seconds())
@@ -24,6 +28,12 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
 
     An eviction is invisible here: Redis reports success and simply no longer holds the key,
     so only connection failures and rejected writes are covered.
+
+    With several UI replicas that do not share the fallback directory, a session moved to a
+    local store is only known to the replica that wrote it until it reconciles back to Redis.
+    Because the local copy only exists after a Redis write failed, it is authoritative by
+    construction: on that replica it wins every read until it has been written back to Redis;
+    the other replicas keep serving the Redis copy until then.
     """
 
     def __init__(self, app, *, client, fallback: BaseCache, logger, breaker_seconds: float = 10.0, **kwargs):
@@ -76,6 +86,25 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
             self.logger.exception("Local session store failed to %s (%s)", action, e)
             return default
 
+    def _drop_local_copy(self, store_id: str) -> None:
+        # cachelib returns False instead of raising on an OSError. Since the local copy is
+        # read before Redis, a copy that cannot be removed would win every later read.
+        if not self._fallback_call("delete", lambda: self.fallback.delete(store_id), default=False):
+            self.logger.warning("Local session store kept a copy that should have been removed (%s)", store_id)
+
+    def _try_redis_delete(self, store_id: str) -> bool:
+        """Best-effort DEL against Redis. Returns whether Redis actually confirmed it."""
+        if not self.redis_available:
+            return False
+        try:
+            self.client.delete(store_id)
+        except RedisError as e:
+            self._handle_failure("delete", e)
+            return False
+        else:
+            self._note_redis_answered()
+            return True
+
     def _discard_stale_redis_copy(self, store_id: str) -> None:
         """Remove what Redis still holds for a session it just refused to update.
 
@@ -83,16 +112,38 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
         such as 2FA on its pre-refusal state for as long as Redis stays full. DEL frees memory
         so it is not rejected at maxmemory, and it only runs once the local copy exists.
         """
-        if not self.redis_available:
-            return
-        try:
-            self.client.delete(store_id)
-        except RedisError as e:
-            self._handle_failure("delete", e)
-        else:
-            self._note_redis_answered()
+        self._try_redis_delete(store_id)
 
     def _retrieve_session_data(self, store_id: str) -> Optional[dict]:
+        # The local copy only exists after a Redis write or delete failed, so it is newer than
+        # whatever Redis holds by construction: read it first, never let a stale Redis value
+        # shadow it. Same payload shape as the cachelib interface: a plain dict, or a tombstone
+        # dict for a delete that has not reached Redis yet.
+        local_session_data = self._fallback_call("read", lambda: self.fallback.get(store_id))
+
+        if isinstance(local_session_data, dict):
+            if local_session_data.get(_TOMBSTONE_KEY):
+                if self._try_redis_delete(store_id):
+                    self._drop_local_copy(store_id)
+                return None
+
+            if self.redis_available:
+                try:
+                    # Encoded outside the Redis error handling: a payload the serializer
+                    # rejects must not turn into a 500 on every request carrying this cookie.
+                    serialized = self.serializer.encode(local_session_data)
+                except Exception as e:
+                    self.logger.exception("Could not encode a locally stored session (%s)", e)
+                    return local_session_data
+                try:
+                    self.client.set(name=store_id, value=serialized, ex=_total_seconds(self.app.permanent_session_lifetime))
+                except RedisError as e:
+                    self._handle_failure("write", e)
+                else:
+                    self._note_redis_answered()
+                    self._drop_local_copy(store_id)
+            return local_session_data
+
         if self.redis_available:
             try:
                 serialized_session_data = self.client.get(store_id)
@@ -102,10 +153,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
             except RedisError as e:
                 self._handle_failure("read", e)
 
-        # A session written while Redis was refusing commands only exists locally, so a miss
-        # upstream must not end it. Same payload shape as the cachelib interface: a plain dict.
-        local_session_data = self._fallback_call("read", lambda: self.fallback.get(store_id))
-        return local_session_data if isinstance(local_session_data, dict) else None
+        return None
 
     def _upsert_session(self, session_lifetime, session: Any, store_id: str) -> None:
         storage_time_to_live = _total_seconds(session_lifetime)
@@ -131,13 +179,16 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
             self._discard_stale_redis_copy(store_id)
 
     def _delete_session(self, store_id: str) -> None:
-        if self.redis_available:
-            try:
-                self.client.delete(store_id)
-            except RedisError as e:
-                self._handle_failure("delete", e)
-            else:
-                self._note_redis_answered()
+        if self._try_redis_delete(store_id):
+            # Redis confirmed the delete: no local copy needed, and none must survive to
+            # shadow the fact that this store_id is gone.
+            self._drop_local_copy(store_id)
+            return
 
-        # Always both: a logout or an id rotation must not leave a usable copy behind.
-        self._fallback_call("delete", lambda: self.fallback.delete(store_id))
+        # Redis did not confirm it (unreachable, or the breaker is open): a stale copy is still
+        # sitting in Redis, so leave a tombstone locally. The next read reconciles the real
+        # delete against Redis instead of resurrecting that stale copy once Redis recovers.
+        self._fallback_call(
+            "write",
+            lambda: self.fallback.set(store_id, {_TOMBSTONE_KEY: True}, timeout=_total_seconds(self.app.permanent_session_lifetime)),
+        )
