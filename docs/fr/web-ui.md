@@ -198,6 +198,10 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 3. Fichier env `/etc/bunkerweb/ui.env` (paquets Linux)
 4. Valeurs par défaut intégrées
 
+## Brouillons dans l'éditeur RAW
+
+L'éditeur RAW d'un service ou des paramètres globaux peut conserver un paramètre en **brouillon** : la valeur est enregistrée mais pas appliquée, et la valeur effective reste la valeur héritée (globale) ou par défaut. Placez le curseur au début d'une ligne `KEY=value` et appuyez sur `#` pour basculer l'état de brouillon, ou sur `Retour arrière` sur une ligne en brouillon pour l'activer, puis enregistrez. Les lignes en brouillon sont surlignées et conservent leur valeur d'un enregistrement à l'autre, ce qui permet de préparer une modification et de l'activer plus tard en un seul enregistrement. Un paramètre non modifiable depuis l'interface (géré par autoconf, ou une valeur par défaut de plugin non surchargeable) ne peut pas changer d'état de brouillon.
+
 ## Référence de configuration
 
 ### Runtime et fuseau

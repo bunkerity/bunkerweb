@@ -219,6 +219,10 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 3. Env file at `/etc/bunkerweb/ui.env` (Linux packages)
 4. Built-in defaults
 
+## Drafts in the RAW editor
+
+The RAW editor of a service or of the global settings can keep a setting as a **draft**: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a `KEY=value` line and press `#` to toggle the draft state, or `Backspace` on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.
+
 ## Configuration reference
 
 ### Runtime & time zone

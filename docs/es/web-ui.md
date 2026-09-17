@@ -198,6 +198,10 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 3. Archivo env `/etc/bunkerweb/ui.env` (paquetes Linux)
 4. Valores por defecto integrados
 
+## Borradores en el editor RAW
+
+El editor RAW de un servicio o de la configuración global puede conservar un ajuste como **borrador**: el valor se guarda pero no se aplica, y el valor efectivo sigue siendo el heredado (global) o el predeterminado. Coloque el cursor al inicio de una línea `KEY=value` y pulse `#` para alternar el estado de borrador, o `Retroceso` en una línea en borrador para activarla, y luego guarde. Las líneas en borrador se resaltan y conservan su valor entre guardados, de modo que un cambio puede prepararse y activarse más tarde con un solo guardado. Un ajuste que no es editable desde la UI (gestionado por autoconf, o un valor predeterminado de plugin que no puede sobrescribirse) no puede cambiar de estado de borrador.
+
 ## Referencia de configuración
 
 ### Tiempo de ejecución y zona horaria

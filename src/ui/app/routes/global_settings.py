@@ -143,7 +143,9 @@ def global_settings_page():
                     current_is_draft = _is_draft(draft_config, key)
                     state_changed = (desired is None and current_is_draft) or (desired is not None and bool(desired) != current_is_draft)
                     metadata = draft_config.get(key, {})
-                    if state_changed and isinstance(metadata, dict) and not is_editable_method(metadata.get("method"), allow_default=True):
+                    # A setting with no stored row has no method yet: it is a default, and drafting it is
+                    # exactly how a new value gets staged from the RAW editor.
+                    if state_changed and isinstance(metadata, dict) and not is_editable_method(metadata.get("method") or "default", allow_default=True):
                         DATA["TO_FLASH"].append(
                             {
                                 "content": f"Setting {key} cannot change draft state because it is managed by the {metadata.get('method')} method.",

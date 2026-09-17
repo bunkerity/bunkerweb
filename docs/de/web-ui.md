@@ -198,6 +198,10 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 3. Env-Datei `/etc/bunkerweb/ui.env` (Linux-Pakete)
 4. Eingebaute Defaults
 
+## Entwürfe im RAW-Editor
+
+Der RAW-Editor eines Dienstes oder der globalen Einstellungen kann eine Einstellung als **Entwurf** behalten: Der Wert wird gespeichert, aber nicht angewendet, und der wirksame Wert bleibt der geerbte (globale) oder der Standardwert. Setzen Sie den Cursor an den Anfang einer `KEY=value`-Zeile und drücken Sie `#`, um den Entwurfsstatus umzuschalten, oder `Rücktaste` auf einer Entwurfszeile, um sie zu aktivieren, und speichern Sie dann. Entwurfszeilen werden hervorgehoben und behalten ihren Wert über Speichervorgänge hinweg, sodass eine Änderung vorbereitet und später mit einem Speichern aktiviert werden kann. Eine Einstellung, die nicht über die UI bearbeitet werden kann (von autoconf verwaltet oder ein nicht überschreibbarer Plugin-Standard), kann ihren Entwurfsstatus nicht ändern.
+
 ## Konfigurationsreferenz
 
 ### Laufzeit & Zeitzone
