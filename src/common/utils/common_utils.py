@@ -1,10 +1,25 @@
 from contextlib import suppress
+import fcntl
 from gzip import GzipFile
 from hashlib import new as new_hash
 from ipaddress import ip_address
 from inspect import signature
 from io import BytesIO
-from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
+from os import (
+    O_CREAT,
+    O_RDWR,
+    close as os_close,
+    ftruncate,
+    getenv,
+    getpid,
+    open as os_open,
+    sched_getaffinity,
+    sep,
+    access,
+    R_OK,
+    cpu_count,
+    write as os_write,
+)
 from os.path import join as path_join, normpath
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
@@ -13,7 +28,7 @@ from re import compile as re_compile
 import tarfile
 from tarfile import open as tar_open
 from threading import Lock
-from time import monotonic
+from time import monotonic, sleep
 from typing import Dict, List, Optional, Tuple, Union, Any
 from urllib.parse import urlsplit
 from math import ceil
@@ -445,6 +460,68 @@ def safe_zip_extractall(zf, path):
         if not contained:
             raise ValueError(f"Zip member {member!r} would escape target directory")
     zf.extractall(path)
+
+
+class DatabaseLockBusy(Exception):
+    """Raised by acquire_db_lock() when the lock could not be taken before the deadline."""
+
+
+def acquire_db_lock(path: Path, timeout: float = 30.0) -> int:
+    """Acquire a real mutual-exclusion lock on `path` using fcntl.flock(LOCK_EX).
+
+    Assumption: the lock file lives on a single local filesystem shared by the
+    scheduler process and the bwcli commands (docker exec into the scheduler
+    container, or the same Linux host), and there is exactly one scheduler per
+    database, so a local-filesystem flock is adequate (it would NOT be safe
+    across NFS or between hosts).
+
+    The file is opened (never truncated, never unlinked) and LOCK_EX|LOCK_NB is
+    retried in a 1s loop until `timeout` seconds (monotonic clock) elapse. On
+    success the holder's pid is written into the file (informational only) and
+    the open file descriptor is returned; the caller must pass it to
+    release_db_lock() when done. On timeout DatabaseLockBusy is raised and the
+    existing holder's lock is left untouched (no stealing).
+
+    If a holder process dies, the kernel releases its flock automatically, so
+    no dead-owner reaper is needed here.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os_open(str(path), O_RDWR | O_CREAT, 0o600)
+    deadline = monotonic() + timeout
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            break
+        except OSError:
+            if monotonic() >= deadline:
+                holder_pid = ""
+                with suppress(OSError):
+                    holder_pid = path.read_text().strip()
+                os_close(fd)
+                if holder_pid:
+                    raise DatabaseLockBusy(f"database is locked by pid {holder_pid}, try again later")
+                raise DatabaseLockBusy("database is locked, try again later")
+            sleep(1)
+
+    with suppress(OSError):
+        ftruncate(fd, 0)
+        os_write(fd, str(getpid()).encode())
+
+    return fd
+
+
+def release_db_lock(fd: int) -> None:
+    """Release a lock handle obtained via acquire_db_lock().
+
+    Ownership-aware: unlocks and closes only the given fd. flock() locks are
+    scoped to the open file description behind that fd, so releasing (or
+    double-releasing) one fd can never touch another owner's lock on the same
+    path, and never unlinks the lock file.
+    """
+    with suppress(OSError):
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    with suppress(OSError):
+        os_close(fd)
 
 
 def normalize_bunkerweb_version(version: str) -> str:

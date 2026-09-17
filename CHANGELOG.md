@@ -6,6 +6,7 @@
 - [BUGFIX] `scheduler`: acknowledge configuration changes before rendering them, so a write that lands while the once-jobs of a previous write are still running gets its own job cycle instead of being rendered without its jobs (a removed mTLS CA stayed trusted, a newly created CrowdSec service ran unchecked, a ModSecurity audit change could be skipped).
 - [BUGFIX] `ui`: store escaped flash messages as plain strings so the Redis session backend can serialise them; with `USE_REDIS=yes` every login answered 500.
 - [BUGFIX] `jobs`: folder caches that contain symlinks (the Let's Encrypt `live/` links) restore from the database again, while absolute or escaping links are still rejected.
+- [BUGFIX] `backup`: the database lock is a real `flock` now; a second backup, restore or scheduler tick waits up to 30 s then reports busy instead of taking the lock away from a live holder.
 - [SECURITY] `jobs`: verify the ASN and country MMDB downloads against the checksum DB-IP publishes, over a host and size bounded transfer, and keep the database already in place when verification fails instead of caching an unchecked file.
 - [FEATURE] `installer`: Docker Full installs can optionally configure a local syslog-ng collector with persistent log storage, making BunkerWeb and component logs available in the Web UI while keeping normal Docker logs.
 - [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
