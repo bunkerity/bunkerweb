@@ -3,6 +3,7 @@
 ## v1.6.15~rc3 - 2026/09/15
 
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
+- [SECURITY] `jobs`: verify the ASN and country MMDB downloads against the checksum DB-IP publishes, over a host and size bounded transfer, and keep the database already in place when verification fails instead of caching an unchecked file.
 - [FEATURE] `installer`: Docker Full installs can optionally configure a local syslog-ng collector with persistent log storage, making BunkerWeb and component logs available in the Web UI while keeping normal Docker logs.
 - [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
 - [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Fixes #3891)
