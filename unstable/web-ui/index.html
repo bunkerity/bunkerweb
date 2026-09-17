@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1025,6 +1025,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafts-in-the-raw-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Drafts in the RAW editor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1541,6 +1552,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (<code>SESSION_LIFETIME_HOURS</code>), refreshed on every request. A hard absolute cap is enforced by <code>SESSION_ABSOLUTE_HOURS</code> (default <code>168</code> = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (<code>SESSION_ROLLING_HOURS</code>, default <code>0</code> = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaxes the IP check for private ranges only. <code>ALWAYS_REMEMBER=yes</code> (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or <em>Wipe other sessions</em>. To stay logged in longer, raise <strong>both</strong> <code>SESSION_LIFETIME_HOURS</code> and <code>SESSION_ABSOLUTE_HOURS</code>: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
+- Session storage: sessions live in Redis when <code>USE_REDIS=yes</code>, otherwise in a local cache under <code>/var/lib/bunkerweb</code>. A Redis that stops answering, or that refuses writes because it hit <code>maxmemory</code>, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size <code>maxmemory</code> for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to <code>SESSION_LIFETIME_HOURS</code> after another replica deletes that session through Redis. <code>UI_USE_REDIS=no</code> takes the UI off Redis on its own, unlike the global <code>USE_REDIS</code> which also stops bans and reports being shared between instances.
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
@@ -1568,6 +1580,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Env file at <code>/etc/bunkerweb/ui.env</code> (Linux packages)</li>
 <li>Built-in defaults</li>
 </ol>
+<h2 id="drafts-in-the-raw-editor">Drafts in the RAW editor</h2>
+<p>The RAW editor of a service or of the global settings can keep a setting as a <strong>draft</strong>: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a <code>KEY=value</code> line and press <code>#</code> to toggle the draft state, or <code>Backspace</code> on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.</p>
 <h2 id="configuration-reference">Configuration reference</h2>
 <h3 id="runtime-time-zone">Runtime &amp; time zone</h3>
 <table>
@@ -1725,6 +1739,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <td>Number of proxy hops to trust for <code>X-Forwarded-*</code></td>
 <td>Integer</td>
 <td><code>1</code></td>
+</tr>
+<tr>
+<td><code>UI_USE_REDIS</code></td>
+<td>Take the web UI off Redis without touching the global <code>USE_REDIS</code></td>
+<td><code>yes</code> or <code>no</code></td>
+<td><code>yes</code></td>
 </tr>
 </tbody>
 </table>
@@ -1897,7 +1917,7 @@ log {
 <h2 id="upgrade-to-pro">Upgrade to PRO</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO free trial</p>
-<p>Use the code <code>freetrial</code> on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> for a one-month trial.</p>
+<p>Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>.</p>
 </div>
 <figure>
 <p><img align="center," alt="PRO upgrade" src="../assets/img/ui-pro.png" width="700" /></p>

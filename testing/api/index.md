@@ -178,10 +178,10 @@ Choose the flavor that matches your environment.
 
 - Coarse role: GET/HEAD/OPTIONS require `read`; write verbs require `write`.
 - Fine-grained ACL is enforced when routes declare required permissions; `admin(true)` bypasses checks.
-- Resource types: `instances`, `global_settings`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
+- Resource types: `instances`, `global_config`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
 - Permission names:
   - `instances_*`: `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
-  - `global_settings_*`: `global_settings_read`, `global_settings_update`
+  - `global_config`: `global_config_read`, `global_config_update`
   - `services`: `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
   - `configs`: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins`: `plugin_read`, `plugin_create`, `plugin_delete`
@@ -198,7 +198,7 @@ Choose the flavor that matches your environment.
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
-    - `global_settings`: `global_settings_update`
+    - `global_config`: `global_config_update`
 
     Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
 
@@ -390,7 +390,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /services`: list services (include drafts by default).
   - `GET /services/{service}`: fetch non-defaults or full config (`full=true`); `methods=true` includes provenance.
   - `POST /services`: create a service (draft or online), set variables, and update `SERVER_NAME` roster atomically.
-  - `PATCH /services/{service}`: rename, update variables, toggle draft.
+  - `PATCH /services/{service}`: rename, update variables, toggle draft. A rename moves the service's custom configs, per-service settings and job cache to the new name in the same operation. API permissions scoped to the old name are not moved, and a service defined outside the API (environment, autoconf, wizard) cannot be renamed here.
   - `DELETE /services/{service}`: remove service and derived config keys.
   - `POST /services/{service}/convert?convert_to=online|draft`: switch draft/online quickly.
 - **Custom configs**

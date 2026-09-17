@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1289,7 +1289,7 @@
 <h2 id="einstellungen">Einstellungen</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO Einstellungen</p>
-<p>Einige Plugins sind der <strong>PRO-Version</strong> vorbehalten. Möchten Sie BunkerWeb PRO einen Monat lang schnell testen? Verwenden Sie den Code <code>freetrial</code> bei Ihrer Bestellung im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> oder klicken Sie <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">hier</a>, um den Promo-Code direkt anzuwenden (wird an der Kasse wirksam).</p>
+<p>Einige Plugins sind der <strong>PRO-Version</strong> vorbehalten. Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</p>
 </div>
 <p>Sobald BunkerWeb in Ihre Umgebung integriert ist, müssen Sie es konfigurieren, um Ihre Webanwendungen bereitzustellen und zu schützen.</p>
 <p>Die Konfiguration von BunkerWeb erfolgt über sogenannte "Einstellungen" oder "Variablen". Jede Einstellung wird durch einen Namen wie <code>AUTO_LETS_ENCRYPT</code> oder <code>USE_ANTIBOT</code> identifiziert. Sie können diesen Einstellungen Werte zuweisen, um BunkerWeb zu konfigurieren.</p>
@@ -1536,6 +1536,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Auswählen einer Vorlage</strong>: Sobald die benutzerdefinierte Vorlage definiert ist, können Benutzer sie während des Einfachmodus-Konfigurationsprozesses eines Dienstes in der Web-UI auswählen. Eine Vorlage kann auch mit der Einstellung <code>USE_TEMPLATE</code> in der Konfiguration ausgewählt werden. Der Name der Vorlagendatei (ohne die <code>.json</code>-Erweiterung) sollte als Wert der Einstellung <code>USE_TEMPLATE</code> angegeben werden.</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Vorlagen und selbst konfigurierte Einstellungen</p>
+<p>Wenn eine Vorlage eine Einstellung deklariert, die Sie ebenfalls konfigurieren, hängt es davon ab, wo die Vorlage ausgewählt wurde, welcher Wert gilt:</p>
+<ul>
+<li>am Dienst ausgewählt (<code>www.example.com_USE_TEMPLATE=medium</code>): der Wert der Vorlage gewinnt gegenüber dem Wert aus den globalen Einstellungen;</li>
+<li>global ausgewählt (<code>USE_TEMPLATE=medium</code>): der Wert aus den globalen Einstellungen gewinnt gegenüber dem der Vorlage;</li>
+<li>ein direkt am Dienst gesetzter Wert gewinnt immer gegenüber beiden.</li>
+</ul>
+<p>Das ist wichtig, weil die Vorlagen <code>low</code>, <code>medium</code> und <code>api</code> <code>CONTENT_SECURITY_POLICY</code> auf einen leeren Wert setzen und <code>low</code> dasselbe für <code>PERMISSIONS_POLICY</code> tut: Ein Dienst, der eine davon auswählt, sendet diesen Header nicht, selbst wenn Ihre globalen Einstellungen eine Richtlinie enthalten. Setzen Sie den Wert am Dienst, <code>www.example.com_CONTENT_SECURITY_POLICY=...</code>, um ihn zu behalten.</p>
+</div>
 <p>Beispiel für eine benutzerdefinierte Vorlagendatei:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vorlagenname"</span><span class="p">,</span>

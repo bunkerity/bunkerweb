@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1289,7 +1289,7 @@
 <h2 id="_4">设置</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 设置</p>
-<p>某些插件是为 <strong>PRO 版本</strong>保留的。想快速测试 BunkerWeb PRO 一个月吗？在 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>下单时使用代码 <code>freetrial</code>，或者点击<a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">这里</a>直接应用促销代码（将在结账时生效）。</p>
+<p>某些插件是为 <strong>PRO 版本</strong>保留的。通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用。</p>
 </div>
 <p>一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。</p>
 <p>BunkerWeb 的配置是通过我们称之为“设置”或“变量”的东西来完成的。每个设置都由一个名称来标识，例如 <code>AUTO_LETS_ENCRYPT</code> 或 <code>USE_ANTIBOT</code>。您可以为这些设置分配值来配置 BunkerWeb。</p>
@@ -1536,6 +1536,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>选择模板</strong>：一旦定义了自定义模板，用户就可以在 Web UI 中服务的简单模式配置过程中选择它。也可以使用配置中的 <code>USE_TEMPLATE</code> 设置来选择模板。模板文件的名称（不带 <code>.json</code> 扩展名）应指定为 <code>USE_TEMPLATE</code> 设置的值。</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">模板与您自行配置的设置</p>
+<p>当模板声明的设置同时也被您自行配置时，以哪一个为准取决于模板是在哪里选择的：</p>
+<ul>
+<li>在服务上选择（<code>www.example.com_USE_TEMPLATE=medium</code>）：模板的值优先于您在全局设置中的值；</li>
+<li>全局选择（<code>USE_TEMPLATE=medium</code>）：您在全局设置中的值优先于模板的值；</li>
+<li>在服务本身设置的值始终优先于以上两者。</li>
+</ul>
+<p>这一点很重要，因为 <code>low</code>、<code>medium</code> 和 <code>api</code> 模板会把 <code>CONTENT_SECURITY_POLICY</code> 设为空值，<code>low</code> 对 <code>PERMISSIONS_POLICY</code> 也是如此：即使您的全局设置中配置了策略，选择这些模板的服务也不会发送该响应头。若要保留您的值，请在服务上设置 <code>www.example.com_CONTENT_SECURITY_POLICY=...</code>。</p>
+</div>
 <p>自定义模板文件示例：
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"模板名称"</span><span class="p">,</span>

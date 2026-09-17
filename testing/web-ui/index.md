@@ -189,6 +189,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
+- Session storage: sessions live in Redis when `USE_REDIS=yes`, otherwise in a local cache under `/var/lib/bunkerweb`. A Redis that stops answering, or that refuses writes because it hit `maxmemory`, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size `maxmemory` for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to `SESSION_LIFETIME_HOURS` after another replica deletes that session through Redis. `UI_USE_REDIS=no` takes the UI off Redis on its own, unlike the global `USE_REDIS` which also stops bans and reports being shared between instances.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! warning "2FA is gone after recreating the container"
@@ -216,6 +217,10 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 2. Secrets in `/run/secrets/<VAR>` (Docker)
 3. Env file at `/etc/bunkerweb/ui.env` (Linux packages)
 4. Built-in defaults
+
+## Drafts in the RAW editor
+
+The RAW editor of a service or of the global settings can keep a setting as a **draft**: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a `KEY=value` line and press `#` to toggle the draft state, or `Backspace` on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.
 
 ## Configuration reference
 
@@ -253,6 +258,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `UI_USE_REDIS`                              | Take the web UI off Redis without touching the global `USE_REDIS`                                        | `yes` or `no`            | `yes`                     |
 
 ### Logging
 
@@ -340,7 +346,7 @@ log {
 ## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"
-    Use the code `freetrial` on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) for a one-month trial.
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 ## Translations (i18n)
 

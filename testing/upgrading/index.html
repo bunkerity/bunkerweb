@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1019,6 +1019,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#two-factor-authentication-replay-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-factor authentication replay protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#procedure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1233,6 +1244,8 @@
 
 <h1 id="upgrading">Upgrading</h1>
 <h2 id="upgrade-from-16x">Upgrade from 1.6.X</h2>
+<h3 id="two-factor-authentication-replay-protection">Two-factor authentication replay protection</h3>
+<p>Upgrade every Web UI replica together: replay protection for two-factor codes is now stored in the shared database and only covers replicas running this version. During the migration, an already displayed authentication code may be rejected for up to 33 seconds; use a newer code after that interval. Keep the existing TOTP encryption keys available to every UI replica, as described in <a href="../troubleshooting/#web-ui">Web UI troubleshooting</a>. The replay counter does not replace those keys. While the database is read-only, codes are accepted without replay protection until it becomes writable again.</p>
 <h3 id="procedure">Procedure</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
@@ -1275,7 +1288,7 @@ by the script — use the <strong>Manual</strong> tab for those.</p>
 <ol>
 <li>Detection<ul>
 <li>Reads the install type (full, manager, worker, scheduler, ui, api) back from <code>.env</code>, so you never have to restate your topology.</li>
-<li>Recovers the secrets, host ports, worker list and Compose project name from <code>.env</code>, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports.</li>
+<li>Recovers the secrets, host ports, worker list and Compose project name from <code>.env</code>, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports; when a key is repeated the last assignment wins. Optional <code>export</code> prefixes are accepted, and explicit command-line values still take precedence. Quoting, interpolation, escaping, and other unsupported dotenv syntax are rejected before the file is rewritten; use the manual upgrade path for those files.</li>
 <li>Reads the version actually running from the container rather than trusting the image tag, so a floating tag (<code>latest</code>, <code>testing</code>) and an interrupted previous upgrade are both detected correctly.</li>
 </ul>
 </li>
@@ -1294,13 +1307,14 @@ by the script — use the <strong>Manual</strong> tab for those.</p>
 </li>
 <li>File updates<ul>
 <li><code>.env</code> is rewritten with the new image tag; any entry you added by hand is carried over.</li>
-<li><code>docker-compose.yml</code> is regenerated only when it still matches what the script produced, so local edits survive. Pass <code>--overwrite-compose</code> to regenerate it anyway. A <code>.bak.&lt;timestamp&gt;</code> copy is kept either way.</li>
+<li><code>docker-compose.yml</code> is regenerated only when it still matches what the script produced, so local edits survive. Pass <code>--overwrite-compose</code> to regenerate a regular file anyway. Symlinked Compose files are always preserved. A <code>.bak.&lt;timestamp&gt;</code> copy is kept either way.</li>
 </ul>
 </li>
 <li>Apply and verify<ul>
 <li><code>docker compose pull</code>, then <code>docker compose up -d</code> — only the containers whose image changed are recreated, so downtime is shorter than a full <code>down</code>/<code>up</code> cycle.</li>
-<li>If the pull fails nothing is recreated, the previous tag is restored in <code>.env</code>, and the running stack is left untouched.</li>
-<li>Afterwards the script re-reads the version from the container and checks that the scheduler did not enter a restart loop, which is how a failed database migration shows up.</li>
+<li>If a step fails before recreation, both the previous <code>.env</code> and <code>docker-compose.yml</code> are restored. Once recreation starts, the script does not automatically roll back binaries because the database schema may already have changed.</li>
+<li>Afterwards the script checks the expected image IDs, container health, and changes to restart counters. It requires two healthy observations at least ten seconds apart before reporting success; historical restarts of a reused container do not by themselves fail an upgrade.</li>
+<li>When the services are not confirmed healthy within the wait timeout, the stack is left running, nothing is rolled back, and the script exits with status 2 instead of reporting a failed upgrade; give a slow first start more room with <code>--docker-wait-timeout N</code>.</li>
 </ul>
 </li>
 </ol>
@@ -1346,6 +1360,10 @@ by the script — use the <strong>Manual</strong> tab for those.</p>
 <tr>
 <td><code>--no-pull</code></td>
 <td>Do not pull images before recreating the stack</td>
+</tr>
+<tr>
+<td><code>--docker-wait-timeout N</code></td>
+<td>Seconds to wait for the stack to become healthy (default: 600)</td>
 </tr>
 <tr>
 <td><code>-y, --yes</code></td>

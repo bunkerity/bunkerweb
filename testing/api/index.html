@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1449,10 +1449,10 @@
 <ul>
 <li>Coarse role: GET/HEAD/OPTIONS require <code>read</code>; write verbs require <code>write</code>.</li>
 <li>Fine-grained ACL is enforced when routes declare required permissions; <code>admin(true)</code> bypasses checks.</li>
-<li>Resource types: <code>instances</code>, <code>global_settings</code>, <code>services</code>, <code>configs</code>, <code>plugins</code>, <code>cache</code>, <code>bans</code>, <code>jobs</code>.</li>
+<li>Resource types: <code>instances</code>, <code>global_config</code>, <code>services</code>, <code>configs</code>, <code>plugins</code>, <code>cache</code>, <code>bans</code>, <code>jobs</code>.</li>
 <li>Permission names:</li>
 <li><code>instances_*</code>: <code>instances_read</code>, <code>instances_update</code>, <code>instances_delete</code>, <code>instances_create</code>, <code>instances_execute</code></li>
-<li><code>global_settings_*</code>: <code>global_settings_read</code>, <code>global_settings_update</code></li>
+<li><code>global_config</code>: <code>global_config_read</code>, <code>global_config_update</code></li>
 <li><code>services</code>: <code>service_read</code>, <code>service_create</code>, <code>service_update</code>, <code>service_delete</code>, <code>service_convert</code>, <code>service_export</code></li>
 <li><code>configs</code>: <code>configs_read</code>, <code>config_read</code>, <code>config_create</code>, <code>config_update</code>, <code>config_delete</code></li>
 <li><code>plugins</code>: <code>plugin_read</code>, <code>plugin_create</code>, <code>plugin_delete</code></li>
@@ -1470,7 +1470,7 @@
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
 <li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
 <li><code>plugins</code>: <code>plugin_create</code></li>
-<li><code>global_settings</code>: <code>global_settings_update</code></li>
+<li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
 <p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
 </div>
@@ -1939,7 +1939,7 @@
 <li><code>GET /services</code>: list services (include drafts by default).</li>
 <li><code>GET /services/{service}</code>: fetch non-defaults or full config (<code>full=true</code>); <code>methods=true</code> includes provenance.</li>
 <li><code>POST /services</code>: create a service (draft or online), set variables, and update <code>SERVER_NAME</code> roster atomically.</li>
-<li><code>PATCH /services/{service}</code>: rename, update variables, toggle draft.</li>
+<li><code>PATCH /services/{service}</code>: rename, update variables, toggle draft. A rename moves the service's custom configs, per-service settings and job cache to the new name in the same operation. API permissions scoped to the old name are not moved, and a service defined outside the API (environment, autoconf, wizard) cannot be renamed here.</li>
 <li><code>DELETE /services/{service}</code>: remove service and derived config keys.</li>
 <li><code>POST /services/{service}/convert?convert_to=online|draft</code>: switch draft/online quickly.</li>
 <li><strong>Custom configs</strong></li>

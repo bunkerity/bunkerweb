@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1019,6 +1019,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#proteccion-contra-la-reutilizacion-de-codigos-de-dos-factores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protección contra la reutilización de códigos de dos factores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#procedimiento" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1233,6 +1244,8 @@
 
 <h1 id="actualizacion">Actualización</h1>
 <h2 id="actualizacion-desde-16x">Actualización desde 1.6.X</h2>
+<h3 id="proteccion-contra-la-reutilizacion-de-codigos-de-dos-factores">Protección contra la reutilización de códigos de dos factores</h3>
+<p>Actualice todas las réplicas de la interfaz web a la vez: la protección contra la reutilización de los códigos de dos factores ahora se guarda en la base de datos compartida y solo cubre las réplicas que ejecutan esta versión. Durante la migración, un código de autenticación ya mostrado puede rechazarse durante un máximo de 33 segundos; use un código más reciente después de ese intervalo. Mantenga las claves de cifrado TOTP existentes disponibles para cada réplica de la interfaz, como se describe en <a href="../troubleshooting/#web-ui">Solución de problemas de la interfaz web</a>. El contador de reutilización no sustituye a esas claves. Mientras la base de datos esté en modo de solo lectura, los códigos se aceptan sin protección contra la reutilización hasta que vuelva a admitir escrituras.</p>
 <h3 id="procedimiento">Procedimiento</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
@@ -1276,7 +1289,7 @@ pestaña <strong>Manual</strong> para esos casos.</p>
 <ol>
 <li>Detección<ul>
 <li>Lee el tipo de instalación (full, manager, worker, scheduler, ui, api) desde el <code>.env</code>, así que nunca tienes que volver a indicar tu topología.</li>
-<li>Recupera los secretos, los puertos del host, la lista de workers y el nombre de proyecto de Compose desde el <code>.env</code>, de modo que una actualización no puede rotar la contraseña de la base de datos, invalidar los secretos 2FA almacenados ni mover tus puertos publicados.</li>
+<li>Recupera los secretos, los puertos del host, la lista de workers y el nombre de proyecto de Compose desde el <code>.env</code>, de modo que una actualización no puede rotar la contraseña de la base de datos, invalidar los secretos 2FA almacenados ni mover tus puertos publicados. Cuando una clave se repite se usa la última asignación; se acepta un prefijo <code>export</code> opcional y los valores explícitos de la línea de comandos siguen teniendo prioridad. Las comillas, la interpolación, los escapes y cualquier otra sintaxis dotenv no admitida se rechazan antes de reescribir el archivo; usa la vía de actualización manual para esos archivos.</li>
 <li>Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (<code>latest</code>, <code>testing</code>) como una actualización anterior interrumpida.</li>
 </ul>
 </li>
@@ -1295,13 +1308,14 @@ pestaña <strong>Manual</strong> para esos casos.</p>
 </li>
 <li>Actualización de archivos<ul>
 <li>El <code>.env</code> se reescribe con la nueva etiqueta de imagen; se conserva cualquier entrada que hayas añadido a mano.</li>
-<li>El <code>docker-compose.yml</code> solo se regenera si sigue coincidiendo con lo que produjo el script, así que tus ediciones locales sobreviven. Usa <code>--overwrite-compose</code> para regenerarlo de todos modos. En ambos casos se guarda una copia <code>.bak.&lt;marca de tiempo&gt;</code>.</li>
+<li>El <code>docker-compose.yml</code> solo se regenera si sigue coincidiendo con lo que produjo el script, así que tus ediciones locales sobreviven. Usa <code>--overwrite-compose</code> para regenerar un archivo normal de todos modos. Los archivos Compose enlazados simbólicamente se conservan siempre. En ambos casos se guarda una copia <code>.bak.&lt;marca de tiempo&gt;</code>.</li>
 </ul>
 </li>
 <li>Aplicación y verificación<ul>
 <li><code>docker compose pull</code> y después <code>docker compose up -d</code>: solo se recrean los contenedores cuya imagen ha cambiado, por lo que la interrupción es menor que con un ciclo completo de <code>down</code>/<code>up</code>.</li>
-<li>Si la descarga falla no se recrea nada, se restaura la etiqueta anterior en el <code>.env</code> y el stack en ejecución queda intacto.</li>
-<li>Después, el script vuelve a leer la versión del contenedor y comprueba que el scheduler no haya entrado en un bucle de reinicios, que es como se manifiesta un fallo de migración de la base de datos.</li>
+<li>Si un paso falla antes de la recreación, se restauran tanto el <code>.env</code> anterior como el <code>docker-compose.yml</code>. Una vez iniciada la recreación, el script no revierte los binarios automáticamente porque el esquema de la base de datos puede haber cambiado ya.</li>
+<li>Después, el script comprueba los ID de imagen esperados, la salud de los contenedores y los cambios en los contadores de reinicio. Exige dos observaciones saludables separadas al menos diez segundos antes de informar del éxito; los reinicios históricos de un contenedor reutilizado no hacen fallar por sí solos una actualización.</li>
+<li>Si los servicios no se confirman saludables dentro del tiempo de espera, el stack se deja en ejecución, no se revierte nada y el script termina con el estado 2 en lugar de informar de una actualización fallida; da más margen a un primer arranque lento con <code>--docker-wait-timeout N</code>.</li>
 </ul>
 </li>
 </ol>
@@ -1347,6 +1361,10 @@ pestaña <strong>Manual</strong> para esos casos.</p>
 <tr>
 <td><code>--no-pull</code></td>
 <td>No descargar las imágenes antes de recrear el stack</td>
+</tr>
+<tr>
+<td><code>--docker-wait-timeout N</code></td>
+<td>Segundos de espera hasta que el stack esté saludable (por defecto: 600)</td>
 </tr>
 <tr>
 <td><code>-y, --yes</code></td>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1346,55 +1346,67 @@
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>Authentik</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Protect your web services with Authentik forward authentication (auth_request) for single sign-on.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik">bunkerweb-plugins/authentik</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Cloudflare</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare">bunkerweb-plugins/cloudflare</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Inspect requests using the Coraza WAF (alternative of ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Send security notifications to a Discord channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Matrix</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Send security notifications to a Matrix room using the Matrix API.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix">bunkerweb-plugins/matrix</a></td>
 </tr>
 <tr>
+<td style="text-align: center;"><strong>SentinelOne</strong></td>
+<td style="text-align: center;">1.12</td>
+<td style="text-align: left;">Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone">bunkerweb-plugins/sentinelone</a></td>
+</tr>
+<tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Send security notifications to a Slack channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
+<td style="text-align: center;"><strong>SysWarden</strong></td>
+<td style="text-align: center;">1.12</td>
+<td style="text-align: left;">Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden">bunkerweb-plugins/syswarden</a></td>
+</tr>
+<tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.11</td>
-<td style="text-align: left;">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
+<td style="text-align: center;">1.12</td>
+<td style="text-align: left;">Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.11</td>
+<td style="text-align: center;">1.12</td>
 <td style="text-align: left;">Send security notifications to a custom HTTP endpoint using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -1403,7 +1415,7 @@
 <h2 id="how-to-use-a-plugin">How to use a plugin</h2>
 <h3 id="automatic">Automatic</h3>
 <p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.</p>
-<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip</code></p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.12.zip</code></p>
 <h3 id="manual">Manual</h3>
 <p>The first step is to install the plugin by placing its files inside the corresponding <code>plugins</code> data folder. The procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>

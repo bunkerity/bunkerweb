@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -3171,7 +3171,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <p>Contrairement aux autres images Docker, l'All-in-one conserve <code>access.log</code>, <code>error.log</code> et <code>modsec_audit.log</code> comme de vrais fichiers sous <code>/var/log/bunkerweb/</code>. Le flux de journalisation les lit pour ajouter un préfixe à chaque ligne et appliquer <code>HIDE_SERVICE_LOGS</code>, et l'analyseur CrowdSec embarqué ainsi que le visualiseur de journaux de l'interface Web les lisent depuis le disque.</p>
 <ul>
 <li>L'image embarque <code>logrotate</code> et l'exécute toutes les heures sous supervisor. Un échec de rotation est signalé par le préfixe <code>[LOGROTATE]</code> dans les logs du conteneur.</li>
-<li>La politique est celle installée par les paquets Linux, dans <code>/etc/logrotate.d/bunkerweb</code> : tout fichier correspondant à <code>/var/log/bunkerweb/*.log</code> est tourné dès qu'il dépasse 100 Mo, sept générations compressées sont conservées, et la rotation utilise <code>copytruncate</code>.</li>
+<li>La politique est celle installée par les paquets Linux, dans <code>/etc/logrotate.d/bunkerweb</code> : tout fichier correspondant à <code>/var/log/bunkerweb/*.log</code> est tourné chaque jour, ou plus tôt s'il dépasse 100 Mo, quatorze générations numérotées sont conservées, et la rotation utilise <code>copytruncate</code>.</li>
 <li><code>copytruncate</code> vide le fichier sur place au lieu de le renommer, si bien qu'il conserve son inode. Le flux de journalisation, l'analyseur CrowdSec et le visualiseur de journaux le suivent donc à travers une rotation sans avoir besoin de redémarrer, et ModSecurity continue d'écrire dans le bon fichier même s'il ne rouvre jamais son journal d'audit.</li>
 <li>Pour modifier le seuil ou le nombre de générations, montez votre propre fichier par-dessus <code>/etc/logrotate.d/bunkerweb</code>. Pour désactiver entièrement la rotation et gérer la rétention vous-même, montez un fichier vide par-dessus ce même chemin ; un volume monté sur <code>/var/log/bunkerweb</code> ne fait que déplacer les données, il n'empêche pas le <code>logrotate</code> du conteneur de continuer à les faire tourner à cet endroit.</li>
 </ul>
@@ -3189,6 +3189,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
 <ul>
+<li>L'<strong>agent CrowdSec embarqué ne démarre que</strong> si le conteneur possède la variable d'environnement sans préfixe <code>USE_CROWDSEC=yes</code> et une <code>CROWDSEC_API</code> locale. Activer CrowdSec pour un seul service (<code>www.example.com_USE_CROWDSEC=yes</code>) ne le démarre pas.</li>
 <li>
 <p>Lorsque <code>USE_CROWDSEC=yes</code>, le point d'entrée :</p>
 <ol>
@@ -3289,7 +3290,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 - Utilisez les slugs du hub tels qu'affichés par <code>cscli parsers list</code> (ex. : <code>crowdsecurity/geoip-enrich</code>).</p>
 <hr />
 <h4 id="desactiver-lapi-centrale">Désactiver l'API centrale</h4>
-<p>Pour faire fonctionner CrowdSec entièrement en local, sans enregistrement ni trafic vers les serveurs de CrowdSec, définissez <code>DISABLE_ONLINE_API</code> à <code>true</code> :</p>
+<p>Pour désactiver l'enregistrement auprès de la Central API et de la Console, sans envoi de signal ni récupération de la liste de blocage communautaire, définissez <code>DISABLE_ONLINE_API</code> à <code>true</code>. Cela n'arrête pas les mises à jour du hub : le catalogue des collections et parseurs continue d'être récupéré depuis le hub CrowdSec quel que soit ce paramètre :</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
@@ -3387,6 +3388,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="admonition tip">
 <p class="admonition-title">Ignorer les conteneurs étiquetés</p>
 <p>Lorsqu'un conteneur doit être ignoré par autoconf, définissez <code>DOCKER_IGNORE_LABELS</code> sur le contrôleur. Fournissez une liste de clés d'étiquettes séparées par des espaces ou des virgules (par exemple <code>bunkerweb.SERVER_NAME</code>) ou simplement le suffixe (<code>SERVER_NAME</code>). Tout conteneur ou source de configuration personnalisée portant une étiquette correspondante est ignoré lors de la découverte, et l'étiquette est ignorée lors de la traduction des paramètres.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
+<p>Contrairement aux paramètres ci-dessus, <code>KEEP_CONFIG_ON_RESTART</code> est lu directement par le point d'entrée du conteneur <code>bunkerweb</code> lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur <code>bunkerweb</code> lui-même. Mettre à <code>yes</code> pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Défaut <code>no</code>.</p>
 </div>
 <h3 id="utilisation-des-secrets-docker">Utilisation des secrets Docker</h3>
 <p>Au lieu de transmettre des paramètres sensibles via des variables d'environnement, vous pouvez les stocker en tant que secrets Docker. Pour chaque paramètre que vous souhaitez sécuriser, créez un secret Docker dont le nom correspond à la clé de paramètre (en majuscules). Les scripts d'entrée de BunkerWeb chargent automatiquement les secrets <code>/run/secrets</code> et les exportent en tant que variables d'environnement.</p>
@@ -3516,7 +3521,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 <tr>
 <td><code>SEND_FILES_MIN_TIMEOUT</code></td>
-<td>Délai de lecture minimal pour l’envoi des dossiers de configuration et de cache</td>
+<td>Délai minimal de lecture pour l'envoi des dossiers de configuration et de cache ; une valeur explicite n'est jamais réduite, et seule la valeur dérivée du nombre de services est plafonnée à 120 secondes, donc le délai effectif est le plus élevé des deux. Le délai de connexion reste fixé à 5 secondes et l'envoi du corps dispose de son propre délai séparé.</td>
 <td>Secondes entières</td>
 <td><code>30</code></td>
 </tr>
@@ -3902,6 +3907,13 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Installations du gestionnaire et du Scheduler</p>
 <p>Si vous choisissez le type d'installation <strong>Manager</strong> ou <strong>Scheduler Only</strong>, vous serez également invité à fournir les adresses IP ou les noms d'hôte de vos instances de travail BunkerWeb.</p>
 </div>
+<h4 id="journaux-locaux-de-linterface-web-avec-docker-compose">Journaux locaux de l'interface Web avec Docker Compose</h4>
+<p>Pour les installations <strong>Docker complètes</strong> (standard ou <code>--autoconf</code>), l'installateur peut collecter les journaux localement pour l'interface Web. Les nouvelles installations interactives utilisent <strong>Oui</strong> par défaut ; pour une installation sans assistance, choisissez explicitement <code>--syslog</code> ou <code>--no-syslog</code> :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--syslog
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--no-syslog
+</code></pre></div>
+<p>Lorsque cette option est activée, la stack générée ajoute un collecteur <code>bw-syslog</code> sur le réseau interne <code>bw-universe</code>, sans publier son port syslog sur l'hôte. Les journaux sont stockés dans le volume persistant <code>bw-logs</code> et montés dans <code>bw-ui</code> ; <code>syslog-ng.conf</code> est généré à côté de <code>docker-compose.yml</code>. Les composants BunkerWeb continuent également à écrire sur la sortie d'erreur standard, donc <code>docker compose logs</code> reste disponible. La configuration générée utilise des noms de fichiers fixes et une rotation limitée (environ 100 Mo par fichier avec 7 rotations).</p>
+<p>Le choix est enregistré sous la forme <code>BW_INSTALL_SYSLOG=yes|no</code> dans <code>.env</code> et conservé lors des mises à niveau et des nouvelles exécutions, sauf remplacement explicite. La désactivation supprime uniquement le collecteur géré par l'installateur après que la stack mise à jour est prête ; l'historique <code>bw-logs</code> et le fichier de configuration sont conservés. Les fichiers Compose et syslog-ng modifiés par l'opérateur ne sont pas remplacés silencieusement.</p>
 <h4 id="options-de-ligne-de-commande">Options de ligne de commande</h4>
 <p>Pour les configurations non interactives ou automatisées, le script peut être contrôlé à l'aide d'indicateurs de ligne de commande :</p>
 <p><strong>Options générales :</strong></p>
@@ -4206,7 +4218,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Redémarrez le Scheduler : <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="installation-a-laide-du-gestionnaire-de-paquets">Installation à l'aide du gestionnaire de paquets</h3>
-<p>Veuillez vous assurer que <strong>NGINX 1.30.4 est installé avant d'installer BunkerWeb</strong>. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du <a href="https://nginx.org/en/linux_packages.html">dépôt officiel NGINX</a>. La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.</p>
+<p>Veuillez vous assurer que <strong>NGINX 1.30.5 est installé avant d'installer BunkerWeb</strong>. Pour toutes les distributions, il est obligatoire d'utiliser des paquets préconstruits à partir du <a href="https://nginx.org/en/linux_packages.html">dépôt officiel NGINX</a>. La compilation de NGINX à partir des sources ou l'utilisation de paquets provenant de différents dépôts ne fonctionnera pas avec les paquets officiels préconstruits de BunkerWeb. Cependant, vous avez la possibilité de construire BunkerWeb à partir des sources.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4218,9 +4230,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx"</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.4 :</p>
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.5 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.4-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.5-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Version testing/dev</p>
@@ -4252,9 +4264,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx"</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.4 :</p>
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.5 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.4-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.5-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Version testing/dev</p>
@@ -4284,8 +4296,12 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora fournit déjà NGINX 1.30.4, que nous prenons en charge</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.4
+<div class="admonition warning">
+<p class="admonition-title">Fedora 43 fournit NGINX 1.30.4</p>
+<p>Fedora 43 ne fournit pas encore NGINX 1.30.5 : le paquet BunkerWeb pour Fedora 43 est donc construit avec NGINX 1.30.4 et attend <code>nginx-1.30.4</code>. Installez cette version sur Fedora 43 ; l'épinglage passera à 1.30.5 dès que Fedora 43 la publiera. Fedora 44 fournit déjà 1.30.5.</p>
+</div>
+<p>Fedora fournit déjà NGINX 1.30.5, que nous prenons en charge</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
@@ -4321,8 +4337,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>Vous devriez maintenant pouvoir installer NGINX 1.30.4 :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.4
+<p>Vous devriez maintenant pouvoir installer NGINX 1.30.5 :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Désactiver l'assistant d'installation</p>
@@ -4350,6 +4366,25 @@ MY_SETTING_2=value2
 </code></pre></div>
 <p>Une fois installé, BunkerWeb est livré avec trois services <code>bunkerweb</code>, <code>bunkerweb-scheduler</code> et <code>bunkerweb-ui</code> que vous pouvez gérer à l'aide <code>systemctl</code>de .</p>
 <p>Si vous modifiez manuellement la configuration de BunkerWeb à l'aide <code>/etc/bunkerweb/variables.env</code> d'un redémarrage du <code>bunkerweb-scheduler</code> service, il suffira de générer et de recharger la configuration sans aucun temps d'arrêt. Mais selon le cas (par exemple, en changeant de port d'écoute), vous devrez peut-être redémarrer le <code>bunkerweb</code> service.</p>
+<p>Le point d'entrée du service <code>bunkerweb</code> lit également directement la variable suivante, en dehors du flux normal des paramètres :</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Description</th>
+<th>Valeurs acceptées</th>
+<th>Défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KEEP_CONFIG_ON_RESTART</code></td>
+<td>Conserve la configuration générée précédemment lors d'un redémarrage du service <code>bunkerweb</code> au lieu de générer la configuration de chargement. Lu depuis l'environnement ou <code>/etc/bunkerweb/variables.env</code>, jamais depuis la base de données.</td>
+<td><code>yes</code> ou <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="haute-disponibilite">Haute disponibilité</h3>
 <p>Le Scheduler peut être détaché de l'instance BunkerWeb pour fournir une haute disponibilité. Dans ce cas, le Scheduler sera installé sur un serveur séparé et pourra gérer plusieurs instances BunkerWeb.</p>
 <h4 id="manager">Manager</h4>
@@ -5004,6 +5039,37 @@ définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
 <li><strong>Annotation du pod</strong> : <code>bunkerweb.io/INSTANCE: "yes"</code></li>
 <li><strong>Variable d'environnement</strong> : <code>KUBERNETES_MODE: "yes"</code></li>
 </ol>
+<div class="admonition warning">
+<p class="admonition-title">Définissez <code>API_TOKEN</code> sur Kubernetes</p>
+<p>L'API interne sur le port 5000 est un plan de contrôle privilégié : elle expose <code>/ping</code>, <code>/reload</code>, <code>/confs</code> et <code>/stop</code>. Les IP des pods sont dynamiques, donc <code>API_WHITELIST_IP</code> doit couvrir le CIDR des pods du cluster et ne peut pas à elle seule écarter les autres charges de travail. Définissez <code>API_TOKEN</code> sur les pods BunkerWeb et sur chaque composant qui les appelle, y compris le Scheduler, l'interface web et le service API s'il est déployé, et conservez-le dans un Secret ; sans cela, tout pod capable d'atteindre le port 5000 peut piloter le plan de données.</p>
+<p>Créez le Secret dans chaque namespace qui exécute un pod BunkerWeb, en remplaçant <code>your-namespace</code> si nécessaire :</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>bunkerweb-api<span class="w"> </span>--namespace<span class="w"> </span>your-namespace<span class="w"> </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">32</span><span class="k">)</span><span class="s2">"</span>
+</code></pre></div>
+<p>Utilisez le même token dans les pods BunkerWeb et dans chaque appelant de l'API d'instance. L'omettre chez un appelant empêche ce composant d'utiliser l'API d'instance :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+<span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+<span class="nt">ui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+</code></pre></div>
+<p>Restreignez <code>API_WHITELIST_IP</code> au CIDR réel des pods de votre cluster plutôt qu'à toute la plage RFC1918 lorsque vous le connaissez.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -5041,6 +5107,11 @@ définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">              </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nn">---</span>
@@ -5128,6 +5199,11 @@ définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">              </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">---</span>
 <span class="w">  </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
@@ -5155,7 +5231,8 @@ définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
 <span class="p p-Indicator">|</span><span class="err"> ------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |</span>
 <span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_MODE`         | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |</span>
 <span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                             |</span>
-<span class="p p-Indicator">|</span><span class="err"> `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API                                 |</span>
+<span class="p p-Indicator">|</span><span class="err"> `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API. Restreignez-la au CIDR réel des pods du cluster et associez-la à `API_TOKEN` ; la liste blanche seule n'isole pas l'API des autres charges de travail |</span>
+<span class="nt">| `API_TOKEN`               | *(depuis un Secret)* | Requis sur Kubernetes </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">doit correspondre sur les pods BunkerWeb et sur chaque appelant de l'API d'instance, y compris le Scheduler, l'interface web et le service API s'il est déployé |</span>
 
 <span class="c1">##### Étape 3 : Création des Services</span>
 
@@ -5373,6 +5450,10 @@ définir uniquement sur <code>bunkerweb.extraEnvs</code> n’a aucun effet.</p>
 ✅ <strong>Vérifiez les logs</strong> du scheduler et des sidecars régulièrement</p>
 <h4 id="fichiers-yaml-complets">Fichiers YAML complets</h4>
 <p>Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">dossier misc/integrations</a> du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.</p>
+<div class="admonition warning">
+<p class="admonition-title">DNS_RESOLVERS doit désigner le Service DNS du cluster</p>
+<p>Donnez à <code>DNS_RESOLVERS</code> le Service DNS du cluster, dont la ClusterIP reste stable pendant toute la vie du Service, et jamais une IP de pod. nginx résout cette valeur une seule fois, au moment où il analyse sa configuration, et réutilise l'adresse obtenue jusqu'au rechargement suivant : ce qui pointe vers des pods ne fonctionne donc que jusqu'à leur déplacement, et un redémarrage progressif de CoreDNS laisse alors toutes les résolutions en échec. Sur un cluster standard, ce Service est <code>kube-dns.kube-system.svc.cluster.local</code>, y compris lorsque CoreDNS est l'implémentation qui se trouve derrière.</p>
+</div>
 <h3 id="ressources-dentree">Ressources d'entrée</h3>
 <p>Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et opérationnelle (reportez-vous aux journaux autoconf pour plus d'informations), vous pouvez procéder au déploiement d'applications Web au sein du cluster et déclarer votre ressource d'entrée.</p>
 <p>Il est important de noter que les paramètres BunkerWeb doivent être spécifiés en tant qu'annotations pour la ressource Ingress. Pour la partie domaine, veuillez utiliser la valeur spéciale <strong><code>bunkerweb.io</code></strong>. En incluant les annotations appropriées, vous pouvez configurer BunkerWeb en conséquence pour la ressource Ingress.</p>
@@ -5628,7 +5709,8 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">    </span><span class="c1"># Replace with your DNS resolver</span>
 <span class="w">    </span><span class="c1"># to get it: kubectl exec in a random pod then cat /etc/resolv.conf</span>
 <span class="w">    </span><span class="c1"># if you have an IP as nameserver then do a reverse DNS lookup: nslookup &lt;IP&gt;</span>
-<span class="w">    </span><span class="c1"># most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local</span>
+<span class="w">    </span><span class="c1"># la plupart du temps c'est kube-dns.kube-system.svc.cluster.local, le Service</span>
+<span class="w">    </span><span class="c1"># derrière lequel se trouve CoreDNS sur un cluster standard</span>
 <span class="w">    </span><span class="nt">dnsResolvers</span><span class="p">:</span><span class="w"> </span><span class="s">"kube-dns.kube-system.svc.cluster.local"</span>
 <span class="w">  </span><span class="nt">kubernetes</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller</span>

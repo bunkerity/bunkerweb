@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1019,6 +1019,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#protection-anti-rejeu-de-lauthentification-a-deux-facteurs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protection anti-rejeu de l'authentification à deux facteurs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#procedure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1233,6 +1244,8 @@
 
 <h1 id="mise-a-niveau">Mise à niveau</h1>
 <h2 id="mise-a-niveau-a-partir-de-la-version-16x">Mise à niveau à partir de la version 1.6.X</h2>
+<h3 id="protection-anti-rejeu-de-lauthentification-a-deux-facteurs">Protection anti-rejeu de l'authentification à deux facteurs</h3>
+<p>Mettez à niveau toutes les répliques de l'interface web en même temps : la protection anti-rejeu des codes à deux facteurs est désormais stockée dans la base de données partagée et ne couvre que les répliques qui exécutent cette version. Pendant la migration, un code d'authentification déjà affiché peut être refusé pendant 33 secondes au plus ; utilisez un code plus récent après ce délai. Conservez les clés de chiffrement TOTP existantes à disposition de chaque réplique de l'interface, comme décrit dans <a href="../troubleshooting/#web-ui">Dépannage de l'interface web</a>. Le compteur anti-rejeu ne remplace pas ces clés. Tant que la base de données est en lecture seule, les codes sont acceptés sans protection anti-rejeu jusqu'à ce qu'elle redevienne accessible en écriture.</p>
 <h3 id="procedure">Procédure</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
@@ -1276,7 +1289,7 @@ utilisez l'onglet <strong>Manuel</strong> dans ces cas.</p>
 <ol>
 <li>Détection<ul>
 <li>Relit le type d'installation (full, manager, worker, scheduler, ui, api) depuis le <code>.env</code>, vous n'avez donc jamais à redéclarer votre topologie.</li>
-<li>Récupère les secrets, les ports de l'hôte, la liste des workers et le nom de projet Compose depuis le <code>.env</code> : une mise à niveau ne peut donc ni changer le mot de passe de la base, ni invalider les secrets 2FA enregistrés, ni déplacer vos ports publiés.</li>
+<li>Récupère les secrets, les ports de l'hôte, la liste des workers et le nom de projet Compose depuis le <code>.env</code> : une mise à niveau ne peut donc ni changer le mot de passe de la base, ni invalider les secrets 2FA enregistrés, ni déplacer vos ports publiés. Lorsqu'une clé est répétée, la dernière affectation l'emporte ; un préfixe <code>export</code> facultatif est accepté et les valeurs explicites de la ligne de commande restent prioritaires. Les guillemets, l'interpolation, les échappements et toute autre syntaxe dotenv non prise en charge sont rejetés avant la réécriture du fichier ; utilisez la procédure manuelle pour ces fichiers.</li>
 <li>Lit la version réellement en cours d'exécution depuis le conteneur plutôt que de se fier au tag de l'image : un tag flottant (<code>latest</code>, <code>testing</code>) comme une mise à niveau précédente interrompue sont ainsi correctement détectés.</li>
 </ul>
 </li>
@@ -1295,13 +1308,14 @@ utilisez l'onglet <strong>Manuel</strong> dans ces cas.</p>
 </li>
 <li>Mise à jour des fichiers<ul>
 <li>Le <code>.env</code> est réécrit avec le nouveau tag d'image ; toute entrée que vous avez ajoutée à la main est conservée.</li>
-<li>Le <code>docker-compose.yml</code> n'est régénéré que s'il correspond encore à ce que le script avait produit : vos modifications locales survivent donc. Utilisez <code>--overwrite-compose</code> pour le régénérer malgré tout. Une copie <code>.bak.&lt;horodatage&gt;</code> est conservée dans les deux cas.</li>
+<li>Le <code>docker-compose.yml</code> n'est régénéré que s'il correspond encore à ce que le script avait produit : vos modifications locales survivent donc. Utilisez <code>--overwrite-compose</code> pour régénérer malgré tout un fichier ordinaire. Les fichiers Compose en lien symbolique sont toujours préservés. Une copie <code>.bak.&lt;horodatage&gt;</code> est conservée dans les deux cas.</li>
 </ul>
 </li>
 <li>Application et vérification<ul>
 <li><code>docker compose pull</code>, puis <code>docker compose up -d</code> : seuls les conteneurs dont l'image a changé sont recréés, l'interruption est donc plus courte qu'avec un cycle <code>down</code>/<code>up</code> complet.</li>
-<li>Si le téléchargement échoue, rien n'est recréé, le tag précédent est restauré dans le <code>.env</code> et la pile en cours reste intacte.</li>
-<li>Ensuite, le script relit la version depuis le conteneur et vérifie que le planificateur n'est pas entré dans une boucle de redémarrage, signe d'un échec de migration de la base de données.</li>
+<li>Si une étape échoue avant la recréation, le <code>.env</code> précédent et le <code>docker-compose.yml</code> sont tous deux restaurés. Une fois la recréation commencée, le script ne rétablit pas automatiquement les binaires, car le schéma de la base de données peut déjà avoir changé.</li>
+<li>Ensuite, le script vérifie les identifiants d'image attendus, l'état de santé des conteneurs et l'évolution des compteurs de redémarrage. Il exige deux observations saines espacées d'au moins dix secondes avant d'annoncer un succès ; les redémarrages passés d'un conteneur réutilisé ne font pas échouer à eux seuls une mise à niveau.</li>
+<li>Si les services ne sont pas confirmés sains dans le délai d'attente, la pile reste en marche, rien n'est annulé et le script se termine avec le statut 2 au lieu de signaler une mise à niveau échouée ; accordez plus de temps à un premier démarrage lent avec <code>--docker-wait-timeout N</code>.</li>
 </ul>
 </li>
 </ol>
@@ -1347,6 +1361,10 @@ utilisez l'onglet <strong>Manuel</strong> dans ces cas.</p>
 <tr>
 <td><code>--no-pull</code></td>
 <td>Ne pas télécharger les images avant de recréer la pile</td>
+</tr>
+<tr>
+<td><code>--docker-wait-timeout N</code></td>
+<td>Secondes d'attente avant que la pile soit saine (par défaut : 600)</td>
 </tr>
 <tr>
 <td><code>-y, --yes</code></td>

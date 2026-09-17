@@ -6,17 +6,19 @@ BunkerWeb comes with a plugin system making it possible to easily add new featur
 
 Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) repository for more information) :
 
-|      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
-| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-| **Authentik**  |  1.11   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                               |  [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)  |
-|   **ClamAV**   |  1.11   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Cloudflare** |  1.11   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.               | [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare) |
-|   **Coraza**   |  1.11   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                              |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **Discord**   |  1.11   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Matrix**   |  1.11   | Send security notifications to a Matrix room using the Matrix API.                                                               |     [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)     |
-|   **Slack**    |  1.11   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |  1.11   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |  1.11   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|      Name       | Version | Description                                                                                                                                      |                                                 Link                                                  |
+| :-------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|  **Authentik**  |  1.12   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.12   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.12   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.12   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.12   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.12   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **SentinelOne** |  1.12   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.12   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.12   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.12   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.12   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## How to use a plugin
 
@@ -24,7 +26,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.12.zip`
 
 ### Manual
 

@@ -1439,7 +1439,7 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 Unlike the other Docker images, the All-In-One keeps `access.log`, `error.log` and `modsec_audit.log` as real files under `/var/log/bunkerweb/`. The log stream reads them to prefix each line and to apply `HIDE_SERVICE_LOGS`, and both the bundled CrowdSec parser and the Web UI log viewer read them from disk.
 
 - The image bundles `logrotate` and runs it hourly under supervisor. A rotation failure is reported with the `[LOGROTATE]` prefix in the container logs.
-- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated once it passes 100 MB, seven compressed generations are kept, and rotation uses `copytruncate`.
+- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated daily, or earlier if it passes 100 MB, fourteen numbered generations are kept, and rotation uses `copytruncate`.
 - `copytruncate` empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.
 - To change the threshold or the number of generations, mount your own file over `/etc/logrotate.d/bunkerweb`. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at `/var/log/bunkerweb` only changes where the bytes live, it does not stop the container's own `logrotate` from still rotating them there.
 
@@ -1462,6 +1462,7 @@ docker run -d \
   bunkerity/bunkerweb-all-in-one:testing
 ```
 
+* The **embedded CrowdSec agent starts only** when the container has the unprefixed environment variable `USE_CROWDSEC=yes` and a local `CROWDSEC_API`. Enabling CrowdSec for a single service (`www.example.com_USE_CROWDSEC=yes`) does not start it.
 * When `USE_CROWDSEC=yes`, the entrypoint will:
 
     1. **Register** and **start** the local CrowdSec agent (via `cscli`).
@@ -1551,7 +1552,7 @@ Notes:
 
 #### Disable the Central API
 
-To run CrowdSec entirely locally, with no registration and no traffic to CrowdSec's servers, set `DISABLE_ONLINE_API` to `true`:
+To opt out of the Central API and Console registration, with no signal sent and no community blocklist pulled, set `DISABLE_ONLINE_API` to `true`. This does not stop hub updates: the collection and parser catalog is still fetched from the CrowdSec hub regardless of this setting.
 
 ```bash
 docker run -d \
@@ -1670,6 +1671,9 @@ services:
 
 !!! tip "Skipping labelled containers"
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. Default `no`.
 
 ### Using Docker secrets
 
@@ -1814,7 +1818,7 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
 | `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
-| `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes                                                                                                                                                                                                    | Integer seconds                                | `30`                                   |
+| `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes; an explicit value is never reduced, and only the value derived from the service count is capped at 120 seconds, so the effective timeout is whichever is higher. The connect timeout stays a fixed 5 seconds and the body send has its own separate timeout. | Integer seconds                                | `30`                                   |
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
@@ -2089,6 +2093,19 @@ You will be asked to make the following choices:
 
 !!! info "Manager and Scheduler installations"
     If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted for the IP addresses or hostnames of your BunkerWeb worker instances. This list is optional during install; if you leave it empty, the installer warns and you can add workers later.
+
+#### Local Web UI logs with Docker Compose
+
+For **Full Docker** installations (standard or `--autoconf`), the installer can collect logs locally for the Web UI. Fresh interactive installs default to **Yes**; for unattended installs, choose explicitly with `--syslog` or `--no-syslog`:
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+When enabled, the generated stack adds a `bw-syslog` collector on the internal `bw-universe` network, without publishing its syslog port to the host. Logs are stored in the persistent `bw-logs` volume and mounted into `bw-ui`; `syslog-ng.conf` is generated beside `docker-compose.yml`. BunkerWeb components continue logging to standard error as well, so `docker compose logs` remains available. The generated configuration uses fixed filenames and bounded rotation (approximately 100 MB per file with 7 rotations).
+
+The choice is stored as `BW_INSTALL_SYSLOG=yes|no` in `.env` and preserved across upgrades and reruns unless explicitly overridden. Disabling removes only the installer-managed collector after the updated stack is ready; the `bw-logs` history and configuration file are retained. Operator-edited Compose and syslog-ng files are preserved rather than silently replaced.
 
 #### Command-Line Options
 
@@ -2370,7 +2387,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -2385,11 +2402,11 @@ Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.4:
+    You should now be able to install NGINX 1.30.5:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.4-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2433,11 +2450,11 @@ Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.4:
+    You should now be able to install NGINX 1.30.5:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.4-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -2477,10 +2494,13 @@ Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.4 that we support
+    !!! warning "Fedora 43 ships NGINX 1.30.4"
+        Fedora 43 does not provide NGINX 1.30.5 yet, so the BunkerWeb package for Fedora 43 is built against NGINX 1.30.4 and expects `nginx-1.30.4`. Install that version on Fedora 43; the pin moves to 1.30.5 as soon as Fedora 43 publishes it. Fedora 44 already provides 1.30.5.
+
+    Fedora already provides NGINX 1.30.5 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.4
+    sudo dnf install -y --allowerasing nginx-1.30.5
     ```
 
     !!! example "Disable the setup wizard"
@@ -2527,10 +2547,10 @@ Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.4:
+    You should now be able to install NGINX 1.30.5:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.4
+    sudo dnf install --allowerasing nginx-1.30.5
     ```
 
     !!! example "Disable the setup wizard"
@@ -2568,6 +2588,12 @@ MY_SETTING_2=value2
 When installed, BunkerWeb comes with three services `bunkerweb`, `bunkerweb-scheduler` and `bunkerweb-ui` that you can manage using `systemctl`.
 
 If you manually edit the BunkerWeb configuration using `/etc/bunkerweb/variables.env` a restart of the `bunkerweb-scheduler` service will be enough to generate and reload the configuration without any downtime. But depending on the case (such as changing listening ports) you might need to restart the `bunkerweb` service.
+
+The `bunkerweb` service's entrypoint also reads the following variable directly, outside the normal settings flow:
+
+| Setting                  | Description                                                                                                                                                                                      | Accepted values | Default |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------- |
+| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`    | `no`    |
 
 ### High availability
 
@@ -3086,6 +3112,44 @@ controller:
    - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
    - **Environment variable**: `KUBERNETES_MODE: "yes"`
 
+!!! warning "Set `API_TOKEN` on Kubernetes"
+
+    The internal API on port 5000 is a privileged control plane: it serves `/ping`, `/reload`, `/confs` and `/stop`. Pod IPs are dynamic, so `API_WHITELIST_IP` has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set `API_TOKEN` on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.
+
+    Create the Secret in every namespace that runs a BunkerWeb pod, replacing `your-namespace` as needed:
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3124,6 +3188,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3225,6 +3294,11 @@ spec:
               value: "yes"  # Enable Kubernetes mode
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: MULTISITE
               value: "yes"
             - name: USE_REVERSE_PROXY
@@ -3275,6 +3349,11 @@ spec:
           env:
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
 ```
 
 ###### Important Environment Variables
@@ -3283,7 +3362,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
+| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
 
 ##### Step 3: Creating Services
 
@@ -3487,6 +3567,10 @@ To add a new application protected by BunkerWeb:
 #### Full YAML files
 
 Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
+
+!!! warning "DNS_RESOLVERS must name the cluster DNS Service"
+
+    Give `DNS_RESOLVERS` the cluster DNS Service, whose ClusterIP is stable for the life of the Service, and never a pod IP. nginx resolves that value once, when it parses its configuration, and reuses the address it got until the next reload, so anything pod-scoped keeps working only until those pods move: a rolling CoreDNS restart then leaves every lookup timing out. On a stock cluster the Service is `kube-dns.kube-system.svc.cluster.local`, including when CoreDNS is the implementation behind it.
 
 ### Ingress resources
 
@@ -3791,7 +3875,8 @@ settings:
     # Replace with your DNS resolver
     # to get it: kubectl exec in a random pod then cat /etc/resolv.conf
     # if you have an IP as nameserver then do a reverse DNS lookup: nslookup <IP>
-    # most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local
+    # most of the time it's kube-dns.kube-system.svc.cluster.local, which is the Service
+    # CoreDNS sits behind on a stock cluster
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller

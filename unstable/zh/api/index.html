@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1449,10 +1449,10 @@
 <ul>
 <li>粗粒度角色：GET/HEAD/OPTIONS 需要 <code>read</code>；写操作需要 <code>write</code>。</li>
 <li>当路由声明权限时启用精细 ACL；<code>admin(true)</code> 可跳过检查。</li>
-<li>资源类型：<code>instances</code>、<code>global_settings</code>、<code>services</code>、<code>configs</code>、<code>plugins</code>、<code>cache</code>、<code>bans</code>、<code>jobs</code>。</li>
+<li>资源类型：<code>instances</code>、<code>global_config</code>、<code>services</code>、<code>configs</code>、<code>plugins</code>、<code>cache</code>、<code>bans</code>、<code>jobs</code>。</li>
 <li>权限名称：</li>
 <li><code>instances_*</code>: <code>instances_read</code>, <code>instances_update</code>, <code>instances_delete</code>, <code>instances_create</code>, <code>instances_execute</code></li>
-<li><code>global_settings_*</code>: <code>global_settings_read</code>, <code>global_settings_update</code></li>
+<li><code>global_config</code>: <code>global_config_read</code>, <code>global_config_update</code></li>
 <li><code>services</code>: <code>service_read</code>, <code>service_create</code>, <code>service_update</code>, <code>service_delete</code>, <code>service_convert</code>, <code>service_export</code></li>
 <li><code>configs</code>: <code>configs_read</code>, <code>config_read</code>, <code>config_create</code>, <code>config_update</code>, <code>config_delete</code></li>
 <li><code>plugins</code>: <code>plugin_read</code>, <code>plugin_create</code>, <code>plugin_delete</code></li>
@@ -1470,7 +1470,7 @@
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
 <li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
 <li><code>plugins</code>: <code>plugin_create</code></li>
-<li><code>global_settings</code>: <code>global_settings_update</code></li>
+<li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
 <p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
 </div>

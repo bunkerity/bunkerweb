@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1626,6 +1626,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#investigation-and-decision-removal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Investigation and decision removal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#step-1-prepare-crowdsec-to-ingest-bunkerweb-logs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2302,6 +2313,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#maintenance-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance (PRO)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2517,6 +2539,17 @@
     <span class="md-ellipsis">
       
         Example Configurations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concurrent-audit-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrent audit logs
       
     </span>
   </a>
@@ -3063,6 +3096,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saml-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SAML (PRO)
+      
+    </span>
+  </a>
   
 </li>
       
@@ -4134,7 +4178,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>multisite</td>
 <td>No</td>
-<td><strong>Use Template:</strong> Config template to use that will override the default values of specific settings.</td>
+<td><strong>Use Template:</strong> Config template to use that overrides the default values of specific settings; a value set on the service overrides the template.</td>
 </tr>
 </tbody>
 </table>
@@ -4698,6 +4742,20 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><strong>Excluded User Agents:</strong> List of User-Agent regex patterns separated by spaces that should bypass the challenge.</td>
 </tr>
 <tr>
+<td><code>ANTIBOT_IGNORE_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_IGNORE_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+<tr>
 <td><code>ANTIBOT_IGNORE_COUNTRY</code></td>
 <td></td>
 <td>multisite</td>
@@ -4713,6 +4771,10 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Behavior of Country-Based Settings</p>
 <ul>
@@ -5786,7 +5848,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:6"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community Blacklists</label><label for="__tabbed_8_2">IP Address</label><label for="__tabbed_8_3">Reverse DNS</label><label for="__tabbed_8_4">ASN</label><label for="__tabbed_8_5">User Agent</label><label for="__tabbed_8_6">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:7"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><input id="__tabbed_8_7" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community Blacklists</label><label for="__tabbed_8_2">IP Address</label><label for="__tabbed_8_3">Reverse DNS</label><label for="__tabbed_8_4">ASN</label><label for="__tabbed_8_5">User Agent</label><label for="__tabbed_8_6">URI</label><label for="__tabbed_8_7">Header</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>What this does:</strong> Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.</p>
@@ -6067,6 +6129,54 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
+</div>
+<div class="tabbed-block">
+<p><strong>What this does:</strong> Blocks, or conversely exempts, requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value. An ignore rule wins over every blacklist match, cached verdicts included.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BLACKLIST_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request be blacklisted. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request bypass the blacklist. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_IGNORE_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.</p>
+</div>
 </div>
 </div>
 </div>
@@ -6841,8 +6951,26 @@ TrustedMonitor/\d+\.\d+
 <td>no</td>
 <td><strong>Ignored URI:</strong> List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string.</td>
 </tr>
+<tr>
+<td><code>COUNTRY_IGNORE_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request bypass the country check. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>COUNTRY_IGNORE_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.</p>
+</div>
 <h3 id="supported-country-groups">Supported Country Groups</h3>
 <p>You can use group tokens prefixed with <code>@</code>. They are expanded server-side into their member countries:</p>
 <ul>
@@ -6935,13 +7063,45 @@ TrustedMonitor/\d+\.\d+
 <li>Access to BunkerWeb access logs (<code>/var/log/bunkerweb/access.log</code> by default) so the CrowdSec agent can analyse requests.</li>
 <li><code>cscli</code> access on the CrowdSec host to register the BunkerWeb bouncer key.</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">All-in-one startup is explicit</p>
+<p>The embedded CrowdSec agent starts only when the all-in-one container has the unprefixed environment variable <code>USE_CROWDSEC=yes</code> and a local <code>CROWDSEC_API</code> (the default is <code>http://127.0.0.1:8000</code>). Enabling CrowdSec only for an individual service does not start the embedded agent. For an external Local API, start and configure that agent separately.</p>
+</div>
 <h3 id="integration-workflow">Integration workflow</h3>
 <ol>
 <li>Prepare the CrowdSec agent so it ingests BunkerWeb logs.</li>
 <li>Configure BunkerWeb to query the CrowdSec Local API.</li>
-<li>Validate the link with the <code>/crowdsec/ping</code> API or the admin UI CrowdSec card.</li>
+<li>
+<p>Validate the link with the <code>/crowdsec/ping</code> API or the admin UI CrowdSec card.</p>
+<p>This check makes an authenticated read request to each configured Local API. It reports failure for an unreachable API, rejected credentials, an invalid response, or a service whose bouncer could not load. For AppSec-only services, it confirms that the configuration loaded; it does not test AppSec connectivity or inspection.</p>
+</li>
 </ol>
 <p>The detailed instructions below follow this sequence.</p>
+<h3 id="investigation-and-decision-removal">Investigation and decision removal</h3>
+<p>Open <strong>Extra Pages → CrowdSec</strong> in the Web UI to inspect each configured connection, its affected service, Local API connectivity, and decision synchronization. The CrowdSec plugin status card and the <strong>Investigate IP</strong> actions in Reports and Bans open the same page. Investigation links prefill the address. Select the connection when several services or instances use CrowdSec.</p>
+<p>An investigation combines current CrowdSec decisions, available CrowdSec alerts, retained BunkerWeb reports, and local BunkerWeb bans. Current decisions and captured report evidence are displayed separately. New CrowdSec reports retain available decision IDs, origins, scenarios, targets, remediation, and expiry information after those decisions expire or are removed. AppSec rejections and denials caused by an AppSec failure policy have distinct sources. Historical evidence follows the existing report retention settings; old reports and evicted optional metadata may have no additional details. Alert inspection exposes bounded event metadata rather than raw request bodies, cookies, or authentication headers.</p>
+<p>Local reports and service-specific bans are restricted to the selected connection's service scope; global BunkerWeb bans are also included. If that scope can no longer be established from the instance's loaded configuration, investigation stops rather than returning other services' evidence. Retained reports remain accessible when the Local API is unavailable and the connection configuration is still loaded.</p>
+<p>The <strong>CrowdSec allowlists</strong> section displays native engine allowlists, their entries, comments, expiration dates, and whether they are managed locally or through the CrowdSec Console. IP investigations check the engine's current allowlist state and show its matching reason. Reading and checking allowlists requires the management credentials below. An unavailable check is shown separately from an IP that is not allowlisted. Allowlist exceptions apply to the whole CrowdSec engine; they do not remove local BunkerWeb bans. CrowdSec 1.8.0 exposes read/check operations through LAPI, while native allowlist writes require <code>cscli</code> on its host or separate Console management access.</p>
+<p>The existing <code>CROWDSEC_API_KEY</code> is a <strong>bouncer key</strong>: it supports reading decisions, but cannot remove them or inspect alerts. To enable those operations, register a dedicated machine on the relevant CrowdSec engine and configure both of these optional multisite settings:</p>
+<ul>
+<li><code>CROWDSEC_MANAGEMENT_LOGIN</code>: the dedicated machine's login.</li>
+<li><code>CROWDSEC_MANAGEMENT_PASSWORD</code>: that machine's password.</li>
+</ul>
+<p>Register the machine using CrowdSec's <a href="https://doc.crowdsec.net/docs/local_api/authentication/">Local API authentication procedure</a>. Store the credentials privately. Leaving either setting empty keeps management unavailable. The same configuration applies to bundled and external engines: requests are sent through the selected BunkerWeb instance, so a bundled Local API can continue listening on localhost. Management HTTPS requests verify the server certificate using BunkerWeb's TLS trust configuration, independently of the AppSec verification setting.</p>
+<p><strong>Remove CrowdSec decision</strong> is separate from BunkerWeb unban. Web UI removal requires an administrator with write access, configured management credentials, a writable UI database, and confirmation of the selected decision. Removing a range affects the entire range. Removing a decision on a shared engine also affects the other bouncers that consume it. The selected ID, scope, target, and remediation are checked again before removal; other decisions and local bans are preserved.</p>
+<p>A successful response confirms removal at the Local API and displays remaining matching decisions. Bouncers pick up the change through their configured stream refresh or live cache expiry; the UI reports propagation as pending rather than claiming every client is already allowed. Another decision, a local ban, a new detection, or an AppSec rule can still block a request. Removal outcomes are logged with the authenticated actor and selected connection/decision.</p>
+<p>The public API exposes the same operations:</p>
+<ul>
+<li><code>GET /crowdsec</code>: connections, synchronization state, and per-instance errors.</li>
+<li><code>GET /crowdsec/{connection_id}/decisions</code>: filter by <code>ip</code>, <code>origin</code>, or <code>scenario</code>; paginate with <code>offset</code> and <code>limit</code> (maximum 200).</li>
+<li><code>GET /crowdsec/{connection_id}/ips/{ip}</code>: investigation, including up to 200 decisions, 50 alerts, and 50 reports, with totals or limits and explicit unavailable sections.</li>
+<li><code>GET /crowdsec/{connection_id}/alerts/{alert_id}</code>: sanitized alert details.</li>
+<li><code>GET /crowdsec/{connection_id}/allowlists</code>: native allowlists, with <code>offset</code> and <code>limit</code> pagination; up to 200 entries per list, with the full entry count shown.</li>
+<li><code>GET /crowdsec/{connection_id}/allowlists/check?ip={ip}</code>: current native allowlist membership and matching reason.</li>
+<li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>: include the selected <code>scope</code>, <code>value</code>, and <code>decision_type</code> in the JSON body.</li>
+</ul>
+<p>Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent <code>crowdsec_read</code> or <code>crowdsec_delete</code> permission under the existing <code>bans</code> resource, either for a returned connection ID or <code>*</code>. An ordinary <code>ban_delete</code> grant does not authorize CrowdSec removal. No database migration is required.</p>
+<p>The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in <code>/var/run/bunkerweb</code>, held until the update is published and released automatically if the worker exits.</p>
 <h3 id="step-1-prepare-crowdsec-to-ingest-bunkerweb-logs">Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs</h3>
 <p>Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
@@ -7047,7 +7207,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.8</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.8.0</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># To persist the CrowdSec data</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># The logs of BunkerWeb for CrowdSec to parse</span>
@@ -7382,7 +7542,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>For a more detailed guide, see the <a href="../advanced/#custom-pages-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
-<p>Tweak BunkerWeb error/antibot/default pages with custom HTML.</p>
+<p>Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.</p>
 <table>
 <thead>
 <tr>
@@ -7394,6 +7554,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>CUSTOM_MAINTENANCE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).</td>
+</tr>
 <tr>
 <td><code>CUSTOM_ERROR_PAGE</code></td>
 <td></td>
@@ -7827,6 +7994,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).</td>
 </tr>
 <tr>
+<td><code>DNSBL_IGNORE_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request bypass the DNSBL checks. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>DNSBL_IGNORE_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+<tr>
 <td><code>DNSBL_IGNORE_IP_URLS</code></td>
 <td>``</td>
 <td>multisite</td>
@@ -7835,6 +8016,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Choosing DNSBL Servers</p>
 <p>Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:</p>
@@ -8049,7 +8234,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:5"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP Address</label><label for="__tabbed_20_2">Reverse DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">User Agent</label><label for="__tabbed_20_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP Address</label><label for="__tabbed_20_2">Reverse DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">User Agent</label><label for="__tabbed_20_5">URI</label><label for="__tabbed_20_6">Header</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>What this does:</strong> Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.</p>
@@ -8211,6 +8396,40 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
+</div>
+<div class="tabbed-block">
+<p><strong>What this does:</strong> Greylists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GREYLIST_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request be greylisted. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.</p>
+</div>
 </div>
 </div>
 </div>
@@ -9335,7 +9554,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Pass Through Let's Encrypt:</strong> Set to <code>yes</code> to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL.</td>
+<td><strong>Pass Through Let's Encrypt:</strong> Set to <code>yes</code> to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL. The ACME challenge path then skips every other check.</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -9482,10 +9701,11 @@ TrustedMonitor/\d+\.\d+
 <div class="admonition info">
 <p class="admonition-title">Information and behavior</p>
 <ul>
+<li>The local <code>/.well-known/acme-challenge/</code> handler is enabled only when <code>AUTO_LETS_ENCRYPT=yes</code>, <code>LETS_ENCRYPT_CHALLENGE=http</code>, and <code>LETS_ENCRYPT_PASSTHROUGH=no</code>. The HTTPS redirect exception and access exception also require the exact requested token to exist as a readable, nonempty file. Deleting the token restores normal checks immediately. Other services apply their normal routing and access rules to this path.</li>
 <li>The <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.</li>
 <li>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is provided, the provider's default propagation time is used.</li>
 <li>Full Let's Encrypt automation using the <code>http</code> challenge works in stream mode as long as you open the <code>80/tcp</code> port from the outside. Use the <code>LISTEN_STREAM_PORT_SSL</code> setting to choose your listening SSL/TLS port.</li>
-<li>If <code>LETS_ENCRYPT_PASSTHROUGH</code> is set to <code>yes</code>, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges</li>
+<li>If <code>LETS_ENCRYPT_PASSTHROUGH</code> is set to <code>yes</code>, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges. A <code>GET</code> or <code>HEAD</code> of a single token under <code>/.well-known/acme-challenge/</code> is then whitelisted and reaches the backend without any other check: antibot, blacklist, ModSecurity, request rate limiting, Basic Auth and the ban check are all skipped for that request (connection limits still apply, nginx enforces them), which is more than a locally served challenge skips. Deeper paths, other methods and non token-shaped names get the normal checks.</li>
 </ul>
 </div>
 <div class="admonition tip">
@@ -9507,6 +9727,7 @@ TrustedMonitor/\d+\.\d+
 <div class="admonition warning">
 <p class="admonition-title">Wildcard certificates</p>
 <p>Wildcard certificates are only available with DNS challenges. If you want to use them, you must set the <code>USE_LETS_ENCRYPT_WILDCARD</code> setting to <code>yes</code> and properly configure your DNS provider credentials.</p>
+<p>A wildcard covers only one label: <code>*.example.com</code> does not cover <code>a.b.example.com</code>. Groups that cannot cover every configured hostname are refused and the affected service is reported as misconfigured. Split those names into separate services. Valid groups continue to be processed; if none can be issued, the job fails. Successfully issued sibling certificates still request a reload.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Rate Limits</p>
@@ -10207,6 +10428,30 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<h2 id="maintenance-pro">Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>For a more detailed guide, see the <a href="../advanced/#maintenance-pro">advanced usages</a> documentation.</p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Serve a maintenance page instead of forwarding requests to the application.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_MAINTENANCE</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="metrics">Metrics</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Metrics plugin provides comprehensive monitoring and data collection capabilities for your BunkerWeb instance. This feature enables you to track various performance indicators, security events, and system statistics, giving you valuable insights into the behavior and health of your protected websites and services.</p>
@@ -10359,7 +10604,8 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition info">
 <p class="admonition-title">Redis Integration</p>
-<p>When BunkerWeb is configured to use <a href="#redis">Redis</a>, the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis <code>maxmemory</code> pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.</p>
+<p>When BunkerWeb is configured to use <a href="#redis">Redis</a>, the metrics plugin automatically synchronizes blocked request data to the Redis server. Under <code>maxmemory</code> pressure, rejected reports remain in the bounded worker buffer for retry. Buffer overflow, LRU eviction, or Redis data loss can still discard reports. Incomplete filter counts are rebuilt from the retained request list. Stored reports with malformed data (an unusable timestamp or identifier) are excluded from the reports table and from its totals.</p>
+<p>Counter totals are restored lazily from Redis before synchronization, including after local LRU eviction. Dormant Redis counters remain until <code>METRICS_REDIS_TTL</code> expires; <code>0</code> intentionally retains them indefinitely, so monitor Redis memory when using high-cardinality metrics.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Performance Considerations</p>
@@ -10712,6 +10958,7 @@ TrustedMonitor/\d+\.\d+
 <p>HTTP/3, the latest version of the Hypertext Transfer Protocol, uses QUIC over UDP instead of TCP, addressing issues like head-of-line blocking for faster, more reliable connections.</p>
 <p>NGINX introduced experimental support for HTTP/3 and QUIC starting with version 1.25.0. However, this feature is still experimental, and caution is advised for production use. For more details, see <a href="https://nginx.org/en/docs/quic.html">NGINX's official documentation</a>.</p>
 <p>Thorough testing is recommended before enabling HTTP/3 in production environments.</p>
+<p>HTTP/3 is silently disabled when <code>USE_PROXY_PROTOCOL</code> is set to <code>yes</code>. NGINX cannot read the PROXY protocol header on a QUIC listener, so no <code>quic</code> listener and no <code>Alt-Svc</code> header are generated even though <code>HTTP3</code> still reports <code>yes</code>, and <code>LIMIT_CONN_MAX_HTTP3</code> has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -11007,7 +11254,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code></td>
-<td><code>ABIJDEFHZ</code></td>
+<td><code>BCFH</code></td>
 <td>multisite</td>
 <td>no</td>
 <td><strong>Audit Log Parts:</strong> Which parts of requests/responses to include in audit logs.</td>
@@ -11017,7 +11264,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>/var/log/bunkerweb/modsec_audit.log</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Audit Log Path:</strong> Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support.</td>
+<td><strong>Audit Log Path:</strong> Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in <code>.log</code>. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only <code>modsec_audit.log</code> is symlinked into the container's log stream.</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
@@ -11172,7 +11419,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <span class="nt">MODSECURITY_CRS_VERSION</span><span class="p">:</span><span class="w"> </span><span class="s">"4"</span>
 <span class="nt">MODSECURITY_SEC_RULE_ENGINE</span><span class="p">:</span><span class="w"> </span><span class="s">"DetectionOnly"</span>
 <span class="nt">MODSECURITY_SEC_AUDIT_ENGINE</span><span class="p">:</span><span class="w"> </span><span class="s">"On"</span>
-<span class="nt">MODSECURITY_SEC_AUDIT_LOG_PARTS</span><span class="p">:</span><span class="w"> </span><span class="s">"ABIJDEFHZ"</span>
+<span class="nt">MODSECURITY_SEC_AUDIT_LOG_PARTS</span><span class="p">:</span><span class="w"> </span><span class="s">"BCEFHJK"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -11208,6 +11455,31 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <p class="admonition-title">Human-readable size values</p>
 <p>For size settings like <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code>, the suffixes <code>k</code>, <code>m</code>, and <code>g</code> (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
 </div>
+<h3 id="concurrent-audit-logs">Concurrent audit logs</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_TYPE</code></td>
+<td><code>Serial</code></td>
+<td>Writer: <code>Serial</code> (default) or <code>Concurrent</code>.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
+<td></td>
+<td>Empty by default; required absolute storage directory for <code>Concurrent</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Set <code>MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent</code> and <code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit</code>. Preprovision that directory on every BunkerWeb instance with write and search permissions for the nginx worker. Use a persistent mount for retained records. BunkerWeb rejects invalid candidates before applying them; it does not provision the directory. In global CRS mode (<code>USE_MODSECURITY_GLOBAL_CRS=yes</code>), configure both settings globally; service overrides do not select a separate writer.</p>
+<p><code>MODSECURITY_SEC_AUDIT_LOG</code> stays the regular, lockable <code>.log</code> file: it contains complete records with <code>Serial</code>, and an index pointing to per-transaction files with <code>Concurrent</code>. The existing index path and its rotation rules are unchanged. The operator must manage disk capacity, access permissions and recursive retention of the dated subdirectories. Rotating the index does not remove transaction files. Check compatibility of log readers that expect Serial records before switching.</p>
+<p>Concurrent changes how records are stored; it does not sample requests or reduce the audit data selected by <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code>. Size storage for your request rate, selected parts and retention period; measure record sizes with representative traffic instead of assuming a fixed cost per blocked request.</p>
 <h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
@@ -11275,6 +11547,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>Forward results (optional):</strong> Keep <code>MTLS_FORWARD_CLIENT_HEADERS</code> at <code>yes</code> when upstream services should inspect the presented certificate.</li>
 <li><strong>Maintain revocation data:</strong> If you publish a CRL, set <code>MTLS_CRL</code> (or <code>MTLS_CRL_DATA</code>) so BunkerWeb can deny revoked certificates.</li>
 </ol>
+<p>The Scheduler validates the whole candidate CA bundle and every CRL before replacing either cached file. A CRL is refused when it cannot be parsed, or when its issuer is part of the bundle and the signature does not verify against it; a CRL signed by a CA that is absent from the bundle is published with a warning, because NGINX builds the chain from the intermediates the client presents. An unreadable, malformed or mismatched replacement keeps the previous CA/CRL pair and logs an error. Rotate the CA and its CRL together, and correct invalid sources promptly, especially before a CRL expires. Clearing both <code>MTLS_CRL</code> and <code>MTLS_CRL_DATA</code> deliberately removes revocation checking. Removing the CA configuration, disabling mTLS, or deleting the service removes its cached material; while <code>USE_MTLS</code> stays <code>yes</code> with any mode other than <code>optional_no_ca</code>, <code>ssl_verify_client</code> then applies against a built-in placeholder CA, so every client gets a 400 with <code>on</code> and every client presenting a certificate gets a 400 with <code>optional</code>, until a CA is configured again. Effective removals request a reload.</p>
 <h3 id="configuration-settings_22">Configuration Settings</h3>
 <table>
 <thead>
@@ -11372,7 +11645,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Provide the CA bundle for strict modes</p>
-<p>When <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use <code>optional_no_ca</code> only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent <code>/var/cache/bunkerweb</code>, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.</p>
+<p>When <code>MTLS_VERIFY_CLIENT</code> is <code>on</code> or <code>optional</code>, the Scheduler must be able to validate and cache a client CA bundle. Until it has validated and distributed one, every instance falls back to a placeholder CA that no client can chain to. With <code>on</code> that means every client is rejected, where the service previously ran with client verification switched off entirely. With <code>optional</code> a client that presents no certificate is still allowed through, which is what that mode means; enforcement for those requests comes from <code>MTLS_URL</code> when it is set, and nothing enforces them when it is left empty. A client that does present a certificate is rejected, because nothing can be validated against the placeholder. Use <code>optional_no_ca</code> only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent <code>/var/cache/bunkerweb</code>, that state lasts until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Trusted certificate vs. verification</p>
@@ -12075,7 +12348,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Standard:</strong> Full access to Pro features without technical support.</li>
 <li><strong>BunkerWeb PRO Enterprise:</strong> Full access to Pro features with dedicated technical support.</li>
 </ul>
-<p>You can explore Pro features with a free 1-month trial by using the promo code <code>freetrial</code>. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> to activate your trial and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.</p>
+<p>You can explore Pro features with a free 30-day trial. Start it from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
@@ -12491,7 +12764,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 <tr>
 <td><code>REDIS_SSL_VERIFY</code></td>
-<td><code>yes</code></td>
+<td><code>no</code></td>
 <td>global</td>
 <td>no</td>
 <td><strong>Redis/Valkey SSL Verify:</strong> Set to <code>yes</code> to verify the Redis/Valkey server's SSL certificate.</td>
@@ -12554,10 +12827,10 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 <tr>
 <td><code>REDIS_KEEPALIVE_POOL</code></td>
-<td><code>10</code></td>
+<td><code>64</code></td>
 <td>global</td>
 <td>no</td>
-<td><strong>Keepalive Pool:</strong> Maximum number of Redis/Valkey connections kept in the pool.</td>
+<td><strong>Keepalive Pool:</strong> Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker.</td>
 </tr>
 </tbody>
 </table>
@@ -12644,6 +12917,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <li><strong>Monitor memory usage:</strong> Configure Redis with appropriate <code>maxmemory</code> settings to prevent out-of-memory errors</li>
 <li><strong>Set an eviction policy:</strong> Use <code>maxmemory-policy</code> (e.g., <code>volatile-lru</code> for general use or <code>allkeys-lru</code> for cache-heavy workloads) appropriate for your use case</li>
 <li><strong>All-in-one defaults:</strong> The AIO Docker image ships Redis with <code>maxmemory=256mb</code> and <code>maxmemory-policy=volatile-lru</code>; override via the <code>REDIS_MAXMEMORY</code> and <code>REDIS_MAXMEMORY_POLICY</code> environment variables. With <code>volatile-lru</code>, transient counters (rate-limit, bad-behavior) are evicted before keys with TTLs that matter for sessions and timed bans, and keys without an expiry (permanent bans) are immune. The same policy is recommended for external Redis or Valkey servers used by BunkerWeb.</li>
+<li><strong>Keep the security reports out of the eviction pool:</strong> with the default <code>METRICS_REDIS_TTL</code> the blocked request reports carry an expiry, and that expiry is what makes them eligible for eviction under <code>volatile-lru</code> at all. The list is a single key holding the whole retained window, so one eviction takes all of it rather than the oldest reports. Set <code>METRICS_REDIS_TTL=0</code> on every instance sharing the server, otherwise an instance still on the default re-arms the expiry within seconds. It changes nothing under <code>allkeys-lru</code>, where no key is immune, and it does not lower memory pressure, it moves it onto the keys that still expire, which include timed bans, sessions and cached verdicts. Size <code>maxmemory</code> for the reports you retain instead of relying on eviction: <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code> sets that ceiling.</li>
 <li><strong>Avoid large keys:</strong> Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation</li>
 </ul>
 <h4 id="data-persistence">Data Persistence</h4>
@@ -12654,7 +12928,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 </ul>
 <h4 id="performance-optimization">Performance Optimization</h4>
 <ul>
-<li><strong>Connection pooling:</strong> BunkerWeb already implements this, but ensure other applications follow this practice</li>
+<li><strong>Connection pooling:</strong> BunkerWeb already implements this, but ensure other applications follow this practice. <code>REDIS_KEEPALIVE_POOL</code> is per NGINX worker, so steady-state connections are roughly <code>WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances</code>: size the Redis/Valkey <code>maxclients</code> limit above that, because a refused connection means that request is not checked against the bans held only in Redis</li>
 <li><strong>Pipelining:</strong> When possible, use pipelining for bulk operations to reduce network overhead</li>
 <li><strong>Avoid expensive operations:</strong> Be cautious with commands like KEYS in production environments</li>
 <li><strong>Benchmark your workload:</strong> Use redis-benchmark to test your specific workload patterns</li>
@@ -12838,7 +13112,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Location URL:</strong> Path that will be proxied to the backend server. A value starting with <code>^</code> or ending with <code>$</code> is treated as a regex location.</td>
+<td><strong>Location URL:</strong> Path that will be proxied to the backend server. A value starting with <code>^</code> or ending with <code>$</code> is treated as a regex location. Optionally prefix with <code>~</code>, <code>~*</code>, <code>=</code> or <code>^~</code> followed by one space to set the nginx location modifier explicitly; no spaces, <code>;</code>, <code>{</code> or <code>}</code> are allowed elsewhere in the value.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -12884,6 +13158,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 </tr>
 </tbody>
 </table>
+<p>BunkerWeb quotes the path or regex operand when generating the NGINX location, preserving literal quotes, <code>#</code>, and regex backslashes. Supply the value without adding NGINX quoting yourself. Existing restrictions on whitespace, <code>;</code>, <code>{</code>, and <code>}</code> still apply.</p>
 <div class="admonition tip">
 <p class="admonition-title">Best Practices</p>
 <ul>
@@ -13267,6 +13542,13 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td>yes</td>
 <td><strong>ModSecurity (per location):</strong> Set to <code>no</code> to emit <code>modsecurity off;</code> in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below).</td>
 </tr>
+<tr>
+<td><code>REVERSE_PROXY_MAX_CLIENT_SIZE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Maximum Body Size (per location):</strong> Maximum body size for this location (<code>0</code> for infinite). When empty, the service <code>MAX_CLIENT_SIZE</code> applies.</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition warning">
@@ -13277,6 +13559,10 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <p class="admonition-title">Safety recommendation for large uploads</p>
 <p>ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If, <strong>and only if</strong>, a reverse-proxy URL is used <em>exclusively</em> for file uploads (e.g. a dedicated <code>/upload</code> endpoint), set <code>REVERSE_PROXY_MODSECURITY_N: "no"</code> on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.</p>
 <p>To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> or <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>; they inspect the uploaded file itself instead of the raw request body.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Per-URL body size</p>
+<p><code>REVERSE_PROXY_MAX_CLIENT_SIZE_N</code> caps the body for one URL only, so a dedicated upload endpoint can accept large files while the rest of the service keeps the tighter <code>MAX_CLIENT_SIZE</code>. It also sets the ModSecurity request body limit for that location, overriding the service value and an explicit <code>MODSECURITY_SEC_REQUEST_BODY_LIMIT</code> alike, so the upload is not rejected by the WAF while every other URL keeps its own limit. Two limits stay where they are: JSON, XML and form-encoded bodies are still capped by <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code> (<code>131072</code> by default, <code>400</code> above it), and <code>0</code> disables the ModSecurity limit for that location, which lets it buffer a body of any size. ModSecurity reads the whole body before the request is proxied, so set the value to what the endpoint really needs.</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -13732,6 +14018,254 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 </code></pre></div>
 <hr />
 <p>For more information, see the <a href="https://www.robotstxt.org/robotstxt.html">robots.txt documentation</a>.</p>
+<h2 id="saml-pro">SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>For a more detailed guide, see the <a href="../advanced/#saml-pro">advanced usages</a> documentation.</p>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>SAML 2.0 authentication, identity forwarding and attribute-based access control.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_SAML</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable SAML authentication</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENTITY_ID</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Service provider entity ID</td>
+</tr>
+<tr>
+<td><code>SAML_SP_BASE_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Public HTTPS origin of this service</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_ENTITY_ID</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Identity provider entity ID</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_SSO_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Identity provider HTTPS SSO URL</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_SLO_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Identity provider HTTPS logout URL (empty uses SSO URL)</td>
+</tr>
+<tr>
+<td><code>SAML_SP_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Service provider certificate (PEM)</td>
+</tr>
+<tr>
+<td><code>SAML_SP_PRIVATE_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Service provider private key (PEM, unencrypted)</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Trusted identity provider signing certificate (PEM)</td>
+</tr>
+<tr>
+<td><code>SAML_ACS_PATH</code></td>
+<td><code>/saml/acs</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Assertion consumer path</td>
+</tr>
+<tr>
+<td><code>SAML_LOGOUT_PATH</code></td>
+<td><code>/saml/logout</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Local logout path</td>
+</tr>
+<tr>
+<td><code>SAML_SLS_PATH</code></td>
+<td><code>/saml/sls</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Single logout callback path</td>
+</tr>
+<tr>
+<td><code>SAML_METADATA_PATH</code></td>
+<td><code>/saml/metadata</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SP metadata path</td>
+</tr>
+<tr>
+<td><code>SAML_LOGOUT_REDIRECT</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Local path after logout</td>
+</tr>
+<tr>
+<td><code>SAML_CLOCK_SKEW</code></td>
+<td><code>60</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Allowed clock skew (seconds)</td>
+</tr>
+<tr>
+<td><code>SAML_SESSION_IDLE_TIMEOUT</code></td>
+<td><code>900</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Session idle timeout (seconds)</td>
+</tr>
+<tr>
+<td><code>SAML_SESSION_ABSOLUTE_TIMEOUT</code></td>
+<td><code>3600</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Absolute session timeout (seconds)</td>
+</tr>
+<tr>
+<td><code>SAML_USER_HEADER</code></td>
+<td><code>X-User</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>User identity header (empty disables)</td>
+</tr>
+<tr>
+<td><code>SAML_USER_ATTRIBUTE</code></td>
+<td><code>NameID</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SAML attribute for user (NameID uses the subject identifier)</td>
+</tr>
+<tr>
+<td><code>SAML_EMAIL_HEADER</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Email identity header (empty disables)</td>
+</tr>
+<tr>
+<td><code>SAML_EMAIL_ATTRIBUTE</code></td>
+<td><code>email</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SAML attribute for email (NameID uses the subject identifier)</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_HEADER</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Groups identity header (empty disables)</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_ATTRIBUTE</code></td>
+<td><code>groups</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SAML attribute for groups (NameID uses the subject identifier)</td>
+</tr>
+<tr>
+<td><code>SAML_NAME_HEADER</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Name identity header (empty disables)</td>
+</tr>
+<tr>
+<td><code>SAML_NAME_ATTRIBUTE</code></td>
+<td><code>name</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>SAML attribute for name (NameID uses the subject identifier)</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Separator for multivalued identity attributes</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_RULE_COUNT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page.</td>
+</tr>
+<tr>
+<td><code>SAML_USE_ACL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable attribute-based access control</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_MATCH_MODE</code></td>
+<td><code>all</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>How access-control rules are combined</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_DENIED_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Redirect after ACL denial (empty returns the deny status)</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_ATTRIBUTE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Attribute name to check (NameID uses the subject identifier)</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Required attribute value</td>
+</tr>
+<tr>
+<td><code>SAML_REPLAY_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Shared-memory capacity for single-instance replay protection</td>
+</tr>
+</tbody>
+</table>
 <h2 id="securitytxt">Security.txt</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The Security.txt plugin implements the <a href="https://securitytxt.org/">Security.txt</a> standard (<a href="https://www.rfc-editor.org/rfc/rfc9116">RFC 9116</a>) for your website. This feature helps security researchers access your security policies and provides a standardized way for them to report security vulnerabilities they discover in your systems.</p>
@@ -14574,7 +15108,7 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="46:5"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP Address</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User Agent</label><label for="__tabbed_46_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:6"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><input id="__tabbed_46_6" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP Address</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User Agent</label><label for="__tabbed_46_5">URI</label><label for="__tabbed_46_6">Header</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>What this does:</strong> Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.</p>
@@ -14802,6 +15336,40 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 </tr>
 </tbody>
 </table>
+</div>
+<div class="tabbed-block">
+<p><strong>What this does:</strong> Whitelists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value. Useful for a trusted probe or gateway that can send a shared secret.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WHITELIST_HEADER_NAME</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header name:</strong> Name of a request header that makes the request be whitelisted. Numbered pairs: <code>_NAME_1</code> goes with <code>_VALUE_1</code>.</td>
+</tr>
+<tr>
+<td><code>WHITELIST_HEADER_VALUE</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Header value:</strong> PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">A header rule is a shared secret</p>
+<p>Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with <code>^</code> and <code>$</code> (the match is not anchored by default, so <code>abc</code> also matches <code>xabcx</code>), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there. It also does not lift an existing ban: a banned IP is rejected before the whitelist runs.</p>
+</div>
 </div>
 </div>
 </div>

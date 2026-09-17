@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1019,6 +1019,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#wiederholungsschutz-der-zwei-faktor-authentifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wiederholungsschutz der Zwei-Faktor-Authentifizierung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#vorgehensweise" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1233,6 +1244,8 @@
 
 <h1 id="aufrusten">Aufrüsten</h1>
 <h2 id="upgrade-von-16x">Upgrade von 1.6.X</h2>
+<h3 id="wiederholungsschutz-der-zwei-faktor-authentifizierung">Wiederholungsschutz der Zwei-Faktor-Authentifizierung</h3>
+<p>Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für Zwei-Faktor-Codes wird jetzt in der gemeinsamen Datenbank gespeichert und gilt nur für Replikate, die diese Version ausführen. Während der Migration kann ein bereits angezeigter Authentifizierungscode bis zu 33 Sekunden lang abgelehnt werden; verwenden Sie danach einen neueren Code. Halten Sie die vorhandenen TOTP-Verschlüsselungsschlüssel für jedes UI-Replikat verfügbar, wie unter <a href="../troubleshooting/#web-ui">Fehlerbehebung der Web-UI</a> beschrieben. Der Wiederholungszähler ersetzt diese Schlüssel nicht. Solange die Datenbank schreibgeschützt ist, werden Codes ohne Wiederholungsschutz akzeptiert, bis sie wieder beschreibbar ist.</p>
 <h3 id="vorgehensweise">Vorgehensweise</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
@@ -1277,7 +1290,7 @@ verwenden Sie dafür den Reiter <strong>Manuell</strong>.</p>
 <ol>
 <li>Erkennung<ul>
 <li>Liest den Installationstyp (full, manager, worker, scheduler, ui, api) aus der <code>.env</code> zurück, sodass Sie Ihre Topologie nie erneut angeben müssen.</li>
-<li>Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der <code>.env</code>. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben.</li>
+<li>Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der <code>.env</code>. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben. Wird ein Schlüssel mehrfach gesetzt, gilt die letzte Zuweisung; ein optionales <code>export</code> wird akzeptiert, und explizite Kommandozeilenwerte haben weiterhin Vorrang. Anführungszeichen, Variablenersetzung, Escapes und andere nicht unterstützte dotenv-Syntax werden abgewiesen, bevor die Datei neu geschrieben wird; verwenden Sie für solche Dateien den manuellen Upgrade-Weg.</li>
 <li>Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (<code>latest</code>, <code>testing</code>) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.</li>
 </ul>
 </li>
@@ -1296,13 +1309,14 @@ verwenden Sie dafür den Reiter <strong>Manuell</strong>.</p>
 </li>
 <li>Dateiaktualisierung<ul>
 <li>Die <code>.env</code> wird mit dem neuen Image-Tag neu geschrieben; von Hand ergänzte Einträge werden übernommen.</li>
-<li>Die <code>docker-compose.yml</code> wird nur neu erzeugt, wenn sie noch dem entspricht, was das Skript geschrieben hat — lokale Änderungen bleiben also erhalten. Mit <code>--overwrite-compose</code> wird sie trotzdem neu erzeugt. Eine Kopie <code>.bak.&lt;Zeitstempel&gt;</code> wird in beiden Fällen angelegt.</li>
+<li>Die <code>docker-compose.yml</code> wird nur neu erzeugt, wenn sie noch dem entspricht, was das Skript geschrieben hat — lokale Änderungen bleiben also erhalten. Mit <code>--overwrite-compose</code> wird eine reguläre Datei trotzdem neu erzeugt. Symbolisch verlinkte Compose-Dateien bleiben immer erhalten. Eine Kopie <code>.bak.&lt;Zeitstempel&gt;</code> wird in beiden Fällen angelegt.</li>
 </ul>
 </li>
 <li>Anwenden und Überprüfen<ul>
 <li><code>docker compose pull</code>, danach <code>docker compose up -d</code> — nur Container mit geändertem Image werden neu erstellt, die Ausfallzeit ist also kürzer als bei einem vollständigen <code>down</code>/<code>up</code>.</li>
-<li>Schlägt der Pull fehl, wird nichts neu erstellt, der vorherige Tag in der <code>.env</code> wiederhergestellt und der laufende Stack bleibt unberührt.</li>
-<li>Anschließend liest das Skript die Version erneut aus dem Container und prüft, ob der Scheduler in eine Neustartschleife geraten ist — so zeigt sich eine fehlgeschlagene Datenbankmigration.</li>
+<li>Schlägt ein Schritt vor der Neuerstellung fehl, werden sowohl die vorherige <code>.env</code> als auch die <code>docker-compose.yml</code> wiederhergestellt. Sobald die Neuerstellung begonnen hat, setzt das Skript die Binaries nicht automatisch zurück, weil sich das Datenbankschema bereits geändert haben kann.</li>
+<li>Anschließend prüft das Skript die erwarteten Image-IDs, den Gesundheitszustand der Container und Änderungen der Neustartzähler. Es verlangt zwei gesunde Beobachtungen im Abstand von mindestens zehn Sekunden, bevor es Erfolg meldet; frühere Neustarts eines weiterverwendeten Containers lassen ein Upgrade für sich allein nicht fehlschlagen.</li>
+<li>Werden die Dienste innerhalb der Wartezeit nicht als gesund bestätigt, läuft der Stack weiter, nichts wird zurückgesetzt, und das Skript beendet sich mit Status 2, statt ein fehlgeschlagenes Upgrade zu melden; mit <code>--docker-wait-timeout N</code> geben Sie einem langsamen ersten Start mehr Zeit.</li>
 </ul>
 </li>
 </ol>
@@ -1348,6 +1362,10 @@ verwenden Sie dafür den Reiter <strong>Manuell</strong>.</p>
 <tr>
 <td><code>--no-pull</code></td>
 <td>Images vor dem Neuerstellen nicht herunterladen</td>
+</tr>
+<tr>
+<td><code>--docker-wait-timeout N</code></td>
+<td>Wartezeit in Sekunden, bis der Stack gesund ist (Standard: 600)</td>
 </tr>
 <tr>
 <td><code>-y, --yes</code></td>

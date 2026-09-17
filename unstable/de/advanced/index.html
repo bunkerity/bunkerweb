@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1791,6 +1791,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#maintenance-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance (PRO)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-modus-aktivieren-und-anwenden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance-Modus aktivieren und anwenden
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verhalten-und-umfang-der-anfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verhalten und Umfang der Anfragen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-seite-anpassen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance-Seite anpassen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-fehlerbehebung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance-Fehlerbehebung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#openid-connect-pro" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1895,6 +1956,111 @@
     <span class="md-ellipsis">
       
         Fehlerbehebung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saml-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SAML (PRO)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SAML (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#voraussetzungen-und-vertrauensmaterial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voraussetzungen und Vertrauensmaterial
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saml-in-der-ui-konfigurieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SAML in der UI konfigurieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#browser-request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser-Request-Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloak-registrierung-2652" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keycloak-Registrierung 26.5.2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#einstellungen-erklart_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Einstellungen (erklärt)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abmeldung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abmeldung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grenzen-und-fehlerbehebung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Grenzen und Fehlerbehebung
       
     </span>
   </a>
@@ -4852,7 +5018,7 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
 <h3 id="log-file-retention">Aufbewahrung der Protokolldateien</h3>
-<p>Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: <code>logrotate</code>, mit der Richtlinie, die BunkerWeb unter <code>/etc/logrotate.d/bunkerweb</code> installiert. Sie rotiert jede Datei, die auf <code>/var/log/bunkerweb/*.log</code> passt, sobald diese 100 MB überschreitet, behält sieben komprimierte Generationen und verwendet <code>copytruncate</code>.</p>
+<p>Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: <code>logrotate</code>, mit der Richtlinie, die BunkerWeb unter <code>/etc/logrotate.d/bunkerweb</code> installiert. Sie rotiert jede Datei, die auf <code>/var/log/bunkerweb/*.log</code> passt, täglich oder früher, sobald die Datei 100 MB überschreitet, behält vierzehn nummerierte Generationen (<code>modsec_audit.log.1</code>, <code>.2.gz</code> und so weiter) und verwendet <code>copytruncate</code>.</p>
 <ul>
 <li><strong>Linux</strong>: Die Pakete hängen von <code>logrotate</code> ab, und das System führt es über seinen eigenen Timer aus. Es ist nichts weiter zu tun.</li>
 <li><strong>All-in-one</strong>: Das Image liefert <code>logrotate</code> mit und führt es stündlich unter supervisor aus, mit derselben Richtliniendatei.</li>
@@ -4860,12 +5026,14 @@ LOG_LEVEL_1=error
 </ul>
 <p><code>copytruncate</code> ist das, was eine einzige Richtlinie für alle passend macht. Es kopiert die Datei beiseite und leert das Original an Ort und Stelle, statt es umzubenennen, sodass ein Schreibprozess, der sein Protokoll nie erneut öffnet, weiterhin in die richtige Datei schreibt. ModSecurity ist genau so ein Schreibprozess: Es öffnet das Audit-Log einmal beim Laden der Konfiguration und hält den Deskriptor. Eine Rotation per Umbenennung würde dazu führen, dass es für immer in das Archiv schreibt, während die aktive Datei leer bleibt.</p>
 <p>Bearbeiten Sie <code>/etc/logrotate.d/bunkerweb</code>, um den Schwellenwert oder die Anzahl der Generationen zu ändern, oder um ein <code>maxage</code> hinzuzufügen. Mounten Sie beim All-in-one Ihre eigene Datei über diesen Pfad.</p>
-<p>Der Speicherort des Audit-Logs wird über <code>MODSECURITY_SEC_AUDIT_LOG</code> festgelegt (multisite, Standard <code>/var/log/bunkerweb/modsec_audit.log</code>); siehe die <a href="../features/#modsecurity">ModSecurity-Einstellungen</a>. Wird er außerhalb von <code>/var/log/bunkerweb</code> gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst.</p>
+<p>Zwei Direktiven sind dort tragend. <code>maxsize</code> hält <code>daily</code> am Leben: Das ähnliche <code>size</code> schließt die Intervall-Direktiven aus und würde nur nach Größe rotieren. Und <code>dateext</code> würde jedes Archiv nach dem Datum benennen, sodass eine zweite Rotation am selben Datum mit <code>destination ... already exists, skipping rotation</code> fehlschlägt und die aktive Datei bis zum Datumswechsel unrotiert bleibt.</p>
+<p>Der Speicherort des Audit-Logs wird über <code>MODSECURITY_SEC_AUDIT_LOG</code> festgelegt (multisite, Standard <code>/var/log/bunkerweb/modsec_audit.log</code>); siehe die <a href="../features/#modsecurity">ModSecurity-Einstellungen</a>. Wird er außerhalb von <code>/var/log/bunkerweb</code> gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst. Die Einstellung akzeptiert nur einen Pfad unterhalb von <code>/var/log/bunkerweb</code> und kann daher nicht auf <code>/data</code> zeigen: Um den Audit-Verlauf über eine Neuerstellung des Containers hinweg zu behalten, mounten Sie ein Volume auf <code>/var/log/bunkerweb</code> selbst, was den gesamten Protokollsatz erhält und nicht nur das Audit-Log.</p>
+<p>Mit dem Standardwert <code>BCFH</code> von <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code> legt Teil <code>C</code> den Anfragetext im Audit-Log ab. Behandeln Sie die Datei als sensibel, bevor Sie sie irgendwohin kopieren.</p>
 <h3 id="integrations-defaults-beispiele">Integrations-Defaults &amp; Beispiele</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p><strong>Standardverhalten</strong>: <code>LOG_TYPES="file"</code>. Protokolle werden unter <code>/var/log/bunkerweb/*.log</code> geschrieben. Die Rotation übernimmt die installierte System-<code>logrotate</code>-Konfiguration unter <code>/etc/logrotate.d/bunkerweb</code> (täglich, 7 Tage Aufbewahrung, Komprimierung per <code>copytruncate</code>).</p>
+<p><strong>Standardverhalten</strong>: <code>LOG_TYPES="file"</code>. Protokolle werden unter <code>/var/log/bunkerweb/*.log</code> geschrieben. Die Rotation übernimmt die installierte System-<code>logrotate</code>-Konfiguration unter <code>/etc/logrotate.d/bunkerweb</code> (täglich oder ab 100 MB, vierzehn Generationen, Komprimierung per <code>copytruncate</code>).</p>
 <p><strong>Beispiel</strong>: Lokale Dateien behalten (für die Web-UI) und zusätzlich an den System-Syslog spiegeln.</p>
 <div class="highlight"><pre><span></span><code>  # Service-Protokolle (in /etc/bunkerweb/variables.env oder in spezifischen Dienst-Umgebungsdateien setzen)
   LOG_TYPES="file syslog"
@@ -6354,6 +6522,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </ul>
 <h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>Das Custom Pages Plugin ermöglicht es Ihnen, die eingebauten Seiten von BunkerWeb (Fehlerseiten, Standard-Server-Seite und Antibot-Challenge-Seiten) durch Ihre eigenen benutzerdefinierten HTML- oder Lua-Vorlagen zu ersetzen. Dies ermöglicht es Ihnen, ein einheitliches Branding auf allen benutzerseitigen Seiten von BunkerWeb beizubehalten.</p>
+<p>Informationen zum Verhalten und zur Anpassung von Maintenance finden Sie im <a href="./#maintenance-pro">erweiterten Maintenance-Leitfaden</a>.</p>
 <h3 id="funktionen_5">Funktionen</h3>
 <ul>
 <li><strong>Benutzerdefinierte Fehlerseiten pro Service</strong> und <strong>Antibot-Challenge-Seiten</strong> (Captcha, JavaScript-Prüfung, reCAPTCHA, hCaptcha, Turnstile, mCaptcha, Cap.js).</li>
@@ -6380,6 +6549,12 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>CUSTOM_MAINTENANCE_PAGE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Absoluter Pfad zur benutzerdefinierten Maintenance-Seiten-Vorlage.</td>
+</tr>
 <tr>
 <td><code>CUSTOM_ERROR_PAGE</code></td>
 <td></td>
@@ -7078,6 +7253,60 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>CSP-Konformität</strong>: Verwenden Sie immer die Variablen <code>nonce_script</code> und <code>nonce_style</code> für Inline-Skripte und Styles, um eine ordnungsgemäße Content Security Policy-Handhabung sicherzustellen.</li>
 <li><strong>Vorlagen testen</strong>: Sie können Ihre Vorlagen lokal mit einer Lua-Template-Engine rendern, bevor Sie sie in BunkerWeb bereitstellen.</li>
 </ul>
+<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>Maintenance ersetzt Antworten aus den von der Standard-Reverse-Proxy-Konfiguration erzeugten Locations durch eine Maintenance-Seite, während die Anwendung nicht verfügbar ist. Sie wird pro Service aktiviert, liefert <code>503 Service Unavailable</code> zurück und erreicht den Upstream nie. Die Multisite-Einstellung hat standardmäßig den Wert <code>no</code>.</p>
+<h3 id="maintenance-modus-aktivieren-und-anwenden">Maintenance-Modus aktivieren und anwenden</h3>
+<p>Setzen Sie <code>USE_MAINTENANCE</code> für einen vorhandenen Multisite-Service, der den Standard-Reverse-Proxy verwendet, auf <code>yes</code>. Dieses Fragment zeigt die relevanten Umgebungsvariablen; fügen Sie es in Ihre Scheduler-Konfiguration ein, statt es als vollständige Compose-Datei zu behandeln:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fragment: Scheduler-Umgebung für einen Service mit Reverse-Proxy</span>
+<span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">app.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">  </span><span class="nt">app.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app:8080"</span>
+<span class="w">  </span><span class="nt">app.example.com_USE_MAINTENANCE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
+<p>Wenden Sie die Einstellung über Ihre normale BunkerWeb-Integration an. Der Scheduler erzeugt die Service-Konfiguration und lädt die Worker neu. Setzen Sie <code>app.example.com_USE_MAINTENANCE</code> auf <code>no</code> und wenden Sie sie erneut an, um das Proxying wiederherzustellen. Wenn die Reverse-Proxy-Einstellungen bereits vorhanden sind, ist nur diese Einstellung erforderlich.</p>
+<p>Die Weboberfläche bietet zwei Schnellschalter: die Schaltfläche mit Schraubenschlüsselsymbol in der Spalte <strong>Maintenance</strong> auf der Services-Seite und die schwebende Schraubenschlüssel-Schaltfläche auf der Bearbeitungsseite eines Services. Beide aktualisieren die Service-Einstellung und wenden sie ohne Seitenneuladen an. Das Bearbeitungsformular bleibt synchron, einschließlich Easy-/Advanced-Modus und Roh-Editor, während unabhängige ungespeicherte Änderungen erhalten bleiben.</p>
+<p>Die Schalter erfordern eine beschreibbare Datenbank und Schreibzugriff auf den Service. Sie sind für Benutzer mit Nur-Lese-Zugriff, Nur-Lese-Datenbanken und Services mit <code>USE_UI=yes</code> deaktiviert, damit die integrierte UI verfügbar bleibt. Sie überschreiben keinen extern verwalteten <code>USE_MAINTENANCE</code>-Wert; ändern Sie ihn über dessen Besitzer. Ein Schalter wird abgelehnt, solange eine Anwendung läuft.</p>
+<h3 id="verhalten-und-umfang-der-anfragen">Verhalten und Umfang der Anfragen</h3>
+<p>Maintenance gilt nur für Locations, die aus BunkerWebs Standard-Reverse-Proxy-Konfiguration erzeugt werden, einschließlich <code>REVERSE_PROXY_HOST</code> und seiner nummerierten Varianten. Sie fügt keine Proxy-Locations hinzu, ändert keine benutzerdefinierten Locations und übernimmt keine manuellen Rewrite-Handler. Wenn eine benutzerdefinierte Konfiguration diese Handler oder Backendvariablen ersetzt, integrieren Sie die Maintenance-Antwort selbst.</p>
+<p>Maintenance bewahrt die bestehende HTTPS-Richtlinie, daher erfolgt eine aktivierte HTTP-zu-HTTPS-Weiterleitung zuerst. Auf der effektiven HTTPS-Origin liefert sie <code>503</code> mit <code>Cache-Control: no-store</code>, einer restriktiven Content Security Policy und <code>X-Content-Type-Options: nosniff</code>.</p>
+<p>GET, POST, OPTIONS und WebSocket-Handshakes erhalten die Maintenance-Seite. BunkerWeb verwirft den Request-Body, daher wird ein POST-Body niemals weitergeleitet oder erneut abgespielt. HEAD erhält denselben Status und dieselben Header ohne Body. Bestehende WebSockets werden nicht ausdrücklich geschlossen; beim Reload gilt das normale Herunterfahren der Worker.</p>
+<p>Maintenance läuft vor Authentifizierung, Antibot und anderen Zugriffskontrollen, daher erhalten auch freigeschaltete Clients und Services im Erkennungsmodus die Seite. Lokale NGINX-Locations, die interne API und Health-Endpunkte behalten ihr normales Verhalten. Dasselbe gilt für <code>/.well-known/acme-challenge/</code> und konfiguriertes Let's-Encrypt-Passthrough. Maintenance bewahrt diese Ausnahme; sie stellt weder Zertifikate aus noch erstellt sie einen ACME-Handler.</p>
+<h3 id="maintenance-seite-anpassen">Maintenance-Seite anpassen</h3>
+<p>Die mitgelieferte Seite funktioniert ohne Custom Pages. Um sie mit Custom Pages anzupassen, öffnen Sie den Custom-Pages-Editor und wählen <strong>Maintenance</strong>. Im <strong>Easy Mode</strong> bearbeiten Sie den Maintenance-Titel und die Nachricht, das Favicon, das Footer-Logo bzw. den Footer-Text und die SVG-Illustration. Der Titel aktualisiert den Browser-Titel und die Überschrift; ein leerer Titel oder eine leere Illustration behält den Standard bei. Bewahren Sie die SVG-Klassen <code>maintenance-top</code> und <code>maintenance-tool</code> für die Animation der Illustration.</p>
+<p>Im <strong>Advanced Mode</strong> bearbeiten Sie die vollständige HTML-/Lua-Vorlage. Die verfügbaren Variablen sind:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td><code>Site under maintenance</code>, der vom Plugin bereitgestellte Seitentitel.</td>
+</tr>
+<tr>
+<td><code>nonce_style</code></td>
+<td>CSP-Nonce pro Antwort für Inline-<code>&lt;style&gt;</code>-Elemente.</td>
+</tr>
+<tr>
+<td><code>nonce_script</code></td>
+<td>CSP-Nonce pro Antwort für Inline-<code>&lt;script&gt;</code>-Elemente.</td>
+</tr>
+</tbody>
+</table>
+<p>Verwenden Sie die Nonce-Werte in jedem Inline-Style und -Skript, zum Beispiel <code>nonce="{* nonce_style *}"</code>. Die Antwort erlaubt eingebettete Bilder, SVG und Schriftarten über <code>data:</code>-URLs und blockiert andere Ursprünge. Binden Sie Ressourcen inline oder als Daten-URLs ein; URLs zu Anwendungsressourcen erhalten ebenfalls Maintenance und können keine Abhängigkeiten laden.</p>
+<p>Für eine dateiverwaltete Seite setzen Sie <code>CUSTOM_MAINTENANCE_PAGE</code> auf einen absoluten, für den Scheduler lesbaren Pfad. Dieser Wert hat Vorrang vor einer UI-Vorlage und sperrt diesen Geltungsbereich im Editor. Ohne ihn verwendet ein Service seine eigene UI-Vorlage oder erbt die globale Vorlage. <strong>Löschen</strong> entfernt eine Service-Überschreibung und stellt die Vererbung wieder her. <strong>Zurücksetzen</strong> entfernt die UI-Vorlage und erzwingt die mitgelieferte Seite, selbst wenn eine globale Anpassung existiert. Beim Speichern einer neuen Service-Überschreibung wird deren Zurücksetzungsmarker gelöscht. Aktivieren oder deaktivieren Sie Maintenance unabhängig davon mit <code>USE_MAINTENANCE</code>.</p>
+<p>Der Custom-Pages-Job validiert HTML und schützt vor bekannten Gefahren bei der Kompilierung von Lua-Vorlagen, bevor er sie cached. Eine ungültige Quelle lässt den zuletzt akzeptierten Cache bestehen. Bei einer nicht verfügbaren oder fehlerhaften aktiven Seite wird auf die mitgelieferte Seite und anschließend auf eine minimale Notfallseite zurückgefallen. Ein Rendering-Fehler stellt den Proxy-Traffic nie wieder her.</p>
+<h3 id="maintenance-fehlerbehebung">Maintenance-Fehlerbehebung</h3>
+<ul>
+<li><strong>Der Schalter ist deaktiviert oder wird abgelehnt:</strong> Prüfen Sie Schreibrechte, <code>USE_UI</code> und die externe Verwaltung von <code>USE_MAINTENANCE</code>; ändern Sie extern verwaltete Werte über deren Besitzer.</li>
+<li><strong>Die Anwendung antwortet weiterhin:</strong> Stellen Sie sicher, dass eine Standard-Reverse-Proxy-Location <code>USE_REVERSE_PROXY=yes</code> und <code>USE_MAINTENANCE=yes</code> besitzt. Lokale und ACME-Pfade sind Ausnahmen.</li>
+<li><strong>Sie erhalten eine Weiterleitung statt <code>503</code>:</strong> Die bestehende HTTPS-Richtlinie leitet zuerst weiter; folgen Sie der HTTPS-URL.</li>
+<li><strong>Die mitgelieferte Seite wird verwendet:</strong> Prüfen Sie die für den Scheduler lesbare Datei, die Vorlagenvalidierung und das Scheduler-Log; eine Dateieinstellung sperrt die UI-Vorlage.</li>
+<li><strong>Inline-Ressourcen oder -Skripte fehlen:</strong> Binden Sie sie ein und verwenden Sie <code>nonce_style</code> oder <code>nonce_script</code>; Anwendungs-URLs sind nicht verfügbar.</li>
+</ul>
 <h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p align="center">
   <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -7311,6 +7540,376 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Clock skew / "token not yet valid"</strong>: NTP aktivieren; <code>OPENIDC_IAT_SLACK</code> bei Bedarf anpassen.</li>
 <li><strong>Kein User-Header gesetzt</strong>: prüfen, ob der Claim aus <code>OPENIDC_USER_HEADER_CLAIM</code> im ID Token/userinfo vorhanden ist.</li>
 <li><strong>Multi-Instance-Deployments</strong>: <code>USE_REDIS=yes</code> aktivieren und <code>REDIS_HOST</code> (oder Sentinel) konfigurieren, damit Sessions geteilt werden.</li>
+</ul>
+<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>Das <strong>SAML</strong>-Plugin (PRO) macht BunkerWeb zu einem SAML-2.0-Service-Provider (SP) für Browser-SSO. Es akzeptiert eine IdP-Antwort, deren Assertion von einer vertrauenswürdigen Signatur abgedeckt ist, erstellt eine Session und kann ausgewählte Attribute als Header an den geschützten Upstream weitergeben. Es unterstützt BunkerWeb 1.6.14 und spätere 1.6.x-Releases.</p>
+<h3 id="voraussetzungen-und-vertrauensmaterial">Voraussetzungen und Vertrauensmaterial</h3>
+<p>Verwenden Sie für jeden geschützten Service eine öffentliche HTTPS-Origin wie <code>https://app.example.com</code>, ohne abschließenden Schrägstrich, Pfad oder Query-String. Ein nicht standardmäßiger HTTPS-Port ist zulässig. SAML benötigt drei PEM-Bestandteile:</p>
+<ul>
+<li>einen <strong>unverschlüsselten privaten RSA-Schlüssel</strong> für den SP;</li>
+<li>das passende SP-Zertifikat im PEM-Format;</li>
+<li>das PEM-Signaturzertifikat des IdP, dem BunkerWeb bei der Assertion-Überprüfung vertraut.</li>
+</ul>
+<p>SP-Schlüssel und -Zertifikat müssen zusammenpassen und RSA-Schlüssel mit mindestens 2048 Bit sein. Die IdP-SSO-URL und, falls angegeben, die IdP-SLO-URL müssen HTTPS verwenden. Halten Sie den privaten Schlüssel geheim; BunkerWeb verwendet ihn zum Signieren von Authentifizierungs- und Abmeldeanfragen.</p>
+<h3 id="saml-in-der-ui-konfigurieren">SAML in der UI konfigurieren</h3>
+<p>Öffnen Sie <strong>SAML</strong> für den Zielservice und wählen Sie seinen Geltungsbereich. Das Formular gruppiert die Einstellungen in die Bereiche IdP, SP, Session, Identitäts-Header und ACL. Gehen Sie in dieser Reihenfolge vor:</p>
+<ol>
+<li>Aktivieren Sie <code>USE_SAML</code> für den Service.</li>
+<li>Geben Sie die öffentliche SP-Origin, die SP-Entity-ID, das SP-Zertifikat und den unverschlüsselten privaten RSA-Schlüssel ein.</li>
+<li>Geben Sie die IdP-Entity-ID, die HTTPS-SSO-URL, das vertrauenswürdige PEM-Signaturzertifikat und optional die HTTPS-SLO-URL ein. Eine leere SLO-URL verwendet die SSO-URL.</li>
+<li>Behalten Sie die lokalen Standardpfade bei, sofern sie nicht mit einer vorhandenen Route kollidieren. Speichern und übernehmen Sie die Konfiguration.</li>
+<li>Verwenden Sie <strong>Export metadata</strong>, um BunkerWebs SP-Metadaten herunterzuladen oder anzuzeigen, und registrieren Sie anschließend diese Metadaten sowie die exakten ACS-/SLO-URLs beim IdP.</li>
+<li>Konfigurieren Sie Identitätsattribute und ACL-Regeln, speichern Sie erneut und übernehmen Sie die Konfiguration.</li>
+</ol>
+<p>BunkerWeb exportiert SP-Metadaten; es importiert IdP-Metadaten nicht und aktualisiert sie nicht automatisch. Konfigurieren Sie zuerst die IdP-Felder und Zertifikate und exportieren Sie anschließend die Metadaten, um eine zirkuläre Einrichtung zu vermeiden.</p>
+<h3 id="browser-request-flow">Browser-Request-Flow</h3>
+<p>Eine vom SP initiierte Anmeldung signiert die AuthnRequest mit dem privaten SP-Schlüssel und sendet sie per HTTP-Redirect an den IdP. Der IdP sendet eine Antwort, deren Assertion durch seine Signatur abgedeckt ist, per HTTP-POST an den ACS. BunkerWeb prüft Korrelation, Ziel, Aussteller, Assertion-Zeitstempel, Signatur und Replay-Status, bevor es eine Session erstellt. Der ursprüngliche Request-Body wird nicht erneut gesendet.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as Browser
+  participant BW as BunkerWeb (SAML-SP)
+  participant IdP as Identity Provider
+  participant Up as Upstream
+
+  B-&gt;&gt;BW: GET /protected
+  BW--&gt;&gt;B: 302 signierte HTTP-Redirect-AuthnRequest
+  B-&gt;&gt;IdP: GET SSO-URL mit SAMLRequest
+  IdP--&gt;&gt;B: 200/POST SAMLResponse mit signaturgeschützter Assertion
+  B-&gt;&gt;BW: POST ACS mit SAMLResponse
+  BW-&gt;&gt;BW: Signatur, Aussteller, Ziel, Ablauf, Replay prüfen
+  BW--&gt;&gt;B: 302 /protected mit Session-Cookie
+  B-&gt;&gt;BW: GET /protected
+  BW-&gt;&gt;Up: Request plus konfigurierte Identitäts-Header
+  Up--&gt;&gt;BW: Antwort
+  BW--&gt;&gt;B: Antwort</code></pre>
+<h3 id="endpoints">Endpoints</h3>
+<p>Alle Endpoint-Pfade sind lokale Pfade auf der öffentlichen SP-Origin. Die Standardwerte sind Multisite-Einstellungen und können geändert werden, wenn sie für den Service verfügbar sind.</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Methode und Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SP-Metadaten</td>
+<td><code>SAML_METADATA_PATH</code></td>
+<td><code>/saml/metadata</code></td>
+<td><code>GET</code> oder <code>HEAD</code>; veröffentlicht SP-Entity-, ACS-, SLO- und Signaturzertifikat-Metadaten.</td>
+</tr>
+<tr>
+<td>Assertion Consumer Service (ACS)</td>
+<td><code>SAML_ACS_PATH</code></td>
+<td><code>/saml/acs</code></td>
+<td><code>POST</code>; empfängt die IdP-Antwort, deren Assertion durch ihre Signatur abgedeckt ist.</td>
+</tr>
+<tr>
+<td>Lokale Abmeldung</td>
+<td><code>SAML_LOGOUT_PATH</code></td>
+<td><code>/saml/logout</code></td>
+<td>Startet die lokale Abmeldung; eine authentifizierte Session löst eine signierte IdP-Abmeldeanfrage aus.</td>
+</tr>
+<tr>
+<td>Single Logout Service (SLS)</td>
+<td><code>SAML_SLS_PATH</code></td>
+<td><code>/saml/sls</code></td>
+<td><code>GET</code> oder <code>POST</code>; empfängt eine IdP-Abmeldeanfrage oder -antwort.</td>
+</tr>
+</tbody>
+</table>
+<p><code>SAML_LOGOUT_REDIRECT</code> (Standard <code>/</code>) ist der lokale Pfad nach der Abmeldung. Halten Sie alle vier Endpoint-Pfade verschieden und frei von Query-Strings, Fragmenten, Backslashes, Leerzeichen oder Traversal-Segmenten.</p>
+<h3 id="keycloak-registrierung-2652">Keycloak-Registrierung 26.5.2</h3>
+<p>Der <a href="https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc">Keycloak-26.5.2-Leitfaden für SAML-Clients</a> verwendet die Client-Tabs <strong>Settings</strong>, <strong>Keys</strong> und <strong>Advanced</strong>. Verwenden Sie die folgenden Werte für BunkerWebs Standard-Endpoint-Aufbau. Ersetzen Sie <code>https://app.example.com</code> durch den exakten Wert von <code>SAML_SP_BASE_URL</code>.</p>
+<p>Erstellen Sie einen aktivierten SAML-Client mit diesen Registrierungswerten. In der Keycloak-Oberfläche sind <strong>Enabled</strong> und <strong>Front channel logout</strong> aktiviert (<code>true</code>); das Client-Protokoll ist <code>SAML</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Client-Einstellung</th>
+<th>Wert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client ID</td>
+<td><code>https://app.example.com/saml/metadata</code></td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td><code>SAML</code></td>
+</tr>
+<tr>
+<td>Enabled</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Front channel logout</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Valid redirect URIs</td>
+<td><code>https://app.example.com/saml/acs</code> und <code>https://app.example.com/saml/sls</code></td>
+</tr>
+</tbody>
+</table>
+<p>Verlangen Sie in den Client-Einstellungen signierte Assertions und Dokumente, verlangen Sie Client-Signaturen, wählen Sie <strong>RSA_SHA256</strong> und aktivieren Sie <strong>Force POST Binding</strong>. Lassen Sie <strong>Encrypt Assertions</strong> ausgeschaltet: BunkerWeb verlangt, dass die Assertion von einer vertrauenswürdigen IdP-Signatur abgedeckt ist, entweder auf der Assertion oder auf der gesamten Antwort, und akzeptiert keine verschlüsselten Assertions. Aktivieren Sie unter <strong>Keys</strong> die Option <strong>Client Signature Required</strong>. Setzen Sie <strong>Use metadata descriptor URL</strong> auf <strong>OFF</strong> und geben Sie das SP-Zertifikat manuell an, damit Keycloak BunkerWebs signierte Anfragen ohne einen IdP-Metadatenimport-Zyklus prüfen kann. Setzen Sie unter <strong>Advanced</strong> die <strong>Assertion Consumer Service POST Binding URL</strong> auf <code>/saml/acs</code> sowie die <strong>Logout Service POST Binding URL</strong> und <strong>Logout Service Redirect Binding URL</strong> auf <code>/saml/sls</code> auf der öffentlichen Origin. Setzen Sie das Name-ID-Format auf <code>username</code> und erzwingen Sie dieses Format.</p>
+<p>Die entsprechenden Client-Attribute sind:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">saml.assertion.signature</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.server.signature</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.client.signature</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.encrypt</span><span class="p">:</span><span class="w"> </span><span class="s">"false"</span>
+<span class="nt">saml.force.post.binding</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.authnstatement</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.signature.algorithm</span><span class="p">:</span><span class="w"> </span><span class="s">"RSA_SHA256"</span>
+<span class="nt">saml_name_id_format</span><span class="p">:</span><span class="w"> </span><span class="s">"username"</span>
+<span class="nt">saml_force_name_id_format</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="nt">saml.signing.certificate</span><span class="p">:</span><span class="w"> </span><span class="s">"SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"</span>
+<span class="nt">saml_assertion_consumer_url_post</span><span class="p">:</span><span class="w"> </span><span class="s">"https://app.example.com/saml/acs"</span>
+<span class="nt">saml_single_logout_service_url_post</span><span class="p">:</span><span class="w"> </span><span class="s">"https://app.example.com/saml/sls"</span>
+<span class="nt">saml_single_logout_service_url_redirect</span><span class="p">:</span><span class="w"> </span><span class="s">"https://app.example.com/saml/sls"</span>
+</code></pre></div>
+<p>Fügen Sie Protokoll-Mapper für <code>email</code>, <code>groups</code> und <code>name</code> hinzu. Verwenden Sie für jeden Mapper <code>protocol: "saml"</code>, <code>protocolMapper: "saml-user-attribute-mapper"</code> und <code>consentRequired: false</code>; setzen Sie <code>config.user.attribute</code> und <code>config.attribute.name</code> auf dasselbe Attribut und <code>config.attribute.nameformat</code> auf <code>Basic</code>. Stellen Sie sicher, dass der IdP-Benutzer diese Attribute tatsächlich besitzt; ein fehlender Claim erzeugt keinen entsprechenden Upstream-Header.</p>
+<h3 id="einstellungen-erklart_1">Einstellungen (erklärt)</h3>
+<p>Die folgenden Standardwerte stammen aus den Einstellungen des SAML-Plugins. Leere Standardwerte werden als <code>empty</code> angezeigt.</p>
+<h4 id="aktivierung-vertrauen-und-routen">Aktivierung, Vertrauen und Routen</h4>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_SAML</code></td>
+<td><code>no</code></td>
+<td>Aktiviert SAML für den Service.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENTITY_ID</code></td>
+<td><code>empty</code></td>
+<td>SP-Aussteller und Client-ID.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_BASE_URL</code></td>
+<td><code>empty</code></td>
+<td>Öffentliche HTTPS-Origin ohne Pfad oder Query.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_ENTITY_ID</code></td>
+<td><code>empty</code></td>
+<td>Vertrauenswürdiger IdP-Aussteller.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_SSO_URL</code></td>
+<td><code>empty</code></td>
+<td>HTTPS-Login-Endpoint des IdP.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_SLO_URL</code></td>
+<td><code>empty</code></td>
+<td>HTTPS-Abmelde-Endpoint des IdP; leer wird SSO verwendet.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_CERT</code></td>
+<td><code>empty</code></td>
+<td>Passendes SP-Zertifikat im PEM-Format.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_PRIVATE_KEY</code></td>
+<td><code>empty</code></td>
+<td>Unverschlüsselter passender privater RSA-Schlüssel im PEM-Format.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_CERT</code></td>
+<td><code>empty</code></td>
+<td>Vertrauenswürdiges IdP-Signaturzertifikat im PEM-Format.</td>
+</tr>
+<tr>
+<td><code>SAML_ACS_PATH</code></td>
+<td><code>/saml/acs</code></td>
+<td>Lokaler ACS-Pfad.</td>
+</tr>
+<tr>
+<td><code>SAML_LOGOUT_PATH</code></td>
+<td><code>/saml/logout</code></td>
+<td>Lokaler Abmeldepfad.</td>
+</tr>
+<tr>
+<td><code>SAML_SLS_PATH</code></td>
+<td><code>/saml/sls</code></td>
+<td>Lokaler SLS-Callback-Pfad.</td>
+</tr>
+<tr>
+<td><code>SAML_METADATA_PATH</code></td>
+<td><code>/saml/metadata</code></td>
+<td>Lokaler SP-Metadatenpfad.</td>
+</tr>
+<tr>
+<td><code>SAML_LOGOUT_REDIRECT</code></td>
+<td><code>/</code></td>
+<td>Lokaler Pfad nach der Abmeldung.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sessions-und-identitats-header">Sessions und Identitäts-Header</h4>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SAML_CLOCK_SKEW</code></td>
+<td><code>60</code></td>
+<td>Zulässige Assertion-Uhrabweichung in Sekunden; gültiger Bereich 0–300.</td>
+</tr>
+<tr>
+<td><code>SAML_SESSION_IDLE_TIMEOUT</code></td>
+<td><code>900</code></td>
+<td>Leerlaufzeit der Session in Sekunden; gültiger Bereich 1–86400.</td>
+</tr>
+<tr>
+<td><code>SAML_SESSION_ABSOLUTE_TIMEOUT</code></td>
+<td><code>3600</code></td>
+<td>Maximale Session-Lebensdauer in Sekunden; gültiger Bereich 1–86400.</td>
+</tr>
+<tr>
+<td><code>SAML_USER_HEADER</code></td>
+<td><code>X-User</code></td>
+<td>Upstream-Header für den Benutzerwert; leer deaktiviert ihn.</td>
+</tr>
+<tr>
+<td><code>SAML_USER_ATTRIBUTE</code></td>
+<td><code>NameID</code></td>
+<td>Attribut für den Benutzerwert; <code>NameID</code> bezeichnet die Subject-ID.</td>
+</tr>
+<tr>
+<td><code>SAML_EMAIL_HEADER</code></td>
+<td><code>empty</code></td>
+<td>Upstream-Header für E-Mail; leer deaktiviert ihn.</td>
+</tr>
+<tr>
+<td><code>SAML_EMAIL_ATTRIBUTE</code></td>
+<td><code>email</code></td>
+<td>Attribut für E-Mail; <code>NameID</code> bezeichnet die Subject-ID.</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_HEADER</code></td>
+<td><code>empty</code></td>
+<td>Upstream-Header für Gruppen; leer deaktiviert ihn.</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_ATTRIBUTE</code></td>
+<td><code>groups</code></td>
+<td>Attribut für Gruppen; <code>NameID</code> bezeichnet die Subject-ID.</td>
+</tr>
+<tr>
+<td><code>SAML_NAME_HEADER</code></td>
+<td><code>empty</code></td>
+<td>Upstream-Header für den Anzeigenamen; leer deaktiviert ihn.</td>
+</tr>
+<tr>
+<td><code>SAML_NAME_ATTRIBUTE</code></td>
+<td><code>name</code></td>
+<td>Attribut für den Anzeigenamen; <code>NameID</code> bezeichnet die Subject-ID.</td>
+</tr>
+<tr>
+<td><code>SAML_GROUPS_SEPARATOR</code></td>
+<td><code>,</code></td>
+<td>Verbindet mehrere Werte in einem Header.</td>
+</tr>
+</tbody>
+</table>
+<p>Vor der Authentifizierung löscht BunkerWeb jeden konfigurierten SAML-Identitäts-Header aus dem eingehenden Request. Es fügt einen Header erst nach einer gültigen Antwort und nur dann hinzu, wenn das gemappte Attribut vorhanden ist. Header-Namen müssen eindeutig und syntaktisch gültig sein und dürfen keine Routing- oder sicherheitssensitiven Präfixe wie <code>X-Forwarded-*</code>, <code>Proxy-*</code> oder <code>Sec-*</code> verwenden. Diese Header übertragen die Identität an den geschützten Upstream; sie melden einen Benutzer nicht an der BunkerWeb-Weboberfläche an.</p>
+<h4 id="attribut-acl">Attribut-ACL</h4>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SAML_ACL_RULE_COUNT</code></td>
+<td><code>empty</code></td>
+<td>Explizite Anzahl nummerierter Regeln; <code>0</code> leert die Liste.</td>
+</tr>
+<tr>
+<td><code>SAML_USE_ACL</code></td>
+<td><code>no</code></td>
+<td>Aktiviert die attributbasierte Zugriffskontrolle nach der SAML-Validierung.</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_MATCH_MODE</code></td>
+<td><code>all</code></td>
+<td>Kombiniert Regeln mit <code>all</code> oder <code>any</code>.</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_DENIED_URL</code></td>
+<td><code>empty</code></td>
+<td>Weiterleitung bei Ablehnung; leer wird der Ablehnungsstatus zurückgegeben.</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_ATTRIBUTE</code></td>
+<td><code>empty</code></td>
+<td>Attributname für eine ACL-Regel.</td>
+</tr>
+<tr>
+<td><code>SAML_ACL_VALUE</code></td>
+<td><code>empty</code></td>
+<td>Erforderlicher Wert für eine ACL-Regel.</td>
+</tr>
+</tbody>
+</table>
+<p>Dieses Beispiel verlangt sowohl die Mitgliedschaft in <code>engineering</code> als auch die Administrator-E-Mail:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">app.example.com_USE_SAML</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">app.example.com_SAML_USE_ACL</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">app.example.com_SAML_ACL_RULE_COUNT</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
+<span class="nt">app.example.com_SAML_ACL_MATCH_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">"all"</span>
+<span class="nt">app.example.com_SAML_ACL_ATTRIBUTE_1</span><span class="p">:</span><span class="w"> </span><span class="s">"groups"</span>
+<span class="nt">app.example.com_SAML_ACL_VALUE_1</span><span class="p">:</span><span class="w"> </span><span class="s">"engineering"</span>
+<span class="nt">app.example.com_SAML_ACL_ATTRIBUTE_2</span><span class="p">:</span><span class="w"> </span><span class="s">"email"</span>
+<span class="nt">app.example.com_SAML_ACL_VALUE_2</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
+</code></pre></div>
+<p>Das erste Paar ist <code>_1</code>, das zweite <code>_2</code>; die UI nummeriert Regeln ab 1. Bei einer expliziten Anzahl von <code>2</code> sind beide Paare erforderlich; ein fehlendes Attribut verweigert den Zugriff, während ein leer konfigurierter Wert eine Ablehnung bedeutet. Bei <code>all</code> müssen alle Regeln übereinstimmen; bei <code>any</code> genügt eine passende Regel. Ohne Regeln sind alle authentifizierten Benutzer zugelassen. Auf Service-Ebene übernimmt die UI die globale Regelliste, bis Sie eine Serviceliste auswählen; das Speichern einer Serviceliste ersetzt die geerbte Liste, auch wenn die Ersetzung ausdrücklich leer ist. Lassen Sie <code>SAML_ACL_RULE_COUNT</code> leer, um nummerierte Regeln bis zum ersten von 100 Slots zu erkennen. Setzen Sie den Wert auf <code>0</code>, um alle Regeln zu löschen. Ein ungültiger Modus oder eine fehlerhafte explizite Liste schlägt geschlossen fehl. <code>SAML_ACL_DENIED_URL</code> leitet bei gesetztem Wert weiter; andernfalls gibt BunkerWeb seinen Ablehnungsstatus zurück.</p>
+<h4 id="replay-schutz">Replay-Schutz</h4>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Kontext</th>
+<th>Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SAML_REPLAY_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>Shared-Memory-Kapazität für Replay-Schutz auf einer Instanz.</td>
+</tr>
+</tbody>
+</table>
+<p>Jede akzeptierte Assertion-ID wird für die Zeit, in der sie noch akzeptiert werden könnte, atomar in den Replay-Speicher aufgenommen. Die ausstehende AuthnRequest-ID ist ein separates Session-Korrelationsmerkmal. Erhöhen Sie auf einer Instanz <code>SAML_REPLAY_DICT_SIZE</code>, wenn das Shared Dictionary zu klein ist. Aktivieren Sie für Replikate den Core-Sessionmodus <code>USE_REDIS=yes</code> und verweisen Sie jede Instanz auf denselben Redis-Service, damit Replay-Schlüssel den gemeinsamen Speicher verwenden. Halten Sie außerdem <code>SESSIONS_SECRET</code> des Cores auf jedem Replikat identisch; andernfalls kann eine von einem Worker erstellte Session von einem anderen nicht gelesen werden. Sessions verwenden standardmäßig sichere, hostgebundene Cookies mit <code>HttpOnly</code>, <code>Secure</code> und <code>SameSite=None</code>. Bei aktiviertem Redis werden die Session-Daten statt im Cookie in einem namespace-bezogenen Redis-Speicher abgelegt. Das <code>SessionNotOnOrAfter</code> des IdP kann eine Session früher als die konfigurierten Zeitüberschreitungen beenden. Eine verbrauchte Assertion bleibt verbraucht, wenn ein späterer Callback-Schritt fehlschlägt.</p>
+<h3 id="abmeldung">Abmeldung</h3>
+<p>Eine Anfrage an <code>SAML_LOGOUT_PATH</code> löscht den authentifizierten Zustand, speichert eine ausstehende Abmeldekorrelation und startet Front-Channel-SLO. BunkerWeb sendet eine signierte Abmeldeanfrage mit Redirect-Binding. Nach einer gültigen signierten <code>LogoutResponse</code> zerstört es die lokale Session und leitet den Browser zu <code>SAML_LOGOUT_REDIRECT</code> weiter. Eine vom IdP initiierte <code>LogoutRequest</code> kann an <code>SAML_SLS_PATH</code> eingehen; der SLS validiert Aussteller, Ziel, NameID, Session-Index und Replay-Status, zerstört die lokale Session und sendet eine signierte Antwort an den IdP. Wenn keine lokale Session vorhanden ist, zerstört die Abmelderoute die leere Session und leitet lokal weiter.</p>
+<h3 id="grenzen-und-fehlerbehebung">Grenzen und Fehlerbehebung</h3>
+<p>SAML unterstützt derzeit die vom SP initiierte Browser-Anmeldung mit einer signierten Redirect-AuthnRequest und einer POST-ACS-Antwort. Es unterstützt keine vom IdP initiierte Anmeldung, keine verschlüsselten Assertions und keinen automatischen Import oder die automatische Aktualisierung von IdP-Metadaten. Lassen Sie den IdP Dokumente/Assertions signieren und die Antwort mit POST-Binding senden. Authentifizierungs- und Abmelde-POST-Bodies sind auf 256 KiB begrenzt; zu große Requests werden vor der Verarbeitung abgelehnt.</p>
+<ul>
+<li><strong>Die UI aktiviert SAML nicht:</strong> Prüfen Sie die HTTPS-Origin, alle drei Zertifikate/Schlüssel, den passenden RSA-Schlüssel und das passende Zertifikat, die IdP-Entity-/SSO-Werte und die vier verschiedenen lokalen Pfade. Eine ungültige Konfiguration wird abgelehnt und der Request schlägt mit <code>503</code> geschlossen fehl; kein Request erreicht den Upstream.</li>
+<li><strong>Der IdP lehnt die AuthnRequest ab:</strong> Vergleichen Sie SP-Entity-ID, exakte ACS-/SLS-URLs, SP-Zertifikat, RSA-SHA256-Einstellung und die Anforderung der Client-Signatur. Prüfen Sie in Keycloak, dass <strong>Use metadata descriptor URL</strong> deaktiviert ist und das manuell bereitgestellte SP-Zertifikat aktuell ist.</li>
+<li><strong>Der ACS liefert einen Fehler oder <code>503</code>:</strong> Prüfen Sie das IdP-Signaturzertifikat, den Signaturumfang der Assertion, Aussteller, Ziel, Uhrzeitsynchronisierung, Response-Binding, die Korrelation der ausstehenden Anfrage und ob die Assertion-ID bereits verbraucht wurde. Prüfen Sie, dass der IdP die gemappten Attribute sendet.</li>
+<li><strong>Ein Benutzer authentifiziert sich, erhält aber eine Ablehnung:</strong> Aktivieren Sie die erwarteten ACL-Attribute, bestätigen Sie nummerierte Paare und <code>SAML_ACL_RULE_COUNT</code> und prüfen Sie <code>all</code> gegenüber <code>any</code>. Ein leerer Attributwert oder ein fehlender Claim kann absichtlich ablehnen.</li>
+<li><strong>Eine Session verschwindet hinter einem Load Balancer:</strong> Verwenden Sie denselben Redis-Speicher und dasselbe Core-Session-Secret auf jedem Replikat. Redis muss verfügbar sein, wenn <code>USE_REDIS=yes</code> gilt; Replay-Schutz und Sessions fallen nicht unbemerkt auf einen Worker-lokalen Zustand zurück.</li>
 </ul>
 <h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1272,7 +1272,7 @@
 <h2 id="parametres">Paramètres</h2>
 <div class="admonition tip">
 <p class="admonition-title">Paramètres BunkerWeb PRO</p>
-<p>Certains plugins sont réservés à la <strong>version PRO</strong>. Vous souhaitez tester rapidement BunkerWeb PRO pendant un mois ? Utilisez le code <code>freetrial</code> lors de votre commande sur le <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&amp;utm_campaign=self&amp;utm_source=doc">panneau BunkerWeb</a> ou en cliquant <a href="https://panel.bunkerweb.io/cart.php?language=french&amp;a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">ici</a> pour appliquer directement le code promo (sera effectif à la caisse).</p>
+<p>Certains plugins sont réservés à la <strong>version PRO</strong>. Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&amp;utm_campaign=self&amp;utm_source=doc">Panel BunkerWeb</a>.</p>
 </div>
 <p>Une fois BunkerWeb intégré à votre environnement, vous devrez le configurer pour servir et protéger vos applications Web.</p>
 <p>La configuration de BunkerWeb se fait à l'aide de ce que nous appelons des "paramètres" ou des "variables". Chaque paramètre est identifié par un nom tel que <code>AUTO_LETS_ENCRYPT</code> ou <code>USE_ANTIBOT</code>. Vous pouvez attribuer des valeurs à ces paramètres pour configurer BunkerWeb.</p>
@@ -1517,6 +1517,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Sélection d'un modèle</strong>: une fois le modèle personnalisé défini, les utilisateurs peuvent le sélectionner pendant le processus de configuration en mode facile d'un service dans l'interface utilisateur Web. Un modèle peut également être sélectionné avec le <code>USE_TEMPLATE</code> paramètre dans la configuration. Le nom du fichier modèle (sans l' <code>.json</code> extension) doit être spécifié comme valeur du <code>USE_TEMPLATE</code> paramètre.</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Les modèles et les paramètres que vous configurez</p>
+<p>Lorsqu'un modèle déclare un paramètre que vous configurez aussi, ce qui s'applique dépend de l'endroit où le modèle est sélectionné :</p>
+<ul>
+<li>sélectionné sur le service (<code>www.example.com_USE_TEMPLATE=medium</code>) : la valeur du modèle l'emporte sur celle des paramètres globaux ;</li>
+<li>sélectionné globalement (<code>USE_TEMPLATE=medium</code>) : la valeur des paramètres globaux l'emporte sur celle du modèle ;</li>
+<li>une valeur définie sur le service lui-même l'emporte toujours sur les deux.</li>
+</ul>
+<p>C'est important parce que les modèles <code>low</code>, <code>medium</code> et <code>api</code> fixent <code>CONTENT_SECURITY_POLICY</code> à une valeur vide, et <code>low</code> fait de même pour <code>PERMISSIONS_POLICY</code> : un service qui sélectionne l'un d'eux n'envoie pas cet en-tête, même si vos paramètres globaux contiennent une politique. Définissez la valeur sur le service, <code>www.example.com_CONTENT_SECURITY_POLICY=...</code>, pour la conserver.</p>
+</div>
 <p>Exemple de fichier modèle personnalisé:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"template name"</span><span class="p">,</span>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -3164,7 +3164,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <p>与其他 Docker 镜像不同，一体化镜像会将 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 保留为 <code>/var/log/bunkerweb/</code> 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 <code>HIDE_SERVICE_LOGS</code>，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。</p>
 <ul>
 <li>该镜像内置 <code>logrotate</code>，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 <code>[LOGROTATE]</code> 前缀报告。</li>
-<li>策略与 Linux 软件包安装的相同，位于 <code>/etc/logrotate.d/bunkerweb</code>：任何匹配 <code>/var/log/bunkerweb/*.log</code> 的文件在超过 100 MB 时都会被轮转，保留七个压缩后的历史版本，并使用 <code>copytruncate</code> 进行轮转。</li>
+<li>策略与 Linux 软件包安装的相同，位于 <code>/etc/logrotate.d/bunkerweb</code>：任何匹配 <code>/var/log/bunkerweb/*.log</code> 的文件都会每天轮转，若超过 100 MB 则提前轮转，保留十四个编号的历史版本，并使用 <code>copytruncate</code> 进行轮转。</li>
 <li><code>copytruncate</code> 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。</li>
 <li>如需更改阈值或历史版本数量，请将您自己的文件挂载到 <code>/etc/logrotate.d/bunkerweb</code>。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 <code>/var/log/bunkerweb</code> 只会改变数据的存放位置，并不会阻止容器内运行的 <code>logrotate</code> 继续对其进行轮转。</li>
 </ul>
@@ -3182,6 +3182,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
 <ul>
+<li><strong>内置的 CrowdSec 代理仅在</strong>容器设置了无前缀的环境变量 <code>USE_CROWDSEC=yes</code> 且 <code>CROWDSEC_API</code> 指向本地时才会启动。仅为单个服务启用 CrowdSec（<code>www.example.com_USE_CROWDSEC=yes</code>）不会启动它。</li>
 <li>
 <p>当 <code>USE_CROWDSEC=yes</code> 时，入口点将：</p>
 <ol>
@@ -3282,7 +3283,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 - 使用 <code>cscli parsers list</code> 显示的 hub slug（例如，<code>crowdsecurity/geoip-enrich</code>）。</p>
 <hr />
 <h4 id="api_1">禁用中央 API</h4>
-<p>若要让 CrowdSec 完全在本地运行，不进行注册、也不与 CrowdSec 服务器通信，请将 <code>DISABLE_ONLINE_API</code> 设为 <code>true</code>：</p>
+<p>若要选择退出 Central API 和 Console 注册（不发送任何信号，也不拉取社区黑名单），请将 <code>DISABLE_ONLINE_API</code> 设为 <code>true</code>。这不会停止 hub 更新：无论此设置如何，collection 和 parser 目录仍会从 CrowdSec hub 获取：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
@@ -3376,6 +3377,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="admonition info">
 <p class="admonition-title">完整列表</p>
 <p>有关环境变量的完整列表，请参阅文档的<a href="../features/">设置部分</a>。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
+<p>与上述设置不同，<code>KEEP_CONFIG_ON_RESTART</code> 由 <code>bunkerweb</code> 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 <code>bunkerweb</code> 容器本身上设置。设置为 <code>yes</code> 可在容器重启时保留之前生成的配置，而不是渲染加载配置。默认值为 <code>no</code>。</p>
 </div>
 <h3 id="docker-secrets">使用 Docker secrets</h3>
 <p>与其通过环境变量传递敏感设置，不如将它们存储为 Docker secrets。对于每个您想要保护的设置，创建一个名称与设置键（大写）匹配的 Docker secret。BunkerWeb 的入口点脚本会自动从 <code>/run/secrets</code> 加载 secrets 并将它们导出为环境变量。</p>
@@ -3505,7 +3510,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 <tr>
 <td><code>SEND_FILES_MIN_TIMEOUT</code></td>
-<td>推送配置和缓存目录时的最小读取超时</td>
+<td>推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。</td>
 <td>整秒</td>
 <td><code>30</code></td>
 </tr>
@@ -3894,6 +3899,13 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">管理器和调度器安装</p>
 <p>如果您选择<strong>管理器</strong>或<strong>仅调度器</strong>安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。</p>
 </div>
+<h4 id="docker-compose-web-ui">使用 Docker Compose 收集 Web UI 本地日志</h4>
+<p>对于<strong>完整 Docker 安装</strong>（标准模式或 <code>--autoconf</code>），安装程序可以在本地收集日志供 Web UI 使用。全新的交互式安装默认选择<strong>是</strong>；无人值守安装请通过 <code>--syslog</code> 或 <code>--no-syslog</code> 明确选择：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--syslog
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--no-syslog
+</code></pre></div>
+<p>启用后，生成的堆栈会在内部 <code>bw-universe</code> 网络上添加 <code>bw-syslog</code> 收集器，不会将其 syslog 端口发布到主机。日志保存在持久化 <code>bw-logs</code> 卷中并挂载到 <code>bw-ui</code>；<code>syslog-ng.conf</code> 会生成在 <code>docker-compose.yml</code> 旁边。BunkerWeb 组件仍会同时向标准错误输出日志，因此 <code>docker compose logs</code> 仍然可用。生成的配置使用固定文件名和有限轮转（每个文件约 100 MB，保留 7 次轮转）。</p>
+<p>该选择以 <code>BW_INSTALL_SYSLOG=yes|no</code> 保存到 <code>.env</code> 中，并在升级和重新运行时保留，除非显式覆盖。禁用时，只有安装程序管理的收集器会在更新后的堆栈就绪后被删除；<code>bw-logs</code> 历史记录和配置文件会保留。操作员编辑过的 Compose 和 syslog-ng 文件不会被静默替换。</p>
 <h4 id="_52">命令行选项</h4>
 <p>对于非交互式或自动化设置，可以使用命令行标志来控制脚本：</p>
 <p><strong>通用选项：</strong></p>
@@ -4201,7 +4213,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>重启调度器：<code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="_54">使用软件包管理器安装</h3>
-<p>请确保在安装 BunkerWeb 之前<strong>已经安装了 NGINX 1.30.4</strong>。对于所有发行版，强制要求使用来自<a href="https://nginx.org/en/linux_packages.html">官方 NGINX 仓库</a>的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。</p>
+<p>请确保在安装 BunkerWeb 之前<strong>已经安装了 NGINX 1.30.5</strong>。对于所有发行版，强制要求使用来自<a href="https://nginx.org/en/linux_packages.html">官方 NGINX 仓库</a>的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4213,9 +4225,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx"</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.30.4：</p>
+<p>您现在应该能够安装 NGINX 1.30.5：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.4-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.5-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">测试/开发版本</p>
@@ -4247,9 +4259,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx"</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.30.4：</p>
+<p>您现在应该能够安装 NGINX 1.30.5：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.4-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.5-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">测试/开发版本</p>
@@ -4279,8 +4291,12 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<p>Fedora 已经提供了我们支持的 NGINX 1.30.4</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.4
+<div class="admonition warning">
+<p class="admonition-title">Fedora 43 提供的是 NGINX 1.30.4</p>
+<p>Fedora 43 尚未提供 NGINX 1.30.5，因此 Fedora 43 的 BunkerWeb 软件包基于 NGINX 1.30.4 构建并依赖 <code>nginx-1.30.4</code>。请在 Fedora 43 上安装该版本；Fedora 43 发布 1.30.5 后，依赖将随之更新。Fedora 44 已提供 1.30.5。</p>
+</div>
+<p>Fedora 已经提供了我们支持的 NGINX 1.30.5</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
@@ -4316,8 +4332,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>您现在应该能够安装 NGINX 1.30.4：</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.4
+<p>您现在应该能够安装 NGINX 1.30.5：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
@@ -4345,6 +4361,25 @@ MY_SETTING_2=value2
 </code></pre></div>
 <p>安装后，BunkerWeb 带有三个服务 <code>bunkerweb</code>、<code>bunkerweb-scheduler</code> 和 <code>bunkerweb-ui</code>，您可以使用 <code>systemctl</code> 来管理它们。</p>
 <p>如果您手动编辑了 BunkerWeb 的配置（使用 <code>/etc/bunkerweb/variables.env</code>），重启 <code>bunkerweb-scheduler</code> 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 <code>bunkerweb</code> 服务。</p>
+<p><code>bunkerweb</code> 服务的入口点还会在正常设置流程之外，直接读取以下变量：</p>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>描述</th>
+<th>可选值</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KEEP_CONFIG_ON_RESTART</code></td>
+<td>重启 <code>bunkerweb</code> 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 <code>/etc/bunkerweb/variables.env</code> 读取，绝不从数据库读取。</td>
+<td><code>yes</code> 或 <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="_56">高可用性</h3>
 <p>调度器可以与 BunkerWeb 实例分离，以提供高可用性。在这种情况下，调度器将安装在一台独立的服务器上，并能够管理多个 BunkerWeb 实例。</p>
 <h4 id="_57">管理器</h4>
@@ -4997,6 +5032,37 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 <li><strong>Pod annotation</strong>: <code>bunkerweb.io/INSTANCE: "yes"</code></li>
 <li><strong>Environment variable</strong>: <code>KUBERNETES_MODE: "yes"</code></li>
 </ol>
+<div class="admonition warning">
+<p class="admonition-title">Set <code>API_TOKEN</code> on Kubernetes</p>
+<p>The internal API on port 5000 is a privileged control plane: it serves <code>/ping</code>, <code>/reload</code>, <code>/confs</code> and <code>/stop</code>. Pod IPs are dynamic, so <code>API_WHITELIST_IP</code> has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set <code>API_TOKEN</code> on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.</p>
+<p>Create the Secret in every namespace that runs a BunkerWeb pod, replacing <code>your-namespace</code> as needed:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>bunkerweb-api<span class="w"> </span>--namespace<span class="w"> </span>your-namespace<span class="w"> </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">32</span><span class="k">)</span><span class="s2">"</span>
+</code></pre></div>
+<p>Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+<span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+<span class="nt">ui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+</code></pre></div>
+<p>Narrow <code>API_WHITELIST_IP</code> to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -5034,6 +5100,11 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">              </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nn">---</span>
@@ -5120,6 +5191,11 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span><span class="w">  </span><span class="c1"># Enable Kubernetes mode</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">              </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REVERSE_PROXY</span>
@@ -5165,6 +5241,11 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_TOKEN</span>
+<span class="w">              </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 </code></pre></div>
 <h6 id="important-environment-variables">Important Environment Variables</h6>
 <table>
@@ -5189,7 +5270,12 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 <tr>
 <td><code>API_WHITELIST_IP</code></td>
 <td><code>127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16</code></td>
-<td>IPs allowed to access the API</td>
+<td>IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with <code>API_TOKEN</code>; the whitelist alone does not isolate the API from other workloads</td>
+</tr>
+<tr>
+<td><code>API_TOKEN</code></td>
+<td><em>(from a Secret)</em></td>
+<td>Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed</td>
 </tr>
 </tbody>
 </table>
@@ -5405,6 +5491,10 @@ Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 <code>settings.re
 ✅ <strong>Check logs</strong> of scheduler and sidecars regularly</p>
 <h4 id="yaml">完整的 YAML 文件</h4>
 <p>除了使用 helm chart，您还可以使用 GitHub 仓库中 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations 文件夹</a>内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。</p>
+<div class="admonition warning">
+<p class="admonition-title">DNS_RESOLVERS 必须填写集群的 DNS Service</p>
+<p>请将 <code>DNS_RESOLVERS</code> 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 <code>kube-dns.kube-system.svc.cluster.local</code>，即使其背后的实现是 CoreDNS 也是如此。</p>
+</div>
 <h3 id="ingress">Ingress 资源</h3>
 <p>一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。</p>
 <p>需要注意的是，BunkerWeb 设置需要作为 Ingress 资源的注解来指定。对于域部分，请使用特殊值 <strong><code>bunkerweb.io</code></strong>。通过包含适当的注解，您可以相应地为 Ingress 资源配置 BunkerWeb。</p>
@@ -5660,7 +5750,8 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">    </span><span class="c1"># 替换为您的 DNS 解析器</span>
 <span class="w">    </span><span class="c1"># 获取方法：在任意 pod 中执行 kubectl exec，然后 cat /etc/resolv.conf</span>
 <span class="w">    </span><span class="c1"># 如果您的 nameserver 是一个 IP，则执行反向 DNS 查找：nslookup &lt;IP&gt;</span>
-<span class="w">    </span><span class="c1"># 大多数情况下是 coredns.kube-system.svc.cluster.local 或 kube-dns.kube-system.svc.cluster.local</span>
+<span class="w">    </span><span class="c1"># 大多数情况下是 kube-dns.kube-system.svc.cluster.local，在标准集群上</span>
+<span class="w">    </span><span class="c1"># CoreDNS 正是位于该 Service 之后</span>
 <span class="w">    </span><span class="nt">dnsResolvers</span><span class="p">:</span><span class="w"> </span><span class="s">"kube-dns.kube-system.svc.cluster.local"</span>
 <span class="w">  </span><span class="nt">kubernetes</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 我们只考虑带有 ingressClass bunkerweb 的 Ingress 资源，以避免与现有 ingress 控制器冲突</span>

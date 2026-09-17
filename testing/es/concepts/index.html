@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1289,7 +1289,7 @@
 <h2 id="configuraciones">Configuraciones</h2>
 <div class="admonition tip">
 <p class="admonition-title">Configuraciones de BunkerWeb PRO</p>
-<p>Algunos plugins están reservados para la <strong>versión PRO</strong>. ¿Quieres probar rápidamente BunkerWeb PRO durante un mes? Usa el código <code>freetrial</code> al realizar tu pedido en el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">panel de BunkerWeb</a> o haciendo clic <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">aquí</a> para aplicar directamente el código de promoción (se hará efectivo al finalizar la compra).</p>
+<p>Algunos plugins están reservados para la <strong>versión PRO</strong>. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a>.</p>
 </div>
 <p>Una vez que BunkerWeb esté integrado en tu entorno, necesitarás configurarlo para servir y proteger tus aplicaciones web.</p>
 <p>La configuración de BunkerWeb se realiza utilizando lo que llamamos "configuraciones" o "variables". Cada configuración se identifica por un nombre como <code>AUTO_LETS_ENCRYPT</code> o <code>USE_ANTIBOT</code>. Puedes asignar valores a estas configuraciones para configurar BunkerWeb.</p>
@@ -1536,6 +1536,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Selección de una plantilla</strong>: Una vez definida la plantilla personalizada, los usuarios pueden seleccionarla durante el proceso de configuración en modo fácil de un servicio en la interfaz de usuario web. También se puede seleccionar una plantilla con la configuración <code>USE_TEMPLATE</code> en la configuración. El nombre del archivo de la plantilla (sin la extensión <code>.json</code>) debe especificarse como el valor de la configuración <code>USE_TEMPLATE</code>.</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Las plantillas y los ajustes que usted configura</p>
+<p>Cuando una plantilla declara un ajuste que usted también configura, cuál se aplica depende de dónde se haya seleccionado la plantilla:</p>
+<ul>
+<li>seleccionada en el servicio (<code>www.example.com_USE_TEMPLATE=medium</code>): el valor de la plantilla prevalece sobre el de la configuración global;</li>
+<li>seleccionada globalmente (<code>USE_TEMPLATE=medium</code>): el valor de la configuración global prevalece sobre el de la plantilla;</li>
+<li>un valor definido en el propio servicio prevalece siempre sobre ambos.</li>
+</ul>
+<p>Esto importa porque las plantillas <code>low</code>, <code>medium</code> y <code>api</code> establecen <code>CONTENT_SECURITY_POLICY</code> en un valor vacío, y <code>low</code> hace lo mismo con <code>PERMISSIONS_POLICY</code>: un servicio que seleccione una de ellas no envía esa cabecera aunque su configuración global contenga una política. Defina el valor en el servicio, <code>www.example.com_CONTENT_SECURITY_POLICY=...</code>, para conservarlo.</p>
+</div>
 <p>Ejemplo de un archivo de plantilla personalizada:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nombre de la plantilla"</span><span class="p">,</span>

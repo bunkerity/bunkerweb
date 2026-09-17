@@ -574,6 +574,8 @@ You can now log in with the administrator account you created during the setup w
 
         
 
+        At the start of a setting line, press `#` to toggle its draft state. Draft entries show a muted visual `#` prefix; press **Backspace** at the start of the line to activate them again. The prefix is editor metadata and does not alter the setting value. Click **Save** to persist the change. While a setting is draft, its inherited or default value applies. Draft settings are managed only in RAW mode and are preserved when saving in Simple or Advanced mode. This is separate from making the whole service a draft. Locked settings and service identity controls cannot be drafted.
+
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
     🚀 Once you've saved the configuration, you should see your new service in the list of services.

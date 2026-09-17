@@ -45,6 +45,7 @@ PRO_PLUGIN_DOCS = {
             "title": "Load Balancer",
         },
     },
+    "maintenance": {"advanced_anchor": "maintenance-pro"},
     "custom-pages": {"advanced_anchor": "custom-pages-pro"},
     "openid-connect": {
         "advanced_anchor": "openid-connect-pro",
@@ -54,6 +55,7 @@ PRO_PLUGIN_DOCS = {
         },
     },
     "ldap-sso": {"advanced_anchor": "ldap-sso-pro"},
+    "saml": {"advanced_anchor": "saml-pro"},
     "openapi-validator": {
         "advanced_anchor": "openapi-validator-pro",
         "youtube": {
