@@ -213,7 +213,7 @@ class StagedDirectory:
 def restore_directory(target: Path, data: bytes, companion: Path = None, companion_data: bytes = None) -> None:
     with StagedDirectory(target, companion) as staged:
         with tar_open(fileobj=BytesIO(data), mode="r:gz") as tar:
-            safe_tar_extractall(tar, staged.path, tar_filter="data")
+            safe_tar_extractall(tar, staged.path, tar_filter="auto")
         staged.publish(companion_data)
         staged.commit()
 
