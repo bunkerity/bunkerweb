@@ -1908,7 +1908,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1925,7 +1925,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -3280,7 +3280,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | Einstellung                                 | Standard      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------------------- | ------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | nein     | **Let's Encrypt aktivieren:** Auf `yes` setzen, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht.                                                                                                                                                                  |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht. Der ACME-Challenge-Pfad umgeht dann jede andere Prüfung.                                                                                                                                                                  |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | nein     | **Kontakt-E-Mail:** E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit `--register-unsafely-without-email`).                                                                                                             |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | nein     | **Zertifizierungsstelle:** Wählen Sie den ACME-Server für die Ausstellung. Optionen: `letsencrypt` oder `zerossl`.                                                                                                                                                                                                                                                     |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | nein     | **ZeroSSL-API-Schlüssel:** Optionaler Schlüssel, der von `zerossl-bot` verwendet wird, wenn `LETS_ENCRYPT_SERVER=zerossl` gesetzt ist. Wenn leer, wird `EMAIL_LETS_ENCRYPT` verwendet, um EAB-Zugangsdaten abzurufen.                                                                                                                                                  |
@@ -3307,7 +3307,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
     - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
     - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
-    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
+    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein `GET` oder `HEAD` eines einzelnen Tokens unter `/.well-known/acme-challenge/` wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen.
 
 !!! tip "HTTP- vs. DNS-Challenges"
     **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
@@ -4365,6 +4365,20 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
 
 !!! note "Menschenlesbare Größenwerte"
     Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+
+### Concurrent-Auditprotokolle
+
+| Einstellung | Standard | Beschreibung |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
+
+Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` und `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Erstellen Sie das Verzeichnis vorher auf jeder BunkerWeb-Instanz mit Schreib- und Suchrechten für den nginx-Worker. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab und erstellt das Verzeichnis nicht. Im globalen CRS-Modus (`USE_MODSECURITY_GLOBAL_CRS=yes`) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.
+
+`MODSECURITY_SEC_AUDIT_LOG` bleibt eine normale, sperrbare `.log`-Datei: Bei `Serial` enthält sie vollständige Datensätze, bei `Concurrent` einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.
+
+Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit `MODSECURITY_SEC_AUDIT_LOG_PARTS` ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.
 
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

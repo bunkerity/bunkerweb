@@ -28,9 +28,9 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 !!! tip "证书配置文件"
     Let's Encrypt 为不同的用例提供了不同的证书配置文件：
 
-    - **classic**：通用证书，有效期为 90 天（默认）
-    - **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小
-    - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境
+    - **classic**：通用证书，有效期为 90 天，最多 100 个名称（默认）
+    - **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 45 天，最多 25 个名称，有效负载更小
+    - **shortlived**：增强安全性，有效期为 160 小时，最多 25 个名称，适用于自动化环境
     - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
 
 !!! info "配置文件可用性"
@@ -58,7 +58,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                      |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | 否   | **清除旧证书：** 设置为 `yes` 时，在续订期间删除不再需要的旧证书。                                                                                                                   |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | 否   | **并发请求：** 设置为 `yes` 时，certbot-new 将并发发起证书请求。请谨慎使用以避免速率限制。                                                                                           |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                                |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用，最多 100 个名称）、`tlsserver`（针对 TLS 服务器优化，有效期 45 天，最多 25 个名称）或 `shortlived`（160 小时证书，最多 25 个名称）。 |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                         |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | 否   | **Certbot 日志备份上限：** Certbot 每个任务保留的轮转 `letsencrypt.log` 备份数量。Certbot 自带的默认值 `1000` 很容易迅速堆积；`50` 是一个更合理的上限。设置为 `0` 时仅保留当前日志。 |
@@ -68,7 +68,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：

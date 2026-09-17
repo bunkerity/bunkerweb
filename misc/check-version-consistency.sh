@@ -46,7 +46,6 @@ check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: 1\.[0-9][^ ]*'
 #   src/common/db/alembic/            revision ids and down_revision chains
 #   .github/RELEASING.md              worked examples of the tag convention
 #   misc/install-bunkerweb.sh         ~rc vs -rc comparison examples in comments
-#   tests/unit/test_installer_versions.sh   version-parsing fixtures
 CORE="${VERSION%%[~-]*}"
 mapfile -t stale < <(
     git grep -nE "${CORE//./\\.}[~-]rc[0-9]+" -- \
@@ -56,7 +55,6 @@ mapfile -t stale < <(
         ':!.github/scripts/**' \
         ':!docs/superpowers/**' \
         ':!misc/install-bunkerweb.sh' \
-        ':!tests/unit/test_installer_versions.sh' \
         ':!misc/check-version-consistency.sh' 2>/dev/null |
         grep -vF "$VERSION" | grep -vF "$TAG_VERSION" || true
 )
@@ -68,6 +66,34 @@ if [ ${#stale[@]} -gt 0 ]; then
     [ ${#stale[@]} -gt 20 ] && echo "  ... and $(( ${#stale[@]} - 20 )) more"
     fail=1
 fi
+
+# --- 3. NGINX: every Linux package must build its modules against the tree it runs. ---
+# nginx refuses a dynamic module compiled for another version at config load, so each
+# src/linux/Dockerfile-* NGINX_VERSION must match the vendored tree that src/deps/install.sh
+# selects for it: src/deps/src/nginx by default, src/deps/src/nginx-<version> for a distro
+# that lags (selected by OS and OS_VERSION in install.sh).
+nginx_tree_version() {
+    [ -f "$1/src/core/nginx.h" ] || return 0
+    sed -n 's/^#define NGINX_VERSION[[:space:]]*"\([^"]*\)"/\1/p' "$1/src/core/nginx.h"
+}
+MAIN_NGINX="$(nginx_tree_version src/deps/src/nginx)"
+# A tree without the vendored sources (the release unit test's fixture) has nothing to check.
+for df in $([ -n "$MAIN_NGINX" ] && ls src/linux/Dockerfile-* 2>/dev/null); do
+    pin="$(sed -n 's/^ENV NGINX_VERSION=//p' "$df" | head -1)"
+    [ -z "$pin" ] && continue
+    if [ "$pin" = "$MAIN_NGINX" ]; then
+        continue
+    fi
+    if [ "$(nginx_tree_version "src/deps/src/nginx-$pin")" != "$pin" ]; then
+        note "$df: NGINX_VERSION=$pin but the vendored tree is $MAIN_NGINX and src/deps/src/nginx-$pin does not exist"
+        continue
+    fi
+    os="$(sed -n 's/^ENV OS=//p' "$df" | head -1)"
+    os_version="$(sed -n 's/^ENV OS_VERSION=//p' "$df" | head -1)"
+    if ! grep -qE "\"\\\$OS\" = \"$os\".*\"\\\$OS_VERSION\" = \"$os_version\"" src/deps/install.sh; then
+        note "$df: NGINX_VERSION=$pin needs src/deps/install.sh to select src/deps/src/nginx-$pin for OS=$os OS_VERSION=$os_version"
+    fi
+done
 
 if [ "$fail" -ne 0 ]; then
     cat >&2 <<EOF

@@ -26,6 +26,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: no-ui-source-maps
+        name: Reject source-map references in shipped UI assets
+        entry: '(?://[#@]|/\*[#@])\s*sourceMappingURL='
+        language: pygrep
+        types: [text]
+        files: ^src/ui/app/static/.*\.(js|css)$
+
       - id: prettier
         name: Prettier
         entry: prettier --write

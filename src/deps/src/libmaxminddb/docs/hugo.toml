@@ -1,0 +1,18 @@
+title = "libmaxminddb"
+uglyURLs = true
+disableKinds = ["taxonomy", "term", "RSS"]
+
+[[cascade]]
+  layout = "default"
+
+[markup.highlight]
+  noClasses = true
+  style = "github"
+
+[[module.mounts]]
+  source = "../doc/libmaxminddb.md"
+  target = "content/_index.md"
+
+[[module.mounts]]
+  source = "../doc/mmdblookup.md"
+  target = "content/mmdblookup.md"

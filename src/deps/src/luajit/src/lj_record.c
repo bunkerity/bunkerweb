@@ -2266,6 +2266,8 @@ void lj_record_ins(jit_State *J)
       {
 	BCReg s;
 	TValue *tv = J->L->base;
+	ptrdiff_t delta = J->L->top - tv;
+	if (J->maxslot > (BCReg)delta) J->maxslot = (BCReg)delta;
 	for (s = 0; s < J->maxslot; s++)  /* Constify stack slots (if any). */
 	  if (J->base[s] == TREF_NIL && !tvisnil(&tv[s]))
 	    J->base[s] = lj_record_constify(J, &tv[s]);

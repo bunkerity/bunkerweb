@@ -23,7 +23,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from app.models.safe_session_cache import SafeFileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -676,11 +677,13 @@ with app.app_context():
     # Same helper the routes use, so the worker ends up with one memoised client and one
     # connection pool instead of a session pool plus a per-request one.
     redis_client = get_ui_redis_client()
+    session_fallback_cache = None
     if redis_client:
         LOGGER.debug("Using Redis as session backend")
         app.config["SESSION_TYPE"] = "redis"
         app.config["SESSION_REDIS"] = redis_client
         app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        session_fallback_cache = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     else:
         # get_redis_client returns None for both "disabled" and "unreachable"; only the second
         # is worth a WARNING, because this worker is now pinned to file sessions for its life.
@@ -691,6 +694,27 @@ with app.app_context():
         app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+    # dies or fills up after this point makes every request raise. Same parameters as the
+    # interface it replaces, plus the local cache it falls back to.
+    if session_fallback_cache is not None:
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it. This branch only runs once a Redis
+        # client exists.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=session_fallback_cache,
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
 
     # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
     # every request, so an untouched session is rewritten to the store even for a static
@@ -714,6 +738,8 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session so a form left open is not rejected before the session expires
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
@@ -850,12 +876,13 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+            flash(
+                Markup("""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>here</a>
+</div>""").format(url_for("profile.profile_page")),
                 "error",
+                save=False,
             )
 
     return ui_user
@@ -1022,14 +1049,9 @@ def _delete_session_store_entry(sid: str) -> None:
         return
     interface = app.session_interface
     try:
-        client = getattr(interface, "client", None)
-        key_prefix = getattr(interface, "key_prefix", None)
-        if client is not None and key_prefix is not None:
-            client.delete(f"{key_prefix}{sid}")
-            return
-        cache = getattr(interface, "cache", None)
-        if cache is not None:
-            cache.delete(sid)
+        # The interface's own delete already covers whichever store backs it, including the
+        # local one a failing Redis falls back to.
+        interface._delete_session(interface._get_store_id(sid))
     except Exception:
         LOGGER.exception("Failed to delete session store entry during rotation/expiry")
 
@@ -1169,20 +1191,24 @@ def before_request():
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
-        if app.config.get("SESSION_TYPE") == "cachelib":
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0).
+        # Covers the Redis fallback cache too, which fills up during an outage and prunes no more than the other.
+        session_file_cache = (
+            app.config["SESSION_CACHELIB"] if app.config.get("SESSION_TYPE") == "cachelib" else getattr(app.session_interface, "fallback", None)
+        )
+        if session_file_cache is not None:
             global _session_cleanup_last_run
             now_ts = time()
             if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
                 _session_cleanup_last_run = now_ts
-                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
+                _periodic_tasks_executor.submit(session_file_cache._remove_expired, now_ts)
 
         schedule_database_state_check(request.method, request.path)
 
         DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash("Database connection is in read-only mode : no modifications possible.", "error", save=False)
 
         if current_user.is_authenticated:
             passed = True
@@ -1253,16 +1279,20 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                flash(
+                    Markup(
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
+                    ),
                     "error",
+                    save=False,
                 )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
+                flash(
+                    Markup("""<div class='d-flex flex-column'>
                         <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
-                    </div>""",
+                        <p class='p-0 m-0 fst-italic'>{}</p>
+                    </div>""").format(metadata["failover_message"]),
                     "error",
+                    save=False,
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
                 flash("The last changes have been applied successfully.")
@@ -1547,7 +1577,7 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash("Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})

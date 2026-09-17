@@ -19,22 +19,33 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
-from time import monotonic, sleep, time
+from time import monotonic, sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union, cast
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
-for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("deps", "python"), ("utils",), ("api",), ("db",), ("gen",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude, safe_tar_extractall  # type: ignore
+from common_utils import (  # type: ignore
+    acquire_db_lock,
+    bytes_hash,
+    create_plugin_tar_gz,
+    DatabaseLockBusy,
+    dict_to_frozenset,
+    handle_docker_secrets,
+    plugin_tar_exclude,
+    release_db_lock,
+    safe_tar_extractall,
+)
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
+from Configurator import Configurator  # type: ignore
 from JobScheduler import JobScheduler
 from jobs import Job, _write_atomic  # type: ignore
 from cache_restore import (  # type: ignore
@@ -101,6 +112,7 @@ HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = getLogger("SCHEDULER")
+PLUGIN_VALIDATOR: Optional[Configurator] = None
 
 HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "30")
 
@@ -257,7 +269,7 @@ def handle_reload(signum, frame):
                 env=cmd_env,
             )
             if proc.returncode != 0:
-                LOGGER.error("Config saver failed, configuration will not work as expected...")
+                LOGGER.error(f"Config saver failed with return code {proc.returncode}, configuration will not work as expected...")
         else:
             LOGGER.warning("Ignored reload operation because scheduler is not running ...")
     except BaseException as e:
@@ -468,6 +480,22 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                     continue
                 LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
 
+            if file.is_dir() and not file.is_symlink() and file.joinpath("plugin.json").is_file():
+                plugin_data: Any = None
+                with suppress(OSError, TypeError, ValueError):
+                    with file.joinpath("plugin.json").open("r", encoding="utf-8") as plugin_file:
+                        plugin_data = json_load(plugin_file)
+                plugin_id = plugin_data.get("id") if isinstance(plugin_data, dict) else None
+                stored_plugin = next((plugin for plugin in plugins if plugin["id"] in (file.name, plugin_id)), None)
+                if (stored_plugin is None or stored_plugin["method"] == "manual") and (
+                    not isinstance(plugin_data, dict) or not validate_manual_plugin(plugin_data, file, log_invalid=False)
+                ):
+                    ignored_plugins.add(file.name)
+                    if isinstance(plugin_data, dict) and isinstance(plugin_data.get("id"), str):
+                        ignored_plugins.add(plugin_data["id"])
+                    LOGGER.warning(f"Preserving invalid manual plugin {file.name} during generation")
+                    continue
+
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
@@ -484,6 +512,8 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
             try:
                 if plugin["data"]:
                     with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
+                        if plugin["method"] == "manual" and any(Path(name).parts and Path(name).parts[0] in ignored_plugins for name in tar.getnames()):
+                            continue
                         safe_tar_extractall(tar, original_path)
 
                     # Add u+x permissions to executable files
@@ -508,6 +538,26 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     if send and SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
         send_file_to_bunkerweb(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
+
+
+def get_plugin_validator() -> Configurator:
+    global PLUGIN_VALIDATOR
+
+    if PLUGIN_VALIDATOR is None:
+        PLUGIN_VALIDATOR = Configurator(BUNKERWEB_PATH / "settings.json", BUNKERWEB_PATH / "core", [], [], {}, LOGGER)
+    return PLUGIN_VALIDATOR
+
+
+def validate_manual_plugin(plugin_data: Dict[str, Any], plugin_path: Path, *, log_invalid: bool = True) -> bool:
+    try:
+        valid, message = get_plugin_validator()._Configurator__validate_plugin(deepcopy(plugin_data))
+    except (AttributeError, KeyError, OSError, TypeError, ValueError) as e:
+        if log_invalid:
+            LOGGER.error(f"Ignoring invalid manual plugin {plugin_path.name}: {e}")
+        return False
+    if not valid and log_invalid:
+        LOGGER.error(f"Ignoring invalid manual plugin {plugin_path.name}: {message}")
+    return valid
 
 
 def generate_caches() -> Set[str]:
@@ -701,6 +751,26 @@ def _render_holding_applying_changes() -> bool:
     finally:
         if held:
             APPLYING_CHANGES.clear()
+
+
+def claim_changes(changes: Optional[List[str]] = None, *, plugins_changes=None) -> Dict[str, Any]:
+    """Acknowledge pending changes, then return a fresh configuration snapshot.
+
+    The order is the whole point: the flags are cleared first, so anything written after this
+    call is still flagged when the returned snapshot is rendered, and the next tick picks it up.
+    """
+    try:
+        ret = SCHEDULER.db.checked_changes(changes, plugins_changes=plugins_changes)
+        if ret:
+            LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+    except BaseException as e:
+        LOGGER.error(f"Error while setting changes to checked in the database: {e}")
+    env = SCHEDULER.db.get_config()
+    env["DATABASE_URI"] = SCHEDULER.db.database_uri
+    tz = getenv("TZ")
+    if tz:
+        env["TZ"] = tz
+    return env
 
 
 def generate_configs_for_jobs() -> bool:
@@ -1112,7 +1182,7 @@ if __name__ == "__main__":
                 env=cmd_env,
             )
             if proc.returncode != 0:
-                LOGGER.error("Config saver failed, configuration will not work as expected...")
+                LOGGER.error(f"Config saver failed with return code {proc.returncode}, configuration will not work as expected...")
 
         ready = False
         while not ready:
@@ -1175,7 +1245,7 @@ if __name__ == "__main__":
                 env=cmd_env,
             )
             if proc.returncode != 0:
-                LOGGER.error("Config saver failed, configuration will not work as expected...")
+                LOGGER.error(f"Config saver failed with return code {proc.returncode}, configuration will not work as expected...")
                 return False
             return True
 
@@ -1188,14 +1258,27 @@ if __name__ == "__main__":
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
+            ignored_plugins = set()
+            unchanged_ids = set()
             for file in plugin_path.glob("*/plugin.json"):
-                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
-
-                with file.open("r", encoding="utf-8") as f:
-                    plugin_data = json_load(f)
-
-                if plugin_data["id"] == "letsencrypt_dns":
+                try:
+                    with file.open("r", encoding="utf-8") as f:
+                        plugin_data = json_load(f)
+                    if not isinstance(plugin_data, dict):
+                        raise ValueError("plugin.json must contain a JSON object")
+                    if plugin_data.get("id") == "letsencrypt_dns":
+                        continue
+                    if not validate_manual_plugin(plugin_data, file.parent):
+                        ignored_plugins.add(file.parent.name)
+                        if isinstance(plugin_data.get("id"), str):
+                            ignored_plugins.add(plugin_data["id"])
+                        continue
+                except (OSError, ValueError) as e:
+                    LOGGER.error(f"Ignoring invalid manual plugin {file.parent.name}: {e}")
+                    ignored_plugins.add(file.parent.name)
                     continue
+
+                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
 
                 checksum = bytes_hash(plugin_content, algorithm="sha256")
                 common_data = plugin_data | {
@@ -1209,6 +1292,7 @@ if __name__ == "__main__":
                     index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
 
                     if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                        unchanged_ids.add(common_data["id"])
                         continue
 
                 tmp_external_plugins.append(common_data.copy())
@@ -1222,13 +1306,18 @@ if __name__ == "__main__":
                     | ({"jobs": jobs} if jobs else {})
                 )
 
+            if ignored_plugins:
+                LOGGER.debug(f"Preserving ignored {_type} plugin(s): {sorted(ignored_plugins)}")
+
             changes = False
             if tmp_external_plugins:
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
                     try:
-                        err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                        err = SCHEDULER.db.update_external_plugins(
+                            external_plugins, _type=_type, delete_missing=True, preserve_ids=ignored_plugins | unchanged_ids
+                        )
                         if err:
                             LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
                     except BaseException as e:
@@ -1243,12 +1332,17 @@ if __name__ == "__main__":
 
         check_configs_changes()
         plugins_refreshed = []
-        task_futures.extend(
-            [
-                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
-                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
-            ]
-        )
+        try:
+            get_plugin_validator()
+        except (AttributeError, KeyError, OSError, TypeError, ValueError) as e:
+            LOGGER.error(f"Skipping manual plugin scan because validation is unavailable: {e}")
+        else:
+            task_futures.extend(
+                [
+                    SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
+                    SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
+                ]
+            )
 
         for future in task_futures:
             plugins_refreshed.append(bool(future.result()))
@@ -1302,6 +1396,13 @@ if __name__ == "__main__":
         JOB.restore_cache(job_name="failover-backup", plugin_id="jobs")
 
         del dotenv_env
+
+        # Every pending change is acknowledged before the configuration it will be rendered from is
+        # read. Acknowledging after the render used to wipe flags raised while the jobs were running,
+        # so that later change was rendered (nginx saw it) but never reached the once-jobs (mTLS CA
+        # removal kept the cached bundle, a new CrowdSec service never got its crowdsec.conf).
+        # A write landing after this point stays flagged and is handled by the first loop tick.
+        env = claim_changes(plugins_changes="all")
 
         FIRST_START = True
         CONFIG_NEED_GENERATION = True
@@ -1544,13 +1645,6 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 
-            try:
-                ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
-                if ret:
-                    LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-            except BaseException as e:
-                LOGGER.error(f"Error while setting changes to checked in the database: {e}")
-
             # A pre-job push that reached no instance leaves its work pending: the once-jobs have to
             # run against the configuration the instances actually hold, and a job scheduled "once"
             # is retried by nothing once its flag has been cleared.
@@ -1630,20 +1724,18 @@ if __name__ == "__main__":
                     if _gc_counter >= 10:
                         collect()
                         _gc_counter = 0
+                    # The lock is only a barrier against a running bwcli save/restore: take it,
+                    # read the metadata, release it right away (never held across the loop body).
                     try:
-                        # A lock is stale 30s after its creation, whatever happened to its holder.
-                        # The deadline is monotonic so that an NTP step can't extend the wait.
-                        lock_deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
-                    except OSError:
-                        lock_deadline = monotonic()
+                        db_lock = acquire_db_lock(DB_LOCK_FILE, timeout=30.0)
+                    except DatabaseLockBusy as e:
+                        LOGGER.warning(f"{e}, skipping this scheduler tick")
+                        continue
 
-                    while DB_LOCK_FILE.is_file() and monotonic() < lock_deadline:
-                        LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-                        sleep(1)
-
-                    DB_LOCK_FILE.unlink(missing_ok=True)
-
-                    db_metadata = SCHEDULER.db.get_metadata()
+                    try:
+                        db_metadata = SCHEDULER.db.get_metadata()
+                    finally:
+                        release_db_lock(db_lock)
 
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
@@ -1742,29 +1834,36 @@ if __name__ == "__main__":
                 LOGGER.debug(f"Changes: {changes}")
                 SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
+                for flag, change in (
+                    (INSTANCES_NEED_GENERATION, "instances"),
+                    (CONFIGS_NEED_GENERATION, "custom_configs"),
+                    (PLUGINS_NEED_GENERATION, "external_plugins"),
+                    (PRO_PLUGINS_NEED_GENERATION, "pro_plugins"),
+                    (CONFIG_NEED_GENERATION, "config"),
+                ):
+                    if flag:
+                        CHANGES.append(change)
+                # Claim exactly what this iteration is about to read (the plugin ids came from the
+                # same metadata snapshot), before reading it: see the note above the main loop.
+                claim_changes(CHANGES, plugins_changes=changed_plugins or None)
 
                 if INSTANCES_NEED_GENERATION:
-                    CHANGES.append("instances")
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
                         SCHEDULER.apis.append(API.from_instance(db_instance))
 
                 if CONFIGS_NEED_GENERATION:
-                    CHANGES.append("custom_configs")
                     generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
                 if PLUGINS_NEED_GENERATION:
-                    CHANGES.append("external_plugins")
                     generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
-                    CHANGES.append("pro_plugins")
                     generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
-                    CHANGES.append("config")
                     old_env = env.copy()
                     env = SCHEDULER.db.get_config()
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(

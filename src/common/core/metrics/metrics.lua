@@ -622,12 +622,17 @@ function metrics:log(bypass_checks)
 				self.logger:log(ERR, "can't get country code " .. err)
 			end
 		end
+		local request_method = self.ctx.bw.request_method
+		-- Early parser denials can redirect to an error page before the context is saved.
+		if reason == "modsecurity-body" and ngx.var.request then
+			request_method = ngx.var.request:match("^(%S+)") or request_method
+		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
-			method = self.ctx.bw.request_method,
+			method = request_method,
 			url = self.ctx.bw.request_uri,
 			status = ngx.status,
 			user_agent = self.ctx.bw.http_user_agent or "",

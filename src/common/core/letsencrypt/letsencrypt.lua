@@ -1,9 +1,10 @@
+local acme = require "bunkerweb.acme"
 local cjson = require "cjson"
 local class = require "middleclass"
+local env = require "resty.env"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
 local utils = require "bunkerweb.utils"
-local is_http_challenge = require("bunkerweb.acme").is_http_challenge
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -18,6 +19,9 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local parse_pem_cert = ssl.parse_pem_cert
 local parse_pem_priv_key = ssl.parse_pem_priv_key
 local ssl_server_name = ssl.server_name
+local is_http_challenge = acme.is_http_challenge
+local is_challenge_uri = acme.is_challenge_uri
+local env_set = env.set
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
@@ -47,6 +51,7 @@ local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
 		return nil
 	end
+	local explicit = domain:sub(1, 2) == "*."
 	local cleaned = lower(gsub(domain, "^%*%.", ""))
 	cleaned = gsub(cleaned, "%.+$", "")
 	local labels = {}
@@ -58,7 +63,7 @@ local function sanitize_domain_labels(domain)
 	if #labels == 0 then
 		return nil
 	end
-	return labels
+	return labels, explicit
 end
 
 local function determine_wildcard_bases(labels_list)
@@ -95,6 +100,11 @@ local function determine_wildcard_bases(labels_list)
 		insert(common_suffix, 1, label)
 	end
 	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
+		for _, labels in ipairs(labels_list) do
+			if #labels > #common_suffix + 1 then
+				return {}
+			end
+		end
 		return { table.concat(common_suffix, ".") }
 	end
 	local bases = {}
@@ -115,12 +125,29 @@ local function determine_wildcard_bases(labels_list)
 end
 
 local function build_wildcard_groups(domains)
-	local grouped = {}
-	local has_entries = false
+	local cleaned_labels = {}
+	local explicit_bases = {}
 	for _, domain in ipairs(domains) do
-		local labels = sanitize_domain_labels(domain)
+		local labels, explicit = sanitize_domain_labels(domain)
 		if labels then
-			has_entries = true
+			insert(cleaned_labels, { labels = labels, explicit = explicit })
+			if explicit then
+				explicit_bases[table.concat(labels, ".")] = true
+			end
+		end
+	end
+	if #cleaned_labels == 0 then
+		return {}
+	end
+	local groups = {}
+	for base, _ in pairs(explicit_bases) do
+		groups[base] = { ["*." .. base] = true, [base] = true }
+	end
+	local grouped = {}
+	for _, entry in ipairs(cleaned_labels) do
+		local labels = entry.labels
+		local base = table.concat(labels, ".")
+		if not entry.explicit and not explicit_bases[base] and not explicit_bases[table.concat(labels, ".", 2)] then
 			local len = #labels
 			local key
 			if len >= 2 then
@@ -132,10 +159,6 @@ local function build_wildcard_groups(domains)
 			insert(grouped[key], labels)
 		end
 	end
-	if not has_entries then
-		return {}
-	end
-	local groups = {}
 	for _, labels_list in pairs(grouped) do
 		local bases = determine_wildcard_bases(labels_list)
 		for _, base in ipairs(bases) do
@@ -191,10 +214,32 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+-- A passed-through ACME challenge belongs to the backend that answers it, so no other check
+-- runs on it: it is whitelisted, which also skips the ban check and ModSecurity, more than the
+-- locally served token gets. That is why it is limited to one token-shaped segment (base64url,
+-- RFC 8555 section 8.3) fetched with GET or HEAD, never a deeper backend route. Decided in the
+-- set phase because the ModSecurity kill switch reads ENV:is_whitelisted in phase 1.
+function letsencrypt:is_passthrough_challenge()
+	if self.variables["LETS_ENCRYPT_PASSTHROUGH"] ~= "yes" or not is_challenge_uri(self.ctx) then
+		return false
+	end
+	local method = self.ctx.bw.request_method
+	if method ~= "GET" and method ~= "HEAD" then
+		return false
+	end
+	return match(self.ctx.bw.uri, "^/%.well%-known/acme%-challenge/[A-Za-z0-9_%-]+$") ~= nil
+end
+
 function letsencrypt:set()
 	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
 	if https_configured == "yes" then
 		self.ctx.bw.https_configured = "yes"
+	end
+	if self:is_passthrough_challenge() then
+		ngx.var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		return self:ret(true, "ACME challenge passed through, whitelisted")
 	end
 	return self:ret(true, "set https_configured to " .. https_configured)
 end
@@ -531,6 +576,10 @@ function letsencrypt:access()
 	if is_http_challenge(self.ctx) then
 		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", OK)
+	end
+	if self:is_passthrough_challenge() then
+		self.logger:log(NOTICE, "ACME challenge passed through to the backend, skipping the other checks")
+		return self:ret(true, "ACME challenge passed through", OK)
 	end
 	return self:ret(true, "success")
 end

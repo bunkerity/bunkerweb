@@ -133,6 +133,7 @@ class Global_values(Base):
     file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     setting = relationship("Settings", back_populates="global_value")
 
@@ -162,6 +163,7 @@ class Services_settings(Base):
     file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     service = relationship("Services", back_populates="settings")
     setting = relationship("Settings", back_populates="services")
@@ -358,7 +360,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.15~rc2", nullable=False)
+    version = Column(String(32), default="1.6.15~rc3", nullable=False)
 
 
 ## UI Models

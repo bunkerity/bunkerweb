@@ -1941,7 +1941,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1958,7 +1958,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -3343,7 +3343,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | 设置                                        | 默认值        | 上下文    | 多选 | 描述                                                                                                                                                                                 |
 | ------------------------------------------- | ------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                     |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。                                |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。 此时 ACME 验证路径会跳过所有其他检查。                                |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。   |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                       |
@@ -3370,7 +3370,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
@@ -4427,6 +4427,20 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
 
 !!! note "人类可读的大小值"
     对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。
+
+
+### Concurrent 审计日志
+
+| 设置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | 写入模式：`Serial`（默认）或 `Concurrent`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | 默认为空；`Concurrent` 必须使用绝对存储目录。 |
+
+设置 `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` 和 `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`。请预先在每个 BunkerWeb 实例上创建该目录，并授予 nginx worker 写入和目录访问权限。需要保留日志时请使用持久化挂载。BunkerWeb 会在应用之前拒绝无效配置，不会创建此目录。在全局 CRS 模式（`USE_MODSECURITY_GLOBAL_CRS=yes`）下，这两个设置必须在全局配置；服务级覆盖不会选择独立的写入模式。
+
+`MODSECURITY_SEC_AUDIT_LOG` 仍为可加锁的普通 `.log` 文件：`Serial` 写入完整记录，`Concurrent` 写入指向各事务文件的索引。索引路径及其轮转规则保持不变。操作员负责磁盘容量、访问权限以及按日期创建的子目录的递归保留策略。轮转索引不会删除事务文件。切换之前请确认日志读取工具能够处理 Concurrent 索引，而非仅支持 Serial 记录。
+
+Concurrent 改变记录的存储方式；它不会对请求进行采样，也不会减少 `MODSECURITY_SEC_AUDIT_LOG_PARTS` 选择的审计数据。请根据请求速率、所选记录部分和保留时间规划存储容量，并使用有代表性的流量测量记录大小，而不是假设每个被阻止的请求都有固定的开销。
 
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

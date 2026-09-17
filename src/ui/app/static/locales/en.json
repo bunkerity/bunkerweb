@@ -927,7 +927,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Locked ({{method}})",
-    "locked_settings_hint": "Locked settings are highlighted"
+    "locked_settings_hint": "Locked settings are highlighted",
+    "raw_setting_drafts": "At the start of a setting, press # to toggle draft or Backspace to activate it. Save to apply. Drafts keep their values while inherited or default values take effect."
   },
   "link": {
     "back_to_login": "Back to Login",

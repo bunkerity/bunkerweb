@@ -663,6 +663,14 @@ MSize LJ_FASTCALL lj_tab_len(GCtab *t)
 {
   size_t hi = (size_t)t->asize;
   if (hi) hi--;
+#if LJ_TARGET_PPC && LJ_ARCH_BITS == 64
+  /* On ppc64 non-GC64, direct arrayslot access for the binary search is
+  ** unreliable: the compiler generates incorrect code for the variable-index
+  ** array slot address calculation, causing tvisnil to misread the type tag.
+  ** Skip the fast path entirely and always use the slow path which accesses
+  ** array elements via lj_tab_getint (a separate, correct code path). */
+  return tab_len_slow(t, hi);
+#else
   /* In a growing array the last array element is very likely nil. */
   if (hi > 0 && LJ_LIKELY(tvisnil(arrayslot(t, hi)))) {
     /* Binary search to find a non-nil to nil transition in the array. */
@@ -675,6 +683,7 @@ MSize LJ_FASTCALL lj_tab_len(GCtab *t)
   }
   /* Without a hash part, there's an implicit nil after the last element. */
   return t->hmask ? tab_len_slow(t, hi) : (MSize)hi;
+#endif
 }
 
 #if LJ_HASJIT

@@ -42,7 +42,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -77,7 +77,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.15-rc2
+        image: bunkerity/bunkerweb-api:1.6.15-rc3
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
     ```
 
 === "Linux"
@@ -390,7 +390,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /services`: list services (include drafts by default).
   - `GET /services/{service}`: fetch non-defaults or full config (`full=true`); `methods=true` includes provenance.
   - `POST /services`: create a service (draft or online), set variables, and update `SERVER_NAME` roster atomically.
-  - `PATCH /services/{service}`: rename, update variables, toggle draft.
+  - `PATCH /services/{service}`: rename, update variables, toggle draft. A rename moves the service's custom configs, per-service settings and job cache to the new name in the same operation. API permissions scoped to the old name are not moved, and a service defined outside the API (environment, autoconf, wizard) cannot be renamed here.
   - `DELETE /services/{service}`: remove service and derived config keys.
   - `POST /services/{service}/convert?convert_to=online|draft`: switch draft/online quickly.
 - **Custom configs**

@@ -6,14 +6,15 @@ from hashlib import sha256
 from json import dumps, loads
 from os import environ
 from pathlib import Path
+from shutil import copyfile
 from subprocess import CalledProcessError, run
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import release_artifacts as release
 import release_integration as integration
-from release_smoke import compose_config
+from release_smoke import compose_config, start_services
 from yaml import safe_load
 
 
@@ -171,6 +172,20 @@ class ReleaseArtifactsTest(TestCase):
             # The API and the all-in-one API refuse to start without an auth path.
             self.assertTrue(service["environment"]["API_TOKEN"])
 
+    @patch("release_smoke.run")
+    def test_smoke_seeds_shared_volume_before_starting_services(self, mocked_run):
+        compose = ["docker", "compose", "--project-name", "staging-smoke", "--file", "compose.json"]
+
+        start_services(compose)
+
+        self.assertEqual(
+            mocked_run.call_args_list,
+            [
+                call([*compose, "create", "--no-build", "scheduler"], check=True),
+                call([*compose, "up", "--detach", "--wait", "--wait-timeout", "600", "--no-build"], check=True),
+            ],
+        )
+
     def test_workflow_graph_has_no_publication_bypass(self):
         root = Path(__file__).resolve().parents[1] / "workflows"
         jobs = safe_load((root / "release.yml").read_text())["jobs"]
@@ -234,6 +249,21 @@ gh() {
             (directory / "src/VERSION").write_text("1.6.15~rc2\n")
             changelog = directory / "CHANGELOG.md"
             changelog.write_text("## v1.6.15~rc2\nRelease fixes.\n")
+            (directory / "misc").mkdir()
+            copyfile(Path.cwd() / "misc/check-version-consistency.sh", directory / "misc/check-version-consistency.sh")
+            pins = {
+                "src/bw/Dockerfile": 'LABEL version="1.6.15~rc2"\n',
+                "misc/install-bunkerweb.sh": 'DEFAULT_BUNKERWEB_VERSION="1.6.15~rc2"\n',
+                "publiccode.yml": "softwareVersion: 1.6.15~rc2\n",
+                "pyproject.toml": 'version = "1.6.15~rc2"\n',
+                ".github/ISSUE_TEMPLATE/bug_report.yml": "      value: 1.6.15~rc2\n",
+            }
+            for name, content in pins.items():
+                target = directory / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content)
+            run(["git", "init", "--quiet"], cwd=directory, check=True, capture_output=True)
+            run(["git", "add", "."], cwd=directory, check=True, capture_output=True)
             source = "a" * 40
             signed = {"verification": {"verified": True, "reason": "valid"}, "object": {"type": "commit", "sha": source}}
 

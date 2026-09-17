@@ -35,7 +35,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc2-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc2
+        image: bunkerity/bunkerweb:1.6.15-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc2
+        image: bunkerity/bunkerweb-ui:1.6.15-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -169,6 +169,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
 - Sesiones: duración de inactividad por defecto 12 h (`SESSION_LIFETIME_HOURS`), refrescada en cada petición. Se aplica un límite absoluto vía `SESSION_ABSOLUTE_HOURS` (por defecto `168` = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (`SESSION_ROLLING_HOURS`, por defecto `0` = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
+- Almacenamiento de sesiones: las sesiones viven en Redis cuando `USE_REDIS=yes`, y si no en una caché local bajo `/var/lib/bunkerweb`. Un Redis que deja de responder, o que rechaza las escrituras porque alcanzó `maxmemory`, ya no rompe la interfaz: las sesiones afectadas pasan a esa caché local, que se lee antes que Redis para que un cambio o un borrado que nunca llegó a Redis no quede oculto tras la copia antigua que Redis aún conserva, y se reconcilian con Redis en cuanto responde de nuevo. Un cierre de sesión o una rotación del ID de sesión durante la caída tampoco se deshace con la recuperación. Cada revocación se registra en ambos almacenes para seguir aplicándose en cualquier caso. Un desalojo no está cubierto, porque Redis informa éxito y simplemente deja de tener la clave, así que dimensiona `maxmemory` para las claves que conservas. Cuando Redis rechaza una actualización, esa sesión pasa al almacenamiento local y se elimina de inmediato la copia que Redis aún tenía, de modo que el cambio no quede oculto tras la versión anterior y un flujo de varios pasos como el 2FA no se quede en bucle sobre su estado previo. Esa caché local es por host, lo que importa si ejecutas varias réplicas de la interfaz: las demás réplicas dejan de ver una sesión que se ha movido a la caché local de una réplica hasta que esa réplica la reconcilia con Redis, una revocación emitida mientras Redis no estaba disponible solo la aplica la réplica que la emitió, y una réplica que ya sirve una sesión desde su propia caché local puede seguir haciéndolo hasta `SESSION_LIFETIME_HOURS` después de que otra réplica borre esa sesión a través de Redis. `UI_USE_REDIS=no` desconecta solo la interfaz de Redis, a diferencia del `USE_REDIS` global, que además deja de compartir baneos e informes entre instancias.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
 !!! warning "La 2FA desaparece al recrear el contenedor"
@@ -196,6 +197,10 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 2. Secrets en `/run/secrets/<VAR>` (Docker)
 3. Archivo env `/etc/bunkerweb/ui.env` (paquetes Linux)
 4. Valores por defecto integrados
+
+## Borradores en el editor RAW
+
+El editor RAW de un servicio o de la configuración global puede conservar un ajuste como **borrador**: el valor se guarda pero no se aplica, y el valor efectivo sigue siendo el heredado (global) o el predeterminado. Coloque el cursor al inicio de una línea `KEY=value` y pulse `#` para alternar el estado de borrador, o `Retroceso` en una línea en borrador para activarla, y luego guarde. Las líneas en borrador se resaltan y conservan su valor entre guardados, de modo que un cambio puede prepararse y activarse más tarde con un solo guardado. Un ajuste que no es editable desde la UI (gestionado por autoconf, o un valor predeterminado de plugin que no puede sobrescribirse) no puede cambiar de estado de borrador.
 
 ## Referencia de configuración
 
@@ -233,6 +238,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 | `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                                                          | `yes` o `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                                                                  | `yes` o `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                                                                        | Entero                  | `1`                       |
+| `UI_USE_REDIS`                              | Desconecta la interfaz web de Redis sin tocar el `USE_REDIS` global                                                    | `yes` o `no`            | `yes`                     |
 
 ### Logging
 

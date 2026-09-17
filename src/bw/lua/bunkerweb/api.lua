@@ -247,9 +247,24 @@ local function acquire_swap_lock(seconds)
 	return lock
 end
 
+local function check_audit_storage(variables_path)
+	-- Only called with our fixed config path or the internally generated staging path.
+	local handle = io.popen("python3 /usr/share/bunkerweb/utils/modsecurity_audit.py '" .. variables_path .. "' 2>&1")
+	if not handle then
+		return false, "cannot run ModSecurity audit preflight"
+	end
+	local result = handle:read("*a")
+	handle:close()
+	return result == "ModSecurity audit preflight successful\n", result
+end
+
 -- The body returns the response triple instead of sending it, so the wrapper has one
 -- place to release the swap lock whichever way the reload ends.
 local function reload_locked(test_arg)
+	local valid, validation_error = check_audit_storage("/etc/nginx/variables.env")
+	if not valid then
+		return HTTP_INTERNAL_SERVER_ERROR, "error", validation_error
+	end
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
@@ -416,6 +431,14 @@ api.global.POST["^/confs$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "cannot extract archive")
 	end
 
+	if destination == "/etc/nginx" then
+		local ran, valid, validation_error = pcall(check_audit_storage, staging .. "/variables.env")
+		if not ran or not valid then
+			execute("rm -rf '" .. staging .. "'")
+			os.remove(tmp)
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", ran and validation_error or tostring(valid))
+		end
+	end
 	-- Extraction only added this request's own staging directory, which nothing else reads or
 	-- writes. The destructive part starts here, so this is where the lock has to be held.
 	local lock = acquire_swap_lock(PUSH_LOCK_WAIT)

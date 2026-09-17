@@ -927,7 +927,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Verrouillé ({{method}})",
-    "locked_settings_hint": "Les paramètres verrouillés sont mis en surbrillance"
+    "locked_settings_hint": "Les paramètres verrouillés sont mis en surbrillance",
+    "raw_setting_drafts": "Au début d’un paramètre, appuyez sur # pour basculer son état brouillon ou sur Retour arrière pour l’activer. Enregistrez pour appliquer. Les brouillons conservent leurs valeurs tandis que les valeurs héritées ou par défaut s’appliquent."
   },
   "link": {
     "back_to_login": "Retour à la Connexion",

@@ -59,10 +59,10 @@
                             </h5>
                             {% if is_overlapped %}
                                 <div class="mt-2 mb-2 alert alert-danger text-center" role="alert">
-                                    <span data-i18n="pro.alert.overlapped_1">You have more services than your license allows !</span>
+                                    <span data-i18n="pro.alert.overlapped_1">You have more active services than your license allows!</span>
                                     <br />
                                     <span data-i18n="pro.alert.overlapped_2"
-                                          data-i18n-options="{'pro_services': {{ pro_services }}}">Delete or draft some services to reach the number of {{ pro_services }} services.</span>
+                                          data-i18n-options='{"pro_services": {{ pro_services }}}'>Delete or convert some services to Draft mode to reach the {{ pro_services }} service limit.</span>
                                 </div>
                             {% endif %}
                             <a href="{% if is_pro_version %}https://panel.bunkerweb.io/clientarea.php?action=services&utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui{% endif %}"

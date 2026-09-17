@@ -216,3 +216,16 @@ Le Jeu de Règles de Base OWASP prend également en charge une gamme de **plugin
 
 !!! note "Valeurs de taille lisibles"
     Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Journaux d’audit Concurrent
+
+| Paramètre | Défaut | Description |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Mode : `Serial` (par défaut) ou `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Vide par défaut ; répertoire de stockage absolu requis pour `Concurrent`. |
+
+Définissez `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` et `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Créez ce répertoire sur chaque instance BunkerWeb avec les droits d’écriture et de traversée pour le worker nginx. Utilisez un volume persistant pour conserver les données. BunkerWeb rejette les configurations invalides avant leur application ; il ne crée pas ce répertoire. En mode CRS global (`USE_MODSECURITY_GLOBAL_CRS=yes`), configurez ces deux paramètres globalement ; les valeurs par service ne sélectionnent pas un autre mode d’écriture.
+
+`MODSECURITY_SEC_AUDIT_LOG` reste un fichier `.log` ordinaire et verrouillable : il contient les événements complets en mode `Serial`, et un index vers les fichiers par transaction en mode `Concurrent`. Le chemin de l’index et ses règles de rotation restent inchangés. L’opérateur gère la capacité disque, les permissions et la rétention récursive des sous-répertoires datés. La rotation de l’index ne supprime pas les fichiers de transaction. Vérifiez la compatibilité des lecteurs qui attendent des événements Serial avant de changer de mode.
+
+Concurrent change le stockage des événements ; il n’échantillonne pas les requêtes et ne réduit pas les données sélectionnées par `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Dimensionnez le stockage selon le débit de requêtes, les parties sélectionnées et la durée de rétention ; mesurez la taille des événements avec un trafic représentatif plutôt que de supposer un coût fixe par requête bloquée.

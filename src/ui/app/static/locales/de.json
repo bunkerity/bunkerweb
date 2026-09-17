@@ -927,7 +927,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Gesperrt ({{method}})",
-    "locked_settings_hint": "Gesperrte Einstellungen sind hervorgehoben"
+    "locked_settings_hint": "Gesperrte Einstellungen sind hervorgehoben",
+    "raw_setting_drafts": "Drücken Sie am Anfang einer Einstellung #, um den Entwurfsstatus umzuschalten, oder die Rücktaste, um sie zu aktivieren. Speichern Sie zum Anwenden. Entwürfe behalten ihre Werte, während geerbte oder Standardwerte gelten."
   },
   "link": {
     "back_to_login": "Zurück zum Login",

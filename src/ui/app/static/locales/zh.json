@@ -927,7 +927,8 @@
   },
   "legend": {
     "locked_settings_annotation": "已锁定 ({{method}})",
-    "locked_settings_hint": "锁定的设置会突出显示"
+    "locked_settings_hint": "锁定的设置会突出显示",
+    "raw_setting_drafts": "在设置行的开头按 # 切换草稿状态，或按退格键启用。保存后生效。草稿保留其值，同时使用继承值或默认值。"
   },
   "link": {
     "back_to_login": "返回登录",

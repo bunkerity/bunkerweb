@@ -40,7 +40,10 @@ class KubernetesTest(Test):
                 "SEND_ANONYMOUS_REPORT": "no",
                 "USE_DNSBL": "no",
             }
-            replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
+            replace_env = {
+                "API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+                "DNS_RESOLVERS": "coredns.kube-system.svc.cluster.local",
+            }
             for yaml in data:
                 if yaml["metadata"]["name"] == "bunkerweb" and yaml["kind"] == "DaemonSet":
                     for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
