@@ -19,7 +19,7 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
-from time import monotonic, sleep, time
+from time import monotonic, sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union, cast
 
@@ -31,7 +31,17 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude, safe_tar_extractall  # type: ignore
+from common_utils import (  # type: ignore
+    acquire_db_lock,
+    bytes_hash,
+    create_plugin_tar_gz,
+    DatabaseLockBusy,
+    dict_to_frozenset,
+    handle_docker_secrets,
+    plugin_tar_exclude,
+    release_db_lock,
+    safe_tar_extractall,
+)
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
@@ -743,6 +753,26 @@ def _render_holding_applying_changes() -> bool:
             APPLYING_CHANGES.clear()
 
 
+def claim_changes(changes: Optional[List[str]] = None, *, plugins_changes=None) -> Dict[str, Any]:
+    """Acknowledge pending changes, then return a fresh configuration snapshot.
+
+    The order is the whole point: the flags are cleared first, so anything written after this
+    call is still flagged when the returned snapshot is rendered, and the next tick picks it up.
+    """
+    try:
+        ret = SCHEDULER.db.checked_changes(changes, plugins_changes=plugins_changes)
+        if ret:
+            LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+    except BaseException as e:
+        LOGGER.error(f"Error while setting changes to checked in the database: {e}")
+    env = SCHEDULER.db.get_config()
+    env["DATABASE_URI"] = SCHEDULER.db.database_uri
+    tz = getenv("TZ")
+    if tz:
+        env["TZ"] = tz
+    return env
+
+
 def generate_configs_for_jobs() -> bool:
     """Render for JobScheduler.run_pending(), which runs on this same main-loop thread.
 
@@ -1367,6 +1397,13 @@ if __name__ == "__main__":
 
         del dotenv_env
 
+        # Every pending change is acknowledged before the configuration it will be rendered from is
+        # read. Acknowledging after the render used to wipe flags raised while the jobs were running,
+        # so that later change was rendered (nginx saw it) but never reached the once-jobs (mTLS CA
+        # removal kept the cached bundle, a new CrowdSec service never got its crowdsec.conf).
+        # A write landing after this point stays flagged and is handled by the first loop tick.
+        env = claim_changes(plugins_changes="all")
+
         FIRST_START = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
@@ -1608,13 +1645,6 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 
-            try:
-                ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
-                if ret:
-                    LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-            except BaseException as e:
-                LOGGER.error(f"Error while setting changes to checked in the database: {e}")
-
             # A pre-job push that reached no instance leaves its work pending: the once-jobs have to
             # run against the configuration the instances actually hold, and a job scheduled "once"
             # is retried by nothing once its flag has been cleared.
@@ -1694,20 +1724,18 @@ if __name__ == "__main__":
                     if _gc_counter >= 10:
                         collect()
                         _gc_counter = 0
+                    # The lock is only a barrier against a running bwcli save/restore: take it,
+                    # read the metadata, release it right away (never held across the loop body).
                     try:
-                        # A lock is stale 30s after its creation, whatever happened to its holder.
-                        # The deadline is monotonic so that an NTP step can't extend the wait.
-                        lock_deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
-                    except OSError:
-                        lock_deadline = monotonic()
+                        db_lock = acquire_db_lock(DB_LOCK_FILE, timeout=30.0)
+                    except DatabaseLockBusy as e:
+                        LOGGER.warning(f"{e}, skipping this scheduler tick")
+                        continue
 
-                    while DB_LOCK_FILE.is_file() and monotonic() < lock_deadline:
-                        LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-                        sleep(1)
-
-                    DB_LOCK_FILE.unlink(missing_ok=True)
-
-                    db_metadata = SCHEDULER.db.get_metadata()
+                    try:
+                        db_metadata = SCHEDULER.db.get_metadata()
+                    finally:
+                        release_db_lock(db_lock)
 
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
@@ -1806,29 +1834,36 @@ if __name__ == "__main__":
                 LOGGER.debug(f"Changes: {changes}")
                 SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
+                for flag, change in (
+                    (INSTANCES_NEED_GENERATION, "instances"),
+                    (CONFIGS_NEED_GENERATION, "custom_configs"),
+                    (PLUGINS_NEED_GENERATION, "external_plugins"),
+                    (PRO_PLUGINS_NEED_GENERATION, "pro_plugins"),
+                    (CONFIG_NEED_GENERATION, "config"),
+                ):
+                    if flag:
+                        CHANGES.append(change)
+                # Claim exactly what this iteration is about to read (the plugin ids came from the
+                # same metadata snapshot), before reading it: see the note above the main loop.
+                claim_changes(CHANGES, plugins_changes=changed_plugins or None)
 
                 if INSTANCES_NEED_GENERATION:
-                    CHANGES.append("instances")
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
                         SCHEDULER.apis.append(API.from_instance(db_instance))
 
                 if CONFIGS_NEED_GENERATION:
-                    CHANGES.append("custom_configs")
                     generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
                 if PLUGINS_NEED_GENERATION:
-                    CHANGES.append("external_plugins")
                     generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
-                    CHANGES.append("pro_plugins")
                     generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
-                    CHANGES.append("config")
                     old_env = env.copy()
                     env = SCHEDULER.db.get_config()
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
