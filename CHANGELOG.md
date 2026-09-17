@@ -2,6 +2,7 @@
 
 ## v1.6.15~rc3 - 2026/09/15
 
+- [DEPS] `bunkerweb`: update NGINX to 1.30.5 (CVE-2026-90439, HTTP/3 buffer overflow). Fedora 43 has no 1.30.5 package yet, so its BunkerWeb package keeps building its modules against 1.30.4.
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
 - [BUGFIX] `scheduler`: acknowledge configuration changes before rendering them, so a write that lands while the once-jobs of a previous write are still running gets its own job cycle instead of being rendered without its jobs (a removed mTLS CA stayed trusted, a newly created CrowdSec service ran unchecked, a ModSecurity audit change could be skipped).
 - [BUGFIX] `ui`: store escaped flash messages as plain strings so the Redis session backend can serialise them; with `USE_REDIS=yes` every login answered 500.

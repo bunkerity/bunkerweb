@@ -1,7 +1,7 @@
 FROM redhat/ubi9:9.8@sha256:12b3fafdd3d51cb894196ecf944b1119ff4bc2d390a3a57fd141c3b5f0de9b15 AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.30.4
+ENV NGINX_VERSION=1.30.5
 
 # Copy rocky repo
 COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
