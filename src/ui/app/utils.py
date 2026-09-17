@@ -387,13 +387,18 @@ def flash(message: Union[str, Markup], category: str = "success", i18n_key: Opti
     if i18n_key:
         message = Markup('<span data-i18n="{}">{}</span>').format(i18n_key, message)
 
+    # The session serializer (msgspec, Redis backend) only encodes plain types, so the
+    # escaped body is stored as str. flash.html and sidebar-notifications.html render it
+    # with |safe: the escaping above is the only thing that ever produced that string.
+    message = str(message)
+
     if category != "success":
         flask_flash(message, category)
     else:
         flask_flash(message)
 
     if save and "flash_messages" in session:
-        session["flash_messages"].append((str(message), category, datetime.now().astimezone().isoformat()))
+        session["flash_messages"].append((message, category, datetime.now().astimezone().isoformat()))
         session.modified = True
 
 

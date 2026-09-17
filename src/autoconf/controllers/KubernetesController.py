@@ -370,7 +370,8 @@ class KubernetesController(Controller):
         return metadata.annotations or {} if metadata else {}
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        pod_ip = controller_instance.status.pod_ip
+        status = controller_instance.status
+        pod_ip = status.pod_ip if status else None
         pod_name = controller_instance.metadata.name
         namespace = controller_instance.metadata.namespace
         instance = {
@@ -383,12 +384,6 @@ class KubernetesController(Controller):
             "env": {},
         }
 
-        if controller_instance.status.conditions:
-            for condition in controller_instance.status.conditions:
-                if condition.type == "Ready" and condition.status == "True":
-                    instance["health"] = True
-                    break
-
         pod = None
         for container in controller_instance.spec.containers:
             if container.name == "bunkerweb":
@@ -397,8 +392,19 @@ class KubernetesController(Controller):
 
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
-        elif pod.env:
-            for env in pod.env:
+            # Preserve discovery behavior for legacy deployments with a different container name.
+            instance["health"] = bool(status and any(c.type == "Ready" and c.status == "True" for c in status.conditions or []))
+        else:
+            # Readiness gates traffic, not configuration delivery: a loading container needs
+            # configuration before it can become Ready. The scheduler checks API reachability.
+            instance["health"] = bool(
+                status
+                and status.phase == "Running"
+                and pod_ip
+                and not controller_instance.metadata.deletion_timestamp
+                and any(c.name == pod.name and c.state and c.state.running is not None for c in status.container_statuses or [])
+            )
+            for env in pod.env or []:
                 instance["env"][env.name] = env.value or ""
 
         for controller_service in self._get_controller_services():

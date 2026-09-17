@@ -3,25 +3,37 @@
 ## v1.6.15~rc3 - 2026/09/15
 
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
+- [SECURITY] `jobs`: verify the ASN and country MMDB downloads against the checksum DB-IP publishes, over a host and size bounded transfer, and keep the database already in place when verification fails instead of caching an unchecked file.
 - [FEATURE] `installer`: Docker Full installs can optionally configure a local syslog-ng collector with persistent log storage, making BunkerWeb and component logs available in the Web UI while keeping normal Docker logs.
 - [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
-- [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Fixes #3891)
 - [FEATURE] `ui`: retain individual settings as drafts in the RAW editor, with explicit activation and inherited or default effective values. (Refs #3631)
-- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery; with several UI replicas the others stop seeing a session that moved and ask for a login. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
-- [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.
-- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Fixes #3905)
-- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Fixes #3896)
+- [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Fixes #3891)
+- [BUGFIX] `scheduler`: acknowledge configuration changes before rendering them, so a write that lands while the previous write's once-jobs are still running gets its own job cycle instead of being rendered without its jobs (a removed mTLS CA stayed trusted, a new CrowdSec service ran unchecked, a ModSecurity audit change could be skipped).
+- [BUGFIX] `scheduler`, `ui`: validate manual plugins before database updates and preserve rejected plugin folders and stored configuration during scanning and restoration. Keep unchanged sibling plugins and log config-saver exit codes. (Refs #3303)
+- [BUGFIX] `jobs`: folder caches that contain symlinks (the Let's Encrypt `live/` links) restore from the database again, while absolute or escaping links are still rejected.
+- [BUGFIX] `backup`: the database lock is a real `flock` now; a second backup, restore or scheduler tick waits up to 30 s then reports busy instead of taking the lock away from a live holder.
 - [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)
-- [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
+- [BUGFIX] `api`: renaming a service through `PATCH /services/{service}` moves its custom configs, per-service settings and job cache to the new name instead of dropping them as a deleted service; a service owned by the environment, autoconf or the wizard is refused there since its owner would recreate the old name.
+- [BUGFIX] `autoconf`: on Kubernetes, a BunkerWeb pod that is running but not yet Ready receives its configuration, since the readiness probe waits for it; a pod being deleted is skipped.
+- [BUGFIX] `letsencrypt`: with `LETS_ENCRYPT_PASSTHROUGH=yes`, a GET or HEAD of a single ACME token under `/.well-known/acme-challenge/` reaches the backend without any other check, ModSecurity, bans and antibot included. (Fixes #3927)
+- [BUGFIX] `letsencrypt`: preserve the full base of explicit wildcard names and keep separate wildcard scopes aligned between certificate issuance and loading. Affected services request a new certificate after upgrading; old certificates remain on disk unless `LETS_ENCRYPT_CLEAR_OLD_CERTS=yes`. (Refs #3326)
+- [BUGFIX] `letsencrypt`: correct certificate-profile validity periods and name limits in setting help and all translations, and warn before issuance when a known Let's Encrypt profile exceeds its name limit. Requests continue unchanged. (Refs #3251)
 - [BUGFIX] `letsencrypt`: prevent `preferred_profile` errors in the legacy certificate-list helper. (Refs #3839)
+- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Fixes #3905)
 - [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Fixes #3867)
 - [BUGFIX] `errors`: keep the blocking plugin reason on reports when a custom error page is configured, instead of `unknown`. (Fixes #3916)
-- [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
 - [BUGFIX] `bunkernet`: back off failed registration retries with an exponential delay capped at 24 hours, retaining the previous exit status while waiting. Registration still depends on the BunkerNet API; HTTP 429 and 403 remain non-fatal. (Refs #3636)
-- [BUGFIX] `letsencrypt`: preserve the full base of explicit wildcard names and keep separate wildcard scopes aligned between certificate issuance and loading. Affected services request a new certificate after upgrading; old certificates remain on disk unless `LETS_ENCRYPT_CLEAR_OLD_CERTS=yes`. (Refs #3326)
-- [BUGFIX] `scheduler`, `ui`: validate manual plugins before database updates and preserve rejected plugin folders and stored configuration during scanning and restoration. Keep unchanged sibling plugins and log config-saver exit codes. (Refs #3303)
-- [BUGFIX] `letsencrypt`: correct certificate-profile validity periods and name limits in setting help and all translations, and warn before issuance when a known Let's Encrypt profile exceeds its name limit. Requests continue unchanged. (Refs #3251)
+- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery; with several UI replicas the others stop seeing a session that moved and ask for a login. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
+- [BUGFIX] `ui`: a session updated or ended while Redis was unavailable is no longer replaced by the older copy Redis still held once it answers again; the local copy is read first and written back on recovery.
+- [BUGFIX] `ui`: store flash messages as plain strings so the Redis session backend can serialise them; with `USE_REDIS=yes` every login answered 500.
+- [BUGFIX] `ui`: a setting that was never set before can be drafted from the RAW editor.
+- [BUGFIX] `ui`: the PRO page showed a raw `{{pro_services}}` placeholder in the licence limit alert.
+- [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.
+- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Fixes #3896)
+- [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
+- [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
 - [PERFORMANCE] `errors`: reduce inline SVG whitespace without changing error-page artwork. (Refs #3892)
+- [DEPS] `bunkerweb`: update NGINX to 1.30.5 (CVE-2026-90439, HTTP/3 buffer overflow). Fedora 43 has no 1.30.5 package yet, so its BunkerWeb package keeps building its modules against 1.30.4.
 - [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for fixing Concurrent audit validation on inactive scopes. (#3907)
 
 ## v1.6.15~rc2 - 2026/09/10

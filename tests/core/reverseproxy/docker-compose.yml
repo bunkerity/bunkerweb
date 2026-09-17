@@ -2,27 +2,27 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.6.0-beta
+    image: bunkerweb-tests
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+      API_WHITELIST_IP: "127.0.0.0/8 10.77.2.0/24 192.168.77.3"
     networks:
       bw-universe:
       bw-services:
-        ipv4_address: 192.168.0.2
+        ipv4_address: 192.168.77.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    image: scheduler-tests
     pull_policy: never
     depends_on:
       - bw
     environment:
       BUNKERWEB_INSTANCES: "bw"
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+      API_WHITELIST_IP: "127.0.0.0/8 10.77.2.0/24 192.168.77.3"
       HTTP_PORT: "80"
       HTTPS_PORT: "443"
       USE_BUNKERNET: "no"
@@ -45,6 +45,7 @@ services:
       REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ""
       REVERSE_PROXY_AUTH_REQUEST_SET: ""
       REVERSE_PROXY_CUSTOM_HOST: ""
+      REVERSE_PROXY_HTTP_VERSION: "1.1"
       CUSTOM_CONF_SERVER_HTTP_ready: |
         location /ready {
           default_type 'text/plain';
@@ -65,20 +66,21 @@ services:
       REVERSE_PROXY_KEEPALIVE: "no"
       REVERSE_PROXY_AUTH_REQUEST: ""
       REVERSE_PROXY_CUSTOM_HOST: ""
+      REVERSE_PROXY_HTTP_VERSION: "1.1"
     networks:
       bw-services:
-        ipv4_address: 192.168.0.4
+        ipv4_address: 192.168.77.4
 
 networks:
   bw-universe:
-    name: bw-universe
+    name: fixtures_reverseproxy_universe
     ipam:
       driver: default
       config:
-        - subnet: 10.20.30.0/24
+        - subnet: 10.77.2.0/24
   bw-services:
-    name: bw-services
+    name: fixtures_reverseproxy_services
     ipam:
       driver: default
       config:
-        - subnet: 192.168.0.0/24
+        - subnet: 192.168.77.0/24

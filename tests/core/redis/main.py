@@ -14,7 +14,7 @@ from uvicorn import run
 
 fastapi_proc = None
 
-ip_to_check = "1.0.0.253" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
+ip_to_check = "192.168.77.253" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
 
 
 def get_all_redis_key_values(redis_client: Redis):
@@ -125,7 +125,7 @@ try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "no") == "yes"
 
     if use_reverse_scan:
-        if ip_to_check == "1.0.0.253":
+        if ip_to_check == "192.168.77.253":
             print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
             app = FastAPI()
             fastapi_proc = Process(target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080))
@@ -153,7 +153,7 @@ try:
 
         print("ℹ️ The request was blocked, checking Redis ...", flush=True)
 
-        port_to_check = "8080" if ip_to_check == "1.0.0.253" else "80"
+        port_to_check = "8080" if ip_to_check == "192.168.77.253" else "80"
 
         key_value = redis_client.get(f"plugin_reverse_scan_{ip_to_check}:{port_to_check}")
 
@@ -238,15 +238,18 @@ try:
         print("❌ The request was not blocked, exiting ...", flush=True)
         exit(1)
 
-    sleep(0.5)
-
     print("ℹ️ The request was blocked, checking Redis ...", flush=True)
 
-    key_value = redis_client.get(f"plugin_bad_behavior_{ip_to_check}")
+    bad_behavior_key = f"plugin_bad_behavior_www.example.com_{ip_to_check}"
+    for _ in range(20):
+        key_value = redis_client.get(bad_behavior_key)
+        if key_value:
+            break
+        sleep(1)
 
     if not key_value:
         print(
-            f'❌ The Bad Behavior key ("plugin_bad_behavior_{ip_to_check}") was not found, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
+            f'❌ The Bad Behavior key ("{bad_behavior_key}") was not found, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
             flush=True,
         )
         exit(1)
@@ -272,20 +275,22 @@ try:
         print("❌ The request was not blocked, exiting ...", flush=True)
         exit(1)
 
-    sleep(0.5)
-
-    second_key_value = redis_client.get(f"plugin_bad_behavior_{ip_to_check}")
+    for _ in range(20):
+        second_key_value = redis_client.get(bad_behavior_key)
+        if second_key_value and second_key_value > key_value:
+            break
+        sleep(1)
 
     if not second_key_value:
         print(
-            f'❌ The Bad Behavior key ("plugin_bad_behavior_{ip_to_check}") was not found, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
+            f'❌ The Bad Behavior key ("{bad_behavior_key}") was not found, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
             flush=True,
         )
         exit(1)
 
     if second_key_value <= key_value:
         print(
-            f'❌ The Bad Behavior key ("plugin_bad_behavior_{ip_to_check}") was not incremented, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
+            f'❌ The Bad Behavior key ("{bad_behavior_key}") was not incremented, exiting ...\nkeys: {get_all_redis_key_values(redis_client)}',
             flush=True,
         )
         exit(1)
@@ -416,7 +421,7 @@ try:
     #     flush=True,
     # )
 
-    # if ip_to_check == "1.0.0.253":
+    # if ip_to_check == "192.168.77.253":
     #     print(
     #         "ℹ️ Checking if the dnsbl keys were created ...",
     #         flush=True,

@@ -44,13 +44,13 @@ beautifulsoup4==4.15.0 \
     --hash=sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7 \
     --hash=sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9
     # via dns-lexicon
-boto3==1.43.93 \
-    --hash=sha256:196bfc8b4c9cd5505f9f7b963e30956db3a00fd47e20dd0ee3574a243c1fb212 \
-    --hash=sha256:3c948fe231490d446bf90bf3322d1452632107329d3683b37d88b7399bf481a0
+boto3==1.43.95 \
+    --hash=sha256:9d71f299111e1f4e8c28f573a1b7c0555fe40d2147fe9bef852a02bd57cbde60 \
+    --hash=sha256:c906921c4f9ab41e9587af6586f072c8f2be6979e8bde2ec26aa443bb1745019
     # via certbot-dns-route53
-botocore==1.43.93 \
-    --hash=sha256:3ca57bb5d26d88b554a74de708a5c991f45306436c91aacca931252d1d4d54ff \
-    --hash=sha256:82da355d18a7f784347b00444be33942834651f31b6c5ffef49999cd47364c5e
+botocore==1.43.95 \
+    --hash=sha256:0fda26d16c7c7bf7082c421390a817b696f98a43d3da7c43dbbb093f76662876 \
+    --hash=sha256:779588da32bd48a7bb0c097da4bcb747260e86d2bfc507369dca56f1450e0722
     # via
     #   boto3
     #   s3transfer
@@ -607,9 +607,9 @@ filelock==3.32.6 \
     --hash=sha256:3f16ecd0117feae0dfc147e8c62eb5daeccd8bd800378c3ddf416de9b4feb6b1 \
     --hash=sha256:a3f55a18af3652a94d8f47d6055df434f254ca1d02ef2524850c6d249ca2512c
     # via tldextract
-google-api-core==2.36.0 \
-    --hash=sha256:32779307b52e64c9a9592a3621de6281676ecaeea299fe8524e4637ab7ac2531 \
-    --hash=sha256:e4d0b179260727ea5c42222426d9199285214dbef7bf48f8b16600c7f9a78944
+google-api-core==2.37.0 \
+    --hash=sha256:cf58f220aa797f1ffdda52194c4c7d72efeced09297c2976529f8135f6d85b9a \
+    --hash=sha256:d84042a0034cce9c4304e17d2e5e9966c2fcb1a851b73799291f687a67470c8b
     # via google-api-python-client
 google-api-python-client==2.200.0 \
     --hash=sha256:82aa18b851328ea04867fd51c5a0c8da2e1b86ec45ce08487e902e7726d4ee50 \
@@ -1170,9 +1170,9 @@ uritemplate==4.2.0 \
     --hash=sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e \
     --hash=sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686
     # via google-api-python-client
-urllib3==2.7.0 \
-    --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c \
-    --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897
+urllib3==2.8.0 \
+    --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 \
+    --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63
     # via
     #   botocore
     #   domeneshop

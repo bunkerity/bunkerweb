@@ -3,4 +3,4 @@ cryptography==50.0.1
 # oracledb==3.0.0
 psycopg[c,pool]==3.3.5
 PyMySQL==1.2.0
-sqlalchemy==2.0.52
+sqlalchemy==2.0.53

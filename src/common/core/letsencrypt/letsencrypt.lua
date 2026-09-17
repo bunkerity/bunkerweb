@@ -1,9 +1,10 @@
+local acme = require "bunkerweb.acme"
 local cjson = require "cjson"
 local class = require "middleclass"
+local env = require "resty.env"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
 local utils = require "bunkerweb.utils"
-local is_http_challenge = require("bunkerweb.acme").is_http_challenge
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -18,6 +19,9 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local parse_pem_cert = ssl.parse_pem_cert
 local parse_pem_priv_key = ssl.parse_pem_priv_key
 local ssl_server_name = ssl.server_name
+local is_http_challenge = acme.is_http_challenge
+local is_challenge_uri = acme.is_challenge_uri
+local env_set = env.set
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
@@ -210,10 +214,32 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+-- A passed-through ACME challenge belongs to the backend that answers it, so no other check
+-- runs on it: it is whitelisted, which also skips the ban check and ModSecurity, more than the
+-- locally served token gets. That is why it is limited to one token-shaped segment (base64url,
+-- RFC 8555 section 8.3) fetched with GET or HEAD, never a deeper backend route. Decided in the
+-- set phase because the ModSecurity kill switch reads ENV:is_whitelisted in phase 1.
+function letsencrypt:is_passthrough_challenge()
+	if self.variables["LETS_ENCRYPT_PASSTHROUGH"] ~= "yes" or not is_challenge_uri(self.ctx) then
+		return false
+	end
+	local method = self.ctx.bw.request_method
+	if method ~= "GET" and method ~= "HEAD" then
+		return false
+	end
+	return match(self.ctx.bw.uri, "^/%.well%-known/acme%-challenge/[A-Za-z0-9_%-]+$") ~= nil
+end
+
 function letsencrypt:set()
 	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
 	if https_configured == "yes" then
 		self.ctx.bw.https_configured = "yes"
+	end
+	if self:is_passthrough_challenge() then
+		ngx.var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		return self:ret(true, "ACME challenge passed through, whitelisted")
 	end
 	return self:ret(true, "set https_configured to " .. https_configured)
 end
@@ -550,6 +576,10 @@ function letsencrypt:access()
 	if is_http_challenge(self.ctx) then
 		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", OK)
+	end
+	if self:is_passthrough_challenge() then
+		self.logger:log(NOTICE, "ACME challenge passed through to the backend, skipping the other checks")
+		return self:ret(true, "ACME challenge passed through", OK)
 	end
 	return self:ret(true, "success")
 end

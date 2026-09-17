@@ -3841,6 +3841,73 @@ class Database:
                 return str(e)
         return ""
 
+    def rename_service(self, old_name: str, new_name: str) -> str:
+        """Rename a service, moving every service-owned row along with it in one transaction.
+
+        Renaming a service must change only its identity, never its content: the
+        ``bw_services`` primary key and the ``service_id`` foreign key of its
+        dependent rows (per-service settings, custom configs, job cache) are all
+        updated in a single database transaction, so a caller renaming a service
+        can never end up with the old service gone and its custom configs or job
+        cache orphaned/deleted (as happens if a rename is done by rewriting
+        SERVER_NAME-prefixed keys through ``save_config``: the old service id
+        disappears from the incoming config, which save_config treats as a
+        deletion, cascading away its custom configs and job cache).
+
+        Nothing but ``service_id``/``id`` values move: setting values, methods,
+        checksums, ``is_draft`` and job cache data/checksums are left untouched.
+
+        Returns an empty string on success, or a human-readable error message on
+        failure. On failure nothing is written: the pre-checks below run before any
+        statement is issued, and if ``commit()`` itself raises, SQLAlchemy has
+        already rolled back the transaction (nothing was flushed to disk).
+        """
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+        if old_name == new_name:
+            return ""
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                service = session.query(Services).get(old_name)
+                if service is None:
+                    return f"Service {old_name} doesn't exist"
+
+                if session.query(Services).get(new_name) is not None:
+                    return f"Service {new_name} already exists"
+
+                # Rename the parent row first so a backend that actually enforces
+                # the declared ON UPDATE CASCADE (MySQL/MariaDB/PostgreSQL) cascades
+                # the dependent rows immediately; the explicit updates below then
+                # only need to catch backends that don't enforce FKs at all
+                # (SQLite, the default here, never enforces them).
+                service.id = new_name
+                service.last_update = datetime.now().astimezone()
+                session.flush()
+
+                session.query(Services_settings).filter_by(service_id=old_name).update({Services_settings.service_id: new_name}, synchronize_session=False)
+                session.query(Custom_configs).filter_by(service_id=old_name).update({Custom_configs.service_id: new_name}, synchronize_session=False)
+                session.query(Jobs_cache).filter_by(service_id=old_name).update({Jobs_cache.service_id: new_name}, synchronize_session=False)
+
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        now = datetime.now().astimezone()
+                        metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = now
+
+                session.commit()
+            except BaseException as e:
+                with suppress(Exception):
+                    session.rollback()
+                return str(e)
+        return ""
+
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""
         with self._db_session() as session:

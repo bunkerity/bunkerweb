@@ -6,6 +6,7 @@ from hashlib import sha256
 from json import dumps, loads
 from os import environ
 from pathlib import Path
+from shutil import copyfile
 from subprocess import CalledProcessError, run
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
@@ -248,6 +249,21 @@ gh() {
             (directory / "src/VERSION").write_text("1.6.15~rc2\n")
             changelog = directory / "CHANGELOG.md"
             changelog.write_text("## v1.6.15~rc2\nRelease fixes.\n")
+            (directory / "misc").mkdir()
+            copyfile(Path.cwd() / "misc/check-version-consistency.sh", directory / "misc/check-version-consistency.sh")
+            pins = {
+                "src/bw/Dockerfile": 'LABEL version="1.6.15~rc2"\n',
+                "misc/install-bunkerweb.sh": 'DEFAULT_BUNKERWEB_VERSION="1.6.15~rc2"\n',
+                "publiccode.yml": "softwareVersion: 1.6.15~rc2\n",
+                "pyproject.toml": 'version = "1.6.15~rc2"\n',
+                ".github/ISSUE_TEMPLATE/bug_report.yml": "      value: 1.6.15~rc2\n",
+            }
+            for name, content in pins.items():
+                target = directory / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content)
+            run(["git", "init", "--quiet"], cwd=directory, check=True, capture_output=True)
+            run(["git", "add", "."], cwd=directory, check=True, capture_output=True)
             source = "a" * 40
             signed = {"verification": {"verified": True, "reason": "valid"}, "object": {"type": "commit", "sha": source}}
 

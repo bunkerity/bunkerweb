@@ -40,7 +40,6 @@ try:
     USE_REVERSE_PROXY = getenv("USE_REVERSE_PROXY", "no") == "yes"
     REVERSE_PROXY_INTERCEPT_ERRORS = getenv("REVERSE_PROXY_INTERCEPT_ERRORS", "yes") == "yes"
     REVERSE_PROXY_WS = getenv("REVERSE_PROXY_WS", "no") == "yes"
-    REVERSE_PROXY_KEEPALIVE = getenv("REVERSE_PROXY_KEEPALIVE", "no") == "yes"
     REVERSE_PROXY_HEADERS = getenv("REVERSE_PROXY_HEADERS", "")
     REVERSE_PROXY_HEADERS_CLIENT = getenv("REVERSE_PROXY_HEADERS_CLIENT", "")
     REVERSE_PROXY_AUTH_REQUEST = getenv("REVERSE_PROXY_AUTH_REQUEST", "")
@@ -73,14 +72,19 @@ try:
         if USE_REVERSE_PROXY:
             random_endpoint = f"/{uuid4()}"
             print(f"ℹ️ Navigating to http://www.example.com{random_endpoint} to test the reverse proxy error interception ...", flush=True)
-            driver.get(f"http://www.example.com{random_endpoint}")
-            content = driver.page_source
+            error_response = get(
+                f"http://www.example.com{random_endpoint}",
+                headers={"Host": "www.example.com"},
+                verify=False,
+                allow_redirects=True,
+            )
+            default_error = error_response.status_code == 404 and error_response.text == '{"detail":"Not Found"}'
 
-            if '{"detail":"Not Found"}' in content and REVERSE_PROXY_INTERCEPT_ERRORS:
+            if default_error and REVERSE_PROXY_INTERCEPT_ERRORS:
                 print("❌ The default error page is being displayed, exiting ...", flush=True)
                 exit(1)
-            elif '{"detail":"Not Found"}' not in content and not REVERSE_PROXY_INTERCEPT_ERRORS:
-                print(f"❌ The default error page is not being displayed, exiting ...\n{content}", flush=True)
+            elif not default_error and not REVERSE_PROXY_INTERCEPT_ERRORS:
+                print(f"❌ The default error page is not being displayed, exiting ...\n{error_response.text}", flush=True)
                 exit(1)
 
             print("✅ The reverse proxy error interception is behaving as expected", flush=True)
@@ -105,15 +109,12 @@ try:
             print("✅ The reverse proxy WebSocket is behaving as expected", flush=True)
 
     if USE_REVERSE_PROXY:
-        print("ℹ️ Sending a request to http://www.example.com/headers to test the reverse proxy headers and the keep-alive ...", flush=True)
+        print("ℹ️ Sending a request to http://www.example.com/headers to test the reverse proxy headers and upstream HTTP version ...", flush=True)
         with Session() as session:
             resp = session.post("http://www.example.com/headers", headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
 
             if resp.status_code == 505:
                 print("❌ The HTTP version is not 1.1, exiting ...", flush=True)
-                exit(1)
-            elif resp.status_code == 426:
-                print("❌ The HTTP version is 1.1 but the keep-alive is disabled, exiting ...", flush=True)
                 exit(1)
             elif resp.status_code == 400:
                 print("❌ Some headers have the wrong value, exiting ...", flush=True)
@@ -125,7 +126,7 @@ try:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
                 exit(1)
 
-            print("✅ The reverse proxy headers and keep-alive are behaving as expected", flush=True)
+            print("✅ The reverse proxy headers and upstream HTTP version are behaving as expected", flush=True)
 
             print("ℹ️ Checking the headers received ...", flush=True)
             headers = {header.split(" ")[0].lower(): header.split(" ")[1] for header in REVERSE_PROXY_HEADERS_CLIENT.split(";") if header}
