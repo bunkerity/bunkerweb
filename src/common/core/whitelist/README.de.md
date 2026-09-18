@@ -83,6 +83,9 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | `WHITELIST_URI_URLS`        |          | multisite | nein     | **URI-Whitelist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
     | `WHITELIST_IGNORE_URI_URLS` |          | multisite | nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.                                        |
 
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
 === "Header"
     **Was dies bewirkt:** Setzt Anfragen mit einem bestimmten Request-Header auf die Whitelist, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert. Nützlich für eine vertrauenswürdige Sonde oder ein Gateway, das ein gemeinsames Geheimnis senden kann.
 

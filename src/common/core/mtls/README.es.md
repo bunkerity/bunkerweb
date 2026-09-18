@@ -45,6 +45,9 @@ El Scheduler valida el paquete de CA candidato completo y todas las CRL antes de
 | `MTLS_CRL`                       |                       | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación. |
 | `MTLS_CRL_DATA`                  |                       | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                           |
 
+!!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+    Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 !!! tip "Configúralo una vez, distribuido en todas partes"
     Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 

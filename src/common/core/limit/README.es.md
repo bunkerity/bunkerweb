@@ -29,6 +29,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_REQ_URL`  | `/`               | multisite | yes      | **Patrón de URL:** Patrón de URL (expresión regular PCRE) al que se aplicará el límite de tasa; use `/` para aplicar a todas las solicitudes.                                     |
     | `LIMIT_REQ_RATE` | `2r/s`            | multisite | yes      | **Límite de Tasa:** Tasa máxima de solicitudes en el formato `Nr/t`, donde N es el número de solicitudes y t es la unidad de tiempo: s (segundo), m (minuto), h (hora) o d (día). |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
     !!! tip "Formato de Limitación de Tasa"
         El formato del límite de tasa se especifica como `Nr/t` donde:
 

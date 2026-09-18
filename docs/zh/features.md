@@ -753,6 +753,9 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 scrypt 哈希以实现最大安全性。                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                                                                               |
 
+!!! tip "锚定受保护路径时要覆盖其下的所有内容"
+    像 `/admin` 这样的普通路径是前缀匹配，因此也会保护 `/admin/`、`/admin/users` 以及规范化后落入其中的编码变体。`=` 修饰符会让匹配变为精确匹配，于是 `= /admin` 会让 `/admin/` 失去保护，而你的应用仍可能在那里提供同一资源。除非你确实只想匹配一个路径，否则请保留前缀形式。
+
 !!! warning "安全注意事项"
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
 
@@ -1149,6 +1152,9 @@ STREAM 支持 :warning:
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
 === "请求头"
     **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
 
@@ -1199,7 +1205,7 @@ STREAM 支持 :warning:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # AWS 和 Amazon 的 ASN
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # 自定义忽略规则
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -2721,6 +2727,9 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     | `GREYLIST_URI`      |        | multisite | 否   | **URI 灰名单：** 要列入灰名单的 URI 模式（PCRE 正则表达式）列表，以空格分隔。 |
     | `GREYLIST_URI_URLS` |        | multisite | 否   | **URI 灰名单 URL：** 包含要列入灰名单的 URI 模式的 URL 列表，以空格分隔。     |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
 === "请求头"
     **功能说明：** 将携带指定请求头的请求列入灰名单，按名称匹配，并可选地用 PCRE 正则匹配其值。
 
@@ -3545,6 +3554,9 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `USE_LIMIT_REQ`  | `yes`  | multisite | 否   | **启用请求限制：** 设置为 `yes` 以启用请求速率限制功能。                                                             |
     | `LIMIT_REQ_URL`  | `/`    | multisite | 是   | **URL 模式：** 将应用速率限制的 URL 模式（PCRE 正则表达式）；使用 `/` 以应用于所有请求。                             |
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | 是   | **速率限制：** 最大请求速率，格式为 `Nr/t`，其中 N 是请求数，t 是时间单位：s（秒）、m（分钟）、h（小时）或 d（天）。 |
+
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
 
     !!! tip "速率限制格式"
         速率限制格式指定为 `Nr/t`，其中：
@@ -4505,6 +4517,9 @@ Scheduler 会先验证完整的候选 CA 证书包以及每个 CRL，再替换�
 | `MTLS_CRL_PRIORITY`            | `file` | multisite | 否   | **客户端 CRL 优先级：** CRL 的来源：`file`（路径）或 `data`（base64/PEM）。                                                                                                                         |
 | `MTLS_CRL`                     |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。                                     |
 | `MTLS_CRL_DATA`                |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                                                                         |
+
+!!! tip "锚定路径模式时要覆盖其下的所有内容"
+    请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
 
 !!! tip "配置一次，处处分发"
     CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。
@@ -6408,6 +6423,9 @@ STREAM 支持 :warning:
     | `WHITELIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 白名单检查的 URI 模式列表。                 |
     | `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
+
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
 
 === "请求头"
     **功能说明：** 将携带指定请求头的请求列入白名单，按名称匹配，并可选地用 PCRE 正则匹配其值。适用于能够发送共享密钥的可信探针或网关。

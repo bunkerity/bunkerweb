@@ -735,6 +735,9 @@ Comment ça marche :
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec scrypt pour une sécurité maximale.                                                      |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                                                                        |
 
+!!! tip "Ancrez le chemin protégé pour couvrir tout ce qui est en dessous"
+    Un chemin simple comme `/admin` est une correspondance par préfixe : il protège aussi `/admin/`, `/admin/users` et les variantes encodées qui s'y normalisent. Le modificateur `=` rend la correspondance exacte, donc `= /admin` laisse `/admin/` sans protection alors que votre application peut y servir la même ressource. Gardez la forme préfixe sauf si vous visez vraiment un seul chemin.
+
 !!! warning "Sécurité"
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
@@ -1115,6 +1118,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_URI_URLS`        |        | multisite | non      | **URL de listes noires d’URI :** Liste d’URL contenant des motifs d’URI à bloquer.                                    |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
 
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
 === "En-tête"
     **Ce que cela fait :** Bloque, ou au contraire exempte, les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Une règle d’exclusion l’emporte sur toute correspondance de liste noire, y compris celles servies par le cache.
 
@@ -1165,7 +1171,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN d'AWS et d'Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Règles d'ignorance personnalisées
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -2630,6 +2636,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces.             |
     | `GREYLIST_URI_URLS` |        | multisite | non      | **URL de greylist URI :** Liste d'URL contenant des motifs d'URI à placer en greylist, séparées par des espaces. |
 
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
 === "En-tête"
     **Ce que cela fait :** Place en liste grise les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur.
 
@@ -3435,6 +3444,9 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `USE_LIMIT_REQ`  | `yes`  | multisite | non      | **Activer la limitation de requêtes :** Mettre à `yes` pour activer la fonctionnalité de limitation de débit par requêtes.                                                   |
     | `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
+
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
 
     !!! tip "Format de la limitation de débit"
         Le format de la limite de débit est spécifié comme `Nr/t` où :
@@ -4394,6 +4406,9 @@ Le Scheduler valide l’intégralité du nouveau bundle d’AC ainsi que chaque 
 | `MTLS_CRL_PRIORITY`            | `file`            | multisite | non      | **Priorité de la CRL client :** source de la CRL : `file` (chemin) ou `data` (base64/PEM).                                                                                                                                                                                                           |
 | `MTLS_CRL`                     |                   | multisite | non      | **Chemin de la CRL client :** chemin optionnel vers une liste de révocation de certificats encodée en PEM, lisible par le Scheduler. Appliqué uniquement si le bundle d’AC est chargé avec succès. NGINX exige que le fichier de CRL contienne une CRL pour chaque AC de la chaîne de vérification.  |
 | `MTLS_CRL_DATA`                |                   | multisite | non      | **Données de la CRL client :** liste de révocation fournie directement en base64 ou PEM.                                                                                                                                                                                                             |
+
+!!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+    Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
 
 !!! tip "Configurez une fois, distribué partout"
     Les bundles d’AC et les listes de révocation n’ont pas besoin d’être montés dans les conteneurs BunkerWeb. Fournissez-les uniquement au Scheduler, sous forme de chemin de fichier ou de données en ligne ; le Scheduler les valide, les met en cache et les distribue à chaque instance. Les mises à jour sont prises en compte et redistribuées automatiquement lors de la prochaine exécution du job.
@@ -6219,6 +6234,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | `WHITELIST_IGNORE_URI`      |        | multisite | non      | **Liste d'ignore URI :** Liste de motifs d'URI qui doivent contourner les contrôles de whitelist URI.              |
     | `WHITELIST_URI_URLS`        |        | multisite | non      | **URL de whitelist URI :** Liste d'URL contenant des motifs d'URI à placer en whitelist, séparées par des espaces. |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de liste d'ignore URI :** Liste d'URL contenant des motifs d'URI à ignorer.                                  |
+
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
 
 === "En-tête"
     **Ce que cela fait :** Place en whitelist les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Utile pour une sonde ou une passerelle de confiance capable d’envoyer un secret partagé.

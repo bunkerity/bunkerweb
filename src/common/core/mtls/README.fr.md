@@ -45,6 +45,9 @@ Le Scheduler valide l’intégralité du nouveau bundle d’AC ainsi que chaque 
 | `MTLS_CRL`                         |                    | multisite | non      | **Chemin de la CRL client :** chemin optionnel vers une liste de révocation de certificats encodée en PEM, lisible par le Scheduler. Appliqué uniquement si le bundle d’AC est chargé avec succès. NGINX exige que le fichier de CRL contienne une CRL pour chaque AC de la chaîne de vérification. |
 | `MTLS_CRL_DATA`                    |                    | multisite | non      | **Données de la CRL client :** liste de révocation fournie directement en base64 ou PEM.                                                                |
 
+!!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+    Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
 !!! tip "Configurez une fois, distribué partout"
     Les bundles d’AC et les listes de révocation n’ont pas besoin d’être montés dans les conteneurs BunkerWeb. Fournissez-les uniquement au Scheduler, sous forme de chemin de fichier ou de données en ligne ; le Scheduler les valide, les met en cache et les distribue à chaque instance. Les mises à jour sont prises en compte et redistribuées automatiquement lors de la prochaine exécution du job.
 

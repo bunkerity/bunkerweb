@@ -113,6 +113,9 @@
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
 === "请求头"
     **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
 
@@ -163,7 +166,7 @@
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # AWS 和 Amazon 的 ASN
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # 自定义忽略规则
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

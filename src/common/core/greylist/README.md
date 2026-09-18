@@ -79,6 +79,9 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
     | `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
 
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
 === "Header"
     **What this does:** Greylists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value.
 

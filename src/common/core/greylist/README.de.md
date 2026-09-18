@@ -79,6 +79,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_URI`      |          | multisite | nein     | **URI-Greylist:** Liste von URI-Mustern (PCRE-Regex), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.            |
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
 === "Header"
     **Was dies bewirkt:** Setzt Anfragen mit einem bestimmten Request-Header auf die Greylist, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert.
 

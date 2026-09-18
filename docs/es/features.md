@@ -747,6 +747,9 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con scrypt para máxima seguridad.                                                                                                                            |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                                                                                                      |
 
+!!! tip "Ancle la ruta protegida para cubrir todo lo que hay por debajo"
+    Una ruta simple como `/admin` es una coincidencia por prefijo, así que también protege `/admin/`, `/admin/users` y las variantes codificadas que se normalizan a ellas. El modificador `=` hace la coincidencia exacta, de modo que `= /admin` deja `/admin/` sin protección mientras su aplicación puede servir ahí el mismo recurso. Mantenga la forma de prefijo salvo que realmente quiera una sola ruta.
+
 !!! warning "Consideraciones de seguridad"
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
 
@@ -1143,6 +1146,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 === "Cabecera"
     **Qué hace esto:** Bloquea, o por el contrario exime, las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Una regla de exclusión prevalece sobre cualquier coincidencia de la lista negra, incluidas las cacheadas.
 
@@ -1193,7 +1199,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN de AWS y Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Reglas de omisión personalizadas
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -2711,6 +2717,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_URI`      |                   | multisite | no       | **Lista Gris de URI:** Lista de patrones de URI (expresión regular PCRE) para incluir en la lista gris, separados por espacios.   |
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 === "Cabecera"
     **Qué hace esto:** Pone en la lista gris las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor.
 
@@ -3535,6 +3544,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `USE_LIMIT_REQ`  | `yes`             | multisite | no       | **Habilitar Limitación de Solicitudes:** Establezca en `yes` para habilitar la función de limitación de tasa de solicitudes.                                                      |
     | `LIMIT_REQ_URL`  | `/`               | multisite | yes      | **Patrón de URL:** Patrón de URL (expresión regular PCRE) al que se aplicará el límite de tasa; use `/` para aplicar a todas las solicitudes.                                     |
     | `LIMIT_REQ_RATE` | `2r/s`            | multisite | yes      | **Límite de Tasa:** Tasa máxima de solicitudes en el formato `Nr/t`, donde N es el número de solicitudes y t es la unidad de tiempo: s (segundo), m (minuto), h (hora) o d (día). |
+
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
 
     !!! tip "Formato de Limitación de Tasa"
         El formato del límite de tasa se especifica como `Nr/t` donde:
@@ -4495,6 +4507,9 @@ El Scheduler valida el paquete de CA candidato completo y todas las CRL antes de
 | `MTLS_CRL_PRIORITY`            | `file`               | multisite | no       | **Prioridad de la CRL de clientes:** origen de la CRL: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                                                        |
 | `MTLS_CRL`                     |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación.  |
 | `MTLS_CRL_DATA`                |                      | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                                                                                                                                                                      |
+
+!!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+    Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
 
 !!! tip "Configúralo una vez, distribuido en todas partes"
     Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
@@ -6400,6 +6415,9 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
+
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
 
 === "Cabecera"
     **Qué hace esto:** Pone en la lista blanca las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Útil para una sonda o pasarela de confianza que pueda enviar un secreto compartido.

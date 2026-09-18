@@ -27,6 +27,9 @@ Follow these steps to enable and configure Auth Basic authentication:
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Passwords are hashed using scrypt for maximum security.                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                                                                                       |
 
+!!! tip "Anchor the protected path to cover everything below it"
+    A plain path like `/admin` is a prefix match, so it also protects `/admin/`, `/admin/users` and the encoded variants that normalize into them. The `=` modifier makes the match exact, so `= /admin` leaves `/admin/` unprotected while your application may still serve the same resource there. Keep the prefix form unless you really mean one single path.
+
 !!! warning "Security Considerations"
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
 
