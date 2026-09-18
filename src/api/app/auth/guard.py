@@ -86,6 +86,7 @@ class BiscuitWithAdminBearer:
                 raise HTTPException(status_code=401, detail="Unauthorized")
             self._logger.debug(f"Auth success via Basic admin: user={username}")
             request.state.auth_subject = username
+            request.state.auth_admin = True
             return  # Full access for admin via Basic
 
         # Second path: API token as admin override (Bearer) or Biscuit
@@ -95,6 +96,7 @@ class BiscuitWithAdminBearer:
             if api_token and compare_digest(provided, api_token):
                 self._logger.debug("Auth success via admin Bearer token (API_TOKEN)")
                 request.state.auth_subject = "api-token"
+                request.state.auth_admin = True
                 return  # Full access via admin Bearer
             # Not the admin token (or no API_TOKEN set): try Biscuit ACL
             try:
