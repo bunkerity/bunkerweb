@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.15 - 2026/09/??
+
+- [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
+
 ## v1.6.15~rc3 - 2026/09/15
 
 - [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.

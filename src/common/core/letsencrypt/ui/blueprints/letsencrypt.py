@@ -122,7 +122,7 @@ def download_certificates(target: Path) -> None:
     for cache_file in DB.get_jobs_cache_files(job_name="certbot-renew"):
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
-                safe_tar_extractall(tar, target.as_posix(), tar_filter="auto")
+                safe_tar_extractall(tar, target.as_posix(), links="contained")
 
 
 def _persist_le_cache_dir(source: Path, bypass_gate: bool = False) -> Optional[str]:
