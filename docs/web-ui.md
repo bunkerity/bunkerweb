@@ -152,7 +152,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
 
     Add `bunkerweb-autoconf` and apply labels on the UI container instead of explicit `BUNKERWEB_INSTANCES`. The scheduler still reverse-proxies the UI through the `ui` template and a secret `REVERSE_PROXY_URL`.

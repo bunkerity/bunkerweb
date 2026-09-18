@@ -2048,7 +2048,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
     sudo systemctl reload bunkerweb
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     L'image Docker BunkerWeb All-In-One (AIO) est livrée avec CrowdSec entièrement intégré. Vous n'avez pas besoin de configurer une instance CrowdSec séparée ou de configurer manuellement les fichiers d'acquisition pour les journaux de BunkerWeb lorsque vous utilisez l'agent CrowdSec interne.
 

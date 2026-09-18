@@ -136,7 +136,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "All-in-one"
 
     ```bash
     docker run -d \

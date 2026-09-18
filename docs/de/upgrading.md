@@ -133,7 +133,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
         4. **Überprüfen Sie die Datenbank**: Überprüfen Sie, ob das Datenbank-Upgrade erfolgreich war, indem Sie die Daten und Konfigurationen im neuen Datenbankcontainer überprüfen.
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     Das [All-In-One-Image](integrations.md#all-in-one-aio-image) bündelt BunkerWeb, den Scheduler, die Weboberfläche und optional API, Redis und CrowdSec in einem **einzigen Container**, der standardmäßig `bunkerweb-aio` heißt. Der gesamte persistente Zustand — SQLite-Datenbank, Cache, benutzerdefinierte Konfigurationen, Plugins, Sicherungen und Redis-/CrowdSec-Daten — liegt im Volume `/data`; beim Upgrade wird daher der Container ersetzt, während dieses Volume erhalten bleibt.
 
@@ -575,7 +575,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     Der Scheduler läuft im Container `bunkerweb-aio`, daher werden die Wiederherstellungsbefehle direkt dort ausgeführt. Das Volume `/data` (Datenbank, Konfigurationen, Plugins, Sicherungen) bleibt währenddessen erhalten — nur das Container-Image wird zurückgerollt.
 

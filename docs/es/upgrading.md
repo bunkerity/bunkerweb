@@ -132,7 +132,7 @@ Actualice todas las réplicas de la interfaz web a la vez: la protección contra
 
         4.  **Verifica la base de datos**: Verifica que la actualización de la base de datos fue exitosa revisando los datos y las configuraciones en el nuevo contenedor de la base de datos.
 
-=== "All-In-One (AIO)"
+=== "Todo en uno"
 
     La [imagen All-In-One](integrations.md#all-in-one-aio-image) agrupa BunkerWeb, el Programador, la interfaz web y, opcionalmente, la API, Redis y CrowdSec en un **único contenedor** llamado `bunkerweb-aio` por defecto. Todo el estado persistente — base de datos SQLite, caché, configuraciones personalizadas, plugins, copias de seguridad y datos de Redis/CrowdSec — vive en el volumen `/data`, por lo que actualizar consiste en reemplazar el contenedor conservando ese volumen.
 
@@ -578,7 +578,7 @@ Actualice todas las réplicas de la interfaz web a la vez: la protección contra
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "Todo en uno"
 
     El Programador se ejecuta dentro del contenedor `bunkerweb-aio`, por lo que los comandos de restauración se ejecutan allí directamente. El volumen `/data` (base de datos, configuraciones, plugins, copias de seguridad) se conserva durante todo el proceso; solo se revierte la imagen del contenedor.
 

@@ -131,7 +131,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
         4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
 
@@ -578,7 +578,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     The Scheduler runs inside the `bunkerweb-aio` container, so the restore commands are executed there directly. The `/data` volume (database, configs, plugins, backups) is preserved throughout — only the container image is rolled back.
 

@@ -136,7 +136,7 @@ Choose the flavor that matches your environment.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "All-in-one"
 
     ```bash
     docker run -d \

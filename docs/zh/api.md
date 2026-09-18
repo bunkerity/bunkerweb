@@ -136,7 +136,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "All-in-one"
 
     ```bash
     docker run -d \

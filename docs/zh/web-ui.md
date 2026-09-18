@@ -132,7 +132,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     添加 `bunkerweb-autoconf`，并在 UI 容器上使用标签而不是显式的 `BUNKERWEB_INSTANCES`。Scheduler 仍通过 `ui` 模板和秘密的 `REVERSE_PROXY_URL` 为 UI 做反代。
 

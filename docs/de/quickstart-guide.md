@@ -181,7 +181,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc3/exam
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     Hier ist die vollständige Docker-Compose-Datei, die Sie verwenden können; bitte beachten Sie, dass wir später den Webdienst mit dem `bw-services`-Netzwerk verbinden werden:
 

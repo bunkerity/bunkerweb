@@ -33,8 +33,16 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
+    # one back-to-top button for pages like advanced.md, which builds to 545 KB
+    - navigation.top
+    # a reader who picks Linux once gets every other Linux tab on the site, which
+    # is 23 of them on advanced.md alone; the choice is remembered between visits
+    - content.tabs.link
     - toc.integrate
     - content.code.copy
+    # marks the matched terms on the page, which is what lets extra.js open the
+    # content tab a search hit landed in
+    - search.highlight
   custom_dir: docs/overrides
 
 extra_css:
@@ -54,6 +62,9 @@ markdown_extensions:
   - pymdownx.details
   - toc:
       toc_depth: 3
+      # without this no heading on the site is linkable, so a section of a long
+      # page cannot be shared at all
+      permalink: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

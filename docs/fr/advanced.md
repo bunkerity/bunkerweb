@@ -2815,7 +2815,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
         name: bw-db
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     **Comportement par défaut** : comme Docker (`LOG_TYPES="stderr"`), mais l'image All-in-one conserve `ACCESS_LOG`, `ERROR_LOG` et `MODSECURITY_SEC_AUDIT_LOG` comme des fichiers réels sous `/var/log/bunkerweb/` (les mêmes valeurs par défaut que sous Linux), car le CrowdSec embarqué et le visualiseur de journaux de l'interface Web les lisent tous deux depuis le disque.
 
@@ -3002,7 +3002,7 @@ Les variables couramment utilisées sont :
     sudo systemctl restart bunkerweb-scheduler
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     Fournissez les variables lors de la création du conteneur (et montez le bundle CA si nécessaire). L'image All-in-one inclut le Scheduler, ce qui couvre les tâches sortantes :
 

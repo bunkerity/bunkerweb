@@ -132,7 +132,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
         4. **Vérifier la base de données **: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.
 
-=== "All-In-One (AIO)"
+=== "Tout-en-un"
 
     L'[image All-In-One](integrations.md#all-in-one-aio-image) regroupe BunkerWeb, le Scheduler, l'interface Web et, facultativement, l'API, Redis et CrowdSec dans un **seul conteneur** nommé `bunkerweb-aio` par défaut. Tout l'état persistant — base SQLite, cache, configurations personnalisées, plugins, sauvegardes et données Redis/CrowdSec — réside dans le volume `/data`; la mise à niveau consiste donc à remplacer le conteneur en conservant ce volume.
 
@@ -578,7 +578,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "Tout-en-un"
 
     Le Scheduler s'exécute dans le conteneur `bunkerweb-aio`, les commandes de restauration y sont donc exécutées directement. Le volume `/data` (base de données, configurations, plugins, sauvegardes) est conservé pendant toute l'opération — seule l'image du conteneur est restaurée à la version précédente.
 

@@ -132,7 +132,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     Añade `bunkerweb-autoconf` y aplica labels al contenedor de la UI en vez de `BUNKERWEB_INSTANCES`. El scheduler sigue haciendo reverse proxy a la UI mediante la plantilla `ui` y un `REVERSE_PROXY_URL` secreto.
 
