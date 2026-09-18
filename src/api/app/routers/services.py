@@ -60,8 +60,11 @@ def _full_config_snapshot() -> Dict[str, Any]:
     return get_db().get_non_default_settings(methods=False, with_drafts=True)
 
 
-def _persist_config(config: Dict[str, Any]) -> JSONResponse:
-    ret = get_db().save_config(config, "api", changed=True)
+def _persist_config(config: Dict[str, Any], rename: Optional[tuple[str, str]] = None) -> JSONResponse:
+    kwargs = {"changed": True}
+    if rename is not None:
+        kwargs["rename"] = rename
+    ret = get_db().save_config(config, "api", **kwargs)
 
     if isinstance(ret, str):
         code = 400 if ("read-only" in ret or "already exists" in ret or "doesn't exist" in ret) else 500
@@ -125,11 +128,9 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
 
     target = service
-    # Handle rename. The service row and every service-owned row (custom configs,
-    # per-service settings, job cache) are moved together in one DB transaction
-    # (Database.rename_service) so they can never be dropped the way a plain
-    # SERVER_NAME key rewrite through save_config would drop them (old service
-    # id disappears -> cascade delete of its custom configs/job cache).
+    rename = None
+    # Build the complete save payload from the pre-rename snapshot. Database.save_config
+    # moves the service rows in the same transaction.
     if req.server_name:
         new_name = req.server_name.split(" ")[0].strip()
         if not new_name:
@@ -155,30 +156,25 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
             if not valid:
                 return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid server_name {new_name}: {reason}"})
 
-            # The rename is committed here; the variables and draft changes below go through
-            # _persist_config afterwards, so an error from that step reports a rename that
-            # already happened.
-            err = db.rename_service(service, new_name)
-            if err:
-                code = 400 if ("already exists" in err or "doesn't exist" in err) else 500
-                return JSONResponse(status_code=code, content={"status": "error", "message": err})
-
-            # Re-read the snapshot: the rename already happened at the DB level,
-            # so the rest of this request must build on the post-rename state.
-            conf = _full_config_snapshot()
-            services_list = (conf.get("SERVER_NAME", "") or "").split()
+            own = db.get_non_default_settings(methods=True, with_drafts=True, service=service).get("SERVER_NAME")
+            rewritten = {}
+            prefix = f"{service}_"
+            for key, value in conf.items():
+                rewritten[f"{new_name}_{key[len(prefix):]}" if key.startswith(prefix) else key] = value
+            conf = rewritten
+            conf["SERVER_NAME"] = " ".join(new_name if token == service else token for token in str(conf.get("SERVER_NAME", "") or "").split())
             target = new_name
+            rename = (service, new_name)
 
-            # rename_service moves the per-service SERVER_NAME row but not its value, and
-            # nginx's server_name directive is built from that value. Without a row the
-            # snapshot falls back to the global roster, which must never be persisted as
-            # this service's own value (it would claim its siblings' hostnames).
-            own = db.get_non_default_settings(methods=True, with_drafts=True, service=target).get("SERVER_NAME")
             if isinstance(own, dict) and own.get("global") is False:
-                remaining = [t for t in str(own.get("value") or "").split() if t != service]
-                conf[f"{target}_SERVER_NAME"] = " ".join(remaining) if remaining else new_name
+                conf[f"{target}_SERVER_NAME"] = " ".join(new_name if token == service else token for token in str(own.get("value") or "").split()) or new_name
             else:
                 conf[f"{target}_SERVER_NAME"] = new_name
+
+    for key, value in (req.variables or {}).items():
+        valid, reason = db.is_valid_setting(key, value=value, multisite=True)
+        if not valid:
+            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid value for {key}: {reason}"})
 
     # Draft flag update
     if req.is_draft is not None:
@@ -189,11 +185,9 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         if k == "SERVER_NAME":
             # Ignore direct edits to SERVER_NAME via variables
             continue
-        if isinstance(v, (dict, list)):
-            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid value for {k}: must be scalar"})
         conf[f"{target}_{k}"] = "" if v is None else v
 
-    return _persist_config(conf)
+    return _persist_config(conf, rename=rename)
 
 
 @router.delete("/{service}", dependencies=[Depends(guard)])

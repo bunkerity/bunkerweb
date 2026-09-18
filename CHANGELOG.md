@@ -3,6 +3,7 @@
 ## v1.6.15 - 2026/09/??
 
 - [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
+- [BUGFIX] `api`: `PATCH /services/{service}` renames a service and saves its settings in one transaction; a failed request leaves the old service untouched. Unknown or global-only variables are refused with a 422.
 
 ## v1.6.15~rc3 - 2026/09/15
 
