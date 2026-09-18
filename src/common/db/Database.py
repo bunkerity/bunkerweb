@@ -3987,7 +3987,10 @@ class Database:
 
         return f"Removed {deleted} expired UI user sessions"
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
+    def delete_job_cache(
+        self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, plugin_id: Optional[str] = None
+    ) -> Optional[str]:
+        """Delete a job cache file: None means no matching row, an empty string means success, and other strings are errors."""
         job_name = job_name or argv[0].replace(".py", "")
         filters = {"file_name": file_name, "service_id": service_id or None}
         if job_name:
@@ -3997,7 +4000,12 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if plugin_id is not None and not session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first():
+                return None
+
+            deleted = session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if not deleted:
+                return None
 
             try:
                 session.commit()

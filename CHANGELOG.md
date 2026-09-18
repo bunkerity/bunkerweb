@@ -4,6 +4,7 @@
 
 - [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
 - [SECURITY] `api`: moving a custom config with `PATCH /configs` needs `config_update` on the destination service; a body without `service` keeps the current one, not global.
+- [SECURITY] `api`, `ui`: a cache delete marks a plugin changed only when one of its rows was really deleted; `cache_delete` can no longer run another plugin's jobs.
 - [BUGFIX] `reverseproxy`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them. Header names are matched case-insensitively. (Fixes #3936)
 - [BUGFIX] `api`: `PATCH /services/{service}` renames a service and saves its settings in one transaction; a failed request leaves the old service untouched. Unknown or global-only variables are refused with a 422.
 - [BUGFIX] `ui`: the reports table shows the CrowdSec investigation button only on CrowdSec reports, as a CrowdSec-branded icon next to the ban button it used to override in the Actions column.
