@@ -3055,7 +3055,7 @@ controller:
 
     Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
 
-    Die Whitelist und das Token sind die Schutzschichten, die jeder Cluster erhält. Wenn Ihre CNI `NetworkPolicy` durchsetzt, schließen Sie zusätzlich Port 5000 für alle außer den aufrufenden Pods und lassen die bereitgestellten Ports offen. Der untenstehende Sidecar-Pod wird über das `app: nginx-bw`-Label seines Deployments ausgewählt, nicht über die Annotation `bunkerweb.io/INSTANCE`; passen Sie den Selektor an das Label Ihres eigenen Deployments an. Erlauben Sie nur dem Scheduler und der Web-UI, die API aufzurufen; wenn Sie zusätzlich den API-Dienst betreiben, ergänzen Sie das `app`-Label seiner eigenen Pods, da dieses Beispiel keines definiert. Port 9113 bleibt offen, weil der Sidecar oben dort Metriken bereitstellt. Eine Policy verweigert jeden Port, den sie nicht nennt: wenn Sie `API_LISTEN_HTTPS` aktivieren, ergänzen Sie `API_HTTPS_PORT` (5443) neben 5000.
+    Die Whitelist und das Token sind die Schutzschichten, die jeder Cluster erhält. Wenn Ihre CNI `NetworkPolicy` durchsetzt, schließen Sie zusätzlich Port 5000 für alle außer den aufrufenden Pods und lassen die bereitgestellten Ports offen. Der untenstehende Sidecar-Pod wird über das `app: nginx-bw`-Label seines Deployments ausgewählt, nicht über die Annotation `bunkerweb.io/INSTANCE`; passen Sie den Selektor an das Label Ihres eigenen Deployments an. Erlauben Sie nur dem Scheduler und der Web-UI, die API aufzurufen; wenn Sie zusätzlich den API-Dienst betreiben, ergänzen Sie das `app`-Label seiner eigenen Pods, da dieses Beispiel keines definiert. Port 9113 bleibt offen, weil der Sidecar oben dort Metriken bereitstellt. Die Regel deckt die gesamte interne API ab, einschließlich der Plugin-Routen, da sie denselben `bwapi`-Server nutzen, dessen Access-Phase zuerst das Token prüft. Port 5443 ist für `API_LISTEN_HTTPS` vorgesehen, und 5000 bleibt dabei offen: das API-Zertifikat erreicht den Worker über den Cache-Push per HTTP-API, und NGINX aktiviert den TLS-Listener erst, wenn diese Datei angekommen ist.
 
     ```yaml
     apiVersion: networking.k8s.io/v1
@@ -3085,6 +3085,8 @@ controller:
           ports:
             - protocol: TCP
               port: 5000
+            - protocol: TCP
+              port: 5443
     ```
 
   ```yaml
