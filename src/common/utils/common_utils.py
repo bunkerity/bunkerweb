@@ -20,7 +20,7 @@ from os import (
     cpu_count,
     write as os_write,
 )
-from os.path import join as path_join, normpath
+from os.path import join as path_join
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
@@ -361,6 +361,39 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
     return result
 
 
+def _resolve_through_members(name, symlinks, *, max_hops=64):
+    """Return where a member actually lands, or None if it escapes the extraction root.
+
+    TarFile follows symlinks that earlier members already created, so a member's declared
+    path is not necessarily where it is written. Metadata only, no disk access.
+    """
+    parts = list(Path(name).parts)
+    resolved, hops, index = [], 0, 0
+    while index < len(parts):
+        part = parts[index]
+        index += 1
+        if part in (".", ""):
+            continue
+        if part == "..":
+            if not resolved:
+                return None
+            resolved.pop()
+            continue
+        candidate = "/".join(resolved + [part])
+        if candidate not in symlinks:
+            resolved.append(part)
+            continue
+        hops += 1
+        if hops > max_hops:
+            return None
+        target = symlinks[candidate]
+        if Path(target).is_absolute():
+            return None
+        parts = resolved + list(Path(target).parts) + parts[index:]
+        resolved, index = [], 0
+    return "/".join(resolved)
+
+
 def _validate_tar_members(members, *, allow_symlinks=False):
     """Pre-validate tar members before extraction (defense-in-depth against CVE-2025-4517).
 
@@ -368,6 +401,7 @@ def _validate_tar_members(members, *, allow_symlinks=False):
     When allow_symlinks is False, all symlinks/hardlinks are rejected (matching filter="data").
     When allow_symlinks is True, symlinks are permitted but their targets are still validated.
     """
+    symlinks = {}
     for member in members:
         # Block absolute paths
         if member.name.startswith("/"):
@@ -378,6 +412,10 @@ def _validate_tar_members(members, *, allow_symlinks=False):
         # Block device files and pipes
         if member.isdev() or member.isfifo():
             raise ValueError(f"Tar member {member.name!r} is a device or pipe")
+        # Where this member actually lands once earlier symlink members are followed
+        location = _resolve_through_members(member.name, symlinks)
+        if location is None:
+            raise ValueError(f"Tar member {member.name!r} resolves outside target directory through a symlink chain")
         # Check symlinks/hardlinks
         if member.issym() or member.islnk():
             if not allow_symlinks:
@@ -385,13 +423,15 @@ def _validate_tar_members(members, *, allow_symlinks=False):
             # Even when symlinks are allowed, validate their targets
             if Path(member.linkname).is_absolute():
                 raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
-            # Normalize to collapse valid .. segments, then check if any remain (= escaping)
+            # Resolve the target from where the link lands, not from its declared parent, and
+            # through any symlink members already declared.
             # TarFile resolves symlinks relative to the member's parent but hardlinks relative
             # to the extraction root.
-            link_parent = Path(member.name).parent if member.issym() else Path()
-            normalized = normpath(path_join(str(link_parent), member.linkname))
-            if ".." in Path(normalized).parts:
+            link_parent = str(Path(location).parent) if member.issym() else ""
+            if _resolve_through_members(path_join(link_parent, member.linkname), symlinks) is None:
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            if member.issym():
+                symlinks[location] = member.linkname
 
 
 def _native_tar_filter(tar_filter):
