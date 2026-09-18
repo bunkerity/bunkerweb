@@ -394,7 +394,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `GET /configs`: lista snippets (servicio por defecto `global`); `with_data=true` incrusta contenido imprimible.
   - `POST /configs`, `POST /configs/upload`: crea snippets vía JSON o subida de archivo.
   - `GET /configs/{service}/{type}/{name}`: obtiene snippet; `with_data=true` para el contenido.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: actualizar o mover snippets gestionados por la API.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: actualizar o mover snippets gestionados por la API. Mover exige además `config_update` en el servicio de destino (`global` cuenta como servicio); un cuerpo JSON sin `service` conserva el servicio actual.
   - `DELETE /configs` o `DELETE /configs/{service}/{type}/{name}`: eliminar snippets gestionados por la API; los gestionados por plantillas se omiten.
   - Tipos soportados: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks de CRS/plug-in.
 - **Bans**
@@ -408,7 +408,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 - **Cache (artefactos de jobs)**
   - `GET /cache`: lista archivos de caché con filtros (`service`, `plugin`, `job_name`); `with_data=true` incrusta contenido imprimible.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: obtiene/descarga un archivo de caché específico (`download=true`).
-  - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché y notifica al scheduler.
+  - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché. Solo se notifica al scheduler para un plugin cuya fila se borró de verdad; un `plugin` que no posee el job se rechaza y no se borra nada.
 - **Jobs**
   - `GET /jobs`: lista jobs, horarios y resúmenes de caché.
   - `POST /jobs/run`: marca plugins como cambiados para disparar los jobs asociados.

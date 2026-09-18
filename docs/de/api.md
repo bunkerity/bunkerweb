@@ -394,7 +394,7 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
   - `GET /configs`: Snippets auflisten (Default-Service `global`); `with_data=true` bettet druckbaren Inhalt ein.
   - `POST /configs`, `POST /configs/upload`: Snippets via JSON oder File-Upload erstellen.
   - `GET /configs/{service}/{type}/{name}`: Snippet holen; `with_data=true` für Inhalt.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: API-gemanagte Snippets aktualisieren oder verschieben.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: API-gemanagte Snippets aktualisieren oder verschieben. Ein Verschieben verlangt zusätzlich `config_update` auf dem Zielservice (`global` zählt als Service); ein JSON-Body ohne `service` behält den aktuellen Service.
   - `DELETE /configs` oder `DELETE /configs/{service}/{type}/{name}`: API-gemanagte Snippets löschen; template-gemanagte werden übersprungen.
   - Unterstützte Typen: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/Plugin-Hooks.
 - **Bans**
@@ -408,7 +408,7 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
 - **Cache (Job-Artefakte)**
   - `GET /cache`: Cache-Dateien mit Filtern (`service`, `plugin`, `job_name`) auflisten; `with_data=true` bettet druckbaren Inhalt ein.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: spezifische Cache-Datei holen/herunterladen (`download=true`).
-  - `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: Cache-Dateien löschen und Scheduler benachrichtigen.
+  - `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: Cache-Dateien löschen. Der Scheduler wird nur für ein Plugin benachrichtigt, dessen Zeile tatsächlich gelöscht wurde; ein `plugin`, dem der Job nicht gehört, wird abgelehnt und nichts wird gelöscht.
 - **Jobs**
   - `GET /jobs`: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.
   - `POST /jobs/run`: Plugins als geändert markieren, um zugehörige Jobs auszulösen.

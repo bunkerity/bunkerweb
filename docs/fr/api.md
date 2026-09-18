@@ -394,7 +394,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `GET /configs` : lister les snippets (service par défaut `global`) ; `with_data=true` intègre le contenu imprimable.
   - `POST /configs`, `POST /configs/upload` : créer des snippets via JSON ou upload de fichier.
   - `GET /configs/{service}/{type}/{name}` : récupérer un snippet ; `with_data=true` pour le contenu.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API. Un déplacement exige aussi `config_update` sur le service de destination (`global` compte comme un service) ; un corps JSON sans `service` conserve le service actuel.
   - `DELETE /configs` ou `DELETE /configs/{service}/{type}/{name}` : supprimer les snippets gérés par l’API ; ceux gérés par template sont ignorés.
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
 - **Bans**
@@ -408,7 +408,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 - **Cache (artefacts de jobs)**
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
-  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache et notifier le scheduler.
+  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache. Le scheduler n’est notifié que pour un plugin dont une ligne a réellement été supprimée ; un `plugin` qui ne possède pas le job est refusé et rien n’est supprimé.
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.
