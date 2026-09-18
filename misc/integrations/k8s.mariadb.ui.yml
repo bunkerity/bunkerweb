@@ -39,6 +39,46 @@ metadata:
 spec:
   controller: bunkerweb.io/ingress-controller
 ---
+# Generate a real value with: openssl rand -hex 32
+# Use the same token on the BunkerWeb pods and every component that calls the instance API.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bunkerweb-api
+type: Opaque
+stringData:
+  token: changeme
+---
+# NetworkPolicy is enforced only by CNIs that implement it (Calico, Cilium, kube-router, etc.);
+# kindnet and flannel alone do not; API_TOKEN is the layer that holds regardless.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bunkerweb-api
+spec:
+  podSelector:
+    matchLabels:
+      app: bunkerweb
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8443
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - bunkerweb-scheduler
+                  - bunkerweb-ui
+      ports:
+        - protocol: TCP
+          port: 5000
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -76,6 +116,11 @@ spec:
             # 10.0.0.0/8 is the cluster internal subnet
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
           livenessProbe:
             exec:
               command:
@@ -163,6 +208,11 @@ spec:
             # 10.0.0.0/8 is the cluster internal subnet
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: BUNKERWEB_INSTANCES
               value: ""
             - name: SERVER_NAME
@@ -258,6 +308,11 @@ spec:
           env:
             - name: KUBERNETES_MODE
               value: "YES"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: DATABASE_URI
               value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
             - name: ADMIN_USERNAME

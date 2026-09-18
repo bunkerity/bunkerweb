@@ -3057,6 +3057,38 @@ controller:
 
     Restreignez `API_WHITELIST_IP` au CIDR réel des pods de votre cluster plutôt qu'à toute la plage RFC1918 lorsque vous le connaissez.
 
+    La liste blanche et le jeton sont les couches de protection dont dispose chaque cluster. Avec une CNI qui applique `NetworkPolicy`, fermez également le port 5000 à tout le monde sauf aux pods appelants, tout en laissant ouverts les ports servis. Le pod sidecar ci-dessous est sélectionné par le label `app: nginx-bw` de son Deployment, et non par l'annotation `bunkerweb.io/INSTANCE` ; adaptez le sélecteur au label de votre propre Deployment. N'autorisez que le Scheduler et l'interface web à appeler l'API ; si vous déployez aussi le service API, ajoutez le label `app` que portent ses propres pods, cet exemple n'en définit aucun. Le port 9113 reste ouvert car le sidecar ci-dessus y expose les métriques.
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: bunkerweb-api
+      namespace: bunkerweb
+    spec:
+      podSelector:
+        matchLabels:
+          app: nginx-bw
+      policyTypes: [Ingress]
+      ingress:
+        - ports:
+            - protocol: TCP
+              port: 8080
+            - protocol: TCP
+              port: 8443
+            - protocol: TCP
+              port: 9113
+        - from:
+            - podSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: [bunkerweb-scheduler, bunkerweb-ui]
+          ports:
+            - protocol: TCP
+              port: 5000
+    ```
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
