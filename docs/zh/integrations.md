@@ -3052,7 +3052,7 @@ controller:
 
     Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
 
-    白名单和令牌是每个集群都应具备的两层防护。在会强制执行 `NetworkPolicy` 的 CNI 上，还应将 5000 端口关闭给所有非调用方，同时保持服务端口开放。下面的 sidecar Pod 通过其 Deployment 的 `app: nginx-bw` 标签选择，而不是通过 `bunkerweb.io/INSTANCE` 注解选择；请根据您自己的 Deployment 标签调整选择器。仅允许 Scheduler 和 Web UI 作为调用方；如果您还部署了 API 服务，请补充其自身 Pod 所带的 `app` 标签，本示例并未定义该标签。9113 端口保持开放，因为上面的 sidecar 在该端口暴露指标。
+    白名单和令牌是每个集群都应具备的两层防护。在会强制执行 `NetworkPolicy` 的 CNI 上，还应将 5000 端口关闭给所有非调用方，同时保持服务端口开放。下面的 sidecar Pod 通过其 Deployment 的 `app: nginx-bw` 标签选择，而不是通过 `bunkerweb.io/INSTANCE` 注解选择；请根据您自己的 Deployment 标签调整选择器。仅允许 Scheduler 和 Web UI 作为调用方；如果您还部署了 API 服务，请补充其自身 Pod 所带的 `app` 标签，本示例并未定义该标签。9113 端口保持开放，因为上面的 sidecar 在该端口暴露指标。 策略会拒绝其未列出的所有端口，因此如果启用 `API_LISTEN_HTTPS`，请在 5000 之外补上 `API_HTTPS_PORT`（5443）。
 
     ```yaml
     apiVersion: networking.k8s.io/v1

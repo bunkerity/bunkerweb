@@ -83,6 +83,9 @@ spec:
                 values:
                   - bunkerweb-scheduler
       ports:
+        # API_HTTP_PORT. Turning on API_LISTEN_HTTPS moves the API to
+        # API_HTTPS_PORT (5443) as well; add it here, since an ingress policy
+        # denies every port it does not name.
         - protocol: TCP
           port: 5000
 ---

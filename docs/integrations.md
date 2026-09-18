@@ -3180,7 +3180,7 @@ controller:
 
     Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
 
-    The whitelist and token are the layers every cluster gets. On a CNI that enforces `NetworkPolicy`, also close port 5000 to everything but the callers while leaving the served ports open. The sidecar pod below is selected by the Deployment's `app: nginx-bw` label, not by its `bunkerweb.io/INSTANCE` annotation; adapt the selector to your own Deployment label. Allow only the Scheduler and the Web UI as callers; if you deploy the API service too, add whatever `app` label its own pods carry, since this example defines none. Port 9113 stays open because the sidecar above exposes metrics on it.
+    The whitelist and token are the layers every cluster gets. On a CNI that enforces `NetworkPolicy`, also close port 5000 to everything but the callers while leaving the served ports open. The sidecar pod below is selected by the Deployment's `app: nginx-bw` label, not by its `bunkerweb.io/INSTANCE` annotation; adapt the selector to your own Deployment label. Allow only the Scheduler and the Web UI as callers; if you deploy the API service too, add whatever `app` label its own pods carry, since this example defines none. Port 9113 stays open because the sidecar above exposes metrics on it. A policy denies every port it does not name, so if you turn on `API_LISTEN_HTTPS` add `API_HTTPS_PORT` (5443) next to 5000.
 
     ```yaml
     apiVersion: networking.k8s.io/v1
