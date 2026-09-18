@@ -361,13 +361,18 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
     return result
 
 
-def _resolve_through_members(name, symlinks, *, max_hops=64):
+def _resolve_through_members(name, symlinks, *, resolve_final=True, max_hops=64):
     """Return where a member actually lands, or None if it escapes the extraction root.
 
     TarFile follows symlinks that earlier members already created, so a member's declared
     path is not necessarily where it is written. Metadata only, no disk access.
+
+    resolve_final=False keeps the last component literal: a member that creates a link is
+    written at that name rather than through a link already sitting there, because neither
+    os.symlink() nor os.link() dereferences its final component.
     """
     parts = list(Path(name).parts)
+    tail = parts.pop() if not resolve_final and parts else None
     resolved, hops, index = [], 0, 0
     while index < len(parts):
         part = parts[index]
@@ -391,6 +396,13 @@ def _resolve_through_members(name, symlinks, *, max_hops=64):
             return None
         parts = resolved + list(Path(target).parts) + parts[index:]
         resolved, index = [], 0
+    if tail is not None:
+        if tail == "..":
+            if not resolved:
+                return None
+            resolved.pop()
+        elif tail != ".":
+            resolved.append(tail)
     return "/".join(resolved)
 
 
@@ -412,8 +424,9 @@ def _validate_tar_members(members, *, allow_symlinks=False):
         # Block device files and pipes
         if member.isdev() or member.isfifo():
             raise ValueError(f"Tar member {member.name!r} is a device or pipe")
-        # Where this member actually lands once earlier symlink members are followed
-        location = _resolve_through_members(member.name, symlinks)
+        # Where this member actually lands once earlier symlink members are followed. A member
+        # that creates a link is written at its own name, not through a link already there.
+        location = _resolve_through_members(member.name, symlinks, resolve_final=not (member.issym() or member.islnk()))
         if location is None:
             raise ValueError(f"Tar member {member.name!r} resolves outside target directory through a symlink chain")
         # Check symlinks/hardlinks
