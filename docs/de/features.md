@@ -2798,28 +2798,57 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
 
 ### Konfigurationseinstellungen
 
-| Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |
-| ---------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                |
-| `GRPC_HOST`                  |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).            |
-| `GRPC_URL`                   | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird.                                 |
-| `GRPC_CUSTOM_HOST`           |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                   |
-| `GRPC_HEADERS`               |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.              |
-| `GRPC_HIDE_HEADERS`          |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.             |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                   |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                  |
-| `GRPC_READ_TIMEOUT`          | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                 |
-| `GRPC_SEND_TIMEOUT`          | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                             |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                           |
-| `GRPC_SSL_SNI`               | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                             |
-| `GRPC_SSL_SNI_NAME`          |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                               |
-| `GRPC_NEXT_UPSTREAM`         |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                         |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                     |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                      |
-| `GRPC_INCLUDES`              |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks. |
+| Einstellung                             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                           |
+| --------------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_GRPC`                              | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                                                                 |
+| `GRPC_HOST`                             |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).                                                             |
+| `GRPC_URL`                              | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird.                                                                                  |
+| `GRPC_CUSTOM_HOST`                      |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                                                                    |
+| `GRPC_HEADERS`                          |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.                                                               |
+| `GRPC_HIDE_HEADERS`                     |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.                                                              |
+| `GRPC_HEADERS_CLIENT`                   |          | multisite | ja       | **Antwort-Header für Clients:** Semikolon-getrennte Liste von `add_header`-Werten, die an den Client gesendet werden.                                  |
+| `GRPC_PASS_HEADERS`                     |          | multisite | ja       | **Durchgereichte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_pass_header`-Werten, um standardmäßig verborgene Header weiterzugeben.        |
+| `GRPC_IGNORE_HEADERS`                   |          | multisite | ja       | **Ignorierte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_ignore_headers`-Werten, damit NGINX sie nicht verarbeitet.                        |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`     | multisite | nein     | **Unterstriche in Headern:** Aktiviert/deaktiviert `underscores_in_headers`.                                                                           |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                                                                    |
+| `GRPC_BUFFER_SIZE`                      |          | multisite | ja       | **Puffergröße:** Wert für `grpc_buffer_size` (Puffer zum Lesen der Upstream-Antwort).                                                                  |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                                                                   |
+| `GRPC_READ_TIMEOUT`                     | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                                                                  |
+| `GRPC_SEND_TIMEOUT`                     | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                                                                              |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                                                                            |
+| `GRPC_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                                                                              |
+| `GRPC_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                                                                                |
+| `GRPC_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL-Prüfung:** Aktiviert/deaktiviert die Prüfung des gRPC-Upstream-Zertifikats.                                                                      |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle des CA-Bundles, `file` oder `data`.                                                           |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen Zertifikats:** Pfad zu einem PEM-CA-Bundle, das der Scheduler lesen kann (Priorität `file`).                             |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen Zertifikats:** CA-Bundle als base64 oder Klartext-PEM (Priorität `data`).                                               |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL-Prüftiefe:** Prüftiefe in der Upstream-Zertifikatskette.                                                                                         |
+| `GRPC_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                         |
+| `GRPC_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                      |
+| `GRPC_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                   |
+| `GRPC_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.           |
+| `GRPC_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                            |
+| `GRPC_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                             |
+| `GRPC_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                |
+| `GRPC_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                |
+| `GRPC_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                   |
+| `GRPC_NEXT_UPSTREAM`                    |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                                                                          |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                                                                      |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                                                                       |
+| `GRPC_AUTH_REQUEST`                     |          | multisite | ja       | **Auth Request:** Wert für `auth_request`, um über einen externen Anbieter zu authentifizieren.                                                        |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |          | multisite | ja       | **Auth-Request-Anmelde-URL:** Weiterleitungsziel, wenn der Auth-Request 401 zurückgibt.                                                                |
+| `GRPC_AUTH_REQUEST_SET`                 |          | multisite | ja       | **Auth Request Set:** Semikolon-getrennte Liste von `auth_request_set`-Werten.                                                                         |
+| `GRPC_INCLUDES`                         |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks.                                                  |
+| `GRPC_MAX_CLIENT_SIZE`                  |          | multisite | ja       | **Maximale Body-Größe:** Wert für `client_max_body_size` in diesem Location-Block (`0` für unbegrenzt). Ohne Wert gilt `MAX_CLIENT_SIZE` des Dienstes. |
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! warning "ModSecurity in gRPC-Location-Blöcken"
     ModSecurity wird aktuell in den von diesem Plugin generierten gRPC-`location`-Blöcken automatisch deaktiviert, da ModSecurity gRPC-Verkehrsmuster nicht zuverlässig unterstützt.
+
+!!! tip "Upstream-Zertifikat prüfen"
+    `GRPC_SSL_VERIFY` wirkt erst, wenn ein CA-Bundle verfügbar ist. Stellen Sie es über `GRPC_SSL_TRUSTED_CERTIFICATE` (ein für den Scheduler lesbarer Pfad) oder `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 oder Klartext-PEM) bereit und wählen Sie die Quelle mit `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Der Scheduler prüft das Bundle, legt es im Cache ab und verteilt es an die Instanzen. Ohne nutzbares Bundle bleibt die Prüfung deaktiviert.
 
 !!! warning "Lang laufende Streams und Core-Timeouts"
     Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT` in den Einstellungen des General-Plugins angepasst.
@@ -2880,6 +2909,30 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
 
+=== "Geprüftes TLS-Upstream"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    GRPC_SSL_VERIFY: "yes"
+    GRPC_SSL_TRUSTED_CERTIFICATE: "/etc/ssl/certs/ca-certificates.crt"
+    GRPC_SSL_VERIFY_DEPTH: "2"
+    ```
+
+=== "Externe Authentifizierung"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_AUTH_REQUEST: "/auth"
+    GRPC_AUTH_REQUEST_SIGNIN_URL: "https://sso.example.com/login"
+    GRPC_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_email $upstream_http_x_email"
+    GRPC_HEADERS: "x-forwarded-user $auth_user"
+    ```
 ## Gzip
 
 STREAM-Unterstützung :x:
@@ -5247,17 +5300,17 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Protokollbehandlung:** Unterstützung für HTTP, HTTPS, WebSockets und andere Protokolle
         - **Fehlerabfang:** Passen Sie Fehlerseiten für ein einheitliches Benutzererlebnis an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                                   |
-    | --------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                                                                                                                                                             |
-    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                                                                                                                                                                |
-    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt. |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                                                                                                                                                              |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                                                                                                                                                                 |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.                                                                                                                                                                                                                                                                         |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1.                                                                                                                                             |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                                                                                                                                                                  |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.                                                                                                                                                                                                                                                                              |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                       |
+    | --------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                 |
+    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                    |
+    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt.                                                                            |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                     |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.                                                                                                                             |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1. |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                      |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.                                                                                                                                  |
 
     BunkerWeb setzt den Pfad oder Regex-Ausdruck beim Erzeugen der NGINX-Location in Anführungszeichen und erhält dabei enthaltene Anführungszeichen, `#` und Regex-Backslashes. Geben Sie den Wert ohne zusätzliche NGINX-Anführungszeichen an. Die bestehenden Einschränkungen für Leerraum, `;`, `{` und `}` gelten weiterhin.
 
@@ -5314,6 +5367,15 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI).                                 |
     | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                                                                      |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                             |
+    | `REVERSE_PROXY_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                          |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                       |
+    | `REVERSE_PROXY_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.               |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                                |
+    | `REVERSE_PROXY_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                                 |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                    |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                       |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -5417,10 +5479,10 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Leistungsoptimierung:** Optimieren Sie die Anforderungsbehandlung für bestimmte Anwendungsfälle
         - **Flexibilität:** Passen Sie sich mit speziellen Konfigurationen an einzigartige Anwendungsanforderungen an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                      |
-    | --------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                  |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                         |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                       |
+    | --------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                   |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                          |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`    | multisite | ja       | **ModSecurity (pro Location):** Auf `no` setzen, um `modsecurity off;` in dieser Location auszugeben; umgeht die WAF auf Endpunkten für große Uploads, um OOM zu vermeiden (siehe Hinweis unten). |
     | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |          | multisite | ja       | **Maximale Körpergröße (pro Location):** Maximale Körpergröße für diese Location (`0` für unbegrenzt). Wenn leer, gilt das `MAX_CLIENT_SIZE` des Dienstes.                                        |
 
@@ -5465,6 +5527,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Verwenden Sie je nach Inhaltstyp geeignete Cache-Dauern (statische Assets können länger zwischengespeichert werden)
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! danger "Docker Compose-Benutzer - NGINX-Variablen"
     Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.
@@ -5568,7 +5633,6 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     REVERSE_PROXY_HOST_2: "http://auth-service:8080"
     REVERSE_PROXY_URL_2: "/auth"
     ```
-
 ## Reverse scan
 
 STREAM-Unterstützung :white_check_mark:
