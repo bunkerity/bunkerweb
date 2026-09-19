@@ -42,7 +42,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -77,7 +77,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.15-rc3
+        image: bunkerity/bunkerweb-api:1.6.15
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -136,7 +136,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "All-in-one"
 
     ```bash
     docker run -d \
@@ -144,7 +144,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.15
     ```
 
 === "Linux"
@@ -394,7 +394,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `GET /configs`: 列出片段（默认服务 `global`）；`with_data=true` 内嵌可打印内容。
   - `POST /configs`, `POST /configs/upload`: 通过 JSON 或文件上传创建片段。
   - `GET /configs/{service}/{type}/{name}`: 获取片段；`with_data=true` 返回内容。
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: 更新或移动 API 管理的片段。
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: 更新或移动 API 管理的片段。移动还需要目标服务上的 `config_update`（`global` 也算一个服务）；JSON 请求体不带 `service` 时保留当前服务。
   - `DELETE /configs` 或 `DELETE /configs/{service}/{type}/{name}`: 删除 API 管理的片段；模板管理的会被跳过。
   - 支持类型：`http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`，以及 CRS/插件钩子。
 - **Bans**
@@ -408,7 +408,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - **Cache（任务制品）**
   - `GET /cache`: 按筛选 (`service`, `plugin`, `job_name`) 列出缓存文件；`with_data=true` 内嵌可打印内容。
   - `GET /cache/{service}/{plugin}/{job}/{file}`: 获取/下载特定缓存文件（`download=true`）。
-  - `DELETE /cache` 或 `DELETE /cache/{service}/{plugin}/{job}/{file}`: 删除缓存文件并通知调度器。
+  - `DELETE /cache` 或 `DELETE /cache/{service}/{plugin}/{job}/{file}`: 删除缓存文件。只有某个插件的行真正被删除时才会通知调度器；`plugin` 不拥有该 job 时会被拒绝且不删除任何内容。
 - **Jobs**
   - `GET /jobs`: 列出作业、计划和缓存摘要。
   - `POST /jobs/run`: 将插件标记为已变更以触发关联作业。

@@ -35,7 +35,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     Verwenden Sie die veröffentlichten Images und das Layout aus dem [Quickstart-Guide](quickstart-guide.md#__tabbed_1_3). Stack starten, dann den Wizard im Browser abschließen.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Öffnen Sie den Scheduler-Host (z. B. `https://www.example.com/changeme`) und führen Sie den `/setup`-Wizard aus, um UI, Scheduler und Instanz zu konfigurieren.
@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -132,7 +132,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     `bunkerweb-autoconf` hinzufügen und Labels auf dem UI-Container statt `BUNKERWEB_INSTANCES` setzen. Der Scheduler reverse-proxiet die UI weiterhin über das Template `ui` und einen geheimen `REVERSE_PROXY_URL`.
 
@@ -159,7 +159,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
 - Admin-Konto: per Wizard oder über `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwort muss Klein-, Großbuchstaben, Zahl und Sonderzeichen enthalten. `OVERRIDE_ADMIN_CREDS=yes` erzwingt Neu-Initialisierung auch bei bestehendem Konto.
 - Passwortlängenbegrenzung: bcrypt verwendet nur die ersten **72 Bytes** eines Secrets; Passwörter sind daher überall, wo sie gesetzt werden (Setup-Assistent, Profilseite, `ADMIN_PASSWORD` / `API_PASSWORD`), auf 72 Bytes begrenzt. Ein längerer Wert wird mit einer erklärenden Fehlermeldung oder einem Logeintrag abgelehnt, statt stillschweigend abgeschnitten zu werden. Beachten Sie, dass Nicht-ASCII-Zeichen (Akzente, Emoji) jeweils mehrere Bytes belegen; eine aus solchen Zeichen bestehende "72-Zeichen"-Passphrase kann daher die Grenze überschreiten. Vorgehashte bcrypt-Werte sind ausgenommen (der Hash kodiert die Grenze bereits).
-- Rollen: `admin`, `writer` und `reader` werden automatisch angelegt; Konten liegen in der Datenbank.
+- Rollen: `admin`, `writer` und `reader` werden automatisch angelegt; Konten liegen in der Datenbank. Die Open-Source-Oberfläche autorisiert nur über Lesen und Schreiben, daher haben `admin` und `writer` dieselben Rechte und `reader` ist die einzige eingeschränkte Rolle. Eine feinere Trennung, etwa wer Benutzer und Sicherheitseinstellungen verwalten darf, kommt mit dem PRO-Plugin `user_manager`, dokumentiert unter [erweiterte Nutzung](advanced.md#user-manager-pro).
 - Secrets: `FLASK_SECRET` liegt in `/var/lib/bunkerweb/.flask_secret`; Biscuit-Keys daneben, optional per `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: TOTP-Secrets liegen in der Datenbank, verschlüsselt mit Schlüsseln aus `/var/lib/bunkerweb/.totp_encryption_keys.json`. Die UI erzeugt sie beim ersten Start, solange diese Datei persistiert wird ist also nichts zu tun. Mit `TOTP_ENCRYPTION_KEYS` (leerzeichengetrennt oder JSON-Map) geben Sie eigene Schlüssel vor; jeder muss dann genau **43 Zeichen** haben, alles andere wird mit der Warnung `Invalid TOTP secret for key` verworfen und durch einen Zufallsschlüssel ersetzt. Schlüssel generieren:
 

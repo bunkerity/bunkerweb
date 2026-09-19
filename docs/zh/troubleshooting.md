@@ -331,7 +331,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -411,7 +411,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -434,7 +434,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -515,7 +515,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "仅限 MariaDB / MySQL"
         以下步骤仅适用于 MariaDB / MySQL 数据库。如果您正在使用其他数据库，请参阅您数据库的文档。

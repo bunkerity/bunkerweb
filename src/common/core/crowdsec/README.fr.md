@@ -143,7 +143,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -160,7 +160,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -323,7 +323,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
     sudo systemctl reload bunkerweb
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     L'image Docker BunkerWeb All-In-One (AIO) est livrée avec CrowdSec entièrement intégré. Vous n'avez pas besoin de configurer une instance CrowdSec séparée ou de configurer manuellement les fichiers d'acquisition pour les journaux de BunkerWeb lorsque vous utilisez l'agent CrowdSec interne.
 

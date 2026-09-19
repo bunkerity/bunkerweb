@@ -25,6 +25,9 @@ Comment ça marche :
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec scrypt pour une sécurité maximale.                                                      |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                                                                        |
 
+!!! tip "Ancrez le chemin protégé pour couvrir tout ce qui est en dessous"
+    Un chemin simple comme `/admin` est une correspondance par préfixe : il protège aussi `/admin/`, `/admin/users` et les variantes encodées qui s'y normalisent. Le modificateur `=` rend la correspondance exacte, donc `= /admin` laisse `/admin/` sans protection alors que votre application peut y servir la même ressource. Gardez la forme préfixe sauf si vous visez vraiment un seul chemin.
+
 !!! warning "Sécurité"
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 

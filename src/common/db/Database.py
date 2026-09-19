@@ -739,7 +739,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.15~rc3"
+                return "1.6.15"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -773,7 +773,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.15~rc3",
+            "version": "1.6.15",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1715,6 +1715,7 @@ class Database:
         explicit_keys: Optional[Set[str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
+        rename: Optional[Tuple[str, str]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1742,6 +1743,7 @@ class Database:
                              ``True``/``False`` updates the row state; ``None`` explicitly
                              deletes an existing draft row. A missing map preserves the
                              existing per-setting draft state.
+            rename: Move a service and its dependent rows inside this save transaction.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
@@ -1861,6 +1863,23 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            if rename:
+                try:
+                    rename_error = self._rename_service_rows(session, *rename)
+                except BaseException as e:
+                    session.rollback()
+                    return str(e)
+                if rename_error:
+                    return rename_error
+
+            def aborted_save():
+                # A data-loss guard below returns the changed set without committing, and the
+                # session teardown rolls the flushed rename back: report that as an error instead of
+                # a success-shaped result when a rename was requested.
+                if rename:
+                    return f"Configuration save aborted, service {rename[0]} was not renamed"
+                return changed_plugins
+
             self.logger.debug(f"Saving config for method {method}")
 
             # When the autoconf disable_cleanup flag is on, precompute the set of existing
@@ -1929,7 +1948,7 @@ class Database:
                     f"This almost always indicates a transient variables.env or environment race at scheduler "
                     f"startup. Aborting save_config to prevent data loss."
                 )
-                return changed_plugins
+                return aborted_save()
 
             self.logger.debug(f"Cleaning up {method} old services settings")
             # Collect service settings to delete (skip entirely when skip_service_management to avoid deleting service settings)
@@ -2004,7 +2023,7 @@ class Database:
                         f"submitted an incomplete config (e.g. an Advanced-mode form post missing keys). "
                         f"Aborting save_config to prevent data loss."
                     )
-                    return changed_plugins
+                    return aborted_save()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -2051,13 +2070,13 @@ class Database:
                                         f"Received empty SERVER_NAME for method 'autoconf' but database has {len(foreign_services)} non-autoconf service(s), "
                                         "skipping entire config save to prevent data loss"
                                     )
-                                    return changed_plugins
+                                    return aborted_save()
                             else:
                                 self.logger.warning(
                                     f"Received empty SERVER_NAME for method '{method}' but database has {len(method_services)} existing service(s), "
                                     "skipping entire config save to prevent data loss"
                                 )
-                                return changed_plugins
+                                return aborted_save()
                         else:
                             missing_ids = [
                                 service.id
@@ -2895,6 +2914,7 @@ class Database:
                 explicit_keys=explicit_keys,
                 draft_settings=draft_settings,
                 retry_on_conflict=False,
+                rename=rename,
             )
 
         return changed_plugins
@@ -3841,6 +3861,40 @@ class Database:
                 return str(e)
         return ""
 
+    def _rename_service_rows(self, session: scoped_session, old_name: str, new_name: str) -> str:
+        """Move a service and its dependent rows inside an existing transaction."""
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+
+        service = session.query(Services).get(old_name)
+        if service is None:
+            return f"Service {old_name} doesn't exist"
+
+        if session.query(Services).get(new_name) is not None:
+            return f"Service {new_name} already exists"
+
+        # Rename the parent row first so a backend that enforces ON UPDATE CASCADE
+        # cascades dependent rows immediately; the explicit updates catch backends
+        # that do not enforce foreign keys.
+        service.id = new_name
+        service.last_update = datetime.now().astimezone()
+        session.flush()
+
+        session.query(Services_settings).filter_by(service_id=old_name).update({Services_settings.service_id: new_name}, synchronize_session=False)
+        session.query(Custom_configs).filter_by(service_id=old_name).update({Custom_configs.service_id: new_name}, synchronize_session=False)
+        session.query(Jobs_cache).filter_by(service_id=old_name).update({Jobs_cache.service_id: new_name}, synchronize_session=False)
+
+        with suppress(ProgrammingError, OperationalError):
+            metadata = session.query(Metadata).get(1)
+            if metadata is not None:
+                now = datetime.now().astimezone()
+                metadata.custom_configs_changed = True
+                metadata.last_custom_configs_change = now
+
+        return ""
+
     def rename_service(self, old_name: str, new_name: str) -> str:
         """Rename a service, moving every service-owned row along with it in one transaction.
 
@@ -3874,32 +3928,9 @@ class Database:
                 return "The database is read-only, the changes will not be saved"
 
             try:
-                service = session.query(Services).get(old_name)
-                if service is None:
-                    return f"Service {old_name} doesn't exist"
-
-                if session.query(Services).get(new_name) is not None:
-                    return f"Service {new_name} already exists"
-
-                # Rename the parent row first so a backend that actually enforces
-                # the declared ON UPDATE CASCADE (MySQL/MariaDB/PostgreSQL) cascades
-                # the dependent rows immediately; the explicit updates below then
-                # only need to catch backends that don't enforce FKs at all
-                # (SQLite, the default here, never enforces them).
-                service.id = new_name
-                service.last_update = datetime.now().astimezone()
-                session.flush()
-
-                session.query(Services_settings).filter_by(service_id=old_name).update({Services_settings.service_id: new_name}, synchronize_session=False)
-                session.query(Custom_configs).filter_by(service_id=old_name).update({Custom_configs.service_id: new_name}, synchronize_session=False)
-                session.query(Jobs_cache).filter_by(service_id=old_name).update({Jobs_cache.service_id: new_name}, synchronize_session=False)
-
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        now = datetime.now().astimezone()
-                        metadata.custom_configs_changed = True
-                        metadata.last_custom_configs_change = now
+                err = self._rename_service_rows(session, old_name, new_name)
+                if err:
+                    return err
 
                 session.commit()
             except BaseException as e:
@@ -3956,7 +3987,10 @@ class Database:
 
         return f"Removed {deleted} expired UI user sessions"
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
+    def delete_job_cache(
+        self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, plugin_id: Optional[str] = None
+    ) -> Optional[str]:
+        """Delete a job cache file: None means no matching row, an empty string means success, and other strings are errors."""
         job_name = job_name or argv[0].replace(".py", "")
         filters = {"file_name": file_name, "service_id": service_id or None}
         if job_name:
@@ -3966,7 +4000,12 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if plugin_id is not None and not session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first():
+                return None
+
+            deleted = session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if not deleted:
+                return None
 
             try:
                 session.commit()

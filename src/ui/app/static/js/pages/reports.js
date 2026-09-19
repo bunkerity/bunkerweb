@@ -241,6 +241,7 @@ $(document).ready(function () {
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const crowdsecUrl = $("#crowdsec-url").val().trim();
+  const crowdsecLogoUrl = $("#crowdsec-logo-url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const filtersStateCache = new Map();
@@ -873,8 +874,31 @@ $(document).ready(function () {
                     "This action is not allowed in read-only mode.",
                   )
                 : t("tooltip.button.ban_ip", "Ban this IP address");
+              // The investigation page only knows about CrowdSec decisions.
+              const isCrowdsecReport =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecReport
+                ? `<a class="btn btn-outline-crowdsec btn-sm d-inline-flex align-items-center"
+                       href="${crowdsecUrl}?ip=${encodeURIComponent(
+                         String(row.ip || ""),
+                       )}"
+                       aria-label="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="bottom"
+                       data-bs-original-title="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec">
+                      <img src="${crowdsecLogoUrl}" width="16" height="16" alt="" aria-hidden="true" />
+                    </a>`
+                : "";
               return `
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center align-items-center">
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
                           data-ip="${row.ip}"
@@ -885,6 +909,7 @@ $(document).ready(function () {
                           data-bs-original-title="${banTooltip}">
                     <i class="bx bx-block bx-xs"></i>
                   </button>
+                  ${investigateLink}
                 </div>
               `;
             }
@@ -1097,20 +1122,6 @@ $(document).ready(function () {
           data: "actions",
           title: "<span data-i18n='table.header.actions'>Actions</span>",
           orderable: false,
-          render: function (_data, type, row) {
-            if (type !== "display") return "";
-            const investigateUrl = `${crowdsecUrl}?ip=${encodeURIComponent(
-              String(row.ip || ""),
-            )}`;
-            return `<a class="btn btn-sm btn-outline-primary"
-                       href="${investigateUrl}"
-                       data-i18n="crowdsec.investigation.submit">
-                      <i class="bx bx-search-alt me-1" aria-hidden="true"></i>${t(
-                        "crowdsec.investigation.submit",
-                        "Investigate",
-                      )}
-                    </a>`;
-          },
         },
       ],
       headerCallback: function (thead) {

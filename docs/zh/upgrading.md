@@ -104,16 +104,16 @@
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.15-rc3
+                            image: bunkerity/bunkerweb:1.6.15
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                            image: bunkerity/bunkerweb-scheduler:1.6.15
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                            image: bunkerity/bunkerweb-autoconf:1.6.15
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                            image: bunkerity/bunkerweb-ui:1.6.15
                             ...
                     ```
 
@@ -131,7 +131,7 @@
 
         4.  **验证数据库**：通过检查新数据库容器中的数据和配置来验证数据库升级是否成功。
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     [All-In-One 镜像](integrations.md#all-in-one-aio-image)默认在名为 `bunkerweb-aio` 的**单个容器**中打包 BunkerWeb、Scheduler、Web UI，并可选打包 API、Redis 和 CrowdSec。所有持久状态——SQLite 数据库、缓存、自定义配置、插件、备份以及 Redis/CrowdSec 数据——都位于 `/data` 卷中，因此升级就是在保留该卷的同时替换容器。
 
@@ -169,7 +169,7 @@
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.15
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -180,7 +180,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                bunkerity/bunkerweb-all-in-one:1.6.15
                 ```
 
         === "Docker Compose"
@@ -189,7 +189,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                        image: bunkerity/bunkerweb-all-in-one:1.6.15
                         ...
                 ```
 
@@ -312,20 +312,20 @@
             示例：
 
             ```bash
-            # 交互式升级到 1.6.15~rc3（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.6.15~rc3
+            # 交互式升级到 1.6.15（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.6.15
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.15 --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.15 -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.15 --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.15 --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -405,7 +405,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -431,7 +431,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.15
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -577,7 +577,7 @@
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     Scheduler 在 `bunkerweb-aio` 容器内运行，因此恢复命令直接在其中执行。整个过程中都会保留 `/data` 卷（数据库、配置、插件、备份）——只回滚容器镜像。
 
@@ -903,16 +903,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.15-rc3
+                        image: bunkerity/bunkerweb:1.6.15
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.15
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.15
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.15
                         ...
                 ```
 
@@ -947,7 +947,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -973,7 +973,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.15
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

@@ -331,7 +331,7 @@ Elige una ventana de retención (ejemplo: 90 días) y revisa qué se eliminaría
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ Una vez verificado, elimina las filas.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +412,7 @@ puedes forzar una actualización del “marcador de cambios”:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +435,7 @@ puedes forzar una actualización del “marcador de cambios”:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -516,7 +516,7 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "Solo MariaDB / MySQL"
         Los siguientes pasos solo son válidos para bases de datos MariaDB / MySQL. Si estás utilizando otra base de datos, por favor consulta la documentación de tu base de datos.

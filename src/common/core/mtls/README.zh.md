@@ -45,6 +45,9 @@ Scheduler 会先验证完整的候选 CA 证书包以及每个 CRL，再替换�
 | `MTLS_CRL`                      |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。 |
 | `MTLS_CRL_DATA`                 |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                        |
 
+!!! tip "锚定路径模式时要覆盖其下的所有内容"
+    请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
 !!! tip "配置一次，处处分发"
     CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。
 

@@ -90,15 +90,24 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - **Validation des certificats :** Contrôlez la validation des certificats des serveurs backend
         - **Support SNI :** Spécifiez l'indication du nom du serveur (SNI) pour les backends hébergeant plusieurs sites
 
-    | Paramètre                    | Défaut | Contexte  | Multiple | Description                                                                                    |
-    | ---------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`   | multisite | no       | **SSL SNI :** Active ou désactive l'envoi du SNI (Server Name Indication) à l'amont.           |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |        | multisite | no       | **Nom SSL SNI :** Définit le nom d'hôte SNI à envoyer à l'amont lorsque le SSL SNI est activé. |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify :** Active ou désactive la vérification du certificat SSL du serveur amont.                |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Priorité du certificat de confiance :** Source de l'AC de confiance : `file` (chemin) ou `data` (base64/PEM). |
+    | Paramètre                                        | Défaut | Contexte  | Multiple | Description                                                                                                                                        |
+    | ------------------------------------------------ | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | no       | **SSL SNI :** Active ou désactive l'envoi du SNI (Server Name Indication) à l'amont.                                                               |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | no       | **Nom SSL SNI :** Définit le nom d'hôte SNI à envoyer à l'amont lorsque le SSL SNI est activé.                                                     |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify :** Active ou désactive la vérification du certificat SSL du serveur amont.                                                           |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Priorité du certificat de confiance :** Source de l'AC de confiance : `file` (chemin) ou `data` (base64/PEM).                                    |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **Chemin du certificat de confiance SSL :** Chemin vers un bundle d'AC au format PEM (lisible par le planificateur) utilisé pour vérifier l'amont. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **Données du certificat de confiance SSL :** AC de confiance fournie directement en base64 ou PEM (p. ex. via l'interface web). |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **Profondeur de vérification SSL :** Profondeur de vérification dans la chaîne de certificats de l'amont. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **Données du certificat de confiance SSL :** AC de confiance fournie directement en base64 ou PEM (p. ex. via l'interface web).                    |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **Profondeur de vérification SSL :** Profondeur de vérification dans la chaîne de certificats de l'amont.                                          |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file` | multisite | non      | **Priorité du certificat client :** Source du certificat et de la clé client, `file` ou `data`.                                                    |
+    | `REVERSE_PROXY_SSL_CERT`                         |        | multisite | non      | **Chemin du certificat client :** Certificat client PEM présenté à l'upstream pour le TLS mutuel (priorité `file`).                                |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |        | multisite | non      | **Données du certificat client :** Certificat client en base64 ou PEM en clair (priorité `data`).                                                  |
+    | `REVERSE_PROXY_SSL_KEY`                          |        | multisite | non      | **Chemin de la clé client :** Clé privée PEM correspondant au certificat client (priorité `file`). Elle ne doit pas être chiffrée.                 |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |        | multisite | non      | **Données de la clé client :** Clé privée client en base64 ou PEM en clair (priorité `data`).                                                      |
+    | `REVERSE_PROXY_SSL_CRL`                          |        | multisite | non      | **Chemin de la CRL :** Liste de révocation PEM appliquée lors de la vérification de l'upstream. Prioritaire sur les données de CRL.                |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |        | multisite | non      | **Données de la CRL :** Liste de révocation en base64 ou PEM en clair. Utilisées seulement si le chemin de la CRL est vide.                        |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |        | multisite | non      | **Protocoles SSL upstream :** Versions TLS proposées à l'upstream. Vide conserve la valeur par défaut de NGINX.                                    |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |        | multisite | non      | **Ciphers SSL upstream :** Suite de chiffrement proposée à l'upstream. Vide conserve la valeur par défaut de NGINX.                                |
 
     !!! info "Vérification du certificat"
         Lorsque `REVERSE_PROXY_SSL_VERIFY` est défini sur `yes`, NGINX valide à la fois la chaîne de certificats de l'amont et son nom :
@@ -250,6 +259,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - Utilisez des durées de cache appropriées en fonction du type de contenu (les ressources statiques peuvent être mises en cache plus longtemps)
         - Configurez `PROXY_NO_CACHE` pour éviter de mettre en cache du contenu sensible ou personnalisé
         - Surveillez les taux de réussite du cache et ajustez les paramètres en conséquence
+
+!!! tip "TLS mutuel vers l'upstream"
+    Le certificat client et sa clé doivent tous deux être fournis, et la clé ne doit pas être chiffrée. Le scheduler valide la paire, la met en cache et la distribue aux instances ; si elle n'est pas valide, les directives de certificat ne sont simplement pas générées. Une CRL n'est appliquée que si la vérification de l'upstream est active.
 
 !!! danger "Utilisateurs de Docker Compose - Variables NGINX"
     Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (`$`) en utilisant des doubles signes dollar (`$$`). Cela s'applique à tous les paramètres contenant des variables NGINX comme `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.

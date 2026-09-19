@@ -113,6 +113,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_URI_URLS`        |        | multisite | non      | **URL de listes noires d’URI :** Liste d’URL contenant des motifs d’URI à bloquer.                                    |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
 
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
 === "En-tête"
     **Ce que cela fait :** Bloque, ou au contraire exempte, les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Une règle d’exclusion l’emporte sur toute correspondance de liste noire, y compris celles servies par le cache.
 
@@ -163,7 +166,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN d'AWS et d'Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Règles d'ignorance personnalisées
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

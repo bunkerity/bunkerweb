@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -132,7 +132,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     添加 `bunkerweb-autoconf`，并在 UI 容器上使用标签而不是显式的 `BUNKERWEB_INSTANCES`。Scheduler 仍通过 `ui` 模板和秘密的 `REVERSE_PROXY_URL` 为 UI 做反代。
 
@@ -159,7 +159,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 - 管理员账户：通过向导或 `ADMIN_USERNAME` / `ADMIN_PASSWORD` 创建。密码必须包含大小写字母、数字和特殊字符。`OVERRIDE_ADMIN_CREDS=yes` 会在已有账户时强制重置。
 - 密码长度限制：bcrypt 只使用秘密的前 **72 字节**，因此所有设置密码的位置（设置向导、个人资料页面、`ADMIN_PASSWORD` / `API_PASSWORD`）都会将密码限制为 72 字节。更长的值会被拒绝，并给出明确的错误或日志，而不是静默截断。请注意，非 ASCII 字符（重音字符、emoji）每个都会占用多个字节；由这些字符组成的“72 字符”口令可能超过该限制。预哈希的 bcrypt 值不受影响（哈希本身已经编码了该限制）。
-- 角色：`admin`、`writer`、`reader` 会自动创建；账户存储在数据库。
+- 角色：`admin`、`writer`、`reader` 会自动创建；账户存储在数据库。开源界面只按读和写授权，因此 `admin` 与 `writer` 拥有相同能力，`reader` 是唯一受限的角色。更细粒度的区分，包括限制谁可以管理用户和安全设置，需要 PRO 插件 `user_manager`，详见[高级用法](advanced.md#user-manager-pro)文档。
 - 秘密：`FLASK_SECRET` 存于 `/var/lib/bunkerweb/.flask_secret`；Biscuit 密钥位于同目录，可用 `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY` 提供。
 - 2FA：TOTP 秘钥加密后存放在数据库，解密用的密钥保存在 `/var/lib/bunkerweb/.totp_encryption_keys.json`。UI 会在首次启动时生成它们，只要该文件被持久化就无需额外配置。若要提供自己的密钥，可设置 `TOTP_ENCRYPTION_KEYS`（空格分隔或 JSON 映射）；此时每个密钥必须正好 **43 个字符**，其他长度会被丢弃并记录 `Invalid TOTP secret for key` 警告，然后用随机密钥替代。生成密钥：
 

@@ -32,9 +32,9 @@ pip-tools==7.6.1 \
     --hash=sha256:6111c8b4b07fd14b7223ca921485b0e96cf66e20bf94da95eeed9845f510cb8f \
     --hash=sha256:695556edeb647eb94ee8345cc7108657fdb7fb16b3876623a399b4f61bbede01
     # via -r requirements.in
-pyproject-hooks==1.3.0 \
-    --hash=sha256:26dfd4229ff1820b7964be33bd3eb64367eb7c841215defe11341450c219ce20 \
-    --hash=sha256:733909c6ac133d222c0b8cfc11364f19d363793d8fbcd8bb7240c5220af8d35d
+pyproject-hooks==1.3.3 \
+    --hash=sha256:5fc53fdac9f7bd63fbcdc868fb5f90b4784d78a53a3d3388cd738b807441a20b \
+    --hash=sha256:defda19b854fa0d3bd4f76ea4ddcba8abd7dcfcdd585a6690ade050744fc5f43
     # via
     #   -r requirements.in
     #   pip-tools

@@ -113,6 +113,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 === "Cabecera"
     **Qué hace esto:** Bloquea, o por el contrario exime, las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Una regla de exclusión prevalece sobre cualquier coincidencia de la lista negra, incluidas las cacheadas.
 
@@ -163,7 +166,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN de AWS y Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Reglas de omisión personalizadas
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

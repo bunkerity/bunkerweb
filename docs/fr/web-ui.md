@@ -35,7 +35,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Utilisez les images publiées et le layout du [guide de démarrage rapide](quickstart-guide.md#__tabbed_1_3) pour monter la stack, puis terminez la configuration dans le navigateur.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc3-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Ouvrez le nom d’hôte du scheduler (par ex. `https://www.example.com/changeme`) et lancez l’assistant `/setup` pour configurer l’UI, le scheduler et l’instance.
@@ -52,7 +52,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -132,7 +132,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     Ajoutez `bunkerweb-autoconf` et appliquez des labels sur le conteneur UI au lieu d’un `BUNKERWEB_INSTANCES` explicite. Le scheduler reverse-proxie toujours l’UI via le template `ui` et un `REVERSE_PROXY_URL` secret.
 
@@ -159,7 +159,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 - Compte admin : créé via l’assistant ou via `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Mot de passe requis : minuscule, majuscule, chiffre, caractère spécial. `OVERRIDE_ADMIN_CREDS=yes` force le réensemencement même si un compte existe.
 - Limite de longueur du mot de passe : bcrypt n'utilise que les **72 premiers octets** d'un secret ; les mots de passe sont donc limités à 72 octets partout où ils sont définis (assistant de configuration, page de profil, `ADMIN_PASSWORD` / `API_PASSWORD`). Une valeur plus longue est rejetée avec une erreur ou un journal explicite au lieu d'être tronquée silencieusement. Notez que les caractères non ASCII (accents, emoji) consomment plusieurs octets chacun ; une phrase secrète de "72 caractères" composée de tels caractères peut donc dépasser la limite. Les valeurs bcrypt pré-hachées sont exemptées (le hash encode déjà cette limite).
-- Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base.
+- Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base. L'interface open source n'autorise que sur la lecture et l'écriture, donc `admin` et `writer` ont les mêmes capacités et `reader` est le seul rôle restreint. Une séparation plus fine, notamment pour limiter qui peut gérer les utilisateurs et les réglages de sécurité, arrive avec le plugin PRO `user_manager`, documenté dans les [utilisations avancées](advanced.md#user-manager-pro).
 - Secrets : `FLASK_SECRET` est enregistré dans `/var/lib/bunkerweb/.flask_secret` ; les clés Biscuit sont à côté et peuvent être fournies via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA : les secrets TOTP sont stockés en base, chiffrés avec des clés conservées dans `/var/lib/bunkerweb/.totp_encryption_keys.json`. L’UI les génère au premier démarrage : rien n’est requis tant que ce fichier est persisté. Définissez `TOTP_ENCRYPTION_KEYS` (clés séparées par des espaces ou map JSON) pour fournir les vôtres ; chaque clé doit alors faire exactement **43 caractères**, toute autre valeur est écartée avec un avertissement `Invalid TOTP secret for key` et remplacée par une clé aléatoire. Générer une clé :
 

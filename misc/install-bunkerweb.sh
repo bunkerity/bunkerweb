@@ -105,7 +105,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.15~rc3"
+DEFAULT_BUNKERWEB_VERSION="1.6.15"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -139,11 +139,6 @@ declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     # 1.6.13: Fedora 43/44 still lack 1.30.4, so they ship 1.30.3.
     [1.6.13]="1.30.3"
 )
-# Fedora 43 has the 1.6.15 NGINX build pending in Bodhi; Fedora 44 has it in updates-testing.
-declare -A _NGINX_VERSION_BY_BW_FEDORA_43=(
-    [1.6.15]="1.30.4"
-)
-
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 FORCE_TYPE_CHANGE="no"
@@ -5616,9 +5611,6 @@ resolve_nginx_version() {
     local _base="${_NGINX_VERSION_BY_BW[$_bw]:-$DEFAULT_NGINX_VERSION}"
     if [ "$DISTRO_ID" = "fedora" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA[$_bw]:-}" ]; then
         _base="${_NGINX_VERSION_BY_BW_FEDORA[$_bw]}"
-    fi
-    if [ "$DISTRO_ID" = "fedora" ] && [ "$DISTRO_VERSION" = "43" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]:-}" ]; then
-        _base="${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]}"
     fi
     printf '%s' "$_base"
 }

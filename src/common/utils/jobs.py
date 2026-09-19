@@ -320,7 +320,9 @@ class Job:
         return self.cache_file(file_name, content.getvalue(), job_name=job_name, service_id=service_id)
 
     def del_cache(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
-        """Delete cache file from database and local cache file."""
+        """Delete cache file from database and local cache file.
+
+        Returns (deleted, error): error is "" on success, including when no database row existed."""
         if isinstance(name, Path):
             name = str(name)
 
@@ -344,7 +346,7 @@ class Job:
                 return False, err
         except:
             return False, f"exception :\n{format_exc()}"
-        return ret, err
+        return ret, ""
 
     def cache_hash(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:
         """Get cache file hash from database or from local cache file."""

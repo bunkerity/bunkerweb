@@ -83,6 +83,9 @@ Follow these steps to configure and use the Whitelist feature:
     | `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
     | `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
 
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
 === "Header"
     **What this does:** Whitelists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value. Useful for a trusted probe or gateway that can send a shared secret.
 

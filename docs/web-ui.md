@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -152,7 +152,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
 
     Add `bunkerweb-autoconf` and apply labels on the UI container instead of explicit `BUNKERWEB_INSTANCES`. The scheduler still reverse-proxies the UI through the `ui` template and a secret `REVERSE_PROXY_URL`.
@@ -180,7 +180,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
 - Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
-- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database.
+- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so `admin` and `writer` hold the same capabilities and `reader` is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO `user_manager` plugin, documented under [advanced usages](advanced.md#user-manager-pro).
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: TOTP secrets are stored in the database, encrypted with keys kept in `/var/lib/bunkerweb/.totp_encryption_keys.json`. The UI generates them on first start, so nothing is required as long as that file is persisted. Set `TOTP_ENCRYPTION_KEYS` (space-separated keys or a JSON map) to supply your own; each key must then be exactly **43 characters**, anything else is discarded with an `Invalid TOTP secret for key` warning and replaced by a random key. Generate one with:
 

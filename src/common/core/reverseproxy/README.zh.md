@@ -90,15 +90,24 @@
         - **证书验证：** 控制如何验证后端服务器证书
         - **SNI 支持：** 为托管多个站点的后端指定服务器名称指示
 
-    | 设置                         | 默认值 | 上下文    | 多选 | 描述                                                                  |
-    | ---------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。            |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。 |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                  |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。 |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。 |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。 |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                       |
+    | 设置                                             | 默认值 | 上下文    | 多选 | 描述                                                                                     |
+    | ------------------------------------------------ | ------ | --------- | ---- | ---------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。                               |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。                    |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                                   |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。         |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。       |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                                        |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file` | multisite | 否   | **客户端证书来源：** 客户端证书与私钥的来源，`file` 或 `data`。                          |
+    | `REVERSE_PROXY_SSL_CERT`                         |        | multisite | 否   | **客户端证书路径：** 向上游出示的 PEM 客户端证书，用于双向 TLS（来源为 `file` 时使用）。 |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |        | multisite | 否   | **客户端证书内容：** base64 或明文 PEM 形式的客户端证书（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_KEY`                          |        | multisite | 否   | **客户端私钥路径：** 与客户端证书匹配的 PEM 私钥（来源为 `file` 时使用）。私钥不能加密。 |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |        | multisite | 否   | **客户端私钥内容：** base64 或明文 PEM 形式的客户端私钥（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_CRL`                          |        | multisite | 否   | **CRL 路径：** 校验上游时应用的 PEM 吊销列表。优先于 CRL 内容。                          |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |        | multisite | 否   | **CRL 内容：** base64 或明文 PEM 形式的吊销列表。仅在 CRL 路径为空时使用。               |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |        | multisite | 否   | **上游 SSL 协议：** 向上游提供的 TLS 版本。留空则沿用 NGINX 默认值。                     |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |        | multisite | 否   | **上游 SSL 加密套件：** 向上游提供的加密套件字符串。留空则沿用 NGINX 默认值。            |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -250,6 +259,9 @@
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+!!! tip "上游双向 TLS"
+    客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
 
 !!! danger "Docker Compose 用户 - NGINX 变量"
     当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (`$$`) 来转义美元符号 (`$`)。这适用于所有包含 NGINX 变量的设置，如 `$remote_addr`、`$proxy_add_x_forwarded_for` 等。
