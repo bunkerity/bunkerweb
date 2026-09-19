@@ -1,0 +1,25 @@
+tests/terraform/templates/docker_inventory.tftpl
+  s_4b075fdbb90bf8::t_f99c0e14744277 2
+tests/terraform/templates/swarm_inventory.tftpl
+  s_4b075fdbb90bf8::t_f99c0e14744277 2,5-6
+tests/terraform/templates/autoconf_inventory.tftpl
+  s_4b075fdbb90bf8::t_f99c0e14744277 2
+tests/terraform/templates/linux_inventory.tftpl
+  s_4b075fdbb90bf8::t_f99c0e14744277 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dcca0bfd06eb816b113e5022fdede9965b332e52",
+  "prompts": {},
+  "sessions": {
+    "s_4b075fdbb90bf8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ba16-521f-71c0-9e4b-3473bb424a04",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
