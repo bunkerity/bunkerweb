@@ -6,9 +6,14 @@
 - [SECURITY] `api`: moving a custom config with `PATCH /configs` needs `config_update` on the destination service; a body without `service` keeps the current one, not global.
 - [SECURITY] `api`, `ui`: a cache delete marks a plugin changed only when one of its rows was really deleted; `cache_delete` can no longer run another plugin's jobs.
 - [SECURITY] `kubernetes`: the example manifests now wire `API_TOKEN` from a Secret and ship a `NetworkPolicy` admitting port 5000 only from the scheduler and the Web UI.
+- [SECURITY] `reverseproxy`, `grpc`: setting values rendered into an NGINX directive now reject the characters that terminate or escape it, so an upstream, header or include value can no longer inject configuration. Shipped defaults are unaffected; a value containing a semicolon, a hash, braces, quotes or a backslash is refused on save.
+- [FEATURE] `grpc`: the plugin now matches the reverse proxy's configurability, adding client response headers, pass and ignore headers, underscores in headers, buffer and body size limits, `auth_request` and upstream TLS verification. See the plugin README for the full list.
+- [FEATURE] `reverseproxy`, `grpc`: present a client certificate to the upstream for mutual TLS, and set the upstream CRL, TLS protocols and ciphers. The scheduler validates the material and distributes it to the instances.
 - [BUGFIX] `reverseproxy`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them. Header names are matched case-insensitively. (Fixes #3936)
 - [BUGFIX] `api`: `PATCH /services/{service}` renames a service and saves its settings in one transaction; a failed request leaves the old service untouched. Unknown or global-only variables are refused with a 422.
 - [BUGFIX] `ui`: the reports table shows the CrowdSec investigation button only on CrowdSec reports, as a CrowdSec-branded icon next to the ban button it used to override in the Actions column.
+- [BUGFIX] `grpc`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them, and `X-Forwarded-Protocol` is sent like the reverse proxy already does.
+- [BUGFIX] `reverseproxy`, `grpc`: the trusted-cert job validates every certificate in a CA bundle instead of only the first, keeps the cached material when a run fails transiently instead of purging it and silently disabling upstream verification, and asks for a reload when it removes one.
 
 ## v1.6.15~rc3 - 2026/09/17
 

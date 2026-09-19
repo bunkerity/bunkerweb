@@ -90,15 +90,24 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Certificate Validation:** Control how backend server certificates are validated
         - **SNI Support:** Specify Server Name Indication for backends that host multiple sites
 
-    | Setting                      | Default | Context   | Multiple | Description                                                                          |
-    | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_SSL_SNI`                 | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                       |
-    | `REVERSE_PROXY_SSL_SNI_NAME`            |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                                   |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.            |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).   |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI). |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                  |
+    | Setting                                          | Default | Context   | Multiple | Description                                                                                                        |
+    | ------------------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                   |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                               |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`    | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.                           |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI).             |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                                 |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`  | multisite | no       | **Client Certificate Priority:** Source of the client certificate and key, `file` or `data`.                       |
+    | `REVERSE_PROXY_SSL_CERT`                         |         | multisite | no       | **Client Certificate Path:** PEM client certificate presented to the upstream for mutual TLS (priority `file`).    |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |         | multisite | no       | **Client Certificate Data:** Client certificate as base64 or plaintext PEM (priority `data`).                      |
+    | `REVERSE_PROXY_SSL_KEY`                          |         | multisite | no       | **Client Key Path:** PEM private key matching the client certificate (priority `file`). It must not be encrypted.  |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |         | multisite | no       | **Client Key Data:** Client private key as base64 or plaintext PEM (priority `data`).                              |
+    | `REVERSE_PROXY_SSL_CRL`                          |         | multisite | no       | **CRL Path:** PEM revocation list applied when verifying the upstream. Takes precedence over the CRL data setting. |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |         | multisite | no       | **CRL Data:** Revocation list as base64 or plaintext PEM. Used only when the CRL path is empty.                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |         | multisite | no       | **Upstream SSL Protocols:** TLS versions offered to the upstream. Empty keeps the NGINX default.                   |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |         | multisite | no       | **Upstream SSL Ciphers:** Cipher suite string offered to the upstream. Empty keeps the NGINX default.              |
 
     !!! info "Certificate Verification"
         When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
@@ -250,6 +259,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - Use appropriate cache durations based on content type (static assets can be cached longer)
         - Configure `PROXY_NO_CACHE` to avoid caching sensitive or personalized content
         - Monitor cache hit rates and adjust settings accordingly
+
+!!! tip "Upstream Mutual TLS"
+    A client certificate and its key must both be supplied, and the key must not be encrypted. The scheduler validates the pair, caches it and distributes it to the instances; if it does not validate, the certificate directives are simply not generated. A CRL is only applied while upstream verification is on.
 
 !!! danger "Docker Compose Users - NGINX Variables"
     When using Docker Compose with NGINX variables in your configurations, you must escape the dollar sign (`$`) by using double dollar signs (`$$`). This applies to all settings that contain NGINX variables like `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.

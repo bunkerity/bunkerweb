@@ -90,15 +90,24 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Zertifikatsvalidierung:** Kontrollieren Sie, wie Backend-Serverzertifikate validiert werden
         - **SNI-Unterstützung:** Geben Sie die Server Name Indication für Backends an, die mehrere Websites hosten
 
-    | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                  |
-    | ---------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.          |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist. |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.        |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM). |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI). |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                       |
+    | Einstellung                                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                               |
+    | ------------------------------------------------ | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.                                                       |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist.                                              |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.                                                       |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM).                                |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI).                                 |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                                                                      |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                             |
+    | `REVERSE_PROXY_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                          |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                       |
+    | `REVERSE_PROXY_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.               |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                                |
+    | `REVERSE_PROXY_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                                 |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                    |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                       |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -250,6 +259,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Verwenden Sie je nach Inhaltstyp geeignete Cache-Dauern (statische Assets können länger zwischengespeichert werden)
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! danger "Docker Compose-Benutzer - NGINX-Variablen"
     Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.
