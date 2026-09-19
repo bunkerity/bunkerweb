@@ -2399,9 +2399,6 @@ Asegúrate de tener **NGINX 1.30.5 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora 43 incluye NGINX 1.30.4"
-        Fedora 43 aún no proporciona NGINX 1.30.5, por lo que el paquete de BunkerWeb para Fedora 43 se compila contra NGINX 1.30.4 y espera `nginx-1.30.4`. Instala esa versión en Fedora 43; la fijación pasará a 1.30.5 en cuanto Fedora 43 la publique. Fedora 44 ya proporciona 1.30.5.
-
     Fedora ya proporciona NGINX 1.30.5 que soportamos
 
     ```shell

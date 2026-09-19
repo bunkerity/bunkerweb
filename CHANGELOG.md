@@ -14,6 +14,7 @@
 - [BUGFIX] `ui`: the reports table shows the CrowdSec investigation button only on CrowdSec reports, as a CrowdSec-branded icon next to the ban button it used to override in the Actions column.
 - [BUGFIX] `grpc`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them, and `X-Forwarded-Protocol` is sent like the reverse proxy already does.
 - [BUGFIX] `reverseproxy`, `grpc`: the trusted-cert job validates every certificate in a CA bundle instead of only the first, keeps the cached material when a run fails transiently instead of purging it and silently disabling upstream verification, and asks for a reload when it removes one.
+- [LINUX] `fedora`: Fedora 43 packages now build against NGINX 1.30.5, dropping the 1.30.4 exception.
 
 ## v1.6.15~rc3 - 2026/09/17
 
