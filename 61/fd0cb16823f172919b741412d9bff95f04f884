@@ -1,0 +1,43 @@
+.coderabbit.yaml
+  s_fb1d8ba318ac61::t_f66d726ce3d915 3
+  s_fb1d8ba318ac61::t_e1154a4c048b64 128-129,131,147,191,196,238,286-287,295-297,462,472,487
+  s_795e2ccdb6801b::t_694fee935c61d5 130,326,355,476,494
+  s_fb1d8ba318ac61::t_b28b3857990756 354
+  s_3f5442b0000cad::t_5d5f036e73dccc 149-150,234
+  s_3f5442b0000cad::t_4d3d75e11d8592 12-14,26-28,36-37,41-42
+  s_3f5442b0000cad::t_4f25aadb1c3a5b 377,488
+  s_3f5442b0000cad::t_4b40140b2768d0 52,76,135,160-169,179-190,192-195,197-198,208-216,219-224,233,235-237,239-252,260-261,277-285,288-294,298-314,432-440,449-453,461,471,495
+  s_795e2ccdb6801b::t_44a9393568e55c 315
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "61fd0cb16823f172919b741412d9bff95f04f884",
+  "prompts": {},
+  "sessions": {
+    "s_3f5442b0000cad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2fe-4c18-7492-99e8-015cd995c96b",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fb1d8ba318ac61": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c31a-3bf8-7621-bc40-bca35d4a24d5",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
