@@ -177,6 +177,17 @@
 - [FEATURE] `api`/`ui`: services can now be declared `redirect_only` from their settings page, and the services list flags every service that could become one.
 - [FEATURE] `api`/`ui`: a `redirect_only` service will stop consuming a PRO service slot once redirect-only billing goes live; it stays a full service everywhere else.
 - [BUGFIX] `ui`: a service's declared mode was silently reset to `standard` by the next ordinary save of its settings page.
+- [FEATURE] `scheduler`: `JOBS_DAILY_TIME`/`JOBS_WEEKLY_DAY` set when daily/weekly jobs run, instead of drifting at every scheduler restart.
+- [FEATURE] `plugins`: plugins can declare phase order in `plugin.json`; PRO and external plugins run before core plugins that do not pin themselves first.
+- [FEATURE] `plugins`: computed plugin order is final after startup, preventing plugins from silently overriding `PLUGINS_ORDER_<PHASE>`.
+- [FEATURE] `plugins`: core plugins can pin themselves ahead of PRO/external plugins with `order.<phase>.before: ["*"]`.
+- [FEATURE] `plugins`: core, external and PRO plugins can ship translation catalogs merged into the admin UI.
+- [FEATURE] `ui`: plugin pages get the supported `PLUGIN_API` data surface; the retired 1.6 `DB` handle names the plugin in its error.
+- [BUGFIX] `jobs`: plugin `async` jobs are now routed to the `heavy` job queue (dedicate a worker with `WORKER_QUEUES=heavy`).
+- [BUGFIX] `plugins`: malformed `plugin.json` files are refused identically by the config generator and NGINX runtime, with a field and cap error.
+- [BUGFIX] `plugins`: corrupt or non-object `plugin.json` files no longer crash NGINX startup.
+- [BUGFIX] `ui`: a plugin page with `actions.py` but no `pre_render` no longer shows another plugin's data.
+- [MISC] `db`: the 1.6.15-rc3 and final 1.6.15 migration revisions are part of every supported upgrade chain.
 
 ## v1.6.14~rc1 - 2026/07/??
 

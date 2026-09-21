@@ -362,6 +362,33 @@ Here are the details of the fields :
 |    `jobs`     |    no     |  list  | List of the jobs of your plugin.                                                                                          |
 |    `bwcli`    |    no     |  dict  | Map CLI command names to files stored in the plugin's `bwcli` directory to expose CLI plugins.                            |
 
+### Execution order
+
+A plugin may declare where it wants to sit inside a phase. The key is optional; everything below is a hint, not a guarantee.
+
+```json
+{
+  "id": "myplugin",
+  "order": {
+    "ssl_certificate": { "after": ["certificates"] },
+    "access": { "before": ["antibot"] }
+  }
+}
+```
+
+- Phase names are `init`, `init_worker`, `set`, `rewrite`, `access`, `content`, `ssl_client_hello_default`, `ssl_certificate`, `ssl_certificate_default`, `header`, `log`, `preread`, `log_stream`, `log_default`, `timer` and `init_workers`. `headers` is accepted as an alias of `header`, as in `order.json`.
+- `before` / `after` are lists of plugin ids. An unavailable plugin, or one that does not implement the phase, is ignored with a warning in the BunkerWeb error log.
+- Mutually contradictory declarations (a cycle) are dropped with a warning: the declarations of the plugins on the cycle are skipped and the order is recomputed with every other plugin's constraints still applied; only if that retry fails too is the default order kept. A malformed `order` block is also warned about and dropped; the plugin still loads.
+- `before` / `after` may contain the wildcard `"*"`, meaning every other plugin implementing this phase that is not itself constrained relative to me. `"before": ["*"]` puts a plugin ahead of every plugin that does not pin itself and `"after": ["*"]` puts it last. Plugins with the same wildcard keep their default-list order; an explicit plugin id wins over another plugin's wildcard.
+
+After initialization, the computed `plugins_order` is sealed: declare `order` in the manifest instead of trying to change it from plugin code.
+
+**Precedence inside a phase**, strongest first:
+
+1. the operator's `PLUGINS_ORDER_<PHASE>` setting (global or per service);
+2. declared `order` constraints, resolved with a stable sort;
+3. PRO plugins alphabetically, then external plugins alphabetically, then core plugins in `order.json` order, then remaining core plugins alphabetically.
+
 Each setting has the following fields (the key is the ID of the settings used in a configuration) :
 
 |   Field    | Mandatory |  Type  | Description                                                      |
@@ -384,8 +411,38 @@ Each job has the following fields :
 | `file`  |    yes    | string | Name of the file inside the jobs folder.                                                                                                |
 | `every` |    yes    | string | Job scheduling frequency : `minute`, `hour`, `day`, `week` or `once` (no frequency, only once before (re)generating the configuration). |
 | `reload` |    no    |  bool  | Whether a change from this job should trigger a reload of the BunkerWeb instances. Defaults to `false`.                                 |
-| `async`  |    no    |  bool  | Whether the job may run on the `heavy` worker queue instead of blocking the default one. Defaults to `false`.                            |
+| `async`  |    no    |  bool  | Whether the job is routed to the `heavy` worker queue. Both queues share the default worker pool; isolate them only with workers pinned through `WORKER_QUEUES=heavy` or `WORKER_QUEUES=default`. Defaults to `false`. |
 | `regenerate` |  no  |  bool  | Whether a change from this job requires the NGINX configuration to be **rendered again**, not just shipped. Defaults to `false`.        |
+
+Core heavy jobs are `backup-data`, `bunkernet-register`, `bunkernet-data`, `push-configs`, `certbot-new`, `certbot-renew`, `download-plugins`, `download-crs-plugins` and `download-pro-plugins`; routing follows the manifest's `async` flag, not the job name.
+
+!!! info "A refused manifest is refused everywhere"
+
+    A `plugin.json` that fails one of the caps below is refused by both the config generator
+    (Python) and the NGINX runtime (Lua): it is dropped from the generated configuration and never
+    loaded, ordered or executed. The refusal is logged as an `ERROR` naming the plugin id, file,
+    failing field and cap.
+
+    Length caps are measured in **UTF-8 bytes**, not characters. `id`, `version` and setting `id`
+    are ASCII-only, so byte and character counts always agree for those fields.
+
+    | Field | Cap |
+    | :---: | :--- |
+    | `id` | ASCII letters, digits, `.`, `_`, `-` only, 1-64 bytes |
+    | `name` | max 128 bytes |
+    | `description` | max 256 bytes |
+    | `version` | must match `\d+\.\d+(\.\d+)?` (ASCII digits only) |
+    | `stream` | one of `yes`, `no`, `partial` |
+    | setting `id` | ASCII uppercase letters, digits, `_` only, 1-256 bytes |
+    | setting `context` | one of `global`, `multisite` |
+    | setting `default` | max 4096 bytes |
+    | setting `help` | max 512 bytes |
+    | setting `label` | max 256 bytes |
+    | setting `regex` | max 1024 bytes |
+    | setting `type` | one of `password`, `text`, `number`, `file`, `check`, `select`, `multiselect`, `multivalue`, `size`, `duration` |
+
+    `extensions` is validated on the Python side only: the NGINX runtime never reads it. Job
+    fields (`jobs[]`) are also Python-only because the Worker dispatches them.
 
 ### CLI commands
 
@@ -668,8 +725,10 @@ return jsonify({"message": "ok", "data": <plugin_id_data>}), 200
 Here are the arguments that are passed and access on action.py functions:
 
 ```python
-function(app=app, args=request.args.to_dict() or request.json or None)
+function(app=app, db=db, api_client=api_client, bw_instances_utils=bw_instances_utils, args=args, data=data)
 ```
+
+`db` is the retired handle and raises `RetiredDBError` if used; use `api_client` instead.
 
 !!! info "Available Python Libraries"
 
@@ -897,3 +956,52 @@ plugin /
 ```
 
 In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_auth.html` is the associated template, adhering to the recommended naming conventions.
+
+### Plugin translations
+
+A plugin can ship its own translation catalog and have it merged into the admin UI, both in the browser (`t()`) and server-side (`_()` in a Jinja template). No `plugin.json` declaration or build step is needed.
+
+Two layouts are supported, in order:
+
+1. `ui/blueprints/static/locales/<lang>.json` for a plugin with a Flask blueprint.
+2. `ui/static/locales/<lang>.json` for a simple `ui/template.html` page.
+
+`en.json` is the required fallback; every other language file is optional. Keep keys under your plugin id, such as `{"my_plugin": {"title": "..."}}`. A colliding leaf cannot override a core key or an already-loaded plugin key: its value is dropped with a warning. New leaves under an existing namespace merge normally.
+
+Server-side `_()` cannot interpolate `{{var}}` placeholders as the browser's `t()` can. Use `t()` in the browser for strings requiring substitution.
+
+### UI plugins: supported surface
+
+The web UI holds no database connection. Plugin UI code reaches the central API through **`PLUGIN_API`**:
+
+```python
+from app.dependencies import PLUGIN_API
+
+
+def my_page():
+    return PLUGIN_API.get_services(with_drafts=True)
+```
+
+`ui/actions.py` receives it as `api_client`:
+
+```python
+def pre_render(**kwargs):
+    return {"services": kwargs["api_client"].get_services(with_drafts=True)}
+```
+
+These methods are the compatibility promise between minor versions; other UI-client methods are internal. `PLUGIN_API` is not a security boundary: plugin code runs in the UI process, so install only plugins you trust.
+
+| Method | What it returns |
+| --- | --- |
+| `get_global_settings(full=False, methods=False, with_drafts=False, filtered_settings=None, global_only=True)` | The configuration as a flat dict. |
+| `get_plugins(type="all", with_data=False, only_enabled=False, with_settings=True)` | Installed plugins and settings schema. |
+| `get_services(with_drafts=True)` / `get_service(service_id, full=False, methods=True, with_drafts=True)` | Services or one service configuration. |
+| `get_configs(service=None, type=None, with_drafts=True, with_data=False)` / `get_config_item(service, type, name, with_data=True)` | Custom configs. |
+| `create_config(**kwargs)` / `update_config(service, type, name, body=None, **kwargs)` / `delete_config(service, type, name)` | Custom config writes. |
+| `get_cache_files(service=None, plugin=None, job_name=None, with_data=False)` / `get_cache_file(service, plugin, job, filename, download=False)` | Job cache entries. |
+| `get_jobs()` / `get_last_job_run(name)` | Registered jobs and last run. |
+| `readonly` | `True` when the database is read-only. |
+
+Settings are not written through `PLUGIN_API`: use `BW_CONFIG.edit_global_conf()` or `BW_CONFIG.edit_service()`, which validate them first.
+
+**Migrating from 1.6.** `app.dependencies.DB` is retired; using it raises a `RuntimeError` naming the plugin. Replace `DB.get_config(...)` with `PLUGIN_API.get_global_settings(...)` or `PLUGIN_API.get_service(...)`, custom-config calls with the matching `get_config*` / config-write methods, job-cache calls with `get_cache_files(..., with_data=True)`, and `kwargs["db"]` in `ui/actions.py` with `kwargs["api_client"]`. `DB._db_session()` has no replacement: the UI has no database session. `DB` is falsy, so replace `if DB is not None:` with `if DB:` before accessing it.

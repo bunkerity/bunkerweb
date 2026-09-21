@@ -5102,16 +5102,16 @@ This setting mirrors the behavior of the OSS core `LETS_ENCRYPT_PASSTHROUGH` and
 
 #### Plugin execution order
 
-The ACME plugin automatically reorders itself to execute first in the `ssl_certificate` NGINX phase, ensuring TLS-ALPN-01 challenge certificates are served before other certificate-providing plugins (selfsigned, letsencrypt, customcert) can short-circuit the loop.
+Declare a plugin's phase position with its manifest `order`; the computed order is sealed after initialization, and the core `certificates` plugin keeps the head of the `ssl_certificate` phase unless a `PLUGINS_ORDER_*` override lists other plugins first (the override is prepended to the computed order, so list `certificates` first).
 
 When using ACME alongside other PRO plugins that depend on valid TLS (e.g., OpenID Connect, UI SSO), it is recommended to explicitly add `acme` right after `customcert` in the relevant phase ordering settings:
 
 ```env
-PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
+PLUGINS_ORDER_SSL_CERTIFICATE=certificates customcert acme letsencrypt selfsigned
 PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert acme letsencrypt selfsigned
 ```
 
-External/PRO plugins not listed in `PLUGINS_ORDER_*` settings are appended alphabetically after explicitly ordered core plugins.
+Without an operator override, the default order is PRO plugins alphabetically, external plugins alphabetically, core plugins in `order.json`, then remaining core plugins alphabetically; declared manifest `order` constraints are applied afterward.
 
 !!! warning "Do not enable both `USE_ACME` and `AUTO_LETS_ENCRYPT` on the same service"
     The ACME plugin and the built-in Let's Encrypt plugin use separate storage and challenge paths, but enabling both on the same service will cause conflicts. Use one or the other per service. In multisite mode, different services can use different plugins — for example, `app1.example.com_USE_ACME=yes` and `app2.example.com_AUTO_LETS_ENCRYPT=yes`.
