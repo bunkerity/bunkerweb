@@ -6,7 +6,7 @@ Pure functions, no I/O and no NGINX, so the same code can answer at write time
 two layers disagreeing about the same configuration.
 
 Why the module exists at all — three NGINX facts read in the vendored source
-(``src/deps/src/nginx``, 1.30.4) that a Jinja template cannot express, because a
+(``src/deps/src/nginx``, 1.30.5) that a Jinja template cannot express, because a
 template only ever sees ONE server block while these rules are about the set of
 blocks sharing an ``addr:port``:
 

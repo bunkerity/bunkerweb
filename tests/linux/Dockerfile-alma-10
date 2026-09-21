@@ -1,6 +1,6 @@
 FROM almalinux:10.1@sha256:5e1f19a1fc018dcb17f042411bff68c64cb06131ff1a71356d0be011f87c7baa
 
-ENV NGINX_VERSION=1.30.4
+ENV NGINX_VERSION=1.30.5
 
 # Copy rocky repo
 COPY tests/linux/utils/rocky-10.repo /etc/yum.repos.d/rocky.repo

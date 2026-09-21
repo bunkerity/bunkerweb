@@ -15,8 +15,11 @@ SCRIPT = Path(__file__).resolve().parents[3] / "misc" / "install-bunkerweb.sh"
         ("1.6.11", "1.30.2"),
         ("v1.6.10~rc5", "1.30.1"),
         ("1.6.12", "1.30.3"),
-        # Unknown/future version falls back to DEFAULT_NGINX_VERSION (bumped to 1.30.4).
-        ("9.9.9", "1.30.4"),
+        # Releases that were on the previous default stay pinned to it once the default moves on.
+        ("1.6.13", "1.30.4"),
+        ("1.6.14", "1.30.4"),
+        # Unknown/future version falls back to DEFAULT_NGINX_VERSION (bumped to 1.30.5).
+        ("9.9.9", "1.30.5"),
     ],
 )
 def test_dry_run_resolves_nginx_version(version, nginx):

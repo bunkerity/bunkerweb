@@ -9,7 +9,7 @@ Agent guide for the BunkerWeb NGINX/Lua runtime in `src/bw/`. This is the canoni
 
 ## What This Is
 
-The core NGINX container: the reverse-proxy runtime that processes HTTP and Stream requests through a Lua plugin pipeline. It packages the Lua runtime, the entrypoint, the loading page and static assets (GeoIP bootstrap databases, root CA) on top of `nginx:1.30.4` — Debian/glibc, migrated off Alpine because the certbot-dns-multi Go/CGO bridge cannot load on musl. Verify the pin in the Dockerfile before quoting it.
+The core NGINX container: the reverse-proxy runtime that processes HTTP and Stream requests through a Lua plugin pipeline. It packages the Lua runtime, the entrypoint, the loading page and static assets (GeoIP bootstrap databases, root CA) on top of `nginx:1.30.5` — Debian/glibc, migrated off Alpine because the certbot-dns-multi Go/CGO bridge cannot load on musl. Verify the pin in the Dockerfile before quoting it.
 
 There is **no Python here**. This component depends on `src/common/` (core plugins, confs, gen, helpers, utils, settings) and `src/deps/` (compiled NGINX modules, Python deps for config generation).
 

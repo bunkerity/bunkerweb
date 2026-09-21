@@ -1,10 +1,10 @@
-FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c AS builder
+FROM nginx:1.30.5@sha256:0aa2d81d65bc0cac0407e738b8f07d312c8685a84225fcb4db7bcbdd8c9bdf11 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # glibc base (was Alpine): certbot-dns-multi's Go/CGO bridge cannot load on musl, so the AIO image
-# — which bundles the worker that runs the certbot jobs — must be glibc. nginx:1.30.4 is the
+# — which bundles the worker that runs the certbot jobs — must be glibc. nginx:1.30.5 is the
 # official Debian image: nginx + the nginx user are prebuilt (--with-compat, so the BunkerWeb
 # dynamic modules compiled by install.sh load), no separate nginx build needed.
 
@@ -186,7 +186,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.4@sha256:d5792f71a9496b833bc08ea834a758c46e2b6a6306c10f4be926f38a656cdc1c
+FROM nginx:1.30.5@sha256:0aa2d81d65bc0cac0407e738b8f07d312c8685a84225fcb4db7bcbdd8c9bdf11
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -217,7 +217,7 @@ RUN . /etc/os-release && \
 RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
 # Every package below maps to a finding of this image's own pre-fix Trivy scan (gate flags:
 # --ignore-unfixed, UNKNOWN..CRITICAL). Nothing is a blanket upgrade.
-#   util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by nginx:1.30.4:
+#   util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by nginx:1.30.5:
 #     CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
 #   image codecs inherited from the same base: CVE-2026-56208 (libaom3),
 #     CVE-2024-38949, CVE-2026-33164, CVE-2026-33165 (libde265-0) 1.0.15-1+deb13u1 -> 1.0.15-1+deb13u2,
