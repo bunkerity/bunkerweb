@@ -45,7 +45,15 @@ JOB = {"name": "certbot-new", "plugin_id": "letsencrypt", "file": "certbot-new.p
 def _clean():
     drain_requeue_request()
     MODULE.execute_job = Mock()
-    MODULE.queue_for = Mock(return_value="heavy")
+
+    def queue_for(name, *, is_async=None):
+        if is_async is True:
+            return "heavy"
+        if is_async is False:
+            return "default"
+        return "heavy" if name == "certbot-new" else "default"
+
+    MODULE.queue_for = Mock(side_effect=queue_for)
     yield
     drain_requeue_request()
 
@@ -80,7 +88,13 @@ class TestTheReDispatch:
     def test_it_stays_on_the_lane_the_job_belongs_to(self):
         request_requeue(10, "waiting", Mock())
         MODULE._requeue_if_asked(dict(JOB), Mock())
-        MODULE.queue_for.assert_called_once_with("certbot-new")
+        MODULE.queue_for.assert_called_once_with("certbot-new", is_async=None)
+        assert _sent().kwargs["queue"] == "heavy"
+
+    def test_it_preserves_the_manifest_async_flag_when_requeued(self):
+        request_requeue(10, "waiting", Mock())
+        MODULE._requeue_if_asked(dict(JOB) | {"name": "external-job", "async": True}, Mock())
+        MODULE.queue_for.assert_called_once_with("external-job", is_async=True)
         assert _sent().kwargs["queue"] == "heavy"
 
     def test_it_mints_a_new_task_id_instead_of_retrying_the_old_one(self):

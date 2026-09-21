@@ -447,13 +447,15 @@
       "name": "certbot-new",
       "file": "certbot-new.py",
       "every": "once",
-      "reload": false
+      "reload": false,
+      "async": true
     },
     {
       "name": "certbot-renew",
       "file": "certbot-renew.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     }
   ],
   "extensions": {

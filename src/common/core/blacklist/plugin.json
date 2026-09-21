@@ -291,7 +291,7 @@
       "file": "blacklist-download.py",
       "every": "hour",
       "reload": true,
-      "async": true
+      "async": false
     }
   ]
 }

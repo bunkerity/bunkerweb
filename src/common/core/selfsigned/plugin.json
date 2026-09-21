@@ -49,7 +49,7 @@
       "file": "self-signed.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": false
     }
   ],
   "extensions": {

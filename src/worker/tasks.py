@@ -351,7 +351,7 @@ def _requeue_if_asked(job_data: dict, logger) -> None:
     payload["requeue_count"] = count
     payload["run_id"] = str(uuid4())
     try:
-        execute_job.apply_async(args=[payload], task_id=payload["run_id"], queue=queue_for(name), countdown=request["delay"])
+        execute_job.apply_async(args=[payload], task_id=payload["run_id"], queue=queue_for(name, is_async=job_data.get("async")), countdown=request["delay"])
     except BaseException as exc:
         # Nothing is lost that was not already lost: the job did no work, and the scheduler
         # re-dispatches `once` jobs on the next change or restart.

@@ -66,7 +66,7 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             "run_id": run_id,
             "dispatch_time": datetime.now(timezone.utc).isoformat(),
         }
-        queue = queue_for(job.name)
+        queue = queue_for(job.name, is_async=job.run_async)
         try:
             celery.send_task("worker.execute_job", args=[job_payload], task_id=run_id, queue=queue)
         except Exception as exc:

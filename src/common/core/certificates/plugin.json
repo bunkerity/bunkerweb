@@ -11,7 +11,7 @@
       "file": "deploy-certificates.py",
       "every": "hour",
       "reload": true,
-      "async": true
+      "async": false
     }
   ]
 }

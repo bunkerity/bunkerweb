@@ -80,7 +80,7 @@ def route_job(name: str, args: tuple[Any, ...], kwargs: dict[str, Any], options:
     job_data = args[0] if args else kwargs.get("job_data", {})
     if not isinstance(job_data, dict):
         return {"queue": "default"}
-    return {"queue": queue_for(job_data.get("name", ""))}
+    return {"queue": queue_for(job_data.get("name", ""), is_async=job_data.get("async"))}
 
 
 app.conf.task_routes = {"worker.execute_job": route_job}

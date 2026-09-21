@@ -215,7 +215,7 @@
       "file": "anonymous-report.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "download-plugins",

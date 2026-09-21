@@ -66,21 +66,21 @@
       "file": "geoip-country.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": false
     },
     {
       "name": "geoip-asn",
       "file": "geoip-asn.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": false
     },
     {
       "name": "geoip-city",
       "file": "geoip-city.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": false
     }
   ]
 }

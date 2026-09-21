@@ -47,33 +47,36 @@
       "name": "bunkernet-register",
       "file": "bunkernet-register.py",
       "every": "hour",
-      "reload": true
+      "reload": true,
+      "async": true
     },
     {
       "name": "bunkernet-data",
       "file": "bunkernet-data.py",
       "every": "day",
-      "reload": true
+      "reload": true,
+      "async": true
     },
     {
       "name": "bunkernet-send",
       "file": "bunkernet-send.py",
       "every": "hour",
-      "reload": true
+      "reload": true,
+      "async": false
     },
     {
       "name": "bunkernet-stats",
       "file": "bunkernet-stats.py",
       "every": "hour",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "bunkernet-cleanup-stats",
       "file": "bunkernet-cleanup-stats.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     }
   ],
   "extensions": {

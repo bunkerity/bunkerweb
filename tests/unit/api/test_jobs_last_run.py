@@ -4,6 +4,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
@@ -92,3 +93,24 @@ def test_last_run_route_uses_the_same_auth_guard_as_its_siblings():
     route = next(kwargs for path, kwargs in ROUTER.router.get_routes if path == "/{name}/last-run")
 
     assert route["dependencies"] == [ROUTER.guard]
+
+
+def test_dispatch_uses_the_manifest_async_flag_for_its_queue(monkeypatch):
+    celery = Mock()
+    ROUTER.queue_for.reset_mock()
+    monkeypatch.setattr(ROUTER, "get_celery_app", lambda: celery)
+    job = SimpleNamespace(
+        name="external-job",
+        plugin_id="external",
+        file="external-job.py",
+        path="/plugins/external",
+        every="hour",
+        reload=False,
+        run_async=True,
+        regenerate=False,
+    )
+
+    response = ROUTER.dispatch_jobs(SimpleNamespace(jobs=[job]))
+
+    assert response.status_code == 202
+    ROUTER.queue_for.assert_called_once_with("external-job", is_async=True)

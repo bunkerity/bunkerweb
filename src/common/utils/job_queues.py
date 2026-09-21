@@ -8,7 +8,11 @@ keep the two copies in sync by hand.
 """
 
 # Long-running or resource-intensive jobs. They get their own lane so a certbot
-# run or a blocklist download never starves the fast maintenance jobs.
+# run or a blocklist download never starves the fast maintenance jobs. This is
+# only a fallback for name-only callers; plugin manifests are the source of truth.
+# Both production dispatch paths default a missing `async` to False (JobScheduler
+# `job.get("async", False)`, API schema `Field(False, alias="async")`), so an external
+# or PRO job that omits the key routes `default` even if its name is listed here.
 #
 # Not listed (they were in the old copies but can never be dispatched):
 #   - certbot-auth / certbot-cleanup are certbot's own --manual-*-hook scripts,
@@ -30,6 +34,10 @@ HEAVY_JOBS = frozenset(
 )
 
 
-def queue_for(job_name: str) -> str:
+def queue_for(job_name: str, *, is_async: bool | None = None) -> str:
     """Return the queue lane a job belongs to."""
+    if is_async is True:
+        return "heavy"
+    if is_async is False:
+        return "default"
     return "heavy" if job_name in HEAVY_JOBS else "default"

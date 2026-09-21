@@ -129,14 +129,14 @@
       "file": "robots-txt-download.py",
       "every": "hour",
       "reload": true,
-      "async": true
+      "async": false
     },
     {
       "name": "robots-txt-darkvisitors",
       "file": "robots-txt-darkvisitors.py",
       "every": "hour",
       "reload": true,
-      "async": true
+      "async": false
     }
   ]
 }

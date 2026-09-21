@@ -107,7 +107,7 @@
       "file": "custom-cert.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": false
     }
   ],
   "extensions": {

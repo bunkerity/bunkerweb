@@ -11,14 +11,14 @@
       "file": "update-check.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "failover-backup",
       "file": "failover-backup.py",
       "every": "once",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "push-configs",
@@ -32,7 +32,7 @@
       "file": "sync-bans.py",
       "every": "minute",
       "reload": false,
-      "async": true
+      "async": false
     }
   ]
 }

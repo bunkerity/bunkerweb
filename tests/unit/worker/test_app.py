@@ -99,7 +99,9 @@ def test_plugin_registration_failure_does_not_abort_worker(monkeypatch):
     APP.shutdown_worker_db()
 
 
-def test_route_job_uses_heavy_queue_only_for_known_jobs():
+def test_route_job_uses_the_manifest_async_flag_when_present():
+    assert APP.route_job("task", ({"name": "external-job", "async": True},), {}, {}) == {"queue": "heavy"}
+    assert APP.route_job("task", ({"name": "backup-data", "async": False},), {}, {}) == {"queue": "default"}
     assert APP.route_job("task", ({"name": "backup-data"},), {}, {}) == {"queue": "heavy"}
     assert APP.route_job("task", ({"name": "cleanup"},), {}, {}) == {"queue": "default"}
     assert APP.route_job("task", ("not-a-dict",), {}, {}) == {"queue": "default"}
@@ -115,6 +117,8 @@ def test_worker_and_api_route_from_the_same_set():
     import job_queues
 
     assert APP.HEAVY_JOBS == job_queues.HEAVY_JOBS
+    assert job_queues.queue_for("external-job", is_async=True) == "heavy"
+    assert job_queues.queue_for("push-configs", is_async=False) == "default"
     assert job_queues.queue_for("push-configs") == "heavy"
     assert job_queues.queue_for("update-check") == "default"
 
@@ -122,17 +126,19 @@ def test_worker_and_api_route_from_the_same_set():
         assert "backup-data" not in source.read_text(encoding="utf-8"), f"{source} grew a second copy of HEAVY_JOBS"
 
 
-def test_every_heavy_job_is_actually_declared_somewhere():
-    """Routing is by name, so a name no plugin.json declares can never be dispatched.
-
-    Guards against the rot that left certbot-auth, certbot-cleanup and
-    coreruleset-nightly occupying heavy slots they could never use.
-    """
+def test_core_manifest_async_flags_match_heavy_jobs():
+    """The manifest source of truth and name-only fallback stay in lockstep."""
     import job_queues
 
-    declared = set()
+    async_jobs = set()
+    missing_async = []
     for manifest in (ROOT / "src" / "common" / "core").glob("*/plugin.json"):
         for job in loads(manifest.read_text(encoding="utf-8")).get("jobs", []):
-            declared.add(job["name"])
+            if not isinstance(job.get("async"), bool):
+                missing_async.append(job["name"])
+            if job.get("async") is True:
+                async_jobs.add(job["name"])
 
-    assert job_queues.HEAVY_JOBS <= declared, f"undeclared heavy jobs: {sorted(job_queues.HEAVY_JOBS - declared)}"
+    assert not missing_async, f"jobs without explicit async: {sorted(missing_async)}"
+    assert job_queues.HEAVY_JOBS <= async_jobs, f"heavy jobs without async: {sorted(job_queues.HEAVY_JOBS - async_jobs)}"
+    assert async_jobs <= job_queues.HEAVY_JOBS, f"non-heavy async jobs: {sorted(async_jobs - job_queues.HEAVY_JOBS)}"

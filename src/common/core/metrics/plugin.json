@@ -156,14 +156,14 @@
       "file": "scrape-persist-reports.py",
       "every": "minute",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "cleanup-metrics-retention",
       "file": "cleanup-metrics-retention.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     }
   ]
 }

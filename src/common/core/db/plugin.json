@@ -140,14 +140,14 @@
       "file": "cleanup-excess-jobs-runs.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     },
     {
       "name": "cleanup-expired-ui-sessions",
       "file": "cleanup-expired-ui-sessions.py",
       "every": "day",
       "reload": false,
-      "async": true
+      "async": false
     }
   ]
 }
