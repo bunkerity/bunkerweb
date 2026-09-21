@@ -1,0 +1,120 @@
+name: Final two-worker runtime regression
+
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921b]
+    paths: [.github/workflows/final-runtime-audit.yml]
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Run two-worker release regressions
+        working-directory: audit_final
+        run: |
+          set -o pipefail
+          mkdir -p audit-results
+          python3 -u - <<'PY' 2>&1 | tee audit-results/runtime-final.log
+          import json, os, re, time, urllib.parse, urllib.request
+          from http.client import HTTPConnection
+          from http.cookiejar import CookieJar
+          import audit_runtime as audit
+          audit.SHA=os.environ['AUDIT_SOURCE_SHA']
+          import audit_runtime_launch
+          import audit_finalize
+          previous=audit.run_scenarios
+
+          def final_scenarios():
+              previous()
+              # Known non-representative direct UI fixture: replace it with UI traffic through BunkerWeb below.
+              audit.RESULTS[:] = [r for r in audit.RESULTS if r['name'] != 'ui.login_and_logout_replay']
+
+              def raw_management(path, method='GET', payload=None):
+                  headers={'Content-Type':'application/json','Authorization':'Bearer '+audit.TOKEN,'User-Agent':'BunkerWeb-audit-control'}
+                  conn=HTTPConnection('127.0.0.1',18888,timeout=12)
+                  try:
+                      conn.request(method,path,body=json.dumps(payload).encode() if payload is not None else None,headers=headers)
+                      res=conn.getresponse(); code=res.status; raw=res.read()
+                  finally:
+                      conn.close()
+                  try: body=json.loads(raw)
+                  except ValueError: body=raw.decode(errors='replace')
+                  return code,body
+
+              def atomic_rename_failure():
+                  code,body=raw_management('/services/renamed.audit.test','PATCH',{'server_name':'rollback.audit.test','variables':{'NOT_A_SETTING':'x'}})
+                  audit.need(code==422,f'invalid rename returned {code}: {body}')
+                  old,_=audit.api('/services/renamed.audit.test')
+                  new,_=audit.api('/services/rollback.audit.test')
+                  audit.need(old==200 and new==404,f'rename was not rolled back: old={old} new={new}')
+                  code,data=audit.api('/configs?service=renamed.audit.test&with_data=true')
+                  audit.need(code==200 and any(x.get('name')=='audit_deny' for x in data.get('configs',[])),f'old custom config lost: {data}')
+                  return {'invalid_patch_status':422,'old_service_retained':True,'destination_absent':True}
+              audit.record('api.rename_and_invalid_setting_are_atomic',atomic_rename_failure)
+
+              def proxy_ui_login():
+                  code,body=audit.api('/services','POST',{'server_name':'ui.audit.test','variables':{
+                      'USE_REVERSE_PROXY':'yes','REVERSE_PROXY_HOST':'http://ui:7000','USE_MODSECURITY':'no',
+                      'USE_BAD_BEHAVIOR':'no','USE_ANTIBOT':'no'}})
+                  audit.need(code in (200,201),f'UI proxy service create failed {code}: {body}')
+                  audit.await_http(18880,'ui.audit.test',200,'/login')
+                  jar=CookieJar(); client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+                  def req(path,data=None):
+                      r=urllib.request.Request('http://127.0.0.1:18880'+path,data=data,headers={'Host':'ui.audit.test','User-Agent':'BunkerWeb-audit-ui'})
+                      return client.open(r,timeout=20)
+                  response=req('/login'); page=response.read().decode()
+                  token=re.search(r'name="csrf_token"[^>]*value="([^"]+)"',page)
+                  audit.need(token is not None,'proxied login page lacked CSRF token')
+                  data=urllib.parse.urlencode({'username':'audit-admin','password':audit.PASSWORD,'csrf_token':token.group(1)}).encode()
+                  response=req('/login',data); response.read()
+                  response=req('/services'); response.read()
+                  audit.need('/login' not in response.url and '/setup' not in response.url,f'proxied authenticated UI refused: {response.url}')
+                  return {'login_through_bunkerweb':True,'authenticated_services_route':True}
+              audit.record('ui.proxied_login_and_authenticated_navigation',proxy_ui_login)
+
+              def override_generated_header():
+                  audit.patch('app.audit.test',{'REVERSE_PROXY_HEADERS':'X-Forwarded-Proto https'})
+                  last=None
+                  for _ in range(40):
+                      code,_,raw=audit.http(18880,host='app.audit.test')
+                      if code==200:
+                          last=json.loads(raw)
+                          values={k.lower():v for k,v in last.get('headers',{}).items()}
+                          if values.get('x-forwarded-proto')=='https':
+                              return {'custom_x_forwarded_proto':'https'}
+                      time.sleep(2)
+                  raise AssertionError(f'custom generated header override not observed: {last}')
+              audit.record('reverseproxy.custom_header_overrides_generated_default',override_generated_header)
+
+          audit.run_scenarios=final_scenarios
+          raise SystemExit(audit.main())
+          PY
+      - name: Cleanup
+        if: always()
+        working-directory: audit_final
+        run: |
+          if [ -f audit-results/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-runtime-two-worker
+          path: audit_final/audit-results/
+          retention-days: 1
+          if-no-files-found: error
