@@ -69,9 +69,17 @@ def list_cache(
 
 
 def _transform_filename(path_token: str) -> str:
-    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'
+    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'. The
+    # prefix itself is kept -- `cache_dir` stores `file_name` WITH it included
+    # (src/common/utils/jobs.py:609) and the DB lookup matches that column exactly
+    # (src/common/db/db_methods/jobs.py:245), so stripping it here made every folder-backed cache
+    # file 404. GET callers must send the ENCODED token (`folder:_var_...`), one path segment, no
+    # literal '/'; the DELETE body carries the raw stored name, which only survives because no
+    # cached folder path contains '_'. `src/ui/app/routes/cache.py:42-43` decodes BEFORE calling the client instead --
+    # sends slashes into a `<string:file_name>` client-side call and can never reach this route at
+    # all (`{file_name}` is one FastAPI path segment). That caller is still broken; see followup.
     if path_token.startswith("folder:"):
-        return path_token.replace("_", "/")[len("folder:") :]  # noqa: E203
+        return path_token.replace("_", "/")
     return path_token
 
 
