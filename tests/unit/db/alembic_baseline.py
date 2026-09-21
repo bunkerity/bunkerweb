@@ -57,6 +57,17 @@ LEGACY_TAG = "v1.5.0-beta"
 PRERELEASE_TAG = "v1.6.15-rc2"
 PRERELEASE_VERSION = PRERELEASE_TAG.lstrip("v")
 
+# The next published pre-release is a distinct real-world entry point. Keeping it here proves that
+# the version stamped by that release remains resolvable after the 1.7 head is re-parented.
+RC3_TAG = "v1.6.15-rc3"
+RC3_VERSION = RC3_TAG.lstrip("v")
+
+FINAL_1_6_15_TAG = "v1.6.15"
+FINAL_1_6_15_VERSION = FINAL_1_6_15_TAG.lstrip("v")
+# No v1.6.15 tag was published on 2026-09-21. Replace this with the tag once it
+# exists, after asserting that it resolves to this commit or carries an identical model.py.
+FINAL_1_6_15_REF = "8132fdf5"
+
 
 def baseline_metadata(tag=None):
     """`model.py` as it was at `tag` (the 1.6.13 baseline by default), loaded under its own `Base`.
@@ -66,7 +77,8 @@ def baseline_metadata(tag=None):
     `create_all`-ing the current model, just less obvious.
     """
     tag = tag or BASELINE_TAG
-    source = run(["git", "show", f"{tag}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    model_ref = FINAL_1_6_15_REF if tag == FINAL_1_6_15_TAG else tag
+    source = run(["git", "show", f"{model_ref}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     module = ModuleType(f"bw_model_{tag.lstrip('v').replace('.', '_').replace('-', '_')}")
     exec(compile(source, f"<{tag}:src/common/db/model.py>", "exec"), module.__dict__)  # noqa: S102
     return module.Base.metadata
