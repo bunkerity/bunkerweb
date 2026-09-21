@@ -80,6 +80,67 @@ local function migrate_lru(old_lru, new_lru)
 	return new_lru
 end
 
+-- Keys the init phase writes once and every later read depends on. `plugins_order` used to be
+-- rewritable at runtime, so a plugin could recompute the phase order from its own init() and
+-- silently override the operator's PLUGINS_ORDER_<PHASE> (PRO acme did exactly that). Once the
+-- init phase has stored the key it calls datastore.seal() on it and every later mutation is
+-- refused : set, set_with_retries and delete return an error, delete_all skips the key and
+-- flush_lru preserves it. A reload builds a fresh Lua VM, so the seal is per-configuration and
+-- never outlives the order it protects. The seal is keyed by key NAME, shared by every datastore
+-- instance and therefore by every zone -- deliberately, since the key is written and read through
+-- the per-worker LRU those instances share.
+local sealed_keys = {}
+
+-- A key can only be sealed once it actually holds a value. Plugin chunks run unsandboxed during
+-- init_by_lua (they are `require`d before the order is computed), so an unconditional setter would
+-- let one seal `plugins_order` ahead of init's own write, make that write fail and leave the
+-- instance with no order at all -- fail-open. This is an anti-footgun, not a trust boundary: the
+-- same plugin code can already call os.execute in this phase.
+datastore.static.seal = function(key)
+	if lru and lru:get(key) ~= nil then
+		sealed_keys[key] = true
+		return true
+	end
+	return false
+end
+
+-- The caller's plugin id, when the stack reaches a plugin's Lua half : those are required as
+-- `<id>/<id>.lua` (helpers.require_plugin), which is what the back-reference matches. Core code
+-- and anonymous chunks yield nil and the key is named instead.
+local function caller_plugin_id()
+	for level = 2, 12 do
+		-- Guarded : this is the only debug.getinfo in src/bw/lua, and it sits on the refusal path.
+		-- A stripped or sandboxed `debug` must not turn a refusal into a raised error.
+		local info = debug and debug.getinfo(level, "S")
+		if not info then
+			return nil
+		end
+		local id = info.source and info.source:match("/([%w_-]+)/%1%.lua$")
+		if id then
+			return id
+		end
+	end
+	return nil
+end
+
+local function refuse_if_sealed(key, action)
+	if not sealed_keys[key] then
+		return false
+	end
+	local who = caller_plugin_id()
+	logger:log(
+		ERR,
+		"refused post-init "
+			.. action
+			.. " of "
+			.. key
+			.. " by "
+			.. (who and ("plugin " .. who) or "an unidentified caller")
+			.. " : the key is sealed once the init phase has computed it"
+	)
+	return true
+end
+
 local lru_configured = false
 local lru_configuring = false
 local function ensure_lru_sized()
@@ -154,6 +215,9 @@ function datastore:get(key, worker)
 end
 
 function datastore:set(key, value, exptime, worker)
+	if refuse_if_sealed(key, "write") then
+		return false, "key " .. key .. " is sealed after init"
+	end
 	if worker then
 		ensure_lru_sized()
 		if not lru then
@@ -194,6 +258,9 @@ local function warn_forcible(setting, key)
 end
 
 function datastore:set_with_retries(key, value, exptime, max_retries)
+	if refuse_if_sealed(key, "write") then
+		return false, "key " .. key .. " is sealed after init"
+	end
 	max_retries = max_retries or 5
 	local success, err, forcible
 	-- Try multiple times if we need to make room for the new value
@@ -223,6 +290,9 @@ function datastore:set_with_retries(key, value, exptime, max_retries)
 end
 
 function datastore:delete(key, worker)
+	if refuse_if_sealed(key, "delete") then
+		return false, "key " .. key .. " is sealed after init"
+	end
 	if worker then
 		if not lru then
 			return false, "lru is not instantiated"
@@ -270,7 +340,9 @@ function datastore:delete_all(pattern, worker)
 		keys = self.dict:get_keys(0)
 	end
 	for _, key in ipairs(keys) do
-		if key:match(pattern) then
+		-- A sealed key is skipped rather than refused : delete_all is a pattern sweep, so a
+		-- caller that matches one by accident must not lose the whole sweep over it.
+		if key:match(pattern) and not sealed_keys[key] then
 			if worker then
 				lru:delete(key)
 			else
@@ -286,7 +358,23 @@ function datastore:flush_lru()
 	if not lru then
 		return false, "lru is not instantiated"
 	end
+	-- Sealed keys survive the flush. `plugins_order` lives only in this LRU, and every phase
+	-- runner bails out of its whole phase when the read misses (server-http/access-lua.conf:110),
+	-- so losing it fails OPEN -- a flush would be a wider hole than the write the seal refuses.
+	-- The init confs call this before anything is sealed, so it is a no-op there.
+	-- Re-inserted with ttl = nil, i.e. permanent. Inert today : the only sealed key is
+	-- plugins_order and it is written without an expiry (init-lua.conf), like every bootstrap key.
+	local kept = {}
+	for key in pairs(sealed_keys) do
+		local value, _, flags = lru:get(key)
+		if value ~= nil then
+			kept[key] = { value = value, flags = flags }
+		end
+	end
 	lru:flush_all()
+	for key, entry in pairs(kept) do
+		lru:set(key, entry.value, nil, entry.flags)
+	end
 	return true, "success"
 end
 

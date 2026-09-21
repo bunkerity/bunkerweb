@@ -97,5 +97,12 @@
       "type": "text"
     }
   },
-  "extensions": { "activation": "always" }
+  "extensions": {
+    "activation": "always"
+  },
+  "order": {
+    "access": {
+      "before": ["*"]
+    }
+  }
 }

@@ -225,5 +225,12 @@
       "async": true
     }
   ],
-  "extensions": { "activation": "always" }
+  "extensions": {
+    "activation": "always"
+  },
+  "order": {
+    "header": {
+      "before": ["*"]
+    }
+  }
 }

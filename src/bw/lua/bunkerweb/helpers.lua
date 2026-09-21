@@ -52,7 +52,14 @@ helpers.load_plugin = function(json)
 	local ok, plugin = pcall(decode, file:read("*a"))
 	file:close()
 	if not ok then
-		return false, "invalid JSON at " .. json .. " : " .. err
+		-- `plugin` holds pcall's error message here, not `err` (that's the earlier io.open result,
+		-- already nil on this path) -- concatenating `err` crashed on every malformed JSON file.
+		return false, "invalid JSON at " .. json .. " : " .. tostring(plugin)
+	end
+	if type(plugin) ~= "table" then
+		-- A scalar/boolean top-level JSON value (`123`, `true`, ...) decodes fine but isn't
+		-- indexable the way every check below assumes.
+		return false, "manifest at " .. json .. " is not an object"
 	end
 	-- Check fields
 	local missing_fields = {}
@@ -64,6 +71,195 @@ helpers.load_plugin = function(json)
 	end
 	if #missing_fields > 0 then
 		return false, "missing field(s) " .. encode(missing_fields) .. " for JSON at " .. json
+	end
+	-- Manifest caps, mirrored by hand from Configurator.__validate_plugin / MANIFEST_CAPS
+	-- (src/common/gen/Configurator.py) : a plugin.json Python refuses must be refused here too,
+	-- with the same field named, or the "loads in Lua while dropped from the generated
+	-- configuration" split-brain (PX-A §2.2) comes right back. `extensions` stays Python-only
+	-- (never read here) and jobs are not re-validated (Python already owns job dispatch). Lengths
+	-- are bytes (Lua `#`), matching Python's `len(value.encode())` -- see MANIFEST_CAPS. Every
+	-- field is type-checked before it is indexed or measured : this runs inside
+	-- `init_by_lua_block`, so an uncaught Lua error here is fatal to NGINX startup, not a single
+	-- dropped plugin the way an unexpected type is on the Python side.
+	local at_json = " for JSON at " .. json
+	if type(plugin.id) ~= "string" then
+		return false, "id of plugin " .. tostring(plugin.id) .. " must be a string" .. at_json
+	end
+	if not plugin.id:match("^[%w_.-]+$") or #plugin.id > 64 then
+		return false, "id of plugin " .. plugin.id .. " is invalid, must match ^[\\w.-]{1,64}$" .. at_json
+	end
+	if type(plugin.name) ~= "string" then
+		return false, "name of plugin " .. plugin.id .. " must be a string" .. at_json
+	end
+	if #plugin.name > 128 then
+		return false, "name of plugin " .. plugin.id .. " is " .. #plugin.name .. " bytes, max 128" .. at_json
+	end
+	if type(plugin.description) ~= "string" then
+		return false, "description of plugin " .. plugin.id .. " must be a string" .. at_json
+	end
+	if #plugin.description > 256 then
+		return false,
+			"description of plugin " .. plugin.id .. " is " .. #plugin.description .. " bytes, max 256" .. at_json
+	end
+	if type(plugin.version) ~= "string" then
+		return false, "version of plugin " .. plugin.id .. " must be a string" .. at_json
+	end
+	if not (plugin.version:match("^%d+%.%d+%.%d+$") or plugin.version:match("^%d+%.%d+$")) then
+		return false,
+			"version of plugin "
+				.. plugin.id
+				.. " is "
+				.. plugin.version
+				.. ", must match ^\\d+\\.\\d+(\\.\\d+)?$"
+				.. at_json
+	end
+	if plugin.stream ~= "yes" and plugin.stream ~= "no" and plugin.stream ~= "partial" then
+		return false,
+			"stream of plugin "
+				.. plugin.id
+				.. " is "
+				.. tostring(plugin.stream)
+				.. ", must be one of no, partial, yes"
+				.. at_json
+	end
+	if type(plugin.settings) ~= "table" then
+		return false, "settings of plugin " .. plugin.id .. " must be an object" .. at_json
+	end
+	local setting_mandatory_keys = { "context", "default", "help", "id", "label", "regex", "type" }
+	local valid_setting_types = {
+		password = true,
+		text = true,
+		number = true,
+		file = true,
+		check = true,
+		select = true,
+		multiselect = true,
+		multivalue = true,
+		size = true,
+		duration = true,
+	}
+	-- Sorted, not raw `pairs()` order (undefined in Lua, hash-seeded per process) : with several
+	-- defects in one manifest the field named in the refusal must be reproducible across restarts.
+	-- It does NOT make the named field match Python's (which walks the JSON's own insertion
+	-- order) when more than one setting is broken -- only the VERDICT (refuse) is guaranteed to
+	-- agree, which is what the brief asks for. This pass also catches a `settings` that decoded as
+	-- a JSON array (integer keys, not setting ids) before it can reach the string-only checks
+	-- below.
+	local setting_names = {}
+	for setting_key in pairs(plugin.settings) do
+		if type(setting_key) ~= "string" then
+			return false, "settings of plugin " .. plugin.id .. " must be an object keyed by setting id" .. at_json
+		end
+		table.insert(setting_names, setting_key)
+	end
+	table.sort(setting_names)
+	for _, setting in ipairs(setting_names) do
+		local data = plugin.settings[setting]
+		if type(data) ~= "table" then
+			return false, "setting " .. setting .. " of plugin " .. plugin.id .. " must be an object" .. at_json
+		end
+		local missing_setting_keys = {}
+		for _, key in ipairs(setting_mandatory_keys) do
+			if data[key] == nil then
+				table.insert(missing_setting_keys, key)
+			end
+		end
+		if #missing_setting_keys > 0 then
+			table.sort(missing_setting_keys)
+			return false,
+				"setting " .. setting .. " of plugin " .. plugin.id .. " is missing key(s) " .. table.concat(
+					missing_setting_keys,
+					", "
+				) .. ", must have context, default, help, id, label, regex, type" .. at_json
+		end
+		if not setting:match("^[A-Z0-9_]+$") or #setting > 256 then
+			return false,
+				"id of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is invalid, must match ^[A-Z0-9_]{1,256}$"
+					.. at_json
+		end
+		if data.context ~= "global" and data.context ~= "multisite" then
+			return false,
+				"context of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. tostring(data.context)
+					.. ", must be one of global, multisite"
+					.. at_json
+		end
+		if type(data.default) ~= "string" then
+			return false,
+				"default of setting " .. setting .. " of plugin " .. plugin.id .. " must be a string" .. at_json
+		end
+		if #data.default > 4096 then
+			return false,
+				"default of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. #data.default
+					.. " bytes, max 4096"
+					.. at_json
+		end
+		if type(data.help) ~= "string" then
+			return false, "help of setting " .. setting .. " of plugin " .. plugin.id .. " must be a string" .. at_json
+		end
+		if #data.help > 512 then
+			return false,
+				"help of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. #data.help
+					.. " bytes, max 512"
+					.. at_json
+		end
+		if type(data.label) ~= "string" then
+			return false, "label of setting " .. setting .. " of plugin " .. plugin.id .. " must be a string" .. at_json
+		end
+		if #data.label > 256 then
+			return false,
+				"label of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. #data.label
+					.. " bytes, max 256"
+					.. at_json
+		end
+		if type(data.regex) ~= "string" then
+			return false, "regex of setting " .. setting .. " of plugin " .. plugin.id .. " must be a string" .. at_json
+		end
+		if #data.regex > 1024 then
+			return false,
+				"regex of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. #data.regex
+					.. " bytes, max 1024"
+					.. at_json
+		end
+		if not valid_setting_types[data.type] then
+			return false,
+				"type of setting "
+					.. setting
+					.. " of plugin "
+					.. plugin.id
+					.. " is "
+					.. tostring(data.type)
+					.. ", must be one of check, duration, file, multiselect, multivalue, number, password, select, size, text"
+					.. at_json
+		end
 	end
 	-- Try require
 	local plugin_lua, err = helpers.require_plugin(plugin.id)
@@ -97,6 +293,177 @@ local function parse_override(value)
 	return ids
 end
 
+-- Origin buckets for the per-phase default list. A plugin's `type` is set at load time from the
+-- root its plugin.json was found under (init-lua.conf / init-stream-lua.conf), never from the
+-- manifest, so an external plugin cannot declare itself PRO to jump the queue. Anything without
+-- a known origin sorts with core, which is the conservative end of the list.
+local ORIGIN_RANK = { pro = 1, external = 2, core = 3 }
+
+-- Normalise a plugin.json "order" block into { [phase] = { before = {...}, after = {...} } }.
+-- Shape errors are dropped silently : the Python validator (Configurator.__validate_plugin) is
+-- the half that warns about them, and the Lua runtime must never refuse a plugin over an
+-- optional field -- that asymmetry is exactly what makes a plugin "disappear" on one side only.
+local function parse_declared_order(order, phases_set, phase_aliases)
+	local declared = {}
+	if type(order) ~= "table" then
+		return declared
+	end
+	for phase, constraints in pairs(order) do
+		local canonical_phase = phase_aliases[phase] or phase
+		if phases_set[canonical_phase] and type(constraints) == "table" then
+			-- Reused, not replaced : a manifest may spell the same phase twice (`header` and its
+			-- `headers` alias) and Lua randomises the hash seed, so overwriting would drop one of
+			-- the two -- a different one on every restart.
+			local entry = declared[canonical_phase] or { before = {}, after = {} }
+			for _, side in ipairs({ "before", "after" }) do
+				if type(constraints[side]) == "table" then
+					for _, id in ipairs(constraints[side]) do
+						if type(id) == "string" then
+							table.insert(entry[side], id)
+						end
+					end
+				end
+			end
+			declared[canonical_phase] = entry
+		end
+	end
+	return declared
+end
+
+-- Stable topological sort (Kahn) of `list` under `edges` ({ from = id, to = id }). Among the
+-- nodes that are ready, the one sitting earliest in `list` is always emitted first, so a phase
+-- whose plugins declare nothing comes out exactly as the default list and the result does not
+-- depend on the edge insertion order. Returns the sorted list, or nil plus the ids left in the
+-- cycle (sorted, so the warning is reproducible).
+local function stable_toposort(list, edges)
+	local position, indegree, outgoing = {}, {}, {}
+	for index, id in ipairs(list) do
+		position[id] = index
+		indegree[id] = 0
+		outgoing[id] = {}
+	end
+	for _, edge in ipairs(edges) do
+		table.insert(outgoing[edge.from], edge.to)
+		indegree[edge.to] = indegree[edge.to] + 1
+	end
+
+	local ready = {}
+	for _, id in ipairs(list) do
+		if indegree[id] == 0 then
+			table.insert(ready, id)
+		end
+	end
+
+	local sorted = {}
+	while #ready > 0 do
+		local pick, pick_position = 1, position[ready[1]]
+		for index = 2, #ready do
+			if position[ready[index]] < pick_position then
+				pick, pick_position = index, position[ready[index]]
+			end
+		end
+		local id = table.remove(ready, pick)
+		table.insert(sorted, id)
+		for _, target in ipairs(outgoing[id]) do
+			indegree[target] = indegree[target] - 1
+			if indegree[target] == 0 then
+				table.insert(ready, target)
+			end
+		end
+	end
+
+	if #sorted < #list then
+		-- The nodes never emitted are the cycles themselves PLUS everything stuck downstream of
+		-- them. Peel the ones that no longer point at a residual node until the set stops
+		-- shrinking. What survives is every node on a cycle, plus any node that is both
+		-- downstream of one cycle and points into another -- a bridge between two cycles is kept
+		-- although it is on neither. Exactness would need Tarjan SCCs; the peel is deliberately
+		-- the cheap version, because it is already exact for the single-cycle case (the only one
+		-- a human writes by accident) and the bridge is only ever named, never mis-ordered.
+		-- What matters is what it EXCLUDES : a plain downstream chain, which the round-1 version
+		-- named and silently stripped of its own perfectly satisfiable declarations.
+		local residual = {}
+		for _, id in ipairs(list) do
+			if indegree[id] > 0 then
+				residual[id] = true
+			end
+		end
+		local peeled = true
+		while peeled do
+			peeled = false
+			for id in pairs(residual) do
+				local reaches_residual = false
+				for _, target in ipairs(outgoing[id]) do
+					if residual[target] then
+						reaches_residual = true
+						break
+					end
+				end
+				if not reaches_residual then
+					residual[id] = nil
+					peeled = true
+				end
+			end
+		end
+		local cycle = {}
+		for _, id in ipairs(list) do
+			if residual[id] then
+				table.insert(cycle, id)
+			end
+		end
+		table.sort(cycle)
+		return nil, cycle
+	end
+	return sorted
+end
+
+-- `"*"` inside a declared before/after list means "every other plugin implementing this phase
+-- that is not itself constrained relative to me". Two plugins that wave the same wildcard in the
+-- same direction (`before *` vs `before *`, or `after *` vs `after *`) have nothing to arbitrate,
+-- so no edge is added between them and the default list order stands -- a `before *` vs `after *`
+-- pair is trivially consistent (both independently want the same edge). A plugin that names me
+-- explicitly on the SAME side (e.g. another plugin's own `before` list names me) always wins over
+-- my wildcard : the wildcard edge towards it is simply skipped, no cycle, explicit beats wildcard.
+-- Only an OPPOSITE-side self-contradiction cycles : my own `before: ["*"]` plus my own
+-- `after: [x]` for the same phase produces both `id -> x` (from the wildcard) and `x -> id` (from
+-- the explicit `after`), a genuine 2-node cycle caught by the existing cycle machinery -- no
+-- separate wildcard-contradiction check is needed.
+--
+-- Consults `constrained` (the phase's full declared-order map), not the caller's `skip` set : a
+-- pin's exemption is evaluated against what every other plugin in the phase actually declared, not
+-- against which of them survived an unrelated cycle elsewhere in the same phase. In the rare case
+-- of a wildcard plugin sharing a phase with a *different* cycle, this can make a pin skip one edge
+-- it did not strictly need to (never a wrong order, never a new cycle -- `wildcard_edges` is a pure
+-- function of its arguments, so the retry's edge set is always a subset of the first pass's, and
+-- every wildcard edge still has its declarer as an endpoint, so the "both endpoints are in `cycle`"
+-- argument for the single retry still holds).
+local function wildcard_edges(id, side, list, constrained)
+	local edges = {}
+	for _, other_id in ipairs(list) do
+		if other_id ~= id then
+			local other_entry = constrained[other_id]
+			local other_side = other_entry and other_entry[side]
+			local skip = false
+			if other_side then
+				for _, value in ipairs(other_side) do
+					if value == "*" or value == id then
+						skip = true
+						break
+					end
+				end
+			end
+			if not skip then
+				if side == "before" then
+					table.insert(edges, { from = id, to = other_id })
+				else
+					table.insert(edges, { from = other_id, to = id })
+				end
+			end
+		end
+	end
+	return edges
+end
+
 helpers.order_plugins = function(plugins, variables)
 	-- Extract default orders
 	local file, err, nb = open("/usr/share/bunkerweb/core/order.json", "r")
@@ -112,9 +479,11 @@ helpers.order_plugins = function(plugins, variables)
 	-- Map legacy keys to phases
 	local phase_aliases = { headers = "header" }
 	local phases = get_phases()
+	local phases_set = {}
 	local default_orders = {}
 	for _, phase in ipairs(phases) do
 		default_orders[phase] = {}
+		phases_set[phase] = true
 	end
 	for phase, order in pairs(orders) do
 		local canonical_phase = phase_aliases[phase] or phase
@@ -125,29 +494,180 @@ helpers.order_plugins = function(plugins, variables)
 		end
 	end
 
-	-- Utility
-	local function deep_copy_phases(phases_map)
-		local copy = {}
-		for id, phases_present in pairs(phases_map) do
-			copy[id] = {}
-			for phase, present in pairs(phases_present) do
-				copy[id][phase] = present
-			end
-		end
-		return copy
-	end
-
 	-- Compute plugins/id/phases table
 	local plugins_phases = {}
 	local plugin_lookup = {}
+	local declared_orders = {}
 	for _, plugin in ipairs(plugins) do
 		plugins_phases[plugin.id] = {}
 		plugin_lookup[plugin.id] = true
 		for _, phase in ipairs(plugin.phases) do
 			plugins_phases[plugin.id][phase] = true
 		end
+		if plugin.order ~= nil then
+			declared_orders[plugin.id] = parse_declared_order(plugin.order, phases_set, phase_aliases)
+		end
 	end
-	local base_plugins_phases = deep_copy_phases(plugins_phases)
+
+	-- Default list for a phase : PRO first, then external, then core in order.json order, then
+	-- the core plugins order.json doesn't name, alphabetically. Before 1.7 every non-core plugin
+	-- landed in the alphabetical tail, which is why PRO acme used to rewrite the computed order.
+	local function build_default_list(phase)
+		local buckets = { {}, {}, {} }
+		local bucketed = {}
+		for _, plugin in ipairs(plugins) do
+			local id = plugin.id
+			if not bucketed[id] and plugins_phases[id] and plugins_phases[id][phase] then
+				bucketed[id] = true
+				table.insert(buckets[ORIGIN_RANK[plugin.type] or ORIGIN_RANK.core], id)
+			end
+		end
+		table.sort(buckets[1])
+		table.sort(buckets[2])
+
+		local list = {}
+		for rank = 1, 2 do
+			for _, id in ipairs(buckets[rank]) do
+				table.insert(list, id)
+			end
+		end
+
+		local core_left = {}
+		for _, id in ipairs(buckets[3]) do
+			core_left[id] = true
+		end
+		for _, id in ipairs(default_orders[phase]) do
+			if core_left[id] then
+				core_left[id] = nil
+				table.insert(list, id)
+			end
+		end
+		local rest = {}
+		for _, id in ipairs(buckets[3]) do
+			if core_left[id] then
+				table.insert(rest, id)
+			end
+		end
+		table.sort(rest)
+		for _, id in ipairs(rest) do
+			table.insert(list, id)
+		end
+		return list
+	end
+
+	-- Apply the plugins' own declarations to a phase's default list. Warnings are returned to the
+	-- caller rather than logged here : helpers has no logger, and the two init confs already own
+	-- the reporting of the PLUGINS_ORDER_* misses.
+	local order_warnings = {}
+	local function apply_declared_order(phase, list)
+		local in_phase = {}
+		for _, id in ipairs(list) do
+			in_phase[id] = true
+		end
+
+		local constrained = {}
+		for _, id in ipairs(list) do
+			local entry = declared_orders[id] and declared_orders[id][phase]
+			if entry then
+				for _, side in ipairs({ "before", "after" }) do
+					for _, other in ipairs(entry[side]) do
+						-- "*" is the wildcard token, not a plugin id : never reported as missing.
+						if other ~= "*" and not in_phase[other] then
+							table.insert(
+								order_warnings,
+								"plugin "
+									.. id
+									.. " declares order."
+									.. phase
+									.. "."
+									.. side
+									.. " = "
+									.. other
+									.. " but that plugin is not available or doesn't implement the phase, ignoring it"
+							)
+						end
+					end
+				end
+				constrained[id] = entry
+			end
+		end
+		if next(constrained) == nil then
+			return list
+		end
+
+		local function edges_for(skip)
+			local edges = {}
+			for id, entry in pairs(constrained) do
+				if not skip[id] then
+					for _, side in ipairs({ "before", "after" }) do
+						local has_wildcard = false
+						for _, other in ipairs(entry[side]) do
+							if other == "*" then
+								has_wildcard = true
+							elseif in_phase[other] then
+								if side == "before" then
+									table.insert(edges, { from = id, to = other })
+								else
+									table.insert(edges, { from = other, to = id })
+								end
+							end
+						end
+						if has_wildcard then
+							for _, edge in ipairs(wildcard_edges(id, side, list, constrained)) do
+								table.insert(edges, edge)
+							end
+						end
+					end
+				end
+			end
+			return edges
+		end
+
+		local sorted, cycle = stable_toposort(list, edges_for({}))
+		if sorted then
+			return sorted
+		end
+		if #cycle == 0 then
+			-- Unreachable : a stalled Kahn always leaves at least one node on a cycle. Bail out to
+			-- the default list rather than retry with an empty skip set, which would stall again.
+			table.insert(order_warnings, "unresolvable order for phase " .. phase .. " : keeping the default order")
+			return list
+		end
+		if #cycle == 1 then
+			table.insert(
+				order_warnings,
+				"plugin "
+					.. cycle[1]
+					.. " declares itself before or after itself in phase "
+					.. phase
+					.. " : dropping its order declarations for this phase"
+			)
+		else
+			table.insert(
+				order_warnings,
+				"order cycle for phase "
+					.. phase
+					.. " between "
+					.. table.concat(cycle, ", ")
+					.. " : dropping the order declarations of these plugins for this phase"
+			)
+		end
+		-- Every edge on a cycle is declared by one of its two endpoints, and both endpoints are in
+		-- `cycle`, so skipping their declarations cuts every cycle edge. Dropping edges can never
+		-- create a new cycle, hence a single retry is enough -- and every plugin outside the cycle
+		-- keeps its own, perfectly satisfiable, declarations.
+		local skip = {}
+		for _, id in ipairs(cycle) do
+			skip[id] = true
+		end
+		sorted = stable_toposort(list, edges_for(skip))
+		return sorted or list
+	end
+
+	local phase_defaults = {}
+	for _, phase in ipairs(phases) do
+		phase_defaults[phase] = apply_declared_order(phase, build_default_list(phase))
+	end
 
 	-- Collect overrides (global + per-site for multisite-aware phases)
 	local overrides = { global = {} }
@@ -170,7 +690,8 @@ helpers.order_plugins = function(plugins, variables)
 		end
 	end
 
-	-- Order result
+	-- Order result. The operator override keeps the last word : it is prepended, everything else
+	-- follows in the (already resolved) default order.
 	local function build_order(override_set)
 		local build_orders = {}
 		local missing = {}
@@ -184,37 +705,22 @@ helpers.order_plugins = function(plugins, variables)
 				if not seen[id] and plugin_lookup[id] and plugins_phases[id] and plugins_phases[id][phase] then
 					table.insert(build_orders[phase], id)
 					seen[id] = true
-					plugins_phases[id][phase] = nil
 				elseif not seen[id] then
 					missing[phase][id] = true
 				end
 			end
 
-			for _, id in ipairs(default_orders[phase]) do
-				if plugins_phases[id] and plugins_phases[id][phase] and not seen[id] then
+			for _, id in ipairs(phase_defaults[phase]) do
+				if not seen[id] then
 					table.insert(build_orders[phase], id)
 					seen[id] = true
-					plugins_phases[id][phase] = nil
 				end
-			end
-
-			local remaining = {}
-			for id, plugin in pairs(plugins_phases) do
-				if plugin[phase] and not seen[id] then
-					table.insert(remaining, id)
-					plugin[phase] = nil
-				end
-			end
-			table.sort(remaining)
-			for _, id in ipairs(remaining) do
-				table.insert(build_orders[phase], id)
 			end
 		end
 		return build_orders, missing
 	end
 
 	-- Global order (backward compatible keys at root)
-	plugins_phases = deep_copy_phases(base_plugins_phases)
 	local global_orders, global_missing = build_order(overrides.global)
 	local result_orders = {}
 	for phase, ids in pairs(global_orders) do
@@ -226,7 +732,6 @@ helpers.order_plugins = function(plugins, variables)
 	local per_site_orders = {}
 	local per_site_missing = {}
 	for server_name, override_set in pairs(per_site_overrides) do
-		plugins_phases = deep_copy_phases(base_plugins_phases)
 		local server_name_orders, missing = build_order(override_set)
 		per_site_orders[server_name] = server_name_orders
 		per_site_missing[server_name] = missing
@@ -236,7 +741,7 @@ helpers.order_plugins = function(plugins, variables)
 	-- Merge missing maps for reporting (global + per-site)
 	local missing_plugins = { global = global_missing, per_site = per_site_missing }
 
-	return true, result_orders, missing_plugins
+	return true, result_orders, missing_plugins, order_warnings
 end
 
 helpers.require_plugin = function(id)

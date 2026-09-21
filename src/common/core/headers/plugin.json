@@ -129,5 +129,10 @@
       "select": ["on", "off"]
     }
   },
-  "extensions": { "activation": "always" }
+  "extensions": { "activation": "always" },
+  "order": {
+    "header": {
+      "before": ["*"]
+    }
+  }
 }

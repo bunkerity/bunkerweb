@@ -152,5 +152,10 @@
       "reload": true,
       "async": false
     }
-  ]
+  ],
+  "order": {
+    "access": {
+      "before": ["*"]
+    }
+  }
 }

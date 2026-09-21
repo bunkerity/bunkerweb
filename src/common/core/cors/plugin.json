@@ -110,5 +110,10 @@
       "regex": "^(yes|no)$",
       "type": "check"
     }
+  },
+  "order": {
+    "header": {
+      "before": ["*"]
+    }
   }
 }

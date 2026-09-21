@@ -9,7 +9,7 @@ from logging import Logger
 from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
-from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
+from re import ASCII, DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
@@ -32,6 +32,29 @@ from ports import port_list_setting  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
+# Manifest caps enforced identically by Python (Configurator.__validate_plugin) and Lua
+# (helpers.load_plugin, src/bw/lua/bunkerweb/helpers.lua) : a plugin.json one side refuses must be
+# refused by the other too, with the same field named, or the "loads in Lua while dropped from the
+# generated configuration" split-brain (PX-A §2.2) comes right back. Lua cannot import this file,
+# so any change here must be mirrored by hand in helpers.load_plugin. Measured in UTF-8 BYTES on
+# both sides (Lua's ``#`` is byte length ; Python matches with ``len(value.encode())``), never
+# `len()`/characters alone -- a multi-byte character must cost the same on both sides.
+MANIFEST_CAPS = {
+    "plugin_id_max": 64,
+    "name_max": 128,
+    "description_max": 256,
+    "setting_id_max": 256,
+    "setting_default_max": 4096,
+    "setting_help_max": 512,
+    "setting_label_max": 256,
+    "setting_regex_max": 1024,
+}
+
+
+def _byte_len(value: str) -> int:
+    """UTF-8 byte length -- matches Lua's ``#`` operator, unlike ``len()`` on a str."""
+    return len(value.encode("utf-8"))
+
 
 class Configurator:
     def __init__(
@@ -45,9 +68,15 @@ class Configurator:
     ):
         self.__logger = logger
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
-        self.__plugin_id_rx = re_compile(r"^[\w.-]{1,64}$")
-        self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?$")
-        self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
+        # id/version/stream/setting shape below is mirrored by hand in helpers.load_plugin (Lua) --
+        # see MANIFEST_CAPS above this class for why. re.ASCII + \Z (not $) so these agree with
+        # Lua's %w/%d (ASCII-only) and strict end-of-string match : plain $ lets a trailing
+        # newline slip through, and \w/\d are Unicode-aware by default, so an id/version/setting-id
+        # Python would accept but Lua's load_plugin would refuse (or vice-versa) is closed here
+        # rather than by loosening the Lua side.
+        self.__plugin_id_rx = re_compile(rf"^[\w.-]{{1,{MANIFEST_CAPS['plugin_id_max']}}}\Z", ASCII)
+        self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?\Z", ASCII)
+        self.__setting_id_rx = re_compile(rf"^[A-Z0-9_]{{1,{MANIFEST_CAPS['setting_id_max']}}}\Z", ASCII)
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
         # Plugin API/DB extension manifest validation (1.7): module paths are .py files
@@ -64,6 +93,31 @@ class Configurator:
         # `regenerate` flag exists to close. Adding a key here means adding a reader for it.
         self.__allowed_job_keys = frozenset(("name", "file", "every", "reload", "async", "regenerate"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
+        # Phase names a plugin may order itself in. KEEP IN SYNC with utils.get_phases()
+        # (src/bw/lua/bunkerweb/utils.lua) plus the ``headers`` alias order.json already uses;
+        # the Lua side resolves the alias the same way (helpers.order_plugins).
+        self.__valid_order_phases = frozenset(
+            (
+                "init",
+                "init_worker",
+                "set",
+                "rewrite",
+                "access",
+                "content",
+                "ssl_client_hello_default",
+                "ssl_certificate",
+                "ssl_certificate_default",
+                "header",
+                "headers",
+                "log",
+                "preread",
+                "log_stream",
+                "log_default",
+                "timer",
+                "init_workers",
+            )
+        )
+        self.__valid_order_keys = frozenset(("before", "after"))
         self.__valid_contexts = frozenset(("global", "multisite"))
         self.__valid_setting_types = frozenset(("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration"))
         self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
@@ -238,7 +292,11 @@ class Configurator:
 
             resp, msg = self.__validate_plugin(data)
             if not resp:
-                self.__logger.warning(f"Ignoring {_type} plugin {file} : {msg}")
+                # ERROR, not WARNING : a refused manifest must be as loud here as it is in
+                # helpers.load_plugin (Lua) -- see MANIFEST_CAPS. The whole plugin is dropped from
+                # the generated configuration and the DB, so a WARNING buried in the scheduler log
+                # let this go unnoticed (PX-A §2.2).
+                self.__logger.error(f"Refusing {_type} plugin {file} ({data.get('id', 'unknown')}) : {msg}")
                 return
 
             data["page"] = "ui" in listdir(file.parent)
@@ -539,40 +597,82 @@ class Configurator:
         if not all(key in plugin for key in self.__mandatory_plugin_keys):
             return (False, f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)")
 
-        if not self.__plugin_id_rx.match(plugin["id"]):
-            return (False, f"Invalid id for plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 64))")
-        elif len(plugin["name"]) > 128:
-            return (False, f"Invalid name for plugin {plugin['id']} (Max 128 characters)")
-        elif len(plugin["description"]) > 256:
-            return (False, f"Invalid description for plugin {plugin['id']} (Max 256 characters)")
+        # Type guards mirror helpers.load_plugin (Lua) : a non-string field must be REFUSED with
+        # the field named, not surface as a bare exception message from `except BaseException` in
+        # __load_plugin -- that already stops the plugin loading (same verdict) but breaks the
+        # "same field named" half of the contract.
+        if not isinstance(plugin["id"], str):
+            return (False, f"id of plugin {plugin['id']!r} must be a string")
+        elif not self.__plugin_id_rx.match(plugin["id"]):
+            return (False, f"id of plugin {plugin['id']!r} is invalid, must match ^[\\w.-]{{1,64}}$")
+        elif not isinstance(plugin["name"], str):
+            return (False, f"name of plugin {plugin['id']} must be a string")
+        elif _byte_len(plugin["name"]) > MANIFEST_CAPS["name_max"]:
+            return (False, f"name of plugin {plugin['id']} is {_byte_len(plugin['name'])} bytes, max {MANIFEST_CAPS['name_max']}")
+        elif not isinstance(plugin["description"], str):
+            return (False, f"description of plugin {plugin['id']} must be a string")
+        elif _byte_len(plugin["description"]) > MANIFEST_CAPS["description_max"]:
+            return (False, f"description of plugin {plugin['id']} is {_byte_len(plugin['description'])} bytes, max {MANIFEST_CAPS['description_max']}")
+        elif not isinstance(plugin["version"], str):
+            return (False, f"version of plugin {plugin['id']} must be a string")
         elif not self.__plugin_version_rx.match(plugin["version"]):
-            return (False, f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)")
+            return (False, f"version of plugin {plugin['id']} is {plugin['version']!r}, must match ^\\d+\\.\\d+(\\.\\d+)?$")
         elif plugin["stream"] not in self.__valid_stream_values:
-            return (False, f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)")
+            return (False, f"stream of plugin {plugin['id']} is {plugin['stream']!r}, must be one of {', '.join(sorted(self.__valid_stream_values))}")
+        elif not isinstance(plugin["settings"], dict):
+            return (False, f"settings of plugin {plugin['id']} must be an object")
 
-        for setting, data in plugin.get("settings", {}).items():
-            if not all(key in data.keys() for key in self.__mandatory_setting_keys):
-                return (False, f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type")
+        for setting, data in plugin["settings"].items():
+            if not isinstance(data, dict):
+                return (False, f"setting {setting} of plugin {plugin['id']} must be an object")
 
-            if not self.__setting_id_rx.match(setting):
+            missing_setting_keys = sorted(self.__mandatory_setting_keys - data.keys())
+            if missing_setting_keys:
                 return (
                     False,
-                    f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))",
+                    f"setting {setting} of plugin {plugin['id']} is missing key(s) {', '.join(missing_setting_keys)}, "
+                    f"must have {', '.join(sorted(self.__mandatory_setting_keys))}",
                 )
+
+            if not self.__setting_id_rx.match(setting):
+                return (False, f"id of setting {setting} of plugin {plugin['id']} is invalid, must match ^[A-Z0-9_]{{1,256}}$")
             elif data["context"] not in self.__valid_contexts:
-                return (False, f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)")
-            elif len(data["default"]) > 4096:
-                return (False, f"Invalid default for setting {setting} in plugin {plugin['id']} (Max 4096 characters)")
-            elif len(data["help"]) > 512:
-                return (False, f"Invalid help for setting {setting} in plugin {plugin['id']} (Max 512 characters)")
-            elif len(data["label"]) > 256:
-                return (False, f"Invalid label for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
-            elif len(data["regex"]) > 1024:
-                return (False, f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)")
+                return (
+                    False,
+                    f"context of setting {setting} of plugin {plugin['id']} is {data['context']!r}, must be one of {', '.join(sorted(self.__valid_contexts))}",
+                )
+            elif not isinstance(data["default"], str):
+                return (False, f"default of setting {setting} of plugin {plugin['id']} must be a string")
+            elif _byte_len(data["default"]) > MANIFEST_CAPS["setting_default_max"]:
+                return (
+                    False,
+                    f"default of setting {setting} of plugin {plugin['id']} is {_byte_len(data['default'])} bytes, max {MANIFEST_CAPS['setting_default_max']}",
+                )
+            elif not isinstance(data["help"], str):
+                return (False, f"help of setting {setting} of plugin {plugin['id']} must be a string")
+            elif _byte_len(data["help"]) > MANIFEST_CAPS["setting_help_max"]:
+                return (
+                    False,
+                    f"help of setting {setting} of plugin {plugin['id']} is {_byte_len(data['help'])} bytes, max {MANIFEST_CAPS['setting_help_max']}",
+                )
+            elif not isinstance(data["label"], str):
+                return (False, f"label of setting {setting} of plugin {plugin['id']} must be a string")
+            elif _byte_len(data["label"]) > MANIFEST_CAPS["setting_label_max"]:
+                return (
+                    False,
+                    f"label of setting {setting} of plugin {plugin['id']} is {_byte_len(data['label'])} bytes, max {MANIFEST_CAPS['setting_label_max']}",
+                )
+            elif not isinstance(data["regex"], str):
+                return (False, f"regex of setting {setting} of plugin {plugin['id']} must be a string")
+            elif _byte_len(data["regex"]) > MANIFEST_CAPS["setting_regex_max"]:
+                return (
+                    False,
+                    f"regex of setting {setting} of plugin {plugin['id']} is {_byte_len(data['regex'])} bytes, max {MANIFEST_CAPS['setting_regex_max']}",
+                )
             elif data["type"] not in self.__valid_setting_types:
                 return (
                     False,
-                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, file, check, select, multiselect, multivalue, size or duration)",
+                    f"type of setting {setting} of plugin {plugin['id']} is {data['type']!r}, must be one of {', '.join(sorted(self.__valid_setting_types))}",
                 )
 
             if "multiple" in data:
@@ -662,6 +762,50 @@ class Configurator:
             ok, msg = self.__validate_plugin_extensions(plugin["id"], extensions)
             if not ok:
                 return (False, msg)
+
+        if "order" in plugin:
+            ok, msg = self.__validate_plugin_order(plugin["id"], plugin["order"])
+            if not ok:
+                # Deliberately not a refusal : the block only reshuffles a list the Lua runtime
+                # rebuilds on every load, and a refusal here drops the whole plugin from the
+                # generated configuration while its Lua half keeps running.
+                self.__logger.warning(f"{msg}, ignoring the order declaration")
+                plugin.pop("order", None)
+
+        return True, "ok"
+
+    def __validate_plugin_order(self, plugin_id: str, order) -> Tuple[bool, str]:
+        """Validate the optional ``order`` block (declared phase order, 1.7).
+
+        Shape: ``{"<phase>": {"before": ["<id>", ...], "after": ["<id>", ...]}}``. The operator's
+        ``PLUGINS_ORDER_<PHASE>`` still has the last word, so this is a hint, not a guarantee --
+        hence the caller warns and drops instead of refusing the plugin."""
+        if not isinstance(order, dict):
+            return (False, f"Invalid order for plugin {plugin_id} (Must be an object)")
+
+        for phase, constraints in order.items():
+            if phase not in self.__valid_order_phases:
+                return (False, f"Invalid order phase {phase} for plugin {plugin_id} (Must be one of {', '.join(sorted(self.__valid_order_phases))})")
+            if not isinstance(constraints, dict):
+                return (False, f"Invalid order for phase {phase} in plugin {plugin_id} (Must be an object with before and/or after)")
+
+            unknown_keys = sorted(set(constraints) - self.__valid_order_keys)
+            if unknown_keys:
+                return (False, f"Unknown order key(s) {', '.join(unknown_keys)} for phase {phase} in plugin {plugin_id} (Allowed: after, before)")
+
+            for key, ids in constraints.items():
+                if not isinstance(ids, list):
+                    return (False, f"Invalid order {key} for phase {phase} in plugin {plugin_id} (Must be a list of plugin ids)")
+                for other_id in ids:
+                    # "*" is the wildcard token (every other plugin implementing the phase that
+                    # is not itself constrained relative to me) -- a valid id on its own, not a
+                    # regex-matchable plugin id.
+                    if not isinstance(other_id, str) or not (other_id == "*" or self.__plugin_id_rx.match(other_id)):
+                        return (
+                            False,
+                            f"Invalid order {key} entry {other_id!r} for phase {phase} in plugin {plugin_id} "
+                            '(Can only contain numbers, letters, underscores, dots and hyphens (min 1 characters and max 64), or the wildcard "*")',
+                        )
 
         return True, "ok"
 

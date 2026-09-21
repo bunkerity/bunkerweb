@@ -78,5 +78,15 @@
       "type": "check"
     }
   },
-  "extensions": { "activation": "always" }
+  "extensions": {
+    "activation": "always"
+  },
+  "order": {
+    "init": {
+      "before": ["*"]
+    },
+    "set": {
+      "before": ["*"]
+    }
+  }
 }

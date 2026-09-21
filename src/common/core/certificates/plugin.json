@@ -13,5 +13,10 @@
       "reload": true,
       "async": false
     }
-  ]
+  ],
+  "order": {
+    "ssl_certificate": {
+      "before": ["*"]
+    }
+  }
 }

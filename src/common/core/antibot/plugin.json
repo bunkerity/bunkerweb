@@ -912,5 +912,10 @@
   },
   "extensions": {
     "activation": { "USE_ANTIBOT": "no" }
+  },
+  "order": {
+    "header": {
+      "before": ["*"]
+    }
   }
 }

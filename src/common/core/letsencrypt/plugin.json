@@ -467,6 +467,13 @@
       "label": "Let's Encrypt",
       "renews": true
     },
-    "activation": { "AUTO_LETS_ENCRYPT": "no" }
+    "activation": {
+      "AUTO_LETS_ENCRYPT": "no"
+    }
+  },
+  "order": {
+    "access": {
+      "before": ["*"]
+    }
   }
 }
