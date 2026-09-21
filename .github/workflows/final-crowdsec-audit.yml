@@ -1,0 +1,52 @@
+name: Final CrowdSec release regression
+
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921b]
+    paths: [.github/workflows/final-crowdsec-audit.yml]
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+
+jobs:
+  crowdsec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Run real private CrowdSec 1.8 LAPI regression
+        working-directory: audit_final
+        run: |
+          set -o pipefail
+          mkdir -p audit-results
+          python3 -u - <<'PY' 2>&1 | tee audit-results/crowdsec-driver.log
+          import os, runpy
+          import audit_runtime as audit
+          audit.SHA=os.environ['AUDIT_SOURCE_SHA']
+          runpy.run_path('audit_crowdsec_e2e.py', run_name='__main__')
+          PY
+      - name: Cleanup
+        if: always()
+        working-directory: audit_final
+        run: |
+          if [ -f audit-results/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-crowdsec-real-lapi
+          path: audit_final/audit-results/
+          retention-days: 1
+          if-no-files-found: error
