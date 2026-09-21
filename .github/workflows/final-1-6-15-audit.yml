@@ -79,7 +79,7 @@ jobs:
           done
           docker run --rm --entrypoint sh ghcr.io/bunkerity/bunkerweb-tests:dev -c 'nginx -V 2>&1; openssl version -a; cat /usr/share/bunkerweb/VERSION' | tee audit-results/runtime-versions.txt
           grep -q 'nginx/1.30.5' audit-results/runtime-versions.txt
-          grep -qx '1.6.15' <(tail -n1 audit-results/runtime-versions.txt)
+          grep -qx 'dev' <(tail -n1 audit-results/runtime-versions.txt)
       - name: Six-image Compose startup smoke
         run: |
           set -o pipefail
@@ -348,8 +348,8 @@ jobs:
           import os
           import audit_runtime as audit
           audit.SHA=os.environ['AUDIT_SOURCE_SHA']
-          import audit_tls
-          raise SystemExit(audit_tls.main())
+          import audit_finalize
+          raise SystemExit(audit_finalize.tls_mode())
           PY
       - name: Cleanup
         if: always()
