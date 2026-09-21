@@ -45,7 +45,7 @@ def pre_render(**kwargs):
         # check the registration cache so the page tells apart "not registered"
         # from "registered but the API is unreachable".
         ping_msg = ping_data.get("msg", "") or ""
-        instance_id = kwargs["db"].get_job_cache_file("bunkernet-register", "instance.id")
+        instance_id = kwargs["api_client"].get_cache_file_or_none(None, "bunkernet", "bunkernet-register", "instance.id", download=True)
         if instance_id:
             instance_id = instance_id.decode("utf-8")
             ret["info_instance_id"]["value"] = instance_id
@@ -64,7 +64,7 @@ def pre_render(**kwargs):
                 ret["info_connectivity"]["svg_color"] = "warning"
             ret["info_connectivity"]["description"] = ping_msg.replace(instance_id, "***") if ping_msg else ""
 
-            ips_file = kwargs["db"].get_job_cache_file("bunkernet-data", "ip.list")
+            ips_file = kwargs["api_client"].get_cache_file_or_none(None, "bunkernet", "bunkernet-data", "ip.list", download=True)
             logger.debug(f"IPs file: {ips_file}")
             if ips_file:
                 ips_file = ips_file.decode("utf-8")

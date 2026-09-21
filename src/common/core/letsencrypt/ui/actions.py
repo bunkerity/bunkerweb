@@ -37,7 +37,7 @@ def extract_cache(folder_path, cache_files):
     folder_path.mkdir(parents=True, exist_ok=True)
 
     for cache_file in cache_files:
-        if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
+        if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:") and cache_file.get("data"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 members = [m for m in tar.getmembers() if _is_allowed_member(m)]
                 safe_tar_extractall(tar, folder_path, tar_filter="tar", members=members)
@@ -167,9 +167,16 @@ def pre_render(app, *args, **kwargs):
     }
 
     root_folder = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    folder_path = None
     try:
-        # ? Fetching Let's Encrypt cache files
-        regular_cache_files = kwargs["db"].get_jobs_cache_files(job_name="certbot-renew")
+        # ? Fetching Let's Encrypt cache files (with_data=False: the loop below fetches the one
+        # archive it needs itself, so the text-decoded blob the API would inline here is wasted)
+        regular_cache_files = kwargs["api_client"].get_cache_files(plugin="letsencrypt", job_name="certbot-renew", with_data=False)
+        for cache_file in regular_cache_files:
+            if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
+                cache_file["data"] = kwargs["api_client"].get_cache_file_or_none(
+                    None, "letsencrypt", "certbot-renew", cache_file["file_name"].replace("/", "_"), download=True
+                )
 
         # ? Extracting cache files
         folder_path = root_folder.joinpath("letsencrypt", str(uuid4()))

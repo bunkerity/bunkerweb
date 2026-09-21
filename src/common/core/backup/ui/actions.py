@@ -18,7 +18,7 @@ def pre_render(**kwargs):
         },
     }
     try:
-        backup_file = kwargs["db"].get_job_cache_file("backup-data", "backup.json")
+        backup_file = kwargs["api_client"].get_cache_file_or_none(None, "backup", "backup-data", "backup.json", download=True)
         logger.debug(f"backup_file: {backup_file}")
 
         data = loads(backup_file or "{}")
