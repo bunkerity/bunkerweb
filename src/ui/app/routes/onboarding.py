@@ -5,7 +5,8 @@ The catalog lives in `app.models.onboarding` and owns every step. This blueprint
 the signals dict completion is derived from, and reads/writes the per-user blob.
 
 Storage goes through the API like everything else the UI persists: `app.dependencies.DB` is a
-`None` shim and `src/ui/CLAUDE.md` bans importing it, so the key/value store is reached with
+`RetiredDB` proxy that raises on use and `src/ui/CLAUDE.md` bans importing it, so the key/value
+store is reached with
 the same `get_user_preferences` / `update_user_preferences` pair `/set_columns_preferences`
 already uses. Writes never carry a username — the route always stamps `current_user`, so no
 account can write another's blob.
@@ -45,7 +46,7 @@ def _guarded(label, default, call, *args, **kwargs):
 
 def _load_blob():
     stored = _guarded("preferences", {}, API_CLIENT.get_user_preferences, current_user.get_id(), PREFERENCE_KEY)
-    blob = dict(_BLANK)
+    blob = _BLANK.copy()
     if isinstance(stored, dict):
         blob.update(stored)
     # A crafted or corrupted blob must not make the catalog blow up on `in`.

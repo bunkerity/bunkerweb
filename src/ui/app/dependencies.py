@@ -16,10 +16,12 @@ from app.perf import record_api_call
 from app.models.config import Config
 from app.models.instance import InstancesUtils
 from app.models.ui_data import UIData
+from app.plugin_api import PluginApi, RetiredDB
 
-# DB is no longer used by the UI (all access goes through API_CLIENT).
-# Exported as None for backward compatibility with core plugin blueprints that import it.
-DB = None
+# The UI holds no database connection since 1.7; `DB` only still exists because 1.6 plugins import
+# it. It is a proxy, not None, so the first use raises a RuntimeError naming the plugin and
+# PLUGIN_API instead of an AttributeError on NoneType from somewhere deeper in the plugin.
+DB = RetiredDB()
 
 DATA = UIData(Path(sep, "var", "tmp", "bunkerweb").joinpath("ui_data.json"))
 
@@ -31,6 +33,10 @@ API_CLIENT = ApiClient(
 # Every UI page is assembled from API calls, and what makes one slow is almost always their
 # number. Counting them costs an integer per call and is what `Server-Timing` reports.
 API_CLIENT.observer = record_api_call
+
+# The supported data surface for plugin blueprints, `ui/actions.py` and `ui/hooks.py`: a subset of
+# API_CLIENT with the user/session/admin methods left out. See `app/plugin_api.py`.
+PLUGIN_API = PluginApi(API_CLIENT)
 
 BW_CONFIG = Config(data=DATA, api_client=API_CLIENT)
 BW_INSTANCES_UTILS = InstancesUtils(api_client=API_CLIENT)

@@ -37,6 +37,7 @@ from flask import Flask, get_flashed_messages
 from flask_login import LoginManager
 
 from app.models.plugin_catalog import CATALOG_MAX_AGE  # type: ignore
+from app.plugin_api import PluginApi, RetiredDB  # type: ignore
 
 ROUTE_PATH = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "routes" / "plugins.py"
 
@@ -91,6 +92,8 @@ def route_module():
     dependencies.BW_INSTANCES_UTILS = Mock()
     dependencies.LOGGER = Mock()
     dependencies.CONFIG_TASKS_EXECUTOR = SimpleNamespace(submit=lambda fn, *a, **k: fn(*a, **k))
+    dependencies.DB = RetiredDB()
+    dependencies.PLUGIN_API = PluginApi(client)
     dependencies.CORE_PLUGINS_PATH = Path("/tmp/_core")
     dependencies.EXTERNAL_PLUGINS_PATH = Path("/tmp/_ext")
     dependencies.PRO_PLUGINS_PATH = Path("/tmp/_pro")

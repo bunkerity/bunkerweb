@@ -1,13 +1,13 @@
 from contextlib import suppress
 from html import escape
-from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_file_location
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
 from os import listdir
 from os.path import basename, dirname, isabs, join, sep
 from pathlib import Path
 from shutil import move, rmtree
-from sys import path as sys_path
+from sys import modules as sys_modules, path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
 from typing import List, Optional, Union
@@ -31,7 +31,9 @@ from app.dependencies import (
     BW_INSTANCES_UTILS,
     CONFIG_TASKS_EXECUTOR,
     DATA,
+    DB,
     EXTERNAL_PLUGINS_PATH,
+    PLUGIN_API,
     PRO_PLUGINS_PATH,
 )
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -332,19 +334,40 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
                 LOGGER.error(f"An error occurred while extracting the plugin: {e}")
                 return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
 
-    try:
-        action_file = tmp_dir.joinpath("actions.py")
-        if not action_file.is_file():
-            if function_name == "pre_render":
-                # Mirror the missing pre_render method case: a plugin without an actions file is not a pre-render error
-                return {"status": "ok", "code": 200, "message": "The plugin does not have an action file"}
-            return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
+    action_file = tmp_dir.joinpath("actions.py")
+    if not action_file.is_file():
+        if function_name == "pre_render":
+            # Mirror the missing pre_render method case: a plugin without an actions file is not a pre-render error
+            return {"status": "ok", "code": 200, "message": "The plugin does not have an action file"}
+        return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
+    # Every plugin's actions file gets its OWN module name, registered for the duration of the call
+    # and removed in the `finally`. All three parts matter:
+    #  * a shared name is what made `load_module()` re-execute into the module already registered
+    #    *without clearing it*, so a plugin with no `pre_render` ran the previous plugin's one;
+    #  * the name must still be registered while the module body runs, because the stdlib resolves
+    #    a class's module through `sys.modules` -- `dataclasses._is_type` does
+    #    `sys.modules.get(cls.__module__).__dict__` with no None guard, so an unregistered module
+    #    makes any `@dataclass` in a plugin's actions.py fail to import at all (`typing.get_type_hints`,
+    #    `pickle` and `inspect.getsource` need it too);
+    #  * the name is unique per call, so removing it cannot race another thread under the UI's
+    #    `worker_class = "gthread"` (`src/ui/utils/gunicorn.conf.py:130-131`) the way evicting a
+    #    shared `"actions"` entry would.
+    # `.` is legal in a plugin id (`PLUGIN_NAME_RX`, `app/utils.py:94`) but would make this a
+    # dotted name, i.e. a submodule of a package that does not exist.
+    module_name = f"bw_ui_actions_{plugin.replace('.', '_')}_{uuid4().hex}"
+
+    # `sys_path.append` is the first statement under the `try` on purpose: the `except` and the
+    # `finally` below both pop, and a failure before the append would pop an unrelated entry.
+    try:
         sys_path.append(tmp_dir.as_posix())
-        loader = SourceFileLoader("actions", action_file.as_posix())
-        actions = loader.load_module()
+        spec = spec_from_file_location(module_name, action_file)
+        actions = module_from_spec(spec)
+        sys_modules[module_name] = actions
+        spec.loader.exec_module(actions)
     except BaseException as e:
         sys_path.pop()
+        sys_modules.pop(module_name, None)
         if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
             rmtree(tmp_dir, ignore_errors=True)
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
@@ -357,27 +380,42 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
     message = None
 
     try:
-        # Try to get the custom plugin custom function and call it
-        method = getattr(actions, function_name or plugin)
-        queries = request.args.to_dict()
-        try:
-            data = request.json or {}
-        except BaseException:
-            data = {}
+        # The three-argument `getattr` is what distinguishes a missing handler now -- not an
+        # `except AttributeError`, which also caught the plugin's own AttributeError (PLUGIN_API
+        # refusing an unsupported name, for one) and reported it as "the plugin does not have a
+        # method". It still belongs INSIDE the `try`: a module-level `__getattr__` (PEP 562) may
+        # raise anything, and the default only swallows AttributeError -- outside, that escapes
+        # with the `sys.path` entry, the `sys.modules` entry and the extracted directory all left
+        # behind.
+        method = getattr(actions, function_name or plugin, None)
 
-        res = method(app=current_app, db=None, bw_instances_utils=BW_INSTANCES_UTILS, args=queries, data=data)
-    except AttributeError as e:
-        if function_name == "pre_render":
-            sys_path.pop()
-            return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
+        if method is None:
+            if function_name == "pre_render":
+                return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
+            message = f"The plugin does not have a {function_name or plugin} method"
+        else:
+            queries = request.args.to_dict()
+            try:
+                data = request.json or {}
+            except BaseException:
+                data = {}
 
-        message = "The plugin does not have a method"
-        exception = e
+            # `db` is the retired 1.6 handle: it is passed so a plugin that still takes it gets the
+            # RuntimeError naming PLUGIN_API, which is what it should be reading from instead.
+            res = method(
+                app=current_app,
+                db=DB,
+                api_client=PLUGIN_API,
+                bw_instances_utils=BW_INSTANCES_UTILS,
+                args=queries,
+                data=data,
+            )
     except BaseException as e:
         message = "An error occurred while executing the plugin"
         exception = e
     finally:
         sys_path.pop()
+        sys_modules.pop(module_name, None)
 
         # Only clean up temporary directories that aren't permanent plugin paths
         if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
@@ -897,7 +935,7 @@ def custom_plugin_page(plugin: str):
 
     if is_used and is_metrics_on:
         # A plugin-shipped page is CODE, not data, and loading one executes it twice over:
-        # `run_action(..., "pre_render")` below does `SourceFileLoader(...).load_module()` and
+        # `run_action(..., "pre_render")` below does `spec.loader.exec_module()` on it and
         # calls into it with `app=current_app`, and `template.html` is rendered through a
         # NON-sandboxed `jinja2.Environment` with `current_app.jinja_env.globals` merged in.
         # Either one is arbitrary execution in the UI process, with reach to API_CLIENT, the

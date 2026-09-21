@@ -23,6 +23,7 @@ from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 import plugin_extensions  # type: ignore  # noqa: E402 -- on sys.path via the root conftest
+from app.plugin_api import PluginApi, RetiredDB  # noqa: E402
 from app.utils import get_filtered_settings  # noqa: E402
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
@@ -352,6 +353,8 @@ def plugins_route():
     client = Mock()
     dependencies = ModuleType("app.dependencies")
     dependencies.API_CLIENT = client
+    dependencies.DB = RetiredDB()
+    dependencies.PLUGIN_API = PluginApi(client)
     dependencies.CORE_PLUGINS_PATH = Path("/tmp/core")
     dependencies.BW_CONFIG = Mock()
     dependencies.BW_INSTANCES_UTILS = Mock()

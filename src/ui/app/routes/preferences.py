@@ -10,7 +10,7 @@ Three things the operator can now decide for themselves, all stored in the exist
                             read here so one module owns the key names).
 
 Storage goes through the API like everything else the UI persists (``app.dependencies.DB`` is a
-``None`` shim and ``src/ui/CLAUDE.md`` bans importing it), using the same
+``RetiredDB`` proxy that raises on use and ``src/ui/CLAUDE.md`` bans importing it), using the same
 ``get_user_preferences`` / ``update_user_preferences`` pair the walkthrough and the column
 preferences already use. Writes never carry a username: the route always stamps
 ``current_user``, so no account can write another's blob.
@@ -80,8 +80,7 @@ def dismissed_notices(username):
 def hidden_home_cards(username):
     """The set of Home card ids to skip. Unknown ids are dropped, so a card that leaves the
     product stops mattering and one added later is visible by default."""
-    blob = load_preference(username, HIDDEN_CARDS_KEY, {})
-    stored = blob.get("ids")
+    stored = load_preference(username, HIDDEN_CARDS_KEY, {}).get("ids")
     if not isinstance(stored, list):
         return []
     return sorted({card for card in stored if card in HIDEABLE_HOME_CARDS})
