@@ -1,0 +1,44 @@
+name: Final country regression with current GeoIP fixture
+
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921b]
+    paths: [.github/workflows/final-country-audit.yml]
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+
+jobs:
+  country:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Pin exact images and refresh the stale GB test IP
+        run: |
+          set -euo pipefail
+          for image in bunkerweb scheduler; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = "$AUDIT_SOURCE_SHA"
+            docker tag "$ref" "${image}-tests"
+          done
+          cd tests/core/country
+          sed -i 's/2\.0\.0\.2/81.2.69.2/g; s/2\.0\.0\.3/81.2.69.142/g; s#2\.0\.0\.0/8#81.2.69.0/24#g' docker-compose.yml docker-compose.test.yml
+          grep -R '81.2.69' docker-compose*.yml
+      - name: Run existing country suite with current GB fixture
+        run: |
+          set -o pipefail
+          cd tests/core/country
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1200 ./test.sh docker country
