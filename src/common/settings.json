@@ -633,5 +633,32 @@
       "emerg"
     ],
     "multiple": "error-logs"
+  },
+  "JOBS_DAILY_TIME": {
+    "context": "global",
+    "default": "03:00",
+    "help": "Local time (scheduler TZ, HH:MM, 24h) at which daily scheduled jobs run; weekly jobs also run at this time, on JOBS_WEEKLY_DAY.",
+    "id": "jobs-daily-time",
+    "label": "Jobs daily time",
+    "regex": "^([01]\\d|2[0-3]):[0-5]\\d$",
+    "type": "text"
+  },
+  "JOBS_WEEKLY_DAY": {
+    "context": "global",
+    "default": "sunday",
+    "help": "Day of the week on which weekly scheduled jobs run, at JOBS_DAILY_TIME.",
+    "id": "jobs-weekly-day",
+    "label": "Jobs weekly day",
+    "regex": "^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$",
+    "type": "select",
+    "select": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
   }
 }

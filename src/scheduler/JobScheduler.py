@@ -30,6 +30,14 @@ class JobScheduler:
     environment management, and dispatch calls.
     """
 
+    # Mirrors JOBS_DAILY_TIME/JOBS_WEEKLY_DAY's "default" in src/common/settings.json — that file
+    # is the source of truth (the process boundary means it can't be imported from here), keep
+    # both in sync by hand.
+    #: JOBS_WEEKLY_DAY accepted values — also the `schedule.every()` attribute names to dispatch to.
+    __WEEKLY_DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+    __DEFAULT_DAILY_TIME = "03:00"
+    __DEFAULT_WEEKLY_DAY = "sunday"
+
     def __init__(
         self,
         logger: Optional[Logger] = None,
@@ -51,6 +59,7 @@ class JobScheduler:
         return {
             "name": re_compile(r"^[\w.-]{1,128}$"),
             "file": re_compile(r"^[\w./-]{1,256}$"),
+            "daily_time": re_compile(r"^([01]\d|2[0-3]):[0-5]\d$"),
         }
 
     @property
@@ -154,12 +163,36 @@ class JobScheduler:
             valid_jobs.append(job)
         return valid_jobs
 
+    def __daily_time(self) -> str:
+        """Read JOBS_DAILY_TIME the same way other env-backed settings are read (os.getenv); fall back on invalid/missing."""
+        value = os.getenv("JOBS_DAILY_TIME", self.__DEFAULT_DAILY_TIME).strip()
+        if self.__compiled_regexes["daily_time"].match(value):
+            return value
+        self.__logger.warning(f"Invalid JOBS_DAILY_TIME '{value}' (expected HH:MM, 24h), falling back to the default {self.__DEFAULT_DAILY_TIME}")
+        return self.__DEFAULT_DAILY_TIME
+
+    def __weekly_day(self) -> str:
+        """Read JOBS_WEEKLY_DAY the same way (os.getenv); fall back on invalid/missing."""
+        value = os.getenv("JOBS_WEEKLY_DAY", self.__DEFAULT_WEEKLY_DAY).strip().lower()
+        if value in self.__WEEKLY_DAYS:
+            return value
+        self.__logger.warning(
+            f"Invalid JOBS_WEEKLY_DAY '{value}' (expected one of {', '.join(self.__WEEKLY_DAYS)}), falling back to the default {self.__DEFAULT_WEEKLY_DAY}"
+        )
+        return self.__DEFAULT_WEEKLY_DAY
+
     def __str_to_schedule(self, every: str) -> schedule.Job:
+        # day/week are anchored to an operator-chosen time-of-day (JOBS_DAILY_TIME/JOBS_WEEKLY_DAY)
+        # instead of registration time: the schedule library otherwise anchors on whenever setup()
+        # first runs, which drifts on every scheduler restart and can starve a job entirely if the
+        # scheduler restarts more often than the job's cadence.
+        if every == "day":
+            return schedule.every().day.at(self.__daily_time())
+        if every == "week":
+            return getattr(schedule.every(), self.__weekly_day()).at(self.__daily_time())
         schedule_map = {
             "minute": schedule.every().minute,
             "hour": schedule.every().hour,
-            "day": schedule.every().day,
-            "week": schedule.every().week,
         }
         try:
             return schedule_map[every]
