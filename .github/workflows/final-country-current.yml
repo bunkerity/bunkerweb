@@ -1,0 +1,36 @@
+name: Final country current-MMDB regression v2
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921b]
+    paths: [.github/workflows/final-country-current.yml]
+permissions:
+  contents: read
+  packages: read
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+jobs:
+  country:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - run: |
+          set -euo pipefail
+          docker pull ghcr.io/bunkerity/bunkerweb-tests:dev
+          docker pull ghcr.io/bunkerity/scheduler-tests:dev
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/bunkerweb-tests:dev)" = "$AUDIT_SOURCE_SHA"
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/scheduler-tests:dev)" = "$AUDIT_SOURCE_SHA"
+          docker tag ghcr.io/bunkerity/bunkerweb-tests:dev bunkerweb-tests
+          docker tag ghcr.io/bunkerity/scheduler-tests:dev scheduler-tests
+          cd tests/core/country
+          sed -i 's@bunkerity/bunkerweb:.*@bunkerweb-tests@' docker-compose.yml
+          sed -i 's@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@' docker-compose.yml
+          sed -i 's/2\.0\.0\.2/81.2.69.2/g; s/2\.0\.0\.3/81.2.69.142/g; s#2\.0\.0\.0/8#81.2.69.0/24#g' docker-compose.yml docker-compose.test.yml
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1200 ./test.sh docker country
