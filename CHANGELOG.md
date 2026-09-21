@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.16~rc1 - 2026/09/??
+
+- [BUGFIX] `grpc`, `reverseproxy`: gRPC and the reverse proxy on the same service no longer fail the NGINX configuration check. (Fixes #3950)
+
 ## v1.6.15 - 2026/09/??
 
 - [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
