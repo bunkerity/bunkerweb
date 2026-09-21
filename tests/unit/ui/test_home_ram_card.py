@@ -194,15 +194,13 @@ def test_garbage_in_the_cgroup_files_falls_back_rather_than_raising(tmp_path, no
 # --------------------------------------------------------------------------------------
 
 
-def _render_ram_band(memory_state_value):
+def _render_ram_band(memory_state_value, english):
     """Render just the status band of home.html with a given memory state."""
     env = Environment(
         loader=ChoiceLoader([DictLoader({"dashboard.html": "{% block content %}{% endblock %}"}), FileSystemLoader(TEMPLATES)]),
         autoescape=True,
     )
     env.globals.setdefault("url_for", lambda *a, **k: "#")
-    from conftest import english  # noqa: PLC0415 -- fixture-side helper, imported lazily
-
     env.globals["_"] = english
     source = (TEMPLATES / "home.html").read_text(encoding="utf-8")
     start = source.index('<div class="sb-col sb-ram">')
@@ -221,8 +219,8 @@ def _render_ram_band(memory_state_value):
         ("danger", "sb-chip-danger", "is-danger"),
     ],
 )
-def test_each_band_paints_its_own_chip_and_bar(state, chip, bar):
-    html = _render_ram_band(state)
+def test_each_band_paints_its_own_chip_and_bar(state, chip, bar, english):
+    html = _render_ram_band(state, english)
     assert chip in html
     if bar:
         assert bar in html

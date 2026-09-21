@@ -116,6 +116,12 @@ def english(key, **variables):
     return str(escape(babel_globals()["_"](key, **variables)))
 
 
+@pytest.fixture(name="english")
+def english_fixture():
+    """Expose the renderer helper without importing a collection-local conftest module."""
+    return english
+
+
 # Jinja copies this dict into `Environment.globals` at construction, so every environment built
 # after this module is imported — and conftest is imported before any test module — carries `_`,
 # exactly as the real app does.
