@@ -2,7 +2,7 @@ name: Final 1.6.15 release audit (no publish)
 
 on:
   push:
-    branches: [audit/final-1.6.15-20260921]
+    branches: [audit/final-1.6.15-20260921b]
     paths:
       - .github/workflows/final-1-6-15-audit.yml
       - audit_final/**
@@ -12,7 +12,7 @@ permissions:
   packages: read
 
 concurrency:
-  group: final-1-6-15-audit-${{ github.ref }}
+  group: final-1-6-15-audit-${{ github.sha }}
   cancel-in-progress: true
 
 env:
