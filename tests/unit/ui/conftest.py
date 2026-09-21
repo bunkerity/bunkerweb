@@ -57,7 +57,7 @@ def ui_db(db_engine, tmp_path, quiet_logger, _clean_env):
 # --------------------------------------------------------------------------------------
 # Server-side translation in the standalone Jinja harnesses
 # --------------------------------------------------------------------------------------
-# Templates converted to native i18n (see test_i18n_migration.CONVERTED) call `_()`, which
+# Templates using native i18n (see test_i18n_migration.EVERY_TEMPLATE) call `_()`, which
 # Flask-Babel installs as a Jinja global. The harnesses in this directory build a bare
 # `Environment` to render one template without booting the app, so they need it too — otherwise
 # the render dies with `'_' is undefined`.
