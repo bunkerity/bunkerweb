@@ -1,0 +1,107 @@
+src/ui/app/routes/preferences.py
+  s_e65d3eabd7116f::t_226c17cdf77de0 13
+  s_e65d3eabd7116f::t_19a148794cd9ad 83
+src/ui/app/dependencies.py
+  s_e65d3eabd7116f::t_c476841c12b1f7 19,21-24,37-39
+  s_e65d3eabd7116f::t_0591a1b7e260cb 40
+src/ui/app/routes/onboarding.py
+  s_e65d3eabd7116f::t_226c17cdf77de0 8-9
+  s_e65d3eabd7116f::t_6abf2d9a7c8f89 49
+tests/unit/ui/test_plugin_catalog_routes.py
+  s_e65d3eabd7116f::t_f57375e413499e 40
+  s_e65d3eabd7116f::t_cea28dad2b19e0 95-96
+tests/unit/ui/test_plugin_api_surface.py
+  s_f334b56f43408e::t_1f9c38f4f8c878 75-122
+  s_1c68e41f230bea::t_41dadffaa78d51 399
+  s_e65d3eabd7116f::t_7d36dd770ca3da 406-409
+  s_ba79e7bf7993d6::t_0e61ad5f96c05b 390-398,400-404
+  s_e65d3eabd7116f::t_d1061f5c8a835a 17,24-25,205-254
+  s_e65d3eabd7116f::t_bd57d1d5c2a405 383-389
+  s_795e2ccdb6801b::t_af8b1ff5b92867 415,425,434,472-473,480-498,505
+  s_cce57529f1776a::t_b1fc4de91f8b58 305-310,314-315
+  s_e65d3eabd7116f::t_541c6bceb6fd66 195,199,258-266
+  s_e65d3eabd7116f::t_3e4a5226dd6a2b 416-417,420,444-471,474-479,499-500,511-512,514
+  s_e65d3eabd7116f::t_ec4209f87486f0 1-16,18-23,26-74,123-189,256-257,267-304,311-313,316-382,422,428
+  s_e65d3eabd7116f::t_c4152f092cd03b 190-194
+  s_e65d3eabd7116f::t_2058001478c02e 196-198
+  s_e65d3eabd7116f::t_cc1840c5466b62 200-204
+  s_e65d3eabd7116f::t_15204303645e57 255
+  s_e65d3eabd7116f::t_ca3144c49f8ed9 418-419
+  s_e65d3eabd7116f::t_7ff4fe3ef37e13 421
+  s_e65d3eabd7116f::t_bfaf93d1061686 513
+  s_f334b56f43408e::t_29bebd3e3cf72b 405,410-414,423-424,426-427,429-433,435-443,501-504,506-510
+src/ui/app/plugin_api.py
+  s_e65d3eabd7116f::t_84581430afc50d 154-158
+  s_f334b56f43408e::t_455d223a1f221e 20-21
+  s_e65d3eabd7116f::t_fda287f2b1788c 1-19,22-63,67-71,90-98,118-131,143-153,159-165,167-169
+  s_e65d3eabd7116f::t_b9a25fec5cf3d9 64-66,72,80-81,86-89,132-142,166
+  s_f334b56f43408e::t_1f0c285cec2f89 99-117
+  s_e65d3eabd7116f::t_10db1842ede157 77-79,85
+  s_795e2ccdb6801b::t_04b481bc2061ed 73-76,82-84
+src/ui/app/routes/plugins.py
+  s_e65d3eabd7116f::t_10db1842ede157 366
+  s_e65d3eabd7116f::t_4e42ce2e9194f0 3,337-343,360-361,365,367,395
+  s_e65d3eabd7116f::t_d633207b4d64d1 356-358,383-391
+  s_e65d3eabd7116f::t_9cd3a3627b7ada 938
+  s_e65d3eabd7116f::t_c476841c12b1f7 34,36,392-394,396-412
+  s_e65d3eabd7116f::t_6bd3ae9e7c9767 10,344-355,359,364,370,418
+tests/unit/ui/test_plugins_marketplace.py
+  s_e65d3eabd7116f::t_cea28dad2b19e0 356-357
+  s_e65d3eabd7116f::t_f57375e413499e 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f471e4b849a6180f0b12d4822339b8224d70f19",
+  "prompts": {},
+  "sessions": {
+    "s_1c68e41f230bea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfadf335-e759-43f9-9b53-6ad41334e49a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba79e7bf7993d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2d7-c3a8-7890-a711-e0dc32aa68c7",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cce57529f1776a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e4b89e09-a804-43f3-96d7-c9821dbd68e8",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e65d3eabd7116f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7766284e-2c4d-4f22-845b-dbc934ee2aef",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f334b56f43408e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfd48429-1158-4dd0-8440-0c7632508e89",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

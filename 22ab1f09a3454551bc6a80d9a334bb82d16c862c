@@ -1,0 +1,29 @@
+tests/unit/ui/test_home_ram_card.py
+  s_2eb711bb183d74::t_59ab38ded89a80 197,222-223
+tests/unit/ui/conftest.py
+  s_795e2ccdb6801b::t_8359349292f1d9 119-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "22ab1f09a3454551bc6a80d9a334bb82d16c862c",
+  "prompts": {},
+  "sessions": {
+    "s_2eb711bb183d74": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2d7-a851-7cd3-8a1a-7d1c25f4b380",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
