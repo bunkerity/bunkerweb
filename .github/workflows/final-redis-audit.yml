@@ -34,21 +34,7 @@ jobs:
             docker tag "$ref" "${image}-tests"
           done
           cd tests/core/redis
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path("test.sh")
-          s=p.read_text()
-          needle='''    elif [ "$test" = "sentinel" ] ; then
-        echo "🧰 Running tests with redis' in sentinel mode ..."
-'''
-          repl=needle+'''        # Fixture reset: the previous SSL case leaves the master port at 6380
-        # while this Sentinel case returns the master itself to 6379.
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \\;
-'''
-          if needle not in s:
-              raise SystemExit("sentinel block not found")
-          p.write_text(s.replace(needle,repl,1))
-          PY
+          python3 -c 'from pathlib import Path; p=Path("test.sh"); s=p.read_text(); marker="        echo \"🧰 Running tests with redis\x27 in sentinel mode ...\"\n"; insert="        find . -type f -name \"docker-compose.*\" -exec sed -i \"s@REDIS_MASTER_PORT_NUMBER: \\\"[0-9]*\\\"@REDIS_MASTER_PORT_NUMBER: \\\"6379\\\"@\" {} \\\\;\n"; p.write_text(s.replace(marker, marker+insert, 1))'
       - name: Run complete existing Redis suite
         run: |
           set -o pipefail
