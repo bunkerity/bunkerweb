@@ -95,18 +95,22 @@ def cache_delete_bulk():
             file_name,
             job_name=job_name,
             service_id=service if service != "global" else None,
+            plugin_id=plugin,
         )
 
-        if result:
+        if result is None:
+            errors.append(f"Cache file {file_name} not found")
+        elif result:
             errors.append(f"Error deleting {file_name}: {result}")
         else:
             changed_plugins.add(plugin)
             deleted_count += 1
 
-    ret = DB.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
-    if ret:
-        LOGGER.warning("Cache deletion changes were not committed to the database")
-        errors.append("Changes were not committed to the database")
+    if changed_plugins:
+        ret = DB.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
+        if ret:
+            LOGGER.warning("Cache deletion changes were not committed to the database")
+            errors.append("Changes were not committed to the database")
 
     if errors:
         flash(f"Deleted {deleted_count} files with {len(errors)} errors: {'; '.join(errors)}", "warning", save=False)

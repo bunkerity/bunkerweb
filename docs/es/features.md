@@ -747,6 +747,9 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con scrypt para máxima seguridad.                                                                                                                            |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                                                                                                      |
 
+!!! tip "Ancle la ruta protegida para cubrir todo lo que hay por debajo"
+    Una ruta simple como `/admin` es una coincidencia por prefijo, así que también protege `/admin/`, `/admin/users` y las variantes codificadas que se normalizan a ellas. El modificador `=` hace la coincidencia exacta, de modo que `= /admin` deja `/admin/` sin protección mientras su aplicación puede servir ahí el mismo recurso. Mantenga la forma de prefijo salvo que realmente quiera una sola ruta.
+
 !!! warning "Consideraciones de seguridad"
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
 
@@ -1143,6 +1146,9 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 === "Cabecera"
     **Qué hace esto:** Bloquea, o por el contrario exime, las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Una regla de exclusión prevalece sobre cualquier coincidencia de la lista negra, incluidas las cacheadas.
 
@@ -1193,7 +1199,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN de AWS y Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Reglas de omisión personalizadas
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -1931,7 +1937,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1948,7 +1954,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2711,6 +2717,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_URI`      |                   | multisite | no       | **Lista Gris de URI:** Lista de patrones de URI (expresión regular PCRE) para incluir en la lista gris, separados por espacios.   |
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 === "Cabecera"
     **Qué hace esto:** Pone en la lista gris las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor.
 
@@ -2832,28 +2841,57 @@ El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HT
 
 ### Ajustes de configuración
 
-| Ajuste                       | Predeterminado | Contexto  | Múltiple | Descripción                                                                                            |
-| ---------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `USE_GRPC`                   | `no`           | multisite | no       | **Habilitar gRPC:** Pon `yes` para habilitar el proxy gRPC.                                            |
-| `GRPC_HOST`                  |                | multisite | sí       | **Upstream gRPC:** Valor usado por `grpc_pass` (por ejemplo `grpc://service:50051` o `grpcs://...`).   |
-| `GRPC_URL`                   | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC.                                             |
-| `GRPC_CUSTOM_HOST`           |                | multisite | no       | **Cabecera Host personalizada:** Sobrescribe la cabecera `Host` enviada al upstream.                   |
-| `GRPC_HEADERS`               |                | multisite | sí       | **Cabeceras extra al upstream:** Lista separada por punto y coma de valores para `grpc_set_header`.    |
-| `GRPC_HIDE_HEADERS`          |                | multisite | sí       | **Cabeceras de respuesta ocultas:** Lista separada por espacios de valores para `grpc_hide_header`.    |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`          | multisite | no       | **Interceptar errores:** Activa/desactiva `grpc_intercept_errors`.                                     |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`          | multisite | sí       | **Timeout de conexión:** Tiempo límite para conectar con el upstream.                                  |
-| `GRPC_READ_TIMEOUT`          | `60s`          | multisite | sí       | **Timeout de lectura:** Tiempo límite para leer desde el upstream.                                     |
-| `GRPC_SEND_TIMEOUT`          | `60s`          | multisite | sí       | **Timeout de envío:** Tiempo límite para enviar al upstream.                                           |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`          | multisite | sí       | **Keepalive de socket:** Activa/desactiva keepalive en sockets hacia upstream.                         |
-| `GRPC_SSL_SNI`               | `no`           | multisite | no       | **SSL SNI:** Activa/desactiva SNI para upstreams TLS.                                                  |
-| `GRPC_SSL_SNI_NAME`          |                | multisite | no       | **Nombre SSL SNI:** Nombre SNI que se enviará cuando `GRPC_SSL_SNI=yes`.                               |
-| `GRPC_NEXT_UPSTREAM`         |                | multisite | sí       | **Condiciones de siguiente upstream:** Valor para `grpc_next_upstream`.                                |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |                | multisite | sí       | **Timeout de siguiente upstream:** Valor para `grpc_next_upstream_timeout`.                            |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |                | multisite | sí       | **Intentos de siguiente upstream:** Valor para `grpc_next_upstream_tries`.                             |
-| `GRPC_INCLUDES`              |                | multisite | sí       | **Includes adicionales:** Archivos `include` separados por espacios dentro del bloque gRPC `location`. |
+| Ajuste                                  | Predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                       |
+| --------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                              | `no`           | multisite | no       | **Habilitar gRPC:** Pon `yes` para habilitar el proxy gRPC.                                                                                                       |
+| `GRPC_HOST`                             |                | multisite | sí       | **Upstream gRPC:** Valor usado por `grpc_pass` (por ejemplo `grpc://service:50051` o `grpcs://...`).                                                              |
+| `GRPC_URL`                              | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC.                                                                                                        |
+| `GRPC_CUSTOM_HOST`                      |                | multisite | no       | **Cabecera Host personalizada:** Sobrescribe la cabecera `Host` enviada al upstream.                                                                              |
+| `GRPC_HEADERS`                          |                | multisite | sí       | **Cabeceras extra al upstream:** Lista separada por punto y coma de valores para `grpc_set_header`.                                                               |
+| `GRPC_HIDE_HEADERS`                     |                | multisite | sí       | **Cabeceras de respuesta ocultas:** Lista separada por espacios de valores para `grpc_hide_header`.                                                               |
+| `GRPC_HEADERS_CLIENT`                   |                | multisite | sí       | **Cabeceras de respuesta al cliente:** Lista separada por punto y coma de valores `add_header` enviados al cliente.                                               |
+| `GRPC_PASS_HEADERS`                     |                | multisite | sí       | **Cabeceras de respuesta reenviadas:** Lista separada por espacios de valores `grpc_pass_header`, para reenviar cabeceras que NGINX oculta por defecto.           |
+| `GRPC_IGNORE_HEADERS`                   |                | multisite | sí       | **Cabeceras de respuesta ignoradas:** Lista separada por espacios de valores `grpc_ignore_headers`, para que NGINX no las procese.                                |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`           | multisite | no       | **Guiones bajos en cabeceras:** Activa/desactiva `underscores_in_headers`.                                                                                        |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`          | multisite | no       | **Interceptar errores:** Activa/desactiva `grpc_intercept_errors`.                                                                                                |
+| `GRPC_BUFFER_SIZE`                      |                | multisite | sí       | **Tamaño de búfer:** Valor para `grpc_buffer_size` (búfer usado para leer la respuesta del upstream).                                                             |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`          | multisite | sí       | **Timeout de conexión:** Tiempo límite para conectar con el upstream.                                                                                             |
+| `GRPC_READ_TIMEOUT`                     | `60s`          | multisite | sí       | **Timeout de lectura:** Tiempo límite para leer desde el upstream.                                                                                                |
+| `GRPC_SEND_TIMEOUT`                     | `60s`          | multisite | sí       | **Timeout de envío:** Tiempo límite para enviar al upstream.                                                                                                      |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`          | multisite | sí       | **Keepalive de socket:** Activa/desactiva keepalive en sockets hacia upstream.                                                                                    |
+| `GRPC_SSL_SNI`                          | `no`           | multisite | no       | **SSL SNI:** Activa/desactiva SNI para upstreams TLS.                                                                                                             |
+| `GRPC_SSL_SNI_NAME`                     |                | multisite | no       | **Nombre SSL SNI:** Nombre SNI que se enviará cuando `GRPC_SSL_SNI=yes`.                                                                                          |
+| `GRPC_SSL_VERIFY`                       | `no`           | multisite | no       | **Verificación SSL:** Activa/desactiva la verificación del certificado del upstream gRPC.                                                                         |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`         | multisite | no       | **Prioridad del certificado de confianza:** Origen del bundle CA, `file` o `data`.                                                                                |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |                | multisite | no       | **Ruta del certificado de confianza:** Ruta a un bundle CA PEM legible por el scheduler (prioridad `file`).                                                       |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |                | multisite | no       | **Datos del certificado de confianza:** Bundle CA en base64 o PEM en texto plano (prioridad `data`).                                                              |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`            | multisite | no       | **Profundidad de verificación SSL:** Profundidad de verificación en la cadena de certificados del upstream.                                                       |
+| `GRPC_SSL_CERT_PRIORITY`                | `file`         | multisite | no       | **Prioridad del certificado cliente:** Origen del certificado y la clave cliente, `file` o `data`.                                                                |
+| `GRPC_SSL_CERT`                         |                | multisite | no       | **Ruta del certificado cliente:** Certificado cliente PEM presentado al upstream para TLS mutuo (prioridad `file`).                                               |
+| `GRPC_SSL_CERT_DATA`                    |                | multisite | no       | **Datos del certificado cliente:** Certificado cliente en base64 o PEM en texto plano (prioridad `data`).                                                         |
+| `GRPC_SSL_KEY`                          |                | multisite | no       | **Ruta de la clave cliente:** Clave privada PEM correspondiente al certificado cliente (prioridad `file`). No debe estar cifrada.                                 |
+| `GRPC_SSL_KEY_DATA`                     |                | multisite | no       | **Datos de la clave cliente:** Clave privada cliente en base64 o PEM en texto plano (prioridad `data`).                                                           |
+| `GRPC_SSL_CRL`                          |                | multisite | no       | **Ruta de la CRL:** Lista de revocación PEM aplicada al verificar el upstream. Tiene prioridad sobre los datos de CRL.                                            |
+| `GRPC_SSL_CRL_DATA`                     |                | multisite | no       | **Datos de la CRL:** Lista de revocación en base64 o PEM en texto plano. Solo se usan si la ruta de la CRL está vacía.                                            |
+| `GRPC_SSL_PROTOCOLS`                    |                | multisite | no       | **Protocolos SSL del upstream:** Versiones TLS ofrecidas al upstream. Vacío mantiene el valor por defecto de NGINX.                                               |
+| `GRPC_SSL_CIPHERS`                      |                | multisite | no       | **Cifrados SSL del upstream:** Cadena de cifrados ofrecida al upstream. Vacío mantiene el valor por defecto de NGINX.                                             |
+| `GRPC_NEXT_UPSTREAM`                    |                | multisite | sí       | **Condiciones de siguiente upstream:** Valor para `grpc_next_upstream`.                                                                                           |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |                | multisite | sí       | **Timeout de siguiente upstream:** Valor para `grpc_next_upstream_timeout`.                                                                                       |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |                | multisite | sí       | **Intentos de siguiente upstream:** Valor para `grpc_next_upstream_tries`.                                                                                        |
+| `GRPC_AUTH_REQUEST`                     |                | multisite | sí       | **Auth request:** Valor para `auth_request`, para autenticar mediante un proveedor externo.                                                                       |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |                | multisite | sí       | **URL de inicio de sesión del auth request:** Destino de redirección cuando el auth request devuelve 401.                                                         |
+| `GRPC_AUTH_REQUEST_SET`                 |                | multisite | sí       | **Auth request set:** Lista separada por punto y coma de valores `auth_request_set`.                                                                              |
+| `GRPC_INCLUDES`                         |                | multisite | sí       | **Includes adicionales:** Archivos `include` separados por espacios dentro del bloque gRPC `location`.                                                            |
+| `GRPC_MAX_CLIENT_SIZE`                  |                | multisite | sí       | **Tamaño máximo del cuerpo:** Valor para `client_max_body_size` en esta location (`0` para ilimitado). Si está vacío se aplica el `MAX_CLIENT_SIZE` del servicio. |
+
+!!! tip "TLS mutuo hacia el upstream"
+    Hay que proporcionar el certificado cliente y su clave, y la clave no debe estar cifrada. El scheduler valida el par, lo cachea y lo distribuye a las instancias; si no valida, las directivas de certificado simplemente no se generan. Una CRL solo se aplica mientras la verificación del upstream está activa.
 
 !!! warning "ModSecurity en ubicaciones gRPC"
     Actualmente ModSecurity se desactiva automáticamente dentro de los bloques gRPC `location` generados por este plugin, porque ModSecurity no soporta de forma fiable los patrones de tráfico gRPC.
+
+!!! tip "Verificar el certificado del upstream"
+    `GRPC_SSL_VERIFY` solo surte efecto cuando hay un bundle CA disponible. Proporciónalo con `GRPC_SSL_TRUSTED_CERTIFICATE` (una ruta legible por el scheduler) o `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 o PEM en texto plano), y elige el origen con `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. El scheduler valida el bundle, lo cachea y lo distribuye a las instancias. Sin un bundle utilizable, la verificación permanece desactivada.
 
 !!! warning "Streams de larga duración y timeouts del core"
     Los RPC de larga duración o en streaming pueden requerir timeouts NGINX genéricos más altos que los valores globales por defecto. Los ajustes más comunes son `CLIENT_BODY_TIMEOUT` y `CLIENT_HEADER_TIMEOUT` en la configuración del plugin General.
@@ -2914,6 +2952,30 @@ El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HT
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
 
+=== "Upstream TLS verificado"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    GRPC_SSL_VERIFY: "yes"
+    GRPC_SSL_TRUSTED_CERTIFICATE: "/etc/ssl/certs/ca-certificates.crt"
+    GRPC_SSL_VERIFY_DEPTH: "2"
+    ```
+
+=== "Autenticación externa"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_AUTH_REQUEST: "/auth"
+    GRPC_AUTH_REQUEST_SIGNIN_URL: "https://sso.example.com/login"
+    GRPC_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_email $upstream_http_x_email"
+    GRPC_HEADERS: "x-forwarded-user $auth_user"
+    ```
 ## Gzip
 
 Compatibilidad con STREAM :x:
@@ -3535,6 +3597,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `USE_LIMIT_REQ`  | `yes`             | multisite | no       | **Habilitar Limitación de Solicitudes:** Establezca en `yes` para habilitar la función de limitación de tasa de solicitudes.                                                      |
     | `LIMIT_REQ_URL`  | `/`               | multisite | yes      | **Patrón de URL:** Patrón de URL (expresión regular PCRE) al que se aplicará el límite de tasa; use `/` para aplicar a todas las solicitudes.                                     |
     | `LIMIT_REQ_RATE` | `2r/s`            | multisite | yes      | **Límite de Tasa:** Tasa máxima de solicitudes en el formato `Nr/t`, donde N es el número de solicitudes y t es la unidad de tiempo: s (segundo), m (minuto), h (hora) o d (día). |
+
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
 
     !!! tip "Formato de Limitación de Tasa"
         El formato del límite de tasa se especifica como `Nr/t` donde:
@@ -4496,6 +4561,9 @@ El Scheduler valida el paquete de CA candidato completo y todas las CRL antes de
 | `MTLS_CRL`                     |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación.  |
 | `MTLS_CRL_DATA`                |                      | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                                                                                                                                                                      |
 
+!!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+    Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
 !!! tip "Configúralo una vez, distribuido en todas partes"
     Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
@@ -5305,17 +5373,17 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - **Manejo de Protocolos:** Soporte para HTTP, HTTPS, WebSockets y otros protocolos
         - **Interceptación de Errores:** Personalice las páginas de error para una experiencia de usuario consistente
 
-| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                                                                                                                                                         |
-| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                                                                                                                                           |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor. |
-| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                                                                                                                                            |
-| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                                                                                                                                                          |
-| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                                                                                                                                                       |
-| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente.                                                                                                                            |
-| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                                                                                                                                             |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                                                                                                                                                         |
+| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                     |
+| --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
+| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor.                                                                              |
+| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
+| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
+| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
+| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
+| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                  |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                              |
 
     BunkerWeb entrecomilla la ruta o expresión regular al generar la ubicación de NGINX, conservando las comillas literales, `#` y las barras invertidas de la expresión regular. Introduzca el valor sin añadir comillas de NGINX. Se mantienen las restricciones sobre espacios en blanco, `;`, `{` y `}`.
 
@@ -5372,6 +5440,15 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
 | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |                   | multisite | no       | **Ruta del certificado de confianza SSL:** Ruta a un paquete de CA en PEM (legible por el planificador) usado para verificar el upstream. |
 | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |                   | multisite | no       | **Datos del certificado de confianza SSL:** CA de confianza directamente como base64 o PEM (p. ej. mediante la interfaz web).             |
 | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`               | multisite | no       | **Profundidad de Verificación SSL:** Profundidad de verificación en la cadena de certificados del servidor upstream.                      |
+| `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`            | multisite | no       | **Prioridad del certificado cliente:** Origen del certificado y la clave cliente, `file` o `data`.                                        |
+| `REVERSE_PROXY_SSL_CERT`                         |                   | multisite | no       | **Ruta del certificado cliente:** Certificado cliente PEM presentado al upstream para TLS mutuo (prioridad `file`).                       |
+| `REVERSE_PROXY_SSL_CERT_DATA`                    |                   | multisite | no       | **Datos del certificado cliente:** Certificado cliente en base64 o PEM en texto plano (prioridad `data`).                                 |
+| `REVERSE_PROXY_SSL_KEY`                          |                   | multisite | no       | **Ruta de la clave cliente:** Clave privada PEM correspondiente al certificado cliente (prioridad `file`). No debe estar cifrada.         |
+| `REVERSE_PROXY_SSL_KEY_DATA`                     |                   | multisite | no       | **Datos de la clave cliente:** Clave privada cliente en base64 o PEM en texto plano (prioridad `data`).                                   |
+| `REVERSE_PROXY_SSL_CRL`                          |                   | multisite | no       | **Ruta de la CRL:** Lista de revocación PEM aplicada al verificar el upstream. Tiene prioridad sobre los datos de CRL.                    |
+| `REVERSE_PROXY_SSL_CRL_DATA`                     |                   | multisite | no       | **Datos de la CRL:** Lista de revocación en base64 o PEM en texto plano. Solo se usan si la ruta de la CRL está vacía.                    |
+| `REVERSE_PROXY_SSL_PROTOCOLS`                    |                   | multisite | no       | **Protocolos SSL del upstream:** Versiones TLS ofrecidas al upstream. Vacío mantiene el valor por defecto de NGINX.                       |
+| `REVERSE_PROXY_SSL_CIPHERS`                      |                   | multisite | no       | **Cifrados SSL del upstream:** Cadena de cifrados ofrecida al upstream. Vacío mantiene el valor por defecto de NGINX.                     |
 
     !!! info "Verificación de Certificados"
         Cuando `REVERSE_PROXY_SSL_VERIFY` se establece en `yes`, NGINX valida tanto la cadena de certificados del upstream como su nombre:
@@ -5524,6 +5601,9 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - Configure `PROXY_NO_CACHE` para evitar almacenar en caché contenido sensible o personalizado
         - Supervise las tasas de aciertos de la caché y ajuste la configuración en consecuencia
 
+!!! tip "TLS mutuo hacia el upstream"
+    Hay que proporcionar el certificado cliente y su clave, y la clave no debe estar cifrada. El scheduler valida el par, lo cachea y lo distribuye a las instancias; si no valida, las directivas de certificado simplemente no se generan. Una CRL solo se aplica mientras la verificación del upstream está activa.
+
 !!! danger "Usuarios de Docker Compose - Variables de NGINX"
     Al usar Docker Compose con variables de NGINX en sus configuraciones, debe escapar el signo de dólar (`$`) usando signos de dólar dobles (`$$`). Esto se aplica a todos los ajustes que contienen variables de NGINX como `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
 
@@ -5626,7 +5706,6 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
     REVERSE_PROXY_HOST_2: "http://auth-service:8080"
     REVERSE_PROXY_URL_2: "/auth"
     ```
-
 ## Reverse scan
 
 Compatibilidad con STREAM :white_check_mark:
@@ -6414,6 +6493,9 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
+
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
 
 === "Cabecera"
     **Qué hace esto:** Pone en la lista blanca las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Útil para una sonda o pasarela de confianza que pueda enviar un secreto compartido.

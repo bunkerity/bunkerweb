@@ -42,7 +42,7 @@ Elige el sabor que encaje con tu entorno.
     services:
       bunkerweb:
         # Nombre que usará el scheduler para identificar la instancia
-        image: bunkerity/bunkerweb:1.6.15-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de poner el nombre de instancia correcto
@@ -77,7 +77,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.15-rc3
+        image: bunkerity/bunkerweb-api:1.6.16-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -136,7 +136,7 @@ Elige el sabor que encaje con tu entorno.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "Todo en uno"
 
     ```bash
     docker run -d \
@@ -144,7 +144,7 @@ Elige el sabor que encaje con tu entorno.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.16-rc1
     ```
 
 === "Linux"
@@ -394,7 +394,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `GET /configs`: lista snippets (servicio por defecto `global`); `with_data=true` incrusta contenido imprimible.
   - `POST /configs`, `POST /configs/upload`: crea snippets vía JSON o subida de archivo.
   - `GET /configs/{service}/{type}/{name}`: obtiene snippet; `with_data=true` para el contenido.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: actualizar o mover snippets gestionados por la API.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: actualizar o mover snippets gestionados por la API. Mover exige además `config_update` en el servicio de destino (`global` cuenta como servicio); un cuerpo JSON sin `service` conserva el servicio actual.
   - `DELETE /configs` o `DELETE /configs/{service}/{type}/{name}`: eliminar snippets gestionados por la API; los gestionados por plantillas se omiten.
   - Tipos soportados: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks de CRS/plug-in.
 - **Bans**
@@ -408,7 +408,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 - **Cache (artefactos de jobs)**
   - `GET /cache`: lista archivos de caché con filtros (`service`, `plugin`, `job_name`); `with_data=true` incrusta contenido imprimible.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: obtiene/descarga un archivo de caché específico (`download=true`).
-  - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché y notifica al scheduler.
+  - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché. Solo se notifica al scheduler para un plugin cuya fila se borró de verdad; un `plugin` que no posee el job se rechaza y no se borra nada.
 - **Jobs**
   - `GET /jobs`: lista jobs, horarios y resúmenes de caché.
   - `POST /jobs/run`: marca plugins como cambiados para disparar los jobs asociados.

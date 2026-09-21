@@ -1,10 +1,12 @@
 from contextlib import suppress
+from copy import copy
 import fcntl
 from gzip import GzipFile
 from hashlib import new as new_hash
 from ipaddress import ip_address
 from inspect import signature
 from io import BytesIO
+import os
 from os import (
     O_CREAT,
     O_RDWR,
@@ -27,6 +29,7 @@ from platform import machine
 from re import compile as re_compile
 import tarfile
 from tarfile import open as tar_open
+from stat import S_ISDIR, S_ISREG
 from threading import Lock
 from time import monotonic, sleep
 from typing import Dict, List, Optional, Tuple, Union, Any
@@ -361,12 +364,12 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
     return result
 
 
-def _validate_tar_members(members, *, allow_symlinks=False):
+def _validate_tar_members(members, *, links="none"):
     """Pre-validate tar members before extraction (defense-in-depth against CVE-2025-4517).
 
     Checks archive metadata only — no disk access — so PATH_MAX symlink chain attacks are impossible.
-    When allow_symlinks is False, all symlinks/hardlinks are rejected (matching filter="data").
-    When allow_symlinks is True, symlinks are permitted but their targets are still validated.
+    When links is "none", all symlinks/hardlinks are rejected. When links is "contained",
+    symlinks and hardlinks are permitted when their targets remain inside the destination.
     """
     for member in members:
         # Block absolute paths
@@ -380,66 +383,178 @@ def _validate_tar_members(members, *, allow_symlinks=False):
             raise ValueError(f"Tar member {member.name!r} is a device or pipe")
         # Check symlinks/hardlinks
         if member.issym() or member.islnk():
-            if not allow_symlinks:
+            if links == "none":
                 raise ValueError(f"Tar member {member.name!r} is a symlink/hardlink (not permitted)")
-            # Even when symlinks are allowed, validate their targets
             if Path(member.linkname).is_absolute():
                 raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
             # Normalize to collapse valid .. segments, then check if any remain (= escaping)
-            # TarFile resolves symlinks relative to the member's parent but hardlinks relative
-            # to the extraction root.
             link_parent = Path(member.name).parent if member.issym() else Path()
             normalized = normpath(path_join(str(link_parent), member.linkname))
             if ".." in Path(normalized).parts:
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
 
 
-def _native_tar_filter(tar_filter):
-    if callable(tar_filter):
-        return tar_filter
-    if isinstance(tar_filter, str) and tar_filter in ("data", "tar"):
-        return getattr(tarfile, f"{tar_filter}_filter", None)
-    raise ValueError(f"Unsupported tar filter: {tar_filter!r}")
-
-
 def _supports_tar_filter(tar) -> bool:
     try:
-        return "filter" in signature(tar.extractall).parameters
+        return "filter" in signature(tar.extract).parameters
     except (TypeError, ValueError):
         return False
 
 
-def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
-    """Extract a tar archive safely with pre-validation and a native filter when available.
+def _is_contained(candidate, destination):
+    return os.path.commonpath([candidate, destination]) == destination
 
-    Pre-validates all members before extraction to defend against CVE-2025-4517
-    (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
-    as additional defense-in-depth.
 
-    Use tar_filter="tar" instead of "data" when symlinks must be preserved
-    (e.g. Let's Encrypt certs). Use tar_filter="auto" to let the helper pick
-    "tar" only when the archive actually contains symlink/hardlink members,
-    and fall back to the stricter "data" filter otherwise — useful for
-    restoring trusted cache archives that may or may not contain links
-    depending on the plugin.
+def _has_symlinked_parent(parent, path):
+    relative = os.path.relpath(parent, path)
+    if relative == os.curdir:
+        return False
+    current = path
+    for part in Path(relative).parts:
+        current = os.path.join(current, part)
+        if os.path.lexists(current) and os.path.islink(current):
+            return True
+    return False
 
-    Native filters are selected by their runtime attributes and the actual
-    extractall signature; older or partially backported runtimes use the
-    pre-validated extraction path without retrying unrelated errors.
-    """
-    members_to_check = kwargs.get("members")
-    if members_to_check is None:
-        members_to_check = tar.getmembers()
-    if tar_filter == "auto":
-        tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
-    _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
-    native_filter = _native_tar_filter(tar_filter)
-    if native_filter is not None and _supports_tar_filter(tar):
-        tar.extractall(path, filter=native_filter, **kwargs)
-    elif callable(tar_filter):
-        raise TypeError("Custom tar filter requires native tar filter support")
-    else:
-        tar.extractall(path, **kwargs)
+
+def _resolve_path(path):
+    """Resolve links component-by-component so a link followed by '..' cannot hide an escape."""
+    path = os.fspath(path)
+    if not os.path.isabs(path):
+        path = os.path.join(Path.cwd(), path)
+    pending = list(Path(path).parts)
+    resolved = []
+    link_count = 0
+    while pending:
+        part = pending.pop(0)
+        if part in (os.curdir, os.sep):
+            if part == os.sep:
+                resolved = [os.sep]
+            continue
+        if part == os.pardir:
+            if len(resolved) > 1:
+                resolved.pop()
+            continue
+        candidate = os.path.join(*resolved, part)
+        if os.path.islink(candidate):
+            link_count += 1
+            if link_count > 40:
+                raise OSError("too many symbolic links")
+            target = os.readlink(candidate)
+            if os.path.isabs(target):
+                resolved = [os.sep]
+            pending = list(Path(target).parts) + pending
+            continue
+        resolved.append(part)
+    return os.path.join(*resolved) if resolved != [os.sep] else os.sep
+
+
+def _verify_tar_tree(path, links, destination, members):
+    relative = "."
+
+    try:
+        for member in members:
+            relative = member.name
+            entry = os.path.join(path, member.name)
+            mode = os.lstat(entry).st_mode
+            if os.path.islink(entry):
+                if links == "none":
+                    raise ValueError(f"Tar member {relative!r} is a symlink (not permitted)")
+                target = os.path.join(path, os.path.dirname(member.name), member.linkname)
+                if not _is_contained(_resolve_path(target), destination):
+                    raise ValueError(f"Tar member {relative!r} links outside target directory")
+            elif member.islnk():
+                target = os.path.join(path, member.linkname)
+                if not _is_contained(_resolve_path(target), destination):
+                    raise ValueError(f"Tar member {relative!r} links outside target directory")
+            elif not (S_ISDIR(mode) or S_ISREG(mode)):
+                raise ValueError(f"Tar member {relative!r} is an unexpected entry type")
+    except (OSError, ValueError) as error:
+        if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+            raise
+        raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
+
+
+def safe_tar_extractall(tar, path, *, links="none", **kwargs):
+    """Extract a tar archive with runtime-independent path and link containment checks."""
+    if links not in ("none", "contained"):
+        raise ValueError(f"Unsupported links policy: {links!r}")
+    if "tar_filter" in kwargs:
+        raise TypeError("safe_tar_extractall() got an unexpected keyword argument 'tar_filter'")
+
+    members = kwargs.pop("members", None)
+    numeric_owner = kwargs.pop("numeric_owner", False)
+    members = list(tar.getmembers() if members is None else members)
+    if kwargs:
+        name = next(iter(kwargs))
+        raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {name!r}")
+    _validate_tar_members(members, links=links)
+
+    destination = os.path.realpath(path)
+    supports_filter = _supports_tar_filter(tar)
+    native_filter = getattr(tarfile, "data_filter", None) if supports_filter else None
+    extract_parameters = signature(tar.extract).parameters
+    extract_kwargs = {}
+    if "numeric_owner" in extract_parameters:
+        extract_kwargs["numeric_owner"] = numeric_owner
+    if native_filter is not None:
+        extract_kwargs["filter"] = native_filter
+
+    directories = []
+    for member in members:
+        try:
+            member_path = os.path.join(path, member.name)
+            member_parent = os.path.join(path, os.path.dirname(member.name))
+            if not _is_contained(os.path.realpath(member_parent), destination):
+                raise ValueError(f"Tar member {member.name!r} parent escapes target directory")
+            if _has_symlinked_parent(member_parent, path):
+                raise ValueError(f"Tar member {member.name!r} writes through a symlinked parent")
+            if os.path.lexists(member_path) and os.path.islink(member_path):
+                raise ValueError(f"Tar member {member.name!r} replaces an existing symlink")
+            if member.issym() and not _is_contained(os.path.realpath(os.path.join(path, os.path.dirname(member.name), member.linkname)), destination):
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            if member.islnk() and not _is_contained(os.path.realpath(os.path.join(path, member.linkname)), destination):
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            extract_member = member
+            if member.isdir():
+                extract_member = copy(member)
+                extract_member.mode = 0o700
+                directories.append((member, member_path))
+            tar.extract(extract_member, path, **extract_kwargs)
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be extracted: {error}") from error
+
+    _verify_tar_tree(path, links, destination, members)
+    for member, member_path in sorted(directories, key=lambda item: item[0].name, reverse=True):
+        try:
+            try:
+                is_directory = S_ISDIR(os.lstat(member_path).st_mode)
+            except FileNotFoundError:
+                continue
+            if not is_directory:
+                continue
+            # Keep the archive's directory mode (0o700 on the certbot key directories) minus
+            # setuid/setgid/sticky and group/other write: data_filter drops directory modes and
+            # the runtimes without it would apply the raw mode.
+            directory_mode = member.mode & 0o755 if member.mode is not None else None
+            if native_filter is not None:
+                attributes = native_filter(member, path)
+                if attributes is None:
+                    continue
+                if attributes.mode is None and directory_mode is not None:
+                    attributes = attributes.replace(mode=directory_mode, deep=False)
+            else:
+                attributes = copy(member)
+                attributes.mode = directory_mode
+            tar.chown(attributes, member_path, numeric_owner)
+            tar.utime(attributes, member_path)
+            tar.chmod(attributes, member_path)
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
 def safe_zip_extractall(zf, path):

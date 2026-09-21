@@ -105,16 +105,16 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.15-rc3
+                            image: bunkerity/bunkerweb:1.6.16-rc1
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                            image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                            image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                            image: bunkerity/bunkerweb-ui:1.6.16-rc1
                             ...
                     ```
 
@@ -132,7 +132,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
         4. **Vérifier la base de données **: vérifiez que la mise à niveau de la base de données a réussi en vérifiant les données et les configurations dans le nouveau conteneur de base de données.
 
-=== "All-In-One (AIO)"
+=== "Tout-en-un"
 
     L'[image All-In-One](integrations.md#all-in-one-aio-image) regroupe BunkerWeb, le Scheduler, l'interface Web et, facultativement, l'API, Redis et CrowdSec dans un **seul conteneur** nommé `bunkerweb-aio` par défaut. Tout l'état persistant — base SQLite, cache, configurations personnalisées, plugins, sauvegardes et données Redis/CrowdSec — réside dans le volume `/data`; la mise à niveau consiste donc à remplacer le conteneur en conservant ce volume.
 
@@ -170,7 +170,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
             4. **Téléchargez la nouvelle image** :
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                 ```
 
             5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
@@ -181,7 +181,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                 ```
 
         === "Docker Compose"
@@ -190,7 +190,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                        image: bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                         ...
                 ```
 
@@ -313,20 +313,20 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
             Exemples:
 
             ```bash
-            # Upgrade to 1.6.15~rc3 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.15~rc3
+            # Upgrade to 1.6.16~rc1 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.16~rc1
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --no-auto-backup -y
             ```
 
             !!! warning "Sauter les sauvegardes"
@@ -406,7 +406,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -432,7 +432,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.16~rc1
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -578,7 +578,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "Tout-en-un"
 
     Le Scheduler s'exécute dans le conteneur `bunkerweb-aio`, les commandes de restauration y sont donc exécutées directement. Le volume `/data` (base de données, configurations, plugins, sauvegardes) est conservé pendant toute l'opération — seule l'image du conteneur est restaurée à la version précédente.
 
@@ -904,16 +904,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.15-rc3
+                        image: bunkerity/bunkerweb:1.6.16-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.16-rc1
                         ...
                 ```
 
@@ -948,7 +948,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -974,7 +974,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.16~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :

@@ -104,16 +104,16 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.15-rc3
+                            image: bunkerity/bunkerweb:1.6.16-rc1
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                            image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                            image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                            image: bunkerity/bunkerweb-ui:1.6.16-rc1
                             ...
                     ```
 
@@ -131,7 +131,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
         4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     The [All-In-One image](integrations.md#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
 
@@ -169,7 +169,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             4. **Pull the new image**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                 ```
 
             5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -180,7 +180,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                 ```
 
         === "Docker Compose"
@@ -189,7 +189,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc3
+                        image: bunkerity/bunkerweb-all-in-one:1.6.16-rc1
                         ...
                 ```
 
@@ -312,20 +312,20 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             Examples:
 
             ```bash
-            # Upgrade to 1.6.15~rc3 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.15~rc3
+            # Upgrade to 1.6.16~rc1 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.16~rc1
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc3 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.16~rc1 --no-auto-backup -y
             ```
 
             !!! warning "Skipping backups"
@@ -405,7 +405,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -431,7 +431,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.16~rc1
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -578,7 +578,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
         docker compose up -d
         ```
 
-=== "All-In-One (AIO)"
+=== "All-in-one"
 
     The Scheduler runs inside the `bunkerweb-aio` container, so the restore commands are executed there directly. The `/data` volume (database, configs, plugins, backups) is preserved throughout — only the container image is rolled back.
 
@@ -904,16 +904,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.15-rc3
+                        image: bunkerity/bunkerweb:1.6.16-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.15-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.16-rc1
                         ...
                 ```
 
@@ -948,7 +948,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -974,7 +974,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.16~rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

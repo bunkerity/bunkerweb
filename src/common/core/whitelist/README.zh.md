@@ -83,6 +83,9 @@
     | `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
 === "请求头"
     **功能说明：** 将携带指定请求头的请求列入白名单，按名称匹配，并可选地用 PCRE 正则匹配其值。适用于能够发送共享密钥的可信探针或网关。
 
