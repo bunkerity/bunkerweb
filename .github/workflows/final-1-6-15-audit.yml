@@ -12,7 +12,7 @@ permissions:
   packages: read
 
 concurrency:
-  group: final-1-6-15-audit-\${{ github.ref }}
+  group: final-1-6-15-audit-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -64,16 +64,16 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Verify exact-source dev images
         run: |
           set -euo pipefail
           mkdir -p audit-results
           for image in bunkerweb scheduler autoconf ui api all-in-one; do
-            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
             docker pull "$ref"
-            docker image inspect "$ref" > "audit-results/image-function () { [native code] }.json"
+            docker image inspect "$ref" > "audit-results/image-${image}.json"
             revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")"
             test "$revision" = "$AUDIT_SOURCE_SHA" || { echo "Image source mismatch: $ref => $revision"; exit 1; }
           done
@@ -114,22 +114,22 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Verify exact images
         run: |
           set -euo pipefail
           mkdir -p audit-results
           for image in bunkerweb scheduler; do
-            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
             docker pull "$ref"
             revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")"
             test "$revision" = "$AUDIT_SOURCE_SHA"
-            docker tag "$ref" "function () { [native code] }-tests"
+            docker tag "$ref" "${image}-tests"
           done
       - name: Run existing core suite unchanged
         env:
-          SUITE: \${{ matrix.suite }}
+          SUITE: ${{ matrix.suite }}
         run: |
           set -euo pipefail
           cd "tests/core/$SUITE"
@@ -145,7 +145,7 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: final-core-\${{ matrix.suite }}
+          name: final-core-${{ matrix.suite }}
           path: audit-results/
           retention-days: 3
           if-no-files-found: error
@@ -160,8 +160,8 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Prepare old audit driver against current installed code
         run: |
           set -euo pipefail
@@ -240,8 +240,8 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Real Redis timeout/OOM/logout recovery
         run: |
           set -euo pipefail
@@ -280,8 +280,8 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Run live scheduler/API/Redis/two-worker regression matrix
         working-directory: audit_final
         run: |
@@ -333,8 +333,8 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Install HTTP3 client
         run: |
           python3 -m venv "$RUNNER_TEMP/audit-client"
@@ -376,8 +376,8 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Real CrowdSec 1.8 LAPI live/stream/management checks
         working-directory: audit_final
         run: |
@@ -420,17 +420,17 @@ jobs:
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
         with:
           registry: ghcr.io
-          username: \${{ github.actor }}
-          password: \${{ github.token }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Verify exact UI stack images
         run: |
           set -euo pipefail
           mkdir -p audit-results
           for image in bunkerweb scheduler ui; do
-            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
             docker pull "$ref"
             test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = "$AUDIT_SOURCE_SHA"
-            docker tag "$ref" "function () { [native code] }-tests"
+            docker tag "$ref" "${image}-tests"
           done
           python3 - <<'PY'
           from pathlib import Path
@@ -440,7 +440,7 @@ jobs:
           PY
       - name: Existing browser assertions
         env:
-          PAGE: \${{ matrix.page }}
+          PAGE: ${{ matrix.page }}
           MODE: dev
         run: |
           set -euo pipefail
@@ -457,7 +457,7 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: final-browser-\${{ matrix.page }}
+          name: final-browser-${{ matrix.page }}
           path: audit-results/
           retention-days: 3
           if-no-files-found: error
