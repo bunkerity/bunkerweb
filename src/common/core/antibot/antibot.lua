@@ -20,6 +20,7 @@ local tonumber = tonumber
 local tostring = tostring
 local get_session = utils.get_session
 local get_deny_status = utils.get_deny_status
+local parse_duration = utils.parse_duration
 local rand = utils.rand
 local now = ngx.now
 local captcha_new = captcha.new
@@ -544,14 +545,18 @@ function antibot:check_session()
 	-- Check if still valid
 	local time = now()
 	local resolved = self.session_data.resolved
-	if resolved and (time_valid > time or time - time_valid > tonumber(self.variables["ANTIBOT_TIME_VALID"])) then
+	if
+		resolved
+		and (time_valid > time or time - time_valid > parse_duration(self.variables["ANTIBOT_TIME_VALID"], "s"))
+	then
 		self.session_data = {}
 		self:set_session_data()
 		return "need new resolve"
 	end
 	-- Check if new prepare is needed
 	if
-		not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"]))
+		not resolved
+		and (time_resolve > time or time - time_resolve > parse_duration(self.variables["ANTIBOT_TIME_RESOLVE"], "s"))
 	then
 		self.session_data = {}
 		self:set_session_data()

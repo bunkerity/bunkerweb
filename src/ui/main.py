@@ -24,6 +24,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask_compress import Compress
 from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
@@ -31,7 +32,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import is_newer_version_available  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -173,6 +174,13 @@ _restart_workers_lock = Lock()
 _restart_workers_future = None
 _restart_workers_next_allowed = 0.0
 RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+BW_VERSION = get_version()
+
+
+def _static_cache_control(version_arg: str | None, version: str) -> str | None:
+    if version_arg == version:
+        return "public, max-age=31536000, immutable"
+    return None
 
 
 def _shutdown_executors():
@@ -695,6 +703,30 @@ with app.app_context():
     sess = Session()
     sess.init_app(app)
 
+    app.config.update(
+        COMPRESS_ALGORITHM=["br", "gzip"],
+        # Static files are streamed responses and use this list; its default has no gzip.
+        COMPRESS_ALGORITHM_STREAMING=["br", "gzip"],
+        COMPRESS_BR_LEVEL=4,
+        COMPRESS_LEVEL=6,
+        COMPRESS_MIN_SIZE=1024,
+        # Do not compress authenticated HTML: it carries CSRF tokens and echoed user input.
+        COMPRESS_MIMETYPES=[
+            "text/css",
+            "text/javascript",
+            "application/javascript",
+            "application/json",
+            "application/geo+json",
+            "image/svg+xml",
+            "font/woff",
+            "font/woff2",
+            "font/ttf",
+            "application/vnd.ms-fontobject",
+            "text/plain",
+        ],
+    )
+    Compress(app)
+
     # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
     # dies or fills up after this point makes every request raise. Same parameters as the
     # interface it replaces, plus the local cache it falls back to.
@@ -748,6 +780,8 @@ with app.app_context():
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
+                if endpoint == "static" and not app.debug:
+                    values.setdefault("v", BW_VERSION)
                 if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
@@ -1339,7 +1373,7 @@ def before_request():
             pro_services=metadata["pro_services"],
             pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
             pro_overlapped=pro_overlapped,
-            plugins=BW_CONFIG.get_plugins(),
+            plugins=BW_CONFIG.get_plugins(metadata=metadata),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
@@ -1438,7 +1472,10 @@ def set_security_headers(response):
     # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
     # cannot render the panel after a logout. Static assets keep theirs, and a route that already
     # set its own value wins.
-    if not is_static_path(request.path):
+    cache_control = _static_cache_control(request.args.get("v"), BW_VERSION) if is_static_path(request.path) else None
+    if cache_control:
+        response.headers["Cache-Control"] = cache_control
+    elif not is_static_path(request.path):
         response.headers.setdefault("Cache-Control", "no-store")
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:

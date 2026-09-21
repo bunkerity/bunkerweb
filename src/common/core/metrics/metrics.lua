@@ -54,6 +54,7 @@ local get_country = utils.get_country
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
 local is_oom_error = utils.is_oom_error
+local parse_duration = utils.parse_duration
 local encode = cjson.encode
 local decode = cjson.decode
 
@@ -768,7 +769,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
 	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()

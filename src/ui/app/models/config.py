@@ -22,7 +22,7 @@ class Config:
         # entry per _type. Only the with_data=False catalog is cached.
         self.__plugins_cache: dict = {}
 
-    def _plugins_cache_version(self):
+    def _plugins_cache_version(self, metadata=None):
         """A value that changes only when the plugin catalog itself changes
         (plugins installed/removed/updated/reloaded), NOT when setting values are
         edited. Returns None if it can't be determined, in which case get_plugins
@@ -35,10 +35,11 @@ class Config:
         A future "hot-reload core plugins without restart" feature would need a
         signal added here.
         """
-        try:
-            metadata = self.__db.get_metadata()
-        except Exception:
-            return None
+        if metadata is None:
+            try:
+                metadata = self.__db.get_metadata()
+            except Exception:
+                return None
         # get_metadata swallows read errors and returns its default dict flagged
         # with "default": don't cache against an unreliable version, recompute.
         if metadata.get("default"):
@@ -115,11 +116,11 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False, metadata=None) -> dict:
         # with_data payloads are large and only requested on specific user actions
         # (plugin/template pages), never on the per-request render path, so they are
         # not cached. The hot path is get_plugins() (with_data=False) on every request.
-        version = None if with_data else self._plugins_cache_version()
+        version = None if with_data else self._plugins_cache_version(metadata)
 
         db_plugins = None
         if version is not None:

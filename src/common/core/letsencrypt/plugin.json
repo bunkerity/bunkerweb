@@ -62,30 +62,30 @@
     },
     "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
       "context": "multisite",
-      "default": "2",
-      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot.",
+      "default": "2s",
+      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-retry-delay",
       "label": "ZeroSSL API Retry Delay",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
       "context": "multisite",
-      "default": "5",
-      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot.",
+      "default": "5s",
+      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-connect-timeout",
       "label": "ZeroSSL API Connect Timeout",
-      "regex": "^[1-9]\\d*$",
-      "type": "number"
+      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
       "context": "multisite",
-      "default": "20",
-      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot.",
+      "default": "20s",
+      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-max-time",
       "label": "ZeroSSL API Max Time",
-      "regex": "^[1-9]\\d*$",
-      "type": "number"
+      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_CHALLENGE": {
       "context": "multisite",
@@ -142,10 +142,10 @@
     "LETS_ENCRYPT_DNS_PROPAGATION": {
       "context": "multisite",
       "default": "default",
-      "help": "The time to wait for DNS propagation in seconds for DNS challenges.",
+      "help": "The time to wait for DNS propagation in seconds for DNS challenges. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-dns-propagation",
       "label": "DNS Propagation",
-      "regex": "^(default|\\d+)$",
+      "regex": "^(default|\\d+(ms?|[shdwMy])?)$",
       "type": "text"
     },
     "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {

@@ -49,7 +49,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -220,7 +220,7 @@ class Database:
 
         request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
         try:
-            self._request_retry_delay = max(0.0, float(request_retry_delay))
+            self._request_retry_delay = max(0.0, parse_duration(request_retry_delay, "s"))
         except ValueError:
             self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
@@ -325,19 +325,24 @@ class Database:
 
         # Pool timeout
         pool_timeout = getenv("DATABASE_POOL_TIMEOUT", str(DEFAULT_POOL_TIMEOUT))
-        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
-            pool_timeout = int(pool_timeout)
-        else:
+        try:
+            pool_timeout = parse_duration(pool_timeout, "s")
+            if pool_timeout < 0:
+                raise ValueError("negative")
+        except ValueError:
             self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value ({DEFAULT_POOL_TIMEOUT})")
             pool_timeout = DEFAULT_POOL_TIMEOUT
 
         # Pool recycle
         pool_recycle = getenv("DATABASE_POOL_RECYCLE", str(DEFAULT_POOL_RECYCLE))
-        try:
-            pool_recycle = int(pool_recycle)
-        except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
-            pool_recycle = DEFAULT_POOL_RECYCLE
+        if pool_recycle.strip() == "-1":
+            pool_recycle = -1
+        else:
+            try:
+                pool_recycle = parse_duration(pool_recycle, "s")
+            except ValueError:
+                self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
+                pool_recycle = DEFAULT_POOL_RECYCLE
 
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
@@ -386,11 +391,11 @@ class Database:
             _exit(1)
 
         DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
-        if not DATABASE_RETRY_TIMEOUT.isdigit():
+        try:
+            DATABASE_RETRY_TIMEOUT = parse_duration(DATABASE_RETRY_TIMEOUT, "s")
+        except ValueError:
             self.logger.warning(f"Invalid DATABASE_RETRY_TIMEOUT value: {DATABASE_RETRY_TIMEOUT}, using default value (60)")
-            DATABASE_RETRY_TIMEOUT = "60"
-
-        DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
+            DATABASE_RETRY_TIMEOUT = 60
 
         current_time = datetime.now().astimezone()
         not_connected = True

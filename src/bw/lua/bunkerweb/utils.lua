@@ -58,6 +58,8 @@ local BAN_LOCAL_CACHE_TTL = 30
 
 local utils = {}
 
+utils.parse_duration = require("bunkerweb.duration").parse_duration
+
 math.randomseed(os.time())
 
 utils.get_variable = function(variable, site_search, ctx)

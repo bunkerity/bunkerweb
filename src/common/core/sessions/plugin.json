@@ -34,30 +34,30 @@
     },
     "SESSIONS_IDLING_TIMEOUT": {
       "context": "global",
-      "default": "1800",
-      "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+      "default": "30m",
+      "help": "Maximum time (in seconds) of inactivity before the session is invalidated. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "sessions-idling-timeout",
       "label": "Sessions idling timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "SESSIONS_ROLLING_TIMEOUT": {
       "context": "global",
-      "default": "3600",
-      "help": "Maximum time (in seconds) before a session must be renewed.",
+      "default": "1h",
+      "help": "Maximum time (in seconds) before a session must be renewed. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "sessions-rolling-timeout",
       "label": "Sessions rolling timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "SESSIONS_ABSOLUTE_TIMEOUT": {
       "context": "global",
-      "default": "86400",
-      "help": "Maximum time (in seconds) before a session is destroyed.",
+      "default": "1d",
+      "help": "Maximum time (in seconds) before a session is destroyed. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "sessions-absolute-timeout",
       "label": "Sessions absolute timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "SESSIONS_CHECK_IP": {
       "context": "global",

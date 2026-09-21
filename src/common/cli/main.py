@@ -10,6 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import parse_duration  # type: ignore
 from logger import getLogger  # type: ignore
 from CLI import CLI
 
@@ -30,10 +31,10 @@ if __name__ == "__main__":
         parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
         parser_ban.add_argument("ip", type=str, help="IP address to ban")
 
-        ban_time = getenv("BAD_BEHAVIOR_BAN_TIME", "86400")
-        if not ban_time.isdigit():
-            ban_time = "86400"
-        ban_time = int(ban_time)
+        try:
+            ban_time = int(parse_duration(getenv("BAD_BEHAVIOR_BAN_TIME", "1d"), "s"))
+        except ValueError:
+            ban_time = 86400
 
         parser_ban.add_argument(
             "-exp",

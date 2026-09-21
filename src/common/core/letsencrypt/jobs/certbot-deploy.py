@@ -12,6 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
+from common_utils import parse_duration  # type: ignore
 from logger import getLogger  # type: ignore
 from API import API  # type: ignore
 
@@ -39,11 +40,11 @@ try:
 
     reload_min_timeout = getenv("RELOAD_MIN_TIMEOUT", "5")
 
-    if not reload_min_timeout.isdigit():
-        LOGGER.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+    try:
+        reload_min_timeout = parse_duration(reload_min_timeout, "s")
+    except ValueError:
+        LOGGER.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
         reload_min_timeout = 5
-
-    reload_min_timeout = int(reload_min_timeout)
 
     for instance in instances:
         api = API.from_instance(instance)

@@ -13,7 +13,7 @@ from regex import compile as re_compile
 from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, flash
 
-from common_utils import get_redis_client as get_common_redis_client, getenv_bool  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, getenv_bool, parse_duration  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
@@ -323,8 +323,8 @@ def get_default_ban_time(config: dict, server_name: str) -> int:
         if server_name and server_name not in ("_", ""):
             service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
             if service_key in config:
-                return int(config[service_key])
-        return int(config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+                return int(parse_duration(config[service_key], "s"))
+        return int(parse_duration(config.get("BAD_BEHAVIOR_BAN_TIME", "1d"), "s"))
     except (AttributeError, TypeError, ValueError):
         return 86400
 

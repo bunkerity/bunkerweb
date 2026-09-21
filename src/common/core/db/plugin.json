@@ -44,12 +44,12 @@
     },
     "DATABASE_MAX_SESSION_AGE_DAYS": {
       "context": "global",
-      "default": "14",
-      "help": "The maximum age in days for UI user sessions before they are purged.",
+      "default": "14d",
+      "help": "The maximum age in days for UI user sessions before they are purged. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is days.",
       "id": "database-max-session-age-days",
       "label": "The maximum age in days for UI user sessions",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "DATABASE_POOL_SIZE": {
       "context": "global",
@@ -71,21 +71,21 @@
     },
     "DATABASE_POOL_TIMEOUT": {
       "context": "global",
-      "default": "5",
-      "help": "The number of seconds to wait before giving up on getting a connection from the pool.",
+      "default": "5s",
+      "help": "The number of seconds to wait before giving up on getting a connection from the pool. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-pool-timeout",
       "label": "Database pool timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "DATABASE_POOL_RECYCLE": {
       "context": "global",
-      "default": "1800",
-      "help": "The number of seconds after which a connection is automatically recycled. Set to -1 to disable.",
+      "default": "30m",
+      "help": "The number of seconds after which a connection is automatically recycled. Set to -1 to disable. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-pool-recycle",
       "label": "Database pool recycle",
-      "regex": "^-?\\d+$",
-      "type": "number"
+      "regex": "^(-1|\\d+(ms?|[shdwMy])?)$",
+      "type": "text"
     },
     "DATABASE_POOL_PRE_PING": {
       "context": "global",
@@ -108,12 +108,12 @@
     },
     "DATABASE_RETRY_TIMEOUT": {
       "context": "global",
-      "default": "60",
-      "help": "The maximum number of seconds to wait for the database to be available on startup.",
+      "default": "1m",
+      "help": "The maximum number of seconds to wait for the database to be available on startup. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-retry-timeout",
       "label": "Database retry timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "DATABASE_REQUEST_RETRY_ATTEMPTS": {
       "context": "global",
@@ -126,11 +126,11 @@
     },
     "DATABASE_REQUEST_RETRY_DELAY": {
       "context": "global",
-      "default": "0.25",
-      "help": "The delay in seconds between retry attempts for transient database errors.",
+      "default": "250ms",
+      "help": "The delay in seconds between retry attempts for transient database errors. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-request-retry-delay",
       "label": "Database request retry delay",
-      "regex": "^\\d+(\\.\\d+)?$",
+      "regex": "^\\d+(\\.\\d+)?(ms?|[shdwMy])?$",
       "type": "text"
     }
   },

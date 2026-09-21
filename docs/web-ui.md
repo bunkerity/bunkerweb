@@ -2,7 +2,7 @@
 
 ## Role of the Web UI
 
-The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy.
+The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy. It compresses responses and serves versioned static assets with a long-lived cache header, so direct access on a trusted network is not penalized.
 
 !!! warning "Keep it behind BunkerWeb"
     The UI can change configuration, run jobs, and deploy custom snippets. Keep it on a trusted network, route it through BunkerWeb, and gate it with strong credentials and 2FA.

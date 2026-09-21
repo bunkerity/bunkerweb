@@ -30,7 +30,7 @@ Follow these steps to configure and use the Reverse Scan feature:
 | ---------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------- |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | no       | **Enable Reverse Scan:** Set to `yes` to enable scanning of clients ports.    |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | no       | **Ports to Scan:** Space-separated list of ports to check on the client side. |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Scan Timeout:** Maximum time in milliseconds allowed for scanning a port.   |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | no       | **Scan Timeout:** Maximum time in milliseconds allowed for scanning a port. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 
 !!! warning "Performance Considerations"
     Scanning multiple ports can add latency to client connections. Use an appropriate timeout value and limit the number of ports scanned to maintain good performance.
