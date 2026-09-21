@@ -1,0 +1,463 @@
+name: Final 1.6.15 release audit (no publish)
+
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921]
+    paths:
+      - .github/workflows/final-1-6-15-audit.yml
+      - audit_final/**
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: final-1-6-15-audit-\${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+
+jobs:
+  source-release-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prove production source is exactly audited dev
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          printf '%s\n' "$AUDIT_SOURCE_SHA" > audit-results/source-sha.txt
+          changed="$(git diff --name-only "$AUDIT_SOURCE_SHA" HEAD -- | grep -Ev '^(\.github/workflows/final-1-6-15-audit\.yml|audit_final/)' || true)"
+          test -z "$changed" || { echo "Unexpected production changes on audit branch:"; echo "$changed"; exit 1; }
+          test "$(cat src/VERSION)" = "1.6.15"
+          git diff --stat v1.6.14 "$AUDIT_SOURCE_SHA" > audit-results/diff-stat.txt
+          git log --reverse --format='%H%x09%cI%x09%s' v1.6.14.."$AUDIT_SOURCE_SHA" > audit-results/commits.tsv
+      - name: Release helper unit tests
+        run: |
+          set -o pipefail
+          python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v 2>&1 | tee audit-results/release-unit-tests.log
+      - name: Version consistency
+        if: always()
+        run: |
+          set -o pipefail
+          bash misc/check-version-consistency.sh 2>&1 | tee audit-results/version-consistency.log
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-source-release-contracts
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 3
+
+  six-image-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Verify exact-source dev images
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler autoconf ui api all-in-one; do
+            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            docker pull "$ref"
+            docker image inspect "$ref" > "audit-results/image-function () { [native code] }.json"
+            revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")"
+            test "$revision" = "$AUDIT_SOURCE_SHA" || { echo "Image source mismatch: $ref => $revision"; exit 1; }
+          done
+          docker run --rm --entrypoint sh ghcr.io/bunkerity/bunkerweb-tests:dev -c 'nginx -V 2>&1; openssl version -a; cat /usr/share/bunkerweb/VERSION' | tee audit-results/runtime-versions.txt
+          grep -q 'nginx/1.30.5' audit-results/runtime-versions.txt
+          grep -qx '1.6.15' <(tail -n1 audit-results/runtime-versions.txt)
+      - name: Six-image Compose startup smoke
+        run: |
+          set -o pipefail
+          python3 - <<'PY' 2>&1 | tee audit-results/smoke.log
+          import sys
+          sys.path.insert(0, '.github/scripts')
+          import release_smoke
+          release_smoke.TAG = 'dev'
+          release_smoke.main()
+          PY
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-six-image-smoke
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  core-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        suite:
+          [antibot, authbasic, backup, badbehavior, blacklist, brotli, clientcache, cors, country, customcert, dnsbl, errors, greylist, gzip, headers, inject, limit, misc, modsecurity, redirect, redis, reverseproxy, selfsigned, sessions, whitelist]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Verify exact images
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler; do
+            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            docker pull "$ref"
+            revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")"
+            test "$revision" = "$AUDIT_SOURCE_SHA"
+            docker tag "$ref" "function () { [native code] }-tests"
+          done
+      - name: Run existing core suite unchanged
+        env:
+          SUITE: \${{ matrix.suite }}
+        run: |
+          set -euo pipefail
+          cd "tests/core/$SUITE"
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb:.*@bunkerweb-tests@' {} \;
+          find . -type f -name 'docker-compose.*' -exec sed -i 's@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@' {} \;
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1500 ./test.sh docker "$SUITE" 2>&1 | tee "$GITHUB_WORKSPACE/audit-results/core-$SUITE.log"
+      - name: Diagnostics
+        if: always()
+        run: |
+          docker ps -a > audit-results/containers.txt || true
+          for id in $(docker ps -aq); do docker logs "$id" > "audit-results/container-$id.log" 2>&1 || true; done
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-core-\${{ matrix.suite }}
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  recovery-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Prepare old audit driver against current installed code
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          chmod 777 audit-results
+          cp audit_final/audit_components.py /tmp/audit_components.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/audit_components.py')
+          s=p.read_text()
+          old="bytes_hash(b'add_header X-Audit value;')"
+          if old in s:
+              s=s.replace(old,"bytes_hash(b'add_header X-Audit value;', algorithm='sha256')")
+          p.write_text(s)
+          PY
+          docker pull ghcr.io/bunkerity/scheduler-tests:dev
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/scheduler-tests:dev)" = "$AUDIT_SOURCE_SHA"
+      - name: SQLite, cache restore and lock contracts
+        run: |
+          set -uo pipefail
+          result=0
+          for backend in sqlite lock; do
+            docker run --rm --network none --entrypoint python3 \
+              -e DATABASE_URI=sqlite:////tmp/audit.db \
+              -v "/tmp/audit_components.py:/audit_components.py:ro" \
+              -v "$PWD/audit-results:/audit-results" \
+              ghcr.io/bunkerity/scheduler-tests:dev /audit_components.py "$backend" \
+              2>&1 | tee "audit-results/components-$backend.log" || result=1
+          done
+          exit "$result"
+      - name: Reject transitive symlink escape without native tar filter
+        run: |
+          docker run --rm --network none -i --entrypoint python3 ghcr.io/bunkerity/scheduler-tests:dev - <<'PY' 2>&1 | tee audit-results/transitive-symlink.log
+          import io, os, sys, tarfile, tempfile
+          from pathlib import Path
+          sys.path[:0]=['/usr/share/bunkerweb/utils']
+          import common_utils
+          from cache_restore import restore_directory
+          tarfile.data_filter = None
+          root=Path('/var/cache/bunkerweb')/('audit-chain-'+next(tempfile._get_candidate_names()))
+          target=root/'published'
+          target.mkdir(parents=True)
+          (target/'old.txt').write_text('last-good')
+          outside=root/'escaped.txt'
+          buf=io.BytesIO()
+          with tarfile.open(fileobj=buf,mode='w:gz') as t:
+              d=tarfile.TarInfo('dir'); d.type=tarfile.DIRTYPE; t.addfile(d)
+              a=tarfile.TarInfo('dir/up'); a.type=tarfile.SYMTYPE; a.linkname='..'; t.addfile(a)
+              b=tarfile.TarInfo('dir/up/up2'); b.type=tarfile.SYMTYPE; b.linkname='..'; t.addfile(b)
+              f=tarfile.TarInfo('dir/up/up2/escaped.txt'); data=b'owned-test'; f.size=len(data); t.addfile(f,io.BytesIO(data))
+          try:
+              restore_directory(target,buf.getvalue())
+          except (ValueError,tarfile.TarError,OSError):
+              pass
+          else:
+              raise SystemExit('transitive symlink archive was accepted')
+          assert (target/'old.txt').read_text()=='last-good'
+          assert not outside.exists()
+          print('PASS transitive symlink escape rejected and previous tree preserved')
+          PY
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-recovery-contracts
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  session-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Real Redis timeout/OOM/logout recovery
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          chmod 777 audit-results
+          docker pull ghcr.io/bunkerity/ui-tests:dev
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' ghcr.io/bunkerity/ui-tests:dev)" = "$AUDIT_SOURCE_SHA"
+          docker network create audit-session-network
+          docker run -d --name audit-session-redis --network audit-session-network redis:8-alpine redis-server --save '' --appendonly no
+          for attempt in $(seq 1 30); do docker exec audit-session-redis redis-cli ping && break || sleep 1; done
+          docker run --rm --network audit-session-network --entrypoint python3 \
+            -v "$PWD/audit_final/audit_sessions.py:/audit_sessions.py:ro" \
+            -v "$PWD/audit-results:/audit-results" \
+            ghcr.io/bunkerity/ui-tests:dev /audit_sessions.py 2>&1 | tee audit-results/sessions.log
+      - name: Cleanup
+        if: always()
+        run: |
+          docker logs audit-session-redis > audit-results/redis.log 2>&1 || true
+          docker rm -f audit-session-redis || true
+          docker network rm audit-session-network || true
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-session-recovery
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  runtime-two-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Run live scheduler/API/Redis/two-worker regression matrix
+        working-directory: audit_final
+        run: |
+          set -o pipefail
+          mkdir -p audit-results
+          python3 -u - <<'PY' 2>&1 | tee audit-results/runtime-driver.log
+          import os, sys
+          import audit_runtime as audit
+          audit.SHA=os.environ['AUDIT_SOURCE_SHA']
+          import audit_runtime_launch
+          previous=audit.run_scenarios
+          def final_scenarios():
+              previous()
+              def atomic_rename_failure():
+                  code, body=audit.api('/services/renamed.audit.test','PATCH',{'server_name':'rollback.audit.test','variables':{'NOT_A_SETTING':'x'}})
+                  audit.need(code==422,f'invalid rename returned {code}: {body}')
+                  old,_=audit.api('/services/renamed.audit.test')
+                  new,_=audit.api('/services/rollback.audit.test')
+                  audit.need(old==200 and new==404,f'rename was not rolled back: old={old} new={new}')
+                  code,data=audit.api('/configs?service=renamed.audit.test&with_data=true')
+                  audit.need(code==200 and any(x.get('name')=='audit_deny' for x in data.get('configs',[])),f'old custom config lost: {data}')
+                  return {'invalid_patch_status':422,'old_service_retained':True,'destination_absent':True}
+              audit.record('api.rename_and_invalid_setting_are_atomic',atomic_rename_failure)
+          audit.run_scenarios=final_scenarios
+          raise SystemExit(audit.main())
+          PY
+      - name: Cleanup
+        if: always()
+        working-directory: audit_final
+        run: |
+          if [ -f audit-results/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-runtime-two-worker
+          path: audit_final/audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  tls-http3-mtls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Install HTTP3 client
+        run: |
+          python3 -m venv "$RUNNER_TEMP/audit-client"
+          "$RUNNER_TEMP/audit-client/bin/pip" install aioquic==1.3.0
+      - name: TLS 1.2/1.3, HTTP2/3, ModSecurity/3 and mTLS lifecycle
+        working-directory: audit_final
+        run: |
+          set -o pipefail
+          mkdir -p audit-results
+          "$RUNNER_TEMP/audit-client/bin/python" -u - <<'PY' 2>&1 | tee audit-results/tls-driver.log
+          import os
+          import audit_runtime as audit
+          audit.SHA=os.environ['AUDIT_SOURCE_SHA']
+          import audit_tls
+          raise SystemExit(audit_tls.main())
+          PY
+      - name: Cleanup
+        if: always()
+        working-directory: audit_final
+        run: |
+          if [ -f audit-results/tls/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/tls/compose.json down --volumes --remove-orphans || true
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-tls-http3-mtls
+          path: audit_final/audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  crowdsec-real-lapi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Real CrowdSec 1.8 LAPI live/stream/management checks
+        working-directory: audit_final
+        run: |
+          set -o pipefail
+          mkdir -p audit-results
+          python3 -u - <<'PY' 2>&1 | tee audit-results/crowdsec-driver.log
+          import os
+          import audit_runtime as audit
+          audit.SHA=os.environ['AUDIT_SOURCE_SHA']
+          import audit_crowdsec_e2e
+          raise SystemExit(audit_crowdsec_e2e.main())
+          PY
+      - name: Cleanup
+        if: always()
+        working-directory: audit_final
+        run: |
+          if [ -f audit-results/compose.json ]; then
+            docker compose --project-name bw-audit-runtime --file audit-results/compose.json down --volumes --remove-orphans || true
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-crowdsec-real-lapi
+          path: audit_final/audit-results/
+          retention-days: 3
+          if-no-files-found: error
+
+  browser-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        page: [services_page.py, global_config_page.py, configs_page.py, account_page.py, plugins_page.py]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: \${{ github.actor }}
+          password: \${{ github.token }}
+      - name: Verify exact UI stack images
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          for image in bunkerweb scheduler ui; do
+            ref="ghcr.io/bunkerity/function () { [native code] }-tests:dev"
+            docker pull "$ref"
+            test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = "$AUDIT_SOURCE_SHA"
+            docker tag "$ref" "function () { [native code] }-tests"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/ui/docker-compose.yml')
+          s=p.read_text().replace('      - 80:80','      - 127.0.0.1:80:80').replace('      - 443:443','      - 127.0.0.1:443:443')
+          p.write_text(s)
+          PY
+      - name: Existing browser assertions
+        env:
+          PAGE: \${{ matrix.page }}
+          MODE: dev
+        run: |
+          set -euo pipefail
+          cd tests/ui
+          chmod +x tests.sh
+          timeout --signal=TERM --kill-after=30s 1500 ./tests.sh docker "$PAGE" 2>&1 | tee "$GITHUB_WORKSPACE/audit-results/browser-$PAGE.log"
+      - name: Diagnostics and cleanup
+        if: always()
+        run: |
+          docker ps -a > audit-results/containers.txt || true
+          for id in $(docker ps -aq); do docker logs "$id" > "audit-results/container-$id.log" 2>&1 || true; done
+          cd tests/ui
+          docker compose down --volumes --remove-orphans || true
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-browser-\${{ matrix.page }}
+          path: audit-results/
+          retention-days: 3
+          if-no-files-found: error
