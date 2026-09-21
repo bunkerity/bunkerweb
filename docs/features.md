@@ -133,15 +133,16 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Memory Settings"
 
-    | Setting                        | Default | Context | Multiple | Description                                                                                                                                               |
-    | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
-    | `DATASTORE_LRU_SIZE`           | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | Setting                           | Default | Context | Multiple | Description                                                                                                                                               |
+    | --------------------------------- | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
+    | `DATASTORE_LRU_SIZE`              | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`   | global  | No       | **Sessions Revocation Memory Size:** Size of the store holding revoked cookie session identifiers (for example `8192`, `16k`, `16m`).                     |
 
 === "Logging Settings"
 
@@ -159,12 +160,12 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Integration Settings"
 
-    | Setting                  | Default | Context   | Multiple | Description                                                                                                     |
-    | ------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
-    | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
-    | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
+    | Setting           | Default | Context   | Multiple | Description                                                                                                                                         |
+    | ----------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                                                              |
+    | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                                                    |
+    | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                                                                 |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that overrides the default values of specific settings; a value set on the service overrides the template. |
 
 === "Nginx Settings"
 
@@ -268,7 +269,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_DNS_PROVIDER`                 |             | multisite | no       | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
 | `ACME_DNS_ALIAS`                    |             | multisite | no       | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
 | `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | no       | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_KEY_SIZE`                     | `256`       | multisite | no       | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -357,16 +358,21 @@ The following settings are shared across all challenge mechanisms:
 
 BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
 
-| Setting                     | Default | Context   | Multiple | Description                                                                                                                                                                           |
-| --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
-| `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                           |
-| `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                         |
-| `ANTIBOT_IGNORE_ASN`        |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                          |
-| `ANTIBOT_IGNORE_USER_AGENT` |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                     |
-| `ANTIBOT_IGNORE_COUNTRY`    |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                |
-| `ANTIBOT_ONLY_COUNTRY`      |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                           |
+| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
+| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                           |
+| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                          |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                         |
+| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                          |
+| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                     |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                        |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                      |
+| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                |
+| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                |
+
+!!! warning "A header rule is a shared secret"
+    Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 !!! note "Behavior of Country-Based Settings"
       - When both `ANTIBOT_IGNORE_COUNTRY` and `ANTIBOT_ONLY_COUNTRY` are set, the ignore list takes precedence—countries listed in both will bypass the challenge.
@@ -744,6 +750,9 @@ Follow these steps to enable and configure Auth Basic authentication:
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Username:** The username required for authentication. You can define multiple username/password pairs.                                                                                                  |
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Passwords are hashed using scrypt for maximum security.                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                                                                                       |
+
+!!! tip "Anchor the protected path to cover everything below it"
+    A plain path like `/admin` is a prefix match, so it also protects `/admin/`, `/admin/users` and the encoded variants that normalize into them. The `=` modifier makes the match exact, so `= /admin` leaves `/admin/` unprotected while your application may still serve the same resource there. Keep the prefix form unless you really mean one single path.
 
 !!! warning "Security Considerations"
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
@@ -1141,6 +1150,22 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_URI_URLS`        |         | multisite | no       | **URI Blacklist URLs:** List of URLs containing URI patterns to block, separated by spaces. |
     | `BLACKLIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                   |
 
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
+=== "Header"
+    **What this does:** Blocks, or conversely exempts, requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value. An ignore rule wins over every blacklist match, cached verdicts included.
+
+    | Setting                         | Default | Context   | Multiple | Description                                                                                                                            |
+    | ------------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |         | multisite | yes      | **Header name:** Name of a request header that makes the request be blacklisted. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.       |
+    | `BLACKLIST_HEADER_VALUE`        |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.       |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the blacklist. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.       |
+
+    !!! warning "A header rule is a shared secret"
+        Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
@@ -1178,7 +1203,7 @@ Follow these steps to configure and use the Blacklist feature:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # AWS and Amazon ASNs
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Custom ignore rules
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -1691,11 +1716,16 @@ Follow these steps to configure and use the Country feature:
 
 ### Configuration Settings
 
-| Setting              | Default | Context   | Multiple | Description                                                                                                                                                                          |
-| -------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `WHITELIST_COUNTRY`  |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                      |
-| `BLACKLIST_COUNTRY`  |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                           |
-| `COUNTRY_IGNORE_URI` |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string. |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                          |
+| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`           |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                      |
+| `BLACKLIST_COUNTRY`           |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                           |
+| `COUNTRY_IGNORE_URI`          |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the country check. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                           |
+| `COUNTRY_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                     |
+
+!!! warning "A header rule is a shared secret"
+    Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 ### Supported Country Groups
 
@@ -1801,13 +1831,53 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 - Access to BunkerWeb access logs (`/var/log/bunkerweb/access.log` by default) so the CrowdSec agent can analyse requests.
 - `cscli` access on the CrowdSec host to register the BunkerWeb bouncer key.
 
+!!! warning "All-in-one startup is explicit"
+    The embedded CrowdSec agent starts only when the all-in-one container has the unprefixed environment variable `USE_CROWDSEC=yes` and a local `CROWDSEC_API` (the default is `http://127.0.0.1:8000`). Enabling CrowdSec only for an individual service does not start the embedded agent. For an external Local API, start and configure that agent separately.
+
 ### Integration workflow
 
 1. Prepare the CrowdSec agent so it ingests BunkerWeb logs.
 2. Configure BunkerWeb to query the CrowdSec Local API.
 3. Validate the link with the `/crowdsec/ping` API or the admin UI CrowdSec card.
 
+    This check makes an authenticated read request to each configured Local API. It reports failure for an unreachable API, rejected credentials, an invalid response, or a service whose bouncer could not load. For AppSec-only services, it confirms that the configuration loaded; it does not test AppSec connectivity or inspection.
+
 The detailed instructions below follow this sequence.
+
+### Investigation and decision removal
+
+Open **Extra Pages → CrowdSec** in the Web UI to inspect each configured connection, its affected service, Local API connectivity, and decision synchronization. The CrowdSec plugin status card and the **Investigate IP** actions in Reports and Bans open the same page. Investigation links prefill the address. Select the connection when several services or instances use CrowdSec.
+
+An investigation combines current CrowdSec decisions, available CrowdSec alerts, retained BunkerWeb reports, and local BunkerWeb bans. Current decisions and captured report evidence are displayed separately. New CrowdSec reports retain available decision IDs, origins, scenarios, targets, remediation, and expiry information after those decisions expire or are removed. AppSec rejections and denials caused by an AppSec failure policy have distinct sources. Historical evidence follows the existing report retention settings; old reports and evicted optional metadata may have no additional details. Alert inspection exposes bounded event metadata rather than raw request bodies, cookies, or authentication headers.
+
+Local reports and service-specific bans are restricted to the selected connection's service scope; global BunkerWeb bans are also included. If that scope can no longer be established from the instance's loaded configuration, investigation stops rather than returning other services' evidence. Retained reports remain accessible when the Local API is unavailable and the connection configuration is still loaded.
+
+The **CrowdSec allowlists** section displays native engine allowlists, their entries, comments, expiration dates, and whether they are managed locally or through the CrowdSec Console. IP investigations check the engine's current allowlist state and show its matching reason. Reading and checking allowlists requires the management credentials below. An unavailable check is shown separately from an IP that is not allowlisted. Allowlist exceptions apply to the whole CrowdSec engine; they do not remove local BunkerWeb bans. CrowdSec 1.8.0 exposes read/check operations through LAPI, while native allowlist writes require `cscli` on its host or separate Console management access.
+
+The existing `CROWDSEC_API_KEY` is a **bouncer key**: it supports reading decisions, but cannot remove them or inspect alerts. To enable those operations, register a dedicated machine on the relevant CrowdSec engine and configure both of these optional multisite settings:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: the dedicated machine's login.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: that machine's password.
+
+Register the machine using CrowdSec's [Local API authentication procedure](https://doc.crowdsec.net/docs/local_api/authentication/). Store the credentials privately. Leaving either setting empty keeps management unavailable. The same configuration applies to bundled and external engines: requests are sent through the selected BunkerWeb instance, so a bundled Local API can continue listening on localhost. Management HTTPS requests verify the server certificate using BunkerWeb's TLS trust configuration, independently of the AppSec verification setting.
+
+**Remove CrowdSec decision** is separate from BunkerWeb unban. Web UI removal requires an administrator with write access, configured management credentials, a writable UI database, and confirmation of the selected decision. Removing a range affects the entire range. Removing a decision on a shared engine also affects the other bouncers that consume it. The selected ID, scope, target, and remediation are checked again before removal; other decisions and local bans are preserved.
+
+A successful response confirms removal at the Local API and displays remaining matching decisions. Bouncers pick up the change through their configured stream refresh or live cache expiry; the UI reports propagation as pending rather than claiming every client is already allowed. Another decision, a local ban, a new detection, or an AppSec rule can still block a request. Removal outcomes are logged with the authenticated actor and selected connection/decision.
+
+The public API exposes the same operations:
+
+- `GET /crowdsec`: connections, synchronization state, and per-instance errors.
+- `GET /crowdsec/{connection_id}/decisions`: filter by `ip`, `origin`, or `scenario`; paginate with `offset` and `limit` (maximum 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: investigation, including up to 200 decisions, 50 alerts, and 50 reports, with totals or limits and explicit unavailable sections.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: sanitized alert details.
+- `GET /crowdsec/{connection_id}/allowlists`: native allowlists, with `offset` and `limit` pagination; up to 200 entries per list, with the full entry count shown.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: current native allowlist membership and matching reason.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: include the selected `scope`, `value`, and `decision_type` in the JSON body.
+
+Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
+
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
@@ -1879,7 +1949,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1896,7 +1966,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1930,7 +2000,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.8.0 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -2069,33 +2139,50 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
 Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
+Every setting is `multisite`, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.
+
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                      |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Enable CrowdSec:** Set to `yes` to enable the CrowdSec bouncer.                                                |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service.                                             |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service. Leave empty to disable decision lookups.    |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
 
 #### Application Security Component Settings
 
-| Setting                           | Default       | Context | Multiple | Description                                                                                            |
-| --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
+| Setting                           | Default       | Context   | Multiple | Description                                                                                            |
+| --------------------------------- | ------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
     - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
+
+#### Per-service endpoints
+
+Because the endpoints are `multisite`, services on the same instance can use different CrowdSec components, or only some of them. The two features are independent:
+
+- **Decision lookups** are active when `CROWDSEC_API` is set. Set it to an empty string for a service to skip the Local API entirely.
+- **AppSec inspection** is active when `CROWDSEC_APPSEC_URL` is set. Set it to an empty string for a service to skip deep request inspection.
+
+A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, and the instance logs that neither endpoint is defined.
+
+!!! warning "One decision cache per instance"
+    Cached decisions live in a single shared memory zone for the whole instance, keyed by the Local API they came from. Services pointing at the same `CROWDSEC_API` reuse each other's cached decisions, which is what keeps the lookup cheap. Services pointing at different Local APIs never see each other's decisions. Sizing that zone is instance-wide, so a fleet with many distinct Local APIs and large decision lists shares one budget.
+
+!!! info "Bouncer key per Local API"
+    `CROWDSEC_API_KEY` is resolved per service like every other setting. When services target different Local APIs, give each one the key registered with `cscli bouncers add` on its own CrowdSec host, otherwise the lookups are rejected as unauthenticated.
 
 ### Example Configurations
 
@@ -2129,9 +2216,42 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Per-service Configuration"
+
+    AppSec on every public service, decision lookups on a subset, and one service left out entirely. The unprefixed values are the fleet-wide baseline and each service overrides only what differs:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline for every service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # No decision lookup unless a service asks for it
+    CROWDSEC_API_KEY: ""
+
+    # app1 adds the Local API decision lookup on top of AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 keeps AppSec only, inheriting the empty CROWDSEC_API baseline
+
+    # intranet is not checked at all
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    A service can also point at a different CrowdSec host altogether, with its own bouncer key:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Step&nbsp;3 – Validate the integration
 
 - In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- In the BunkerWeb instance logs, the init phase reports how many bouncers were built and how many services they cover. Services sharing an identical configuration share one bouncer, so the two counts differ when a fleet uses several distinct endpoints.
 - On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
 - In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
@@ -2142,10 +2262,11 @@ For a more detailed guide, see the [advanced usages](advanced.md#custom-pages-pr
 
 STREAM support :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | Setting                          | Default | Context   | Multiple | Description                                                                                                        |
 | -------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |         | multisite | no       | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |         | multisite | no       | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |         | global    | no       | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |         | multisite | no       | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -2360,10 +2481,15 @@ Follow these steps to configure and use the DNSBL feature:
 
 **Ignore Lists**
 
-| Setting                | Default | Context   | Multiple | Description                                                                                    |
-| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
-| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
+| Setting                     | Default | Context   | Multiple | Description                                                                                                                               |
+| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`           | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
+| `DNSBL_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the DNSBL checks. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
+| `DNSBL_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.          |
+| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
+
+!!! warning "A header rule is a shared secret"
+    Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:
@@ -2607,6 +2733,20 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
     | `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
 
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
+=== "Header"
+    **What this does:** Greylists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value.
+
+    | Setting                 | Default | Context   | Multiple | Description                                                                                                                      |
+    | ----------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request be greylisted. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.  |
+    | `GREYLIST_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries. |
+
+    !!! warning "A header rule is a shared secret"
+        Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
@@ -2718,28 +2858,57 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
 
 ### Configuration Settings
 
-| Setting                      | Default | Context   | Multiple | Description                                                                                         |
-| ---------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                              |
-| `GRPC_HOST`                  |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`). |
-| `GRPC_URL`                   | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream.                                   |
-| `GRPC_CUSTOM_HOST`           |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                      |
-| `GRPC_HEADERS`               |         | multisite | yes      | **Extra Upstream Headers:** Semicolon-separated list of `grpc_set_header` values.                   |
-| `GRPC_HIDE_HEADERS`          |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                     |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`   | multisite | no       | **Intercept Errors:** Enables/disables `grpc_intercept_errors`.                                     |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`   | multisite | yes      | **Connect Timeout:** Timeout for establishing connection to upstream.                               |
-| `GRPC_READ_TIMEOUT`          | `60s`   | multisite | yes      | **Read Timeout:** Timeout for reading from upstream.                                                |
-| `GRPC_SEND_TIMEOUT`          | `60s`   | multisite | yes      | **Send Timeout:** Timeout for sending to upstream.                                                  |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`   | multisite | yes      | **Socket Keepalive:** Enables/disables upstream socket keepalive.                                   |
-| `GRPC_SSL_SNI`               | `no`    | multisite | no       | **SSL SNI:** Enables/disables SNI for TLS upstreams.                                                |
-| `GRPC_SSL_SNI_NAME`          |         | multisite | no       | **SSL SNI Name:** SNI name to send when `GRPC_SSL_SNI=yes`.                                         |
-| `GRPC_NEXT_UPSTREAM`         |         | multisite | yes      | **Next Upstream Conditions:** Value for `grpc_next_upstream`.                                       |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |         | multisite | yes      | **Next Upstream Timeout:** Value for `grpc_next_upstream_timeout`.                                  |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |         | multisite | yes      | **Next Upstream Tries:** Value for `grpc_next_upstream_tries`.                                      |
-| `GRPC_INCLUDES`              |         | multisite | yes      | **Additional Includes:** Space-separated include files added inside the gRPC `location` block.      |
+| Setting                                 | Default | Context   | Multiple | Description                                                                                                                               |
+| --------------------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                              | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                                                                    |
+| `GRPC_HOST`                             |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`).                                       |
+| `GRPC_URL`                              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream.                                                                         |
+| `GRPC_CUSTOM_HOST`                      |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                                                            |
+| `GRPC_HEADERS`                          |         | multisite | yes      | **Extra Upstream Headers:** Semicolon-separated list of `grpc_set_header` values.                                                         |
+| `GRPC_HIDE_HEADERS`                     |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                                                           |
+| `GRPC_HEADERS_CLIENT`                   |         | multisite | yes      | **Client Response Headers:** Semicolon-separated list of `add_header` values sent to the client.                                          |
+| `GRPC_PASS_HEADERS`                     |         | multisite | yes      | **Passed Response Headers:** Space-separated list of `grpc_pass_header` values, to forward headers NGINX hides by default.                |
+| `GRPC_IGNORE_HEADERS`                   |         | multisite | yes      | **Ignored Response Headers:** Space-separated list of `grpc_ignore_headers` values, to stop NGINX processing them.                        |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`    | multisite | no       | **Allow Underscores in Headers:** Enables/disables `underscores_in_headers`.                                                              |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`   | multisite | no       | **Intercept Errors:** Enables/disables `grpc_intercept_errors`.                                                                           |
+| `GRPC_BUFFER_SIZE`                      |         | multisite | yes      | **Buffer Size:** Value for `grpc_buffer_size` (buffer used to read the upstream response).                                                |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`   | multisite | yes      | **Connect Timeout:** Timeout for establishing connection to upstream.                                                                     |
+| `GRPC_READ_TIMEOUT`                     | `60s`   | multisite | yes      | **Read Timeout:** Timeout for reading from upstream.                                                                                      |
+| `GRPC_SEND_TIMEOUT`                     | `60s`   | multisite | yes      | **Send Timeout:** Timeout for sending to upstream.                                                                                        |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`   | multisite | yes      | **Socket Keepalive:** Enables/disables upstream socket keepalive.                                                                         |
+| `GRPC_SSL_SNI`                          | `no`    | multisite | no       | **SSL SNI:** Enables/disables SNI for TLS upstreams.                                                                                      |
+| `GRPC_SSL_SNI_NAME`                     |         | multisite | no       | **SSL SNI Name:** SNI name to send when `GRPC_SSL_SNI=yes`.                                                                               |
+| `GRPC_SSL_VERIFY`                       | `no`    | multisite | no       | **SSL Verify:** Enables/disables verification of the gRPC upstream certificate.                                                           |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Trusted Certificate Priority:** Source of the CA bundle, `file` or `data`.                                                              |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **Trusted Certificate Path:** Path to a PEM CA bundle readable by the scheduler (priority `file`).                                        |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **Trusted Certificate Data:** CA bundle as base64 or plaintext PEM (priority `data`).                                                     |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream certificate chain.                                                               |
+| `GRPC_SSL_CERT_PRIORITY`                | `file`  | multisite | no       | **Client Certificate Priority:** Source of the client certificate and key, `file` or `data`.                                              |
+| `GRPC_SSL_CERT`                         |         | multisite | no       | **Client Certificate Path:** PEM client certificate presented to the upstream for mutual TLS (priority `file`).                           |
+| `GRPC_SSL_CERT_DATA`                    |         | multisite | no       | **Client Certificate Data:** Client certificate as base64 or plaintext PEM (priority `data`).                                             |
+| `GRPC_SSL_KEY`                          |         | multisite | no       | **Client Key Path:** PEM private key matching the client certificate (priority `file`). It must not be encrypted.                         |
+| `GRPC_SSL_KEY_DATA`                     |         | multisite | no       | **Client Key Data:** Client private key as base64 or plaintext PEM (priority `data`).                                                     |
+| `GRPC_SSL_CRL`                          |         | multisite | no       | **CRL Path:** PEM revocation list applied when verifying the upstream. Takes precedence over the CRL data setting.                        |
+| `GRPC_SSL_CRL_DATA`                     |         | multisite | no       | **CRL Data:** Revocation list as base64 or plaintext PEM. Used only when the CRL path is empty.                                           |
+| `GRPC_SSL_PROTOCOLS`                    |         | multisite | no       | **Upstream SSL Protocols:** TLS versions offered to the upstream. Empty keeps the NGINX default.                                          |
+| `GRPC_SSL_CIPHERS`                      |         | multisite | no       | **Upstream SSL Ciphers:** Cipher suite string offered to the upstream. Empty keeps the NGINX default.                                     |
+| `GRPC_NEXT_UPSTREAM`                    |         | multisite | yes      | **Next Upstream Conditions:** Value for `grpc_next_upstream`.                                                                             |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |         | multisite | yes      | **Next Upstream Timeout:** Value for `grpc_next_upstream_timeout`.                                                                        |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |         | multisite | yes      | **Next Upstream Tries:** Value for `grpc_next_upstream_tries`.                                                                            |
+| `GRPC_AUTH_REQUEST`                     |         | multisite | yes      | **Auth Request:** Value for `auth_request`, to authenticate through an external provider.                                                 |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |         | multisite | yes      | **Auth Request Signin URL:** Redirect target when the auth request returns 401.                                                           |
+| `GRPC_AUTH_REQUEST_SET`                 |         | multisite | yes      | **Auth Request Set:** Semicolon-separated list of `auth_request_set` values.                                                              |
+| `GRPC_INCLUDES`                         |         | multisite | yes      | **Additional Includes:** Space-separated include files added inside the gRPC `location` block.                                            |
+| `GRPC_MAX_CLIENT_SIZE`                  |         | multisite | yes      | **Maximum Body Size:** Value for `client_max_body_size` in this location (`0` for infinite). Falls back to the service `MAX_CLIENT_SIZE`. |
+
+!!! tip "Upstream Mutual TLS"
+    A client certificate and its key must both be supplied, and the key must not be encrypted. The scheduler validates the pair, caches it and distributes it to the instances; if it does not validate, the certificate directives are simply not generated. A CRL is only applied while upstream verification is on.
 
 !!! warning "ModSecurity on gRPC Locations"
     ModSecurity is currently disabled automatically inside gRPC `location` blocks generated by this plugin because ModSecurity does not reliably support gRPC traffic patterns.
+
+!!! tip "Verifying the Upstream Certificate"
+    `GRPC_SSL_VERIFY` only takes effect once a CA bundle is available. Provide it with `GRPC_SSL_TRUSTED_CERTIFICATE` (a path the scheduler can read) or `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 or plaintext PEM), and select the source with `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. The scheduler validates the bundle, caches it and distributes it to the instances. Without a usable bundle, verification stays off.
 
 !!! warning "Long-Lived Streams and Core Timeouts"
     Long-lived or streaming RPCs may require higher generic NGINX timeouts than the global defaults. Commonly tuned settings are `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` in the General plugin settings.
@@ -2800,6 +2969,30 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
 
+=== "Verified TLS Upstream"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    GRPC_SSL_VERIFY: "yes"
+    GRPC_SSL_TRUSTED_CERTIFICATE: "/etc/ssl/certs/ca-certificates.crt"
+    GRPC_SSL_VERIFY_DEPTH: "2"
+    ```
+
+=== "External Authentication"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_AUTH_REQUEST: "/auth"
+    GRPC_AUTH_REQUEST_SIGNIN_URL: "https://sso.example.com/login"
+    GRPC_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_email $upstream_http_x_email"
+    GRPC_HEADERS: "x-forwarded-user $auth_user"
+    ```
 ## Gzip
 
 STREAM support :x:
@@ -3219,7 +3412,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | Setting                                     | Default       | Context   | Multiple | Description                                                                                                                                                                                                                                                                    |
 | ------------------------------------------- | ------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | no       | **Enable Let's Encrypt:** Set to `yes` to enable automatic certificate issuance and renewal.                                                                                                                                                                                   |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | no       | **Pass Through Let's Encrypt:** Set to `yes` to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL.                                                                                        |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | no       | **Pass Through Let's Encrypt:** Set to `yes` to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL. The ACME challenge path then skips every other check.                                                                                        |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | no       | **Contact Email:** Email address used for Let's Encrypt expiry reminders. Leave blank only if you accept that no alerts or recovery emails will be sent (Certbot registers with `--register-unsafely-without-email`).                                                          |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | no       | **Certificate Authority:** Select the ACME server to use for issuance. Options: `letsencrypt` or `zerossl`.                                                                                                                                                                    |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | no       | **ZeroSSL API Key:** Optional API key used by `zerossl-bot` when `LETS_ENCRYPT_SERVER=zerossl`. If empty, `EMAIL_LETS_ENCRYPT` is used to retrieve EAB credentials.                                                                                                            |
@@ -3230,7 +3423,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
@@ -3242,10 +3435,11 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Maximum Certbot Log Backups:** Number of rotated `letsencrypt.log` backups certbot keeps per job. Certbot's own default of 1000 piles up quickly; `50` is a sensible cap. Set to `0` to keep only the live log.                                                              |
 
 !!! info "Information and behavior"
+    - The local `/.well-known/acme-challenge/` handler is enabled only when `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http`, and `LETS_ENCRYPT_PASSTHROUGH=no`. The HTTPS redirect exception and access exception also require the exact requested token to exist as a readable, nonempty file. Deleting the token restores normal checks immediately. Other services apply their normal routing and access rules to this path.
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
-    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges
+    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges. A `GET` or `HEAD` of a single token under `/.well-known/acme-challenge/` is then whitelisted and reaches the backend without any other check: antibot, blacklist, ModSecurity, request rate limiting, Basic Auth and the ban check are all skipped for that request (connection limits still apply, nginx enforces them), which is more than a locally served challenge skips. Deeper paths, other methods and non token-shaped names get the normal checks.
 
 !!! tip "HTTP vs. DNS Challenges"
     **HTTP Challenges** are easier to set up and work well for most websites:
@@ -3263,6 +3457,8 @@ Follow these steps to configure and use the Let's Encrypt feature:
 
 !!! warning "Wildcard certificates"
     Wildcard certificates are only available with DNS challenges. If you want to use them, you must set the `USE_LETS_ENCRYPT_WILDCARD` setting to `yes` and properly configure your DNS provider credentials.
+
+    A wildcard covers only one label: `*.example.com` does not cover `a.b.example.com`. Groups that cannot cover every configured hostname are refused and the affected service is reported as misconfigured. Split those names into separate services. Valid groups continue to be processed; if none can be issued, the job fails. Successfully issued sibling certificates still request a reload.
 
 !!! warning "Rate Limits"
     Let's Encrypt imposes rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.
@@ -3419,6 +3615,9 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     | `USE_LIMIT_REQ`  | `yes`   | multisite | no       | **Enable Request Limiting:** Set to `yes` to enable the request rate limiting feature.                                                                             |
     | `LIMIT_REQ_URL`  | `/`     | multisite | yes      | **URL Pattern:** URL pattern (PCRE regex) to which the rate limit will be applied; use `/` to apply for all requests.                                              |
     | `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | **Rate Limit:** Maximum request rate in the format `Nr/t`, where N is the number of requests and t is the time unit: s (second), m (minute), h (hour), or d (day). |
+
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
 
     !!! tip "Rate Limiting Format"
         The rate limit format is specified as `Nr/t` where:
@@ -3584,6 +3783,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+For a more detailed guide, see the [advanced usages](advanced.md#maintenance-pro) documentation.
+
+STREAM support :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| Setting           | Default | Context   | Multiple | Description                                                                                                                                                                                               |
+| ----------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`    | multisite | no       | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 STREAM support :warning:
@@ -3691,7 +3903,9 @@ For example, `/metrics/requests` returns information about blocked requests.
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
 
 !!! info "Redis Integration"
-    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis `maxmemory` pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.
+    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin automatically synchronizes blocked request data to the Redis server. Under `maxmemory` pressure, rejected reports remain in the bounded worker buffer for retry. Buffer overflow, LRU eviction, or Redis data loss can still discard reports. Incomplete filter counts are rebuilt from the retained request list. Stored reports with malformed data (an unusable timestamp or identifier) are excluded from the reports table and from its totals.
+
+    Counter totals are restored lazily from Redis before synchronization, including after local LRU eviction. Dormant Redis counters remain until `METRICS_REDIS_TTL` expires; `0` intentionally retains them indefinitely, so monitor Redis memory when using high-cardinality metrics.
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
@@ -3911,6 +4125,8 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
         Thorough testing is recommended before enabling HTTP/3 in production environments.
 
+        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
+
 === "Static File Serving"
 
     **File Serving Configuration**
@@ -4094,18 +4310,19 @@ Follow these steps to configure and use ModSecurity:
 
 ### Configuration Settings
 
-| Setting                               | Default        | Context   | Multiple | Description                                                                                                                                                                               |
-| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                          |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                    |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                    |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                        |
+| Setting                               | Default                               | Context   | Multiple | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                                                                                                                                                                                                                                                                                                                                                              |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in `.log`. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only `modsec_audit.log` is symlinked into the container's log stream. |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`.                                                                                                                                                                                                                                                                                                                                           |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
@@ -4242,7 +4459,7 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Advanced Configuration with Plugins"
@@ -4283,6 +4500,20 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
 
 !!! note "Human-readable size values"
     For size settings like `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, the suffixes `k`, `m`, and `g` (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+
+### Concurrent audit logs
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Writer: `Serial` (default) or `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Empty by default; required absolute storage directory for `Concurrent`. |
+
+Set `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` and `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Preprovision that directory on every BunkerWeb instance with write and search permissions for the nginx worker. Use a persistent mount for retained records. BunkerWeb rejects invalid candidates before applying them; it does not provision the directory. In global CRS mode (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure both settings globally; service overrides do not select a separate writer.
+
+`MODSECURITY_SEC_AUDIT_LOG` stays the regular, lockable `.log` file: it contains complete records with `Serial`, and an index pointing to per-transaction files with `Concurrent`. The existing index path and its rotation rules are unchanged. The operator must manage disk capacity, access permissions and recursive retention of the dated subdirectories. Rotating the index does not remove transaction files. Check compatibility of log readers that expect Serial records before switching.
+
+Concurrent changes how records are stored; it does not sample requests or reduce the audit data selected by `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Size storage for your request rate, selected parts and retention period; measure record sizes with representative traffic instead of assuming a fixed cost per blocked request.
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4330,27 +4561,32 @@ Follow these steps to deploy mutual TLS with confidence:
 5. **Forward results (optional):** Keep `MTLS_FORWARD_CLIENT_HEADERS` at `yes` when upstream services should inspect the presented certificate.
 6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` (or `MTLS_CRL_DATA`) so BunkerWeb can deny revoked certificates.
 
+The Scheduler validates the whole candidate CA bundle and every CRL before replacing either cached file. A CRL is refused when it cannot be parsed, or when its issuer is part of the bundle and the signature does not verify against it; a CRL signed by a CA that is absent from the bundle is published with a warning, because NGINX builds the chain from the intermediates the client presents. An unreadable, malformed or mismatched replacement keeps the previous CA/CRL pair and logs an error. Rotate the CA and its CRL together, and correct invalid sources promptly, especially before a CRL expires. Clearing both `MTLS_CRL` and `MTLS_CRL_DATA` deliberately removes revocation checking. Removing the CA configuration, disabling mTLS, or deleting the service removes its cached material; while `USE_MTLS` stays `yes` with any mode other than `optional_no_ca`, `ssl_verify_client` then applies against a built-in placeholder CA, so every client gets a 400 with `on` and every client presenting a certificate gets a 400 with `optional`, until a CA is configured again. Effective removals request a reload.
+
 ### Configuration Settings
 
-| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                              |
-| ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                       |
-| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                     |
-| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                              |
-| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                              |
-| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
-| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
-| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
+| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                               |
+| ------------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                        |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                      |
+| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                               |
+| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                               |
+| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                     |
+| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.         |
+| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                       |
 | `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window). Client-supplied `X-SSL-*` headers are always stripped on ingress, so these values cannot be spoofed. |
-| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
-| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
-| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
+| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                         |
+| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain.  |
+| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                            |
+
+!!! tip "Anchor a path pattern to cover everything below it"
+    Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
 
 !!! tip "Configure once, distributed everywhere"
     CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
 
 !!! warning "Provide the CA bundle for strict modes"
-    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
+    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. Until it has validated and distributed one, every instance falls back to a placeholder CA that no client can chain to. With `on` that means every client is rejected, where the service previously ran with client verification switched off entirely. With `optional` a client that presents no certificate is still allowed through, which is what that mode means; enforcement for those requests comes from `MTLS_URL` when it is set, and nothing enforces them when it is left empty. A client that does present a certificate is rejected, because nothing can be validated against the placeholder. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, that state lasts until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.
@@ -4658,7 +4894,7 @@ Follow these steps to configure and use the Pro features:
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
 
-You can explore Pro features with a free 1-month trial by using the promo code `freetrial`. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to activate your trial and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
+You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4958,7 +5194,7 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_PORT`              | `6379`     | global  | no       | **Redis/Valkey Port:** Port number of the Redis/Valkey server.                                                                                                              |
 | `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).                                                                                        |
 | `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection.                                                                            |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.                                                                              |
+| `REDIS_SSL_VERIFY`        | `no`       | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.                                                                              |
 | `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations.                                                                           |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                                                                                           |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                                                                                                        |
@@ -4967,7 +5203,7 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                                                                                                          |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                                                                                                    |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection.                                                                    |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                                                                                            |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker.                                                                          |
 
 !!! tip "High Availability with Redis Sentinel"
     For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
@@ -5056,6 +5292,7 @@ When using Redis or Valkey with BunkerWeb, consider these best practices to ensu
 - **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
 - **Set an eviction policy:** Use `maxmemory-policy` (e.g., `volatile-lru` for general use or `allkeys-lru` for cache-heavy workloads) appropriate for your use case
 - **All-in-one defaults:** The AIO Docker image ships Redis with `maxmemory=256mb` and `maxmemory-policy=volatile-lru`; override via the `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` environment variables. With `volatile-lru`, transient counters (rate-limit, bad-behavior) are evicted before keys with TTLs that matter for sessions and timed bans, and keys without an expiry (permanent bans) are immune. The same policy is recommended for external Redis or Valkey servers used by BunkerWeb.
+- **Keep the security reports out of the eviction pool:** with the default `METRICS_REDIS_TTL` the blocked request reports carry an expiry, and that expiry is what makes them eligible for eviction under `volatile-lru` at all. The list is a single key holding the whole retained window, so one eviction takes all of it rather than the oldest reports. Set `METRICS_REDIS_TTL=0` on every instance sharing the server, otherwise an instance still on the default re-arms the expiry within seconds. It changes nothing under `allkeys-lru`, where no key is immune, and it does not lower memory pressure, it moves it onto the keys that still expire, which include timed bans, sessions and cached verdicts. Size `maxmemory` for the reports you retain instead of relying on eviction: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` sets that ceiling.
 - **Avoid large keys:** Ensure individual Redis keys are kept to a reasonable size to prevent performance degradation
 
 #### Data Persistence
@@ -5064,7 +5301,7 @@ When using Redis or Valkey with BunkerWeb, consider these best practices to ensu
 - **Backup strategy:** Implement regular Redis backups as part of your disaster recovery plan
 
 #### Performance Optimization
-- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice
+- **Connection pooling:** BunkerWeb already implements this, but ensure other applications follow this practice. `REDIS_KEEPALIVE_POOL` is per NGINX worker, so steady-state connections are roughly `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`: size the Redis/Valkey `maxclients` limit above that, because a refused connection means that request is not checked against the bans held only in Redis
 - **Pipelining:** When possible, use pipelining for bulk operations to reduce network overhead
 - **Avoid expensive operations:** Be cautious with commands like KEYS in production environments
 - **Benchmark your workload:** Use redis-benchmark to test your specific workload patterns
@@ -5141,13 +5378,15 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
     | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                                                                                                                          |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value.                                             |
     | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
     | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`   | multisite | yes      | **HTTP Version:** Protocol version used to talk to the upstream (`1.0`, `1.1`, or `2`). Set to `2` for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless. |
     | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                                                                                                                              |
     | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend.                                                                                                    |
+
+    BunkerWeb quotes the path or regex operand when generating the NGINX location, preserving literal quotes, `#`, and regex backslashes. Supply the value without adding NGINX quoting yourself. Existing restrictions on whitespace, `;`, `{`, and `}` still apply.
 
     !!! tip "Best Practices"
         - Always specify the full URL in `REVERSE_PROXY_HOST` including the protocol (http:// or https://)
@@ -5202,6 +5441,15 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI).             |
     | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                                 |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`  | multisite | no       | **Client Certificate Priority:** Source of the client certificate and key, `file` or `data`.                       |
+    | `REVERSE_PROXY_SSL_CERT`                         |         | multisite | no       | **Client Certificate Path:** PEM client certificate presented to the upstream for mutual TLS (priority `file`).    |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |         | multisite | no       | **Client Certificate Data:** Client certificate as base64 or plaintext PEM (priority `data`).                      |
+    | `REVERSE_PROXY_SSL_KEY`                          |         | multisite | no       | **Client Key Path:** PEM private key matching the client certificate (priority `file`). It must not be encrypted.  |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |         | multisite | no       | **Client Key Data:** Client private key as base64 or plaintext PEM (priority `data`).                              |
+    | `REVERSE_PROXY_SSL_CRL`                          |         | multisite | no       | **CRL Path:** PEM revocation list applied when verifying the upstream. Takes precedence over the CRL data setting. |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |         | multisite | no       | **CRL Data:** Revocation list as base64 or plaintext PEM. Used only when the CRL path is empty.                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |         | multisite | no       | **Upstream SSL Protocols:** TLS versions offered to the upstream. Empty keeps the NGINX default.                   |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |         | multisite | no       | **Upstream SSL Ciphers:** Cipher suite string offered to the upstream. Empty keeps the NGINX default.              |
 
     !!! info "Certificate Verification"
         When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
@@ -5305,11 +5553,12 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Performance Optimization:** Fine-tune request handling for specific use cases
         - **Flexibility:** Adapt to unique application requirements with specialized configurations
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                        |
-    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                       |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                 |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                         |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |         | multisite | yes      | **Maximum Body Size (per location):** Maximum body size for this location (`0` for infinite). When empty, the service `MAX_CLIENT_SIZE` applies.                   |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
@@ -5318,6 +5567,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If, **and only if**, a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
 
         To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); they inspect the uploaded file itself instead of the raw request body.
+
+    !!! tip "Per-URL body size"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` caps the body for one URL only, so a dedicated upload endpoint can accept large files while the rest of the service keeps the tighter `MAX_CLIENT_SIZE`. It also sets the ModSecurity request body limit for that location, overriding the service value and an explicit `MODSECURITY_SEC_REQUEST_BODY_LIMIT` alike, so the upload is not rejected by the WAF while every other URL keeps its own limit. Two limits stay where they are: JSON, XML and form-encoded bodies are still capped by `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` (`131072` by default, `400` above it), and `0` disables the ModSecurity limit for that location, which lets it buffer a body of any size. ModSecurity reads the whole body before the request is proxied, so set the value to what the endpoint really needs.
 
 === "Caching Configuration"
 
@@ -5349,6 +5601,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - Use appropriate cache durations based on content type (static assets can be cached longer)
         - Configure `PROXY_NO_CACHE` to avoid caching sensitive or personalized content
         - Monitor cache hit rates and adjust settings accordingly
+
+!!! tip "Upstream Mutual TLS"
+    A client certificate and its key must both be supplied, and the key must not be encrypted. The scheduler validates the pair, caches it and distributes it to the instances; if it does not validate, the certificate directives are simply not generated. A CRL is only applied while upstream verification is on.
 
 !!! danger "Docker Compose Users - NGINX Variables"
     When using Docker Compose with NGINX variables in your configurations, you must escape the dollar sign (`$`) by using double dollar signs (`$$`). This applies to all settings that contain NGINX variables like `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
@@ -5452,7 +5707,6 @@ Follow these steps to configure and use the Reverse Proxy feature:
     REVERSE_PROXY_HOST_2: "http://auth-service:8080"
     REVERSE_PROXY_URL_2: "/auth"
     ```
-
 ## Reverse scan
 
 STREAM support :white_check_mark:
@@ -5638,6 +5892,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
+
+## SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+For a more detailed guide, see the [advanced usages](advanced.md#saml-pro) documentation.
+
+STREAM support :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| Setting                         | Default          | Context   | Multiple | Description                                                                                                                                                |
+| ------------------------------- | ---------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_SAML`                      | `no`             | multisite | no       | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | no       | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | no       | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | no       | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | no       | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | no       | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | no       | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | no       | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | no       | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | no       | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | no       | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | no       | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | no       | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | no       | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | no       | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | no       | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | no       | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | no       | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | no       | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | no       | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | no       | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | no       | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | no       | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | no       | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | no       | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | no       | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | no       | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | no       | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | no       | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | no       | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | yes      | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | yes      | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | no       | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Security.txt
 
@@ -5863,6 +6162,13 @@ Follow these steps to configure and use the Sessions feature:
     1. Set `USE_REDIS` to `yes` and configure your Redis connection
     2. Ensure all instances use the exact same `SESSIONS_SECRET` and `SESSIONS_NAME`
     3. This ensures users maintain their session regardless of which BunkerWeb instance handles their requests
+
+!!! info "Session Revocation"
+    Without Redis, session data lives in the cookie itself, so destroying a session only cleared it from the browser and the signed cookie stayed valid until it timed out. BunkerWeb keeps a denylist of destroyed session identifiers in shared memory, so a destroyed cookie is rejected the next time it is presented.
+
+    - It applies only when session data is stored in the cookie. With `USE_REDIS` set to `yes`, session data is server-side and destroying a session already removes it.
+    - The denylist is local to each BunkerWeb instance. Use Redis to revoke sessions across a cluster.
+    - Size it with `SESSIONS_REVOCATION_MEMORY_SIZE`. If the store fills up or becomes unavailable, the session is treated as valid and a warning is logged.
 
 ### Example Configurations
 
@@ -6188,6 +6494,20 @@ Follow these steps to configure and use the Whitelist feature:
     | `WHITELIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI whitelist checks.              |
     | `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
     | `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
+
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
+=== "Header"
+    **What this does:** Whitelists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value. Useful for a trusted probe or gateway that can send a shared secret.
+
+    | Setting                  | Default | Context   | Multiple | Description                                                                                                                      |
+    | ------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request be whitelisted. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
+    | `WHITELIST_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries. |
+
+    !!! warning "A header rule is a shared secret"
+        Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there. It also does not lift an existing ban: a banned IP is rejected before the whitelist runs.
 
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.

@@ -133,6 +133,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | No       | **Tamaño de Memoria de Bloqueos del Cachestore:** Tamaño del cachestore interno (bloqueos).        |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`          | global   | No       | **Tamaño de Memoria de Revocación de Sesiones:** Tamaño del almacén de identificadores de sesión de cookie revocados. |
 
 === "Ajustes de Registro"
 
@@ -155,7 +156,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
     | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
     | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
-    | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos.                                           |
+    | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración que sobrescribe los valores predeterminados de ajustes específicos; un valor definido en el servicio prevalece sobre la plantilla.                                           |
 
 === "Ajustes de Nginx"
 

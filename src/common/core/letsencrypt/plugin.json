@@ -17,7 +17,7 @@
     "LETS_ENCRYPT_PASSTHROUGH": {
       "context": "multisite",
       "default": "no",
-      "help": "Pass through Let's Encrypt requests to the web server.",
+      "help": "Pass through Let's Encrypt requests to the web server. A GET or HEAD of a single ACME token is then whitelisted and reaches the web server without any other check, including the ban check.",
       "id": "lets-encrypt-passthrough",
       "label": "Pass Through Let's Encrypt",
       "regex": "^(yes|no)$",
@@ -198,7 +198,7 @@
     "LETS_ENCRYPT_PROFILE": {
       "context": "multisite",
       "default": "classic",
-      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments.",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and up to 100 names. 'tlsserver' is optimized for TLS server authentication with 45-day lifetime, up to 25 names, and smaller payload. 'shortlived' offers 160-hour certificates with up to 25 names for enhanced security in automated environments.",
       "id": "lets-encrypt-profile",
       "label": "Certificate Profile",
       "regex": "^(classic|tlsserver|shortlived)$",

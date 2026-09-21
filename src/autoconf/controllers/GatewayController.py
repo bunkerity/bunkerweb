@@ -527,6 +527,10 @@ class GatewayController(KubernetesController):
                                 if path.get("type") == "RegularExpression" and not path_value.startswith("^"):
                                     path_value = f"^{path_value}"
 
+                        if not self._is_valid_reverse_proxy_url(path_value):
+                            self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} match with path {path_value!r}: not a valid REVERSE_PROXY_URL.")
+                            continue
+
                         if listener_protocol == "TCP":
                             reverse_proxy_host = f"{backend_name}.{backend_namespace}.svc.{self._domain_name}"
                         else:

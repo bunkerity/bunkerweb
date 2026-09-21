@@ -71,6 +71,7 @@ SecRequestBodyLimitAction {{ MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION }}
 # and the parser then reports "XML: Failed to parse document." on the empty body. WebDAV and
 # SOAP clients send exactly that shape. The check belongs here rather than on 200000, where
 # a Content-Length/Transfer-Encoding guard would leave a chunked body unparsed.
+# Add attribution after the complete chain; action updates must retain deny/status.
   {% if MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION == "ProcessPartial" -%}
 SecRule REQBODY_ERROR "!@eq 0" \
   "id:'200002', phase:2,t:none,log,pass,msg:'Request body truncated at the configured inspection limit.',logdata:'%{reqbody_error_msg}',severity:2,chain"
@@ -80,10 +81,14 @@ SecRule REQBODY_ERROR "!@eq 0" \
   "id:'200005', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2,chain"
 SecRule INBOUND_DATA_ERROR "!@eq 1" "chain"
 SecRule REQUEST_BODY_LENGTH "!@eq 0"
+
+SecRuleUpdateActionById 200005 "deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-200005'"
   {% else -%}
 SecRule REQBODY_ERROR "!@eq 0" \
   "id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}',severity:2,chain"
 SecRule REQUEST_BODY_LENGTH "!@eq 0"
+
+SecRuleUpdateActionById 200002 "deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-200002'"
   {% endif %}
 
 # Be strict with multipart/form-data body
@@ -105,6 +110,15 @@ SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
 SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
   "id:'200004',phase:2,t:none,log,deny,msg:'Multipart parser detected a possible unmatched boundary.'"
 
+# Reject the RFC 2231 filename* parameter in multipart parts. ModSecurity reads
+# filename= only, while RFC 7578 parsers (Werkzeug, Starlette, busboy, Go, Spring)
+# prefer filename*, so a part can show the WAF a benign name and the application a
+# malicious one. RFC 7578 section 4.2 forbids RFC 2231 encoding here, so refusing it
+# costs nothing for a compliant client.
+SecRule MULTIPART_PART_HEADERS "@rx ^content-disposition\s*:.*;\s*filename\s*\*\s*=" \
+  "id:'200006',phase:2,t:none,t:lowercase,log,deny,status:400, \
+  msg:'Multipart Content-Disposition uses the RFC 2231 filename* parameter',logdata:'%{MATCHED_VAR}'"
+
 # Enable response body checks
 SecResponseBodyAccess On
 SecResponseBodyMimeType text/plain text/html text/xml application/json
@@ -114,8 +128,11 @@ SecResponseBodyLimitAction ProcessPartial
 # Log useful stuff
 SecAuditEngine {{ MODSECURITY_SEC_AUDIT_ENGINE }}
 SecAuditLogParts A{{ MODSECURITY_SEC_AUDIT_LOG_PARTS | replace(" ", "") | replace("A", "") | replace("Z", "") }}Z
-SecAuditLogType Serial
-SecAuditLog /var/log/bunkerweb/modsec_audit.log
+SecAuditLogType {{ MODSECURITY_SEC_AUDIT_LOG_TYPE }}
+  {% if MODSECURITY_SEC_AUDIT_LOG_TYPE == "Concurrent" %}
+SecAuditLogStorageDir {{ MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR }}
+  {% endif %}
+SecAuditLog {{ MODSECURITY_SEC_AUDIT_LOG }}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
 # include OWASP CRS configurations

@@ -267,6 +267,13 @@
                                                                               data-i18n="tooltip.different_from_template">
                                                                             <i class="bx bx-edit-alt bw-xs"></i>
                                                                         </span>
+                                                                    {% elif setting_template %}
+                                                                        <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From template: {{ setting_template }}">
+                                                                            <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                        </span>
                                                                     {% endif %}
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
@@ -318,7 +325,7 @@
                                                              {% endif %}>
                                                             <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
                                                             <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
-                                                            <textarea id="{{ step_config_id }}-value" class="visually-hidden">{{- step_config_value|safe -}}</textarea>
+                                                            <textarea id="{{ step_config_id }}-value" class="visually-hidden">{{- step_config_value -}}</textarea>
                                                             <div id="{{ step_config_id }}"
                                                                  aria-labelledby="label-{{ step_config_id }}"
                                                                  data-language="{% if step_config.startswith(('crs', 'modsec')) %}ModSecurity{% else %}NGINX{% endif %}"

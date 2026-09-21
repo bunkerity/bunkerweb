@@ -135,15 +135,16 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "内存设置"
 
-    | 设置                           | 默认值 | 上下文 | 多个 | 描述                                                                                                             |
-    | ------------------------------ | ------ | ------ | ---- | ---------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。                                                 |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                                                                      |
-    | `DATASTORE_LRU_SIZE`           | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                                                                      |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
+    | 设置                              | 默认值 | 上下文 | 多个 | 描述                                                                                                             |
+    | --------------------------------- | ------ | ------ | ---- | ---------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。                                                 |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                                                                      |
+    | `DATASTORE_LRU_SIZE`              | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                                                                      |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`  | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。                                                  |
 
 === "日志设置"
 
@@ -161,12 +162,12 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "集成设置"
 
-    | 设置                     | 默认值 | 上下文    | 多个 | 描述                                                                     |
-    | ------------------------ | ------ | --------- | ---- | ------------------------------------------------------------------------ |
-    | `AUTOCONF_MODE`          | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                           |
-    | `SWARM_MODE`             | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                |
-    | `KUBERNETES_MODE`        | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                             |
-    | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。              |
+    | 设置              | 默认值 | 上下文    | 多个 | 描述                                                                                    |
+    | ----------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                                          |
+    | `SWARM_MODE`      | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                               |
+    | `KUBERNETES_MODE` | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                                            |
+    | `USE_TEMPLATE`    |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值；在服务上设置的值会覆盖模板。 |
 
 === "Nginx 设置"
 
@@ -270,7 +271,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_DNS_PROVIDER`                 |             | multisite | 否     | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | 是     | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | 是     | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | 否     | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | 否     | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
 | `ACME_DNS_ALIAS`                    |             | multisite | 否     | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
 | `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | 否     | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_KEY_SIZE`                     | `256`       | multisite | 否     | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -359,16 +360,21 @@ STREAM 支持 :x:
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                           |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                          |
-| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                      |
-| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                              |
+| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
+| ----------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
+| `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
+| `ANTIBOT_IGNORE_ASN`          |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                           |
+| `ANTIBOT_IGNORE_USER_AGENT`   |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                          |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                     |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                  |
+| `ANTIBOT_IGNORE_COUNTRY`      |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                      |
+| `ANTIBOT_ONLY_COUNTRY`        |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                              |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! note "国家设置的行为"
       - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。
@@ -746,6 +752,9 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | 是   | **用户名：** 身份验证所需的用户名。您可以定义多个用户名/密码对。                                                                                                |
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 scrypt 哈希以实现最大安全性。                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                                                                               |
+
+!!! tip "锚定受保护路径时要覆盖其下的所有内容"
+    像 `/admin` 这样的普通路径是前缀匹配，因此也会保护 `/admin/`、`/admin/users` 以及规范化后落入其中的编码变体。`=` 修饰符会让匹配变为精确匹配，于是 `= /admin` 会让 `/admin/` 失去保护，而你的应用仍可能在那里提供同一资源。除非你确实只想匹配一个路径，否则请保留前缀形式。
 
 !!! warning "安全注意事项"
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
@@ -1143,6 +1152,22 @@ STREAM 支持 :warning:
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
+=== "请求头"
+    **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
+
+    | 设置                            | 默认值 | 上下文    | 多选 | 描述                                                                                    |
+    | ------------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |        | multisite | 是   | **请求头名称：** 使请求加入黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_HEADER_VALUE`        |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。       |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。       |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
+
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 
@@ -1180,7 +1205,7 @@ STREAM 支持 :warning:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # AWS 和 Amazon 的 ASN
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # 自定义忽略规则
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -1693,11 +1718,16 @@ STREAM 支持 :white_check_mark:
 
 ### 配置设置
 
-| 设置                 | 默认值 | 上下文    | 多个 | 描述                                                                                                                              |
-| -------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY`  |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                        |
-| `BLACKLIST_COUNTRY`  |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                      |
-| `COUNTRY_IGNORE_URI` |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
+| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                                              |
+| ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                        |
+| `BLACKLIST_COUNTRY`           |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                      |
+| `COUNTRY_IGNORE_URI`          |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
+| `COUNTRY_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过国家检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                                         |
+| `COUNTRY_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                                 |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 ### 支持的国家/地区分组
 
@@ -1801,13 +1831,53 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 - 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
 - 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
 
+!!! warning "显式启动一体化容器中的代理"
+    只有一体化容器设置了不带服务前缀的环境变量 `USE_CROWDSEC=yes`，并使用本机 `CROWDSEC_API`（默认为 `http://127.0.0.1:8000`）时，才会启动内置 CrowdSec 代理。仅为某个服务启用 CrowdSec 不会启动内置代理。使用外部本地 API 时，需要单独启动并配置该代理。
+
 ### 集成流程
 
 1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
 2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
 3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
 
+    此检查会向每个已配置的本地 API 发送经过身份验证的只读请求。如果 API 无法访问、凭据被拒绝、响应无效或某个服务的 bouncer 无法加载，检查将失败。对于仅使用 AppSec 的服务，此检查只确认配置已加载，不验证 AppSec 连接或检测功能。
+
 以下各节将依次说明这些步骤。
+
+### IP 调查与决策移除
+
+在 Web 界面中打开 **附加页面 → CrowdSec**，查看各个已配置的连接、受影响的服务、本地 API 连通性和决策同步状态。CrowdSec 插件状态卡片以及报告和封禁页面中的 **调查 IP** 操作都会打开同一页面。调查链接会预先填入 IP 地址。当多个服务或实例使用 CrowdSec 时，请选择相应连接。
+
+调查结果汇总当前 CrowdSec 决策、可用的 CrowdSec 告警、保留的 BunkerWeb 报告和 BunkerWeb 本地封禁。当前决策与报告中捕获的证据分开展示。新的 CrowdSec 报告会保留可用的决策 ID、来源、场景、目标、处置措施和到期时间，即使相关决策已到期或被移除。AppSec 拒绝与 AppSec 故障策略导致的拒绝使用不同的来源标识。历史证据遵循现有的报告保留设置；旧报告和已从缓存中逐出的可选元数据可能没有额外详情。告警查看功能仅展示有限的事件元数据，不暴露原始请求正文、Cookie 或认证标头。
+
+本地报告和服务专属封禁仅限于所选连接的服务范围；BunkerWeb 全局封禁也会包含在结果中。如果无法再从实例已加载的配置中确定该范围，调查将停止，以免返回其他服务的证据。当本地 API 不可用但连接配置仍已加载时，保留的报告依然可以访问。
+
+**CrowdSec 允许列表** 部分展示引擎的原生允许列表、条目、备注、到期时间，以及列表由本地还是 CrowdSec Console 管理。IP 调查会检查引擎当前的允许列表状态，并显示匹配原因。读取和检查允许列表需要下文所述的管理凭据。界面会区分检查不可用和 IP 不在允许列表中这两种情况。允许列表例外适用于整个 CrowdSec 引擎，不会移除 BunkerWeb 本地封禁。CrowdSec 1.8.0 通过 LAPI 提供读取和检查操作；修改原生允许列表则需要在其主机上使用 `cscli`，或通过独立的 Console 管理权限完成。
+
+现有的 `CROWDSEC_API_KEY` 是 **bouncer 密钥**，支持读取决策，但不能移除决策或查看告警。要启用这些操作，请在相应的 CrowdSec 引擎上注册专用机器，并配置以下两个可选的多站点设置：
+
+- `CROWDSEC_MANAGEMENT_LOGIN`：专用机器的登录名。
+- `CROWDSEC_MANAGEMENT_PASSWORD`：该机器的密码。
+
+按照 CrowdSec 的[本地 API 认证流程](https://doc.crowdsec.net/docs/local_api/authentication/)注册机器，并妥善保管凭据。任一设置为空时，管理功能均不可用。内置引擎和外部引擎使用相同配置：请求经由所选 BunkerWeb 实例发送，因此内置本地 API 可以继续仅监听 localhost。管理操作的 HTTPS 请求使用 BunkerWeb 的 TLS 信任配置验证服务器证书，与 AppSec 的验证设置相互独立。
+
+**移除 CrowdSec 决策** 与解除 BunkerWeb 封禁是不同的操作。在 Web 界面中移除决策需要具有写入权限的管理员、已配置的管理凭据、可写的界面数据库，以及对所选决策的确认。移除针对地址范围的决策会影响整个范围。在共享引擎上移除决策也会影响使用该决策的其他 bouncer。移除前会再次核对所选 ID、范围、目标和处置措施；其他决策和本地封禁会被保留。
+
+成功响应会确认决策已从本地 API 移除，并显示仍然匹配的决策。Bouncer 会在配置的流刷新或 live 模式缓存到期后获取变化；界面会将传播状态标记为待完成，而不会声称所有客户端都已获准访问。其他决策、本地封禁、新检测结果或 AppSec 规则仍可能阻止请求。移除结果会记录到日志中，同时包含已认证的操作者及所选连接和决策。
+
+公共 API 提供相同的操作：
+
+- `GET /crowdsec`：连接、同步状态和各实例的错误。
+- `GET /crowdsec/{connection_id}/decisions`：按 `ip`、`origin` 或 `scenario` 筛选；使用 `offset` 和 `limit` 分页（上限为 200）。
+- `GET /crowdsec/{connection_id}/ips/{ip}`：调查结果，最多包含 200 条决策、50 条告警和 50 份报告，并显示总数或上限，以及明确标记为不可用的部分。
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`：已过滤敏感数据的告警详情。
+- `GET /crowdsec/{connection_id}/allowlists`：原生允许列表，使用 `offset` 和 `limit` 分页；每个列表最多返回 200 个条目，同时显示完整的条目总数。
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`：当前是否匹配原生允许列表，以及匹配原因。
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`：在 JSON 请求体中包含所选的 `scope`、`value` 和 `decision_type`。
+
+请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
+
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
@@ -1877,7 +1947,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1894,7 +1964,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -1928,7 +1998,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.8.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -2070,30 +2140,45 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                             |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
-| `CROWDSEC_API_KEY`          |                        | global    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
-| `CROWDSEC_MODE`             | `live`                 | global    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
+| `CROWDSEC_API_KEY`          |                        | multisite | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
+| `CROWDSEC_MODE`             | `live`                 | multisite | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
 
 #### 应用程序安全组件设置
 
-| 设置                              | 默认值        | 上下文 | 多个 | 描述                                                                              |
-| --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |               | global | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
+| 设置                              | 默认值        | 上下文    | 多个 | 描述                                                                              |
+| --------------------------------- | ------------- | --------- | ---- | --------------------------------------------------------------------------------- |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
 !!! info "关于操作模式"
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
     - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
+
+#### 按服务的端点
+
+由于这些端点是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或只使用其中一部分。这两个功能相互独立：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于活动状态。将其设为空字符串可让某个服务完全跳过 Local API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于活动状态。将其设为空字符串可让某个服务跳过深度请求检测。
+
+如果某个服务的 `USE_CROWDSEC` 设为 `yes` 但两个 URL 都为空，则该服务不会进行任何检查，实例会记录未定义任何端点。
+
+!!! warning "每个实例一个决策缓存"
+    缓存的决策存放在整个实例共用的单个共享内存区中，按其来源的 Local API 建立索引。指向同一个 `CROWDSEC_API` 的服务会相互复用缓存的决策，这也是查询保持低成本的原因。指向不同 Local API 的服务永远看不到彼此的决策。该区域的大小是实例级别的，因此拥有多个不同 Local API 和大型决策列表的集群会共用同一份预算。
+
+!!! info "每个 Local API 一个 Bouncer 密钥"
+    `CROWDSEC_API_KEY` 与其他设置一样按服务解析。当服务指向不同的 Local API 时，请为每个服务分配在其各自 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过身份验证而被拒绝。
 
 ### 示例配置
 
@@ -2127,6 +2212,38 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "按服务配置"
+
+    在每个公开服务上启用 AppSec，在一部分服务上启用决策查询，并完全排除一个服务。不带前缀的值是整个集群的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某个服务需要，否则不进行决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之上增加 Local API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 仅保留 AppSec，继承空的 CROWDSEC_API 基线
+
+    # intranet 完全不进行检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    服务也可以指向完全不同的 CrowdSec 主机，并使用自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### 第&nbsp;3&nbsp;步 – 验证集成
 
 - 在调度器日志中查找 `CrowdSec configuration successfully generated` 和 `CrowdSec bouncer denied request` 条目，以确认插件处于活动状态。
@@ -2140,10 +2257,11 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 STREAM 支持 :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | 参数                             | 默认值 | 上下文    | 可重复 | 描述                                                                                                               |
 | -------------------------------- | ------ | --------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |        | multisite | 否     | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |        | multisite | 否     | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | 否     | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | 否     | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -2357,10 +2475,15 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 **忽略列表**
 
-| 设置                   | 默认值 | 上下文    | 多个 | 描述                                                                          |
-| ---------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``     | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                         |
-| `DNSBL_IGNORE_IP_URLS` | ``     | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。 |
+| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                         |
+| --------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`           | ``     | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                                        |
+| `DNSBL_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 DNSBL 检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+| `DNSBL_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。                |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! tip "选择 DNSBL 服务器"
     选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：
@@ -2604,6 +2727,20 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     | `GREYLIST_URI`      |        | multisite | 否   | **URI 灰名单：** 要列入灰名单的 URI 模式（PCRE 正则表达式）列表，以空格分隔。 |
     | `GREYLIST_URI_URLS` |        | multisite | 否   | **URI 灰名单 URL：** 包含要列入灰名单的 URI 模式的 URL 列表，以空格分隔。     |
 
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
+=== "请求头"
+    **功能说明：** 将携带指定请求头的请求列入灰名单，按名称匹配，并可选地用 PCRE 正则匹配其值。
+
+    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                                                    |
+    | ----------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求加入灰名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `GREYLIST_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。       |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
+
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 
@@ -2714,28 +2851,57 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
 
 ### 配置项
 
-| 配置项                       | 默认值 | 上下文    | 可多值 | 说明                                                                                   |
-| ---------------------------- | ------ | --------- | ------ | -------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`   | multisite | 否     | **启用 gRPC：** 设置为 `yes` 以启用 gRPC 代理。                                        |
-| `GRPC_HOST`                  |        | multisite | 是     | **gRPC 上游：** `grpc_pass` 使用的值（例如 `grpc://service:50051` 或 `grpcs://...`）。 |
-| `GRPC_URL`                   | `/`    | multisite | 是     | **Location URL：** 将被代理到 gRPC 上游的路径。                                        |
-| `GRPC_CUSTOM_HOST`           |        | multisite | 否     | **自定义 Host 头：** 覆盖发送到上游的 `Host` 头。                                      |
-| `GRPC_HEADERS`               |        | multisite | 是     | **额外上游请求头：** 分号分隔的 `grpc_set_header` 值列表。                             |
-| `GRPC_HIDE_HEADERS`          |        | multisite | 是     | **隐藏响应头：** 空格分隔的 `grpc_hide_header` 值列表。                                |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`  | multisite | 否     | **拦截错误：** 启用/禁用 `grpc_intercept_errors`。                                     |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`  | multisite | 是     | **连接超时：** 与上游建立连接的超时时间。                                              |
-| `GRPC_READ_TIMEOUT`          | `60s`  | multisite | 是     | **读取超时：** 从上游读取数据的超时时间。                                              |
-| `GRPC_SEND_TIMEOUT`          | `60s`  | multisite | 是     | **发送超时：** 向上游发送数据的超时时间。                                              |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`  | multisite | 是     | **Socket Keepalive：** 启用/禁用与上游 socket 的 keepalive。                           |
-| `GRPC_SSL_SNI`               | `no`   | multisite | 否     | **SSL SNI：** 启用/禁用 TLS 上游的 SNI。                                               |
-| `GRPC_SSL_SNI_NAME`          |        | multisite | 否     | **SSL SNI 名称：** 当 `GRPC_SSL_SNI=yes` 时发送的 SNI 主机名。                         |
-| `GRPC_NEXT_UPSTREAM`         |        | multisite | 是     | **下一个上游条件：** `grpc_next_upstream` 的值。                                       |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |        | multisite | 是     | **下一个上游超时：** `grpc_next_upstream_timeout` 的值。                               |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |        | multisite | 是     | **下一个上游重试次数：** `grpc_next_upstream_tries` 的值。                             |
-| `GRPC_INCLUDES`              |        | multisite | 是     | **附加 include：** 在 gRPC `location` 块中追加的、以空格分隔的 include 文件列表。      |
+| 配置项                                  | 默认值 | 上下文    | 可多值 | 说明                                                                                                                    |
+| --------------------------------------- | ------ | --------- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                              | `no`   | multisite | 否     | **启用 gRPC：** 设置为 `yes` 以启用 gRPC 代理。                                                                         |
+| `GRPC_HOST`                             |        | multisite | 是     | **gRPC 上游：** `grpc_pass` 使用的值（例如 `grpc://service:50051` 或 `grpcs://...`）。                                  |
+| `GRPC_URL`                              | `/`    | multisite | 是     | **Location URL：** 将被代理到 gRPC 上游的路径。                                                                         |
+| `GRPC_CUSTOM_HOST`                      |        | multisite | 否     | **自定义 Host 头：** 覆盖发送到上游的 `Host` 头。                                                                       |
+| `GRPC_HEADERS`                          |        | multisite | 是     | **额外上游请求头：** 分号分隔的 `grpc_set_header` 值列表。                                                              |
+| `GRPC_HIDE_HEADERS`                     |        | multisite | 是     | **隐藏响应头：** 空格分隔的 `grpc_hide_header` 值列表。                                                                 |
+| `GRPC_HEADERS_CLIENT`                   |        | multisite | 是     | **返回给客户端的响应头：** 分号分隔的 `add_header` 值列表。                                                             |
+| `GRPC_PASS_HEADERS`                     |        | multisite | 是     | **透传的响应头：** 空格分隔的 `grpc_pass_header` 值列表，用于透传 NGINX 默认隐藏的响应头。                              |
+| `GRPC_IGNORE_HEADERS`                   |        | multisite | 是     | **忽略的响应头：** 空格分隔的 `grpc_ignore_headers` 值列表，使 NGINX 不处理这些响应头。                                 |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`   | multisite | 否     | **允许请求头包含下划线：** 启用/禁用 `underscores_in_headers`。                                                         |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`  | multisite | 否     | **拦截错误：** 启用/禁用 `grpc_intercept_errors`。                                                                      |
+| `GRPC_BUFFER_SIZE`                      |        | multisite | 是     | **缓冲区大小：** `grpc_buffer_size` 的值（读取上游响应所用的缓冲区）。                                                  |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`  | multisite | 是     | **连接超时：** 与上游建立连接的超时时间。                                                                               |
+| `GRPC_READ_TIMEOUT`                     | `60s`  | multisite | 是     | **读取超时：** 从上游读取数据的超时时间。                                                                               |
+| `GRPC_SEND_TIMEOUT`                     | `60s`  | multisite | 是     | **发送超时：** 向上游发送数据的超时时间。                                                                               |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`  | multisite | 是     | **Socket Keepalive：** 启用/禁用与上游 socket 的 keepalive。                                                            |
+| `GRPC_SSL_SNI`                          | `no`   | multisite | 否     | **SSL SNI：** 启用/禁用 TLS 上游的 SNI。                                                                                |
+| `GRPC_SSL_SNI_NAME`                     |        | multisite | 否     | **SSL SNI 名称：** 当 `GRPC_SSL_SNI=yes` 时发送的 SNI 主机名。                                                          |
+| `GRPC_SSL_VERIFY`                       | `no`   | multisite | 否     | **SSL 校验：** 启用/禁用对 gRPC 上游证书的校验。                                                                        |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否     | **受信任证书来源：** CA 包的来源，`file` 或 `data`。                                                                    |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否     | **受信任证书路径：** 调度器 可读取的 PEM CA 包路径（来源为 `file` 时使用）。                                            |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否     | **受信任证书内容：** base64 或明文 PEM 形式的 CA 包（来源为 `data` 时使用）。                                           |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否     | **SSL 校验深度：** 上游证书链的校验深度。                                                                               |
+| `GRPC_SSL_CERT_PRIORITY`                | `file` | multisite | 否     | **客户端证书来源：** 客户端证书与私钥的来源，`file` 或 `data`。                                                         |
+| `GRPC_SSL_CERT`                         |        | multisite | 否     | **客户端证书路径：** 向上游出示的 PEM 客户端证书，用于双向 TLS（来源为 `file` 时使用）。                                |
+| `GRPC_SSL_CERT_DATA`                    |        | multisite | 否     | **客户端证书内容：** base64 或明文 PEM 形式的客户端证书（来源为 `data` 时使用）。                                       |
+| `GRPC_SSL_KEY`                          |        | multisite | 否     | **客户端私钥路径：** 与客户端证书匹配的 PEM 私钥（来源为 `file` 时使用）。私钥不能加密。                                |
+| `GRPC_SSL_KEY_DATA`                     |        | multisite | 否     | **客户端私钥内容：** base64 或明文 PEM 形式的客户端私钥（来源为 `data` 时使用）。                                       |
+| `GRPC_SSL_CRL`                          |        | multisite | 否     | **CRL 路径：** 校验上游时应用的 PEM 吊销列表。优先于 CRL 内容。                                                         |
+| `GRPC_SSL_CRL_DATA`                     |        | multisite | 否     | **CRL 内容：** base64 或明文 PEM 形式的吊销列表。仅在 CRL 路径为空时使用。                                              |
+| `GRPC_SSL_PROTOCOLS`                    |        | multisite | 否     | **上游 SSL 协议：** 向上游提供的 TLS 版本。留空则沿用 NGINX 默认值。                                                    |
+| `GRPC_SSL_CIPHERS`                      |        | multisite | 否     | **上游 SSL 加密套件：** 向上游提供的加密套件字符串。留空则沿用 NGINX 默认值。                                           |
+| `GRPC_NEXT_UPSTREAM`                    |        | multisite | 是     | **下一个上游条件：** `grpc_next_upstream` 的值。                                                                        |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |        | multisite | 是     | **下一个上游超时：** `grpc_next_upstream_timeout` 的值。                                                                |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |        | multisite | 是     | **下一个上游重试次数：** `grpc_next_upstream_tries` 的值。                                                              |
+| `GRPC_AUTH_REQUEST`                     |        | multisite | 是     | **认证请求：** `auth_request` 的值，用于通过外部提供方进行认证。                                                        |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |        | multisite | 是     | **认证请求登录 URL：** 认证请求返回 401 时的跳转目标。                                                                  |
+| `GRPC_AUTH_REQUEST_SET`                 |        | multisite | 是     | **认证请求变量：** 分号分隔的 `auth_request_set` 值列表。                                                               |
+| `GRPC_INCLUDES`                         |        | multisite | 是     | **附加 include：** 在 gRPC `location` 块中追加的、以空格分隔的 include 文件列表。                                       |
+| `GRPC_MAX_CLIENT_SIZE`                  |        | multisite | 是     | **最大请求体大小：** 当前 location 的 `client_max_body_size` 值（`0` 表示不限制）。留空则使用服务的 `MAX_CLIENT_SIZE`。 |
+
+!!! tip "上游双向 TLS"
+    客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
 
 !!! warning "gRPC Location 中的 ModSecurity"
     由于 ModSecurity 目前无法稳定支持 gRPC 流量模式，本插件生成的 gRPC `location` 块中会自动关闭 ModSecurity。
+
+!!! tip "校验上游证书"
+    只有在 CA 包可用时 `GRPC_SSL_VERIFY` 才会生效。可通过 `GRPC_SSL_TRUSTED_CERTIFICATE`（调度器 可读取的路径）或 `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`（base64 或明文 PEM）提供，并用 `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` 选择来源。调度器 会校验该 CA 包、缓存并分发到各实例。若没有可用的 CA 包，校验将保持关闭。
 
 !!! warning "长连接流与核心超时"
     长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。
@@ -2796,6 +2962,30 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
 
+=== "已校验的 TLS 上游"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    GRPC_SSL_VERIFY: "yes"
+    GRPC_SSL_TRUSTED_CERTIFICATE: "/etc/ssl/certs/ca-certificates.crt"
+    GRPC_SSL_VERIFY_DEPTH: "2"
+    ```
+
+=== "外部认证"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_AUTH_REQUEST: "/auth"
+    GRPC_AUTH_REQUEST_SIGNIN_URL: "https://sso.example.com/login"
+    GRPC_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_email $upstream_http_x_email"
+    GRPC_HEADERS: "x-forwarded-user $auth_user"
+    ```
 ## Gzip
 
 STREAM 支持 :x:
@@ -3215,7 +3405,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | 设置                                        | 默认值        | 上下文    | 多选 | 描述                                                                                                                                                                                 |
 | ------------------------------------------- | ------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                     |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。                                |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。 此时 ACME 验证路径会跳过所有其他检查。                                |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。   |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                       |
@@ -3226,7 +3416,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                    |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                                 |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                           |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                      |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                      |
@@ -3238,10 +3428,11 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | 否   | **Certbot 日志备份上限：** Certbot 每个任务保留的轮转 `letsencrypt.log` 备份数量。Certbot 自带的默认值 `1000` 很容易迅速堆积；`50` 是一个更合理的上限。设置为 `0` 时仅保留当前日志。 |
 
 !!! info "信息和行为"
+    - 只有同时设置 `AUTO_LETS_ENCRYPT=yes`、`LETS_ENCRYPT_CHALLENGE=http` 和 `LETS_ENCRYPT_PASSTHROUGH=no` 时，才会启用本地 `/.well-known/acme-challenge/` 处理。HTTPS 重定向和访问检查的例外还要求请求中的确切令牌对应一个可读且非空的文件。删除令牌后会立即恢复正常检查。其他服务对该路径应用正常的路由和访问规则。
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
@@ -3259,6 +3450,8 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 !!! warning "通配符证书"
     通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 `USE_LETS_ENCRYPT_WILDCARD` 设置为 `yes` 并正确配置您的 DNS 提供商凭据。
+
+    通配符仅覆盖一级域名：`*.example.com` 不覆盖 `a.b.example.com`。无法覆盖全部已配置主机名的分组会被拒绝，相关服务会被报告为配置错误。请将这些名称拆分到不同服务中。有效分组仍会继续处理；如果无法签发任何证书，任务将失败。其他分组成功签发的证书仍会请求重新加载。
 
 !!! warning "速率限制"
     Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 `USE_LETS_ENCRYPT_STAGING` 设置为 `yes` 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。
@@ -3414,6 +3607,9 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `USE_LIMIT_REQ`  | `yes`  | multisite | 否   | **启用请求限制：** 设置为 `yes` 以启用请求速率限制功能。                                                             |
     | `LIMIT_REQ_URL`  | `/`    | multisite | 是   | **URL 模式：** 将应用速率限制的 URL 模式（PCRE 正则表达式）；使用 `/` 以应用于所有请求。                             |
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | 是   | **速率限制：** 最大请求速率，格式为 `Nr/t`，其中 N 是请求数，t 是时间单位：s（秒）、m（分钟）、h（小时）或 d（天）。 |
+
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
 
     !!! tip "速率限制格式"
         速率限制格式指定为 `Nr/t`，其中：
@@ -3579,6 +3775,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global | 是     | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global | 是     | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+如需更详细的指南，请参阅[高级用法](advanced.md#maintenance-pro)文档。
+
+STREAM 支持 :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| 参数              | 默认值 | 上下文    | 可重复 | 描述                                                                                                                                                                                                      |
+| ----------------- | ------ | --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`   | multisite | 否     | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 STREAM 支持 :warning:
@@ -3672,20 +3881,23 @@ STREAM 支持 :warning:
 
 ### 配置设置
 
-| 设置                                 | 默认值 | 上下文    | 多选 | 描述                                                                                                                           |
-| ------------------------------------ | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_METRICS`                        | `yes`  | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                                                           |
-| `METRICS_MEMORY_SIZE`                | `16m`  | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                                              |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`   | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                               |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`  | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                          |
-| `MAX_LRU_HISTORY`                    | `1k`   | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
-| `METRICS_SAVE_TO_REDIS`              | `yes`  | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。                               |
+| 设置                                 | 默认值    | 上下文    | 多选 | 描述                                                                                                                                                                                                       |
+| ------------------------------------ | --------- | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`     | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                                                                                                                                       |
+| `METRICS_MEMORY_SIZE`                | `16m`     | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                                                                                                                          |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                                                                                                           |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                                                                                                      |
+| `METRICS_REDIS_TTL`                  | `2592000` | global    | 否   | **指标 Redis TTL：** Redis 指标键过期前的秒数（`0` = 永久）；每次同步都会刷新，因此活跃数据永不过期，而被遗弃的数据可在 `volatile-lru` 下被驱逐，从而让 Redis 从 maxmemory 压力中恢复。支持 `k`/`m` 简写。 |
+| `MAX_LRU_HISTORY`                    | `1k`      | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。                                                                             |
+| `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。                                                                                                           |
 
 !!! tip "调整内存分配大小"
     应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
 
 !!! info "Redis 集成"
-    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。
+    当 BunkerWeb 使用 [Redis](#redis) 时，指标插件会自动同步被阻止请求的报告。达到 `maxmemory` 后，被拒绝的报告会保留在工作进程的有限缓冲区中，等待重试。缓冲区溢出、LRU 驱逐或 Redis 数据丢失仍可能导致报告丢失。不完整的筛选计数会根据保留的请求列表重新构建。存储的报告若数据格式无效（时间戳或标识符不可用），将从报告表格及其总数中排除。
+
+    计数器会在同步前按需从 Redis 恢复总数，包括从本地 LRU 缓存中被驱逐后的情况。非活跃 Redis 计数器会保留到 `METRICS_REDIS_TTL` 到期；设置为 `0` 表示有意无限期保留。因此，使用包含大量不同键的指标时，请监控 Redis 内存。
 
 !!! warning "性能注意事项"
     为 `METRICS_MAX_BLOCKED_REQUESTS` 或 `METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。
@@ -3905,6 +4117,8 @@ STREAM 支持 :warning:
 
         建议在生产环境中启用 HTTP/3 之前进行彻底测试。
 
+        当 `USE_PROXY_PROTOCOL` 设置为 `yes` 时，HTTP/3 会被静默禁用。NGINX 无法在 QUIC 监听器上读取 PROXY protocol 标头，因此即使 `HTTP3` 仍显示为 `yes`，也不会生成 `quic` 监听器或 `Alt-Svc` 标头，并且 `LIMIT_CONN_MAX_HTTP3` 不会生效。请在上游终止 PROXY protocol，或仅使用 HTTP/1.1 和 HTTP/2。
+
 === "静态文件服务"
 
     **文件服务配置**
@@ -4088,18 +4302,19 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 ### 配置设置
 
-| 设置                                  | 默认值         | 上下文    | 多选 | 描述                                                                                                                                        |
-| ------------------------------------- | -------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                            |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                 |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
+| 设置                                  | 默认值                                | 上下文    | 多选 | 描述                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                                                                                                                                                                                                                                                                        |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                                                                                                                                                                                                                                                             |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                                                                                                                                                                                                                                                                 |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                                                                                                                                                                                                                                                             |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                                                                                                                                                                                                                                                            |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                                                                                                                                                                                                                                                              |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。路径必须以 `.log` 结尾。通过该后缀实现的轮转仅适用于安装了 logrotate 的场景（Linux 软件包和 All-In-One 镜像）；在 Docker、Swarm 和 Kubernetes 上，非默认名称既不会被流式传输也不会被轮转，会在容器内无限增长，因为容器的日志流仅链接了 `modsec_audit.log`。 |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。                                                                                                                                                                                                                                             |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                                                                                                                                                                                                                                                                    |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                                                                                                                                                                                                                                                                     |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                                                                                                                                                                                                                                                                |
 
 !!! warning "ModSecurity 和 OWASP 核心规则集"
     **我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)**，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。
@@ -4236,7 +4451,7 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "带插件的高级配置"
@@ -4277,6 +4492,20 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
 
 !!! note "人类可读的大小值"
     对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。
+
+
+### Concurrent 审计日志
+
+| 设置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | 写入模式：`Serial`（默认）或 `Concurrent`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | 默认为空；`Concurrent` 必须使用绝对存储目录。 |
+
+设置 `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` 和 `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`。请预先在每个 BunkerWeb 实例上创建该目录，并授予 nginx worker 写入和目录访问权限。需要保留日志时请使用持久化挂载。BunkerWeb 会在应用之前拒绝无效配置，不会创建此目录。在全局 CRS 模式（`USE_MODSECURITY_GLOBAL_CRS=yes`）下，这两个设置必须在全局配置；服务级覆盖不会选择独立的写入模式。
+
+`MODSECURITY_SEC_AUDIT_LOG` 仍为可加锁的普通 `.log` 文件：`Serial` 写入完整记录，`Concurrent` 写入指向各事务文件的索引。索引路径及其轮转规则保持不变。操作员负责磁盘容量、访问权限以及按日期创建的子目录的递归保留策略。轮转索引不会删除事务文件。切换之前请确认日志读取工具能够处理 Concurrent 索引，而非仅支持 Serial 记录。
+
+Concurrent 改变记录的存储方式；它不会对请求进行采样，也不会减少 `MODSECURITY_SEC_AUDIT_LOG_PARTS` 选择的审计数据。请根据请求速率、所选记录部分和保留时间规划存储容量，并使用有代表性的流量测量记录大小，而不是假设每个被阻止的请求都有固定的开销。
 
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4324,6 +4553,8 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 5. **转发验证结果（可选）：** 若后端需要检查证书信息，请保持 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes`。
 6. **维护吊销数据：** 若发布 CRL，请配置 `MTLS_CRL`（或 `MTLS_CRL_DATA`），使 BunkerWeb 能拒绝已吊销的证书。
 
+Scheduler 会先验证完整的候选 CA 证书包以及每个 CRL，再替换缓存文件。若 CRL 无法解析，或其签发者存在于证书包中而签名校验失败，该 CRL 会被拒绝；若签发 CRL 的 CA 不在证书包内，则记录警告后照常发布，因为 NGINX 会使用客户端提供的中间证书构建证书链。如果数据无法读取、格式无效或不匹配，则保留原有的 CA/CRL 配对并记录错误。请同时轮换 CA 和对应的 CRL，并及时修复无效来源，尤其要在 CRL 到期前完成。同时清空 `MTLS_CRL` 和 `MTLS_CRL_DATA` 表示主动移除吊销检查。移除 CA 配置、禁用 mTLS 或删除服务会移除相应的缓存文件；只要 `USE_MTLS` 仍为 `yes` 且模式不是 `optional_no_ca`，`ssl_verify_client` 就会继续针对内置的占位 CA 生效：`on` 模式下所有客户端都会收到 400，`optional` 模式下所有出示证书的客户端都会收到 400，直到重新配置 CA 为止。实际发生的移除会请求重新加载配置。
+
 ### 配置设置
 
 | 设置                           | 默认值 | 上下文    | 多个 | 说明                                                                                                                                                                                                |
@@ -4335,16 +4566,19 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 | `MTLS_VERIFY_CLIENT`           | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                                                                       |
 | `MTLS_URL`                     |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
 | `MTLS_VERIFY_DEPTH`            | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                                                                           |
-| `MTLS_FORWARD_CLIENT_HEADERS`   | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。 |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。                |
 | `MTLS_CRL_PRIORITY`            | `file` | multisite | 否   | **客户端 CRL 优先级：** CRL 的来源：`file`（路径）或 `data`（base64/PEM）。                                                                                                                         |
 | `MTLS_CRL`                     |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。                                     |
 | `MTLS_CRL_DATA`                |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                                                                         |
+
+!!! tip "锚定路径模式时要覆盖其下的所有内容"
+    请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
 
 !!! tip "配置一次，处处分发"
     CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。
 
 !!! warning "严格模式需提供 CA 证书包"
-    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，Scheduler 必须能够验证并缓存客户端 CA 证书包。如果没有可用的证书包，BunkerWeb 会在每个实例上跳过 mTLS 指令，避免服务在证书引用无效或缺失的情况下运行。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。若 Scheduler 在 `/var/cache/bunkerweb` 非持久化的情况下重启，mTLS 将保持禁用，直到首次任务运行完成并重新分发 CA 证书包；因此在需要严格执行策略的场景下，请使用持久化的缓存卷。
+    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，Scheduler 必须能够验证并缓存客户端 CA 证书包。在证书包通过验证并分发之前，每个实例都会回退到一个没有任何客户端能够构建信任链的占位 CA。在 `on` 模式下，所有客户端都会被拒绝，而此前该服务是在完全不做客户端验证的情况下运行的。在 `optional` 模式下，不提供证书的客户端仍会被放行，这正是该模式的含义；此类请求的强制执行来自 `MTLS_URL`，且仅在其已设置时生效，若留空则没有任何强制执行。而提供了证书的客户端会被拒绝，因为没有任何东西可以用来验证它。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。若 Scheduler 在 `/var/cache/bunkerweb` 非持久化的情况下重启，该状态将一直持续，直到首次任务运行完成并重新分发 CA 证书包；因此在需要严格执行策略的场景下，请使用持久化的缓存卷。
 
 !!! info "受信证书与验证"
     BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。
@@ -4652,7 +4886,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 - **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
 - **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
-您可以使用促销码 `freetrial` 免费试用 Pro 功能 1 个月。请访问 [BunkerWeb 面板](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。
+您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4952,7 +5186,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_PORT`              | `6379`     | global | 否   | **Redis/Valkey 端口：** Redis/Valkey 服务器的端口号。                                                                                    |
 | `REDIS_DATABASE`          | `0`        | global | 否   | **Redis/Valkey 数据库：** 在 Redis/Valkey 服务器上使用的数据库编号 (0-15)。                                                              |
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。                                                            |
-| `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。                                                         |
+| `REDIS_SSL_VERIFY`        | `no`       | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。                                                         |
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。                                                              |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。                                                              |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                                                                               |
@@ -4961,7 +5195,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                                                                                 |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                                                                                |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。                                                            |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                                                                                  |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。                                                              |
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
     对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
@@ -5049,6 +5283,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 - **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
 - **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如通用场景使用 `volatile-lru`，缓存密集型场景使用 `allkeys-lru`）
 - **All-in-One 默认值：** AIO Docker 镜像默认将 Redis 配置为 `maxmemory=256mb` 和 `maxmemory-policy=volatile-lru`；可通过环境变量 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。在 `volatile-lru` 策略下，瞬时计数器（速率限制、不良行为）会先于会话和限时封禁等带 TTL 的关键键被淘汰，而无过期时间的键（永久封禁）则免于被淘汰。建议为 BunkerWeb 使用的外部 Redis 或 Valkey 服务器采用同样的策略。
+- **让安全报告远离驱逐池：** 使用 `METRICS_REDIS_TTL` 的默认值时，被阻止请求的报告带有过期时间，正是该过期时间使它们在 `volatile-lru` 下成为可驱逐对象。该列表是保存整个保留窗口的单个键，因此一次驱逐会清除全部内容，而不是最旧的报告。请在共享同一服务器的每个实例上设置 `METRICS_REDIS_TTL=0`，否则仍使用默认值的实例会在数秒内重新设置过期时间。在 `allkeys-lru` 下这不起作用，那里没有键是免疫的；它也不会降低内存压力，只会把压力转移到仍会过期的键上，其中包括限时封禁、会话和缓存的判定结果。请按需要保留的报告数量规划 `maxmemory`，而不是依赖驱逐：`METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设定该上限。
 - **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
 
 #### 数据持久性
@@ -5059,7 +5294,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 
 #### 性能优化
 
-- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践。`REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 生效：稳态下的连接数约为 `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`。请将 Redis/Valkey 的 `maxclients` 上限设置在该值之上，否则被拒绝的连接会使该请求无法检查仅保存在 Redis 中的封禁
 - **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
 - **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
 - **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式
@@ -5136,13 +5371,15 @@ STREAM 支持 :warning:
     | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
     | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。                                                                                                        |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
     | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
     | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
     | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
     | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。                                                                                                  |
+
+    BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
     !!! tip "最佳实践"
         - 始终在 `REVERSE_PROXY_HOST` 中指定完整的 URL，包括协议（http:// 或 https://）
@@ -5188,15 +5425,24 @@ STREAM 支持 :warning:
         - **证书验证：** 控制如何验证后端服务器证书
         - **SNI 支持：** 为托管多个站点的后端指定服务器名称指示
 
-    | 设置                                             | 默认值 | 上下文    | 多选 | 描述                                                                               |
-    | ------------------------------------------------ | ------ | --------- | ---- | ---------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。                         |
-    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。              |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                             |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。   |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。            |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。 |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                                  |
+    | 设置                                             | 默认值 | 上下文    | 多选 | 描述                                                                                     |
+    | ------------------------------------------------ | ------ | --------- | ---- | ---------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。                               |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。                    |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                                   |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。         |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。       |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                                        |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file` | multisite | 否   | **客户端证书来源：** 客户端证书与私钥的来源，`file` 或 `data`。                          |
+    | `REVERSE_PROXY_SSL_CERT`                         |        | multisite | 否   | **客户端证书路径：** 向上游出示的 PEM 客户端证书，用于双向 TLS（来源为 `file` 时使用）。 |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |        | multisite | 否   | **客户端证书内容：** base64 或明文 PEM 形式的客户端证书（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_KEY`                          |        | multisite | 否   | **客户端私钥路径：** 与客户端证书匹配的 PEM 私钥（来源为 `file` 时使用）。私钥不能加密。 |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |        | multisite | 否   | **客户端私钥内容：** base64 或明文 PEM 形式的客户端私钥（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_CRL`                          |        | multisite | 否   | **CRL 路径：** 校验上游时应用的 PEM 吊销列表。优先于 CRL 内容。                          |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |        | multisite | 否   | **CRL 内容：** base64 或明文 PEM 形式的吊销列表。仅在 CRL 路径为空时使用。               |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |        | multisite | 否   | **上游 SSL 协议：** 向上游提供的 TLS 版本。留空则沿用 NGINX 默认值。                     |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |        | multisite | 否   | **上游 SSL 加密套件：** 向上游提供的加密套件字符串。留空则沿用 NGINX 默认值。            |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -5305,6 +5551,7 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |        | multisite | 是   | **最大请求体大小（按 location）：** 此 location 的最大请求体大小（`0` 表示不限制）。为空时使用服务的 `MAX_CLIENT_SIZE`。                           |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。
@@ -5313,6 +5560,9 @@ STREAM 支持 :warning:
         ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果**（并且仅当）**某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
 
         为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)，它们检查上传文件本身，而不是原始请求体。
+
+    !!! tip "按 URL 的请求体大小"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` 仅限制单个 URL 的请求体，因此专用的上传端点可以接收大文件，而服务的其余部分仍保持更严格的 `MAX_CLIENT_SIZE`。它还会设置该 location 的 ModSecurity 请求体限制，并覆盖服务级取值以及显式设置的 `MODSECURITY_SEC_REQUEST_BODY_LIMIT`，因此上传不会被 WAF 拒绝，而其他每个 URL 都保留自己的限制。有两个限制不受影响：JSON、XML 和表单编码的请求体仍受 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 限制（默认 `131072`，超出返回 `400`），而 `0` 会关闭该 location 的 ModSecurity 限制，此时它会缓冲任意大小的请求体。ModSecurity 会在请求被转发前读取完整的请求体，因此请将该值设置为端点实际需要的大小。
 
 === "缓存配置"
 
@@ -5344,6 +5594,9 @@ STREAM 支持 :warning:
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+!!! tip "上游双向 TLS"
+    客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
 
 !!! danger "Docker Compose 用户 - NGINX 变量"
     当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (`$$`) 来转义美元符号 (`$`)。这适用于所有包含 NGINX 变量的设置，如 `$remote_addr`、`$proxy_add_x_forwarded_for` 等。
@@ -5447,7 +5700,6 @@ STREAM 支持 :warning:
     REVERSE_PROXY_HOST_2: "http://auth-service:8080"
     REVERSE_PROXY_URL_2: "/auth"
     ```
-
 ## Reverse scan
 
 STREAM 支持 :white_check_mark:
@@ -5633,6 +5885,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 更多信息，请参阅 [robots.txt 文档](https://www.robotstxt.org/robotstxt.html)。
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+如需更详细的指南，请参阅[高级用法](advanced.md#saml-pro)文档。
+
+STREAM 支持 :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| 参数                            | 默认值           | 上下文    | 可重复 | 描述                                                                                                                                                       |
+| ------------------------------- | ---------------- | --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_SAML`                      | `no`             | multisite | 否     | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | 否     | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | 否     | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | 否     | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | 否     | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | 否     | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | 否     | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | 否     | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | 否     | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | 否     | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | 否     | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | 否     | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | 否     | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | 否     | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | 否     | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | 否     | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | 否     | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | 否     | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | 否     | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | 否     | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | 否     | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | 否     | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | 否     | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | 否     | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | 否     | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | 否     | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | 否     | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | 否     | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | 否     | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | 否     | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | 是     | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | 是     | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | 否     | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Security.txt
 
@@ -5858,6 +6155,13 @@ STREAM 支持 :white_check_mark:
     1. 将 `USE_REDIS` 设置为 `yes` 并配置您的 Redis 连接
     2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`
     3. 这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话
+
+!!! info "会话吊销"
+    未启用 Redis 时，会话数据保存在 Cookie 本身中，因此销毁会话只会清除浏览器中的 Cookie，已签名的 Cookie 在超时前仍然有效。BunkerWeb 会在共享内存中维护一份已销毁会话标识符的拒绝列表，被销毁的 Cookie 在下次使用时会被拒绝。
+
+    - 仅在会话数据存储于 Cookie 时生效。将 `USE_REDIS` 设为 `yes` 后，会话数据保存在服务端，销毁会话本身就会将其删除。
+    - 拒绝列表仅在单个 BunkerWeb 实例内有效。如需在集群范围内吊销会话，请使用 Redis。
+    - 通过 `SESSIONS_REVOCATION_MEMORY_SIZE` 调整其大小。若存储写满或不可用，会话将被视为有效，并记录一条警告。
 
 ### 配置示例
 
@@ -6183,6 +6487,20 @@ STREAM 支持 :warning:
     | `WHITELIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 白名单检查的 URI 模式列表。                 |
     | `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
+
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
+=== "请求头"
+    **功能说明：** 将携带指定请求头的请求列入白名单，按名称匹配，并可选地用 PCRE 正则匹配其值。适用于能够发送共享密钥的可信探针或网关。
+
+    | 设置                     | 默认值 | 上下文    | 多选 | 描述                                                                                    |
+    | ------------------------ | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求加入白名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `WHITELIST_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。       |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。 它也不会解除已有的封禁：被封禁的 IP 在白名单执行之前就已被拒绝。
 
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。支持使用 `http://user:pass@url` 格式进行基本身份验证。

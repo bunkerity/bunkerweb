@@ -27,18 +27,19 @@ Follow these steps to configure and use ModSecurity:
 
 ### Configuration Settings
 
-| Setting                               | Default        | Context   | Multiple | Description                                                                                                                                                                               |
-| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                          |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                    |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                    |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                        |
+| Setting                               | Default                               | Context   | Multiple | Description                                                                                                                                                                               |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                          |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                    |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                    |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in `.log`. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only `modsec_audit.log` is symlinked into the container's log stream.                 |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                        |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
@@ -175,7 +176,7 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Advanced Configuration with Plugins"
@@ -216,3 +217,16 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
 
 !!! note "Human-readable size values"
     For size settings like `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, the suffixes `k`, `m`, and `g` (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Concurrent audit logs
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Writer: `Serial` (default) or `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Empty by default; required absolute storage directory for `Concurrent`. |
+
+Set `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` and `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Preprovision that directory on every BunkerWeb instance with write and search permissions for the nginx worker. Use a persistent mount for retained records. BunkerWeb rejects invalid candidates before applying them; it does not provision the directory. In global CRS mode (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure both settings globally; service overrides do not select a separate writer.
+
+`MODSECURITY_SEC_AUDIT_LOG` stays the regular, lockable `.log` file: it contains complete records with `Serial`, and an index pointing to per-transaction files with `Concurrent`. The existing index path and its rotation rules are unchanged. The operator must manage disk capacity, access permissions and recursive retention of the dated subdirectories. Rotating the index does not remove transaction files. Check compatibility of log readers that expect Serial records before switching.
+
+Concurrent changes how records are stored; it does not sample requests or reduce the audit data selected by `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Size storage for your request rate, selected parts and retention period; measure record sizes with representative traffic instead of assuming a fixed cost per blocked request.

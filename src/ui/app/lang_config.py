@@ -10,6 +10,7 @@ SUPPORTED_LANGUAGES = [
     {"code": "br", "name": "Português (Brasil)", "flag": "br.svg", "english_name": "Brazilian Portuguese"},
     {"code": "ru", "name": "Русский", "flag": "ru.svg", "english_name": "Russian"},
     {"code": "ur", "name": "اردو", "flag": "pk.svg", "english_name": "Urdu"},
+    {"code": "id", "name": "Bahasa Indonesia", "flag": "id.svg", "english_name": "Indonesian"},
     {"code": "de", "name": "Deutsch", "flag": "de.svg", "english_name": "German"},
     {"code": "ko", "name": "한국어", "flag": "kr.svg", "english_name": "Korean"},
     {"code": "tw", "name": "繁體中文", "flag": "tw.svg", "english_name": "Traditional Chinese"},

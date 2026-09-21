@@ -33,6 +33,13 @@ SecRule REQUEST_FILENAME "@rx /configs/.+$" \
 SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
     "t:lowercase,nolog"
 
+# Configuration content may contain XSS rule patterns.
+SecRule REQUEST_FILENAME "@rx /configs/(?:new|[^/]+/[^/]+/[^/]+)$" \
+    "id:1007782,phase:1,pass,nolog,t:none,t:normalizePath,ctl:ruleRemoveTargetById=941140;ARGS:value,ctl:ruleRemoveTargetById=941160;ARGS:value,ctl:ruleRemoveTargetById=941210;ARGS:value,chain"
+SecRule REQUEST_METHOD "@streq POST" "t:none,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
+    "t:lowercase,nolog"
+
 SecRule REQUEST_FILENAME "@endsWith /logs" \
     "id:1007774,phase:1,ctl:ruleRemoveById=953100,ctl:ruleRemoveByTag=attack-disclosure,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \

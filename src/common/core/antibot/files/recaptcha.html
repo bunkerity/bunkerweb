@@ -170,6 +170,18 @@
       #recaptcha-verify:hover {
         background-color: #27a060;
       }
+      #challenge-retry {
+        background-color: var(--color-bw-green);
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      #challenge-retry:hover {
+        background-color: #27a060;
+      }
       footer {
         width: 100%;
         text-align: center;
@@ -258,6 +270,13 @@
     <article>
       <div class="content">
         <h3>Please prove that you are Human before accessing this website</h3>
+        <p id="challenge-error" role="alert"></p>
+        <p class="subtitle">
+          Having trouble? Check your connection and allow this site's challenge
+          to load.
+          <button type="button" id="challenge-retry">Reload challenge</button>
+          If the problem continues, contact the website administrator.
+        </p>
         <noscript>
           <p class="noscript">
             JavaScript needs to be enabled to complete this challenge.
@@ -270,6 +289,8 @@
             class="g-recaptcha hidden"
             data-sitekey="{*recaptcha_sitekey*}"
             data-callback="onSubmit"
+            data-error-callback="challenge_error"
+            data-expired-callback="challenge_error"
             data-action="submit"
           >
             I'm not a robot
@@ -327,27 +348,41 @@
         >
       </p>
     </footer>
-    {-raw-} {% if recaptcha_classic then %}
-    <script
-      src="https://www.google.com/recaptcha/api.js?onload=onv3Callback&render={*recaptcha_sitekey*}&trustedtypes=true"
-      nonce="{*nonce_script*}"
-    ></script>
-    <script
-      defer="defer"
-      src="https://www.google.com/recaptcha/api.js?onload=onv2Callback&trustedtypes=true"
-      nonce="{*nonce_script*}"
-    ></script>
+    {-raw-}
+    <script nonce="{*nonce_script*}">
+      function challenge_error() {
+        document.getElementById("challenge-error").textContent =
+          "Verification could not complete. Reload the challenge to try again.";
+      }
+      document
+        .getElementById("challenge-retry")
+        .addEventListener("click", function () {
+          window.location.reload();
+        });
+      document.addEventListener(
+        "error",
+        function (event) {
+          if (
+            event.target.tagName === "SCRIPT" &&
+            event.target.hasAttribute("data-challenge-script")
+          ) {
+            challenge_error();
+          }
+        },
+        true,
+      );
+    </script>
+    {% if recaptcha_classic then %}
     <script type="text/javascript" nonce="{*nonce_script*}">
       const isDarkMode = window.matchMedia(
         "(prefers-color-scheme: dark)",
       ).matches;
       var onSubmit = function (e) {
+          document.getElementById("challenge-error").textContent = "";
           ((document.getElementById("token").value = e),
             document.getElementById("form").submit());
         },
-        onExpired = function () {
-          location.reload();
-        },
+        onExpired = challenge_error,
         usedVersion = "v2",
         onv2Callback = function () {
           if ("invisible" !== usedVersion) {
@@ -365,6 +400,7 @@
                   sitekey: "{*recaptcha_sitekey*}",
                   callback: onSubmit,
                   "expired-callback": onExpired,
+                  "error-callback": challenge_error,
                   action: "submit",
                   theme: isDarkMode ? "dark" : "light",
                 });
@@ -379,27 +415,35 @@
             grecaptcha.ready(function () {
               document
                 .getElementById("recaptcha-verify")
-                .addEventListener("click", function () {
-                  grecaptcha.execute();
+                .addEventListener("click", async function () {
+                  try {
+                    await grecaptcha.execute();
+                  } catch (error) {
+                    challenge_error();
+                  }
                 });
             }));
         };
     </script>
+    <script
+      data-challenge-script
+      src="https://www.google.com/recaptcha/api.js?onload=onv3Callback&render={*recaptcha_sitekey*}&trustedtypes=true"
+      nonce="{*nonce_script*}"
+    ></script>
+    <script
+      data-challenge-script
+      defer="defer"
+      src="https://www.google.com/recaptcha/api.js?onload=onv2Callback&trustedtypes=true"
+      nonce="{*nonce_script*}"
+    ></script>
     {% else %}
-    <script
-      src="https://www.google.com/recaptcha/enterprise.js?onload=onInvisibleCallback&trustedtypes=true&render={*recaptcha_sitekey*}"
-      nonce="{*nonce_script*}"
-    ></script>
-    <script
-      src="https://www.google.com/recaptcha/enterprise.js?onload=onVisibleCallback&trustedtypes=true&render=explicit"
-      nonce="{*nonce_script*}"
-    ></script>
     <script type="text/javascript" nonce="{*nonce_script*}">
       const isDarkMode = window.matchMedia(
         "(prefers-color-scheme: dark)",
       ).matches;
       var invisible = false;
       var verifyCallback = function (response) {
+        document.getElementById("challenge-error").textContent = "";
         document.getElementById("token").value = response;
         document.getElementById("form").submit();
       };
@@ -413,20 +457,36 @@
         grecaptcha.enterprise.render("recaptcha-container", {
           sitekey: "{*recaptcha_sitekey*}",
           callback: verifyCallback,
+          "expired-callback": challenge_error,
+          "error-callback": challenge_error,
           theme: isDarkMode ? "dark" : "light",
         });
       };
       var onInvisibleCallback = function () {
         invisible = true;
         grecaptcha.enterprise.ready(async () => {
-          const token = await grecaptcha.enterprise.execute(
-            "{*recaptcha_sitekey*}",
-            { action: "CAPTCHA" },
-          );
-          verifyCallback(token);
+          try {
+            const token = await grecaptcha.enterprise.execute(
+              "{*recaptcha_sitekey*}",
+              { action: "CAPTCHA" },
+            );
+            verifyCallback(token);
+          } catch (error) {
+            challenge_error();
+          }
         });
       };
     </script>
+    <script
+      data-challenge-script
+      src="https://www.google.com/recaptcha/enterprise.js?onload=onInvisibleCallback&trustedtypes=true&render={*recaptcha_sitekey*}"
+      nonce="{*nonce_script*}"
+    ></script>
+    <script
+      data-challenge-script
+      src="https://www.google.com/recaptcha/enterprise.js?onload=onVisibleCallback&trustedtypes=true&render=explicit"
+      nonce="{*nonce_script*}"
+    ></script>
     {% end %} {-raw-}
   </body>
 </html>

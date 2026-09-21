@@ -1,11 +1,11 @@
 from contextlib import suppress
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
-from ..utils import get_db
+from ..utils import get_db, reportable_config
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
 
 router = APIRouter(prefix="/services", tags=["services"])
@@ -51,7 +51,7 @@ def get_service(service: str, full: bool = False, methods: bool = True, with_dra
         conf = db.get_config(methods=methods, with_drafts=with_drafts, service=service)
         return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
-    conf = db.get_non_default_settings(methods=methods, with_drafts=with_drafts, service=service)
+    conf = reportable_config(db.get_config(methods=True, with_drafts=with_drafts, service=service), methods=methods)
     return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
 
@@ -60,8 +60,11 @@ def _full_config_snapshot() -> Dict[str, Any]:
     return get_db().get_non_default_settings(methods=False, with_drafts=True)
 
 
-def _persist_config(config: Dict[str, Any]) -> JSONResponse:
-    ret = get_db().save_config(config, "api", changed=True)
+def _persist_config(config: Dict[str, Any], rename: Optional[tuple[str, str]] = None) -> JSONResponse:
+    kwargs = {"changed": True}
+    if rename is not None:
+        kwargs["rename"] = rename
+    ret = get_db().save_config(config, "api", **kwargs)
 
     if isinstance(ret, str):
         code = 400 if ("read-only" in ret or "already exists" in ret or "doesn't exist" in ret) else 500
@@ -118,32 +121,60 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         service: Current service identifier
         req: Update request with new server_name, variables, and draft status
     """
+    db = get_db()
     conf = _full_config_snapshot()
     services_list = (conf.get("SERVER_NAME", "") or "").split()
     if service not in services_list:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
 
     target = service
-    # Handle rename
+    rename = None
+    # Build the complete save payload from the pre-rename snapshot. Database.save_config
+    # moves the service rows in the same transaction.
     if req.server_name:
         new_name = req.server_name.split(" ")[0].strip()
         if not new_name:
             return JSONResponse(status_code=422, content={"status": "error", "message": "server_name cannot be empty"})
-        if new_name != service and new_name in services_list:
-            return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {new_name} already exists"})
+        if new_name != service:
+            if new_name in services_list:
+                return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {new_name} already exists"})
 
-        # Replace in SERVER_NAME and prefix keys
-        services_list = [new_name if s == service else s for s in services_list]
-        conf["SERVER_NAME"] = " ".join(services_list)
-        # Rename prefixed keys
-        renames: List[tuple[str, str]] = []
-        for key in list(conf.keys()):
-            if key.startswith(f"{service}_"):
-                suffix = key[len(service) + 1 :]  # noqa: E203
-                renames.append((key, f"{new_name}_{suffix}"))
-        for old, new in renames:
-            conf[new] = conf.pop(old)
-        target = new_name
+            # A service defined outside the API (environment, autoconf, wizard) is re-asserted
+            # by its owner on the next scheduler pass, which would treat the renamed row as a
+            # removed service and cascade-delete its custom configs and job cache.
+            method = _service_method(service)
+            if method not in ("ui", "api"):
+                return JSONResponse(
+                    status_code=403,
+                    content={
+                        "status": "error",
+                        "message": f"Service {service} is managed by {method or 'another component'} and must be renamed where it is defined",
+                    },
+                )
+
+            valid, reason = db.is_valid_setting("SERVER_NAME", value=new_name, multisite=True)
+            if not valid:
+                return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid server_name {new_name}: {reason}"})
+
+            own = db.get_non_default_settings(methods=True, with_drafts=True, service=service).get("SERVER_NAME")
+            rewritten = {}
+            prefix = f"{service}_"
+            for key, value in conf.items():
+                rewritten[f"{new_name}_{key[len(prefix):]}" if key.startswith(prefix) else key] = value
+            conf = rewritten
+            conf["SERVER_NAME"] = " ".join(new_name if token == service else token for token in str(conf.get("SERVER_NAME", "") or "").split())
+            target = new_name
+            rename = (service, new_name)
+
+            if isinstance(own, dict) and own.get("global") is False:
+                conf[f"{target}_SERVER_NAME"] = " ".join(new_name if token == service else token for token in str(own.get("value") or "").split()) or new_name
+            else:
+                conf[f"{target}_SERVER_NAME"] = new_name
+
+    for key, value in (req.variables or {}).items():
+        valid, reason = db.is_valid_setting(key, value=value, multisite=True)
+        if not valid:
+            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid value for {key}: {reason}"})
 
     # Draft flag update
     if req.is_draft is not None:
@@ -154,11 +185,9 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         if k == "SERVER_NAME":
             # Ignore direct edits to SERVER_NAME via variables
             continue
-        if isinstance(v, (dict, list)):
-            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid value for {k}: must be scalar"})
         conf[f"{target}_{k}"] = "" if v is None else v
 
-    return _persist_config(conf)
+    return _persist_config(conf, rename=rename)
 
 
 @router.delete("/{service}", dependencies=[Depends(guard)])

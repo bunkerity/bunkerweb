@@ -41,7 +41,7 @@ def extract_cache(folder_path, cache_files):
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 members = [m for m in tar.getmembers() if _is_allowed_member(m)]
-                safe_tar_extractall(tar, folder_path, tar_filter="tar", members=members)
+                safe_tar_extractall(tar, folder_path, links="contained", members=members)
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
@@ -55,6 +55,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
         "serial_number": [],
         "fingerprint": [],
         "version": [],
+        "preferred_profile": [],
         "challenge": [],
         "authenticator": [],
         "key_type": [],
@@ -99,8 +100,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                     cert_info["issuer"] = issuer[0].value
 
                 # ? Getting the validity period
-                cert_info["valid_from"] = cert.not_valid_before.strftime("%d-%m-%Y %H:%M:%S UTC")
-                cert_info["valid_to"] = cert.not_valid_after.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_from"] = cert.not_valid_before_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_to"] = cert.not_valid_after_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
 
                 # ? Getting the serial number
                 cert_info["serial_number"] = str(cert.serial_number)

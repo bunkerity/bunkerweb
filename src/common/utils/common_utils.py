@@ -1,16 +1,38 @@
 from contextlib import suppress
+from copy import copy
+import fcntl
 from gzip import GzipFile
 from hashlib import new as new_hash
 from ipaddress import ip_address
+from inspect import signature
 from io import BytesIO
-from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
+import os
+from os import (
+    O_CREAT,
+    O_RDWR,
+    close as os_close,
+    ftruncate,
+    getenv,
+    getpid,
+    open as os_open,
+    sched_getaffinity,
+    sep,
+    access,
+    R_OK,
+    cpu_count,
+    write as os_write,
+)
 from os.path import join as path_join, normpath
 from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from re import compile as re_compile
+import tarfile
 from tarfile import open as tar_open
-from typing import Dict, List, Optional, Union, Any
+from stat import S_ISDIR, S_ISREG
+from threading import Lock
+from time import monotonic, sleep
+from typing import Dict, List, Optional, Tuple, Union, Any
 from urllib.parse import urlsplit
 from math import ceil
 import logging
@@ -342,12 +364,12 @@ def create_plugin_tar_gz(dir_path: Union[str, Path], arc_root: Optional[str] = N
     return result
 
 
-def _validate_tar_members(members, *, allow_symlinks=False):
+def _validate_tar_members(members, *, links="none"):
     """Pre-validate tar members before extraction (defense-in-depth against CVE-2025-4517).
 
     Checks archive metadata only — no disk access — so PATH_MAX symlink chain attacks are impossible.
-    When allow_symlinks is False, all symlinks/hardlinks are rejected (matching filter="data").
-    When allow_symlinks is True, symlinks are permitted but their targets are still validated.
+    When links is "none", all symlinks/hardlinks are rejected. When links is "contained",
+    symlinks and hardlinks are permitted when their targets remain inside the destination.
     """
     for member in members:
         # Block absolute paths
@@ -361,41 +383,178 @@ def _validate_tar_members(members, *, allow_symlinks=False):
             raise ValueError(f"Tar member {member.name!r} is a device or pipe")
         # Check symlinks/hardlinks
         if member.issym() or member.islnk():
-            if not allow_symlinks:
+            if links == "none":
                 raise ValueError(f"Tar member {member.name!r} is a symlink/hardlink (not permitted)")
-            # Even when symlinks are allowed, validate their targets
             if Path(member.linkname).is_absolute():
                 raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
             # Normalize to collapse valid .. segments, then check if any remain (= escaping)
-            normalized = normpath(path_join(str(Path(member.name).parent), member.linkname))
+            link_parent = Path(member.name).parent if member.issym() else Path()
+            normalized = normpath(path_join(str(link_parent), member.linkname))
             if ".." in Path(normalized).parts:
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
 
 
-def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
-    """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
-
-    Pre-validates all members before extraction to defend against CVE-2025-4517
-    (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
-    as additional defense-in-depth.
-
-    Use tar_filter="tar" instead of "data" when symlinks must be preserved
-    (e.g. Let's Encrypt certs). Use tar_filter="auto" to let the helper pick
-    "tar" only when the archive actually contains symlink/hardlink members,
-    and fall back to the stricter "data" filter otherwise — useful for
-    restoring trusted cache archives that may or may not contain links
-    depending on the plugin.
-    """
-    members_to_check = kwargs.get("members")
-    if members_to_check is None:
-        members_to_check = tar.getmembers()
-    if tar_filter == "auto":
-        tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
-    _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
+def _supports_tar_filter(tar) -> bool:
     try:
-        tar.extractall(path, filter=tar_filter, **kwargs)
-    except TypeError:
-        tar.extractall(path, **kwargs)
+        return "filter" in signature(tar.extract).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _is_contained(candidate, destination):
+    return os.path.commonpath([candidate, destination]) == destination
+
+
+def _has_symlinked_parent(parent, path):
+    relative = os.path.relpath(parent, path)
+    if relative == os.curdir:
+        return False
+    current = path
+    for part in Path(relative).parts:
+        current = os.path.join(current, part)
+        if os.path.lexists(current) and os.path.islink(current):
+            return True
+    return False
+
+
+def _resolve_path(path):
+    """Resolve links component-by-component so a link followed by '..' cannot hide an escape."""
+    path = os.fspath(path)
+    if not os.path.isabs(path):
+        path = os.path.join(Path.cwd(), path)
+    pending = list(Path(path).parts)
+    resolved = []
+    link_count = 0
+    while pending:
+        part = pending.pop(0)
+        if part in (os.curdir, os.sep):
+            if part == os.sep:
+                resolved = [os.sep]
+            continue
+        if part == os.pardir:
+            if len(resolved) > 1:
+                resolved.pop()
+            continue
+        candidate = os.path.join(*resolved, part)
+        if os.path.islink(candidate):
+            link_count += 1
+            if link_count > 40:
+                raise OSError("too many symbolic links")
+            target = os.readlink(candidate)
+            if os.path.isabs(target):
+                resolved = [os.sep]
+            pending = list(Path(target).parts) + pending
+            continue
+        resolved.append(part)
+    return os.path.join(*resolved) if resolved != [os.sep] else os.sep
+
+
+def _verify_tar_tree(path, links, destination, members):
+    relative = "."
+
+    try:
+        for member in members:
+            relative = member.name
+            entry = os.path.join(path, member.name)
+            mode = os.lstat(entry).st_mode
+            if os.path.islink(entry):
+                if links == "none":
+                    raise ValueError(f"Tar member {relative!r} is a symlink (not permitted)")
+                target = os.path.join(path, os.path.dirname(member.name), member.linkname)
+                if not _is_contained(_resolve_path(target), destination):
+                    raise ValueError(f"Tar member {relative!r} links outside target directory")
+            elif member.islnk():
+                target = os.path.join(path, member.linkname)
+                if not _is_contained(_resolve_path(target), destination):
+                    raise ValueError(f"Tar member {relative!r} links outside target directory")
+            elif not (S_ISDIR(mode) or S_ISREG(mode)):
+                raise ValueError(f"Tar member {relative!r} is an unexpected entry type")
+    except (OSError, ValueError) as error:
+        if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+            raise
+        raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
+
+
+def safe_tar_extractall(tar, path, *, links="none", **kwargs):
+    """Extract a tar archive with runtime-independent path and link containment checks."""
+    if links not in ("none", "contained"):
+        raise ValueError(f"Unsupported links policy: {links!r}")
+    if "tar_filter" in kwargs:
+        raise TypeError("safe_tar_extractall() got an unexpected keyword argument 'tar_filter'")
+
+    members = kwargs.pop("members", None)
+    numeric_owner = kwargs.pop("numeric_owner", False)
+    members = list(tar.getmembers() if members is None else members)
+    if kwargs:
+        name = next(iter(kwargs))
+        raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {name!r}")
+    _validate_tar_members(members, links=links)
+
+    destination = os.path.realpath(path)
+    supports_filter = _supports_tar_filter(tar)
+    native_filter = getattr(tarfile, "data_filter", None) if supports_filter else None
+    extract_parameters = signature(tar.extract).parameters
+    extract_kwargs = {}
+    if "numeric_owner" in extract_parameters:
+        extract_kwargs["numeric_owner"] = numeric_owner
+    if native_filter is not None:
+        extract_kwargs["filter"] = native_filter
+
+    directories = []
+    for member in members:
+        try:
+            member_path = os.path.join(path, member.name)
+            member_parent = os.path.join(path, os.path.dirname(member.name))
+            if not _is_contained(os.path.realpath(member_parent), destination):
+                raise ValueError(f"Tar member {member.name!r} parent escapes target directory")
+            if _has_symlinked_parent(member_parent, path):
+                raise ValueError(f"Tar member {member.name!r} writes through a symlinked parent")
+            if os.path.lexists(member_path) and os.path.islink(member_path):
+                raise ValueError(f"Tar member {member.name!r} replaces an existing symlink")
+            if member.issym() and not _is_contained(os.path.realpath(os.path.join(path, os.path.dirname(member.name), member.linkname)), destination):
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            if member.islnk() and not _is_contained(os.path.realpath(os.path.join(path, member.linkname)), destination):
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            extract_member = member
+            if member.isdir():
+                extract_member = copy(member)
+                extract_member.mode = 0o700
+                directories.append((member, member_path))
+            tar.extract(extract_member, path, **extract_kwargs)
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be extracted: {error}") from error
+
+    _verify_tar_tree(path, links, destination, members)
+    for member, member_path in sorted(directories, key=lambda item: item[0].name, reverse=True):
+        try:
+            try:
+                is_directory = S_ISDIR(os.lstat(member_path).st_mode)
+            except FileNotFoundError:
+                continue
+            if not is_directory:
+                continue
+            # Keep the archive's directory mode (0o700 on the certbot key directories) minus
+            # setuid/setgid/sticky and group/other write: data_filter drops directory modes and
+            # the runtimes without it would apply the raw mode.
+            directory_mode = member.mode & 0o755 if member.mode is not None else None
+            if native_filter is not None:
+                attributes = native_filter(member, path)
+                if attributes is None:
+                    continue
+                if attributes.mode is None and directory_mode is not None:
+                    attributes = attributes.replace(mode=directory_mode, deep=False)
+            else:
+                attributes = copy(member)
+                attributes.mode = directory_mode
+            tar.chown(attributes, member_path, numeric_owner)
+            tar.utime(attributes, member_path)
+            tar.chmod(attributes, member_path)
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
 def safe_zip_extractall(zf, path):
@@ -416,6 +575,68 @@ def safe_zip_extractall(zf, path):
         if not contained:
             raise ValueError(f"Zip member {member!r} would escape target directory")
     zf.extractall(path)
+
+
+class DatabaseLockBusy(Exception):
+    """Raised by acquire_db_lock() when the lock could not be taken before the deadline."""
+
+
+def acquire_db_lock(path: Path, timeout: float = 30.0) -> int:
+    """Acquire a real mutual-exclusion lock on `path` using fcntl.flock(LOCK_EX).
+
+    Assumption: the lock file lives on a single local filesystem shared by the
+    scheduler process and the bwcli commands (docker exec into the scheduler
+    container, or the same Linux host), and there is exactly one scheduler per
+    database, so a local-filesystem flock is adequate (it would NOT be safe
+    across NFS or between hosts).
+
+    The file is opened (never truncated, never unlinked) and LOCK_EX|LOCK_NB is
+    retried in a 1s loop until `timeout` seconds (monotonic clock) elapse. On
+    success the holder's pid is written into the file (informational only) and
+    the open file descriptor is returned; the caller must pass it to
+    release_db_lock() when done. On timeout DatabaseLockBusy is raised and the
+    existing holder's lock is left untouched (no stealing).
+
+    If a holder process dies, the kernel releases its flock automatically, so
+    no dead-owner reaper is needed here.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os_open(str(path), O_RDWR | O_CREAT, 0o600)
+    deadline = monotonic() + timeout
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            break
+        except OSError:
+            if monotonic() >= deadline:
+                holder_pid = ""
+                with suppress(OSError):
+                    holder_pid = path.read_text().strip()
+                os_close(fd)
+                if holder_pid:
+                    raise DatabaseLockBusy(f"database is locked by pid {holder_pid}, try again later")
+                raise DatabaseLockBusy("database is locked, try again later")
+            sleep(1)
+
+    with suppress(OSError):
+        ftruncate(fd, 0)
+        os_write(fd, str(getpid()).encode())
+
+    return fd
+
+
+def release_db_lock(fd: int) -> None:
+    """Release a lock handle obtained via acquire_db_lock().
+
+    Ownership-aware: unlocks and closes only the given fd. flock() locks are
+    scoped to the open file description behind that fd, so releasing (or
+    double-releasing) one fd can never touch another owner's lock on the same
+    path, and never unlinks the lock file.
+    """
+    with suppress(OSError):
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    with suppress(OSError):
+        os_close(fd)
 
 
 def normalize_bunkerweb_version(version: str) -> str:
@@ -442,6 +663,49 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
         return False
 
 
+_REDIS_CLIENT_LOCK = Lock()
+# Single-entry, process-wide memo: (cache_key, client_or_None, negative_window_deadline).
+# A configuration change yields a different key and therefore a new client, so there is no
+# separate invalidation path. The superseded client is never closed: the Web UI hands the
+# very same object to flask-session as app.config["SESSION_REDIS"], and closing it would
+# break every live session in the worker. Dropping the reference is enough, the pool is
+# garbage collected once nothing uses it.
+_REDIS_CLIENT_ENTRY: Optional[Tuple[tuple, Any, float]] = None
+
+# How long a failed connection is remembered before another connect is attempted.
+# REDIS_TIMEOUT feeds both socket_timeout and socket_connect_timeout (default 1000 ms), so
+# without a negative window every single request against a down Redis pays a full timeout.
+REDIS_NEGATIVE_CACHE_SECONDS = 10.0
+
+
+def shared_redis_pool_size() -> int:
+    """Upper bound on connections in the process-wide Redis pool.
+
+    Deliberately NOT derived from REDIS_KEEPALIVE_POOL: that setting sizes the per-NGINX-worker
+    keepalive pool of the OpenResty Lua client and means nothing here. It was only safe as a
+    Python max_connections while every call owned a private pool.
+
+    Now that one client is shared, the cap has to cover everything in the process that can
+    talk to Redis at once: the gunicorn gthread request threads (MAX_THREADS, defaulting to
+    MAX_WORKERS * 2, src/ui/utils/gunicorn.conf.py) plus the two 4-worker executors in
+    src/ui/app/dependencies.py. redis-py *raises* MaxConnectionsError rather than blocking
+    once the pool is exhausted, so this is a hard ceiling, not a target. Connections are
+    created lazily, so a generous cap costs nothing while idle.
+    """
+    try:
+        workers = int(getenv("MAX_WORKERS") or max(effective_cpu_count() - 1, 1))
+    except ValueError:
+        workers = 1
+    try:
+        threads = int(getenv("MAX_THREADS") or workers * 2)
+    except ValueError:
+        threads = workers * 2
+
+    # + 8 for CONFIG_TASKS_EXECUTOR and PAGE_TASKS_EXECUTOR, doubled for short overlaps
+    # (a thread holding a connection while another is checked out), floored at 32.
+    return max(32, (max(threads, 1) + 8) * 2)
+
+
 def get_redis_client(
     use_redis: bool = False,
     redis_host: Optional[str] = None,
@@ -450,6 +714,7 @@ def get_redis_client(
     redis_timeout: Union[str, float] = "1000.0",
     redis_keepalive_pool: Union[str, int] = "10",
     redis_ssl: bool = False,
+    redis_ssl_verify: bool = True,
     redis_username: Optional[str] = None,
     redis_password: Optional[str] = None,
     redis_sentinel_hosts: Union[List[List[str]], List[tuple], str] = [],
@@ -469,6 +734,7 @@ def get_redis_client(
         redis_timeout: Connection timeout in milliseconds
         redis_keepalive_pool: Maximum connections in pool
         redis_ssl: Whether to use SSL for connection
+        redis_ssl_verify: Whether to verify the Redis server certificate (REDIS_SSL_VERIFY)
         redis_username: Redis username for authentication
         redis_password: Redis password for authentication
         redis_sentinel_hosts: List of Redis Sentinel hosts
@@ -480,6 +746,8 @@ def get_redis_client(
     Returns:
         Redis client instance or None if connection fails
     """
+    global _REDIS_CLIENT_ENTRY
+
     if not use_redis:
         return None
 
@@ -521,6 +789,36 @@ def get_redis_client(
     if isinstance(redis_sentinel_hosts, str):
         redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
 
+    # Every connection parameter except the logger, so a configuration change simply
+    # produces a different key.
+    cache_key = (
+        redis_host,
+        redis_port,
+        redis_db,
+        redis_timeout,
+        redis_ssl,
+        redis_ssl_verify,
+        redis_username,
+        redis_password,
+        tuple(tuple(host) for host in redis_sentinel_hosts),
+        redis_sentinel_username,
+        redis_sentinel_password,
+        redis_sentinel_master,
+    )
+
+    entry = _REDIS_CLIENT_ENTRY
+    if entry is not None and entry[0] == cache_key:
+        if entry[1] is not None:
+            # No ping on a cache hit: it never proved anything about the next command, and
+            # every Redis branch in the Web UI already falls back to the instance HTTP APIs.
+            return entry[1]
+        if monotonic() < entry[2]:
+            return None
+
+    # ssl_cert_reqs is only meaningful on a TLS connection, and the non-SSL Sentinel
+    # connection class does not accept it at all.
+    ssl_kwargs = {"ssl_cert_reqs": "required" if redis_ssl_verify else "none"} if redis_ssl else {}
+
     redis_client = None
 
     try:
@@ -537,24 +835,22 @@ def get_redis_client(
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,
                 socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
+                max_connections=shared_redis_pool_size(),
+                **ssl_kwargs,
             )
 
-            try:
-                # Test the connection
-                sentinel.discover_master(redis_sentinel_master)
+            # Test the connection. No inner handler: a Sentinel failure must reach the outer
+            # except below, which is what arms the negative window. Returning early here left
+            # every request paying a full discover_master timeout against a down Sentinel.
+            sentinel.discover_master(redis_sentinel_master)
 
-                # Get master connection
-                redis_client = sentinel.master_for(
-                    redis_sentinel_master,
-                    db=redis_db,
-                    username=redis_username,
-                    password=redis_password,
-                )
-            except Exception as e:
-                if logger:
-                    logger.error(f"Failed to connect to Redis Sentinel: {e}")
-                return None
+            # Get master connection
+            redis_client = sentinel.master_for(
+                redis_sentinel_master,
+                db=redis_db,
+                username=redis_username,
+                password=redis_password,
+            )
 
         # Direct connection to Redis
         else:
@@ -574,18 +870,32 @@ def get_redis_client(
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,
                 socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
+                max_connections=shared_redis_pool_size(),
                 ssl=redis_ssl,
+                **ssl_kwargs,
             )
 
-        # Test the connection
+        # Test the connection once, when the client is built.
         redis_client.ping()
         if logger:
             logger.info("Successfully connected to Redis")
+
+        # Built outside the lock, published under it: holding a lock across a connect would
+        # serialise every thread in the worker behind one slow handshake.
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is not None and entry[0] == cache_key and entry[1] is not None:
+                # Another thread won the race; drop ours (never close it) and share theirs.
+                return entry[1]
+            _REDIS_CLIENT_ENTRY = (cache_key, redis_client, 0.0)
 
         return redis_client
 
     except Exception as e:
         if logger:
             logger.error(f"Failed to connect to Redis: {e}")
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is None or entry[0] != cache_key or entry[1] is None:
+                _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
         return None

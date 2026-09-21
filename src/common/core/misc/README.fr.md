@@ -145,6 +145,8 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
 
         Des tests approfondis sont recommandés avant d'activer HTTP/3 en production.
 
+        HTTP/3 est silencieusement désactivé lorsque `USE_PROXY_PROTOCOL` vaut `yes`. NGINX ne peut pas lire l'en-tête PROXY protocol sur un écouteur QUIC : aucun écouteur `quic` ni en-tête `Alt-Svc` n'est généré, bien que `HTTP3` indique toujours `yes`, et `LIMIT_CONN_MAX_HTTP3` reste sans effet. Terminez le PROXY protocol en amont, ou limitez-vous à HTTP/1.1 et HTTP/2.
+
 === "Service de fichiers statiques"
 
     **Configuration du service de fichiers**

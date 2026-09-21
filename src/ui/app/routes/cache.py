@@ -1,12 +1,12 @@
 from io import BytesIO
 from json import JSONDecodeError, loads
 
-from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, Response, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from app.dependencies import BW_CONFIG, DB
-from app.utils import LOGGER, get_printable_content
+from app.utils import LOGGER, flash, get_printable_content
 
 cache = Blueprint("cache", __name__)
 
@@ -51,7 +51,11 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
         return send_file(BytesIO(cache_file), as_attachment=True, download_name=file_name)
 
     if not cache_file:
-        flask_flash(f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found", "error")
+        flash(
+            f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found",
+            "error",
+            save=False,
+        )
         return redirect(url_for("cache.cache_page"))
 
     return render_template("cache_view.html", cache_file=get_printable_content(cache_file))
@@ -91,22 +95,26 @@ def cache_delete_bulk():
             file_name,
             job_name=job_name,
             service_id=service if service != "global" else None,
+            plugin_id=plugin,
         )
 
-        if result:
+        if result is None:
+            errors.append(f"Cache file {file_name} not found")
+        elif result:
             errors.append(f"Error deleting {file_name}: {result}")
         else:
             changed_plugins.add(plugin)
             deleted_count += 1
 
-    ret = DB.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
-    if ret:
-        LOGGER.warning("Cache deletion changes were not committed to the database")
-        errors.append("Changes were not committed to the database")
+    if changed_plugins:
+        ret = DB.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
+        if ret:
+            LOGGER.warning("Cache deletion changes were not committed to the database")
+            errors.append("Changes were not committed to the database")
 
     if errors:
-        flask_flash(f"Deleted {deleted_count} files with {len(errors)} errors: {'; '.join(errors)}", "warning")
+        flash(f"Deleted {deleted_count} files with {len(errors)} errors: {'; '.join(errors)}", "warning", save=False)
     else:
-        flask_flash(f"Successfully deleted {deleted_count} cache file{'s' if deleted_count != 1 else ''}", "success")
+        flash(f"Successfully deleted {deleted_count} cache file{'s' if deleted_count != 1 else ''}", "success", save=False)
 
     return redirect(url_for("cache.cache_page"))

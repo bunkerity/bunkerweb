@@ -133,6 +133,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).          |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global  | Nein     | **Sitzungswiderruf-Speichergröße:** Größe des Speichers für widerrufene Cookie-Sitzungskennungen. |
 
 === "Protokollierungseinstellungen"
 
@@ -156,7 +157,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `AUTOCONF_MODE`          | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                           |
     | `SWARM_MODE`             | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                                 |
     | `KUBERNETES_MODE`        | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                              |
-    | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt.                                                            |
+    | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt; ein am Dienst gesetzter Wert überschreibt die Vorlage.                                                            |
 
 === "Nginx-Einstellungen"
 

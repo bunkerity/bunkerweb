@@ -6,17 +6,19 @@ BunkerWeb est livré avec un système de plugins permettant d'ajouter facilement
 
 Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) pour plus d'informations) :
 
-|       Nom       | Version | Description                                                                                                                                               |                                                Lien                                                 |
-| :-------------: | :-----: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.11   | Protégez vos services web avec l'authentification déléguée Authentik (auth_request) pour l'authentification unique (SSO).                                 |  [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)  |
-|   **ClamAV**    |  1.11   | Analyse automatiquement les fichiers téléchargés avec le moteur antivirus ClamAV et rejette la demande lorsqu'un fichier est détecté comme malveillant.   |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Cloudflare**  |  1.11   | Configurez les IP de confiance de Cloudflare, gérez les certificats Origin CA et synchronisez les bannissements BunkerWeb vers une liste d'IP Cloudflare. | [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare) |
-|   **Coraza**    |  1.11   | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                                |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **Discorde**   |  1.11   | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                           |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Matrix**    |  1.11   | Envoyez des notifications de sécurité à un salon Matrix à l'aide de l'API Matrix.                                                                         |     [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)     |
-|    **Lâche**    |  1.11   | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                             |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal**  |  1.11   | Analyse automatiquement les fichiers téléchargés à l'aide de l'API VirusTotal et rejette la demande lorsqu'un fichier est détecté comme malveillant.      | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **Crochet Web** |  1.11   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                  |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
+|       Nom       | Version | Description                                                                                                                                                                                           |                                                 Lien                                                  |
+| :-------------: | :-----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|  **Authentik**  |  1.12   | Protégez vos services web avec l'authentification déléguée Authentik (auth_request) pour l'authentification unique (SSO).                                                                             |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.12   | Analyse automatiquement les fichiers téléversés avec le moteur antivirus ClamAV et rejette la requête lorsqu'un fichier est détecté comme malveillant.                                                |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.12   | Configurez les IP de confiance de Cloudflare, gérez les certificats Origin CA et synchronisez les bannissements BunkerWeb vers une liste d'IP Cloudflare.                                             |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.12   | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                                                                            |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.12   | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                                                                       |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.12   | Envoyez des notifications de sécurité à un salon Matrix à l'aide de l'API Matrix.                                                                                                                     |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **SentinelOne** |  1.12   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API SentinelOne et bloquez les requêtes selon la réputation des empreintes ou les indicateurs de compromission. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.12   | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                                                                         |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.12   | Synchronisez les bannissements BunkerWeb vers SysWarden pour un blocage nftables au niveau du noyau et importez ses listes de blocage et d'autorisation.                                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.12   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API VirusTotal et bloquez les requêtes lorsque les seuils de réputation configurés sont dépassés.               |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.12   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                                                              |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## Comment utiliser un plugin
 
@@ -24,7 +26,7 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 
 Si vous souhaitez installer rapidement des plugins externes, vous pouvez utiliser ce `EXTERNAL_PLUGIN_URLS` paramètre. Il prend une liste d'URL séparées par des espaces, chacune pointant vers une archive compressée (format zip) contenant un ou plusieurs plugins.
 
-Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip`
+Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.12.zip`
 
 ### Manuelle
 
@@ -92,7 +94,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15
       volumes:
         - ./bw-data:/data
     ...
@@ -128,7 +130,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         volumes:
           - ./bw-data:/data
     ...
@@ -171,7 +173,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -218,7 +220,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.14
+              image: bunkerity/bunkerweb-scheduler:1.6.15
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -258,7 +260,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 !!! tip "Plugins existants"
 
-    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
+    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.15/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
 
 À quoi ressemble la structure d'un plugin :
 ```
@@ -563,7 +565,7 @@ end
 
 !!! tip "Plus d'exemples"
 
-    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/src/bw/lua/bunkerweb) du dépôt.
+    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.15/src/bw/lua/bunkerweb) du dépôt.
 
 ### Emplois
 

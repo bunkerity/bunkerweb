@@ -20,17 +20,17 @@
       "help": "Full URL of the proxied resource (proxy_pass).",
       "id": "reverse-proxy-host",
       "label": "Reverse proxy host",
-      "regex": "^.*$",
+      "regex": "^$|^[^\\s\"\\'\\;{}#]+$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location.",
+      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location. Optionally prefix with ~, ~*, = or ^~ followed by one space to set the nginx location modifier explicitly; no spaces, ;, { or } are allowed elsewhere in the value.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^.+$",
+      "regex": "^(?!(?:~\\*|~|\\^~|=)$)(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -91,7 +91,7 @@
       "help": "Override Host header sent to upstream server.",
       "id": "reverse-proxy-custom-host",
       "label": "Reverse proxy custom host",
-      "regex": "^.*$",
+      "regex": "^$|^[^\\s\"\\'\\;{}#]+$",
       "type": "text"
     },
     "REVERSE_PROXY_HEADERS": {
@@ -100,7 +100,7 @@
       "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -111,7 +111,7 @@
       "help": "List of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).",
       "id": "reverse-proxy-hide-headers",
       "label": "Reverse proxy hide headers",
-      "regex": "^.*$",
+      "regex": "^$|^[A-Za-z][\\w-]*( +[A-Za-z][\\w-]*)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -121,7 +121,7 @@
       "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -138,7 +138,7 @@
     "REVERSE_PROXY_INTERCEPT_ERRORS": {
       "context": "multisite",
       "default": "yes",
-      "help": "Intercept and rewrite errors.",
+      "help": "Intercept and rewrite HTTP error responses from the proxied resource (value of the proxy_intercept_errors directive).",
       "id": "reverse-proxy-intercept-errors",
       "label": "Intercept errors",
       "regex": "^(yes|no)$",
@@ -189,7 +189,7 @@
       "help": "Sets the SNI host to send to upstream server.",
       "id": "reverse-proxy-ssl-sni-name",
       "label": "SSL SNI name",
-      "regex": "^.*$",
+      "regex": "^$|^[^\\s\"\\'\\;{}#]+$",
       "type": "text"
     },
     "REVERSE_PROXY_SSL_VERIFY": {
@@ -239,13 +239,125 @@
       "regex": "^[1-9]\\d*$",
       "type": "number"
     },
+    "REVERSE_PROXY_SSL_CERT_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the client certificate and key presented to the upstream server: file path or base64/PEM data (file or data).",
+      "id": "reverse-proxy-ssl-cert-priority",
+      "label": "Client certificate priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
+    "REVERSE_PROXY_SSL_CERT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to a PEM client certificate presented to the upstream server for mutual TLS (priority 'file', readable by the scheduler, which caches and distributes it). Requires REVERSE_PROXY_SSL_KEY.",
+      "id": "reverse-proxy-ssl-cert",
+      "label": "Client certificate path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_CERT_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client certificate as base64 or plaintext PEM (priority 'data').",
+      "id": "reverse-proxy-ssl-cert-data",
+      "label": "Client certificate data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
+    },
+    "REVERSE_PROXY_SSL_KEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to the PEM private key matching REVERSE_PROXY_SSL_CERT (priority 'file', readable by the scheduler). The key must not be encrypted.",
+      "id": "reverse-proxy-ssl-key",
+      "label": "Client key path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_KEY_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client private key as base64 or plaintext PEM (priority 'data').",
+      "id": "reverse-proxy-ssl-key-data",
+      "label": "Client key data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.key,.txt"
+    },
+    "REVERSE_PROXY_SSL_CRL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to a PEM certificate revocation list used when verifying the upstream server. Takes precedence over REVERSE_PROXY_SSL_CRL_DATA. Only applied when REVERSE_PROXY_SSL_VERIFY is yes.",
+      "id": "reverse-proxy-ssl-crl",
+      "label": "CRL path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_SSL_CRL_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Certificate revocation list as base64 or plaintext PEM. Used only when the CRL path setting is empty.",
+      "id": "reverse-proxy-ssl-crl-data",
+      "label": "CRL data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crl,.txt"
+    },
+    "REVERSE_PROXY_SSL_PROTOCOLS": {
+      "context": "multisite",
+      "default": "",
+      "help": "TLS versions offered to the upstream server (value of the proxy_ssl_protocols directive). Empty keeps the NGINX default.",
+      "id": "reverse-proxy-ssl-protocols",
+      "label": "Upstream SSL protocols",
+      "regex": "^$|^(TLSv1\\.1|TLSv1\\.2|TLSv1\\.3|TLSv1|SSLv3)( +(TLSv1\\.1|TLSv1\\.2|TLSv1\\.3|TLSv1|SSLv3))*$",
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "SSLv3",
+          "label": "SSLv3 (deprecated)",
+          "value": "SSLv3"
+        },
+        {
+          "id": "TLSv1",
+          "label": "TLSv1 (1.0)",
+          "value": "TLSv1"
+        },
+        {
+          "id": "TLSv1.1",
+          "label": "TLSv1.1",
+          "value": "TLSv1.1"
+        },
+        {
+          "id": "TLSv1.2",
+          "label": "TLSv1.2 (recommended)",
+          "value": "TLSv1.2"
+        },
+        {
+          "id": "TLSv1.3",
+          "label": "TLSv1.3 (recommended)",
+          "value": "TLSv1.3"
+        }
+      ]
+    },
+    "REVERSE_PROXY_SSL_CIPHERS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Cipher suite string offered to the upstream server (value of the proxy_ssl_ciphers directive). Empty keeps the NGINX default.",
+      "id": "reverse-proxy-ssl-ciphers",
+      "label": "Upstream SSL ciphers",
+      "regex": "^$|^[A-Za-z0-9!+_@=:.\\-]+$",
+      "type": "text"
+    },
     "REVERSE_PROXY_AUTH_REQUEST": {
       "context": "multisite",
       "default": "",
       "help": "Enable authentication using an external provider (value of auth_request directive).",
       "id": "reverse-proxy-auth-request",
       "label": "Reverse proxy auth request",
-      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+      "regex": "^(\\/[\\w\\].~:\\/?\\[@!$\\&'\\(\\)*+,=\\-]*|off)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -255,7 +367,7 @@
       "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401). NGINX variables such as $scheme, $host and $request_uri are supported.",
       "id": "reverse-proxy-auth-request-signin-url",
       "label": "Auth request signin URL",
-      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[\\-\\w@:%.+~#=$]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[\\-\\w@:%.+~=$]+[\\-\\w\\(\\)!@:%+.~?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -265,7 +377,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*(\\$[a-z_\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -276,7 +388,7 @@
       "help": "Additional configuration to include in the location block, separated with spaces.",
       "id": "reverse-proxy-includes",
       "label": "Reverse proxy includes",
-      "regex": "^(?! )( ?([^ ]))*$",
+      "regex": "^$|^[^\\s;\\\"'\\\\{}#]+( +[^\\s;\\\"'\\\\{}#]+)*$",
       "type": "multivalue",
       "multiple": "reverse-proxy"
     },
@@ -298,6 +410,16 @@
       "label": "Reverse proxy ModSecurity",
       "regex": "^(yes|no)$",
       "type": "check",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Maximum body size for this reverse proxy location (0 for infinite). When empty, the service MAX_CLIENT_SIZE applies. A value also sets the ModSecurity request body limit for this location, overriding the service-wide one; it does not change MODSECURITY_REQ_BODY_NO_FILES_LIMIT.",
+      "id": "reverse-proxy-max-client-size",
+      "label": "Reverse proxy maximum body size",
+      "regex": "^$|^[0-9]+[kKmMgG]?$",
+      "type": "text",
       "multiple": "reverse-proxy"
     },
     "USE_PROXY_CACHE": {
@@ -333,7 +455,7 @@
       "help": "Additional parameters to add to the proxy_cache directive.",
       "id": "proxy-cache-path-params",
       "label": "Reverse proxy cache params",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     },
     "PROXY_CACHE_METHODS": {
@@ -378,7 +500,7 @@
       "help": "Conditions to disable caching of responses.",
       "id": "proxy-no-cache",
       "label": "Reverse proxy no cache",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     },
     "PROXY_CACHE_BYPASS": {
@@ -387,7 +509,7 @@
       "help": "Conditions to bypass caching of responses.",
       "id": "proxy-cache-bypass",
       "label": "Reverse proxy bypass",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     },
     "PROXY_BUFFERS": {
@@ -396,7 +518,7 @@
       "help": "Value for proxy_buffers directive.",
       "id": "proxy-buffers",
       "label": "Proxy buffers",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     },
     "PROXY_BUFFER_SIZE": {
@@ -405,7 +527,7 @@
       "help": "Value for proxy_buffer_size directive.",
       "id": "proxy-buffer-size",
       "label": "Proxy buffer size",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     },
     "PROXY_BUSY_BUFFERS_SIZE": {
@@ -414,7 +536,7 @@
       "help": "Value for proxy_busy_buffers_size directive.",
       "id": "proxy-busy-buffers-size",
       "label": "Proxy busy buffers size",
-      "regex": "^.*$",
+      "regex": "^[^;{}#\\r\\n]*$",
       "type": "text"
     }
   },

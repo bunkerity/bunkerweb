@@ -1,8 +1,57 @@
 version: "3.5"
 
+x-redis-sentinel: &redis-sentinel
+  image: redis:8-alpine
+  volumes:
+    - ./acl:/acl:ro
+    - ./tls:/tls:ro
+  environment:
+    REDIS_SENTINEL_PORT_NUMBER: "26379"
+    REDIS_MASTER_HOST: "bw-redis"
+    REDIS_MASTER_PORT_NUMBER: "6379"
+    REDIS_MASTER_USERNAME: "bunkerweb"
+    REDIS_MASTER_PASSWORD: ""
+  command:
+    - sh
+    - -c
+    - |
+      until getent hosts "$${REDIS_MASTER_HOST}" >/dev/null 2>&1; do sleep 1; done
+      cat > /tmp/sentinel.conf <<EOF
+      port $${REDIS_SENTINEL_PORT_NUMBER}
+      sentinel resolve-hostnames yes
+      sentinel monitor bw-master $${REDIS_MASTER_HOST} $${REDIS_MASTER_PORT_NUMBER} 2
+      sentinel down-after-milliseconds bw-master 5000
+      sentinel failover-timeout bw-master 10000
+      sentinel parallel-syncs bw-master 1
+      EOF
+      if [ -n "$${REDIS_MASTER_PASSWORD}" ]; then
+        echo "sentinel auth-user bw-master $${REDIS_MASTER_USERNAME}" >> /tmp/sentinel.conf
+        echo "sentinel auth-pass bw-master $${REDIS_MASTER_PASSWORD}" >> /tmp/sentinel.conf
+      fi
+      retries=0
+      until redis-server /tmp/sentinel.conf --sentinel --aclfile /acl/sentinel.acl; do
+        retries=$$((retries + 1))
+        [ "$${retries}" -ge 30 ] && exit 1
+        sleep 1
+      done
+  depends_on:
+    - bw-redis
+    - bw-redis-slave
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        'redis-cli -p "$${REDIS_SENTINEL_PORT_NUMBER}" --raw SENTINEL replicas bw-master | grep -q ''^ip$''',
+      ]
+    interval: 1s
+    timeout: 3s
+    retries: 30
+  networks:
+    - bw-services
+
 services:
   bw:
-    image: bunkerity/bunkerweb:1.6.0-beta
+    image: bunkerweb-tests
     pull_policy: never
     depends_on:
       - bw-redis
@@ -11,20 +60,20 @@ services:
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 1.0.0.3"
+      API_WHITELIST_IP: "127.0.0.0/8 10.77.3.0/24 192.168.77.253"
     networks:
       bw-universe:
       bw-services:
-        ipv4_address: 1.0.0.254
+        ipv4_address: 192.168.77.254
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    image: scheduler-tests
     pull_policy: never
     depends_on:
       - bw
     environment:
       BUNKERWEB_INSTANCES: "bw"
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 1.0.0.3"
+      API_WHITELIST_IP: "127.0.0.0/8 10.77.3.0/24 192.168.77.253"
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       SEND_ANONYMOUS_REPORT: "no"
@@ -63,89 +112,78 @@ services:
       - bw-universe
 
   bw-redis:
-    image: bitnami/redis:8.0
+    image: redis:8-alpine
     volumes:
-      - ./acl:/acl
-      - ./tls:/tls
+      - ./acl:/acl:ro
+      - ./tls:/tls:ro
     environment:
       REDIS_PORT_NUMBER: "6379"
       REDIS_TLS_PORT_NUMBER: "6379"
-      REDIS_ACLFILE: "/acl/redis.acl"
       REDIS_TLS_ENABLED: "no"
-      REDIS_TLS_CERT_FILE: "/tls/redis.pem"
-      REDIS_TLS_KEY_FILE: "/tls/redis.key"
-      REDIS_TLS_CA_FILE: "/tls/ca.crt"
       REDIS_TLS_AUTH_CLIENTS: "yes"
-      REDIS_REPLICATION_MODE: "master"
-      REDIS_MASTER_SET: "bw-master"
-      ALLOW_EMPTY_PASSWORD: "yes"
+    command:
+      - sh
+      - -c
+      - |
+        if [ "$${REDIS_TLS_ENABLED}" = "yes" ]; then
+          exec redis-server --port 0 --tls-port "$${REDIS_TLS_PORT_NUMBER}" --tls-cert-file /tls/redis.pem --tls-key-file /tls/redis.key --tls-ca-cert-file /tls/ca.crt --tls-auth-clients "$${REDIS_TLS_AUTH_CLIENTS}" --aclfile /acl/redis.acl
+        else
+          exec redis-server --port "$${REDIS_PORT_NUMBER}" --aclfile /acl/redis.acl
+        fi
     networks:
       - bw-services
 
   bw-redis-slave:
-    image: bitnami/redis:8.0
+    image: redis:8-alpine
     volumes:
-      - ./acl:/acl
-      - ./tls:/tls
+      - ./acl:/acl:ro
+      - ./tls:/tls:ro
     environment:
       REDIS_PORT_NUMBER: "6379"
       REDIS_TLS_PORT_NUMBER: "6379"
-      REDIS_ACLFILE: "/acl/redis.acl"
       REDIS_TLS_ENABLED: "no"
-      REDIS_TLS_CERT_FILE: "/tls/redis.pem"
-      REDIS_TLS_KEY_FILE: "/tls/redis.key"
-      REDIS_TLS_CA_FILE: "/tls/ca.crt"
       REDIS_TLS_AUTH_CLIENTS: "yes"
-      REDIS_REPLICATION_MODE: "slave"
       REDIS_MASTER_HOST: "bw-redis"
-      REDIS_MASTER_SET: "bw-master"
       REDIS_MASTER_PORT_NUMBER: "6379"
+      REDIS_MASTER_USERNAME: "bunkerweb"
       REDIS_MASTER_PASSWORD: ""
-      ALLOW_EMPTY_PASSWORD: "yes"
+    command:
+      - sh
+      - -c
+      - |
+        if [ "$${REDIS_TLS_ENABLED}" = "yes" ]; then
+          if [ -n "$${REDIS_MASTER_PASSWORD}" ]; then
+            exec redis-server --port 0 --tls-port "$${REDIS_TLS_PORT_NUMBER}" --tls-cert-file /tls/redis.pem --tls-key-file /tls/redis.key --tls-ca-cert-file /tls/ca.crt --tls-auth-clients "$${REDIS_TLS_AUTH_CLIENTS}" --tls-replication yes --aclfile /acl/redis.acl --replicaof "$${REDIS_MASTER_HOST}" "$${REDIS_MASTER_PORT_NUMBER}" --masteruser "$${REDIS_MASTER_USERNAME}" --masterauth "$${REDIS_MASTER_PASSWORD}"
+          else
+            exec redis-server --port 0 --tls-port "$${REDIS_TLS_PORT_NUMBER}" --tls-cert-file /tls/redis.pem --tls-key-file /tls/redis.key --tls-ca-cert-file /tls/ca.crt --tls-auth-clients "$${REDIS_TLS_AUTH_CLIENTS}" --tls-replication yes --aclfile /acl/redis.acl --replicaof "$${REDIS_MASTER_HOST}" "$${REDIS_MASTER_PORT_NUMBER}"
+          fi
+        elif [ -n "$${REDIS_MASTER_PASSWORD}" ]; then
+          exec redis-server --port "$${REDIS_PORT_NUMBER}" --aclfile /acl/redis.acl --replicaof "$${REDIS_MASTER_HOST}" "$${REDIS_MASTER_PORT_NUMBER}" --masteruser "$${REDIS_MASTER_USERNAME}" --masterauth "$${REDIS_MASTER_PASSWORD}"
+        else
+          exec redis-server --port "$${REDIS_PORT_NUMBER}" --aclfile /acl/redis.acl --replicaof "$${REDIS_MASTER_HOST}" "$${REDIS_MASTER_PORT_NUMBER}"
+        fi
     depends_on:
       - bw-redis
     networks:
       - bw-services
-    deploy:
-      replicas: 2
 
-  bw-redis-sentinel:
-    image: bitnami/redis-sentinel:8.0
-    command: /opt/bitnami/scripts/redis-sentinel/run.sh --aclfile /acl/sentinel.acl
-    volumes:
-      - ./acl:/acl
-      - ./tls:/tls
-    environment:
-      REDIS_SENTINEL_PORT_NUMBER: "26379"
-      REDIS_SENTINEL_TLS_PORT_NUMBER: "0"
-      REDIS_SENTINEL_TLS_ENABLED: "no"
-      REDIS_SENTINEL_TLS_CERT_FILE: "/tls/sentinel.pem"
-      REDIS_SENTINEL_TLS_KEY_FILE: "/tls/sentinel.key"
-      REDIS_SENTINEL_TLS_CA_FILE: "/tls/sentinel_ca.crt"
-      REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"
-      REDIS_MASTER_HOST: "bw-redis"
-      REDIS_MASTER_SET: "bw-master"
-      REDIS_MASTER_PORT_NUMBER: "6379"
-      REDIS_MASTER_PASSWORD: ""
-      ALLOW_EMPTY_PASSWORD: "yes"
-    depends_on:
-      - bw-redis
-      - bw-redis-slave
-    networks:
-      - bw-services
-    deploy:
-      replicas: 3
+  bw-redis-sentinel-1:
+    <<: *redis-sentinel
+  bw-redis-sentinel-2:
+    <<: *redis-sentinel
+  bw-redis-sentinel-3:
+    <<: *redis-sentinel
 
 networks:
   bw-universe:
-    name: bw-universe
+    name: fixtures_redis_universe
     ipam:
       driver: default
       config:
-        - subnet: 10.20.30.0/24
+        - subnet: 10.77.3.0/24
   bw-services:
-    name: bw-services
+    name: fixtures_redis_services
     ipam:
       driver: default
       config:
-        - subnet: 1.0.0.0/24
+        - subnet: 192.168.77.0/24

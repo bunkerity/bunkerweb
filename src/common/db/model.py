@@ -2,7 +2,7 @@
 
 from json import dumps, loads
 from typing import Any, Optional
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, Text, TypeDecorator, UnicodeText
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -133,6 +133,7 @@ class Global_values(Base):
     file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     setting = relationship("Settings", back_populates="global_value")
 
@@ -162,6 +163,7 @@ class Services_settings(Base):
     file_name = Column(String(512), nullable=True, default=None)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
+    is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
 
     service = relationship("Services", back_populates="settings")
     setting = relationship("Settings", back_populates="services")
@@ -358,7 +360,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.14", nullable=False)
+    version = Column(String(32), default="1.6.15", nullable=False)
 
 
 ## UI Models
@@ -408,6 +410,7 @@ class Users(Base):
 
     # 2FA
     totp_secret = Column(String(256), nullable=True)
+    totp_last_counter = Column(BigInteger, nullable=True)
 
     creation_date = Column(DateTime(timezone=True), nullable=False)
     update_date = Column(DateTime(timezone=True), nullable=False)
@@ -532,6 +535,8 @@ API_PERMISSION_ENUM = Enum(
     "ban_read",
     "ban_update",
     "ban_delete",
+    "crowdsec_read",
+    "crowdsec_delete",
     # Job permissions
     "job_read",
     "job_run",

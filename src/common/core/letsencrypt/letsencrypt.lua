@@ -1,5 +1,7 @@
+local acme = require "bunkerweb.acme"
 local cjson = require "cjson"
 local class = require "middleclass"
+local env = require "resty.env"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
 local utils = require "bunkerweb.utils"
@@ -17,6 +19,9 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local parse_pem_cert = ssl.parse_pem_cert
 local parse_pem_priv_key = ssl.parse_pem_priv_key
 local ssl_server_name = ssl.server_name
+local is_http_challenge = acme.is_http_challenge
+local is_challenge_uri = acme.is_challenge_uri
+local env_set = env.set
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
@@ -35,10 +40,18 @@ local lower = string.lower
 local gsub = string.gsub
 
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
+local function normalize_hostname(hostname)
+	if not hostname then
+		return nil
+	end
+	return lower(gsub(hostname, "%.$", ""))
+end
+
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
 		return nil
 	end
+	local explicit = domain:sub(1, 2) == "*."
 	local cleaned = lower(gsub(domain, "^%*%.", ""))
 	cleaned = gsub(cleaned, "%.+$", "")
 	local labels = {}
@@ -50,7 +63,7 @@ local function sanitize_domain_labels(domain)
 	if #labels == 0 then
 		return nil
 	end
-	return labels
+	return labels, explicit
 end
 
 local function determine_wildcard_bases(labels_list)
@@ -87,6 +100,11 @@ local function determine_wildcard_bases(labels_list)
 		insert(common_suffix, 1, label)
 	end
 	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
+		for _, labels in ipairs(labels_list) do
+			if #labels > #common_suffix + 1 then
+				return {}
+			end
+		end
 		return { table.concat(common_suffix, ".") }
 	end
 	local bases = {}
@@ -107,12 +125,29 @@ local function determine_wildcard_bases(labels_list)
 end
 
 local function build_wildcard_groups(domains)
-	local grouped = {}
-	local has_entries = false
+	local cleaned_labels = {}
+	local explicit_bases = {}
 	for _, domain in ipairs(domains) do
-		local labels = sanitize_domain_labels(domain)
+		local labels, explicit = sanitize_domain_labels(domain)
 		if labels then
-			has_entries = true
+			insert(cleaned_labels, { labels = labels, explicit = explicit })
+			if explicit then
+				explicit_bases[table.concat(labels, ".")] = true
+			end
+		end
+	end
+	if #cleaned_labels == 0 then
+		return {}
+	end
+	local groups = {}
+	for base, _ in pairs(explicit_bases) do
+		groups[base] = { ["*." .. base] = true, [base] = true }
+	end
+	local grouped = {}
+	for _, entry in ipairs(cleaned_labels) do
+		local labels = entry.labels
+		local base = table.concat(labels, ".")
+		if not entry.explicit and not explicit_bases[base] and not explicit_bases[table.concat(labels, ".", 2)] then
 			local len = #labels
 			local key
 			if len >= 2 then
@@ -124,10 +159,6 @@ local function build_wildcard_groups(domains)
 			insert(grouped[key], labels)
 		end
 	end
-	if not has_entries then
-		return {}
-	end
-	local groups = {}
 	for _, labels_list in pairs(grouped) do
 		local bases = determine_wildcard_bases(labels_list)
 		for _, base in ipairs(bases) do
@@ -167,7 +198,12 @@ local function resolve_wildcard_base(host, bases)
 		end
 		local suffix = "." .. base
 		if #host > #suffix and host:sub(-#suffix) == suffix then
-			return base
+			-- A wildcard covers a single label. A deeper name is not certified by *.base, so it
+			-- must not be routed to it, whatever the base derivation produced.
+			local label = host:sub(1, #host - #suffix)
+			if not label:find(".", 1, true) then
+				return base
+			end
 		end
 	end
 	return nil
@@ -178,10 +214,32 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+-- A passed-through ACME challenge belongs to the backend that answers it, so no other check
+-- runs on it: it is whitelisted, which also skips the ban check and ModSecurity, more than the
+-- locally served token gets. That is why it is limited to one token-shaped segment (base64url,
+-- RFC 8555 section 8.3) fetched with GET or HEAD, never a deeper backend route. Decided in the
+-- set phase because the ModSecurity kill switch reads ENV:is_whitelisted in phase 1.
+function letsencrypt:is_passthrough_challenge()
+	if self.variables["LETS_ENCRYPT_PASSTHROUGH"] ~= "yes" or not is_challenge_uri(self.ctx) then
+		return false
+	end
+	local method = self.ctx.bw.request_method
+	if method ~= "GET" and method ~= "HEAD" then
+		return false
+	end
+	return match(self.ctx.bw.uri, "^/%.well%-known/acme%-challenge/[A-Za-z0-9_%-]+$") ~= nil
+end
+
 function letsencrypt:set()
 	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
 	if https_configured == "yes" then
 		self.ctx.bw.https_configured = "yes"
+	end
+	if self:is_passthrough_challenge() then
+		ngx.var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		return self:ret(true, "ACME challenge passed through, whitelisted")
 	end
 	return self:ret(true, "set https_configured to " .. https_configured)
 end
@@ -243,7 +301,9 @@ function letsencrypt:init()
 						for base, _ in pairs(wildcard_groups) do
 							insert(bases, base)
 							wildcard_bases_set[base] = true
-							wildcard_servers[base] = base
+							if wildcard_servers[base] == nil then
+								wildcard_servers[base] = base
+							end
 						end
 						sort(bases, function(a, b)
 							if #a == #b then
@@ -252,12 +312,10 @@ function letsencrypt:init()
 							return #a > #b
 						end)
 						for _, part in ipairs(server_list) do
-							local base = resolve_wildcard_base(part, bases)
-							if base then
-								wildcard_servers[part] = base
-							else
-								wildcard_servers[part] = false
-							end
+							local host = normalize_hostname(part)
+							-- A name of a service that uses Let's Encrypt maps to its wildcard base,
+							-- or to itself. Only a service that does not use it maps to false.
+							wildcard_servers[host] = resolve_wildcard_base(host, bases) or host
 						end
 						for _, base in ipairs(bases) do
 							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
@@ -283,9 +341,11 @@ function letsencrypt:init()
 						end
 					else
 						for _, part in ipairs(server_list) do
-							wildcard_servers[part] = false
+							local host = normalize_hostname(part)
+							wildcard_servers[host] = host
 						end
-						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
+						data =
+							self.internalstore:get("plugin_letsencrypt_" .. normalize_hostname(cert_identifier), true)
 						if not data then
 							local check
 							check, data = read_files({
@@ -305,6 +365,13 @@ function letsencrypt:init()
 								end
 							end
 						end
+					end
+				elseif server_name ~= "global" then
+					-- The service does not use Let's Encrypt : its names must never resolve to
+					-- another service's wildcard certificate.
+					for part in (multisite_vars["SERVER_NAME"] or server_name):gmatch("%S+") do
+						local host = normalize_hostname(part)
+						wildcard_servers[host] = false
 					end
 				end
 			end
@@ -337,7 +404,9 @@ function letsencrypt:init()
 				for base, _ in pairs(wildcard_groups) do
 					insert(bases, base)
 					wildcard_bases_set[base] = true
-					wildcard_servers[base] = base
+					if wildcard_servers[base] == nil then
+						wildcard_servers[base] = base
+					end
 				end
 				sort(bases, function(a, b)
 					if #a == #b then
@@ -346,12 +415,8 @@ function letsencrypt:init()
 					return #a > #b
 				end)
 				for _, part in ipairs(server_list) do
-					local base = resolve_wildcard_base(part, bases)
-					if base then
-						wildcard_servers[part] = base
-					else
-						wildcard_servers[part] = false
-					end
+					local host = normalize_hostname(part)
+					wildcard_servers[host] = resolve_wildcard_base(host, bases) or host
 				end
 				for _, base in ipairs(bases) do
 					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
@@ -377,7 +442,8 @@ function letsencrypt:init()
 				end
 			else
 				for _, part in ipairs(server_list) do
-					wildcard_servers[part] = false
+					local host = normalize_hostname(part)
+					wildcard_servers[host] = host
 				end
 				local check, data = read_files({
 					"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
@@ -433,6 +499,7 @@ function letsencrypt:ssl_certificate()
 		end
 		return self:ret(true, "no SNI provided")
 	end
+	server_name = normalize_hostname(server_name)
 	local wildcard_servers, err = self.internalstore:get("plugin_letsencrypt_wildcard_servers", true)
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
@@ -447,16 +514,24 @@ function letsencrypt:ssl_certificate()
 	local alias = wildcard_servers[server_name]
 	if type(alias) == "string" and alias ~= "" then
 		server_name = alias
+	elseif alias == false then
+		-- The host belongs to a service that does not use Let's Encrypt : it must not be served
+		-- another service's certificate, including one cached under its own name as a base.
+		return self:ret(true, "let's encrypt is not used")
 	else
+		-- Only a host that belongs to no configured service may fall back to a wildcard base.
 		for _, base in ipairs(wildcard_bases) do
 			if server_name == base then
-				server_name = base
 				break
 			end
 			local suffix = "." .. base
 			if #server_name > #suffix and server_name:sub(-#suffix) == suffix then
-				server_name = base
-				break
+				local label = server_name:sub(1, #server_name - #suffix)
+				-- A wildcard covers a single label, so a.b.example.com is not example.com's
+				if label ~= "" and not label:find(".", 1, true) then
+					server_name = base
+					break
+				end
 			end
 		end
 	end
@@ -487,7 +562,7 @@ function letsencrypt:load_data(data, server_name)
 	end
 	-- Cache data
 	for key in server_name:gmatch("%S+") do
-		local cache_key = "plugin_letsencrypt_" .. key
+		local cache_key = "plugin_letsencrypt_" .. normalize_hostname(key)
 		local ok
 		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
@@ -498,12 +573,13 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
-	if
-		self.variables["LETS_ENCRYPT_PASSTHROUGH"] == "no"
-		and sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/"
-	then
+	if is_http_challenge(self.ctx) then
 		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", OK)
+	end
+	if self:is_passthrough_challenge() then
+		self.logger:log(NOTICE, "ACME challenge passed through to the backend, skipping the other checks")
+		return self:ret(true, "ACME challenge passed through", OK)
 	end
 	return self:ret(true, "success")
 end

@@ -12,6 +12,9 @@ docs/package-lock.json
 .mypy_cache
 .cache/
 .pytest_cache/
+/src/*/tests/
+/tests/unit/
+/tests/lua/
 .env
 .venv/
 /package*.json

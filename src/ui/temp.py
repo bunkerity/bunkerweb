@@ -97,8 +97,10 @@ def not_found_handler(error):
     message = "BunkerWeb UI is starting..."
     error = ""
     if ERROR_FILE.is_file():
-        message = "BunkerWeb UI encountered an error while starting."
-        error = ERROR_FILE.read_text()
+        # The detail stays out of the response body. This page is unauthenticated on 0.0.0.0:7000
+        # and the file holds raw exception text, which can carry the Flask secret, the TOTP and
+        # Biscuit keys, or database errors with their bound parameters.
+        message = "BunkerWeb UI encountered an error while starting. Check the service logs for details."
     return render_template("starting.html", message=message, error=error)
 
 
@@ -108,6 +110,8 @@ def catch_all(path):
     message = "BunkerWeb UI is starting..."
     error = ""
     if ERROR_FILE.is_file():
-        message = "BunkerWeb UI encountered an error while starting."
-        error = ERROR_FILE.read_text()
+        # The detail stays out of the response body. This page is unauthenticated on 0.0.0.0:7000
+        # and the file holds raw exception text, which can carry the Flask secret, the TOTP and
+        # Biscuit keys, or database errors with their bound parameters.
+        message = "BunkerWeb UI encountered an error while starting. Check the service logs for details."
     return render_template("starting.html", message=message, error=error)

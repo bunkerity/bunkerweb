@@ -1,3 +1,238 @@
+function formatCrowdSecReportData(data, t) {
+  const object = (value) =>
+    value && typeof value === "object" && !Array.isArray(value);
+  data = object(data) ? data : {};
+  const unknown = t("crowdsec.unknown", "Unknown");
+  const value = (input) =>
+    (typeof input === "string" && input.trim()) ||
+    (typeof input === "number" && Number.isFinite(input))
+      ? String(input)
+      : unknown;
+  const element = (tag, className, text) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const field = (container, label, text) => {
+    const item = element("div", "col-sm-6");
+    item.append(
+      element("dt", "small text-muted fw-normal mb-1", label),
+      element("dd", "text-break mb-0", value(text)),
+    );
+    container.append(item);
+  };
+  const date = (input) => {
+    if (value(input) === unknown) return unknown;
+    const numeric = Number(input);
+    const parsed = Number.isFinite(numeric)
+      ? new Date(numeric < 1e12 ? numeric * 1000 : numeric)
+      : new Date(input);
+    return Number.isFinite(parsed.getTime())
+      ? parsed.toLocaleString(document.documentElement.lang || undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZoneName: "short",
+        })
+      : unknown;
+  };
+  const badge = (input) =>
+    element(
+      "span",
+      `badge text-wrap text-start ${input === "ban" ? "bg-danger" : input === "captcha" ? "bg-warning" : "bg-secondary"}`,
+      value(input),
+    );
+  const sourceLabels = {
+    lapi: t("reports.crowdsec.source_lapi", "Local API decision"),
+    appsec: t("reports.crowdsec.source_appsec", "AppSec inspection"),
+    failure_policy: t(
+      "reports.crowdsec.source_failure_policy",
+      "AppSec failure policy",
+    ),
+  };
+  const sourceValue = value(data.source);
+  const source = Object.hasOwn(sourceLabels, sourceValue)
+    ? sourceLabels[sourceValue]
+    : sourceValue;
+  const root = element("div", "crowdsec-report");
+  const header = element(
+    "div",
+    "d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3",
+  );
+  header.append(element("h6", "mb-0 text-primary", source));
+  root.append(header);
+  const summary = element("dl", "row g-3 mb-4");
+  field(
+    summary,
+    t("crowdsec.report.remediation", "Captured remediation"),
+    data.remediation,
+  );
+  field(
+    summary,
+    t("crowdsec.report.captured", "Captured at"),
+    date(data.captured_at),
+  );
+  field(
+    summary,
+    t("crowdsec.report.service", "Service"),
+    data.service_scope === "global"
+      ? t("scope.global_all_services", "Global (all services)")
+      : data.service_scope,
+  );
+  field(
+    summary,
+    t("crowdsec.report.matched_target", "Matched target"),
+    data.matched_target,
+  );
+  root.append(summary);
+  root.append(
+    element(
+      "p",
+      "small text-muted mb-3",
+      t(
+        "crowdsec.captured_history_help",
+        "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+      ),
+    ),
+  );
+
+  const decisions = Array.isArray(data.decisions)
+    ? data.decisions.filter(object)
+    : [];
+  if (
+    data.metadata_available !== true ||
+    !Array.isArray(data.decisions) ||
+    decisions.length !== data.decisions.length
+  ) {
+    root.append(
+      element(
+        "div",
+        "alert alert-warning py-2",
+        data.metadata_available === undefined
+          ? t(
+              "crowdsec.report.metadata_unavailable",
+              "CrowdSec snapshot metadata is unavailable for this older report.",
+            )
+          : t(
+              "crowdsec.report.metadata_warning",
+              "Some captured decision metadata was unavailable at request time.",
+            ),
+      ),
+    );
+  }
+  if (data.source === "appsec" || data.source === "failure_policy") {
+    root.append(
+      element(
+        "p",
+        "mb-3",
+        data.source === "appsec"
+          ? t(
+              "reports.crowdsec.appsec_help",
+              "AppSec inspected this request; a Local API decision may not exist.",
+            )
+          : t(
+              "reports.crowdsec.failure_policy_help",
+              "The configured failure policy was applied after an AppSec error.",
+            ),
+      ),
+    );
+  }
+  if (object(data.appsec)) {
+    const appsec = element("dl", "row g-3 mb-4");
+    field(
+      appsec,
+      `AppSec HTTP · ${t("table.header.status_code", "Status Code")}`,
+      data.appsec.status,
+    );
+    field(
+      appsec,
+      t("reports.crowdsec.appsec_action", "AppSec action"),
+      data.appsec.action,
+    );
+    root.append(appsec);
+  }
+  if (!decisions.length) {
+    root.append(
+      element(
+        "p",
+        "text-muted mb-3",
+        t(
+          "reports.crowdsec.no_decisions",
+          "No decision details were captured for this request.",
+        ),
+      ),
+    );
+  } else {
+    root.append(
+      element(
+        "h6",
+        "mb-3",
+        t("crowdsec.report.decisions", "Captured decisions"),
+      ),
+    );
+    if (decisions.length > 20) {
+      root.append(
+        element(
+          "p",
+          "small text-warning mb-3",
+          t("crowdsec.decisions.count", `Showing 1–20 of ${decisions.length}`, {
+            start: 1,
+            end: 20,
+            total: decisions.length,
+          }),
+        ),
+      );
+    }
+    for (const decision of decisions.slice(0, 20)) {
+      const card = element("article", "border rounded p-3 mb-3");
+      const title = element(
+        "div",
+        "d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3",
+      );
+      title.append(
+        element("h6", "mb-0 text-break", value(decision.scenario)),
+        badge(decision.type),
+      );
+      const details = element("dl", "row g-3 mb-0");
+      field(details, t("crowdsec.decision.origin", "Origin"), decision.origin);
+      field(details, t("crowdsec.decision.scope", "Scope"), decision.scope);
+      field(details, t("crowdsec.decision.target", "Target"), decision.value);
+      field(
+        details,
+        t("crowdsec.decision.expires", "Expires"),
+        date(decision.expires_at),
+      );
+      field(details, t("crowdsec.decision.id", "Decision ID"), decision.id);
+      card.append(title, details);
+      root.append(card);
+    }
+  }
+  if (value(data.connection) !== unknown || value(data.instance) !== unknown) {
+    const technical = element("details", "border-top pt-3 mt-4");
+    technical.append(
+      element(
+        "summary",
+        "text-muted",
+        t("reports.crowdsec.technical_details", "Technical details"),
+      ),
+    );
+    const details = element("dl", "row g-3 mt-1 mb-0 small");
+    field(
+      details,
+      t("reports.crowdsec.connection_id", "Connection ID"),
+      data.connection,
+    );
+    field(details, t("reports.crowdsec.instance", "Instance"), data.instance);
+    technical.append(details);
+    root.append(technical);
+  }
+  return root;
+}
+
 $(document).ready(function () {
   // Ensure i18next is loaded before using it
   const t =
@@ -5,6 +240,8 @@ $(document).ready(function () {
       ? i18next.t
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const crowdsecUrl = $("#crowdsec-url").val().trim();
+  const crowdsecLogoUrl = $("#crowdsec-logo-url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const filtersStateCache = new Map();
@@ -637,8 +874,31 @@ $(document).ready(function () {
                     "This action is not allowed in read-only mode.",
                   )
                 : t("tooltip.button.ban_ip", "Ban this IP address");
+              // The investigation page only knows about CrowdSec decisions.
+              const isCrowdsecReport =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecReport
+                ? `<a class="btn btn-outline-crowdsec btn-sm d-inline-flex align-items-center"
+                       href="${crowdsecUrl}?ip=${encodeURIComponent(
+                         String(row.ip || ""),
+                       )}"
+                       aria-label="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="bottom"
+                       data-bs-original-title="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec">
+                      <img src="${crowdsecLogoUrl}" width="16" height="16" alt="" aria-hidden="true" />
+                    </a>`
+                : "";
               return `
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center align-items-center">
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
                           data-ip="${row.ip}"
@@ -649,6 +909,7 @@ $(document).ready(function () {
                           data-bs-original-title="${banTooltip}">
                     <i class="bx bx-block bx-xs"></i>
                   </button>
+                  ${investigateLink}
                 </div>
               `;
             }
@@ -1234,6 +1495,9 @@ $(document).ready(function () {
     const normalizedReason = String(reason || "")
       .trim()
       .toLowerCase();
+    if (normalizedReason === "crowdsec") {
+      return formatCrowdSecReportData(data, t);
+    }
     const badBehaviorEntries = normalizeBadBehaviorEntries(data);
     const shouldFilterByServer = shouldFilterBadBehaviorByServer(serverName);
     const filteredBadBehaviorEntries = shouldFilterByServer

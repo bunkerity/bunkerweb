@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found | {{ .Site.Title }}</title>
+    {{- $css := resources.Get "css/main.css" | fingerprint -}}
+    <link
+      rel="stylesheet"
+      href="{{ $css.RelPermalink }}"
+      integrity="{{ $css.Data.Integrity }}"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <main>
+      <h1>Page not found</h1>
+      <p>
+        The page you're looking for doesn't exist. Return to
+        <a href="{{ .Site.Home.RelPermalink }}">{{ .Site.Title }}</a>.
+      </p>
+    </main>
+  </body>
+</html>

@@ -17,45 +17,25 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.BUNKERBOT_TOKEN }}
           ref: dev
-      - name: Download mmdb files
-        run: |
-          mkdir -p src/bw/misc/
-          cd src/bw/misc/
-          CURL_RETURN_CODE=0
-          CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o asn.mmdb.gz https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
-          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
-            echo "Curl connection failed when downloading asn-lite mmdb file with return code - ${CURL_RETURN_CODE}"
-            exit 1
-          else
-              echo "Curl connection success"
-              # Check http code for curl operation/response in  CURL_OUTPUT
-              httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
-              if [ ${httpCode} -ne 200 ]; then
-                  echo "Curl operation/command failed due to server return code - ${httpCode}"
-                  exit 1
-              fi
-          fi
-          CURL_RETURN_CODE=0
-          CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o country.mmdb.gz https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
-          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
-            echo "Curl connection failed when downloading country-lite mmdb file with return code - ${CURL_RETURN_CODE}"
-            exit 1
-          else
-              echo "Curl connection success"
-              # Check http code for curl operation/response in  CURL_OUTPUT
-              httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
-              if [ ${httpCode} -ne 200 ]; then
-                  echo "Curl operation/command failed due to server return code - ${httpCode}"
-                  exit 1
-              fi
-          fi
-          rm -f asn.mmdb country.mmdb
-          gunzip asn.mmdb.gz country.mmdb.gz
+          persist-credentials: false
+      - name: Set up Python for MMDB validation
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install existing MMDB validation dependency
+        run: python -m pip install --disable-pip-version-check --no-cache-dir --no-deps --require-hashes -r misc/requirements-mmdb.txt
+      - name: Download and verify mmdb files
+        run: ./misc/update-mmdb.sh
+      - name: Configure Git authentication
+        run: gh auth setup-git --hostname github.com --force
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        env:
+          GH_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
         with:
           branch: dev
           commit_message: "Monthly mmdb update"
           commit_options: "--no-verify"
           commit_user_name: "BunkerBot"
           commit_user_email: "bunkerbot@bunkerity.com"
+          file_pattern: src/bw/misc/asn.mmdb src/bw/misc/country.mmdb

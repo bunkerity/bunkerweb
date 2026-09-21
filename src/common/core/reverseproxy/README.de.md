@@ -36,13 +36,15 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     | --------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                 |
     | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                    |
-    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt.                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt.                                                                            |
     | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                  |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                     |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.                                                                                                                             |
     | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1. |
     | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                      |
     | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.                                                                                                                                  |
+
+    BunkerWeb setzt den Pfad oder Regex-Ausdruck beim Erzeugen der NGINX-Location in Anführungszeichen und erhält dabei enthaltene Anführungszeichen, `#` und Regex-Backslashes. Geben Sie den Wert ohne zusätzliche NGINX-Anführungszeichen an. Die bestehenden Einschränkungen für Leerraum, `;`, `{` und `}` gelten weiterhin.
 
     !!! tip "Bewährte Praktiken"
         - Geben Sie in `REVERSE_PROXY_HOST` immer die vollständige URL an, einschließlich des Protokolls (http:// oder https://)
@@ -88,15 +90,24 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Zertifikatsvalidierung:** Kontrollieren Sie, wie Backend-Serverzertifikate validiert werden
         - **SNI-Unterstützung:** Geben Sie die Server Name Indication für Backends an, die mehrere Websites hosten
 
-    | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                  |
-    | ---------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.          |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist. |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.        |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM). |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI). |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                       |
+    | Einstellung                                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                               |
+    | ------------------------------------------------ | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.                                                       |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist.                                              |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.                                                       |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM).                                |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI).                                 |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                                                                      |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                             |
+    | `REVERSE_PROXY_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                          |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                       |
+    | `REVERSE_PROXY_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.               |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                                |
+    | `REVERSE_PROXY_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                                 |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                    |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                       |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -205,6 +216,7 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                   |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                          |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`    | multisite | ja       | **ModSecurity (pro Location):** Auf `no` setzen, um `modsecurity off;` in dieser Location auszugeben; umgeht die WAF auf Endpunkten für große Uploads, um OOM zu vermeiden (siehe Hinweis unten). |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |          | multisite | ja       | **Maximale Körpergröße (pro Location):** Maximale Körpergröße für diese Location (`0` für unbegrenzt). Wenn leer, gilt das `MAX_CLIENT_SIZE` des Dienstes.                                        |
 
     !!! warning "Sicherheitsüberlegungen"
         Seien Sie vorsichtig, wenn Sie benutzerdefinierte Konfigurationsausschnitte einfügen, da diese die Sicherheitseinstellungen von BunkerWeb überschreiben oder bei unsachgemäßer Konfiguration Schwachstellen einführen können.
@@ -213,6 +225,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         ModSecurity puffert den vollständigen Anforderungskörper im Arbeitsspeicher und kann ihn bei Uploads mit mehreren GB nicht begrenzen, was zu einem OOM des Workers führen kann. Wenn, **und nur wenn**, eine Reverse-Proxy-URL *ausschließlich* für Datei-Uploads verwendet wird (z. B. ein dedizierter `/upload`-Endpunkt), setzen Sie `REVERSE_PROXY_MODSECURITY_N: "no"` für diese URL. Deaktivieren Sie dies nicht für gemischt genutzte URLs: Sie würden die WAF-Abdeckung für alles verlieren, was von dieser Location bereitgestellt wird.
 
         Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
+
+    !!! tip "Körpergröße pro URL"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` begrenzt den Körper nur für eine URL, sodass ein dedizierter Upload-Endpunkt große Dateien annehmen kann, während der Rest des Dienstes beim strengeren `MAX_CLIENT_SIZE` bleibt. Es setzt außerdem das ModSecurity-Limit für den Anforderungskörper in dieser Location und überschreibt dabei sowohl den Dienstwert als auch ein ausdrückliches `MODSECURITY_SEC_REQUEST_BODY_LIMIT`, sodass der Upload nicht von der WAF abgelehnt wird und jede andere URL ihr eigenes Limit behält. Zwei Limits bleiben unberührt: JSON, XML und formularkodierte Körper werden weiterhin durch `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` begrenzt (standardmäßig `131072`, darüber `400`), und `0` deaktiviert das ModSecurity-Limit in dieser Location, die dann einen Körper beliebiger Größe puffert. ModSecurity liest den gesamten Körper, bevor die Anfrage weitergeleitet wird, setzen Sie den Wert also auf das, was der Endpunkt wirklich benötigt.
 
 === "Caching-Konfiguration"
 
@@ -244,6 +259,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Verwenden Sie je nach Inhaltstyp geeignete Cache-Dauern (statische Assets können länger zwischengespeichert werden)
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! danger "Docker Compose-Benutzer - NGINX-Variablen"
     Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.

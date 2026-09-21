@@ -17,11 +17,16 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre            | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                              |
-| -------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `WHITELIST_COUNTRY`  |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés.                                                                                                               |
-| `BLACKLIST_COUNTRY`  |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.                                                                                                                         |
-| `COUNTRY_IGNORE_URI` |        | multisite | non      | URI ignorée : liste de motifs regex PCRE, séparés par des espaces, pour les URI à exclure de la vérification du pays. Les motifs sont vérifiés sur le chemin et sur l'URI de requête complète avec la chaîne de requête. |
+| Paramètre                     | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                              |
+| ----------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`           |        | multisite | non      | Liste blanche : codes pays et/ou tokens de groupe, séparés par des espaces. Seuls ces pays sont autorisés.                                                                                                               |
+| `BLACKLIST_COUNTRY`           |        | multisite | non      | Liste noire : codes pays et/ou tokens de groupe, séparés par des espaces. Ces pays sont bloqués.                                                                                                                         |
+| `COUNTRY_IGNORE_URI`          |        | multisite | non      | URI ignorée : liste de motifs regex PCRE, séparés par des espaces, pour les URI à exclure de la vérification du pays. Les motifs sont vérifiés sur le chemin et sur l'URI de requête complète avec la chaîne de requête. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner la vérification du pays. Paires numérotées : `_NAME_1` va avec `_VALUE_1`.                                                             |
+| `COUNTRY_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.                                                                       |
+
+!!! warning "Une règle d’en-tête est un secret partagé"
+    N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
 
 ### Groupes de pays pris en charge
 

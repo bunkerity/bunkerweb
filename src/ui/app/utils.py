@@ -14,6 +14,7 @@ from urllib.parse import unquote
 from bcrypt import checkpw, gensalt, hashpw
 from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import current_app, flash as flask_flash, session
+from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
@@ -56,8 +57,10 @@ BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
 MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
-# \Z, not $: a trailing newline would otherwise pass and become a directory name.
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}\Z")
+# \Z, not $: a trailing newline would otherwise pass and become a directory name. The
+# ".bw-" prefix is the instance-side swap's own bookkeeping namespace: an entry carrying it
+# is exempt from the stale-entry sweep, so a plugin named that way survives its own deletion.
+PLUGIN_NAME_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".biscuit_private_key")
@@ -375,9 +378,19 @@ def get_latest_stable_release():
     return latest_release
 
 
-def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+def flash(message: Union[str, Markup], category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+    # Flash bodies are rendered as HTML. Everything that is not explicitly
+    # marked safe is escaped here, so a service name, an IP or a config name
+    # echoed back into a message can never carry markup. Callers that really
+    # mean to send markup wrap it in Markup(...).
+    message = message if isinstance(message, Markup) else escape(message)
     if i18n_key:
-        message = f'<span data-i18n="{i18n_key}">{message}</span>'
+        message = Markup('<span data-i18n="{}">{}</span>').format(i18n_key, message)
+
+    # The session serializer (msgspec, Redis backend) only encodes plain types, so the
+    # escaped body is stored as str. flash.html and sidebar-notifications.html render it
+    # with |safe: the escaping above is the only thing that ever produced that string.
+    message = str(message)
 
     if category != "success":
         flask_flash(message, category)
@@ -496,8 +509,8 @@ def _revoked_session_ttl_seconds():
 def _session_store_backend():
     """``(redis_client, key_prefix)`` or ``(cachelib_cache, None)``, whichever backs Flask-Session.
 
-    Same two-branch shape as main.py's ``_delete_session_store_entry``. ``(None, None)`` if the
-    session interface exposes neither, which only happens if the backend failed to initialise.
+    ``(None, None)`` if the session interface exposes neither, which only happens if the
+    backend failed to initialise.
     """
     interface = getattr(current_app, "session_interface", None)
     client = getattr(interface, "client", None)
@@ -508,6 +521,16 @@ def _session_store_backend():
 
 def _revoked_session_key(session_id, prefix) -> str:
     return f"{prefix}revoked:{session_id}" if prefix is not None else f"revoked:{session_id}"
+
+
+def _session_store_fallback():
+    """The local cache the Redis session interface falls back to, or ``None`` outside that setup."""
+    return getattr(getattr(current_app, "session_interface", None), "fallback", None)
+
+
+def _session_store_redis_available() -> bool:
+    """False while the session interface is skipping a Redis it cannot reach."""
+    return getattr(getattr(current_app, "session_interface", None), "redis_available", True)
 
 
 def revoke_sessions(ids) -> str:
@@ -525,6 +548,18 @@ def revoke_sessions(ids) -> str:
         return "No session backend available to record the revocation"
 
     ttl = _revoked_session_ttl_seconds()
+
+    # Mirrored locally on every revocation, not only when Redis fails. The session it names can
+    # be served from the local store during any later outage, and the check consults that store
+    # too, so a marker held only by Redis would stop applying exactly when Redis goes away.
+    fallback = _session_store_fallback()
+    if fallback is not None:
+        try:
+            for sid in ids:
+                fallback.set(_revoked_session_key(sid, prefix), True, timeout=ttl)
+        except Exception:
+            LOGGER.exception("Couldn't record revoked session ids in the local session store")
+
     try:
         for sid in ids:
             key = _revoked_session_key(sid, prefix)
@@ -533,6 +568,7 @@ def revoke_sessions(ids) -> str:
             else:
                 backend.set(key, True, timeout=ttl)
     except BaseException as e:
+        # Still returned: it is what tells the caller the revocation did not reach the other replicas.
         LOGGER.exception("Couldn't record revoked session ids")
         return str(e)
 
@@ -542,9 +578,9 @@ def revoke_sessions(ids) -> str:
 def is_session_revoked(session_id) -> bool:
     """Whether this session id has been revoked. Checked on every authenticated request.
 
-    Fails open on a backend error, which is safe here: the same backend stores the sessions
-    themselves, so if it is unreachable the session cannot be loaded and the request is
-    unauthenticated long before this check runs.
+    Both stores are consulted. A session served from the local fallback while Redis is
+    unavailable would otherwise outlive its own revocation, since the marker for it never
+    reached Redis either.
     """
     if not session_id:
         return False
@@ -554,12 +590,24 @@ def is_session_revoked(session_id) -> bool:
         return False
 
     key = _revoked_session_key(session_id, prefix)
+    # Skipped while the interface has given up on Redis, since this runs on every authenticated
+    # request and would otherwise pay REDIS_TIMEOUT each time. Every revocation is mirrored
+    # locally, so the check below still sees it.
+    if _session_store_redis_available():
+        try:
+            if bool(backend.exists(key)) if prefix is not None else bool(backend.get(key)):
+                return True
+        except Exception:
+            LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+
+    fallback = _session_store_fallback()
+    if fallback is None:
+        return False
+
     try:
-        if prefix is not None:
-            return bool(backend.exists(key))
-        return bool(backend.get(key))
+        return bool(fallback.get(key))
     except BaseException:
-        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked in the local session store")
         return False
 
 

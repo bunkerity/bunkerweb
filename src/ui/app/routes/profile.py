@@ -155,9 +155,7 @@ def totp_disable():
 
     verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
-        request.form["totp_token"], user=current_user
-    ):
+    if not TOTP.verify_totp(request.form["totp_token"], user=current_user) and not TOTP.verify_recovery_code(request.form["totp_token"], user=current_user):
         return handle_error("The totp token is invalid.", "profile")
 
     ret = DB.update_ui_user(
@@ -187,26 +185,18 @@ def totp_enable():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
-        request.form["totp_token"], user=current_user
-    ):
+    totp_secret = session.get("tmp_totp_secret", "")
+    match = TOTP.match_totp(request.form["totp_token"], totp_secret)
+    if match is None:
         return handle_error("The totp token is invalid.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
-    totp_secret = session.pop("tmp_totp_secret", "")
 
-    ret = DB.update_ui_user(
-        current_user.get_id(),
-        current_user.password.encode("utf-8"),
-        totp_secret,
-        theme=current_user.theme,
-        totp_recovery_codes=totp_recovery_codes,
-        method=current_user.method,
-        language=current_user.language,
-    )
+    ret = DB.enable_ui_user_totp(current_user.get_id(), totp_secret, match.counter, totp_recovery_codes)
     if ret:
         return handle_error(f"Couldn't enable the two-factor authentication in the database: {ret}", "profile")
 
+    session.pop("tmp_totp_secret", None)
     session["totp_validated"] = True
     session["totp_refreshed"] = True
     session["decrypted_recovery_codes"] = totp_recovery_codes

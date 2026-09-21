@@ -48,6 +48,13 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
     2. Stellen Sie sicher, dass alle Instanzen genau denselben `SESSIONS_SECRET` und `SESSIONS_NAME` verwenden
     3. Dies stellt sicher, dass Benutzer ihre Sitzung beibehalten, unabhängig davon, welche BunkerWeb-Instanz ihre Anfragen bearbeitet
 
+!!! info "Sitzungswiderruf"
+    Ohne Redis liegen die Sitzungsdaten im Cookie selbst. Das Zerstören einer Sitzung löschte sie deshalb nur im Browser, und das signierte Cookie blieb bis zum Zeitablauf gültig. BunkerWeb führt eine Sperrliste der zerstörten Sitzungskennungen im gemeinsamen Speicher, sodass ein zerstörtes Cookie bei der nächsten Verwendung abgelehnt wird.
+
+    - Gilt nur, wenn die Sitzungsdaten im Cookie gespeichert sind. Mit `USE_REDIS` auf `yes` liegen die Daten serverseitig und werden beim Zerstören bereits entfernt.
+    - Die Sperrliste ist lokal zu jeder BunkerWeb-Instanz. Verwenden Sie Redis, um Sitzungen clusterweit zu widerrufen.
+    - Die Größe steuert `SESSIONS_REVOCATION_MEMORY_SIZE`. Ist der Speicher voll oder nicht verfügbar, gilt die Sitzung als gültig und es wird eine Warnung protokolliert.
+
 ### Beispielkonfigurationen
 
 === "Grundlegende Konfiguration"

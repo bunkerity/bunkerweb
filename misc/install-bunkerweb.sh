@@ -37,6 +37,10 @@ _bw_wipe_secret_tmpfiles() {
 
 # EXIT hook — runs on every exit path (normal, error, signal). Keep callees idempotent.
 _bw_install_cleanup() {
+    # Until recreation begins, restore the complete original upgrade configuration.
+    if declare -F _docker_restore_upgrade_files >/dev/null 2>&1; then
+        _docker_restore_upgrade_files || true
+    fi
     # Wipe plaintext credential tempfiles first.
     _bw_wipe_secret_tmpfiles
     # _gum_cleanup defined later; guard against early-exit.
@@ -101,15 +105,16 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.14"
+DEFAULT_BUNKERWEB_VERSION="1.6.15"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
+BUNKERWEB_VERSION_EXPLICIT="no"
 NGINX_VERSION=""
 
 # NGINX bundled with the default BunkerWeb version; also the fallback for any
 # BunkerWeb version absent from the dictionary below (pre-1.6, the current-default
 # line, or newer-than-this-script). KEEP IN SYNC with src/linux/Dockerfile-*.
-DEFAULT_NGINX_VERSION="1.30.4"
+DEFAULT_NGINX_VERSION="1.30.5"
 
 # BunkerWeb release (X.Y.Z) -> NGINX version its packages were compiled against.
 # Each BunkerWeb Linux package ships NGINX dynamic modules built for one specific
@@ -126,7 +131,7 @@ declare -A _NGINX_VERSION_BY_BW=(
     [1.6.10]="1.30.1"
     [1.6.11]="1.30.2"
     [1.6.12]="1.30.3"
-    # 1.6.13 uses 1.30.4 (= DEFAULT_NGINX_VERSION) via the fallback.
+    [1.6.13]="1.30.4" [1.6.14]="1.30.4"
 )
 # Fedora lagged the common pin on these releases only (Fedora repo timing).
 declare -A _NGINX_VERSION_BY_BW_FEDORA=(
@@ -134,7 +139,6 @@ declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     # 1.6.13: Fedora 43/44 still lack 1.30.4, so they ship 1.30.3.
     [1.6.13]="1.30.3"
 )
-
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 FORCE_TYPE_CHANGE="no"
@@ -219,14 +223,26 @@ USE_TUI="${BW_INSTALL_TUI:-auto}"
 DOCKER_MODE="no"                   # "yes" when the docker-compose deployment path is selected
 DOCKER_AUTOCONF=""                 # "yes" | "no" — autoconf integration variant (full only)
 DOCKER_IMAGE_TAG=""                # explicit Docker Hub tag; empty = derive from BUNKERWEB_VERSION
+DOCKER_IMAGE_TAG_EXPLICIT="no"
 DOCKER_PROJECT_DIR=""              # dir that receives docker-compose.yml + .env
 DOCKER_COMPOSE_FILE=""             # $DOCKER_PROJECT_DIR/docker-compose.yml
 DOCKER_ENV_FILE=""                 # $DOCKER_PROJECT_DIR/.env
+DOCKER_SYSLOG=""                   # "yes" | "no" — resolved local Web UI log collection
+DOCKER_SYSLOG_EXPLICIT="no"        # "yes" when --syslog/--no-syslog was passed
+DOCKER_SYSLOG_SAVED=""             # valid BW_INSTALL_SYSLOG value loaded from an existing .env
+DOCKER_SYSLOG_PREVIOUS=""          # effective state of an existing stack
+DOCKER_SYSLOG_CHANGED="no"         # desired state differs from the existing stack
+DOCKER_SYSLOG_STALE="no"           # managed collector topology contradicts stored state
+DOCKER_SYSLOG_COMPOSE_MANAGED="no" # generated collector topology found during legacy detection
+DOCKER_SYSLOG_CONFIG_PRESERVE="no" # keep an existing collector config during an upgrade/reconfigure
+DOCKER_SYSLOG_CONTAINER_ID=""      # targeted old collector container captured before a disable
+DOCKER_SYSLOG_FILE=""              # $DOCKER_PROJECT_DIR/syslog-ng.conf
 DOCKER_OVERWRITE_EXISTING="no"     # --overwrite-compose: back up + overwrite existing files
 DOCKER_AUTO_INSTALL=""             # "yes" (--install-docker): install Docker if missing, no prompt
 DOCKER_NEED_INSTALL="no"           # "yes" when check_docker_prereqs deferred a Docker install to after the confirm
 DOCKER_PULL="yes"                  # --no-pull sets this to "no"
-DOCKER_WAIT_TIMEOUT=180            # seconds to wait for the stack to become ready
+DOCKER_PULL_EXPLICIT="no"          # --no-pull was explicitly requested
+DOCKER_WAIT_TIMEOUT=600            # seconds to wait for the stack to become healthy and stable
 DOCKER_DB_PASSWORD_GENERATED=""    # MariaDB bunkerweb-user password (operator-set or generated)
 DOCKER_TOTP_KEY_GENERATED=""       # TOTP_ENCRYPTION_KEYS value
 DOCKER_API_TOKEN_GENERATED=""      # API_TOKEN value (generated for full/ui/api, prompted for manager/worker/scheduler)
@@ -234,14 +250,34 @@ DOCKER_FLASK_SECRET_GENERATED=""   # UI FLASK_SECRET value
 DOCKER_DATABASE_URI=""             # external DATABASE_URI for scheduler/ui/api docker types
 API_USERNAME_INPUT=""              # FastAPI admin username (api docker type)
 API_PASSWORD_INPUT=""              # FastAPI admin password (api docker type)
-# Host ports published by the generated stack. Defaults match a standalone
-# deploy; override (--http-port etc.) so several stacks can co-exist on one
-# host (e.g. a manager plus several workers in one test VM, one folder each).
-DOCKER_HTTP_PORT="80"              # bunkerweb HTTP      (container 8080)
-DOCKER_HTTPS_PORT="443"            # bunkerweb HTTPS+QUIC (container 8443 tcp+udp)
-DOCKER_API_PORT="5000"             # worker internal API (container 5000)
-DOCKER_UI_PORT="7000"              # manager/ui Web UI   (container 7000)
-DOCKER_FASTAPI_PORT="8888"         # api FastAPI service (container 8888)
+# Host ports published by the generated stack. Override (--http-port etc.) so
+# several stacks can co-exist on one host (e.g. a manager plus several workers
+# in one test VM, one folder each).
+# These start EMPTY on purpose: _docker_load_existing_env reuses the ports of an
+# existing stack, and it can only tell "operator passed --http-port" from "the
+# default kicked in" while the unset value is empty. _docker_default_ports fills
+# whatever is still empty afterwards with the standalone-deploy defaults.
+DOCKER_HTTP_PORT=""                # bunkerweb HTTP      (container 8080) — default 80
+DOCKER_HTTPS_PORT=""               # bunkerweb HTTPS+QUIC (container 8443 tcp+udp) — default 443
+DOCKER_API_PORT=""                 # worker internal API (container 5000) — default 5000
+DOCKER_UI_PORT=""                  # manager/ui Web UI   (container 7000) — default 7000
+DOCKER_FASTAPI_PORT=""             # api FastAPI service (container 8888) — default 8888
+
+# ---------------------------------------------------------------------------
+# Docker upgrade path — set when an existing stack generated by this script is
+# found in DOCKER_PROJECT_DIR. The stack is then upgraded in place (new image
+# tag, pull, recreate) instead of being generated from scratch.
+# ---------------------------------------------------------------------------
+DOCKER_STACK_DETECTED="no"         # "yes" when DOCKER_PROJECT_DIR holds a stack this script generated
+DOCKER_RECONFIGURATION="no"        # "yes" for same-version syslog-only changes
+DOCKER_PROJECT_NAME=""             # COMPOSE_PROJECT_NAME pinned from an existing .env — NEVER recomputed
+DOCKER_INSTALLED_TAG=""            # BW_TAG currently recorded in the existing .env
+DOCKER_INSTALLED_VERSION=""        # version actually reported by the running containers
+DOCKER_COMPOSE_RENDER_MODE=""      # "rerender" | "preserve" — decided by _docker_check_existing
+_BW_RECORDED_TYPE=""               # install type read back from the .env header marker
+_BW_RECORDED_COMPOSE_SHA256=""     # checksum of docker-compose.yml as this script last wrote it
+_BW_RECORDED_SYSLOG_SHA256=""      # checksum of syslog-ng.conf as this script last wrote it
+DOCKER_LOADED_WHITELIST=""         # API_WHITELIST_IP read back, used to recover MANAGER_IP_INPUT
 
 # ---------------------------------------------------------------------------
 # Save-state / resume — checkpoints the fresh-install flow so a crash or Ctrl+C
@@ -1359,6 +1395,15 @@ _docker_compose() {
 # on one host — one folder each. Sanitized to the Compose project-name grammar.
 _docker_project_name() {
     local b
+    # An existing stack's project name is load-bearing: every volume and network
+    # it owns is prefixed with it, so recomputing it from a directory that was
+    # renamed (or from /root after the operator followed our own "--compose-dir
+    # /opt/bunkerweb-docker" advice) would silently orphan bw-data / bw-storage.
+    # _docker_load_existing_env pins the recorded value; honour it verbatim.
+    if [ -n "$DOCKER_PROJECT_NAME" ]; then
+        printf '%s' "$DOCKER_PROJECT_NAME"
+        return 0
+    fi
     b=$(basename "$DOCKER_PROJECT_DIR" 2>/dev/null | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
     b=${b#-}; b=${b%-}
     [ -z "$b" ] && b="bunkerweb"
@@ -1411,6 +1456,13 @@ render_docker_env() {
                 printf 'API_WHITELIST_IP=%s\n' "$_docker_whitelist"
                 printf 'HTTP_PORT=%s\n' "$DOCKER_HTTP_PORT"
                 printf 'HTTPS_PORT=%s\n' "$DOCKER_HTTPS_PORT"
+                printf 'BW_INSTALL_SYSLOG=%s\n' "$DOCKER_SYSLOG"
+                if [ -n "${_BW_RECORDED_SYSLOG_SHA256:-}" ] && {
+                    [ "${DOCKER_SYSLOG_CONFIG_PRESERVE:-no}" = "yes" ] ||
+                    { [ "$DOCKER_SYSLOG" = "no" ] && [ "$DOCKER_STACK_DETECTED" = "yes" ] && [ -e "$DOCKER_SYSLOG_FILE" ]; };
+                }; then
+                    printf '_BW_SYSLOG_SHA256=%s\n' "$_BW_RECORDED_SYSLOG_SHA256"
+                fi
                 _docker_env_admin_block
                 ;;
             manager)
@@ -1451,6 +1503,92 @@ render_docker_env() {
     mv -f "$tmp" "$DOCKER_ENV_FILE"
     chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
     print_status "Wrote $DOCKER_ENV_FILE (mode 0600)."
+}
+
+# Add the optional collector to an already-rendered Full-stack compose file.
+# Keeping this as a post-render patch lets the disabled output stay unchanged
+# and keeps scratch rendering free of side effects outside its target file.
+_docker_add_syslog_compose_fragments() {
+    [ "$DOCKER_SYSLOG" = "yes" ] || return 0
+    local _tmp
+    _tmp=$(mktemp "${DOCKER_COMPOSE_FILE}.XXXXXX") || return 1
+    awk '
+        /^    image: bunkerity\/bunkerweb-scheduler:/ {
+            print
+            print "    depends_on:"
+            print "      - bw-syslog"
+            next
+        }
+        /^      MULTISITE: "yes"$/ {
+            print
+            print "      LOG_TYPES: \"stderr syslog\""
+            print "      LOG_SYSLOG_ADDRESS: \"udp://bw-syslog:514\""
+            print "      LOG_SYSLOG_TAG: \"bw-scheduler\""
+            print "      ACCESS_LOG_1: \"syslog:server=bw-syslog:514,tag=bunkerweb_access\""
+            print "      ERROR_LOG_1: \"syslog:server=bw-syslog:514,tag=bunkerweb\""
+            next
+        }
+        /^    image: bunkerity\/bunkerweb-ui:/ {
+            print
+            print "    depends_on:"
+            print "      - bw-syslog"
+            next
+        }
+        /^      TOTP_ENCRYPTION_KEYS:/ {
+            print
+            print "      LOG_TYPES: \"stderr syslog\""
+            print "      LOG_SYSLOG_ADDRESS: \"udp://bw-syslog:514\""
+            print "      LOG_SYSLOG_TAG: \"bw-ui\""
+            print "    volumes:"
+            print "      - bw-logs:/var/log/bunkerweb"
+            next
+        }
+        /^      - bw-docker$/ {
+            print
+            if (!autoconf_dependency_seen++) print "      - bw-syslog"
+            next
+        }
+        /^      DOCKER_HOST:/ {
+            print
+            print "      LOG_TYPES: \"stderr syslog\""
+            print "      LOG_SYSLOG_ADDRESS: \"udp://bw-syslog:514\""
+            print "      LOG_SYSLOG_TAG: \"bw-autoconf\""
+            next
+        }
+        /^  bw-db:$/ {
+            if (bw_db_seen++) {
+                print
+                next
+            }
+            print "  bw-syslog:"
+            print "    image: balabit/syslog-ng:4.10.2"
+            print "    healthcheck:"
+            print "      test: [\"CMD\", \"/usr/sbin/syslog-ng-ctl\", \"healthcheck\", \"--timeout\", \"5\"]"
+            print "      interval: \"30s\""
+            print "      timeout: \"10s\""
+            print "      retries: 3"
+            print "      start_period: \"30s\""
+            print "    labels:"
+            print "      com.bunkerweb.installer: \"install-bunkerweb.sh\""
+            print "      io.bunkerweb.installer.component: \"syslog\""
+            print "    volumes:"
+            print "      - bw-logs:/var/log/bunkerweb"
+            print "      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro"
+            print "    restart: \"unless-stopped\""
+            print "    networks:"
+            print "      - bw-universe"
+            print ""
+            print
+            next
+        }
+        /^  redis-data:$/ {
+            print
+            print "  bw-logs:"
+            next
+        }
+        { print }
+    ' "$DOCKER_COMPOSE_FILE" > "$_tmp" || { rm -f "$_tmp"; return 1; }
+    mv -f "$_tmp" "$DOCKER_COMPOSE_FILE"
 }
 
 # Standard stack — bunkerweb + scheduler + ui + mariadb + redis.
@@ -1551,6 +1689,7 @@ networks:
   bw-services:
   bw-db:
 COMPOSE
+    _docker_add_syslog_compose_fragments
 }
 
 # Autoconf stack — adds bw-autoconf + bw-docker (socket proxy) so containers
@@ -1680,6 +1819,74 @@ networks:
   bw-docker:
   bw-db:
 COMPOSE
+    _docker_add_syslog_compose_fragments
+}
+
+# Fixed destinations keep an incoming PROGRAM/tag from becoming a filesystem
+# path. The UI process runs with group 101, so collector files are group-read.
+_docker_syslog_config() {
+    cat <<'SYSLOG_NG'
+@version: 4.10
+
+source s_net {
+  udp(ip("0.0.0.0") port(514));
+};
+
+template t_bunkerweb {
+  template("$ISODATE $HOST $PROGRAM $MSG\n");
+  template_escape(no);
+};
+
+destination d_access {
+  file("/var/log/bunkerweb/bunkerweb_access.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+destination d_error {
+  file("/var/log/bunkerweb/bunkerweb.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+destination d_scheduler {
+  file("/var/log/bunkerweb/bw-scheduler.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+destination d_ui {
+  file("/var/log/bunkerweb/bw-ui.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+destination d_autoconf {
+  file("/var/log/bunkerweb/bw-autoconf.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+destination d_other {
+  file("/var/log/bunkerweb/other.log" template(t_bunkerweb)
+    owner("101") group("101") dir_owner("root") dir_group("101")
+    perm(0440) dir_perm(0770) create_dirs(yes)
+    logrotate(enable(yes), size(100MB), rotations(7)));
+};
+
+filter f_access { program("bunkerweb_access"); };
+filter f_error { program("bunkerweb"); };
+filter f_scheduler { program("bw-scheduler") or program("bw-scheduler-access"); };
+filter f_ui { program("bw-ui") or program("bw-ui-access"); };
+filter f_autoconf { program("bw-autoconf") or program("bw-autoconf-access"); };
+
+log { source(s_net); filter(f_access); destination(d_access); flags(final); };
+log { source(s_net); filter(f_error); destination(d_error); flags(final); };
+log { source(s_net); filter(f_scheduler); destination(d_scheduler); flags(final); };
+log { source(s_net); filter(f_ui); destination(d_ui); flags(final); };
+log { source(s_net); filter(f_autoconf); destination(d_autoconf); flags(final); };
+log { source(s_net); destination(d_other); };
+SYSLOG_NG
 }
 
 # Manager stack — bw-scheduler + bw-ui + bw-db + redis. Manages the remote
@@ -1907,7 +2114,11 @@ COMPOSE
 
 # Render the compose file for the chosen install type, then ask Compose to
 # validate it (catches a malformed .env or YAML before we ever call 'up').
-render_docker_compose() {
+# Renderer dispatch only — writes $DOCKER_COMPOSE_FILE and nothing else. Split
+# out of render_docker_compose so _docker_compose_is_pristine can render today's
+# template into a scratch file (by pointing DOCKER_COMPOSE_FILE at it) without
+# the chmod / status line / validation that belong to a real deploy.
+_docker_render_compose_variant() {
     case "$INSTALL_TYPE" in
         full)
             if [ "$DOCKER_AUTOCONF" = "yes" ]; then
@@ -1926,6 +2137,20 @@ render_docker_compose() {
             exit 1
             ;;
     esac
+}
+
+render_docker_compose() {
+    if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+        print_error "Refusing to replace a symlinked docker-compose.yml; update its target manually."
+        return 1
+    fi
+    local _original="$DOCKER_COMPOSE_FILE" _tmp
+    _tmp=$(mktemp "${DOCKER_COMPOSE_FILE}.XXXXXX") || return 1
+    _bw_register_secret_tmpfile "$_tmp"
+    DOCKER_COMPOSE_FILE="$_tmp"
+    _docker_render_compose_variant
+    DOCKER_COMPOSE_FILE="$_original"
+    mv -f "$_tmp" "$DOCKER_COMPOSE_FILE"
     chmod 644 "$DOCKER_COMPOSE_FILE" 2>/dev/null || true
     print_status "Wrote $DOCKER_COMPOSE_FILE."
     if ! _docker_compose config -q >/dev/null 2>&1; then
@@ -1937,24 +2162,487 @@ render_docker_compose() {
     fi
 }
 
-# Poll until every service reports 'running', or DOCKER_WAIT_TIMEOUT elapses.
-# Returns 0 when ready, 1 on timeout (caller surfaces a logs hint, not fatal).
-wait_for_docker_stack_ready() {
-    local deadline=$(( $(date +%s) + DOCKER_WAIT_TIMEOUT ))
-    local total running=0
-    total=$(_docker_compose ps --services 2>/dev/null | grep -c . || echo 0)
-    [ "$total" -gt 0 ] || total=5
-    print_status "Waiting for $total services to start (timeout ${DOCKER_WAIT_TIMEOUT}s)..."
-    while [ "$(date +%s)" -lt "$deadline" ]; do
-        running=$(_docker_compose ps --services --status running 2>/dev/null | grep -c . || echo 0)
-        if [ "$running" -ge "$total" ]; then
-            print_status "All $total services are running."
+# Record the current docker-compose.yml checksum in .env, so a later upgrade run
+# can tell "still exactly what we generated" from "the operator edited it".
+# MUST run after render_docker_env (which rewrites .env from scratch and would
+# drop the line) and after the compose file is final.
+_docker_record_compose_checksum() {
+    local _sum
+    _sum=$(sha256sum "$DOCKER_COMPOSE_FILE" 2>/dev/null | awk '{print $1}')
+    [ -n "$_sum" ] || return 0
+    printf '_BW_COMPOSE_SHA256=%s\n' "$_sum" >> "$DOCKER_ENV_FILE"
+    chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
+}
+
+_docker_record_syslog_checksum() {
+    [ "$DOCKER_SYSLOG" = "yes" ] || return 0
+    [ "$DOCKER_SYSLOG_CONFIG_PRESERVE" != "yes" ] || return 0
+    local _sum
+    _sum=$(sha256sum "$DOCKER_SYSLOG_FILE" 2>/dev/null | awk '{print $1}')
+    [ -n "$_sum" ] || return 0
+    printf '_BW_SYSLOG_SHA256=%s\n' "$_sum" >> "$DOCKER_ENV_FILE"
+    chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
+}
+
+# 0 when docker-compose.yml on disk is byte-identical to what this script would
+# generate right now for the resolved INSTALL_TYPE/DOCKER_AUTOCONF — i.e. safe to
+# re-render. 1 when it was hand-edited, or when we cannot tell.
+#
+# A recorded checksum answers it outright. Stacks generated before that line
+# existed (1.6.14 and earlier) fall back to rendering today's template into a
+# scratch file and comparing: if a release-to-release template tweak makes an
+# untouched old file look edited, the fallback direction is the safe one — we
+# preserve the operator's file and only patch the tag.
+_docker_compose_is_pristine() {
+    # A symlink names an operator-owned compose file, not our generated template.
+    [ -L "$DOCKER_COMPOSE_FILE" ] && return 1
+
+    local _actual
+    _actual=$(sha256sum "$DOCKER_COMPOSE_FILE" 2>/dev/null | awk '{print $1}')
+    [ -n "$_actual" ] || return 1
+
+    if [ -n "$_BW_RECORDED_COMPOSE_SHA256" ]; then
+        [ "$_BW_RECORDED_COMPOSE_SHA256" = "$_actual" ]
+        return $?
+    fi
+
+    local _real="$DOCKER_COMPOSE_FILE" _scratch _rc _syslog="$DOCKER_SYSLOG"
+    _scratch=$(mktemp) || return 1
+    DOCKER_COMPOSE_FILE="$_scratch"
+    if [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ] || [ "$DOCKER_SYSLOG_COMPOSE_MANAGED" = "yes" ]; then
+        DOCKER_SYSLOG="yes"
+    else
+        DOCKER_SYSLOG="no"
+    fi
+    _docker_render_compose_variant
+    DOCKER_SYSLOG="$_syslog"
+    DOCKER_COMPOSE_FILE="$_real"
+    cmp -s "$_scratch" "$DOCKER_COMPOSE_FILE"
+    _rc=$?
+    rm -f "$_scratch"
+    return $_rc
+}
+
+# render_docker_env rebuilds .env from a fixed per-type key set, so anything the
+# operator added by hand (USE_BACKUP=no, BACKUP_SCHEDULE=weekly, a plugin
+# setting, ...) would silently disappear on an upgrade. Snapshot the old file
+# first, then append back every key the regenerated file does not define.
+#
+# Deliberately keyed on "absent from the new file" rather than an allow-list of
+# known keys: a list would need updating every time a renderer gains a variable,
+# and forgetting to update it loses operator data silently.
+_DOCKER_ENV_SNAPSHOT=""
+_DOCKER_UPGRADE_SNAPSHOT=""
+_DOCKER_UPGRADE_SYSLOG_TARGET=""
+_DOCKER_UPGRADE_SYSLOG_PRESENT="no"
+_DOCKER_RECREATION_STARTED="no"
+
+_docker_stack_update_mode() {
+    [ "$UPGRADE_SCENARIO" = "yes" ] || [ "$DOCKER_RECONFIGURATION" = "yes" ]
+}
+
+# Existing collector configuration is operator-owned once it exists. A fresh
+# symlink or non-regular path is rejected so generation never follows or
+# replaces an unexpected filesystem object.
+_docker_prepare_syslog_config() {
+    [ "$DOCKER_SYSLOG" = "yes" ] || return 0
+    # This is deliberately recomputed on every render. The preference pass can
+    # run well before application, and a deleted file must not leave a stale
+    # preserve decision that suppresses fresh generation.
+    DOCKER_SYSLOG_CONFIG_PRESERVE="no"
+    if [ -L "$DOCKER_SYSLOG_FILE" ]; then
+        if [ "$DOCKER_STACK_DETECTED" = "yes" ]; then
+            if [ ! -e "$DOCKER_SYSLOG_FILE" ]; then
+                print_error "Refusing to use broken symlinked syslog-ng.conf."
+                return 1
+            fi
+            DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+            print_status "Keeping the existing symlinked syslog-ng.conf."
             return 0
         fi
-        sleep 3
+        print_error "Refusing to replace a symlinked syslog-ng.conf; update its target manually."
+        return 1
+    fi
+    if [ -e "$DOCKER_SYSLOG_FILE" ] && [ ! -f "$DOCKER_SYSLOG_FILE" ]; then
+        print_error "Refusing to replace non-regular syslog-ng.conf (directory, device, or FIFO)."
+        return 1
+    fi
+    if [ -f "$DOCKER_SYSLOG_FILE" ]; then
+        local _sum _legacy_tmp
+        _sum=$(sha256sum "$DOCKER_SYSLOG_FILE" 2>/dev/null | awk '{print $1}')
+        if [ -n "${_BW_RECORDED_SYSLOG_SHA256:-}" ]; then
+            if [ "$_sum" = "$_BW_RECORDED_SYSLOG_SHA256" ]; then
+                print_status "Regenerating the unchanged installer-owned syslog-ng.conf."
+            else
+                DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+                print_status "Keeping the edited syslog-ng.conf; custom collector configuration is preserved."
+            fi
+            return 0
+        fi
+
+        # Older generated stacks have no checksum. A byte-for-byte match with
+        # today's fixed template is safe to regenerate; every other file is
+        # unknown/custom and remains untouched.
+        _legacy_tmp=$(mktemp 2>/dev/null) || {
+            DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+            print_warning "Could not classify syslog-ng.conf; preserving the existing file."
+            return 0
+        }
+        if ! _docker_syslog_config > "$_legacy_tmp" || ! cmp -s "$DOCKER_SYSLOG_FILE" "$_legacy_tmp"; then
+            DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+            print_status "Keeping the unknown syslog-ng.conf; custom collector configuration is preserved."
+        else
+            print_status "Regenerating the unchanged legacy syslog-ng.conf."
+        fi
+        rm -f "$_legacy_tmp"
+    fi
+}
+
+render_docker_syslog_config() {
+    if [ "$DOCKER_SYSLOG" = "yes" ]; then
+        _docker_prepare_syslog_config || exit 1
+    elif [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ] || [ "$DOCKER_SYSLOG_STALE" = "yes" ]; then
+        # Disabling does not render a replacement, but it still must refresh
+        # ownership immediately before .env is written so a vanished file is
+        # not carried as a preserved custom config.
+        DOCKER_SYSLOG_CONFIG_PRESERVE="no"
+        if [ -L "$DOCKER_SYSLOG_FILE" ] && [ ! -e "$DOCKER_SYSLOG_FILE" ]; then
+            print_error "Refusing to use broken symlinked syslog-ng.conf."
+            exit 1
+        fi
+        if [ -e "$DOCKER_SYSLOG_FILE" ] && [ ! -f "$DOCKER_SYSLOG_FILE" ] && [ ! -L "$DOCKER_SYSLOG_FILE" ]; then
+            print_error "Refusing to use non-regular syslog-ng.conf (directory, device, or FIFO)."
+            exit 1
+        fi
+        [ -f "$DOCKER_SYSLOG_FILE" ] || [ -L "$DOCKER_SYSLOG_FILE" ] && DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+        return 0
+    else
+        return 0
+    fi
+    [ "$DOCKER_SYSLOG_CONFIG_PRESERVE" = "yes" ] && return 0
+    local _tmp
+    _tmp=$(mktemp "${DOCKER_SYSLOG_FILE}.XXXXXX") || {
+        print_error "Cannot create a temporary syslog-ng.conf in $DOCKER_PROJECT_DIR."
+        exit 1
+    }
+    _docker_syslog_config > "$_tmp" || { rm -f "$_tmp"; exit 1; }
+    chmod 644 "$_tmp" 2>/dev/null || true
+    mv -f "$_tmp" "$DOCKER_SYSLOG_FILE" || {
+        rm -f "$_tmp"
+        print_error "Cannot write $DOCKER_SYSLOG_FILE."
+        exit 1
+    }
+    print_status "Wrote $DOCKER_SYSLOG_FILE."
+}
+
+# Keep originals until the first `up`: even a partial recreation may migrate the DB.
+_docker_snapshot_upgrade_files() {
+    _docker_stack_update_mode || return 0
+    _DOCKER_UPGRADE_ENV_TARGET="$DOCKER_ENV_FILE"
+    _DOCKER_UPGRADE_COMPOSE_TARGET="$DOCKER_COMPOSE_FILE"
+    _DOCKER_UPGRADE_SYSLOG_TARGET="$DOCKER_SYSLOG_FILE"
+    _DOCKER_UPGRADE_SNAPSHOT=$(mktemp -d /tmp/bw-upgrade.XXXXXX) || return 1
+    if [ -L "$DOCKER_SYSLOG_FILE" ] || [ -f "$DOCKER_SYSLOG_FILE" ]; then
+        _DOCKER_UPGRADE_SYSLOG_PRESENT="yes"
+    elif [ -e "$DOCKER_SYSLOG_FILE" ]; then
+        print_error "Cannot safely snapshot non-regular syslog-ng.conf."
+        return 1
+    else
+        _DOCKER_UPGRADE_SYSLOG_PRESENT="no"
+    fi
+    cp -pP "$DOCKER_ENV_FILE" "$_DOCKER_UPGRADE_SNAPSHOT/.env" || return 1
+    cp -pP "$DOCKER_COMPOSE_FILE" "$_DOCKER_UPGRADE_SNAPSHOT/docker-compose.yml" || return 1
+    if [ "$_DOCKER_UPGRADE_SYSLOG_PRESENT" = "yes" ]; then
+        cp -pP "$DOCKER_SYSLOG_FILE" "$_DOCKER_UPGRADE_SNAPSHOT/syslog-ng.conf" || return 1
+    fi
+    _DOCKER_RECREATION_STARTED=no
+}
+
+_docker_restore_upgrade_files() {
+    [ -n "${_DOCKER_UPGRADE_SNAPSHOT:-}" ] || return 0
+    if [ "${_DOCKER_RECREATION_STARTED:-no}" != "yes" ]; then
+        local _name _target
+        for _name in .env docker-compose.yml syslog-ng.conf; do
+            case "$_name" in
+                .env)                 _target="$_DOCKER_UPGRADE_ENV_TARGET" ;;
+                docker-compose.yml)   _target="$_DOCKER_UPGRADE_COMPOSE_TARGET" ;;
+                *)                    _target="$_DOCKER_UPGRADE_SYSLOG_TARGET" ;;
+            esac
+            if [ -e "$_DOCKER_UPGRADE_SNAPSHOT/$_name" ] || [ -L "$_DOCKER_UPGRADE_SNAPSHOT/$_name" ]; then
+                if ! mv -f "$_DOCKER_UPGRADE_SNAPSHOT/$_name" "$_target"; then
+                    print_error "Could not restore $_name; original retained in $_DOCKER_UPGRADE_SNAPSHOT."
+                    return 1
+                fi
+            elif [ "$_name" = "syslog-ng.conf" ] && [ "$_DOCKER_UPGRADE_SYSLOG_PRESENT" = "no" ]; then
+                if [ -L "$_target" ] || [ -f "$_target" ]; then
+                    rm -f "$_target" || {
+                        print_error "Could not remove the newly generated syslog-ng.conf; original retained in $_DOCKER_UPGRADE_SNAPSHOT."
+                        return 1
+                    }
+                elif [ -e "$_target" ]; then
+                    print_error "Could not safely remove the newly generated non-regular syslog-ng.conf."
+                    return 1
+                fi
+            fi
+        done
+        print_status "Restored the original .env, docker-compose.yml, and syslog-ng.conf; no containers were recreated."
+    fi
+    # Paths are fixed members of our private mktemp directory; never shred a link's target.
+    local _file
+    for _file in "$_DOCKER_UPGRADE_SNAPSHOT/.env" "$_DOCKER_UPGRADE_SNAPSHOT/docker-compose.yml" "$_DOCKER_UPGRADE_SNAPSHOT/syslog-ng.conf"; do
+        if [ -L "$_file" ]; then rm -f "$_file"; elif [ -f "$_file" ]; then _bw_shred "$_file"; fi
     done
-    print_warning "Timed out waiting for the stack ($running/$total services running)."
-    return 1
+    rmdir "$_DOCKER_UPGRADE_SNAPSHOT"
+    _DOCKER_UPGRADE_SNAPSHOT=""
+}
+
+# Accept literal assignments, including Compose's optional export and whitespace.
+# Reject syntax we cannot preserve rather than changing its effective value on rewrite.
+_docker_env_last_assignments() {
+    awk '
+        /^[[:space:]]*(#|$)/ { next }
+        {
+            assignment = $0
+            sub(/^[[:space:]]+/, "", assignment)
+            sub(/^export[[:space:]]+/, "", assignment)
+            if (assignment !~ /^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=/) { invalid = NR; exit }
+            equal = index(assignment, "=")
+            name = substr(assignment, 1, equal - 1)
+            sub(/[[:space:]]+$/, "", name)
+            value = substr(assignment, equal + 1)
+            sub(/^[[:space:]]+/, "", value)
+            # Compose requires a literal space before an inline comment, not a tab.
+            sub(/ +#.*$/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            if (value ~ /[$\\\047"]/) { invalid = NR; exit }
+            last[name] = NR; line[NR] = name "=" value; key[NR] = name
+        }
+        END {
+            if (invalid) {
+                print "Unsupported Docker .env syntax at line " invalid "; automatic rewrite requires literal assignments without quotes, interpolation, or escapes." > "/dev/stderr"
+                exit 1
+            }
+            for (i = 1; i <= NR; i++) if (i == last[key[i]]) print line[i]
+        }
+    ' "$1"
+}
+
+_docker_capture_env_extras() {
+    # Upgrades only. Overwriting an unrelated stack's .env must not inherit its
+    # variables — those belong to somebody else's project, not to this one.
+    _docker_stack_update_mode || return 0
+    [ -f "$DOCKER_ENV_FILE" ] || return 0
+    _docker_env_last_assignments "$DOCKER_ENV_FILE" >/dev/null || return 1
+    _DOCKER_ENV_SNAPSHOT=$(_bw_mk_secret_tmpfile) || return 1
+    _bw_register_secret_tmpfile "$_DOCKER_ENV_SNAPSHOT"
+    cat "$DOCKER_ENV_FILE" > "$_DOCKER_ENV_SNAPSHOT"
+}
+
+_docker_restore_env_extras() {
+    [ -n "$_DOCKER_ENV_SNAPSHOT" ] && [ -f "$_DOCKER_ENV_SNAPSHOT" ] || return 0
+    local _line _k _carried=0 _assignments
+    _assignments=$(_docker_env_last_assignments "$_DOCKER_ENV_SNAPSHOT") || return 1
+    while IFS= read -r _line || [ -n "$_line" ]; do
+        case "$_line" in ''|'#'*) continue ;; esac
+        case "$_line" in *=*) : ;; *) continue ;; esac
+        _k=${_line%%=*}
+        # Internal bookkeeping is re-derived on every run, never carried over.
+        case "$_k" in _BW_COMPOSE_SHA256|_BW_SYSLOG_SHA256) continue ;; esac
+        if ! grep -q "^${_k}=" "$DOCKER_ENV_FILE" 2>/dev/null; then
+            printf '%s\n' "$_line" >> "$DOCKER_ENV_FILE"
+            _carried=$((_carried + 1))
+        fi
+    done <<< "$_assignments"
+    chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
+    [ "$_carried" -gt 0 ] && \
+        print_status "Carried over $_carried custom entr$([ "$_carried" = 1 ] && echo y || echo ies) from the previous .env."
+    _bw_shred "$_DOCKER_ENV_SNAPSHOT"
+    _DOCKER_ENV_SNAPSHOT=""
+    return 0
+}
+
+# Resolve expected images after pulling, and record restart counts before recreation.
+declare -A _DOCKER_EXPECTED_IMAGES=() _DOCKER_RESTART_COUNTS=() _DOCKER_HEALTH_REQUIRED=()
+
+_docker_service_image() {
+    local _config
+    # --images SERVICE also lists its dependencies. Read this service's image
+    # from Compose's normalized YAML, without emitting its environment values.
+    _config=$(_docker_compose config "$1") || return 1
+    awk -v service="$1" '
+        /^services:$/ { services = 1; next }
+        services && /^[^ ]/ { exit }
+        services && /^  [^ ]/ {
+            name = substr($0, 3, length($0) - 3)
+            gsub(/^[\047"]|[\047"]$/, "", name)
+            selected = name == service
+        }
+        selected && /^    image: / {
+            image = substr($0, 12)
+            gsub(/^[\047"]|[\047"]$/, "", image)
+            print image
+            exit
+        }
+    ' <<< "$_config"
+}
+
+_docker_prepare_upgrade_verification() {
+    local _services _svc _image _expected _requested _repo _ids _cid _restarts _state _running _running_image
+    _DOCKER_EXPECTED_IMAGES=()
+    _DOCKER_RESTART_COUNTS=()
+    _DOCKER_HEALTH_REQUIRED=()
+    _services=$(_docker_compose config --services) || return 1
+    [ -n "$_services" ] || return 1
+    for _svc in $_services; do
+        _image=$(_docker_service_image "$_svc") || return 1
+        [ -n "$_image" ] || return 1
+        # A fresh install may legitimately have no local image yet (--no-pull):
+        # Compose pulls it implicitly on `up -d`. Only an upgrade needs the
+        # pre-recreation identity, to tell "recreated" from "never restarted".
+        if ! _expected=$(docker image inspect --format '{{.Id}}' "$_image" 2>/dev/null) || [ -z "$_expected" ]; then
+            [ "$UPGRADE_SCENARIO" != "yes" ] || return 1
+            _expected=""
+        fi
+        _repo=${_image%%@*}
+        # Strip the tag only when the last path segment carries one, so a registry
+        # port (localhost:5000/bunkerity/bunkerweb) survives an untagged reference.
+        case "${_repo##*/}" in *:*) _repo=${_repo%:*} ;; esac
+        _repo=${_repo#docker.io/}
+        _repo=${_repo#index.docker.io/}
+        # Match the repository by suffix so a registry mirror or pull-through
+        # cache (mirror.corp/bunkerity/bunkerweb, ghcr.io/bunkerity/bunkerweb)
+        # is guarded too, and resolve the requested tag from that same repo.
+        case "$_repo" in
+            bunkerity/bunkerweb|bunkerity/bunkerweb-scheduler|bunkerity/bunkerweb-ui|bunkerity/bunkerweb-api|bunkerity/bunkerweb-autoconf|\
+            */bunkerity/bunkerweb|*/bunkerity/bunkerweb-scheduler|*/bunkerity/bunkerweb-ui|*/bunkerity/bunkerweb-api|*/bunkerity/bunkerweb-autoconf)
+                _DOCKER_HEALTH_REQUIRED[$_svc]=yes
+                if [ "$_image" != "${_image%%@*}" ]; then
+                    print_error "The image configured for $_svc is pinned by digest ($_image), so rewriting the image tag cannot upgrade it. Point docker-compose.yml at a tag, then re-run."
+                    return 1
+                fi
+                if [ -n "$_expected" ]; then
+                    _requested=$(docker image inspect --format '{{.Id}}' "${_repo}:${DOCKER_IMAGE_TAG}") || return 1
+                    if [ "$_expected" != "$_requested" ]; then
+                        print_error "The image configured for $_svc ($_image, $_expected) does not match the requested BunkerWeb image (${_repo}:${DOCKER_IMAGE_TAG}, $_requested). Check hard-coded image tags in docker-compose.yml."
+                        return 1
+                    fi
+                fi
+                ;;
+        esac
+        case "$_svc" in bunkerweb|bw-scheduler|bw-ui|bw-api|bw-autoconf|bw-syslog) _DOCKER_HEALTH_REQUIRED[$_svc]=yes ;; esac
+        _DOCKER_EXPECTED_IMAGES[$_svc]="$_expected"
+        _ids=$(_docker_compose ps -a -q "$_svc") || return 1
+        if [ "$_svc" = "bw-syslog" ] && [ "$DOCKER_RECONFIGURATION" = "yes" ] && [ "$DOCKER_SYSLOG" = "yes" ] && [ -z "$_expected" ]; then
+            print_error "Cannot reconfigure syslog because the collector image is not available locally after the targeted pull."
+            return 1
+        fi
+        case "$_svc" in
+            bunkerweb|bw-scheduler|bw-ui|bw-api|bw-autoconf)
+                if [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+                    [ -n "$_expected" ] || {
+                        print_error "Cannot reconfigure syslog without a locally available image for $_svc; refusing to let Compose pull BunkerWeb implicitly."
+                        return 1
+                    }
+                    [ -n "$_ids" ] || {
+                        print_error "Cannot reconfigure syslog because no existing $_svc container is available to preserve."
+                        return 1
+                    }
+                    for _cid in $_ids; do
+                        _state=$(docker inspect --format '{{.State.Running}} {{.Image}}' "$_cid") || return 1
+                        read -r _running _running_image <<< "$_state"
+                        if [ "$_running" != "true" ] || [ "$_running_image" != "$_expected" ]; then
+                            print_error "Refusing syslog-only reconfiguration: $_svc is running $_running_image, but Compose resolves $_image to $_expected."
+                            print_error "Resolve the image drift explicitly before reconfiguring; BunkerWeb images will not be pulled or changed implicitly."
+                            return 1
+                        fi
+                    done
+                fi
+                ;;
+        esac
+        for _cid in $_ids; do
+            _restarts=$(docker inspect --format '{{.RestartCount}}' "$_cid") || return 1
+            case "$_restarts" in ''|*[!0-9]*) return 1 ;; esac
+            _DOCKER_RESTART_COUNTS[$_cid]="$_restarts"
+        done
+    done
+}
+
+# Require the expected image and two healthy samples at least ten seconds apart,
+# under one deadline. Infrastructure without a healthcheck must remain running.
+# 0 = ready, 1 = hard evidence the deployment is wrong, 2 = deadline expired
+# without a verdict (the stack is left running; the caller must not treat that
+# as a failed upgrade).
+wait_for_docker_stack_ready() {
+    local deadline=$(( $(date +%s) + DOCKER_WAIT_TIMEOUT ))
+    local _svc _ids _cid _state _image _restarts _status _health _now _ready _sample _previous="" _healthy_since="" _delay _want
+    [ "${#_DOCKER_EXPECTED_IMAGES[@]}" -gt 0 ] || return 1
+    print_status "Waiting for healthy, stable services (timeout ${DOCKER_WAIT_TIMEOUT}s)..."
+    while [ "$(date +%s)" -le "$deadline" ]; do
+        _ready=yes
+        _sample=""
+        for _svc in "${!_DOCKER_EXPECTED_IMAGES[@]}"; do
+            _ids=$(_docker_compose ps -a -q "$_svc") || return 1
+            [ -n "$_ids" ] || { _ready=no; continue; }
+            for _cid in $_ids; do
+                _state=$(docker inspect --format '{{.Image}} {{.RestartCount}} {{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$_cid") || return 1
+                read -r _image _restarts _status _health <<< "$_state"
+                case "$_restarts" in ''|*[!0-9]*) return 1 ;; esac
+                # An empty expected ID means the image was absent on a fresh
+                # install and Compose pulled it during `up -d`; nothing to compare.
+                _want=${_DOCKER_EXPECTED_IMAGES[$_svc]}
+                if { [ -n "$_want" ] && [ "$_image" != "$_want" ]; } || [ "$_restarts" != "${_DOCKER_RESTART_COUNTS[$_cid]:-0}" ]; then
+                    print_warning "$_svc has an unexpected image or restarted during deployment."
+                    return 1
+                fi
+                [ "$_status" = running ] || _ready=no
+                case "$_health" in
+                    healthy) : ;;
+                    none)
+                        [ "${_DOCKER_HEALTH_REQUIRED[$_svc]:-no}" = no ] || _ready=no
+                        ;;
+                    *) _ready=no ;;
+                esac
+                _sample="${_sample} ${_cid}"
+            done
+        done
+        _now=$(date +%s)
+        [ "$_now" -le "$deadline" ] || break
+        if [ "$_ready" = yes ]; then
+            if [ -z "$_healthy_since" ] || [ "$_sample" != "$_previous" ]; then
+                _healthy_since=$_now
+            elif [ "$((_now - _healthy_since))" -ge 10 ]; then
+                print_status "All services have the expected images and remained healthy for 10 seconds."
+                return 0
+            fi
+        else
+            _healthy_since=""
+        fi
+        _previous=$_sample
+        _delay=$((deadline - _now))
+        [ "$_delay" -gt 0 ] || break
+        [ "$_delay" -le 2 ] || _delay=2
+        sleep "$_delay"
+    done
+    print_warning "Services were not confirmed healthy after ${DOCKER_WAIT_TIMEOUT}s. The stack is left running and nothing was rolled back."
+    return 2
+}
+
+# A syslog-only reconfiguration must not let Compose resolve a floating
+# BunkerWeb tag differently during `up`. Pull the newly introduced collector
+# alone when it is absent; BunkerWeb images are checked locally and never
+# pulled on this path.
+_docker_pull_syslog_for_reconfiguration() {
+    [ "$DOCKER_RECONFIGURATION" = "yes" ] && [ "$DOCKER_SYSLOG" = "yes" ] || return 0
+    local _image
+    _image=$(_docker_service_image bw-syslog) || return 1
+    [ -n "$_image" ] || return 1
+    docker image inspect --format '{{.Id}}' "$_image" >/dev/null 2>&1 && return 0
+    if [ "$DOCKER_PULL_EXPLICIT" = "yes" ]; then
+        print_error "The bw-syslog image ($_image) is not available locally and --no-pull was requested."
+        return 1
+    fi
+    print_step "📥 Pulling the bw-syslog image"
+    _docker_compose pull bw-syslog
 }
 
 # Post-install summary — per-type entry point, management hints. Secrets are
@@ -1969,14 +2657,30 @@ show_docker_final_info() {
     {
         echo
         echo "========================================="
-        echo "  🐳 BunkerWeb Docker stack is up!"
+        if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+            echo "  🐳 BunkerWeb Docker stack upgraded!"
+        elif [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+            echo "  🐳 BunkerWeb Docker stack reconfigured!"
+        else
+            echo "  🐳 BunkerWeb Docker stack is up!"
+        fi
         echo "========================================="
         echo
+        if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+            echo "  ⬆️  Upgraded            : ${DOCKER_INSTALLED_VERSION:-unknown} -> ${DOCKER_IMAGE_TAG}"
+            [ -n "$BACKUP_DIRECTORY" ] && \
+                echo "  💾 Pre-upgrade backup : $BACKUP_DIRECTORY"
+            [ "$DOCKER_COMPOSE_RENDER_MODE" = "preserve" ] && \
+                echo "  📄 docker-compose.yml : kept as you had it (only the image tag changed)"
+        fi
         echo "  📂 Compose directory : $DOCKER_PROJECT_DIR"
         echo "  📦 Installation type : $INSTALL_TYPE"
         [ "$INSTALL_TYPE" = "full" ] && \
             echo "  🧩 Variant           : $([ "$DOCKER_AUTOCONF" = "yes" ] && echo "autoconf" || echo "standard")"
         echo "  🏷️  Image tag         : $DOCKER_IMAGE_TAG"
+        if [ "$INSTALL_TYPE" = "full" ]; then
+            echo "  📝 Local Web UI logs  : $([ "$DOCKER_SYSLOG" = "yes" ] && echo "enabled (bw-logs volume)" || echo "disabled")"
+        fi
         echo
         echo "  🔑 Secrets (admin password, API token, DB password, ...) are stored in"
         echo "     the generated env file — readable by root only (mode 0600):"
@@ -2076,8 +2780,57 @@ _docker_check_existing() {
     local existing=""
     [ -f "$DOCKER_COMPOSE_FILE" ] && existing="docker-compose.yml"
     [ -f "$DOCKER_ENV_FILE" ] && existing="${existing:+$existing, }.env"
+    [ "$DOCKER_SYSLOG" = "yes" ] && [ "$DOCKER_STACK_DETECTED" != "yes" ] \
+        && [ -f "$DOCKER_SYSLOG_FILE" ] && existing="${existing:+$existing, }syslog-ng.conf"
     [ -n "$existing" ] || return 0
 
+    # An upgrade of a stack this script generated is not a clobber. Both files
+    # are backed up either way; what is decided here is whether the compose file
+    # gets regenerated from the current template or preserved as the operator
+    # left it. .env is always rebuilt, with hand-added keys carried over.
+    if _docker_stack_update_mode; then
+        _docker_backup_file "$DOCKER_ENV_FILE"
+        if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+            DOCKER_COMPOSE_RENDER_MODE="preserve"
+            print_status "Keeping the symlinked docker-compose.yml and its target; --overwrite-compose does not replace symlinks."
+        elif [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
+            DOCKER_COMPOSE_RENDER_MODE="rerender"
+            print_status "Regenerating docker-compose.yml from the current template (--overwrite-compose)."
+        elif _docker_compose_is_pristine; then
+            DOCKER_COMPOSE_RENDER_MODE="rerender"
+            print_status "docker-compose.yml matches this script's template — regenerating it so new services and settings land."
+        else
+            DOCKER_COMPOSE_RENDER_MODE="preserve"
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                if ! tui_yesno "Compose File Modified" \
+"docker-compose.yml in $DOCKER_PROJECT_DIR does not match what this
+script generates — it looks hand-edited, is a symlink, or predates the
+checksum the installer now records.
+
+Keep your file and change only the image tag? (recommended)
+
+Answering No regenerates it from the current template; a .bak copy of
+your version is kept either way." "yes"; then
+                    DOCKER_COMPOSE_RENDER_MODE="rerender"
+                fi
+            else
+                print_warning "docker-compose.yml looks hand-edited — keeping it; only the image tag changes."
+                print_warning "Pass --overwrite-compose to regenerate it from the current template instead."
+            fi
+        fi
+        if [ "$DOCKER_SYSLOG_CHANGED" = "yes" ] && [ "$DOCKER_COMPOSE_RENDER_MODE" = "preserve" ]; then
+            print_error "Cannot change local log collection while preserving an edited docker-compose.yml."
+            print_error "Re-run with --overwrite-compose, or update the compose file manually and retry."
+            exit 1
+        fi
+        [ "$DOCKER_COMPOSE_RENDER_MODE" = "rerender" ] && _docker_backup_file "$DOCKER_COMPOSE_FILE"
+        return 0
+    fi
+
+    if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+        print_error "Refusing to replace a symlinked docker-compose.yml; update its target manually."
+        exit 1
+    fi
     print_warning "Found existing files in $DOCKER_PROJECT_DIR: $existing"
     if [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
         print_status "Proceeding with overwrite (--overwrite-compose)."
@@ -2089,10 +2842,124 @@ _docker_check_existing() {
         fi
     else
         print_error "Existing compose files present. Re-run with --overwrite-compose to replace them."
+        print_error "If this is a BunkerWeb stack generated by this script, it would have been upgraded in place;"
+        print_error "the .env file carries no 'generated by install-bunkerweb.sh' header, so it is not recognised as one."
         exit 1
     fi
     _docker_backup_file "$DOCKER_COMPOSE_FILE"
     _docker_backup_file "$DOCKER_ENV_FILE"
+    DOCKER_COMPOSE_RENDER_MODE="rerender"
+}
+
+# Install types that own no database, so there is nothing to back up before an
+# upgrade. Shared by the Linux and Docker pre-upgrade backups.
+_skip_backup_for_type() {
+    case "$INSTALL_TYPE" in
+        worker|ui|api) return 0 ;;
+        *)             return 1 ;;
+    esac
+}
+
+# Pre-upgrade database backup for a Docker stack — the counterpart of
+# perform_upgrade_backup() on the Linux side. Runs bwcli inside the scheduler
+# container and copies the archive out onto the host.
+_docker_upgrade_backup() {
+    [ "$UPGRADE_SCENARIO" = "yes" ] || return 0
+
+    if _skip_backup_for_type; then
+        print_status "Skipping pre-upgrade backup (a ${INSTALL_TYPE} stack owns no database)."
+        return 0
+    fi
+    if [ "$AUTO_BACKUP" != "yes" ]; then
+        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
+        return 0
+    fi
+
+    # bwcli runs *inside* the container, so the scheduler has to be up. docker cp
+    # would work against a stopped container, but `exec` would not.
+    if ! _docker_compose ps --services --status running 2>/dev/null | grep -qx bw-scheduler; then
+        print_warning "The bw-scheduler container is not running, so no automatic backup can be taken."
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            if tui_yesno "Pre-upgrade Backup" \
+                "⚠️  bw-scheduler is not running, so no automatic backup can be taken.\n\nUpgrade anyway, without a backup?" "no"; then
+                print_warning "Continuing without a backup at your request."
+                return 0
+            fi
+            print_status "Upgrade cancelled."
+            exit 0
+        fi
+        print_error "bw-scheduler is not running — cannot take the pre-upgrade backup."
+        print_error "Start the stack first (docker compose up -d), or re-run with --no-auto-backup to upgrade without one."
+        exit 1
+    fi
+
+    [ -z "$BACKUP_DIRECTORY" ] && BACKUP_DIRECTORY="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$BACKUP_DIRECTORY" 2>/dev/null || {
+        print_error "Unable to create backup directory $BACKUP_DIRECTORY."
+        exit 1
+    }
+    chmod 700 "$BACKUP_DIRECTORY" 2>/dev/null || true
+    print_step "💾 Creating pre-upgrade backup in $BACKUP_DIRECTORY"
+
+    # -d is mandatory and BACKUP_DIRECTORY must NOT be exported into the
+    # container: bwcli only auto-creates the directory when it differs from the
+    # plugin default, and setting the env var makes the custom path *become*
+    # that default, so the command would exit 1 on a stack whose backup
+    # directory does not exist yet (a fresh install, or USE_BACKUP=no).
+    local _in_container="/var/tmp/bunkerweb-upgrade-backup" _cid _ok="yes"
+    _docker_compose exec -T bw-scheduler bwcli plugin backup save -d "$_in_container" || _ok="no"
+    if [ "$_ok" = "yes" ]; then
+        _cid=$(_docker_compose ps -q bw-scheduler 2>/dev/null)
+        if [ -z "$_cid" ] || ! docker cp "${_cid}:${_in_container}/." "$BACKUP_DIRECTORY/"; then
+            _ok="no"
+        fi
+    fi
+    # Exit code 0 is not evidence on its own — confirm an archive actually landed.
+    if [ "$_ok" = "yes" ] && [ -z "$(find "$BACKUP_DIRECTORY" -maxdepth 1 -name '*.zip' -size +0 -print -quit 2>/dev/null)" ]; then
+        print_error "The backup command reported success but produced no archive in $BACKUP_DIRECTORY."
+        _ok="no"
+    fi
+
+    if [ "$_ok" = "yes" ]; then
+        # The scheduler container runs as a non-root user, so docker cp writes
+        # the archive with that UID. Normalise it to root, like every other
+        # sensitive file this script produces.
+        chown -R root: "$BACKUP_DIRECTORY" 2>/dev/null || true
+        print_status "Backup completed: $BACKUP_DIRECTORY"
+        return 0
+    fi
+
+    print_error "Pre-upgrade backup failed. Nothing was upgraded yet."
+    if [ "$INTERACTIVE_MODE" = "yes" ] \
+        && tui_yesno "Pre-upgrade Backup" \
+            "⚠️  The pre-upgrade backup failed. Upgrade anyway, without a backup?" "no"; then
+        print_warning "Continuing without a backup at your request."
+        return 0
+    fi
+    print_error "Take a backup manually (see https://docs.bunkerweb.io/latest/upgrading),"
+    print_error "or re-run with --no-auto-backup to upgrade without one."
+    exit 1
+}
+
+# Confirm the containers really came up on the new version. For a floating tag
+# there is nothing to compare against, so this only reports what is running.
+_docker_verify_running_version() {
+    local _svc _running
+    _svc=$(_docker_probe_service)
+    [ -n "$_svc" ] || return 0
+    _running=$(_docker_compose exec -T "$_svc" cat /usr/share/bunkerweb/VERSION 2>/dev/null | tr -d '[:space:]')
+    if [ -z "$_running" ]; then
+        print_warning "Could not read /usr/share/bunkerweb/VERSION from '$_svc' to confirm the upgrade."
+        return 1
+    fi
+    print_status "Running version (${_svc}): ${_running}"
+    # Compare as tags, so 1.6.15~rc1 in the container matches the 1.6.15-rc1 tag.
+    if ! _docker_tag_is_floating "$DOCKER_IMAGE_TAG" \
+        && [ "$(derive_docker_image_tag "$_running")" != "$DOCKER_IMAGE_TAG" ]; then
+        print_warning "Running version (${_running}) does not match the requested tag (${DOCKER_IMAGE_TAG})."
+        return 1
+    fi
+    return 0
 }
 
 # Orchestrator for INSTALL_TYPE=docker. Renders files, brings the stack up,
@@ -2104,23 +2971,120 @@ docker_install_flow() {
     # the Linux phases run only after the same confirm screen.
     _docker_ensure_runtime
 
-    print_step "🐳 Generating the BunkerWeb Docker stack in $DOCKER_PROJECT_DIR"
-    _docker_check_existing
-    render_docker_env
-    render_docker_compose
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        print_step "🐳 Upgrading the BunkerWeb Docker stack in $DOCKER_PROJECT_DIR"
+    elif [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+        print_step "🐳 Reconfiguring local Web UI log collection in $DOCKER_PROJECT_DIR"
+    else
+        print_step "🐳 Generating the BunkerWeb Docker stack in $DOCKER_PROJECT_DIR"
+    fi
 
-    if [ "$DOCKER_PULL" = "yes" ]; then
+    # Back up BEFORE anything on disk changes, so a failure here leaves the
+    # running stack and its files exactly as they were.
+    _docker_upgrade_backup
+
+    _docker_snapshot_upgrade_files || { print_error "Cannot save the original upgrade files."; exit 1; }
+    _docker_check_existing
+    _docker_capture_env_extras || { print_error "Cannot safely preserve the existing Docker .env."; exit 1; }
+    # Re-evaluate ownership before .env is rendered; this prevents a file that
+    # disappeared after preference collection from carrying a stale checksum.
+    render_docker_syslog_config
+    render_docker_env
+    _docker_restore_env_extras
+    if [ "$DOCKER_COMPOSE_RENDER_MODE" = "preserve" ]; then
+        print_status "Keeping the existing docker-compose.yml; only the image tag changed."
+        # A hand-edited compose may reference a variable the regenerated .env no
+        # longer defines — catch that here rather than halfway through `up -d`.
+        if ! _docker_compose config -q >/dev/null 2>&1; then
+            print_error "The existing docker-compose.yml failed validation against the updated .env:"
+            _docker_compose config >/dev/null || true
+            print_error "Fix docker-compose.yml, or re-run with --overwrite-compose to regenerate it."
+            exit 1
+        fi
+    else
+        render_docker_compose
+        _docker_record_compose_checksum
+    fi
+    _docker_record_syslog_checksum
+
+    if [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+        if ! _docker_pull_syslog_for_reconfiguration; then
+            print_error "Failed to prepare the bw-syslog image; no containers were recreated."
+            exit 1
+        fi
+    elif [ "$DOCKER_PULL" = "yes" ]; then
         print_step "📥 Pulling container images"
-        run_cmd _docker_compose pull
+        if ! _docker_compose pull; then
+            print_error "Failed to pull the container images."
+            if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+                print_error "The stack was NOT recreated — the previous version is still running."
+            fi
+            exit 1
+        fi
+    fi
+
+    if ! _docker_prepare_upgrade_verification; then
+        print_error "Could not resolve deployment images and restart baselines; no containers were recreated."
+        exit 1
     fi
 
     print_step "🚀 Starting the stack"
-    run_cmd _docker_compose up -d
+    # Deliberately `up -d` rather than the `down` + `up -d` of the manual
+    # procedure in docs/upgrading.md: Compose recreates only the containers
+    # whose image actually changed, so downtime is shorter and no volume is
+    # ever in play. Do not "fix" this to match the docs.
+    # No --remove-orphans: a topology change is already gated behind
+    # --force-type-change, and running it with a mismatched project name would
+    # remove containers this stack does not own.
+    local _verified=yes _timed_out=no _rc=0
+    _DOCKER_RECREATION_STARTED=yes
+    if [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+        _docker_compose up -d --pull never || _verified=no
+    else
+        _docker_compose up -d || _verified=no
+    fi
+    if [ "$_verified" = "yes" ]; then
+        wait_for_docker_stack_ready || _rc=$?
+        # A slow first start (DB connect, migration, first job run, first push)
+        # is not a failed deployment: warn, keep the stack, exit 2.
+        if [ "$_rc" = 2 ]; then
+            _timed_out=yes
+        elif [ "$_rc" != 0 ]; then
+            _verified=no
+        fi
+        [ "$_rc" = 0 ] || print_warning "Check progress with: cd $DOCKER_PROJECT_DIR && docker compose ps"
+        [ "$_timed_out" = no ] || print_warning "Wait longer with --docker-wait-timeout N."
+    fi
 
-    wait_for_docker_stack_ready || \
-        print_warning "Check progress with: cd $DOCKER_PROJECT_DIR && docker compose ps"
+    if [ "$_verified" = "yes" ] && [ "$_timed_out" = "no" ]; then
+        _docker_remove_managed_syslog || print_warning "The stack is ready, but the previous collector was not removed automatically."
+    fi
+
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        _docker_verify_running_version   || _verified="no"
+        if [ "$_verified" != "yes" ]; then
+            print_error "Upgrade verification failed — see the warnings above."
+            # No automatic rollback: 'alembic upgrade head' may already have
+            # migrated the schema, and putting the old tag back would leave an
+            # old binary running against a new schema. Restore first, redeploy
+            # second — the order the documented rollback uses.
+            print_error "Do NOT simply redeploy the old tag: the database schema may already be migrated."
+            if [ -n "$BACKUP_DIRECTORY" ]; then
+                print_error "Restore the pre-upgrade backup in ${BACKUP_DIRECTORY} first, then redeploy tag '${DOCKER_INSTALLED_TAG}':"
+            else
+                print_error "Restore a backup first, then redeploy tag '${DOCKER_INSTALLED_TAG}':"
+            fi
+            print_error "  https://docs.bunkerweb.io/latest/upgrading#rollback"
+            exit 1
+        fi
+    fi
+    [ "$_verified" = yes ] || { print_error "The stack did not become ready."; exit 1; }
 
     show_docker_final_info
+    if [ "$_timed_out" = yes ]; then
+        print_warning "The services were not confirmed healthy within ${DOCKER_WAIT_TIMEOUT}s; nothing was rolled back."
+        exit 2
+    fi
 }
 
 # Generate a URL-safe random secret of N characters (default 32).
@@ -2245,6 +3209,73 @@ derive_docker_image_tag() {
         return 0
     fi
     printf '%s' "${v//\~/-}"
+}
+
+# A tag that does not start with a digit is a floating alias (latest, testing,
+# dev, ...) rather than a pinned version: the image behind it moves without the
+# tag string changing, so tag equality proves nothing about what is running.
+_docker_tag_is_floating() {
+    case "${1:-}" in
+        [0-9]*) return 1 ;;
+        *)      return 0 ;;
+    esac
+}
+
+# Numeric X.Y.Z core of a version or tag, with any pre-release suffix dropped:
+# 1.6.15-rc1 -> 1.6.15, 1.6.15~rc1 -> 1.6.15, 1.6.15 -> 1.6.15. Empty when the
+# argument is not a dotted numeric version at all (latest/testing/dev).
+_docker_version_core() {
+    local v="${1:-}"
+    v="${v%%[-~]*}"
+    case "$v" in
+        [0-9]*[!0-9.]*) printf '' ;;
+        [0-9]*)         printf '%s' "$v" ;;
+        *)              printf '' ;;
+    esac
+}
+
+# Pre-release rank for a version/tag whose numeric core already matches
+# another one: stable (no `-`/`~` suffix) always outranks any rcN, and a
+# higher N outranks a lower one. Maps to a fixed-width "rcNNNNN" token so a
+# plain lexicographic sort orders it correctly against another rc token and
+# against "zzz" (stable, or any suffix this does not recognise — never
+# mistaken for older than a known rc).
+_docker_prerelease_rank() {
+    local v="${1:-}" suffix n
+    suffix="${v#*[-~]}"
+    [ "$suffix" = "$v" ] && { printf 'zzz'; return 0; }
+    case "$suffix" in
+        rc[0-9]*)
+            n="${suffix#rc}"
+            n="${n%%[!0-9]*}"
+            printf 'rc%05d' "$((10#$n))"
+            ;;
+        *) printf 'zzz' ;;
+    esac
+}
+
+# 0 when $2 (target) is an OLDER release than $1 (installed): either a lower
+# numeric core, or the same core with an older pre-release rank (stable beats
+# any rcN, a higher rcN beats a lower one, rcN -> stable is always forward).
+# Comparing the full strings would break the core check, because `sort -V`
+# orders 1.6.15 BEFORE 1.6.15-rc1.
+# Returns 1 (not a downgrade) whenever either side has no comparable core,
+# which also leaves floating tags (latest, testing) unordered.
+_docker_is_downgrade() {
+    local _from_core _to_core _from_rank _to_rank _older
+    _from_core=$(_docker_version_core "${1:-}")
+    _to_core=$(_docker_version_core "${2:-}")
+    [ -n "$_from_core" ] && [ -n "$_to_core" ] || return 1
+    if [ "$_from_core" = "$_to_core" ]; then
+        _from_rank=$(_docker_prerelease_rank "${1:-}")
+        _to_rank=$(_docker_prerelease_rank "${2:-}")
+        [ "$_from_rank" = "$_to_rank" ] && return 1
+        _older=$(printf '%s\n%s\n' "$_from_rank" "$_to_rank" | sort | head -n1)
+        [ "$_older" = "$_to_rank" ]
+        return $?
+    fi
+    _older=$(printf '%s\n%s\n' "$_from_core" "$_to_core" | sort -V | head -n1)
+    [ "$_older" = "$_to_core" ]
 }
 
 # URL-encode for SQLAlchemy DSN user:password — escapes @ : / % ? # & cleanly.
@@ -2570,7 +3601,15 @@ detect_architecture() {
 _docker_ask_image_tag() {
     local _default_tag
     _default_tag=$(derive_docker_image_tag "$BUNKERWEB_VERSION")
-    if [ -n "$DOCKER_IMAGE_TAG" ]; then
+    if [ "$DOCKER_STACK_DETECTED" = "yes" ] \
+        && [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ] \
+        && [ "$DOCKER_IMAGE_TAG_EXPLICIT" != "yes" ] \
+        && [ "$BUNKERWEB_VERSION_EXPLICIT" != "yes" ] \
+        && [ -n "$DOCKER_INSTALLED_TAG" ]; then
+        # A syslog-only reconfiguration must not inherit the installer's
+        # current default tag or ask an unnecessary image-tag question.
+        DOCKER_IMAGE_TAG="$DOCKER_INSTALLED_TAG"
+    elif [ -n "$DOCKER_IMAGE_TAG" ]; then
         # Flag-provided — still normalize '~' → '-'.
         DOCKER_IMAGE_TAG=$(derive_docker_image_tag "$DOCKER_IMAGE_TAG")
     elif [ "$INTERACTIVE_MODE" != "yes" ]; then
@@ -2788,9 +3827,15 @@ _docker_ask_api_creds() {
 # TOTP key that decrypts stored 2FA secrets, the Flask session secret, ...)
 # instead of rotating them. Only fills globals that are still empty — an
 # explicit CLI flag always wins.
+_DOCKER_ENV_LOADED="no"
 _docker_load_existing_env() {
     [ -f "$DOCKER_ENV_FILE" ] || return 0
-    local _loaded="no" _pair _k _v
+    # Idempotent: _docker_check_existing_stack calls this early (so the install
+    # type is known before the menu) and ask_docker_preferences calls it again.
+    [ "$_DOCKER_ENV_LOADED" = "yes" ] && return 0
+    _DOCKER_ENV_LOADED="yes"
+    local _loaded="no" _pair _k _v _assignments
+    _assignments=$(_docker_env_last_assignments "$DOCKER_ENV_FILE") || exit 1
     while IFS= read -r _pair || [ -n "$_pair" ]; do
         case "$_pair" in ''|'#'*) continue ;; esac
         _k=${_pair%%=*}
@@ -2805,8 +3850,40 @@ _docker_load_existing_env() {
             API_USERNAME)         [ -z "$API_USERNAME_INPUT" ]           && { API_USERNAME_INPUT="$_v";            _loaded="yes"; } ;;
             API_PASSWORD)         [ -z "$API_PASSWORD_INPUT" ]           && { API_PASSWORD_INPUT="$_v";            _loaded="yes"; } ;;
             DATABASE_URI)         [ -z "$DOCKER_DATABASE_URI" ]          && { DOCKER_DATABASE_URI="$_v";           _loaded="yes"; } ;;
+            # Host ports — reused so an upgrade never silently moves a stack
+            # back to the default ports. Only possible because these globals now
+            # start empty; see the declaration block.
+            HTTP_PORT)            [ -z "$DOCKER_HTTP_PORT" ]             && DOCKER_HTTP_PORT="$_v" ;;
+            HTTPS_PORT)           [ -z "$DOCKER_HTTPS_PORT" ]            && DOCKER_HTTPS_PORT="$_v" ;;
+            UI_PORT)              [ -z "$DOCKER_UI_PORT" ]               && DOCKER_UI_PORT="$_v" ;;
+            API_PORT)             [ -z "$DOCKER_API_PORT" ]              && DOCKER_API_PORT="$_v" ;;
+            FASTAPI_PORT)         [ -z "$DOCKER_FASTAPI_PORT" ]          && DOCKER_FASTAPI_PORT="$_v" ;;
+            BUNKERWEB_INSTANCES)  [ -z "$BUNKERWEB_INSTANCES_INPUT" ]    && BUNKERWEB_INSTANCES_INPUT="$_v" ;;
+            API_WHITELIST_IP)     DOCKER_LOADED_WHITELIST="$_v" ;;
+            # The project name owns every volume and network of the stack. Pin
+            # it verbatim; _docker_project_name must never recompute it.
+            COMPOSE_PROJECT_NAME) [ -z "$DOCKER_PROJECT_NAME" ]          && DOCKER_PROJECT_NAME="$_v" ;;
+            # Bookkeeping written by previous runs of this script.
+            BW_TAG)               DOCKER_INSTALLED_TAG="$_v" ;;
+            BW_INSTALL_SYSLOG)   case "$_v" in yes|no) DOCKER_SYSLOG_SAVED="$_v" ;; *) print_warning "Ignoring invalid BW_INSTALL_SYSLOG in $DOCKER_ENV_FILE." ;; esac ;;
+            _BW_COMPOSE_SHA256)   _BW_RECORDED_COMPOSE_SHA256="$_v" ;;
+            _BW_SYSLOG_SHA256)    _BW_RECORDED_SYSLOG_SHA256="$_v" ;;
         esac
-    done < "$DOCKER_ENV_FILE"
+    done <<< "$_assignments"
+
+    # MANAGER_IP_INPUT is never stored verbatim — only the composed worker
+    # whitelist is (render_docker_env writes "127.0.0.0/8 ${MANAGER_IP_INPUT}").
+    # Recover it by stripping that known literal prefix, otherwise a
+    # non-interactive worker re-run dies in _docker_ask_manager_ip on
+    # "--manager-ip is required", which makes worker upgrades impossible.
+    # A hand-edited whitelist simply leaves it empty, so the existing prompt or
+    # hard error still fires — a loud failure, never silent corruption.
+    if [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ] && [ -n "$DOCKER_LOADED_WHITELIST" ]; then
+        case "$DOCKER_LOADED_WHITELIST" in
+            "127.0.0.0/8 "*) MANAGER_IP_INPUT="${DOCKER_LOADED_WHITELIST#127.0.0.0/8 }" ;;
+        esac
+    fi
+
     if [ "$_loaded" = "yes" ]; then
         print_warning "Reusing existing secrets from $DOCKER_ENV_FILE so a re-run keeps the DB/UI/2FA values that persisted data depends on."
         print_warning "Delete that file first if you intend to rotate them."
@@ -2814,10 +3891,25 @@ _docker_load_existing_env() {
     return 0
 }
 
-# Collect every Docker-mode setting: install type, image tag, autoconf variant,
-# per-type credentials / remote IPs / shared secrets. Called by
-# docker_install_flow() for both interactive and non-interactive (--yes) runs.
-ask_docker_preferences() {
+# Fill the standalone-deploy port defaults for whatever _docker_load_existing_env
+# did not reuse and no --*-port flag set. Must run after that reload.
+_docker_default_ports() {
+    [ -z "$DOCKER_HTTP_PORT" ]    && DOCKER_HTTP_PORT="80"
+    [ -z "$DOCKER_HTTPS_PORT" ]   && DOCKER_HTTPS_PORT="443"
+    [ -z "$DOCKER_API_PORT" ]     && DOCKER_API_PORT="5000"
+    [ -z "$DOCKER_UI_PORT" ]      && DOCKER_UI_PORT="7000"
+    [ -z "$DOCKER_FASTAPI_PORT" ] && DOCKER_FASTAPI_PORT="8888"
+    return 0
+}
+
+# Resolve DOCKER_PROJECT_DIR and the two file paths derived from it. Idempotent:
+# main() calls it before the install-type menu so _docker_check_existing_stack
+# can see an existing stack, and ask_docker_preferences calls it again.
+_docker_resolve_project_dir() {
+    if [ -n "$DOCKER_COMPOSE_FILE" ]; then
+        [ -n "$DOCKER_SYSLOG_FILE" ] || DOCKER_SYSLOG_FILE="$DOCKER_PROJECT_DIR/syslog-ng.conf"
+        return 0
+    fi
     # Compose directory — current working directory unless --compose-dir set it.
     if [ -z "$DOCKER_PROJECT_DIR" ]; then
         DOCKER_PROJECT_DIR=$(pwd -P)
@@ -2834,12 +3926,366 @@ ask_docker_preferences() {
     fi
     DOCKER_COMPOSE_FILE="$DOCKER_PROJECT_DIR/docker-compose.yml"
     DOCKER_ENV_FILE="$DOCKER_PROJECT_DIR/.env"
+    DOCKER_SYSLOG_FILE="$DOCKER_PROJECT_DIR/syslog-ng.conf"
     if [ "$DOCKER_PROJECT_DIR" = "/root" ]; then
         print_warning "Compose files will be written to /root — consider re-running from a dedicated directory (e.g. --compose-dir /opt/bunkerweb-docker)."
     fi
+    return 0
+}
 
-    # Re-run idempotency — adopt secrets from an existing .env before prompting.
+# Read the install type back out of the .env header that render_docker_env
+# writes ("# BunkerWeb Docker stack (<type>) — generated by install-bunkerweb.sh").
+# Echoes the type, or nothing when the marker is absent. That marker is the
+# "this script generated this stack" gate: without it the directory belongs to
+# somebody else and _docker_check_existing keeps its clobber protection.
+_docker_marker_type() {
+    [ -f "$DOCKER_ENV_FILE" ] || return 1
+    head -n1 "$DOCKER_ENV_FILE" 2>/dev/null | sed -n \
+        's/^# BunkerWeb Docker stack (\(full\|manager\|worker\|scheduler\|ui\|api\)).*generated by install-bunkerweb\.sh.*$/\1/p'
+}
+
+# Service that always exists for a given install type, used to read the version
+# actually running rather than trusting the tag recorded in .env.
+_docker_probe_service() {
+    case "$INSTALL_TYPE" in
+        full|manager|scheduler) printf 'bw-scheduler' ;;
+        worker)                 printf 'bunkerweb' ;;
+        ui)                     printf 'bw-ui' ;;
+        api)                    printf 'bw-api' ;;
+    esac
+}
+
+# Version reported by the running stack. BW_TAG cannot answer this: latest /
+# testing / dev float, and an interrupted `up -d` leaves a new BW_TAG over a
+# half-recreated stack. Falls back to the recorded tag when nothing is running.
+_docker_installed_version() {
+    local _svc _v
+    _svc=$(_docker_probe_service)
+    [ -n "$_svc" ] || return 1
+    if _docker_compose ps --services --status running 2>/dev/null | grep -qx "$_svc"; then
+        _v=$(_docker_compose exec -T "$_svc" cat /usr/share/bunkerweb/VERSION 2>/dev/null | tr -d '[:space:]')
+        if [ -n "$_v" ]; then
+            DOCKER_INSTALLED_VERSION="$_v"
+            print_status "Detected running BunkerWeb version: ${_v} (read from the ${_svc} container)"
+            return 0
+        fi
+    fi
+    DOCKER_INSTALLED_VERSION="$DOCKER_INSTALLED_TAG"
+    print_status "Stack is not running — using the image tag recorded in .env: ${DOCKER_INSTALLED_TAG:-unknown}"
+    return 0
+}
+
+# Detect a stack this script generated in DOCKER_PROJECT_DIR and adopt its
+# topology. Runs from main() BEFORE the interactive install-type menu, so the
+# operator is never asked to re-state a topology we can read off disk.
+# The version comparison happens later, in _docker_resolve_upgrade_scenario,
+# once the target tag is known.
+_docker_check_existing_stack() {
+    _docker_resolve_project_dir
+    [ -f "$DOCKER_COMPOSE_FILE" ] && [ -f "$DOCKER_ENV_FILE" ] || return 0
+
+    _BW_RECORDED_TYPE=$(_docker_marker_type)
+    if [ -z "$_BW_RECORDED_TYPE" ]; then
+        # Compose files that are not ours — leave them to _docker_check_existing.
+        return 0
+    fi
+
+    DOCKER_STACK_DETECTED="yes"
+    print_status "Detected an existing BunkerWeb Docker stack in $DOCKER_PROJECT_DIR"
+    print_status "Detected install type: $(_install_type_label "$_BW_RECORDED_TYPE")"
+
+    # Reconcile the operator's --type flag against what is on disk, mirroring
+    # the Linux guard in check_existing_installation.
+    if [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "$_BW_RECORDED_TYPE" ]; then
+        if [ "$FORCE_TYPE_CHANGE" != "yes" ]; then
+            print_error "Install type mismatch: the stack in $DOCKER_PROJECT_DIR is $(_install_type_label "$_BW_RECORDED_TYPE"), but you passed --${INSTALL_TYPE}."
+            print_error "Changing install type on upgrade is destructive. Pass --force-type-change to confirm, or drop the --${INSTALL_TYPE} flag to upgrade in place."
+            exit 1
+        fi
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            if ! tui_yesno "Install Type Change" \
+"You passed --force-type-change.
+Existing stack: $(_install_type_label "$_BW_RECORDED_TYPE")
+Requested:      $(_install_type_label "$INSTALL_TYPE")
+
+The running containers are replaced with a different topology. Named
+volumes the new topology does not use are left behind, not migrated.
+
+Proceed with topology change?" "no"; then
+                print_status "Topology change cancelled."
+                exit 0
+            fi
+        fi
+        print_warning "Install type change on upgrade: $(_install_type_label "$_BW_RECORDED_TYPE") -> $(_install_type_label "$INSTALL_TYPE") (--force-type-change)."
+    else
+        INSTALL_TYPE="$_BW_RECORDED_TYPE"
+    fi
+
+    # Autoconf variant is not recorded in .env — read it off the compose file,
+    # which is the thing that actually defines the stack.
+    if [ -z "$DOCKER_AUTOCONF" ]; then
+        if grep -q '^  bw-autoconf:' "$DOCKER_COMPOSE_FILE" 2>/dev/null; then
+            DOCKER_AUTOCONF="yes"
+        else
+            DOCKER_AUTOCONF="no"
+        fi
+    fi
+
     _docker_load_existing_env
+    _docker_default_ports
+    return 0
+}
+
+# Return one installer-owned collector container for this project, including a
+# stopped container left behind after a previous collector service was removed.
+# A manually managed service can use the same Compose service name, so its
+# labels are checked before it is adopted or targeted for removal.
+_docker_syslog_container_is_managed() {
+    local _id="${1:-}" _project _labels _topology
+    [ -n "$_id" ] || return 1
+    _project=$(_docker_project_name)
+    _labels=$(docker inspect -f '{{index .Config.Labels "com.bunkerweb.installer"}}|{{index .Config.Labels "io.bunkerweb.installer.component"}}|{{index .Config.Labels "com.docker.compose.project"}}|{{index .Config.Labels "com.docker.compose.service"}}|{{.Config.Image}}' "$_id" 2>/dev/null) || return 1
+    [ "$_labels" = "install-bunkerweb.sh|syslog|$_project|bw-syslog|balabit/syslog-ng:4.10.2" ] || return 1
+    _topology=$(docker inspect -f '{{range .Mounts}}{{.Type}}|{{.Name}}|{{.Destination}}|{{.RW}};{{end}}{{range $name, $_ := .NetworkSettings.Networks}}{{$name}};{{end}}{{if .HostConfig.PortBindings}}PORT_BINDINGS;{{end}}' "$_id" 2>/dev/null) || return 1
+    case ";$_topology;" in *";volume|${_project}_bw-logs|/var/log/bunkerweb|true;"*) ;; *) return 1 ;; esac
+    case ";$_topology;" in *";bind||/etc/syslog-ng/syslog-ng.conf|false;"*) ;; *) return 1 ;; esac
+    case ";$_topology;" in *";${_project}_bw-universe;"*) ;; *) return 1 ;; esac
+    case "$_topology" in *";PORT_BINDINGS;"*) return 1 ;; esac
+}
+
+_docker_syslog_compose_is_managed() {
+    [ -f "$DOCKER_COMPOSE_FILE" ] || return 1
+    awk '
+        /^  bw-syslog:$/ { in_service=1; saw_service=1; next }
+        in_service && /^  [^ ]/ { in_service=0 }
+        in_service && /^    image: balabit\/syslog-ng:4\.10\.2$/ { saw_image=1 }
+        in_service && /^      com\.bunkerweb\.installer: "install-bunkerweb\.sh"$/ { saw_installer=1 }
+        in_service && /^      io\.bunkerweb\.installer\.component: "syslog"$/ { saw_component=1 }
+        in_service && /^      - bw-logs:\/var\/log\/bunkerweb$/ { saw_logs=1 }
+        in_service && /^      - \.\/syslog-ng\.conf:\/etc\/syslog-ng\/syslog-ng\.conf:ro$/ { saw_config=1 }
+        in_service && /^      - bw-universe$/ { saw_network=1 }
+        in_service && /^    ports:/ { saw_ports=1 }
+        END { exit !(saw_service && saw_image && saw_installer && saw_component && saw_logs && saw_config && saw_network && !saw_ports) }
+    ' "$DOCKER_COMPOSE_FILE"
+}
+
+_docker_find_syslog_container() {
+    local _project _id
+    _project=$(_docker_project_name)
+    while IFS= read -r _id; do
+        [ -n "$_id" ] || continue
+        if _docker_syslog_container_is_managed "$_id"; then
+            printf '%s' "$_id"
+            return 0
+        fi
+    done < <(docker ps -aq \
+        --filter "label=com.docker.compose.project=$_project" \
+        --filter "label=com.docker.compose.service=bw-syslog" 2>/dev/null)
+}
+
+# Resolve the persisted/default state before the version decision. Explicit
+# flags are the only way to change an existing stack; a fresh interactive Full
+# install defaults to yes, while unattended fresh installs default to no.
+_docker_resolve_syslog() {
+    if [ "$INSTALL_TYPE" != "full" ]; then
+        if [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ] && [ "$DOCKER_SYSLOG" = "yes" ]; then
+            print_error "--syslog only applies to Full Docker installations (standard or autoconf)."
+            exit 1
+        fi
+        DOCKER_SYSLOG="no"
+        return 0
+    fi
+
+    DOCKER_SYSLOG_CONFIG_PRESERVE="no"
+    DOCKER_SYSLOG_CHANGED="no"
+    DOCKER_SYSLOG_STALE="no"
+    DOCKER_SYSLOG_COMPOSE_MANAGED="no"
+    DOCKER_SYSLOG_CONTAINER_ID=""
+    DOCKER_SYSLOG_PREVIOUS="no"
+    if [ "$DOCKER_STACK_DETECTED" = "yes" ]; then
+        local _managed_service="no" _container_id=""
+        if _docker_syslog_compose_is_managed; then
+            _managed_service="yes"
+            DOCKER_SYSLOG_COMPOSE_MANAGED="yes"
+        fi
+        _container_id=$(_docker_find_syslog_container)
+        [ -n "$_container_id" ] && DOCKER_SYSLOG_CONTAINER_ID="$_container_id"
+        if [ -n "${DOCKER_SYSLOG_SAVED:-}" ]; then
+            # A valid BW_INSTALL_SYSLOG value is authoritative. Topology is
+            # drift evidence only; it cannot turn a stored "no" into "yes".
+            DOCKER_SYSLOG_PREVIOUS="$DOCKER_SYSLOG_SAVED"
+            if [ "$DOCKER_SYSLOG_PREVIOUS" = "no" ] && { [ "$_managed_service" = "yes" ] || [ -n "$_container_id" ]; }; then
+                DOCKER_SYSLOG_STALE="yes"
+            elif [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ] && [ "$_managed_service" != "yes" ]; then
+                DOCKER_SYSLOG_STALE="yes"
+            fi
+        elif [ "$_managed_service" = "yes" ] || [ -n "$_container_id" ]; then
+            # Legacy stacks without metadata are adopted only from the exact
+            # generated topology/ownership markers above.
+            DOCKER_SYSLOG_PREVIOUS="yes"
+        fi
+        if [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ]; then
+            : # --syslog/--no-syslog already set the desired value.
+        else
+            DOCKER_SYSLOG="$DOCKER_SYSLOG_PREVIOUS"
+        fi
+    elif [ "$DOCKER_SYSLOG_EXPLICIT" != "yes" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_section "📝 Local Web UI Log Collection" \
+                "The Web UI Logs page can read component and BunkerWeb logs from a persistent local volume."
+            if tui_yesno "Local Log Collection" \
+                "Enable local log collection for the Web UI? (adds bw-syslog and keeps Docker stderr logs too)" "yes"; then
+                DOCKER_SYSLOG="yes"
+            else
+                DOCKER_SYSLOG="no"
+            fi
+        else
+            DOCKER_SYSLOG="no"
+        fi
+    fi
+
+    if [ "$DOCKER_STACK_DETECTED" = "yes" ] && { [ "$DOCKER_SYSLOG_PREVIOUS" != "$DOCKER_SYSLOG" ] || [ "$DOCKER_SYSLOG_STALE" = "yes" ]; }; then
+        DOCKER_SYSLOG_CHANGED="yes"
+    fi
+    if [ "$DOCKER_SYSLOG" = "yes" ] || [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ]; then
+        if [ -L "$DOCKER_SYSLOG_FILE" ] && [ ! -e "$DOCKER_SYSLOG_FILE" ]; then
+            print_error "Refusing to use broken symlinked syslog-ng.conf."
+            exit 1
+        fi
+        if [ -e "$DOCKER_SYSLOG_FILE" ] && [ ! -f "$DOCKER_SYSLOG_FILE" ] && [ ! -L "$DOCKER_SYSLOG_FILE" ]; then
+            print_error "Refusing to use non-regular syslog-ng.conf (directory, device, or FIFO)."
+            exit 1
+        fi
+    fi
+    if [ "$DOCKER_SYSLOG" = "yes" ]; then
+        _docker_prepare_syslog_config || exit 1
+    elif { [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ] || [ "$DOCKER_SYSLOG_STALE" = "yes" ]; } \
+        && { [ -f "$DOCKER_SYSLOG_FILE" ] || [ -L "$DOCKER_SYSLOG_FILE" ]; }; then
+        DOCKER_SYSLOG_CONFIG_PRESERVE="yes"
+    fi
+}
+
+# Disabling syslog must not sweep up unrelated containers. The generated
+# collector carries an installer label and is removed only after the new stack
+# is ready; the named bw-logs volume is intentionally left untouched.
+_docker_remove_managed_syslog() {
+    { [ "$DOCKER_SYSLOG_PREVIOUS" = "yes" ] || [ "$DOCKER_SYSLOG_STALE" = "yes" ]; } \
+        && [ "$DOCKER_SYSLOG" = "no" ] || return 0
+    local _id="${DOCKER_SYSLOG_CONTAINER_ID:-}"
+    [ -n "$_id" ] || _id=$(_docker_find_syslog_container)
+    [ -n "$_id" ] || return 0
+    if ! _docker_syslog_container_is_managed "$_id"; then
+        print_warning "The previous bw-syslog container is not installer-owned; leaving it untouched."
+        return 0
+    fi
+    if docker rm -f "$_id" >/dev/null; then
+        print_status "Removed the installer-owned bw-syslog container; kept the bw-logs volume."
+    else
+        print_warning "Could not remove the installer-owned bw-syslog container; leaving it for manual cleanup."
+        return 1
+    fi
+}
+
+# Decide whether this run is an upgrade, a no-op, or a refusal. Called once the
+# target tag is resolved. Sets UPGRADE_SCENARIO=yes for the upgrade case.
+_docker_resolve_upgrade_scenario() {
+    [ "$DOCKER_STACK_DETECTED" = "yes" ] || return 0
+
+    _docker_installed_version
+    # Compare against the resolved TAG, not BUNKERWEB_VERSION: --image-tag can
+    # be given on its own, in which case BUNKERWEB_VERSION still holds the
+    # script's default and would name the wrong target. Both sides go through
+    # derive_docker_image_tag so a Debian-style 1.6.15~rc1 and the Docker Hub
+    # 1.6.15-rc1 compare equal.
+    local _from="$DOCKER_INSTALLED_VERSION" _to="$DOCKER_IMAGE_TAG"
+    local _from_tag
+    _from_tag=$(derive_docker_image_tag "$_from")
+
+    if [ "$DOCKER_SYSLOG_CHANGED" = "yes" ] \
+        && [ "$DOCKER_IMAGE_TAG_EXPLICIT" != "yes" ] \
+        && [ "$BUNKERWEB_VERSION_EXPLICIT" != "yes" ]; then
+        # A log-only toggle follows the existing recorded tag, including a
+        # floating alias, and never pulls a newer BunkerWeb image implicitly.
+        if [ -n "$DOCKER_INSTALLED_TAG" ]; then
+            DOCKER_IMAGE_TAG="$DOCKER_INSTALLED_TAG"
+        else
+            DOCKER_IMAGE_TAG="$_from_tag"
+        fi
+        DOCKER_PULL="no"
+        DOCKER_RECONFIGURATION="yes"
+        print_status "Applying the requested local log collection change without changing the BunkerWeb image tag."
+        return 0
+    fi
+
+    # A downgrade is terminal, not merely risky: the scheduler entrypoint looks
+    # the Alembic revision up from the version stored in the DB and exits 1 when
+    # no matching migration exists, which restart:unless-stopped turns into a
+    # crash loop. There is no downgrade migration to undo it, so the script
+    # refuses outright — rollback goes through the documented restore path.
+    if _docker_is_downgrade "$_from" "$_to"; then
+        print_error "Refusing to downgrade: the stack runs ${_from}, and ${_to} is older."
+        print_error "BunkerWeb has no downgrade migration — the scheduler would fail to start and restart in a loop."
+        print_error "To roll back, restore a backup FIRST and redeploy the older tag afterwards:"
+        print_error "  https://docs.bunkerweb.io/latest/upgrading#rollback"
+        exit 1
+    fi
+
+    # dev / testing store their version verbatim and skip Alembic entirely, so
+    # leaving that channel does not migrate the schema. Say so plainly.
+    case "$_from" in
+        dev|testing)
+            print_warning "The stack currently runs the '${_from}' channel, which does not run schema migrations."
+            print_warning "Moving to ${_to} will NOT migrate the database schema; verify the result before relying on it."
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                tui_yesno "Pre-release Channel" \
+                    "The running stack is on the '${_from}' channel.\n\nUpgrading from it does not run a schema migration.\n\nContinue anyway?" "no" \
+                    || { print_status "Upgrade cancelled."; exit 0; }
+            fi
+            ;;
+    esac
+
+    if [ "$_from_tag" = "$_to" ] && ! _docker_tag_is_floating "$DOCKER_IMAGE_TAG"; then
+        if [ "$DOCKER_SYSLOG_CHANGED" = "yes" ]; then
+            DOCKER_PULL="no"
+            DOCKER_RECONFIGURATION="yes"
+            print_status "BunkerWeb ${_from} is already running in $DOCKER_PROJECT_DIR; applying the requested local log collection change."
+            return 0
+        fi
+        print_status "BunkerWeb ${_from} is already running in $DOCKER_PROJECT_DIR."
+        _docker_compose ps
+        exit 0
+    fi
+
+    if _docker_tag_is_floating "$DOCKER_IMAGE_TAG"; then
+        # The tag string cannot tell us whether the published image moved, so
+        # never claim "up to date" — offer to pull and let the digest decide.
+        print_status "Image tag '${DOCKER_IMAGE_TAG}' is a floating alias; re-pulling to pick up any newer build."
+    fi
+
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        if ! tui_yesno "Upgrade BunkerWeb" \
+            "Upgrade the stack in ${DOCKER_PROJECT_DIR}?\n\nFrom: ${_from}\nTo:   ${_to}\n\nProceed?" "yes"; then
+            print_status "Upgrade cancelled."
+            exit 0
+        fi
+    fi
+    UPGRADE_SCENARIO="yes"
+    print_status "Upgrade mode: ${_from} -> ${_to}"
+    return 0
+}
+
+# Collect every Docker-mode setting: install type, image tag, autoconf variant,
+# per-type credentials / remote IPs / shared secrets. Called by
+# docker_install_flow() for both interactive and non-interactive (--yes) runs.
+ask_docker_preferences() {
+    # Idempotent — main() already ran this so the upgrade check could see the
+    # stack before the interactive install-type menu.
+    _docker_resolve_project_dir
+
+    # Re-run idempotency — adopt secrets, ports and the project name from an
+    # existing .env before prompting.
+    _docker_load_existing_env
+    _docker_default_ports
 
     # Install type — picked by the shared install-type menu in
     # ask_user_preferences (interactive) or a --full/--manager/... flag;
@@ -2851,6 +4297,11 @@ ask_docker_preferences() {
     esac
 
     _docker_ask_image_tag
+    _docker_resolve_syslog
+
+    # Now the target tag is known, decide upgrade vs no-op vs refusal. Exits on
+    # a same-version run, a downgrade, or a declined confirmation.
+    _docker_resolve_upgrade_scenario
 
     # Autoconf integration — only meaningful for the full stack.
     if [ "$INSTALL_TYPE" = "full" ]; then
@@ -2995,7 +4446,9 @@ ask_user_preferences() {
     # generated/started later by docker_install_flow(), after the confirm
     # screen, mirroring how the Linux phases run after the same confirm.
     if [ "$DOCKER_MODE" = "yes" ]; then
-        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        # An existing stack already told us its topology (_docker_check_existing_stack,
+        # run from main before this point) — never make the operator restate it.
+        if [ "$INTERACTIVE_MODE" = "yes" ] && [ "$DOCKER_STACK_DETECTED" != "yes" ]; then
             echo
             print_step "Configuration Options"
             echo
@@ -3910,11 +5363,13 @@ _build_configuration_summary() {
         _field "Image tag"           "${DOCKER_IMAGE_TAG:-$(derive_docker_image_tag "$BUNKERWEB_VERSION")}"
         [ "$INSTALL_TYPE" = "full" ] && \
             _field "Autoconf integration" "$([ "$DOCKER_AUTOCONF" = "yes" ] && echo "Enabled" || echo "Disabled")"
+        [ "$INSTALL_TYPE" = "full" ] && \
+            _field "Local Web UI logs" "$([ "$DOCKER_SYSLOG" = "yes" ] && echo "Enabled (persistent bw-logs)" || echo "Disabled")"
         _field "Compose directory"   "${DOCKER_PROJECT_DIR:-$(pwd -P)}"
 
         _section "Topology"
         case "$INSTALL_TYPE" in
-            full)      _field "Services" "bunkerweb, bw-scheduler, bw-ui, bw-db, redis"
+            full)      _field "Services" "bunkerweb, bw-scheduler, bw-ui, bw-db, redis$([ "$DOCKER_SYSLOG" = "yes" ] && echo ", bw-syslog")"
                        [ "$DOCKER_AUTOCONF" = "yes" ] && _field "" "+ bw-autoconf, bw-docker"
                        _field "Database" "MariaDB (bundled bw-db)" ;;
             manager)   _field "Services" "bw-scheduler, bw-ui, bw-db, redis"
@@ -4223,6 +5678,12 @@ check_supported_os() {
 }
 
 check_ports() {
+    # On an upgrade the ports are bound by the stack being upgraded, so the
+    # "conflict" is our own listener. Warning about it — and, interactively,
+    # offering to abort with a default of "no" — would be pure noise.
+    if [ "$UPGRADE_SCENARIO" = "yes" ] || [ "$DOCKER_RECONFIGURATION" = "yes" ]; then
+        return 0
+    fi
     if [[ "$INSTALL_TYPE" == "full" || "$INSTALL_TYPE" == "worker" || "$DOCKER_MODE" == "yes" || -z "$INSTALL_TYPE" ]]; then
         if command -v ss >/dev/null 2>&1; then
             local _pc_rows
@@ -6493,14 +7954,21 @@ usage() {
     echo "                           (combine with an install type, e.g. --docker --manager)"
     echo
     echo "Docker mode options (with --docker):"
+    echo "  Re-running against a directory that already holds a stack this script"
+    echo "  generated upgrades it in place: the install type, ports, secrets and"
+    echo "  project name are recovered from .env, the database is backed up first"
+    echo "  (--backup-dir / --no-auto-backup), and only the image tag moves."
     echo "  --autoconf               Add the autoconf integration (full type only)"
     echo "  --no-autoconf            Do not add the autoconf integration (default)"
     echo "  --image-tag TAG          Docker Hub image tag (default: derived from --version)"
     echo "  --compose-dir PATH       Directory for docker-compose.yml + .env (default: current dir)"
-    echo "  --overwrite-compose      Back up and overwrite existing compose files without prompting"
+    echo "  --syslog                 (Docker Full only) collect local Web UI logs; interactive default: yes"
+    echo "  --no-syslog              (Docker Full only) disable local Web UI log collection"
+    echo "  --overwrite-compose      Back up and overwrite existing compose files without prompting;"
+    echo "                           on an upgrade, regenerate docker-compose.yml even if it was edited"
     echo "  --install-docker         Install Docker via the official convenience script if missing"
     echo "  --no-pull                Skip 'docker compose pull' before starting the stack"
-    echo "  --docker-wait-timeout N  Seconds to wait for the stack to become ready (default: 180)"
+    echo "  --docker-wait-timeout N  Seconds to wait for the stack to become ready (default: 600)"
     echo "  --http-port N            Host HTTP port      (default: 80;   bunkerweb)"
     echo "  --https-port N           Host HTTPS/QUIC port (default: 443; bunkerweb)"
     echo "  --api-port N             Host worker-API port (default: 5000; worker)"
@@ -6635,6 +8103,7 @@ while [[ $# -gt 0 ]]; do
         -v|--version)
             require_value "$1" "$2" "version"
             BUNKERWEB_VERSION="$2"
+            BUNKERWEB_VERSION_EXPLICIT="yes"
             shift 2
             ;;
         -w|--enable-wizard)
@@ -6713,7 +8182,18 @@ while [[ $# -gt 0 ]]; do
         --image-tag)
             require_value "$1" "$2" "tag"
             DOCKER_IMAGE_TAG="$2"
+            DOCKER_IMAGE_TAG_EXPLICIT="yes"
             shift 2
+            ;;
+        --syslog)
+            DOCKER_SYSLOG="yes"
+            DOCKER_SYSLOG_EXPLICIT="yes"
+            shift
+            ;;
+        --no-syslog)
+            DOCKER_SYSLOG="no"
+            DOCKER_SYSLOG_EXPLICIT="yes"
+            shift
             ;;
         --compose-dir)
             require_value "$1" "$2" "path"
@@ -6730,6 +8210,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-pull)
             DOCKER_PULL="no"
+            DOCKER_PULL_EXPLICIT="yes"
             shift
             ;;
         --docker-wait-timeout)
@@ -7178,6 +8659,11 @@ unset _bw_xtrace_was_on
 # ---------------------------------------------------------------------------
 if [ "$DOCKER_MODE" != "yes" ]; then
 
+if [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ]; then
+    print_error "--syslog/--no-syslog require --docker."
+    exit 1
+fi
+
 # Force wizard off for manager installations
 if [ "$INSTALL_TYPE" = "manager" ]; then
     if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -7339,6 +8825,12 @@ fi
 
 fi  # end DOCKER_MODE != yes — Linux-package post-argv guards
 
+if [ "$DOCKER_MODE" = "yes" ] && [ "$DOCKER_SYSLOG" = "yes" ] \
+    && [ -n "$INSTALL_TYPE" ] && [ "$INSTALL_TYPE" != "full" ]; then
+    print_error "--syslog only applies to Full Docker installations (standard or autoconf)."
+    exit 1
+fi
+
 # Deferred --dry-run summary — after argv parse + guards. Exits 0 on success.
 if [ "$DRY_RUN" = "yes" ]; then
     # Restore operator's stdout via _BW_OUT_FD (was /dev/null under --quiet); branch exits after.
@@ -7352,10 +8844,15 @@ if [ "$DRY_RUN" = "yes" ]; then
         echo "Deployment platform: docker (compose stack)"
         echo "Installation type: ${_dt}"
         [ "$_dt" = "full" ] && echo "Autoconf integration: ${DOCKER_AUTOCONF:-no}"
+        if [ "$_dt" = "full" ]; then
+            _ds="${DOCKER_SYSLOG:-}"
+            [ -n "$_ds" ] || { [ "$INTERACTIVE_MODE" = "yes" ] && _ds="prompt (default: yes)" || _ds="no"; }
+            echo "Local Web UI log collection: $_ds"
+        fi
         echo "Image tag: $(derive_docker_image_tag "${DOCKER_IMAGE_TAG:-$BUNKERWEB_VERSION}")"
         echo "Compose directory: ${DOCKER_PROJECT_DIR:-$(pwd -P)}"
         case "$_dt" in
-            full)      echo "Services: bunkerweb, bw-scheduler, bw-ui, bw-db, redis"
+            full)      echo "Services: bunkerweb, bw-scheduler, bw-ui, bw-db, redis$([ "${DOCKER_SYSLOG:-}" = "yes" ] && echo ", bw-syslog")"
                        [ "${DOCKER_AUTOCONF:-no}" = "yes" ] && echo "         + bw-autoconf, bw-docker"
                        echo "Database: MariaDB (bundled bw-db container)"
                        echo "Host ports: ${DOCKER_HTTP_PORT} (HTTP), ${DOCKER_HTTPS_PORT} (HTTPS/QUIC)" ;;
@@ -7654,6 +9151,21 @@ Proceed with topology change?" "no"; then
     fi
 }
 
+# Resolve DATABASE_URI the same way the running scheduler would: variables.env
+# is exported first and scheduler.env last (bunkerweb-scheduler.sh:89-91), so
+# a value set in scheduler.env wins over one left in variables.env. Takes the
+# two env file paths as arguments so it stays pure and testable; defaults to
+# the real ones on the host.
+_upgrade_backup_database_uri() {
+    local _variables_env="${1:-/etc/bunkerweb/variables.env}" _scheduler_env="${2:-/etc/bunkerweb/scheduler.env}"
+    local _db_uri="" _val _env_file
+    for _env_file in "$_variables_env" "$_scheduler_env" ; do
+        _val="$(sed -n 's/^DATABASE_URI=\(..*\)/\1/p' "$_env_file" 2>/dev/null | tail -n1 | tr -d '\r')"
+        [ -n "$_val" ] && _db_uri="$_val"
+    done
+    printf '%s' "$_db_uri"
+}
+
 perform_upgrade_backup() {
     local TEMP_STARTED="no"
     [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
@@ -7683,10 +9195,35 @@ perform_upgrade_backup() {
     mkdir -p "$BACKUP_DIRECTORY" || {
         print_warning "Unable to create backup directory $BACKUP_DIRECTORY. Skipping automatic backup."; return 0; }
     print_step "Creating pre-upgrade backup in $BACKUP_DIRECTORY"
-    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" bwcli plugin backup save; then
+    # This runs before the package is replaced, so it uses the installed bwcli, which reads
+    # /etc/nginx/variables.env first and finds DATABASE_URI's default there whenever the
+    # scheduler has not rendered the real config yet. Every CLI version prefers the environment,
+    # so passing it here fixes the backup on the version being upgraded away from, not only on
+    # the one being installed. Full Stack and Manager keep the URI in variables.env, Scheduler
+    # Only in scheduler.env; worker, ui and api never reach this line.
+    local _db_uri
+    _db_uri=$(_upgrade_backup_database_uri)
+    # env is load-bearing: without it the expanded word is not recognised as an assignment
+    # prefix and becomes the command name. An empty _db_uri expands to nothing.
+    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" env ${_db_uri:+DATABASE_URI="$_db_uri"} bwcli plugin backup save; then
         print_status "Backup completed: $BACKUP_DIRECTORY"
     else
-        print_warning "Automatic backup failed. Verify manually before continuing."
+        # The upgrade stops the services and replaces /etc/bunkerweb and the database schema.
+        # Carrying on after the backup the operator asked for has failed leaves nothing to
+        # restore from, so this aborts unless they say otherwise.
+        print_error "Pre-upgrade backup failed. Nothing was upgraded yet."
+        if [ "$TEMP_STARTED" = "yes" ]; then
+            systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+        fi
+        if [ "$INTERACTIVE_MODE" = "yes" ] \
+            && tui_yesno "Pre-upgrade Backup" \
+                "⚠️  The pre-upgrade backup failed. Upgrade anyway, without a backup?" "no"; then
+            print_warning "Continuing without a backup at your request."
+            return 0
+        fi
+        print_error "Take a backup manually (see https://docs.bunkerweb.io/latest/upgrading),"
+        print_error "or re-run with --no-auto-backup to upgrade without one."
+        exit 1
     fi
     if [ "$TEMP_STARTED" = "yes" ]; then
         systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
@@ -7694,7 +9231,8 @@ perform_upgrade_backup() {
 }
 
 should_skip_upgrade_backup() {
-    if [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
+    # Shared with the Docker upgrade path — these types own no database.
+    if _skip_backup_for_type; then
         return 0
     fi
     if ! systemctl list-unit-files --type=service 2>/dev/null | grep -q "^bunkerweb-scheduler.service"; then
@@ -7847,6 +9385,10 @@ main() {
     # mode never checkpoints, so it skips that entirely).
     if [ "$DOCKER_MODE" = "yes" ]; then
         check_docker_prereqs
+        # Same slot check_existing_installation occupies on the Linux side:
+        # adopt an existing stack's topology BEFORE ask_user_preferences would
+        # prompt for an install type we can read off disk.
+        _docker_check_existing_stack
     else
         check_supported_os
         # Resume detection — before check_existing_installation, which would
@@ -7873,7 +9415,10 @@ main() {
         # always "no" and docker always lands in this branch.
         [ "$DOCKER_MODE" != "yes" ] && check_existing_installation
 
-        if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        # upgrade_only() is the LINUX package upgrade. Docker mode sets
+        # UPGRADE_SCENARIO too (later, from _docker_resolve_upgrade_scenario),
+        # and must never be routed through it.
+        if [ "$DOCKER_MODE" != "yes" ] && [ "$UPGRADE_SCENARIO" = "yes" ]; then
             upgrade_only
         fi
 
@@ -7916,7 +9461,29 @@ main() {
         export UI_WIZARD=no
     fi
 
-    print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
+    # Wording for the confirm screen — an in-place Docker upgrade is not an
+    # install, and saying so avoids the operator thinking they are about to
+    # replace a running stack from scratch.
+    local _confirm_title _confirm_q _confirm_yes _confirm_cancelled
+    if [ "$DOCKER_RECONFIGURATION" = "yes" ] && [ "$DOCKER_MODE" = "yes" ]; then
+        _confirm_title="Reconfigure Log Collection"
+        _confirm_q="Change local Web UI log collection in ${DOCKER_PROJECT_DIR}?"
+        _confirm_yes="Reconfigure"
+        _confirm_cancelled="Reconfiguration cancelled"
+        print_status "Reconfiguring local Web UI log collection in $DOCKER_PROJECT_DIR"
+    elif [ "$UPGRADE_SCENARIO" = "yes" ] && [ "$DOCKER_MODE" = "yes" ]; then
+        _confirm_title="Confirm Upgrade"
+        _confirm_q="Upgrade the ${INSTALL_TYPE:-full} stack in ${DOCKER_PROJECT_DIR} to ${DOCKER_IMAGE_TAG}?"
+        _confirm_yes="Upgrade"
+        _confirm_cancelled="Upgrade cancelled"
+        print_status "Upgrading BunkerWeb in $DOCKER_PROJECT_DIR to $DOCKER_IMAGE_TAG"
+    else
+        _confirm_title="Confirm Installation"
+        _confirm_q="Install BunkerWeb $BUNKERWEB_VERSION (type: ${INSTALL_TYPE:-full}) with the chosen configuration?"
+        _confirm_yes="Install"
+        _confirm_cancelled="Installation cancelled"
+        print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
+    fi
     echo
 
     # Interactive confirm — embed recap in dialog body (single confirm screen).
@@ -7926,13 +9493,13 @@ main() {
             # Recap already rendered after ask_user_preferences; show only install/cancel.
             local _rc=0
             gum confirm \
-                "Install BunkerWeb $BUNKERWEB_VERSION with this configuration?" \
+                "$_confirm_q" \
                 --default=true \
-                --affirmative "Install" --negative "Cancel" \
+                --affirmative "$_confirm_yes" --negative "Cancel" \
                 --prompt.foreground "#2eac68" \
                 || _rc=$?
             if ! _tui_normalize_rc "$_rc"; then
-                print_status "Installation cancelled"
+                print_status "$_confirm_cancelled"
                 exit 0
             fi
         elif [ "$WHIPTAIL_AVAILABLE" = "yes" ]; then
@@ -7941,7 +9508,7 @@ main() {
             _summary=$(_build_configuration_summary)
             _confirm_body="${_summary}
 
-Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
+${_confirm_q}"
             local _lines _h _term_h _max_h
             _lines=$(printf '%s' "$_confirm_body" | awk 'END {print NR}')
             _term_h=$(tput lines 2>/dev/null || echo 24)
@@ -7951,17 +9518,16 @@ Install BunkerWeb $BUNKERWEB_VERSION with this configuration?"
             [ "$_h" -gt "$_max_h" ] && _h="$_max_h"
             [ "$_h" -lt 14 ] && _h=14
             if ! whiptail --backtitle "$TUI_BACKTITLE" \
-                          --title "Confirm Installation" \
-                          --yes-button "Install" --no-button "Cancel" \
+                          --title "$_confirm_title" \
+                          --yes-button "$_confirm_yes" --no-button "Cancel" \
                           --scrolltext \
                           --yesno "$_confirm_body" "$_h" 78; then
-                print_status "Installation cancelled"
+                print_status "$_confirm_cancelled"
                 exit 0
             fi
         else
-            if ! tui_yesno "Confirm Installation" \
-                "Install BunkerWeb $BUNKERWEB_VERSION (type: ${INSTALL_TYPE:-full}) with the chosen configuration?" "yes"; then
-                print_status "Installation cancelled"
+            if ! tui_yesno "$_confirm_title" "$_confirm_q" "yes"; then
+                print_status "$_confirm_cancelled"
                 exit 0
             fi
         fi

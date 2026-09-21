@@ -3,6 +3,7 @@ from logging import Logger
 from os import sep
 from os.path import join
 from sys import path as sys_path
+from time import time
 from typing import Dict, List, Literal, Optional, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -179,6 +180,20 @@ class UIDatabase(Database):
                 session.query(UserColumnsPreferences).filter_by(user_name=old_username).update({"user_name": username})
 
             totp_changed = user.totp_secret != totp_secret
+            if totp_changed:
+                # The caller verified the enrollment code before storing the secret, so every code
+                # valid at this moment is spent; starting the counter there keeps that code from
+                # replaying as a login for the rest of its window (the next code is a period away).
+                # Do not reset a replacement secret's counter if another request already
+                # rotated the secret after this user row was loaded.
+                counter = int((time() + 3) // 30) if totp_secret else None
+                updated = (
+                    session.query(UiUsers)
+                    .filter(UiUsers.username == username, UiUsers.totp_secret == user.totp_secret)
+                    .update({UiUsers.totp_secret: totp_secret, UiUsers.totp_last_counter: counter}, synchronize_session="fetch")
+                )
+                if updated != 1:
+                    return "The two-factor authentication secret changed; please retry"
 
             user.email = email
             user.password = password.decode("utf-8")
@@ -199,6 +214,33 @@ class UIDatabase(Database):
             else:
                 self.delete_ui_user_recovery_codes(username)
 
+        return ""
+
+    def enable_ui_user_totp(self, username: str, totp_secret: str, counter: int, recovery_codes: List[str]) -> str:
+        """Enroll only a disabled user, saving the new secret and consumed token together."""
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
+        if not totp_secret or type(counter) is not int or counter < 0:
+            return "Invalid TOTP enrollment"
+        try:
+            with self._db_session() as session:
+                updated = (
+                    session.query(UiUsers)
+                    .filter(UiUsers.username == username, (UiUsers.totp_secret.is_(None)) | (UiUsers.totp_secret == ""))
+                    .update(
+                        {UiUsers.totp_secret: totp_secret, UiUsers.totp_last_counter: counter, UiUsers.update_date: datetime.now().astimezone()},
+                        synchronize_session=False,
+                    )
+                )
+                if updated != 1:
+                    return "The user no longer exists or two-factor authentication is already enabled"
+                session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
+                for code in recovery_codes:
+                    session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
+                session.commit()
+        except Exception as e:
+            self.logger.error(f"Failed to enable TOTP ({type(e).__name__})")
+            return "An error occurred while enabling two-factor authentication"
         return ""
 
     def delete_ui_user(self, username: str) -> str:
@@ -388,22 +430,17 @@ class UIDatabase(Database):
 
     def use_ui_user_recovery_code(self, username: str, hashed_code: str) -> str:
         """Use ui user recovery code."""
-        with self._db_session() as session:
-            user = session.query(UiUsers).filter_by(username=username).first()
-            if not user:
-                return f"User {username} doesn't exist"
-
-            recovery_code = session.query(UserRecoveryCodes).filter_by(user_name=username, code=hashed_code).first()
-            if not recovery_code:
-                return "Invalid recovery code"
-
-            session.delete(recovery_code)
-
-            try:
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
+        try:
+            with self._db_session() as session:
+                deleted = session.query(UserRecoveryCodes).filter_by(user_name=username, code=hashed_code).delete(synchronize_session=False)
+                if deleted != 1:
+                    return "Invalid recovery code"
                 session.commit()
-            except BaseException as e:
-                return str(e)
-
+        except Exception as e:
+            self.logger.error(f"Failed to consume recovery code ({type(e).__name__})")
+            return "An error occurred while consuming the recovery code"
         return ""
 
     def delete_ui_user_old_sessions(self, username: str, keep_session_id: Optional[int] = None) -> str:

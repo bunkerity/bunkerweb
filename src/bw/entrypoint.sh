@@ -46,6 +46,10 @@ function trap_reload() {
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
 	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
+		if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+			log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+			return 1
+		fi
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
@@ -97,6 +101,14 @@ function set_loading_state() {
 		echo "IS_LOADING=yes" >> "$nginx_variables_path"
 	fi
 
+	# The scheduler skips a push whose archive digest matches the applied marker left by the
+	# previous one. That marker lives outside the tree it describes, keyed by destination path,
+	# so a push never archives its own bookkeeping. Editing variables.env here makes the tree
+	# differ from what the marker describes, so the push carrying IS_LOADING=no would be
+	# answered "already applied" and the instance would stay in the loading state, serving
+	# traffic with every Lua plugin disabled.
+	rm -f "/var/tmp/bunkerweb/pushswap/$(dirname "$nginx_variables_path" | sed 's/[^[:alnum:]][^[:alnum:]]*/_/g').applied"
+
 	return 0
 }
 
@@ -141,6 +153,10 @@ for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
 done
 
 # start nginx
+if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+	log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+	exit 1
+fi
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &
 pid="$!"

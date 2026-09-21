@@ -1,6 +1,156 @@
 # Changelog
 
-## v1.6.14 - 2026/08/??
+## v1.6.15 - 2026/09/??
+
+- [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
+- [SECURITY] `api`: moving a custom config with `PATCH /configs` needs `config_update` on the destination service; a body without `service` keeps the current one, not global.
+- [SECURITY] `api`, `ui`: a cache delete marks a plugin changed only when one of its rows was really deleted; `cache_delete` can no longer run another plugin's jobs.
+- [SECURITY] `kubernetes`: the example manifests now wire `API_TOKEN` from a Secret and ship a `NetworkPolicy` admitting port 5000 only from the scheduler and the Web UI.
+- [SECURITY] `reverseproxy`, `grpc`: setting values rendered into an NGINX directive now reject the characters that terminate or escape it, so an upstream, header or include value can no longer inject configuration. Shipped defaults are unaffected; a value containing a semicolon, a hash, braces, quotes or a backslash is refused on save.
+- [FEATURE] `grpc`: the plugin now matches the reverse proxy's configurability, adding client response headers, pass and ignore headers, underscores in headers, buffer and body size limits, `auth_request` and upstream TLS verification. See the plugin README for the full list.
+- [FEATURE] `reverseproxy`, `grpc`: present a client certificate to the upstream for mutual TLS, and set the upstream CRL, TLS protocols and ciphers. The scheduler validates the material and distributes it to the instances.
+- [BUGFIX] `reverseproxy`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them. Header names are matched case-insensitively. (Fixes #3936)
+- [BUGFIX] `api`: `PATCH /services/{service}` renames a service and saves its settings in one transaction; a failed request leaves the old service untouched. Unknown or global-only variables are refused with a 422.
+- [BUGFIX] `ui`: the reports table shows the CrowdSec investigation button only on CrowdSec reports, as a CrowdSec-branded icon next to the ban button it used to override in the Actions column.
+- [BUGFIX] `grpc`: custom upstream request headers replace same-name generated defaults instead of being sent alongside them, and `X-Forwarded-Protocol` is sent like the reverse proxy already does.
+- [BUGFIX] `reverseproxy`, `grpc`: the trusted-cert job validates every certificate in a CA bundle instead of only the first, keeps the cached material when a run fails transiently instead of purging it and silently disabling upstream verification, and asks for a reload when it removes one.
+- [LINUX] `fedora`: Fedora 43 packages now build against NGINX 1.30.5, dropping the 1.30.4 exception.
+
+## v1.6.15~rc3 - 2026/09/17
+
+- [SECURITY] `ui`: escape and sanitise user data in flash messages, settings editors and session details, closing a script injection through service and config names.
+- [SECURITY] `jobs`: verify the ASN and country MMDB downloads against the checksum DB-IP publishes, over a host and size bounded transfer, and keep the database already in place when verification fails instead of caching an unchecked file.
+- [FEATURE] `installer`: Docker Full installs can optionally configure a local syslog-ng collector with persistent log storage, making BunkerWeb and component logs available in the Web UI while keeping normal Docker logs.
+- [FEATURE] `ui`: add `UI_USE_REDIS=no` to take the web UI off Redis on its own, where the global `USE_REDIS` also stops sharing bans and reports between instances.
+- [FEATURE] `ui`: retain individual settings as drafts in the RAW editor, with explicit activation and inherited or default effective values. (Refs #3631)
+- [FEATURE] `modsecurity`: add opt-in Concurrent audit logging with instance storage validation. (Fixes #3891)
+- [BUGFIX] `scheduler`: acknowledge configuration changes before rendering them, so a write that lands while the previous write's once-jobs are still running gets its own job cycle instead of being rendered without its jobs (a removed mTLS CA stayed trusted, a new CrowdSec service ran unchecked, a ModSecurity audit change could be skipped).
+- [BUGFIX] `scheduler`, `ui`: validate manual plugins before database updates and preserve rejected plugin folders and stored configuration during scanning and restoration. Keep unchanged sibling plugins and log config-saver exit codes. (Refs #3303)
+- [BUGFIX] `jobs`: folder caches that contain symlinks (the Let's Encrypt `live/` links) restore from the database again, while absolute or escaping links are still rejected.
+- [BUGFIX] `backup`: the database lock is a real `flock` now; a second backup, restore or scheduler tick waits up to 30 s then reports busy instead of taking the lock away from a live holder.
+- [BUGFIX] `database`: compute missing custom-config checksums to prevent save failures and config loss when renaming a service. (Refs #3893)
+- [BUGFIX] `api`: renaming a service through `PATCH /services/{service}` moves its custom configs, per-service settings and job cache to the new name instead of dropping them as a deleted service; a service owned by the environment, autoconf or the wizard is refused there since its owner would recreate the old name.
+- [BUGFIX] `autoconf`: on Kubernetes, a BunkerWeb pod that is running but not yet Ready receives its configuration, since the readiness probe waits for it; a pod being deleted is skipped.
+- [BUGFIX] `letsencrypt`: with `LETS_ENCRYPT_PASSTHROUGH=yes`, a GET or HEAD of a single ACME token under `/.well-known/acme-challenge/` reaches the backend without any other check, ModSecurity, bans and antibot included. (Fixes #3927)
+- [BUGFIX] `letsencrypt`: preserve the full base of explicit wildcard names and keep separate wildcard scopes aligned between certificate issuance and loading. Affected services request a new certificate after upgrading; old certificates remain on disk unless `LETS_ENCRYPT_CLEAR_OLD_CERTS=yes`. (Refs #3326)
+- [BUGFIX] `letsencrypt`: correct certificate-profile validity periods and name limits in setting help and all translations, and warn before issuance when a known Let's Encrypt profile exceeds its name limit. Requests continue unchanged. (Refs #3251)
+- [BUGFIX] `letsencrypt`: prevent `preferred_profile` errors in the legacy certificate-list helper. (Refs #3839)
+- [BUGFIX] `modsecurity`: show request-body parser denials in Reports with their rule ID and original HTTP method, without changing enforcement or sharing them through BunkerNet. (Fixes #3905)
+- [BUGFIX] `antibot`: add accessible error messages and reload controls for all external CAPTCHA providers. (Fixes #3867)
+- [BUGFIX] `errors`: keep the blocking plugin reason on reports when a custom error page is configured, instead of `unknown`. (Fixes #3916)
+- [BUGFIX] `bunkernet`: back off failed registration retries with an exponential delay capped at 24 hours, retaining the previous exit status while waiting. Registration still depends on the BunkerNet API; HTTP 429 and 403 remain non-fatal. (Refs #3636)
+- [BUGFIX] `ui`: keep serving sessions when Redis stops answering or refuses writes after startup, instead of failing every request until the workers restart. The affected sessions fall back to a local store, per host, and return to Redis on recovery; with several UI replicas the others stop seeing a session that moved and ask for a login. A silent eviction is not covered, since Redis reports success and simply no longer holds the key.
+- [BUGFIX] `ui`: a session updated or ended while Redis was unavailable is no longer replaced by the older copy Redis still held once it answers again; the local copy is read first and written back on recovery.
+- [BUGFIX] `ui`: store flash messages as plain strings so the Redis session backend can serialise them; with `USE_REDIS=yes` every login answered 500.
+- [BUGFIX] `ui`: a setting that was never set before can be drafted from the RAW editor.
+- [BUGFIX] `ui`: the PRO page showed a raw `{{pro_services}}` placeholder in the licence limit alert.
+- [BUGFIX] `ui`: stop showing HTML entities in validation errors and tooltips.
+- [BUGFIX] `ui`: remove broken source-map references that could trigger bans when opening browser developer tools. (Fixes #3896)
+- [BUGFIX] `ui`: avoid false success notifications after failed service saves, report background errors, and prevent a crash when adding a custom config. (Refs #3893)
+- [BUGFIX] `ui`: align the CSRF token lifetime with the session lifetime, so a form left open for more than an hour no longer logs the user out with a session expired message. (Refs #2359)
+- [PERFORMANCE] `errors`: reduce inline SVG whitespace without changing error-page artwork. (Refs #3892)
+- [DEPS] `bunkerweb`: update NGINX to 1.30.5 (CVE-2026-90439, HTTP/3 buffer overflow). Fedora 43 has no 1.30.5 package yet, so its BunkerWeb package keeps building its modules against 1.30.4.
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for fixing Concurrent audit validation on inactive scopes. (#3907)
+
+## v1.6.15~rc2 - 2026/09/10
+
+- [FEATURE] `crowdsec`: investigate IPs, inspect allowlists, and remove decisions through the Web UI and API, with richer report details and on-page allowlist guidance.
+- [FEATURE] `antibot`, `blacklist`, `whitelist`, `greylist`, `dnsbl`, `country`: match on a request header, name plus an optional PCRE regex on the value, as an ignore or list criterion. The value is a shared secret: it is stored as a password setting, never logged, and never cached.
+- [FEATURE] `reverseproxy`: `REVERSE_PROXY_MAX_CLIENT_SIZE` sets the body size, and the ModSecurity body limit, per URL.
+- [BUGFIX] `healthcheck`: `/healthz` answers `loading` while the instance is loading or reloading instead of always `ok`, and the container healthcheck matches the status exactly.
+- [SECURITY] `mtls`: no unverified clients before the CA bundle arrives; an invalid CA or CRL replacement keeps the last good material, a removal takes effect on reload.
+- [SECURITY] `crowdsec`: SHA-256 cache namespaces, `/crowdsec/ping` asks the Local API directly, per-service captcha settings that fail closed on provider errors.
+- [SECURITY] `whitelist`: `USE_WHITELIST=no` no longer lifts an active ban, and the global `WHITELIST_IP` fallback needs whitelisting on globally.
+- [BUGFIX] `api`, `ui`: settings are reported as rendered, and a service keeps its own settings under a globally selected template. (Fixes #3866)
+- [BUGFIX] `linux`, `all-in-one`: log rotation runs on every pass instead of once a day, and keeps fourteen generations. (Fixes #3838)
+- [BUGFIX] `kubernetes`: the example manifests point `DNS_RESOLVERS` at the `kube-dns` Service instead of one most clusters do not have. (Refs #2524)
+- [BUGFIX] `cli`, `linux`: `bwcli` and the pre-upgrade backup also read `DATABASE_URI` from `scheduler.env`. (Fixes #3836)
+- [BUGFIX] `installer`: a same-core Docker retag to an older pre-release is refused as a downgrade.
+- [BUGFIX] `installer`: Docker upgrades verify image, health and restart stability and roll back both files on failure; `.env` is last-wins, a slow stack exits 2.
+- [BUGFIX] `modsecurity`: the CRS plugin download keeps the last complete set on failure and no longer reloads an unchanged set.
+- [BUGFIX] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` must end in `.log`.
+- [BUGFIX] `core`: a variables file no longer folds the next variable into the setting above it, and keeps urlsafe base64 and PEM chains whole.
+- [BUGFIX] `ui`: TOTP replay counters live in the database across workers and replicas; expect one fresh code after upgrading, and a read-only database no longer locks 2FA out.
+- [BUGFIX] `ui`: the "session expired" notice survives the redirect to /setup, `<html lang>` follows the language, and every locale has the full key set.
+- [BUGFIX] `ui`: a theme, language or table-column change is no longer dropped when a link is followed right after it.
+- [BUGFIX] `ui`: saving a custom config no longer trips the Web UI's own CRS rules when the config contains an XSS rule pattern.
+- [BUGFIX] `headers`: every hardcoded Permissions-Policy copy (loading, default server, error pages, Web UI) matches the plugin default again.
+- [BUGFIX] `letsencrypt`: a wildcard group mixing hostname depths is reported as misconfigured; only enabled HTTP challenges get the ACME path exception.
+- [BUGFIX] `core`: Lua `has_variable` falls back to the global value, and evicting an unexpired shared dict entry is logged with the setting to raise.
+- [BUGFIX] `core`: a cache event lost to a full shared dict no longer makes every following request wait for it, which cost 0.3 s per request until the instance restarted.
+- [BUGFIX] `metrics`: request facets are rebuilt once across workers and instances, and the reports page keeps its precomputed filter counts.
+- [BUGFIX] `metrics`: dashboard IP counts respect the selected window, and cold counters keep their stored baseline when the worker cache is full.
+- [BUGFIX] `metrics`: an instance refills the Redis reports list after it is evicted or deleted, `METRICS_REDIS_TTL=0` strips the expiry already set on those keys, and a failed TTL refresh is logged.
+- [BUGFIX] `ui`: `METRICS_MAX_BLOCKED_REQUESTS_REDIS=0` keeps the reports out of Redis instead of hiding them; the reports page, the dashboard and the metrics endpoint read them from the instances.
+- [BUGFIX] `redis`: a pooled connection no longer re-authenticates and re-selects the database on every use, and the ban check asks Redis for both keys at once, so a request on default settings costs two round trips instead of seven; a ban already cached on the instance is now enforced while Redis is unreachable.
+- [BUGFIX] `redis`: `REDIS_KEEPALIVE_POOL` defaults to 64 per NGINX worker; size `maxclients` from `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`.
+- [BUGFIX] `ui`, `cli`: `REDIS_SSL_VERIFY` is honored by the Web UI and `bwcli`, so a TLS Redis with a private CA works from both.
+- [BUGFIX] `ui`: one Redis client per worker instead of one per request, and an unmodified session is written back once per quarter of its lifetime instead of on every request, so a session idle since its last write can expire up to a quarter early.
+- [BUGFIX] `ui`: the reports page reads the list length once per scan and the writer certificate in one round trip, and a failed config read no longer authorises a scan ten times the configured window.
+- [BUGFIX] `ui`, `cli`: ban listings scan Redis in batches of 1000 and fetch values in one pipeline, and the bans page merges instance bans in linear time.
+- [BUGFIX] `crowdsec`: cache prefixes no longer shift with another service's Local API, and the health endpoint reports every failure at once.
+- [BUGFIX] `autoconf`: a stuck Kubernetes watch is detected on its own, and an invalid Ingress or HTTPRoute path is skipped with a warning.
+- [BUGFIX] `reverseproxy`, `redirect`, `grpc`: location operands are quoted, and the location settings reject whitespace, `;`, `{`, `}` and a bare modifier.
+- [BUGFIX] `scheduler`: the folder push body gets its own timeout, and an explicit `SEND_FILES_MIN_TIMEOUT` is no longer capped at 120 s. (Fixes #2924)
+- [BUGFIX] `scheduler`: a busy instance's `503` is retried, an instance back in loading is pushed to again, and a failed push no longer evicts the others.
+- [BUGFIX] `scheduler`: once-jobs wait for an instance to get the configuration, a custom config edit survives a failed write, a skipped healthcheck unsticks.
+- [BUGFIX] `scheduler`: cache restoration keeps a recoverable backup, cleanup stays inside the cache directory, permission repair skips child symlinks.
+- [BUGFIX] `scheduler`: a failed configuration publication is retried with a backoff instead of on every tick, and each applied change is published once.
+- [BUGFIX] `scheduler`: `CUSTOM_LOG_LEVEL` reaches the generator and a bare IPv6 instance is no longer pushed to twice.
+- [BUGFIX] `core`: a push swap no longer runs during a reload, keeps its digest outside the pushed tree, and never restores its own bookkeeping.
+- [BUGFIX] `core`: a failed push-swap rollback parks unrestored entries under `.bw-rescue.<timestamp>` instead of deleting them; remove it by hand.
+- [BUGFIX] `api`: a plugin id starting with `.bw-` is refused, a failed instance call answers 502, and a folder push gets its own body-write deadline.
+- [BUGFIX] `api`: service conversion uses its `service_convert` permission, and an explicit empty template is reported as empty, not as the global one.
+- [BUGFIX] `db`: `save_config` no longer empties the configuration it is handed (autoconf reloaded on every reconcile); query-string credentials are masked.
+- [BUGFIX] `db`: upgrading a MariaDB or MySQL database created by `1.5.6` no longer aborts on the `bw_jobs_cache` foreign key, whose name differs from an upgraded one's.
+- [DOCS] `templates`: document that a template's value beats one set in the global settings, and that setting it on the service overrides the template.
+- [DOCS] `integrations`, `metrics`: document `KEEP_CONFIG_ON_RESTART`, correct `SEND_FILES_MIN_TIMEOUT` and `DISABLE_ONLINE_API`.
+- [DOCS] `crowdsec`: the all-in-one agent starts only with the unprefixed `USE_CROWDSEC=yes`.
+- [DOCS] Add documentation about the `Maintenance` PRO plugin.
+- [BUILD] `release`: candidates are built once, tested as the exact artifacts and promoted by digest with a manifest; publication requires the `release` environment's reviewers to be the release owners.
+- [ALL-IN-ONE] Update the bundled CrowdSec to `v1.8.0`, fixing two datasource denial of service issues.
+- [BUGFIX] `backup`: the database lock is waited on for at most 30 s and then taken over, so a lock left behind by a killed process no longer wedges the scheduler and every job it runs.
+- [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for correcting the ModSecurity audit log documentation. (#3890)
+
+## v1.6.15~rc1 - 2026/08/31
+
+- [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
+- [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.
+- [SECURITY] `api`: `instances_create` and `instances_update` are now admin-equivalent: a registered instance receives the configuration and TLS keys. See the API documentation.
+- [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering and sanitizer bypasses.
+- [FEATURE] `sessions`: a destroyed cookie session is rejected on its next use, per instance or cluster-wide with Redis. See the Sessions documentation.
+- [FEATURE] `all-in-one`: log files are rotated with logrotate; mount your own `/etc/logrotate.d/bunkerweb` to change the policy. See the All-In-One documentation.
+- [FEATURE] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` sets the audit log path, which must be a regular file under `/var/log/bunkerweb`.
+- [FEATURE] `installer`: `install-bunkerweb.sh --docker` now upgrades a stack it previously generated in place: it backs the database up first, keeps your secrets, ports and `docker-compose.yml` edits, and refuses downgrades. See the Upgrading documentation.
+- [BUGFIX] `installer`: a Docker re-run keeps the stack's Compose project name and published ports, which were recomputed from the directory name and reset to the defaults, orphaning the stack's volumes.
+- [BUGFIX] `letsencrypt`: quarantine an incomplete renewal lineage, where every renewal for that service failed forever with no repair path.
+- [BUGFIX] `letsencrypt`: a wildcard certificate no longer shadows the certificate of every other service under the same base. (Refs #3841)
+- [BUGFIX] `customcert`: the wildcard SNI fallback is skipped for services with `USE_CUSTOM_SSL=no`, which were served another service's certificate. (Fixes #3841)
+- [BUGFIX] `letsencrypt`: certificate lookups ignore the case and a trailing dot in the requested name.
+- [BUGFIX] `ui`: the Reports view reads past discarded Redis entries instead of dropping the valid rows behind them. (Refs #3685)
+- [BUGFIX] `scheduler`: configuration and cache pushes scale their timeout with the number of services. Raise the floor with `SEND_FILES_MIN_TIMEOUT`.
+- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication lists accept repeated whitespace, silently rejected before. (Refs #2577)
+- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables, where one unreadable leftover table aborted it (MariaDB error 1932).
+- [BUGFIX] `scheduler`: the config saver and generator log wherever the Scheduler logs; on Linux their output went to the journal.
+- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where manual edits were overwritten until a restart.
+- [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
+- [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, instead of rewriting the whole blob on every reload.
+- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins, where their pages and hooks stayed missing.
+- [BUGFIX] `scheduler`: a multi-line setting value survives `variables.env`, where the truncated first line was saved back over a working certificate. (Fixes #3835)
+- [BUGFIX] `cli`: `bwcli` falls back to `/etc/bunkerweb/variables.env` for `DATABASE_URI` and refuses a schemaless database. (Refs #3836)
+- [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails. Pass `--no-auto-backup` to skip it. (Refs #3836)
+- [BUGFIX] `letsencrypt`: the UI reads certificate dates from the timezone-aware properties, where they were shown shifted outside UTC. (Fixes #3839)
+- [UI] PRO page: add a **Refresh UI plugins** button that re-extracts the PRO plugins from the database and reloads the workers.
+- [MISC] Add `haptics` to the default Permissions-Policy header; override `PERMISSIONS_POLICY` to allow it.
+- [DEPS] Updated lua-resty-session version to v4.2.0
+- [DEPS] Updated LuaJIT version to v2.1-20260914
+- [DEPS] Updated libmaxminddb version to v1.14.0
+- [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
+- [DEPS] Updated build tooling: cssnano to 8.0.8 and postcss to 8.5.26
+- [CONTRIBUTION] Thank you [robotter112](https://github.com/robotter112) for your contribution regarding the wildcard SNI fallback ignoring `USE_CUSTOM_SSL=no`. (#3842)
+
+## v1.6.14 - 2026/08/21
 
 - [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
 - [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.

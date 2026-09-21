@@ -113,6 +113,22 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
+=== "Cabecera"
+    **Qué hace esto:** Bloquea, o por el contrario exime, las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Una regla de exclusión prevalece sobre cualquier coincidencia de la lista negra, incluidas las cacheadas.
+
+    | Ajuste                          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                    |
+    | ------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista negra. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `BLACKLIST_HEADER_VALUE`        |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                   |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la lista negra. Pares numerados: `_NAME_1` va con `_VALUE_1`.       |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                   |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
@@ -150,7 +166,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN de AWS y Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Reglas de omisión personalizadas
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

@@ -401,6 +401,7 @@ typedef struct GCproto {
 #define PROTO_FFI		0x04	/* Uses BC_KCDATA for FFI datatypes. */
 #define PROTO_NOJIT		0x08	/* JIT disabled for this function. */
 #define PROTO_ILOOP		0x10	/* Patched bytecode with ILOOP etc. */
+#define PROTO_BITOP		0x80	/* Uses bit operator bytecodes. */
 /* Only used during parsing. */
 #define PROTO_HAS_RETURN	0x20	/* Already emitted a return. */
 #define PROTO_FIXUP_RETURN	0x40	/* Need to fixup emitted returns. */
@@ -1041,10 +1042,29 @@ LJ_ASMF LJ_CONSTF int64_t lj_vm_num2int_check(double x);
 ** The uint64_t conversion accepts the union of the unsigned + signed range.
 */
 LJ_ASMF LJ_CONSTF int64_t lj_vm_num2i64(double x);
-LJ_ASMF LJ_CONSTF int64_t lj_vm_num2u64(double x);
+LJ_ASMF LJ_CONSTF uint64_t lj_vm_num2u64(double x);
+
+#if LJ_TARGET_X86
+
+LJ_ASMF LJ_CONSTF int64_t lj_vm_num2i64_sse3(double x);
+LJ_ASMF LJ_CONSTF uint64_t lj_vm_num2u64_sse3(double x);
+LJ_ASMF int64_t (*lj_vm_num2i64_ptr)(double x);
+LJ_ASMF uint64_t (*lj_vm_num2u64_ptr)(double x);
+static LJ_AINLINE int64_t lj_num2i64(double x)
+{
+  return (*lj_vm_num2i64_ptr)(x);
+}
+static LJ_AINLINE uint64_t lj_num2u64(double x)
+{
+  return (*lj_vm_num2u64_ptr)(x);
+}
+
+#else
 
 #define lj_num2i64(x)		(lj_vm_num2i64((x)))
 #define lj_num2u64(x)		(lj_vm_num2u64((x)))
+
+#endif
 
 /* Lua BitOp conversion semantics use the 2^52 + 2^51 trick. */
 LJ_ASMF LJ_CONSTF int32_t lj_vm_tobit(double x);

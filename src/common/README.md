@@ -133,6 +133,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).         |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).       |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).     |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global  | No       | **Sessions Revocation Memory Size:** Size of the store holding revoked cookie session identifiers (for example `8192`, `16k`, `16m`). |
 
 === "Logging Settings"
 
@@ -155,7 +156,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
     | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
     | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
+    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that overrides the default values of specific settings; a value set on the service overrides the template.            |
 
 === "Nginx Settings"
 

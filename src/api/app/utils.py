@@ -2,7 +2,7 @@
 
 from os.path import sep
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from bcrypt import checkpw, gensalt, hashpw
 from regex import compile as re_compile
@@ -43,6 +43,26 @@ def get_api_db(*, log: bool = True) -> APIDatabase:
 
         _API_DB_INSTANCE = APIDatabase(LOGGER, log=log)
     return _API_DB_INSTANCE
+
+
+def reportable_config(conf: Dict[str, Any], *, methods: bool) -> Dict[str, Any]:
+    """Reduce a full config to the settings that differ from a fresh install.
+
+    Takes `Database.get_config(methods=True)` output, so a value a template supplies is already
+    resolved the way the generator resolves it. `get_non_default_settings` cannot be used for
+    this: it reports stored rows only, so a service whose template overrides an inherited global
+    value was answered with the global value the generator was about to discard.
+
+    An entry is kept when it is explicitly set (a row exists, so `method` is not the synthetic
+    `default`) or when a template supplies it. The rest is the plugin default and stays out.
+    """
+    reportable = {}
+    for key, data in conf.items():
+        if not isinstance(data, dict):
+            reportable[key] = data
+        elif data.get("method", "default") != "default" or data.get("template"):
+            reportable[key] = data if methods else data["value"]
+    return reportable
 
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")

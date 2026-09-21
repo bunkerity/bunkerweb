@@ -280,6 +280,10 @@
     <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    <!-- Preload the active ACE theme so setTheme() resolves synchronously (no light flash). -->
+    <script src="{{ url_for('static', filename='libs/ace/src-min/theme-cloud9_' ~ ('night' if theme == 'dark' else 'day') ~ '.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='libs/ace/src-min/ext-searchbox.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>

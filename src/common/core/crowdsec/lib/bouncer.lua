@@ -1,9 +1,14 @@
 package.path = package.path .. ";./?.lua"
 
 local config = require "crowdsec.lib.config"
+local decision_cache = require "crowdsec.lib.decision_cache"
+local stream_lock = require "crowdsec.lib.stream_lock"
+local cache_partition = require "crowdsec.cache_partition"
 local iputils = require "crowdsec.lib.iputils"
 local http = require "resty.http"
 local cjson = require "cjson"
+local decision_json = cjson.new()
+decision_json.decode_array_with_array_mt(true)
 local captcha = require "crowdsec.lib.captcha"
 local flag = require "crowdsec.lib.flag"
 local utils = require "crowdsec.lib.utils"
@@ -41,10 +46,8 @@ local REMEDIATION_API_KEY_HEADER = 'x-api-key'
 
 -- BunkerWeb local modification: BunkerWeb loads one private copy of this module per
 -- distinct per-service configuration, and they all share the single crowdsec_cache
--- shared dict. When those configurations target different Local APIs the caller
--- passes a short prefix so decisions, stream bookkeeping and captcha state cannot
--- bleed between them. Deployments with a single Local API pass nothing and keep
--- upstream's exact keys, so the request path pays no extra concatenation.
+-- shared dict. Decision/stream keys use a Local API prefix; challenge keys use
+-- an explicit service/config prefix passed to Allow, never request-global state.
 local function namespaced_cache(dict, prefix)
   return {
     get = function(_, key) return dict:get(prefix .. key) end,
@@ -52,6 +55,8 @@ local function namespaced_cache(dict, prefix)
       return dict:set(prefix .. key, value, exptime or 0, flags or 0)
     end,
     delete = function(_, key) return dict:delete(prefix .. key) end,
+    safe_set = function(_, key, value, exptime) return dict:safe_set(prefix .. key, value, exptime or 0) end,
+    incr = function(_, key, value, initial) return dict:incr(prefix .. key, value, initial) end,
   }
 end
 
@@ -67,6 +72,12 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
   if cachePrefix and cachePrefix ~= "" then -- BW local mod
     runtime.cache = namespaced_cache(runtime.cache, cachePrefix)
   end
+  runtime.metadata = ngx.shared.crowdsec_metadata
+  if runtime.metadata and cachePrefix and cachePrefix ~= "" then
+    runtime.metadata = namespaced_cache(runtime.metadata, cachePrefix)
+  end
+  runtime.decisions = decision_cache.new(runtime.cache, runtime.metadata)
+  runtime.stream_lock_path = "/var/run/bunkerweb/crowdsec-" .. cache_partition.hash(cachePrefix or conf.API_URL or "") .. ".lock"
   runtime.fallback = runtime.conf["FALLBACK_REMEDIATION"]
 
   if runtime.conf["ENABLED"] == "false" then
@@ -77,18 +88,10 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
     ngx.log(ngx.ERR, "redirect location is set to '/' this will lead into infinite redirection")
   end
 
-  local captcha_ok = true
-  local err = captcha.New(runtime.conf["SITE_KEY"], runtime.conf["SECRET_KEY"], runtime.conf["CAPTCHA_TEMPLATE_PATH"], runtime.conf["CAPTCHA_PROVIDER"])
-  if err ~= nil then
-    -- ngx.log(ngx.ERR, "error loading captcha plugin: " .. err)
-    captcha_ok = false
-  end
-  local succ, err, forcible = runtime.cache:set("captcha_ok", captcha_ok)
-  if not succ then
-    ngx.log(ngx.ERR, "failed to add captcha state key in cache: "..err)
-  end
-  if forcible then
-    ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
+  local captcha_instance, captcha_err = captcha.New(runtime.conf["SITE_KEY"], runtime.conf["SECRET_KEY"], runtime.conf["CAPTCHA_TEMPLATE_PATH"], runtime.conf["CAPTCHA_PROVIDER"])
+  runtime.captcha = captcha_instance
+  if not captcha_instance and runtime.conf["CAPTCHA_PROVIDER"] ~= nil and runtime.conf["CAPTCHA_PROVIDER"] ~= "" then
+    ngx.log(ngx.ERR, "captcha configuration rejected, captcha remediations fall back to ban: " .. tostring(captcha_err))
   end
 
 
@@ -128,6 +131,7 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
 
   -- if stream mode, add callback to stream_query and start timer
   if runtime.conf["MODE"] == "stream" then
+    runtime.cache:incr("startup_request", 1, 0)
     local succ, err, forcible = runtime.cache:set("startup", true)
     if not succ then
       ngx.log(ngx.ERR, "failed to add startup key in cache: "..err)
@@ -159,7 +163,8 @@ end
 
 
 function csmod.validateCaptcha(captcha_res, remote_ip)
-  return captcha.Validate(captcha_res, remote_ip)
+  if not runtime.captcha then return false, "captcha is not configured" end
+  return runtime.captcha.Validate(captcha_res, remote_ip)
 end
 
 
@@ -183,46 +188,34 @@ local function get_remediation_http_request(link)
   return res, err
 end
 
-local function parse_duration(duration)
-  local match, err = ngx.re.match(duration, "^((?<hours>[0-9]+)h)?((?<minutes>[0-9]+)m)?(?<seconds>[0-9]+)")
-  local ttl = 0
-  if not match then
-    if err then
-      return ttl, err
-    end
+-- A direct authenticated read: no decision cache, stream timer, remediation or
+-- AppSec application request can turn an unavailable LAPI into a healthy result.
+function csmod.Health()
+  if not runtime.conf then return false, "CrowdSec configuration is not loaded" end
+  if runtime.conf["API_URL"] == "" then
+    return runtime.conf["APPSEC_ENABLED"], "No Local API configured; AppSec health is not checked", false
   end
-  if match["hours"] ~= nil and match["hours"] ~= false then
-    local hours = tonumber(match["hours"])
-    ttl = ttl + (hours * 3600)
+  local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=127.0.0.1")
+  if err or not res then return false, "Local API request failed" end
+  if res.status ~= 200 then return false, "Local API returned HTTP " .. tostring(res.status) end
+  local ok, decisions = pcall(cjson.decode, res.body)
+  if not ok or (decisions ~= cjson.null and (type(decisions) ~= "table" or not res.body:match("^%s*%["))) then
+    return false, "Invalid Local API response"
   end
-  if match["minutes"] ~= nil and match["minutes"] ~= false then
-    local minutes = tonumber(match["minutes"])
-    ttl = ttl + (minutes * 60)
-  end
-  if match["seconds"] ~= nil and match["seconds"] ~= false then
-    local seconds = tonumber(match["seconds"])
-    ttl = ttl + seconds
-  end
-  return ttl, nil
-end
-
-local function get_remediation_id(remediation)
-  for key, value in pairs(runtime.remediations) do
-    if value == remediation then
-      return tonumber(key)
-    end
-  end
-  return nil
+  return true, nil, true
 end
 
 local function item_to_string(item, scope)
+  if type(item) ~= "string" or type(scope) ~= "string" then return nil end
   local ip, cidr, ip_version
   if scope:lower() == "ip" then
     ip = item
   end
   if scope:lower() == "range" then
+    if not item:match("^[^/]+/%d+$") then return nil end
     ip, cidr = iputils.splitRange(item, scope)
   end
+  if not ip or not ip:match("^[%x:%.]+$") then return nil end
 
   local ip_network_address, is_ipv4 = iputils.parseIPAddress(ip)
   if ip_network_address == nil then
@@ -244,205 +237,165 @@ local function item_to_string(item, scope)
   if ip_version == nil then
     return "normal_"..item
   end
+  if not cidr or cidr < 0 or cidr > (is_ipv4 and 32 or 128) then return nil end
   local ip_netmask = iputils.cidrToInt(cidr, ip_version)
+  if is_ipv4 then
+    ip_network_address = iputils.ipv4_band(ip_network_address, tonumber(ip_netmask))
+  else
+    ip_network_address = iputils.ipv6_band(ip_network_address, iputils.netmasks_by_key_type.ipv6[129 - cidr])
+  end
   return ip_version.."_"..ip_netmask.."_"..ip_network_address
 end
 
-local function set_refreshing(value)
-  local succ, err, forcible = runtime.cache:set("refreshing", value)
-  if not succ then
-    error("Failed to set refreshing key in cache: "..err)
+local function sync_status(err)
+  if err then
+    runtime.cache:safe_set("last_sync_error", err)
+  else
+    runtime.cache:safe_set("last_successful_sync", ngx.time())
+    runtime.cache:delete("last_sync_error")
   end
-  if forcible then
-    ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
+end
+
+local function decode_decisions(body, stream)
+  local ok, decisions = pcall(decision_json.decode, body)
+  if not ok then return nil end
+  if not stream and decisions == cjson.null then return {} end
+  if type(decisions) ~= "table" then return nil end
+  if stream then
+    if not body:match("^%s*{") then return nil end
+    for _, name in ipairs({"new", "deleted"}) do
+      local group = decisions[name]
+      if group ~= nil and group ~= cjson.null and (type(group) ~= "table" or getmetatable(group) ~= cjson.array_mt) then return nil end
+    end
+    if decisions.new == nil and decisions.deleted == nil then return nil end
+  elseif getmetatable(decisions) ~= cjson.array_mt then
+    return nil
   end
+  local groups = stream and {decisions.new or cjson.null, decisions.deleted or cjson.null} or {decisions}
+  for i, group in ipairs(groups) do
+    if group ~= cjson.null then
+      for key, decision in pairs(group) do
+        if type(key) ~= "number" or type(decision) ~= "table" or type(decision.scope) ~= "string"
+          or type(decision.value) ~= "string" or type(decision.type) ~= "string" or #decision.type > 64
+          or not decision_cache.identity(decision) then return nil end
+        local scope = decision.scope:lower()
+        if scope == "ip" or scope == "range" then
+          if not item_to_string(decision.value, scope) then return nil end
+          if (not stream or i == 1) and not decision_cache.duration(decision.duration) then return nil end
+        end
+      end
+    end
+  end
+  return decisions
+end
+
+local function apply_decision(decision, deleted, key, max_ttl, generation)
+  local scope = decision.scope:lower()
+  if scope ~= "ip" and scope ~= "range" then return true end
+  if runtime.conf["BOUNCING_ON_TYPE"] ~= "all" and runtime.conf["BOUNCING_ON_TYPE"] ~= decision.type then return true end
+  local ttl = not deleted and decision_cache.duration(decision.duration) or nil
+  if max_ttl then ttl = math.min(ttl, max_ttl) end
+  local remediation = decision.type
+  if remediation ~= "ban" and remediation ~= "captcha" then remediation = runtime.fallback end
+  return runtime.decisions.update(key or item_to_string(decision.value, scope), decision, remediation, ttl, deleted, generation)
 end
 
 local function stream_query(premature)
-  -- As this function is running inside coroutine (with ngx.timer.at),
-  -- we need to raise error instead of returning them
-
-  if runtime.conf["API_URL"] == "" then
-    return
-  end
-
-  ngx.log(ngx.DEBUG, "running timers: " .. tostring(ngx.timer.running_count()) .. " | pending timers: " .. tostring(ngx.timer.pending_count()))
-
-  if premature then
-    ngx.log(ngx.DEBUG, "premature run of the timer, returning")
-    return
-  end
-
-  local refreshing = runtime.cache:get("refreshing")
-
-  if refreshing == true then
-    ngx.log(ngx.DEBUG, "another worker is refreshing the data, returning")
-    local ok, err = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
-    if not ok then
-      error("Failed to create the timer: " .. (err or "unknown"))
-    end
-    return
-  end
-
-  local last_refresh = runtime.cache:get("last_refresh")
-  if last_refresh ~= nil then
-      -- local last_refresh_time = tonumber(last_refresh)
-      local now = ngx.time()
-      if now - last_refresh < runtime.conf["UPDATE_FREQUENCY"] then
-        ngx.log(ngx.DEBUG, "last refresh was less than " .. runtime.conf["UPDATE_FREQUENCY"] .. " seconds ago, returning")
-        local ok, err = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
-        if not ok then
-          error("Failed to create the timer: " .. (err or "unknown"))
+  if premature or runtime.conf["API_URL"] == "" then return end
+  -- Schedule before I/O/decoding so an invalid response cannot stop synchronization.
+  local scheduled = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
+  if not scheduled then sync_status("Failed to schedule Local API synchronization") end
+  local locked, lock_err = stream_lock.run(runtime.stream_lock_path, function()
+    local last = runtime.cache:get("last_refresh")
+    if last and ngx.time() - last < runtime.conf["UPDATE_FREQUENCY"] then return end
+    local startup_request = runtime.cache:get("startup_request")
+    local startup = runtime.cache:get("startup") == true or startup_request ~= runtime.cache:get("startup_completed")
+    runtime.cache:safe_set("last_refresh", ngx.time())
+    local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions/stream?startup=" .. tostring(startup))
+    if err or not res then
+      sync_status("Local API request failed")
+    elseif res.status ~= 200 then
+      sync_status("Local API returned HTTP " .. tostring(res.status))
+    else
+      local decisions = decode_decisions(res.body, true)
+      if not decisions then
+        sync_status("Invalid Local API response")
+      else
+        local applied, generation = true, nil
+        if startup then
+          -- Publish a fresh snapshot only after all its enforcement records fit.
+          generation = runtime.cache:incr("v2_generation_counter", 1, 0)
+          if not generation then applied = false end
         end
-        return
-      end
-  end
-
-  set_refreshing(true)
-
-  local is_startup = runtime.cache:get("startup")
-  ngx.log(ngx.DEBUG, "Stream Query from worker : " .. tostring(ngx.worker.id()) .. " with startup "..tostring(is_startup) .. " | premature: " .. tostring(premature))
-  local link = runtime.conf["API_URL"] .. "/v1/decisions/stream?startup=" .. tostring(is_startup)
-  local res, err = get_remediation_http_request(link)
-  if not res then
-    local ok, err2 = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
-    if not ok then
-      set_refreshing(false)
-      error("Failed to create the timer: " .. (err2 or "unknown"))
-    end
-    set_refreshing(false)
-    error("request failed: ".. err)
-  end
-
-  local succ, err, forcible = runtime.cache:set("last_refresh", ngx.time())
-  if not succ then
-    error("Failed to set last_refresh key in cache: "..err)
-  end
-  if forcible then
-    ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-  end
-
-  local status = res.status
-  local body = res.body
-
-  ngx.log(ngx.DEBUG, "Response:" .. tostring(status) .. " | " .. tostring(body))
-
-  if status~=200 then
-    local ok, err = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
-    if not ok then
-      set_refreshing(false)
-      error("Failed to create the timer: " .. (err or "unknown"))
-    end
-    set_refreshing(false)
-    error("HTTP error while request to Local API '" .. status .. "' with message (" .. tostring(body) .. ")")
-  end
-
-  local decisions = cjson.decode(body)
-  -- process deleted decisions
-  if type(decisions.deleted) == "table" then
-      for i, decision in pairs(decisions.deleted) do
-        if decision.type == "captcha" then
-          runtime.cache:delete("captcha_" .. decision.value)
+        if applied then
+          for _, group in ipairs({"deleted", "new"}) do
+            if type(decisions[group]) == "table" then
+              for _, decision in ipairs(decisions[group]) do
+                if not apply_decision(decision, group == "deleted", nil, nil, generation) then applied = false; break end
+              end
+            end
+            if not applied then break end
+          end
         end
-        local key = item_to_string(decision.value, decision.scope)
-        runtime.cache:delete(key)
-        ngx.log(ngx.DEBUG, "Deleting '" .. key .. "'")
-      end
-  end
-
-  -- process new decisions
-  if type(decisions.new) == "table" then
-    for i, decision in pairs(decisions.new) do
-      if runtime.conf["BOUNCING_ON_TYPE"] == decision.type or runtime.conf["BOUNCING_ON_TYPE"] == "all" then
-        local ttl, err = parse_duration(decision.duration)
-        if err ~= nil then
-          ngx.log(ngx.ERR, "[Crowdsec] failed to parse ban duration '" .. decision.duration .. "' : " .. err)
+        if applied and generation then applied = runtime.cache:safe_set("v2_generation", generation) end
+        if applied then
+          if startup then
+            -- Record exactly the captured request. A concurrent reload increments
+            -- startup_request, so even a racing Boolean clear cannot erase it.
+            runtime.cache:safe_set("startup_completed", startup_request)
+            if startup_request == runtime.cache:get("startup_request") then runtime.cache:safe_set("startup", false) end
+          end
+          sync_status(nil)
+        else
+          runtime.cache:safe_set("startup", true)
+          sync_status("Local decision cache is full")
         end
-        local remediation_id = get_remediation_id(decision.type)
-        if remediation_id == nil then
-          remediation_id = get_remediation_id(runtime.fallback)
-        end
-        local key = item_to_string(decision.value, decision.scope)
-        local succ, err, forcible = runtime.cache:set(key, false, ttl, remediation_id)
-        if not succ then
-          ngx.log(ngx.ERR, "failed to add ".. decision.value .." : "..err)
-        end
-        if forcible then
-          ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-        end
-        ngx.log(ngx.DEBUG, "Adding '" .. key .. "' in cache for '" .. ttl .. "' seconds")
       end
     end
-  end
-
-  -- not startup anymore after first callback
-  local succ, err, forcible = runtime.cache:set("startup", false)
-  if not succ then
-    ngx.log(ngx.ERR, "failed to set startup key in cache: "..err)
-  end
-  if forcible then
-    ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-  end
-
-
-  local ok, err = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
-  if not ok then
-    set_refreshing(false)
-    error("Failed to create the timer: " .. (err or "unknown"))
-  end
-
-  set_refreshing(false)
-  ngx.log(ngx.DEBUG, "end of stream_query")
-  return nil
+  end)
+  if not locked and lock_err ~= "busy" then sync_status(lock_err) end
 end
 
 local function live_query(ip)
-  if runtime.conf["API_URL"] == "" then
-    return true, nil, nil
+  local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip)
+  if err or not res then
+    sync_status("Local API request failed")
+    return true, nil, "Local API request failed"
   end
-  local link = runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip
-  local res, err = get_remediation_http_request(link)
-  if not res then
-    return true, nil, "request failed: ".. err
+  if res.status ~= 200 then
+    err = "Local API returned HTTP " .. tostring(res.status)
+    sync_status(err)
+    return true, nil, err
   end
-
-  local status = res.status
-  local body = res.body
-  if status~=200 then
-    return true, nil, "Http error " .. status .. " while talking to LAPI (" .. link .. ")"
+  local decisions = decode_decisions(res.body, false)
+  if not decisions then
+    sync_status("Invalid Local API response")
+    return true, nil, "Invalid Local API response"
   end
-  if body == "null" then -- no result from API, no decision for this IP
-    -- set ip in cache and DON'T block it
-    local key = item_to_string(ip, "ip")
-    local succ, err, forcible = runtime.cache:set(key, true, runtime.conf["CACHE_EXPIRATION"], 1)
-    if not succ then
-      ngx.log(ngx.ERR, "failed to add ip '" .. ip .. "' in cache: "..err)
+  local key = item_to_string(ip, "ip")
+  runtime.decisions.clear(key)
+  local applied, remediation = true, nil
+  local evidence = {source = "lapi", captured_at = ngx.time(), decisions = decision_cache.array(), metadata_available = true}
+  for _, decision in ipairs(decisions) do
+    local scope = decision.scope:lower()
+    if (scope == "ip" or scope == "range") and (runtime.conf["BOUNCING_ON_TYPE"] == "all" or runtime.conf["BOUNCING_ON_TYPE"] == decision.type) then
+      if not apply_decision(decision, false, key, runtime.conf["CACHE_EXPIRATION"]) then applied = false end
+      local candidate = decision.type
+      if candidate ~= "ban" and candidate ~= "captcha" then candidate = runtime.fallback end
+      if not remediation or candidate == "ban" then remediation = candidate end
+      local captured = {expires_at = ngx.time() + decision_cache.duration(decision.duration)}
+      for _, name in ipairs({"id", "origin", "scenario", "type", "scope", "value"}) do
+        local value = decision[name]
+        if type(value) == "string" then captured[name] = value:sub(1, 512)
+        elseif type(value) == "number" then captured[name] = value end
+      end
+      evidence.decisions[#evidence.decisions + 1] = captured
+      evidence.matched_target = evidence.matched_target or decision.value
     end
-    if forcible then
-      ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-    end
-    return true, nil, nil
   end
-  local decision = cjson.decode(body)[1]
-
-  if runtime.conf["BOUNCING_ON_TYPE"] == decision.type or runtime.conf["BOUNCING_ON_TYPE"] == "all" then
-    local remediation_id = get_remediation_id(decision.type)
-    if remediation_id == nil then
-      remediation_id = get_remediation_id(runtime.fallback)
-    end
-    local key = item_to_string(decision.value, decision.scope)
-    local succ, err, forcible = runtime.cache:set(key, false, runtime.conf["CACHE_EXPIRATION"], remediation_id)
-    if not succ then
-      ngx.log(ngx.ERR, "failed to add ".. decision.value .." : "..err)
-    end
-    if forcible then
-      ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-    end
-    ngx.log(ngx.DEBUG, "Adding '" .. key .. "' in cache for '" .. runtime.conf["CACHE_EXPIRATION"] .. "' seconds")
-    return false, decision.type, nil
-  else
-    return true, nil, nil
-  end
+  if not remediation then runtime.cache:safe_set("v2_allowed_" .. key, true, runtime.conf["CACHE_EXPIRATION"]) end
+  if applied then sync_status(nil) else sync_status("Local decision cache is full") end
+  return remediation == nil, remediation, nil, evidence
 end
 
 local function get_body()
@@ -470,11 +423,11 @@ local function get_body()
 end
 
 function csmod.GetCaptchaTemplate()
-  return captcha.GetTemplate()
+  return runtime.captcha and runtime.captcha.GetTemplate()
 end
 
 function csmod.GetCaptchaBackendKey()
-  return captcha.GetCaptchaBackendKey()
+  return runtime.captcha and runtime.captcha.GetCaptchaBackendKey()
 end
 
 function csmod.SetupStream()
@@ -509,41 +462,28 @@ function csmod.allowIp(ip)
   if key == nil then
     return true, nil, "Check failed '" .. ip .. "' has no valid IP address"
   end
-  local key_parts = {}
-  for i in key.gmatch(key, "([^_]+)") do
-    table.insert(key_parts, i)
-  end
-
-  local key_type = key_parts[1]
-  if key_type == "normal" then
-    local in_cache, remediation_id = runtime.cache:get(key)
-    if in_cache ~= nil then -- we have it in cache
-      ngx.log(ngx.DEBUG, "'" .. key .. "' is in cache")
-      return in_cache, runtime.remediations[tostring(remediation_id)], nil
-    end
-  end
-
-  local ip_network_address = key_parts[3]
-  local netmasks = iputils.netmasks_by_key_type[key_type]
-  for i, netmask in pairs(netmasks) do
-    local item
+  local key_type, _, address = key:match("^([^_]+)_([^_]+)_(.+)$")
+  local selected, evidence
+  for _, mask in ipairs(iputils.netmasks_by_key_type[key_type]) do
+    local target
     if key_type == "ipv4" then
-      item = key_type.."_"..netmask.."_"..iputils.ipv4_band(ip_network_address, netmask)
+      target = key_type .. "_" .. mask .. "_" .. iputils.ipv4_band(address, mask)
+    else
+      target = key_type .. "_" .. table.concat(mask, ":") .. "_" .. iputils.ipv6_band(address, mask)
     end
-    if key_type == "ipv6" then
-      item = key_type.."_"..table.concat(netmask, ":").."_"..iputils.ipv6_band(ip_network_address, netmask)
-    end
-    local in_cache, remediation_id = runtime.cache:get(item)
-    if in_cache ~= nil then -- we have it in cache
-      ngx.log(ngx.DEBUG, "'" .. key .. "' is in cache")
-      return in_cache, runtime.remediations[tostring(remediation_id)], nil
+    local remediation, matched = runtime.decisions.get(target)
+    if remediation then
+      if not selected or remediation == "ban" then selected = remediation end
+      if not evidence then evidence = matched else
+        evidence.metadata_available = evidence.metadata_available and matched.metadata_available
+        for _, decision in ipairs(matched.decisions) do evidence.decisions[#evidence.decisions + 1] = decision end
+      end
     end
   end
-
-  -- if live mode, query lapi
+  if selected then return false, selected, nil, evidence end
   if runtime.conf["MODE"] == "live" then
-    local ok, remediation, err = live_query(ip)
-    return ok, remediation, err
+    if runtime.cache:get("v2_allowed_" .. key) then return true end
+    return live_query(ip)
   end
   return true, nil, nil
 end
@@ -595,36 +535,36 @@ function csmod.AppSecCheck(ip)
   })
   httpc:close()
 
-  if err ~= nil then
-    ngx.log(ngx.ERR, "Fallback because of err: " .. err)
-    return ok, remediation, status_code, err
-  end
-
-  if res.status == 200 then
-    ok = true
-    remediation = "allow"
+  local observation = {at = ngx.time(), status = res and res.status or 0}
+  local source = "appsec"
+  if err or not res then
+    err, source = "AppSec request failed", "failure_policy"
+  elseif res.status == 200 then
+    ok, remediation = true, "allow"
   elseif res.status == 403 then
-    ok = false
-    ngx.log(ngx.DEBUG, "Appsec body response: " .. res.body)
-    local response = cjson.decode(res.body)
-    remediation = response.action
-    if response.http_status ~= nil then
-      ngx.log(ngx.DEBUG, "Got status code from APPSEC: " .. response.http_status)
-      status_code = response.http_status
+    local decoded, response = pcall(cjson.decode, res.body)
+    if decoded and type(response) == "table" and type(response.action) == "string" then
+      ok = false
+      remediation = response.action
+      status_code = type(response.http_status) == "number" and response.http_status or ngx.HTTP_FORBIDDEN
     else
-      status_code = ngx.HTTP_FORBIDDEN
+      err, source = "Invalid AppSec response", "failure_policy"
     end
-  elseif res.status == 401 then
-    ngx.log(ngx.ERR, "Unauthenticated request to APPSEC")
   else
-    ngx.log(ngx.ERR, "Bad request to APPSEC (" .. res.status .. "): " .. res.body)
+    err, source = "AppSec returned HTTP " .. tostring(res.status), "failure_policy"
   end
-
-  return ok, remediation, status_code, err
+  -- Only known action labels and the response status leave this boundary.
+  local known = {allow = true, ban = true, captcha = true, challenge = true}
+  observation.action = known[remediation] and remediation or "unknown"
+  observation.error = err
+  runtime.cache:safe_set("appsec_last_observed", cjson.encode(observation))
+  local evidence = {source = source, captured_at = observation.at, decisions = decision_cache.array(), metadata_available = true,
+    appsec = {status = observation.status, action = observation.action}}
+  return ok, remediation, status_code, err, evidence
 
 end
 
-function csmod.Allow(ip)
+function csmod.Allow(ip, challengePrefix)
   if runtime.conf["ENABLED"] == "false" then
     return true, "disabled"
   end
@@ -632,6 +572,11 @@ function csmod.Allow(ip)
   if runtime.conf["ENABLE_INTERNAL"] == "false" and ngx.req.is_internal() then
     return true, "internal"
   end
+
+  if not challengePrefix or challengePrefix == "" then
+    return false, "missing CrowdSec challenge namespace"
+  end
+  local challenge_cache = namespaced_cache(ngx.shared.crowdsec_cache, challengePrefix)
 
   local remediationSource = flag.BOUNCER_SOURCE
   local ret_code = nil
@@ -652,14 +597,14 @@ function csmod.Allow(ip)
     end
   end
 
-  local ok, remediation, err = csmod.allowIp(ip)
+  local ok, remediation, err, evidence = csmod.allowIp(ip)
   if err ~= nil then
     ngx.log(ngx.ERR, "[Crowdsec] bouncer error: " .. err)
   end
 
   -- if the ip is now allowed, try to delete its captcha state in cache
   if ok == true then
-    runtime.cache:delete("captcha_" .. ip)
+    challenge_cache:delete("captcha_" .. ip)
   end
 
   -- check with appSec if the remediation component doesn't have decisions for the IP
@@ -667,7 +612,7 @@ function csmod.Allow(ip)
   -- that user configured the remediation component to always check on the appSec (even if there is a decision for the IP)
   if ok == true or runtime.conf["ALWAYS_SEND_TO_APPSEC"] == true then
     if runtime.conf["APPSEC_ENABLED"] == true and ngx.var.no_appsec ~= "1" then
-      local appsecOk, appsecRemediation, status_code, err = csmod.AppSecCheck(ip)
+      local appsecOk, appsecRemediation, status_code, err, appsec_evidence = csmod.AppSecCheck(ip)
       if err ~= nil then
         ngx.log(ngx.ERR, "AppSec check: " .. err)
       end
@@ -676,27 +621,28 @@ function csmod.Allow(ip)
         remediationSource = flag.APPSEC_SOURCE
         remediation = appsecRemediation
         ret_code = status_code
+        evidence = appsec_evidence
       end
     end
   end
 
-  local captcha_ok = runtime.cache:get("captcha_ok")
+  local captcha_ok = runtime.captcha ~= nil
 
   if runtime.fallback ~= "" then
-    -- if we can't use captcha, fallback
-    if remediation == "captcha" and captcha_ok == false then
-      remediation = runtime.fallback
-    end
-
     -- if remediation is not supported, fallback
     if remediation ~= "captcha" and remediation ~= "ban" then
       remediation = runtime.fallback
     end
   end
 
+  -- An unusable captcha must deny even when the configured fallback is captcha.
+  if remediation == "captcha" and not captcha_ok then
+    remediation = "ban"
+  end
+
   if captcha_ok then -- if captcha can be use (configuration is valid)
     -- we check if the IP need to validate its captcha before checking it against crowdsec local API
-    local previous_uri, flags = runtime.cache:get("captcha_"..ip)
+    local previous_uri, flags = challenge_cache:get("captcha_"..ip)
     local source, state_id, err = flag.GetFlags(flags)
     local body = get_body()
 
@@ -715,9 +661,9 @@ function csmod.Allow(ip)
                 -- we will not propose a captcha until the 'CAPTCHA_EXPIRATION'.
                 -- But for the Application security component, we serve the captcha each time the user trigger it.
                 if source == flag.APPSEC_SOURCE then
-                  runtime.cache:delete("captcha_"..ip)
+                  challenge_cache:delete("captcha_"..ip)
                 else
-                  local succ, err, forcible = runtime.cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
+                  local succ, err, forcible = challenge_cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
                   if not succ then
                     ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
                   end
@@ -738,11 +684,13 @@ function csmod.Allow(ip)
       if remediation == "ban" then
         ngx.log(ngx.ALERT, "[Crowdsec] denied '" .. ip .. "' with '"..remediation.."' (by " .. flag.Flags[remediationSource] .. ")")
         -- ban.apply(ret_code)
-        return true, "denied", true
+        evidence = evidence or {source = "lapi", captured_at = ngx.time(), decisions = decision_cache.array(), metadata_available = false}
+        evidence.remediation = "ban"
+        return true, "denied", true, evidence
       end
       -- if the remediation is a captcha and captcha is well configured
       if remediation == "captcha" and captcha_ok and ngx.var.uri ~= "/favicon.ico" then
-          local previous_uri, flags = runtime.cache:get("captcha_"..ip)
+          local previous_uri, flags = challenge_cache:get("captcha_"..ip)
           local source, state_id, err = flag.GetFlags(flags)
           -- we check if the IP is already in cache for captcha and not yet validated
           if previous_uri == nil or state_id ~= flag.VALIDATED_STATE or remediationSource == flag.APPSEC_SOURCE then
@@ -759,7 +707,7 @@ function csmod.Allow(ip)
                   end
                 end
               end
-              local succ, err, forcible = runtime.cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
+              local succ, err, forcible = challenge_cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
               if not succ then
                 ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
               end
@@ -774,6 +722,37 @@ function csmod.Allow(ip)
   return true, "allow"
 end
 
+
+function csmod.Control(action, params)
+  return require("crowdsec.control").run(runtime.conf, runtime.cache, action, params)
+end
+
+function csmod.ConnectionInfo()
+  local conf = runtime.conf or {}
+  local function safe_url(value)
+    if type(value) ~= "string" then return "" end
+    local scheme, authority, path = value:match("^([%a][%w+%.%-]*)://([^/?#]+)([^?#]*)")
+    if not scheme or (scheme:lower() ~= "http" and scheme:lower() ~= "https") then return "" end
+    authority = authority:match("([^@]+)$")
+    if not authority or authority:find("[%s%c%%\\]") or path:find("[%s%c\\]") then return "" end
+    if not authority:match("^[%w%.%-]+:?%d*$") and not authority:match("^%[[%x:%.]+%]:?%d*$") then return "" end
+    return scheme:lower() .. "://" .. authority .. path
+  end
+  local info = {lapi_url = safe_url(conf.API_URL), appsec_url = safe_url(conf.APPSEC_URL), mode = conf.MODE,
+    update_frequency = conf.UPDATE_FREQUENCY, cache_expiration = conf.CACHE_EXPIRATION,
+    management_configured = type(conf.MANAGEMENT_LOGIN) == "string" and conf.MANAGEMENT_LOGIN ~= ""
+      and type(conf.MANAGEMENT_PASSWORD) == "string" and conf.MANAGEMENT_PASSWORD ~= ""}
+  if runtime.cache then
+    info.last_successful_sync = runtime.cache:get("last_successful_sync")
+    info.last_sync_error = runtime.cache:get("last_sync_error")
+    local raw = runtime.cache:get("appsec_last_observed")
+    if raw then
+      local ok, observed = pcall(cjson.decode, raw)
+      if ok then info.appsec_last_observed = observed end
+    end
+  end
+  return info
+end
 
 -- Use it if you are able to close at shuttime
 function csmod.close()

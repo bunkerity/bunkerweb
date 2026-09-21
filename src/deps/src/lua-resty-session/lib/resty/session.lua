@@ -148,6 +148,8 @@ local DEFAULT_FLAGS
 local DEFAULT_REQUEST_HEADERS
 local DEFAULT_RESPONSE_HEADERS
 local DEFAULT_STORAGE
+local DEFAULT_REVOCATION
+local DEFAULT_REVOCATION_FAIL_MODE
 
 
 local DUMMY_META = {}
@@ -371,6 +373,83 @@ local function get_store_ttl(self, remember, current_time, creation_time, rollin
   return max(ttl, 1)
 end
 
+
+local REVOCATION_MARK = "1"
+
+
+local function handle_revocation_error(self, err, msg)
+  if self.revocation_fail_mode == "open" then
+    log(WARN, "[session] ", msg, ": ", err)
+    return true
+  end
+
+  return nil, errmsg(err, msg)
+end
+
+
+local function is_session_revoked(self, sid, cookie_name)
+  if self.storage or not sid then
+    return false, nil
+  end
+
+  local revocation = self.revocation
+  if not revocation then
+    return false, nil
+  end
+
+  local key, herr = self.hash_storage_key(sid)
+  if not key then
+    return nil, herr
+  end
+
+  local current_time = time()
+  local data, err = revocation:get(cookie_name, key, current_time)
+  if err then
+    local ok, rerr = handle_revocation_error(self, err, "unable to check session revocation")
+    if not ok then
+      return nil, rerr
+    end
+    return false, nil
+  end
+
+  if data == REVOCATION_MARK then
+    return true, nil
+  end
+
+  return false, nil
+end
+
+
+local function mark_session_revoked(self, remember, meta)
+  if self.storage then
+    return true
+  end
+
+  local revocation = self.revocation
+  if not revocation then
+    return true
+  end
+
+  local sid = meta and meta.sid
+  if not sid then
+    return true
+  end
+
+  local cookie_name = remember and self.remember_cookie_name or self.cookie_name
+  local key, herr = self.hash_storage_key(sid)
+  if not key then
+    return nil, herr
+  end
+
+  local current_time = time()
+  local ttl = get_store_ttl(self, remember, current_time, meta.creation_time, meta.rolling_offset)
+  local ok, err = revocation:set(cookie_name, key, REVOCATION_MARK, ttl, current_time)
+  if not ok then
+    return handle_revocation_error(self, err, "unable to mark session revoked")
+  end
+
+  return true
+end
 
 
 local function get_store_metadata(self)
@@ -714,6 +793,14 @@ local function open(self, remember, meta_only)
         return nil, errmsg(err, "invalid session message authentication code")
       end
     end
+  end
+
+  local revoked, err = is_session_revoked(self, sid, cookie_name)
+  if err then
+    return nil, err
+  end
+  if revoked then
+    return nil, "session revoked"
   end
 
   local data_index = self.data_index
@@ -1252,6 +1339,11 @@ local function destroy(self, remember)
 
   local cookie_name_size = #cookie_name
   local storage = self.storage
+
+  local ok, err = mark_session_revoked(self, remember, meta)
+  if not ok then
+    return nil, err
+  end
 
   local cookie_chunks = 1
   local data_size = meta.data_size
@@ -2294,7 +2386,7 @@ end
 
 
 local session = {
-  _VERSION = "4.1.5",
+  _VERSION = "4.2.0",
   metatable = metatable,
 }
 
@@ -2341,6 +2433,8 @@ local session = {
 -- @field request_headers Set of headers to send to upstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` request headers when `set_headers` is called.
 -- @field response_headers Set of headers to send to downstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` response headers when `set_headers` is called.
 -- @field storage Storage is responsible of storing session data, use `nil` or `"cookie"` (data is stored in cookie), `"dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`, `"redis"`, or `"shm"`, or give a name of custom module (`"custom-storage"`), or a `table` that implements session storage interface (defaults to `nil`)
+-- @field revocation Storage used for cookie session revocation records, use `nil` or `false` to disable, `"dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`, `"redis"`, or `"shm"`, a custom storage module name, or a storage `table` with `set`/`get` methods (defaults to `nil`)
+-- @field revocation_fail_mode Behavior when the revocation store is unreachable, use `"open"` (treat as not revoked) or `"closed"` (reject the session) (defaults to `"open"`)
 -- @field dshm Configuration for dshm storage, e.g. `{ prefix = "sessions" }`
 -- @field file Configuration for file storage, e.g. `{ path = "/tmp", suffix = "session" }`
 -- @field memcached Configuration for memcached storage, e.g. `{ prefix = "sessions" }`
@@ -2401,6 +2495,7 @@ local function opt(configuration, name, default)
           end
         end
       end
+
     end
 
   else
@@ -2451,6 +2546,28 @@ local function opt(configuration, name, default)
           assert(t == "table", "invalid session storage")
         end
       end
+
+    elseif name == "revocation" then
+      if value == false then
+        value = nil
+
+      else
+        local t = type(value)
+        if t == "string" then
+          value = assert(load_storage(value, configuration), "unable to load session revocation storage")
+
+        elseif t == "table" then
+          if type(value.set) ~= "function" or type(value.get) ~= "function" then
+            error("invalid session revocation")
+          end
+
+        else
+          error("invalid session revocation")
+        end
+      end
+
+    elseif name == "revocation_fail_mode" then
+      assert(value == "open" or value == "closed", "invalid revocation fail mode")
     end
   end
 
@@ -2497,6 +2614,8 @@ function session.init(configuration)
   DEFAULT_REQUEST_HEADERS           = opt(configuration, "request_headers")
   DEFAULT_RESPONSE_HEADERS          = opt(configuration, "response_headers")
   DEFAULT_STORAGE                   = opt(configuration, "storage")
+  DEFAULT_REVOCATION                = opt(configuration, "revocation")
+  DEFAULT_REVOCATION_FAIL_MODE      = opt(configuration, "revocation_fail_mode", "open")
 end
 
 ---
@@ -2553,6 +2672,12 @@ function session.new(configuration)
   local request_headers           = opt(configuration, "request_headers",           DEFAULT_REQUEST_HEADERS)
   local response_headers          = opt(configuration, "response_headers",          DEFAULT_RESPONSE_HEADERS)
   local storage                   = opt(configuration, "storage",                   DEFAULT_STORAGE)
+  local revocation                = opt(configuration, "revocation",                DEFAULT_REVOCATION)
+  local revocation_fail_mode      = opt(configuration, "revocation_fail_mode",      DEFAULT_REVOCATION_FAIL_MODE)
+
+  if storage then
+    revocation = nil
+  end
 
   if cookie_prefix == "__Host-" then
     cookie_name          = cookie_prefix .. cookie_name
@@ -2625,6 +2750,8 @@ function session.new(configuration)
     remember                  = remember,
     flags                     = flags,
     storage                   = storage,
+    revocation                = revocation,
+    revocation_fail_mode      = revocation_fail_mode,
     ikm                       = ikm,
     ikm_fallbacks             = ikm_fallbacks,
     request_headers           = request_headers,

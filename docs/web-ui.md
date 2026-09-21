@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,7 +86,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -152,7 +152,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
 
     Add `bunkerweb-autoconf` and apply labels on the UI container instead of explicit `BUNKERWEB_INSTANCES`. The scheduler still reverse-proxies the UI through the `ui` template and a secret `REVERSE_PROXY_URL`.
@@ -180,7 +180,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
 - Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
-- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database.
+- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so `admin` and `writer` hold the same capabilities and `reader` is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO `user_manager` plugin, documented under [advanced usages](advanced.md#user-manager-pro).
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: TOTP secrets are stored in the database, encrypted with keys kept in `/var/lib/bunkerweb/.totp_encryption_keys.json`. The UI generates them on first start, so nothing is required as long as that file is persisted. Set `TOTP_ENCRYPTION_KEYS` (space-separated keys or a JSON map) to supply your own; each key must then be exactly **43 characters**, anything else is discarded with an `Invalid TOTP secret for key` warning and replaced by a random key. Generate one with:
 
@@ -190,6 +190,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
+- Session storage: sessions live in Redis when `USE_REDIS=yes`, otherwise in a local cache under `/var/lib/bunkerweb`. A Redis that stops answering, or that refuses writes because it hit `maxmemory`, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size `maxmemory` for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to `SESSION_LIFETIME_HOURS` after another replica deletes that session through Redis. `UI_USE_REDIS=no` takes the UI off Redis on its own, unlike the global `USE_REDIS` which also stops bans and reports being shared between instances.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! warning "2FA is gone after recreating the container"
@@ -217,6 +218,10 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 2. Secrets in `/run/secrets/<VAR>` (Docker)
 3. Env file at `/etc/bunkerweb/ui.env` (Linux packages)
 4. Built-in defaults
+
+## Drafts in the RAW editor
+
+The RAW editor of a service or of the global settings can keep a setting as a **draft**: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a `KEY=value` line and press `#` to toggle the draft state, or `Backspace` on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.
 
 ## Configuration reference
 
@@ -254,6 +259,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 | `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `UI_USE_REDIS`                              | Take the web UI off Redis without touching the global `USE_REDIS`                                        | `yes` or `no`            | `yes`                     |
 
 ### Logging
 
@@ -342,7 +348,7 @@ log {
 ## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"
-    Use the code `freetrial` on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) for a one-month trial.
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 
 <figure markdown>

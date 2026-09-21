@@ -13,10 +13,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }} # pin every job in a run to one commit
+          persist-credentials: false
       - name: Install Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -35,7 +39,16 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
       - name: Run mkdocs serve in background
-        run: mkdocs serve -f mkdocs_print.yml & sleep 15
+        # A fixed sleep either wastes the wait or hands the PDF step a dead port, and this job
+        # runs after the release approval: a flake here costs another approval round.
+        run: |
+          mkdocs serve -f mkdocs_print.yml &
+          for _ in $(seq 60); do
+            if curl -sSf http://localhost:8000/print_page/ >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::mkdocs did not serve print_page within 120s"
+          exit 1
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

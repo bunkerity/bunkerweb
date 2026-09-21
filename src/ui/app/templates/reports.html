@@ -21,6 +21,12 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
+        <input type="hidden"
+               id="crowdsec-url"
+               value="{{ url_for('crowdsec') }}" />
+        <input type="hidden"
+               id="crowdsec-logo-url"
+               value="{{ url_for('static', filename='img/brands/crowdsec.svg') }}" />
         <p id="reports-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
            data-i18n="status.loading_reports">Loading reports...</p>

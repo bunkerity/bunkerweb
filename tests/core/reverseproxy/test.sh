@@ -10,6 +10,8 @@ elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     exit 1
 fi
 
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fixtures}"
+
 echo "↪️ Building reverseproxy stack for integration \"$integration\" ..."
 
 # Starting stack
@@ -213,7 +215,7 @@ do
     i=0
     if [ "$integration" == "docker" ] ; then
         while [ $i -lt 120 ] ; do
-            containers=("reverseproxy-bw-1" "reverseproxy-bw-scheduler-1")
+            containers=("${COMPOSE_PROJECT_NAME}-bw-1" "${COMPOSE_PROJECT_NAME}-bw-scheduler-1")
             healthy="true"
             for container in "${containers[@]}" ; do
                 check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"

@@ -231,7 +231,7 @@ function limit:access()
 	-- URI, whose values come from the client and are unbounded.
 	local matched_rule = "/"
 	for pattern, r in pairs(self.rules) do
-		if pattern ~= "/" and regex_match(uri, pattern) then
+		if pattern ~= "/" and regex_match(uri, pattern, nil, "LIMIT_REQ_URL") then
 			rate = r
 			matched_rule = pattern
 			break

@@ -23,14 +23,15 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from app.models.safe_session_cache import SafeFileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
+from common_utils import is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -65,6 +66,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.crowdsec import crowdsec
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
@@ -81,6 +83,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
+from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -88,6 +91,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     totp,
     home,
     logout,
@@ -670,56 +674,58 @@ with app.app_context():
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
     session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
 
-    redis_settings = BW_CONFIG.get_config(
-        global_only=True,
-        methods=False,
-        filtered_settings=(
-            "USE_REDIS",
-            "REDIS_HOST",
-            "REDIS_PORT",
-            "REDIS_DATABASE",
-            "REDIS_TIMEOUT",
-            "REDIS_KEEPALIVE_POOL",
-            "REDIS_SSL",
-            "REDIS_USERNAME",
-            "REDIS_PASSWORD",
-            "REDIS_SENTINEL_HOSTS",
-            "REDIS_SENTINEL_USERNAME",
-            "REDIS_SENTINEL_PASSWORD",
-            "REDIS_SENTINEL_MASTER",
-        ),
-    )
-
-    redis_client = None
-    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
-        redis_client = get_common_redis_client(
-            use_redis=True,
-            redis_host=redis_settings.get("REDIS_HOST"),
-            redis_port=redis_settings.get("REDIS_PORT", "6379"),
-            redis_db=redis_settings.get("REDIS_DATABASE", "0"),
-            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
-            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
-            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
-            redis_username=redis_settings.get("REDIS_USERNAME") or None,
-            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
-            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
-            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
-            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
-            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
-        )
-        if redis_client:
-            LOGGER.debug("Using Redis as session backend")
-            app.config["SESSION_TYPE"] = "redis"
-            app.config["SESSION_REDIS"] = redis_client
-            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
-        else:
+    # Same helper the routes use, so the worker ends up with one memoised client and one
+    # connection pool instead of a session pool plus a per-request one.
+    redis_client = get_ui_redis_client()
+    session_fallback_cache = None
+    if redis_client:
+        LOGGER.debug("Using Redis as session backend")
+        app.config["SESSION_TYPE"] = "redis"
+        app.config["SESSION_REDIS"] = redis_client
+        app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        session_fallback_cache = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
+    else:
+        # get_redis_client returns None for both "disabled" and "unreachable"; only the second
+        # is worth a WARNING, because this worker is now pinned to file sessions for its life.
+        if BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
-
-    if not redis_client:
+        LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
         app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+    # dies or fills up after this point makes every request raise. Same parameters as the
+    # interface it replaces, plus the local cache it falls back to.
+    if session_fallback_cache is not None:
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it. This branch only runs once a Redis
+        # client exists.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=session_fallback_cache,
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
+
+    # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
+    # every request, so an untouched session is rewritten to the store even for a static
+    # asset. Throttle the expiry-only refreshes; a modified session still writes at once,
+    # which leaves login, logout and _rotate_session_id untouched.
+    _session_lifetime_seconds = app.config["PERMANENT_SESSION_LIFETIME"].total_seconds()
+
+    def _throttled_should_set_storage(flask_app, flask_session) -> bool:
+        return session_storage_due(flask_session, _session_lifetime_seconds)
+
+    app.session_interface.should_set_storage = _throttled_should_set_storage
 
     biscuit = BiscuitMiddleware(app)
 
@@ -732,10 +738,12 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session so a form left open is not rejected before the session expires
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:
@@ -868,12 +876,13 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+            flash(
+                Markup("""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>here</a>
+</div>""").format(url_for("profile.profile_page")),
                 "error",
+                save=False,
             )
 
     return ui_user
@@ -893,14 +902,13 @@ def handle_csrf_error(_):
     except (AssertionError, RuntimeError):
         user_id = "unknown"
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
-    try:
-        if not current_user:
-            return redirect(url_for("setup.setup_page"), 303)
-    except (AssertionError, RuntimeError):
-        return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
-    if request.method == "POST":
+    if not DB.get_ui_user():
+        # No admin exists yet (e.g. mid-setup-wizard): there is no usable login page for
+        # this reason to land on, so hand it to /setup directly instead.
+        response.headers["Location"] = url_for("setup.setup_page", reason="session_expired")
+    elif request.method == "POST":
         # A submitted form dies here rather than at the login check, because the CSRF
         # token lives in the session that just went away. logout_page() clears the
         # session and the response tells the browser to drop its cookies, so a flash
@@ -1041,14 +1049,9 @@ def _delete_session_store_entry(sid: str) -> None:
         return
     interface = app.session_interface
     try:
-        client = getattr(interface, "client", None)
-        key_prefix = getattr(interface, "key_prefix", None)
-        if client is not None and key_prefix is not None:
-            client.delete(f"{key_prefix}{sid}")
-            return
-        cache = getattr(interface, "cache", None)
-        if cache is not None:
-            cache.delete(sid)
+        # The interface's own delete already covers whichever store backs it, including the
+        # local one a failing Redis falls back to.
+        interface._delete_session(interface._get_store_id(sid))
     except Exception:
         LOGGER.exception("Failed to delete session store entry during rotation/expiry")
 
@@ -1188,20 +1191,24 @@ def before_request():
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
-        if app.config.get("SESSION_TYPE") == "cachelib":
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0).
+        # Covers the Redis fallback cache too, which fills up during an outage and prunes no more than the other.
+        session_file_cache = (
+            app.config["SESSION_CACHELIB"] if app.config.get("SESSION_TYPE") == "cachelib" else getattr(app.session_interface, "fallback", None)
+        )
+        if session_file_cache is not None:
             global _session_cleanup_last_run
             now_ts = time()
             if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
                 _session_cleanup_last_run = now_ts
-                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
+                _periodic_tasks_executor.submit(session_file_cache._remove_expired, now_ts)
 
         schedule_database_state_check(request.method, request.path)
 
         DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash("Database connection is in read-only mode : no modifications possible.", "error", save=False)
 
         if current_user.is_authenticated:
             passed = True
@@ -1272,16 +1279,20 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                flash(
+                    Markup(
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
+                    ),
                     "error",
+                    save=False,
                 )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
+                flash(
+                    Markup("""<div class='d-flex flex-column'>
                         <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
-                    </div>""",
+                        <p class='p-0 m-0 fst-italic'>{}</p>
+                    </div>""").format(metadata["failover_message"]),
                     "error",
+                    save=False,
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
                 flash("The last changes have been applied successfully.")
@@ -1410,8 +1421,9 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # * Permissions-Policy header to prevent unwanted behavior
+    # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the
@@ -1508,7 +1520,7 @@ def security_txt():
         f"Expires: {expires}",
         "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
         "Preferred-Languages: en, fr",
-        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/SECURITY.md",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/.github/SECURITY.md",
     ]
 
     # Canonical is derived from the request, so it is only emitted once the Host header has been
@@ -1565,7 +1577,7 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash("Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})

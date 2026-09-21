@@ -3,7 +3,6 @@ from time import sleep
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-
 app = FastAPI()
 asked_auth = False
 CONTENT = """<html>
@@ -22,8 +21,8 @@ async def admin():
 async def headers(request: Request):
     headers = {header.split(" ")[0].lower(): header.split(" ")[1] for header in getenv("REVERSE_PROXY_HEADERS", "").split(";") if header}
 
-    keepalive = getenv("REVERSE_PROXY_KEEPALIVE", "no") == "yes" or getenv("REVERSE_PROXY_WS", "no") == "yes"
     request_headers = request.headers
+    expected_http_version = getenv("REVERSE_PROXY_HTTP_VERSION", "1.1")
     http_version = request.scope.get("http_version")
 
     custom_host = getenv("REVERSE_PROXY_CUSTOM_HOST", "")
@@ -32,14 +31,10 @@ async def headers(request: Request):
 
     print(f"ℹ️ Headers received: {request_headers}", flush=True)
 
-    if keepalive and http_version != "1.1":
-        message = f"❌ The HTTP version is not 1.1 ({http_version})"
+    if http_version != expected_http_version:
+        message = f"❌ The HTTP version is not {expected_http_version} ({http_version})"
         print(message, flush=True)
         return JSONResponse({"error": message}, status_code=505)
-    if not keepalive and http_version == "1.1":
-        message = "❌ The HTTP version is 1.1 but the keep-alive is disabled"
-        print(message, flush=True)
-        return JSONResponse({"error": message}, status_code=426)
 
     print(f"ℹ️ Headers to check: {headers}", flush=True)
     found = 0
@@ -61,26 +56,22 @@ async def headers(request: Request):
 async def auth():
     global asked_auth
     asked_auth = True
-    return PlainTextResponse(
-        """<html>
+    return PlainTextResponse("""<html>
     <body>
         <h1>This is the authentication page</h1>
     </body>
-</html>"""
-    )
+</html>""")
 
 
 @app.get("/bad-auth")
 async def bad_auth():
     global asked_auth
     if asked_auth:
-        return PlainTextResponse(
-            """<html>
+        return PlainTextResponse("""<html>
     <body>
         <h1>This is the login page</h1>
     </body>
-</html>"""
-        )
+</html>""")
 
     asked_auth = True
     return PlainTextResponse("Unauthorized", status_code=401)

@@ -344,13 +344,14 @@ static void asm_fusexref(ASMState *as, IRRef ref, RegSet allow)
       as->mrm.base = RID_DISPATCH;
       return;
     }
-  } if (0) {
 #else
     as->mrm.ofs = ir->i;
     as->mrm.base = RID_NONE;
-  } else if (ir->o == IR_STRREF) {
-    asm_fusestrref(as, ir, allow);
+    return;
 #endif
+  }
+  if (ir->o == IR_STRREF) {
+    asm_fusestrref(as, ir, allow);
   } else {
     as->mrm.ofs = 0;
     if (canfuse(as, ir) && ir->o == IR_ADD && ra_noreg(ir->r)) {

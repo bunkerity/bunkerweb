@@ -18,14 +18,14 @@ services:
       PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"
       X_FRAME_OPTIONS: "SAMEORIGIN"
       X_CONTENT_TYPE_OPTIONS: "nosniff"
-      X_XSS_PROTECTION: "1; mode=block"
       X_DNS_PREFETCH_CONTROL: "off"
     extra_hosts:
-      - "www.example.com:192.168.0.2"
+      - "www.example.com:192.168.77.2"
     networks:
       bw-services:
-        ipv4_address: 192.168.0.3
+        ipv4_address: 192.168.77.3
 
 networks:
   bw-services:
+    name: fixtures_headers_services
     external: true

@@ -33,7 +33,15 @@ def upgrade() -> None:
     )
 
     # Handle foreign key constraints for bw_jobs_cache
-    op.drop_constraint("fk_bw_jobs_cache_job_name", "bw_jobs_cache", type_="foreignkey")
+    # Fresh 1.5.6 databases use a server-generated name; upgraded ones use the named key.
+    foreign_keys = (
+        [{"name": "fk_bw_jobs_cache_job_name", "constrained_columns": ["job_name"], "referred_table": "bw_jobs"}]
+        if op.get_context().as_sql
+        else sa.inspect(op.get_bind()).get_foreign_keys("bw_jobs_cache")
+    )
+    for foreign_key in foreign_keys:
+        if foreign_key["constrained_columns"] == ["job_name"] and foreign_key["referred_table"] == "bw_jobs":
+            op.drop_constraint(foreign_key["name"], "bw_jobs_cache", type_="foreignkey")
     op.create_foreign_key(None, "bw_jobs_cache", "bw_jobs", ["job_name"], ["name"], onupdate="cascade", ondelete="cascade")
 
     # Add new columns to bw_plugin_pages

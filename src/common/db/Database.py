@@ -11,11 +11,11 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -127,24 +127,56 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
 
 # Greedy to the last "@" of the authority so an unencoded "@" inside the password is
 # covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
-# drag the host into the mask.
-DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+# drag the host into the mask. The username class is SQLAlchemy's own, "@" and whitespace
+# included: this pass also runs on RAW text, where the username is not percent-encoded, and a
+# username the class rejects makes the whole match fail and leaves the password in the log.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^\s/?#]*@")
+
+# The same span SQLAlchemy's own parser uses: a username that stops at the first ":" and a password
+# that stops at the first "@". Both classes are its classes character for character, so every DSN it
+# parses is one this matches. Narrowing either of them, by whitespace or by anything else, is a DSN
+# that parses, fails the round trip, then matches nothing and reaches the log in cleartext. Only
+# used once make_url has confirmed there is a password, so the wide classes cannot drag a host into
+# the mask the way they would on arbitrary text.
+DB_URI_AUTHORITY_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^@]*@")
+
+# Several drivers take the credential in the query string instead of the authority
+# (`?password=`, `?sslpassword=`, `?token=`), where render_as_string(hide_password=True) leaves
+# it untouched. Matched on the parameter NAME so a driver-specific spelling is covered too, and
+# the value is cut at the next separator so the rest of the DSN survives the mask.
+DB_URI_QUERY_SECRET_RX = re_compile(r"([?&][^=&\s]*(?:password|passwd|pwd|secret|token|api[-_]?key)[^=&\s]*=)[^&#\s]*", IGNORECASE)
 
 
 def mask_db_uri(db_string: str) -> str:
-    """Return a database URI with its password replaced, safe to log.
+    """Return a database URI, or any text that may embed one, safe to log.
 
     Callers reach this on malformed input, which make_url() either rejects outright
-    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    or, worse, parses wrongly, so the regexes have to be able to stand on their own. Driver
+    exceptions are passed through here for the same reason: they quote the DSN they failed on.
     """
     if not db_string:
         return db_string
     masked = db_string
     with suppress(BaseException):
-        masked = make_url(db_string).render_as_string(hide_password=True)
+        url = make_url(db_string)
+        # make_url anchors at the start and its query group stops at the first newline, so a driver
+        # message that merely BEGINS with a URI parses, and rendering it back would drop the failure
+        # reason the operator needs (these call sites exit right after logging). Only let it rewrite
+        # a string it reproduces exactly; anything else keeps its own text and is masked by regex.
+        if url.render_as_string(hide_password=False) == db_string:
+            masked = url.render_as_string(hide_password=True)
+        elif url.password:
+            # A password carrying "/", "?" or "#" does not survive the round trip (render_as_string
+            # percent-encodes it) and is outside DB_URI_PASSWORD_RX's class as well, so without
+            # this neither masker fires and the credential reaches the log verbatim.
+            # `openssl rand -base64` produces "/" routinely. Matched by span rather than by the
+            # value of url.password, which is percent-DECODED and so does not occur in the text
+            # being masked whenever the operator escaped a delimiter.
+            masked = DB_URI_AUTHORITY_PASSWORD_RX.sub(r"\1***@", masked, count=1)
     # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
     # the part before it for the password and hides that, leaving the rest to reach the log.
-    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    masked = DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    return DB_URI_QUERY_SECRET_RX.sub(r"\1***", masked)
 
 
 class Database:
@@ -341,7 +373,7 @@ class Database:
             self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {e}")
+            self.logger.error(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
             error = True
         finally:
             if error:
@@ -394,7 +426,7 @@ class Database:
                         connection_target = mask_db_uri(self.database_uri_readonly)
                         reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {mask_db_uri(str(e))}")
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -409,12 +441,12 @@ class Database:
                 elif log:
                     # Reason once, then the terse line: repeating the exception every 5 seconds is
                     # noise, but withholding it for the whole window leaves nothing to act on.
-                    detail = "" if reason_logged else f" : {e}"
+                    detail = "" if reason_logged else f" : {mask_db_uri(str(e))}"
                     reason_logged = True
                     self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                self.logger.error(f"Error when trying to connect to the database: {mask_db_uri(str(e))}")
                 exit(1)
 
         if log:
@@ -707,7 +739,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.14"
+                return "1.6.15"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -741,7 +773,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.14",
+            "version": "1.6.15",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -871,7 +903,11 @@ class Database:
         while error:
             try:
                 meta_cls = sql_metadata()
-                meta_cls.reflect(self.sql_engine)
+                # Reflect only our own tables. An unfiltered reflect() walks every table in the
+                # schema, so a single unreadable one -- an orphaned test_<uuid> probe whose InnoDB
+                # tablespace was lost, for instance -- makes SHOW CREATE TABLE raise and takes the
+                # whole init down. Nothing below reads a table outside Base.metadata anyway.
+                meta_cls.reflect(self.sql_engine, only=lambda table_name, _: table_name in Base.metadata.tables)
                 error = False
             except Exception as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:
@@ -1677,7 +1713,9 @@ class Database:
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
+        rename: Optional[Tuple[str, str]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1700,11 +1738,28 @@ class Database:
                            set. None or empty means the scheduler never touches
                            ui/api-owned rows (the incoming config is treated as
                            default-filled, not user-declared).
+            draft_settings: Explicit raw-editor state changes keyed by the unprefixed
+                             global setting id or the full ``<service>_<setting>`` key.
+                             ``True``/``False`` updates the row state; ``None`` explicitly
+                             deletes an existing draft row. A missing map preserves the
+                             existing per-setting draft state.
+            rename: Move a service and its dependent rows inside this save transaction.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
                                itself so a genuine conflict cannot loop.
         """
+        # The pass below pops as it goes (DATABASE_URI, then every `<service>_IS_DRAFT` marker),
+        # so it drains whatever dict it is handed. Two things went wrong with that: the conflict
+        # retry replayed the drained dict and published services the caller had marked as drafts,
+        # and a caller that keeps its payload (autoconf hands over its long-lived config) saw it
+        # come back short and read the difference as a configuration change on the next pass.
+        # Drain a copy and leave the caller's dict, which is also what the retry replays. Shallow
+        # on purpose: this carries every setting of every service, and only its own keys are ever
+        # removed, never a value mutated in place.
+        retry_config = config
+        config = config.copy()
+        draft_settings = {key: value for key, value in (draft_settings or {}).items() if isinstance(key, str) and (isinstance(value, bool) or value is None)}
         to_put = []
         to_update = []
         to_delete = []
@@ -1719,7 +1774,29 @@ class Database:
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
 
+        # A value that opens a PEM block and never closes it is a multi-line setting that lost
+        # everything past its first line on the way through a variables file, never something an
+        # operator declared. Saving it replaces a working certificate with its own header and
+        # hands the setting to whichever method is writing, so drop those keys entirely and keep
+        # what is already stored.
+        truncated_pem_keys = {k for k, v in config.items() if isinstance(v, str) and "-----BEGIN" in v and "-----END" not in v}
+        if truncated_pem_keys:
+            self.logger.error(f"Ignoring truncated PEM value for {', '.join(sorted(truncated_pem_keys))}, keeping the stored one")
+            config = {k: v for k, v in config.items() if k not in truncated_pem_keys}
+            explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
+
         explicit_env_keys = frozenset(explicit_keys or ())
+        protected_draft_setting_ids = frozenset({"SERVER_NAME", "MULTISITE", "IS_DRAFT", "USE_TEMPLATE", "DATABASE_URI"})
+
+        def draft_state_for(full_key: str, setting_id: str) -> Optional[bool]:
+            """Return an explicitly posted setting-draft state, excluding structural keys."""
+            if setting_id in protected_draft_setting_ids:
+                return None
+            return draft_settings.get(full_key)
+
+        def draft_state_is_posted(full_key: str, setting_id: str) -> bool:
+            """Return whether a raw map explicitly addresses this non-structural key."""
+            return setting_id not in protected_draft_setting_ids and full_key in draft_settings
 
         def scheduler_can_override(full_key: str, incoming_value: Any) -> bool:
             if full_key not in explicit_env_keys:
@@ -1786,6 +1863,23 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            if rename:
+                try:
+                    rename_error = self._rename_service_rows(session, *rename)
+                except BaseException as e:
+                    session.rollback()
+                    return str(e)
+                if rename_error:
+                    return rename_error
+
+            def aborted_save():
+                # A data-loss guard below returns the changed set without committing, and the
+                # session teardown rolls the flushed rename back: report that as an error instead of
+                # a success-shaped result when a rename was requested.
+                if rename:
+                    return f"Configuration save aborted, service {rename[0]} was not renamed"
+                return changed_plugins
+
             self.logger.debug(f"Saving config for method {method}")
 
             # When the autoconf disable_cleanup flag is on, precompute the set of existing
@@ -1809,10 +1903,16 @@ class Database:
             global_settings_to_delete = []
             global_method_total = 0
             for db_global_config in session.query(Global_values).filter_by(method=method).all():
-                global_method_total += 1
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
+
+                # Draft rows are retained across normal effective-config saves. An explicit
+                # state map is also a declaration that the row is being handled below, so the
+                # cleanup pass must not delete it before that state update is applied.
+                if db_global_config.is_draft or key in draft_settings:
+                    continue
+                global_method_total += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -1848,7 +1948,7 @@ class Database:
                     f"This almost always indicates a transient variables.env or environment race at scheduler "
                     f"startup. Aborting save_config to prevent data loss."
                 )
-                return changed_plugins
+                return aborted_save()
 
             self.logger.debug(f"Cleaning up {method} old services settings")
             # Collect service settings to delete (skip entirely when skip_service_management to avoid deleting service settings)
@@ -1861,10 +1961,15 @@ class Database:
                 # so they can be re-published when the orchestration object returns.
                 if db_service_config.service_id in drafted_service_ids:
                     continue
-                service_method_total[db_service_config.service_id] += 1
                 key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
+
+                # See the global cleanup guard above: a stored setting draft must survive a
+                # default-filled round-trip, while a map entry is handled explicitly later.
+                if db_service_config.is_draft or key in draft_settings:
+                    continue
+                service_method_total[db_service_config.service_id] += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -1918,7 +2023,7 @@ class Database:
                         f"submitted an incomplete config (e.g. an Advanced-mode form post missing keys). "
                         f"Aborting save_config to prevent data loss."
                     )
-                    return changed_plugins
+                    return aborted_save()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -1965,13 +2070,13 @@ class Database:
                                         f"Received empty SERVER_NAME for method 'autoconf' but database has {len(foreign_services)} non-autoconf service(s), "
                                         "skipping entire config save to prevent data loss"
                                     )
-                                    return changed_plugins
+                                    return aborted_save()
                             else:
                                 self.logger.warning(
                                     f"Received empty SERVER_NAME for method '{method}' but database has {len(method_services)} existing service(s), "
                                     "skipping entire config save to prevent data loss"
                                 )
-                                return changed_plugins
+                                return aborted_save()
                         else:
                             missing_ids = [
                                 service.id
@@ -2096,12 +2201,14 @@ class Database:
                         Services_settings.value,
                         Services_settings.file_name,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     ).all()
                     existing_service_settings_dict = {
                         (s.service_id, s.setting_id, s.suffix or 0): {
                             "value": self._empty_if_none(s.value),
                             "file_name": self._empty_if_none(s.file_name),
                             "method": s.method,
+                            "is_draft": bool(s.is_draft),
                         }
                         for s in existing_service_settings
                     }
@@ -2208,16 +2315,55 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            full_key = f"{server_name}_{original_key}"
+                            draft_state_posted = draft_state_is_posted(full_key, key)
+                            explicit_draft_state = draft_state_for(full_key, key)
+
+                            # ``None`` is an explicit raw-editor deletion. It may remove only
+                            # an already-drafted row owned by a compatible method; it must not
+                            # create a row or turn an effective value into a draft.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    service_setting
+                                    and service_setting["is_draft"]
+                                    and self._methods_are_compatible(
+                                        method,
+                                        service_setting["method"],
+                                        allow_scheduler_override=scheduler_can_override(full_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append(
+                                        {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
+                                    )
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # Effective-config callers receive the stored value through the
+                            # normal fallback path. Keep an existing setting draft completely
+                            # opaque to those callers; only the raw editor's explicit map may
+                            # activate, deactivate, or rewrite it.
+                            if service_setting and service_setting["is_draft"] and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = (
+                                explicit_draft_state if explicit_draft_state is not None else bool(service_setting and service_setting["is_draft"])
+                            )
                             current_file_name = service_setting["file_name"] if service_setting else ""
                             value_changed = bool(service_setting and service_setting["value"] != value)
-                            should_update_value = (
-                                value_changed
+                            method_can_update = bool(
+                                service_setting
                                 and self._methods_are_compatible(
                                     method,
                                     service_setting["method"],
-                                    allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value),
+                                    allow_scheduler_override=scheduler_can_override(full_key, value),
                                 )
-                            ) or (bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf")
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
+                                bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            state_changed = bool(
+                                service_setting and explicit_draft_state is not None and desired_is_draft != service_setting["is_draft"] and method_can_update
+                            )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2230,9 +2376,9 @@ class Database:
                             )
                             # A default sibling of a kept-alive slot (anchor row or template) is spurious round-trip
                             # material: drop it (and clean any stale row) so the field stays editable; the slot survives.
-                            if is_spurious_default_sibling:
+                            if is_spurious_default_sibling and not desired_is_draft:
                                 if service_setting and self._methods_are_compatible(
-                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value)
+                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(full_key, value)
                                 ):
                                     self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
                                     local_to_delete.append(
@@ -2246,7 +2392,11 @@ class Database:
                             if not service_setting:
                                 # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
                                 # the entire user-declared all-default slot would never materialise (vanish).
-                                if check_value(key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -2259,6 +2409,7 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
                                 # Update Services.last_update
@@ -2267,17 +2418,20 @@ class Database:
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
                                     local_changed_plugins.add(setting["plugin_id"])
 
                                 # Editing a value down to its default removes the row (defaults are implicit) —
                                 # EXCEPT for a member of an anchorless slot, where dropping the last rows would vanish
                                 # the whole user-declared slot; there we persist the default value instead.
                                 if (
-                                    should_update_value
+                                    (should_update_value or state_changed)
                                     and check_value(key, value, setting, template_setting_default, suffix)
                                     and not is_anchorless_multiple_member
+                                    and not desired_is_draft
                                 ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
@@ -2286,8 +2440,11 @@ class Database:
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else service_setting["is_draft"]
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
@@ -2326,18 +2483,52 @@ class Database:
                                 continue
 
                             global_value = (
-                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                                 .filter_by(setting_id=key, suffix=suffix)
                                 .first()
                             )
+                            draft_state_posted = draft_state_is_posted(original_key, key)
+                            explicit_draft_state = draft_state_for(original_key, key)
+
+                            # ``None`` explicitly deletes a saved draft and never acts as a
+                            # request to save the fallback value that accompanied the form post.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    global_value
+                                    and global_value.is_draft
+                                    and self._methods_are_compatible(
+                                        method,
+                                        global_value.method,
+                                        allow_scheduler_override=scheduler_can_override(original_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # A draft global value must not be rewritten by the effective
+                            # configuration pass. It is only visible to the raw editor, which
+                            # supplies an explicit state map when it intends to edit the row.
+                            if global_value and global_value.is_draft and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                             value_changed = bool(global_value and global_value.value != value)
-                            should_update_value = (
-                                value_changed
+                            method_can_update = bool(
+                                global_value
                                 and self._methods_are_compatible(
-                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
                                 )
-                            ) or (bool(global_value) and method == "autoconf" and global_value.method != "autoconf")
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
+                                bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            state_changed = bool(
+                                global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
+                            )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
                             template_setting_default = None
@@ -2350,7 +2541,7 @@ class Database:
                             )
                             # A default sibling of a kept-alive global multiple slot (anchor row or template) is
                             # spurious round-trip material: drop it so the field stays editable on the global page.
-                            if is_spurious_default_sibling:
+                            if is_spurious_default_sibling and not desired_is_draft:
                                 if global_value and self._methods_are_compatible(
                                     method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
                                 ):
@@ -2363,7 +2554,11 @@ class Database:
                             if not global_value:
                                 # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
                                 # the entire user-declared all-default slot would never materialise (vanish).
-                                if check_value(key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix, True)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -2375,26 +2570,33 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
                                     local_changed_plugins.add(setting["plugin_id"])
 
                                 # Editing a value down to its default removes the row — except for a member of an
                                 # anchorless slot, where that would vanish the whole user-declared slot; persist instead.
                                 if (
-                                    should_update_value
+                                    (should_update_value or state_changed)
                                     and check_value(key, value, setting, template_setting_default, suffix, True)
                                     and not is_anchorless_multiple_member
+                                    and not desired_is_draft
                                 ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
@@ -2510,16 +2712,43 @@ class Database:
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        draft_state_posted = draft_state_is_posted(original_key, key)
+                        explicit_draft_state = draft_state_for(original_key, key)
+                        if draft_state_posted and explicit_draft_state is None:
+                            if (
+                                global_value
+                                and global_value.is_draft
+                                and self._methods_are_compatible(
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
+                                )
+                            ):
+                                to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                changed_plugins.add(setting.plugin_id)
+                            continue
+
+                        if global_value and global_value.is_draft and explicit_draft_state is None:
+                            continue
+
+                        desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                         current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                         value_changed = bool(global_value and global_value.value != value)
-                        should_update_value = bool(
+                        method_can_update = bool(
                             global_value
-                            and self._methods_are_compatible(method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value))
-                            and value_changed
+                            and self._methods_are_compatible(
+                                method,
+                                global_value.method,
+                                allow_scheduler_override=scheduler_can_override(original_key, value),
+                            )
+                        )
+                        should_update_value = bool(global_value and method_can_update and value_changed)
+                        state_changed = bool(
+                            global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
                         )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
@@ -2541,7 +2770,7 @@ class Database:
 
                         if not global_value:
                             # An anchorless slot's default member must be persisted, else the whole slot vanishes.
-                            if value == nm_default and not nm_is_anchorless:
+                            if value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -2553,20 +2782,26 @@ class Database:
                                     file_name=target_file_name if setting.type == "file" else None,
                                     suffix=suffix,
                                     method=method,
+                                    is_draft=desired_is_draft,
                                 )
                             )
-                        elif should_update_value or file_name_changed:
+                        elif should_update_value or file_name_changed or state_changed:
                             if should_update_value:
                                 changed_plugins.add(setting.plugin_id)
+                            if state_changed:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if should_update_value and value == nm_default and not nm_is_anchorless:
+                            if (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
-                            setting_values = {"value": self._empty_if_none(value), "method": method}
-                            if setting.type == "file" and (file_name_changed or value_changed):
+                            persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                            setting_values = {"is_draft": persisted_is_draft}
+                            if should_update_value:
+                                setting_values.update({"value": self._empty_if_none(value), "method": method})
+                            if setting.type == "file" and method_can_update and (file_name_changed or value_changed):
                                 setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
@@ -2575,6 +2810,44 @@ class Database:
                                     "values": setting_values,
                                 }
                             )
+
+            # A removed RAW line is represented by ``None`` and may not be present in the
+            # effective payload. Resolve only those explicit deletions here; True/False states
+            # are handled alongside their unchanged posted values in the save branches above.
+            draft_deletion_keys = {key for key, state in draft_settings.items() if state is None}
+            if draft_deletion_keys:
+                for target_row in session.query(Global_values).filter(Global_values.is_draft == True):  # noqa: E712
+                    row_key = target_row.setting_id + (f"_{target_row.suffix}" if target_row.suffix else "")
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append({"model": Global_values, "filter": {"setting_id": target_row.setting_id, "suffix": target_row.suffix}})
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
+
+                for target_row in session.query(Services_settings).filter(Services_settings.is_draft == True):  # noqa: E712
+                    row_key = f"{target_row.service_id}_{target_row.setting_id}"
+                    if target_row.suffix:
+                        row_key = f"{row_key}_{target_row.suffix}"
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append(
+                        {
+                            "model": Services_settings,
+                            "filter": {"service_id": target_row.service_id, "setting_id": target_row.setting_id, "suffix": target_row.suffix},
+                        }
+                    )
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
 
             if changed_services:
                 changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
@@ -2632,14 +2905,16 @@ class Database:
             # session in another.
             self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
             return self.save_config(
-                config,
+                retry_config,
                 method,
                 changed,
                 file_names,
                 skip_service_management=skip_service_management,
                 disable_cleanup=disable_cleanup,
                 explicit_keys=explicit_keys,
+                draft_settings=draft_settings,
                 retry_on_conflict=False,
+                rename=rename,
             )
 
         return changed_plugins
@@ -2720,21 +2995,23 @@ class Database:
 
             if not disable_cleanup:
                 # Data-loss guard (mirror of the save_config guards above): refuse the
-                # cleanup when a ui/api save_custom_configs call would wipe every
+                # cleanup when a ui/api/manual save_custom_configs call would wipe every
                 # method-owned custom config row while supplying nothing to replace
                 # them. An empty incoming list with existing rows almost always means
                 # the caller built an incomplete payload (route exception, form rebuild
-                # race, missing in-memory state). Genuine "remove all custom configs"
-                # actions delete rows individually through the UI/API, so by the time
-                # an empty payload reaches save_custom_configs there is nothing left
-                # to wipe and this guard is a no-op.
-                if method in ("ui", "api") and not custom_configs:
+                # race, missing in-memory state) or, for the manual method, a configs
+                # folder that is missing or unreadable at scan time. Genuine "remove all
+                # custom configs" actions delete rows individually through the UI/API, so
+                # by the time an empty payload reaches save_custom_configs there is
+                # nothing left to wipe and this guard is a no-op.
+                if method in ("ui", "api", "manual") and not custom_configs:
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(
                             f"Refusing save_custom_configs: incoming method={method!r} payload is empty while {existing_count} "
                             f"{method}-method custom config row(s) exist in the database. This indicates the caller submitted "
-                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map). Aborting "
+                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map, or an "
+                            f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
                         return message
@@ -2773,7 +3050,7 @@ class Database:
                 custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
                 custom_config["is_draft"] = bool(custom_config.get("is_draft", False))
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
-                custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
+                custom_config["checksum"] = custom_config.get("checksum") or bytes_hash(custom_config["data"], algorithm="sha256")  # type: ignore
 
                 service_id = custom_config.get("service_id") or None
                 filters = {
@@ -2841,6 +3118,7 @@ class Database:
         service: Optional[str] = None,
         original_config: Optional[Dict[str, Any]] = None,
         original_multisite: Optional[Set[str]] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -2851,6 +3129,9 @@ class Database:
         with self._db_session() as session:
             config = original_config or {}
             multisite = original_multisite or set()
+            # Keep a separate effective global map while optionally exposing draft rows in
+            # ``config``. Service fallback values must never inherit a global setting draft.
+            effective_global_config = {key: value for key, value in config.items() if isinstance(value, dict) and value.get("global", True)}
 
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
@@ -2867,6 +3148,7 @@ class Database:
                     Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
+                    Global_values.is_draft,
                 )
                 .select_from(j)
                 .order_by(Settings.order)
@@ -2874,6 +3156,8 @@ class Database:
 
             if filtered_settings:
                 stmt = stmt.where(Settings.id.in_(filtered_settings))
+            if not with_setting_drafts:
+                stmt = stmt.where(Global_values.is_draft == False)  # noqa: E712
 
             # Execute the query and fetch all results
             results = session.execute(stmt).fetchall()
@@ -2887,7 +3171,11 @@ class Database:
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
                     "template": None,
+                    "is_draft": bool(global_value.is_draft),
                 }
+
+                if not global_value.is_draft:
+                    effective_global_config[setting_id] = config[setting_id]
 
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
@@ -2919,7 +3207,18 @@ class Database:
 
                 # Pre-build multisite defaults mapping for efficient lookup
                 # Share the same dictionary objects instead of creating copies
-                multisite_defaults = {key: config[key] for key in multisite if key in config}
+                # Use the effective global map, rather than the optionally raw-visible
+                # config, so a global draft's stored value is never inherited by services
+                # while the setting still receives its ordinary global/default fallback.
+                multisite_defaults = {
+                    key: (
+                        effective_global_config[key] | {"is_draft": False}
+                        if with_setting_drafts and isinstance(effective_global_config[key], dict)
+                        else effective_global_config[key]
+                    )
+                    for key in multisite
+                    if key in effective_global_config
+                }
 
                 # Populate service-specific entries using shared references
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
@@ -2944,6 +3243,7 @@ class Database:
                         Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     )
                     .select_from(j)
                     .order_by(Services.id, Settings.order)
@@ -2951,6 +3251,8 @@ class Database:
 
                 if not with_drafts:
                     stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+                if not with_setting_drafts:
+                    stmt = stmt.where(Services_settings.is_draft == False)  # noqa: E712
 
                 if filtered_settings:
                     stmt = stmt.where(Settings.id.in_(filtered_settings))
@@ -2973,8 +3275,9 @@ class Database:
                         "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
-                        "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
+                        "default": self._empty_if_none(effective_global_config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
                         "template": None,
+                        "is_draft": bool(result.is_draft),
                     }
             else:
                 servers = " ".join(db_service.id for db_service in services)
@@ -3012,6 +3315,7 @@ class Database:
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         *,
         service: Optional[str] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -3058,6 +3362,7 @@ class Database:
             service=service,
             original_config=config,
             original_multisite=multisite,
+            with_setting_drafts=with_setting_drafts,
         )
 
         template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
@@ -3137,16 +3442,20 @@ class Database:
         services = config["SERVER_NAME"]["value"].split()
         services_set = set(services)  # O(1) lookup for service prefix matching
 
+        if service:
+            # Strip the prefix in one pass. Stripping inside the loop below popped every key and
+            # re-inserted the stripped one, so an un-prefixed key later in the same snapshot popped
+            # the value that had just been renamed onto it and dropped it on the `continue`. A
+            # globally declared template writes exactly such keys (the block above fills the
+            # un-prefixed name whenever no global row shadows it), so every setting the service set
+            # for itself disappeared from its own configuration.
+            prefix = f"{service}_"
+            config = {key[len(prefix) :]: data for key, data in config.items() if key.startswith(prefix)}  # noqa: E203
+
         # Process config items - use list(items()) which is more memory efficient than copy().items()
         # for large dicts since it creates a list of tuples, not a full dict copy
         for key, data in list(config.items()):
-            new_value = None
-            if service:
-                data = config.pop(key)
-                if not key.startswith(f"{service}_"):
-                    continue
-                key = key.replace(f"{service}_", "")
-                new_value = data
+            new_value = data if service else None
 
             if not methods:
                 new_value = data["value"]
@@ -3395,7 +3704,7 @@ class Database:
             custom_config = session.query(Custom_configs).filter_by(**filters).first()
 
             data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
-            checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+            checksum = config.get("checksum") or bytes_hash(data, algorithm="sha256")
             is_draft = bool(config.get("is_draft", False))
 
             if not custom_config:
@@ -3497,6 +3806,14 @@ class Database:
 
             db_services = query.all()
 
+            # A service with no row of its own inherits the global value, and for USE_TEMPLATE that
+            # template is in force at render time (get_config materialises {service}_USE_TEMPLATE
+            # for every service). Reporting the missing row as "no template" told the operator the
+            # opposite of what the generator does.
+            inherited = dict(
+                session.query(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE"))).all()
+            )
+
         for service in db_services:
             services.append(
                 {
@@ -3505,8 +3822,8 @@ class Database:
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or "",
-                    "security_mode": service.security_mode or "block",
+                    "template": service.template if service.template is not None else inherited.get("USE_TEMPLATE") or "",
+                    "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                 }
             )
 
@@ -3541,6 +3858,84 @@ class Database:
             try:
                 session.commit()
             except BaseException as e:
+                return str(e)
+        return ""
+
+    def _rename_service_rows(self, session: scoped_session, old_name: str, new_name: str) -> str:
+        """Move a service and its dependent rows inside an existing transaction."""
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+
+        service = session.query(Services).get(old_name)
+        if service is None:
+            return f"Service {old_name} doesn't exist"
+
+        if session.query(Services).get(new_name) is not None:
+            return f"Service {new_name} already exists"
+
+        # Rename the parent row first so a backend that enforces ON UPDATE CASCADE
+        # cascades dependent rows immediately; the explicit updates catch backends
+        # that do not enforce foreign keys.
+        service.id = new_name
+        service.last_update = datetime.now().astimezone()
+        session.flush()
+
+        session.query(Services_settings).filter_by(service_id=old_name).update({Services_settings.service_id: new_name}, synchronize_session=False)
+        session.query(Custom_configs).filter_by(service_id=old_name).update({Custom_configs.service_id: new_name}, synchronize_session=False)
+        session.query(Jobs_cache).filter_by(service_id=old_name).update({Jobs_cache.service_id: new_name}, synchronize_session=False)
+
+        with suppress(ProgrammingError, OperationalError):
+            metadata = session.query(Metadata).get(1)
+            if metadata is not None:
+                now = datetime.now().astimezone()
+                metadata.custom_configs_changed = True
+                metadata.last_custom_configs_change = now
+
+        return ""
+
+    def rename_service(self, old_name: str, new_name: str) -> str:
+        """Rename a service, moving every service-owned row along with it in one transaction.
+
+        Renaming a service must change only its identity, never its content: the
+        ``bw_services`` primary key and the ``service_id`` foreign key of its
+        dependent rows (per-service settings, custom configs, job cache) are all
+        updated in a single database transaction, so a caller renaming a service
+        can never end up with the old service gone and its custom configs or job
+        cache orphaned/deleted (as happens if a rename is done by rewriting
+        SERVER_NAME-prefixed keys through ``save_config``: the old service id
+        disappears from the incoming config, which save_config treats as a
+        deletion, cascading away its custom configs and job cache).
+
+        Nothing but ``service_id``/``id`` values move: setting values, methods,
+        checksums, ``is_draft`` and job cache data/checksums are left untouched.
+
+        Returns an empty string on success, or a human-readable error message on
+        failure. On failure nothing is written: the pre-checks below run before any
+        statement is issued, and if ``commit()`` itself raises, SQLAlchemy has
+        already rolled back the transaction (nothing was flushed to disk).
+        """
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+        if old_name == new_name:
+            return ""
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                err = self._rename_service_rows(session, old_name, new_name)
+                if err:
+                    return err
+
+                session.commit()
+            except BaseException as e:
+                with suppress(Exception):
+                    session.rollback()
                 return str(e)
         return ""
 
@@ -3592,7 +3987,10 @@ class Database:
 
         return f"Removed {deleted} expired UI user sessions"
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
+    def delete_job_cache(
+        self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, plugin_id: Optional[str] = None
+    ) -> Optional[str]:
+        """Delete a job cache file: None means no matching row, an empty string means success, and other strings are errors."""
         job_name = job_name or argv[0].replace(".py", "")
         filters = {"file_name": file_name, "service_id": service_id or None}
         if job_name:
@@ -3602,7 +4000,12 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if plugin_id is not None and not session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first():
+                return None
+
+            deleted = session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if not deleted:
+                return None
 
             try:
                 session.commit()
@@ -3621,39 +4024,49 @@ class Database:
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
-        job_name = job_name or argv[0].replace(".py", "")
-        service_id = service_id or None
-        with self._db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
+        return self.upsert_job_caches(
+            [{"job_name": job_name or argv[0].replace(".py", ""), "service_id": service_id, "file_name": file_name, "data": data, "checksum": checksum}]
+        )
 
-            cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+    def upsert_job_caches(self, entries: List[Dict[str, Any]], *, deletions: Sequence[Dict[str, Any]] = ()) -> str:
+        """Save and delete cache files in one transaction, or roll back the whole set."""
+        if not entries and not deletions:
+            return ""
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
 
-            if not cache:
-                session.add(
-                    Jobs_cache(
-                        job_name=job_name,
-                        service_id=service_id,
-                        file_name=file_name,
-                        data=data,
-                        last_update=datetime.now().astimezone(),
-                        checksum=checksum,
-                    )
-                )
-            else:
-                if checksum is None or cache.checksum != checksum:
-                    cache.data = data
+        # A caller malformed against this contract is not a database outage: check the keys here so
+        # the two are distinguishable, and keep the redaction below for driver errors only.
+        for entry in entries:
+            missing = {"job_name", "service_id", "file_name", "data", "checksum"}.difference(entry)
+            if missing:
+                return f"Malformed job cache entry, missing {', '.join(sorted(missing))}"
+        for entry in deletions:
+            missing = {"job_name", "service_id", "file_name"}.difference(entry)
+            if missing:
+                return f"Malformed job cache deletion, missing {', '.join(sorted(missing))}"
+
+        try:
+            with self._db_session() as session:
+                for entry in entries:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    cache = session.query(Jobs_cache).filter_by(**key).first()
+                    if cache is None:
+                        cache = Jobs_cache(**key, data=entry["data"], checksum=entry["checksum"])
+                        session.add(cache)
+                    elif entry["checksum"] is None or cache.checksum != entry["checksum"]:
+                        cache.data = entry["data"]
+                        cache.checksum = entry["checksum"]
+                    # Unchanged data still refreshes the expiry window.
                     cache.last_update = datetime.now().astimezone()
-                    cache.checksum = checksum
-                else:
-                    # Data unchanged — refresh timestamp to reset expiry window
-                    cache.last_update = datetime.now().astimezone()
-
-            try:
+                for entry in deletions:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    session.query(Jobs_cache).filter_by(**key).delete(synchronize_session=False)
                 session.commit()
-            except BaseException as e:
-                return str(e)
-
+        except Exception as e:
+            # Driver exceptions can embed the cache payload or connection credentials.
+            self.logger.error(f"Failed to save job caches ({type(e).__name__})")
+            return "An error occurred while saving job caches"
         return ""
 
     def update_external_plugins(
@@ -3664,6 +4077,7 @@ class Database:
         delete_missing: bool = True,
         only_clear_metadata: bool = False,
         per_plugin_commit: bool = True,
+        preserve_ids: Optional[Set[str]] = None,
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
@@ -3753,7 +4167,7 @@ class Database:
             if delete_missing and db_plugins:
                 db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
-                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+                missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in (preserve_ids or ())]
 
                 # Never cascade-delete a pro plugin just because it's absent from the incoming list
                 # (a transient disk/glob gap during re-ingest); that wipes UI-set values via
@@ -5906,6 +6320,27 @@ class Database:
                 return f"An error occurred while deleting template {template_id}.\n{e}"
 
         return ""
+
+    def use_ui_user_totp(self, username: str, totp_secret: str, counter: int) -> bool:
+        """Consume a counter once, across replicas, only for the user's current secret."""
+        if self.readonly or not totp_secret or type(counter) is not int or counter < 0:
+            return False
+        try:
+            with self._db_session() as session:
+                updated = (
+                    session.query(Users)
+                    .filter(
+                        Users.username == username,
+                        Users.totp_secret == totp_secret,
+                        (Users.totp_last_counter.is_(None)) | (Users.totp_last_counter < counter),
+                    )
+                    .update({Users.totp_last_counter: counter}, synchronize_session=False)
+                )
+                session.commit()
+                return updated == 1
+        except Exception as e:
+            self.logger.error(f"Failed to consume TOTP counter ({type(e).__name__})")
+            return False
 
     def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
         """Get ui users."""

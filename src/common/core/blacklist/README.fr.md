@@ -113,6 +113,22 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_URI_URLS`        |        | multisite | non      | **URL de listes noires d’URI :** Liste d’URL contenant des motifs d’URI à bloquer.                                    |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
 
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
+=== "En-tête"
+    **Ce que cela fait :** Bloque, ou au contraire exempte, les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Une règle d’exclusion l’emporte sur toute correspondance de liste noire, y compris celles servies par le cache.
+
+    | Paramètre                       | Défaut | Contexte  | Multiple | Description                                                                                                                                         |
+    | ------------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de être mise en liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`.  |
+    | `BLACKLIST_HEADER_VALUE`        |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner la liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+
+    !!! warning "Une règle d’en-tête est un secret partagé"
+        N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
+
 !!! info "Support des formats d’URL"
     Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
 
@@ -150,7 +166,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN d'AWS et d'Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Règles d'ignorance personnalisées
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

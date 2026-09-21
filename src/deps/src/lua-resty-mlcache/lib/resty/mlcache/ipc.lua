@@ -22,6 +22,7 @@ local setmetatable = setmetatable
 local INDEX_KEY        = "lua-resty-ipc:index"
 local FORCIBLE_KEY     = "lua-resty-ipc:forcible"
 local POLL_SLEEP_RATIO = 2
+local MAX_HOLE_SCAN    = 1000
 
 
 local function marshall(worker_pid, channel, data)
@@ -221,6 +222,44 @@ function _M:poll(timeout)
         self.idx = idx
 
         if elapsed >= timeout then
+            -- this index is never going to arrive: broadcast() consumes an
+            -- index at incr() before it stores anything, so a hole is left
+            -- both by an event the shm evicted and by a set() that returned
+            -- "no memory", and neither can be filled afterwards. Skipping a
+            -- single index per call means a run of lost events costs the
+            -- whole timeout once per index, which a busy writer outpaces.
+            -- Walk to the next index the shm still holds instead, so a run
+            -- of lost events costs one timeout in total and the events that
+            -- survived it are still delivered on the next poll().
+            local probe  = idx + 1
+            local budget = MAX_HOLE_SCAN
+
+            while probe <= shm_idx and budget > 0 do
+                if self.dict:get(probe) ~= nil then
+                    break
+                end
+
+                probe  = probe + 1
+                budget = budget - 1
+            end
+
+            if probe > shm_idx then
+                -- nothing left to deliver, resume at the current shm index
+                self.idx = shm_idx
+
+            else
+                -- resume just before the next event the shm still holds; when
+                -- the scan ran out of budget rather than finding one, this
+                -- resumes where it stopped, so a run longer than
+                -- MAX_HOLE_SCAN costs one more poll() per chunk instead of
+                -- the events sitting behind it
+                self.idx = probe - 1
+            end
+
+            log(INFO, "no event data at index '", idx, "', skipped ",
+                      self.idx - idx + 1, " lost event(s), resuming at ",
+                      "index '", self.idx + 1, "'")
+
             return nil, "timeout"
         end
 

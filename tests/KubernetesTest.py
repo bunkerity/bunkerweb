@@ -40,7 +40,10 @@ class KubernetesTest(Test):
                 "SEND_ANONYMOUS_REPORT": "no",
                 "USE_DNSBL": "no",
             }
-            replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
+            replace_env = {
+                "API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
+                "DNS_RESOLVERS": "coredns.kube-system.svc.cluster.local",
+            }
             for yaml in data:
                 if yaml["metadata"]["name"] == "bunkerweb" and yaml["kind"] == "DaemonSet":
                     for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
@@ -70,17 +73,17 @@ class KubernetesTest(Test):
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb:.*$",
-                f"ghcr.io/bunkerity/bunkerweb-tests:{getenv('IMAGE_TAG')}",
+                getenv("BUNKERWEB_IMAGE") or f"ghcr.io/bunkerity/bunkerweb-tests:{getenv('IMAGE_TAG')}",
             )
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                f"ghcr.io/bunkerity/autoconf-tests:{getenv('IMAGE_TAG')}",
+                getenv("AUTOCONF_IMAGE") or f"ghcr.io/bunkerity/autoconf-tests:{getenv('IMAGE_TAG')}",
             )
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb-scheduler:.*$",
-                f"ghcr.io/bunkerity/scheduler-tests:{getenv('IMAGE_TAG')}",
+                getenv("SCHEDULER_IMAGE") or f"ghcr.io/bunkerity/scheduler-tests:{getenv('IMAGE_TAG')}",
             )
             proc = run("kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0:

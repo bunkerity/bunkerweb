@@ -331,7 +331,7 @@ Choisissez une fenêtre de rétention (ex. : 90 jours) et vérifiez ce qui serai
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ Une fois vérifié, supprimez les lignes.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +412,7 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +435,7 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -516,7 +516,7 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "MariaDB / MySQL uniquement"
         Les étapes suivantes sont uniquement valides pour les bases de données MariaDB / MySQL. Si vous utilisez une autre base de données, veuillez vous référer à la documentation de votre base de données.
@@ -551,7 +551,7 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
 
         Ensuite, entrez le mot de passe de l'utilisateur de la base de données et vous devriez pouvoir accéder à votre base de données.
 
-    === "All-in-one"
+    === "Tout-en-un"
 
         L'image Tout-en-un n'inclut pas de serveur MariaDB/MySQL. Si vous avez configuré l'AIO pour utiliser une base de données MariaDB/MySQL externe (en définissant la variable d'environnement `DATABASE_URI`), vous devez vous connecter à cette base de données directement à l'aide des outils clients MySQL standard.
 
@@ -598,7 +598,7 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
 
         Si la base de données est hébergée ailleurs, ajoutez les options `-h <host>` et `-p 5432` selon le cas.
 
-    === "All-in-one"
+    === "Tout-en-un"
 
         L'image Tout-en-un n'inclut pas de serveur PostgreSQL. Si vous avez configuré l'AIO pour utiliser une base de données PostgreSQL externe (en définissant la variable d'environnement `DATABASE_URI`), vous devez vous connecter à cette base de données directement à l'aide des outils clients PostgreSQL standard.
 

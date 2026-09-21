@@ -92,7 +92,7 @@ Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous c
 ## Version PRO
 
 !!! tip "BunkerWeb PRO essai gratuit"
-    Vous souhaitez tester rapidement BunkerWeb PRO pendant un mois ? Utilisez le code `freetrial` lors de votre commande sur le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) ou en cliquant [ici](https://panel.bunkerweb.io/cart.php?language=french&a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) pour appliquer directement le code promo (sera effectif à la caisse).
+    Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc).
 
 Lorsque vous utilisez BunkerWeb, vous avez le choix de la version que vous souhaitez utiliser : open-source ou PRO.
 
@@ -102,7 +102,7 @@ Dans la documentation ou l'interface utilisateur, les fonctionnalités PRO sont 
 
 Vous pouvez passer de la version open-source à la version PRO facilement et à tout moment. Le processus est simple :
 
-- Réclamez votre [essai gratuit sur le panneau BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) en utilisant le `freetrial` code promo à la caisse
+- Essayez [BunkerWeb PRO gratuitement pendant 30 jours](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc)
 - Une fois connecté à l'espace client, copiez votre clé de licence PRO
 - Collez votre clé privée dans BunkerWeb à l'aide de l'[interface utilisateur Web](web-ui.md#upgrade-to-pro) ou [d'un paramètre spécifique](features.md#pro)
 

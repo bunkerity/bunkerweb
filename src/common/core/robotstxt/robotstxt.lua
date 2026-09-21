@@ -19,7 +19,7 @@ local robotstxt = class("robotstxt", plugin)
 
 local function is_ignored(rule, ignore_rules)
 	for _, ignore_pattern in ipairs(ignore_rules) do
-		if regex_match(rule, ignore_pattern) then
+		if regex_match(rule, ignore_pattern, nil, "ROBOTSTXT_IGNORE_RULE") then
 			return true
 		end
 	end

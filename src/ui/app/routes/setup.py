@@ -7,17 +7,23 @@ from os import environ, getenv
 from re import escape, match
 from time import sleep
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
 
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
 setup = Blueprint("setup", __name__)
+
+# Reasons the app can redirect here with, mapped to what the user is told. Looked up, never
+# echoed: whatever is in the query string must not reach the page.
+SETUP_NOTICES = {
+    "session_expired": "Your session ended before your change could be saved, so nothing was changed. Log in and try again.",
+}
 
 
 @setup.route("/setup", methods=["GET", "POST"])
@@ -181,7 +187,7 @@ def setup_page():
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
-            flash("The admin user was created successfully")
+            flash("The admin user was created successfully", save=False)
 
         if not ui_reverse_proxy:
             server_names = db_config["SERVER_NAME"].split()
@@ -291,8 +297,11 @@ def setup_page():
     if not server_name:
         server_name = "www.example.com"
 
+    notice = SETUP_NOTICES.get(request.args.get("reason", ""))
+
     return render_template(
         "setup.html",
+        notice=notice,
         plugins_settings=BW_CONFIG.get_plugins_settings(),
         server_name=server_name,
         ui_user=admin_user,

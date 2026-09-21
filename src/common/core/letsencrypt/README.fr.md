@@ -28,9 +28,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 !!! tip "Profils de certificat"
     Let's Encrypt propose différents profils de certificat pour différents cas d'usage :
 
-    - **classic** : Certificats à usage général avec une validité de 90 jours (par défaut)
-    - **tlsserver** : Optimisé pour l'authentification de serveur TLS avec une validité de 90 jours et une charge utile plus petite
-    - **shortlived** : Sécurité renforcée avec une validité de 7 jours pour les environnements automatisés
+    - **classic** : Certificats à usage général avec une validité de 90 jours et jusqu'à 100 noms (par défaut)
+    - **tlsserver** : Optimisé pour l'authentification de serveur TLS avec une validité de 45 jours, jusqu'à 25 noms et une charge utile plus petite
+    - **shortlived** : Sécurité renforcée avec une validité de 160 heures pour jusqu'à 25 noms dans les environnements automatisés
     - **custom** : Si votre serveur ACME prend en charge un profil différent, définissez-le avec `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilité des profils"
@@ -58,16 +58,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Utiliser Staging :** Si mis à `yes`, utilise l'environnement de staging de Let's Encrypt pour les tests. Les limites de débit y sont plus élevées mais les certificats ne sont pas fiables.                                                                                                                                |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Effacer les anciens certificats :** Si mis à `yes`, supprime les anciens certificats inutiles lors du renouvellement.                                                                                                                                                                                                      |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Requêtes concurrentes :** Si mis à `yes`, certbot-new effectue les demandes de certificats en parallèle. À utiliser avec prudence pour éviter les limites de débit.                                                                                                                                                        |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Profil de certificat :** Sélectionnez le profil à utiliser. Options : `classic` (général), `tlsserver` (optimisé TLS), ou `shortlived` (7 jours).                                                                                                                                                                          |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Profil de certificat :** Sélectionnez le profil à utiliser. Options : `classic` (général, jusqu'à 100 noms), `tlsserver` (optimisé TLS, validité de 45 jours, jusqu'à 25 noms), ou `shortlived` (certificats de 160 heures, jusqu'à 25 noms).                                      |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Profil de certificat personnalisé :** Saisissez un profil personnalisé si votre serveur ACME le supporte. Remplace `LETS_ENCRYPT_PROFILE` s'il est défini.                                                                                                                                                                 |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | no       | **Tentatives maximales :** Nombre de tentatives de génération de certificat en cas d'échec. `0` pour désactiver. Utile pour les problèmes réseau temporaires.                                                                                                                                                                |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Nombre maximal de sauvegardes de logs Certbot :** Nombre de sauvegardes rotatives de `letsencrypt.log` que Certbot conserve par job. La valeur par défaut de Certbot, `1000`, s'accumule vite ; `50` est une limite raisonnable. Définissez `0` pour ne conserver que le log actif.                                        |
 
 !!! info "Information et comportement"
+    - Le traitement local de `/.well-known/acme-challenge/` n’est actif que si `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` et `LETS_ENCRYPT_PASSTHROUGH=no`. Les exceptions à la redirection HTTPS et aux contrôles d’accès exigent aussi que le jeton demandé existe sous forme de fichier lisible et non vide. La suppression du jeton rétablit immédiatement les contrôles habituels. Les autres services appliquent leurs règles habituelles de routage et d’accès à ce chemin.
     - Le paramètre `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci.
     - Si aucun paramètre `LETS_ENCRYPT_DNS_PROPAGATION` n'est fourni, le temps de propagation par défaut du fournisseur est utilisé.
     - L'automatisation complète de Let's Encrypt avec le défi `http` fonctionne en mode stream tant que vous ouvrez le port `80/tcp` depuis l'extérieur. Utilisez le paramètre `LISTEN_STREAM_PORT_SSL` pour choisir votre port d'écoute SSL/TLS.
-    - Si `LETS_ENCRYPT_PASSTHROUGH` est mis à `yes`, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt.
+    - Si `LETS_ENCRYPT_PASSTHROUGH` est mis à `yes`, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt. Un `GET` ou `HEAD` d'un seul jeton sous `/.well-known/acme-challenge/` est alors mis en liste blanche et atteint le backend sans aucune autre vérification : antibot, liste noire, ModSecurity, limites de requêtes, Basic Auth et la vérification des bannissements sont ignorés pour cette requête (les limites de connexions restent appliquées, nginx les impose), davantage que pour un défi servi localement. Les chemins plus profonds, les autres méthodes et les noms qui n'ont pas la forme d'un jeton passent les vérifications normales.
 
 !!! tip "Défis HTTP vs. DNS"
     **Les défis HTTP** sont plus simples à configurer et fonctionnent bien pour la plupart des sites web :
@@ -85,6 +86,8 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 
 !!! warning "Certificats wildcard"
     Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous devez mettre le paramètre `USE_LETS_ENCRYPT_WILDCARD` à `yes` et configurer correctement les identifiants de votre fournisseur DNS.
+
+    Un wildcard ne couvre qu’un niveau : `*.example.com` ne couvre pas `a.b.example.com`. Les groupes qui ne peuvent pas couvrir tous les noms configurés sont refusés et le service concerné est signalé comme mal configuré. Répartissez ces noms dans des services distincts. Les groupes valides restent traités ; si aucun certificat ne peut être émis, le job échoue. Les certificats émis pour les autres groupes demandent toujours un rechargement.
 
 !!! warning "Limites de débit"
     Let's Encrypt impose des limites de débit sur l'émission de certificats. Lors du test de configurations, utilisez l'environnement de staging en mettant `USE_LETS_ENCRYPT_STAGING` à `yes` pour éviter d'atteindre les limites de production. Les certificats de staging ne sont pas reconnus par les navigateurs mais sont utiles pour valider votre configuration.

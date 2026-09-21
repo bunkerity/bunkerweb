@@ -48,6 +48,13 @@ Siga estos pasos para configurar y usar la función de Sesiones:
     2. Asegúrese de que todas las instancias usen exactamente el mismo `SESSIONS_SECRET` y `SESSIONS_NAME`
     3. Esto garantiza que los usuarios mantengan su sesión independientemente de qué instancia de BunkerWeb maneje sus solicitudes
 
+!!! info "Revocación de Sesiones"
+    Sin Redis, los datos de sesión viven en la propia cookie, por lo que destruir una sesión solo la borraba del navegador y la cookie firmada seguía siendo válida hasta expirar. BunkerWeb mantiene una lista de denegación de identificadores de sesión destruidos en memoria compartida, de modo que una cookie destruida se rechaza en su siguiente uso.
+
+    - Solo se aplica cuando los datos de sesión se almacenan en la cookie. Con `USE_REDIS` en `yes`, los datos están en el servidor y destruir la sesión ya los elimina.
+    - La lista de denegación es local a cada instancia de BunkerWeb. Use Redis para revocar sesiones en todo un clúster.
+    - Ajuste su tamaño con `SESSIONS_REVOCATION_MEMORY_SIZE`. Si el almacén se llena o deja de estar disponible, la sesión se considera válida y se registra una advertencia.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"

@@ -13,6 +13,11 @@
 #include "lj_ir.h"
 #include "lj_vm.h"
 
+#if LJ_TARGET_X86
+int64_t (*lj_vm_num2i64_ptr)(double x) = lj_vm_num2i64;
+uint64_t (*lj_vm_num2u64_ptr)(double x) = lj_vm_num2u64;
+#endif
+
 /* -- Wrapper functions --------------------------------------------------- */
 
 #if LJ_TARGET_X86 && __ELF__ && __PIC__

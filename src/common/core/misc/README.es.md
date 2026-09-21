@@ -145,6 +145,8 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
         Se recomienda realizar pruebas exhaustivas antes de habilitar HTTP/3 en entornos de producción.
 
+        HTTP/3 se desactiva silenciosamente cuando `USE_PROXY_PROTOCOL` es `yes`. NGINX no puede leer la cabecera del PROXY protocol en un listener QUIC, por lo que no se genera ningún listener `quic` ni cabecera `Alt-Svc` aunque `HTTP3` siga indicando `yes`, y `LIMIT_CONN_MAX_HTTP3` no tiene efecto. Termine el PROXY protocol aguas arriba, o limítese a HTTP/1.1 y HTTP/2.
+
 === "Entrega de Archivos Estáticos"
 
     **Configuración de Entrega de Archivos**

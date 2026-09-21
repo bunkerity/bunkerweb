@@ -3,10 +3,11 @@ from typing import Annotated, Any, Dict, List, Optional
 from re import sub as re_sub
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Path as PathParam, Query
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Path as PathParam, Query, Request
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
+from ..auth.biscuit import authorize_resource
 from ..utils import get_db
 from ..schemas import (
     ConfigCreateRequest,
@@ -50,6 +51,11 @@ def _decode_data(val: bytes | str | None) -> str:
             return val.decode("utf-8")
         return val.decode("utf-8", errors="replace")
     return str(val)
+
+
+def _authorize_config_move(request: Request, source: Optional[str], destination: Optional[str]) -> None:
+    if source != destination:
+        authorize_resource(request, "configs", "config_update", destination or "global")
 
 
 @router.get("", dependencies=[Depends(guard)])
@@ -226,6 +232,7 @@ def update_config(
     config_type: Annotated[ConfigType, PathParam(description="Config type")],
     name: str,
     req: ConfigUpdateRequest,
+    request: Request,
 ) -> JSONResponse:
     """Update or move a custom config. Only configs managed by method "api"/"ui" or template-derived ones can be edited via API."""
     s_orig = None if service in (None, "", "global") else service
@@ -241,7 +248,7 @@ def update_config(
         return JSONResponse(status_code=403, content={"status": "error", "message": "Config is not UI/API-managed and cannot be edited"})
 
     # New values (optional)
-    service_new = req.service
+    service_new = req.service if "service" in req.model_fields_set else current.get("service_id")
     type_new = req.type if req.type is not None else current.get("type")
     name_new = req.name if req.name is not None else current.get("name")
     data_new = req.data if req.data is not None else _decode_data(current.get("data"))
@@ -250,6 +257,7 @@ def update_config(
     # Disallow renaming (changing the name) for template-derived configs; content edits are allowed
     if current.get("template") and name_new != current.get("name"):
         return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
+    _authorize_config_move(request, s_orig, service_new)
     if not _service_exists(service_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
     if (
@@ -282,6 +290,7 @@ def update_config(
 
 @router.patch("/{service}/{config_type}/{name}/upload", dependencies=[Depends(guard)])
 async def update_config_upload(
+    request: Request,
     service: str,
     config_type: Annotated[ConfigType, PathParam(description="Config type")],
     name: str,
@@ -308,6 +317,7 @@ async def update_config_upload(
 
     # Preserve the current service unless the caller explicitly requests a move.
     s_new = current.get("service_id") if new_service is None else (None if new_service in ("", "global") else new_service)
+    _authorize_config_move(request, s_orig, s_new)
     t_new = new_type or current.get("type")  # Already normalized by Pydantic if provided
     n_new = new_name.strip() if isinstance(new_name, str) and new_name else current.get("name")
     if n_new == current.get("name") and not new_name:

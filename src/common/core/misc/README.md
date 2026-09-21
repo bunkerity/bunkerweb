@@ -145,6 +145,8 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
         Thorough testing is recommended before enabling HTTP/3 in production environments.
 
+        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
+
 === "Static File Serving"
 
     **File Serving Configuration**

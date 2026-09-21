@@ -29,7 +29,7 @@ Hier erfahren Sie, wie Sie je nach Integration auf die Protokolle zugreifen kön
     docker-compose logs bunkerweb
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     !!! tip "Container auflisten"
         Um die laufenden Container aufzulisten, können Sie den folgenden Befehl verwenden:
@@ -331,7 +331,7 @@ Wähle ein Aufbewahrungsfenster (Beispiel: 90 Tage) und prüfe, was gelöscht w�
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ Nach der Prüfung kannst du die Zeilen löschen.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +412,7 @@ kannst du ein „Change Marker“-Update erzwingen:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +435,7 @@ kannst du ein „Change Marker“-Update erzwingen:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -516,7 +516,7 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "Nur MariaDB / MySQL"
         Die folgenden Schritte sind nur für MariaDB / MySQL-Datenbanken gültig. Wenn Sie eine andere Datenbank verwenden, lesen Sie bitte die Dokumentation Ihrer Datenbank.

@@ -35,7 +35,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
     Utilisez les images publiées et le layout du [guide de démarrage rapide](quickstart-guide.md#__tabbed_1_3) pour monter la stack, puis terminez la configuration dans le navigateur.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.14-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Ouvrez le nom d’hôte du scheduler (par ex. `https://www.example.com/changeme`) et lancez l’assistant `/setup` pour configurer l’UI, le scheduler et l’instance.
@@ -52,7 +52,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -132,7 +132,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
       bw-db:
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     Ajoutez `bunkerweb-autoconf` et appliquez des labels sur le conteneur UI au lieu d’un `BUNKERWEB_INSTANCES` explicite. Le scheduler reverse-proxie toujours l’UI via le template `ui` et un `REVERSE_PROXY_URL` secret.
 
@@ -159,7 +159,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
 - Compte admin : créé via l’assistant ou via `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Mot de passe requis : minuscule, majuscule, chiffre, caractère spécial. `OVERRIDE_ADMIN_CREDS=yes` force le réensemencement même si un compte existe.
 - Limite de longueur du mot de passe : bcrypt n'utilise que les **72 premiers octets** d'un secret ; les mots de passe sont donc limités à 72 octets partout où ils sont définis (assistant de configuration, page de profil, `ADMIN_PASSWORD` / `API_PASSWORD`). Une valeur plus longue est rejetée avec une erreur ou un journal explicite au lieu d'être tronquée silencieusement. Notez que les caractères non ASCII (accents, emoji) consomment plusieurs octets chacun ; une phrase secrète de "72 caractères" composée de tels caractères peut donc dépasser la limite. Les valeurs bcrypt pré-hachées sont exemptées (le hash encode déjà cette limite).
-- Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base.
+- Rôles : `admin`, `writer` et `reader` sont créés automatiquement ; les comptes sont stockés en base. L'interface open source n'autorise que sur la lecture et l'écriture, donc `admin` et `writer` ont les mêmes capacités et `reader` est le seul rôle restreint. Une séparation plus fine, notamment pour limiter qui peut gérer les utilisateurs et les réglages de sécurité, arrive avec le plugin PRO `user_manager`, documenté dans les [utilisations avancées](advanced.md#user-manager-pro).
 - Secrets : `FLASK_SECRET` est enregistré dans `/var/lib/bunkerweb/.flask_secret` ; les clés Biscuit sont à côté et peuvent être fournies via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA : les secrets TOTP sont stockés en base, chiffrés avec des clés conservées dans `/var/lib/bunkerweb/.totp_encryption_keys.json`. L’UI les génère au premier démarrage : rien n’est requis tant que ce fichier est persisté. Définissez `TOTP_ENCRYPTION_KEYS` (clés séparées par des espaces ou map JSON) pour fournir les vôtres ; chaque clé doit alors faire exactement **43 caractères**, toute autre valeur est écartée avec un avertissement `Invalid TOTP secret for key` et remplacée par une clé aléatoire. Générer une clé :
 
@@ -169,6 +169,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 
     Les codes de récupération sont affichés une seule fois dans l’UI ; perdre les clés de chiffrement supprime les secrets TOTP stockés.
 - Sessions : durée d’inactivité par défaut 12 h (`SESSION_LIFETIME_HOURS`), rafraîchie à chaque requête. Un plafond absolu est imposé par `SESSION_ABSOLUTE_HOURS` (par défaut `168` = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (`SESSION_ROLLING_HOURS`, par défaut `0` = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; `CHECK_PRIVATE_IP=no` relâche le contrôle d’IP pour les plages privées uniquement. `ALWAYS_REMEMBER=yes` force les cookies persistants.
+- Stockage des sessions : les sessions vivent dans Redis quand `USE_REDIS=yes`, sinon dans un cache local sous `/var/lib/bunkerweb`. Un Redis qui cesse de répondre, ou qui refuse les écritures parce qu'il a atteint `maxmemory`, ne casse plus l'interface : les sessions concernées basculent sur ce cache local, lu avant Redis afin qu'une modification ou une suppression jamais parvenue à Redis ne soit pas masquée par l'ancienne copie que Redis détient encore, et sont réconciliées vers Redis dès qu'il répond de nouveau. Une déconnexion ou une rotation de l'identifiant de session pendant l'indisponibilité n'est pas non plus annulée par la reprise. Chaque révocation est enregistrée dans les deux stockages afin de s'appliquer dans les deux cas. Une éviction n'est pas couverte, Redis signalant un succès et cessant simplement de détenir la clé, donc dimensionnez `maxmemory` pour les clés que vous conservez. Quand Redis refuse une mise à jour, la session concernée passe au stockage local et la copie que Redis détenait encore est supprimée immédiatement, afin que la modification ne soit pas masquée par l'ancienne version et qu'un parcours en plusieurs étapes comme la 2FA ne boucle pas sur son état antérieur. Ce cache local est propre à chaque hôte, ce qui compte si vous exécutez plusieurs réplicas de l'interface : les autres réplicas cessent de voir une session passée dans le cache local d'un réplica tant que ce réplica ne l'a pas réconciliée vers Redis, une révocation émise pendant une indisponibilité de Redis n'est appliquée que par le réplica qui l'a émise, et un réplica qui sert déjà une session depuis son propre cache local peut continuer à le faire jusqu'à `SESSION_LIFETIME_HOURS` après qu'un autre réplica a supprimé cette session via Redis. `UI_USE_REDIS=no` retire l'interface de Redis à elle seule, contrairement au `USE_REDIS` global qui cesse aussi de partager les bannissements et les rapports entre instances.
 - Pensez à régler `PROXY_NUMBERS` si plusieurs proxies ajoutent des `X-Forwarded-*`.
 
 !!! warning "Le 2FA disparaît après une recréation du conteneur"
@@ -196,6 +197,10 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 2. Secrets dans `/run/secrets/<VAR>` (Docker)
 3. Fichier env `/etc/bunkerweb/ui.env` (paquets Linux)
 4. Valeurs par défaut intégrées
+
+## Brouillons dans l'éditeur RAW
+
+L'éditeur RAW d'un service ou des paramètres globaux peut conserver un paramètre en **brouillon** : la valeur est enregistrée mais pas appliquée, et la valeur effective reste la valeur héritée (globale) ou par défaut. Placez le curseur au début d'une ligne `KEY=value` et appuyez sur `#` pour basculer l'état de brouillon, ou sur `Retour arrière` sur une ligne en brouillon pour l'activer, puis enregistrez. Les lignes en brouillon sont surlignées et conservent leur valeur d'un enregistrement à l'autre, ce qui permet de préparer une modification et de l'activer plus tard en un seul enregistrement. Un paramètre non modifiable depuis l'interface (géré par autoconf, ou une valeur par défaut de plugin non surchargeable) ne peut pas changer d'état de brouillon.
 
 ## Référence de configuration
 
@@ -233,6 +238,7 @@ L’UI attend que le scheduler/l’API BunkerWeb/le redis/la base soient accessi
 | `ALWAYS_REMEMBER`                           | Toujours activer le cookie “remember me”                                                                                 | `yes` ou `no`             | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Lier la session à l’IP (relâchement sur plages privées si `no`)                                                          | `yes` ou `no`             | `yes`                     |
 | `PROXY_NUMBERS`                             | Nombre de sauts proxy à faire confiance pour `X-Forwarded-*`                                                             | Entier                    | `1`                       |
+| `UI_USE_REDIS`                              | Retire l'interface web de Redis sans toucher au `USE_REDIS` global                                                       | `yes` ou `no`             | `yes`                     |
 
 ### Journalisation
 
@@ -292,7 +298,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Mise à niveau vers PRO {#upgrade-to-pro}
 
 !!! tip "Essai gratuit BunkerWeb PRO"
-    Utilisez le code `freetrial` sur le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) pour un mois d’essai.
+    Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc).
 
 Collez votre clé PRO dans la page **PRO** de l’UI (ou pré-renseignez `PRO_LICENSE_KEY` pour l’assistant). Les mises à niveau sont téléchargées en arrière-plan par le scheduler ; vérifiez l’UI pour l’expiration et les limites de services une fois appliquées.
 

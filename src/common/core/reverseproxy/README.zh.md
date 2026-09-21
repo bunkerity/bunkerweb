@@ -36,13 +36,15 @@
     | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
     | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。                                                 |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
     | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
     | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
     | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
     | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。                                                                                                  |
+
+    BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
     !!! tip "最佳实践"
         - 始终在 `REVERSE_PROXY_HOST` 中指定完整的 URL，包括协议（http:// 或 https://）
@@ -88,15 +90,24 @@
         - **证书验证：** 控制如何验证后端服务器证书
         - **SNI 支持：** 为托管多个站点的后端指定服务器名称指示
 
-    | 设置                         | 默认值 | 上下文    | 多选 | 描述                                                                  |
-    | ---------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。            |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。 |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                  |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。 |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。 |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。 |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                       |
+    | 设置                                             | 默认值 | 上下文    | 多选 | 描述                                                                                     |
+    | ------------------------------------------------ | ------ | --------- | ---- | ---------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。                               |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。                    |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                                   |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。         |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。       |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                                        |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file` | multisite | 否   | **客户端证书来源：** 客户端证书与私钥的来源，`file` 或 `data`。                          |
+    | `REVERSE_PROXY_SSL_CERT`                         |        | multisite | 否   | **客户端证书路径：** 向上游出示的 PEM 客户端证书，用于双向 TLS（来源为 `file` 时使用）。 |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |        | multisite | 否   | **客户端证书内容：** base64 或明文 PEM 形式的客户端证书（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_KEY`                          |        | multisite | 否   | **客户端私钥路径：** 与客户端证书匹配的 PEM 私钥（来源为 `file` 时使用）。私钥不能加密。 |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |        | multisite | 否   | **客户端私钥内容：** base64 或明文 PEM 形式的客户端私钥（来源为 `data` 时使用）。        |
+    | `REVERSE_PROXY_SSL_CRL`                          |        | multisite | 否   | **CRL 路径：** 校验上游时应用的 PEM 吊销列表。优先于 CRL 内容。                          |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |        | multisite | 否   | **CRL 内容：** base64 或明文 PEM 形式的吊销列表。仅在 CRL 路径为空时使用。               |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |        | multisite | 否   | **上游 SSL 协议：** 向上游提供的 TLS 版本。留空则沿用 NGINX 默认值。                     |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |        | multisite | 否   | **上游 SSL 加密套件：** 向上游提供的加密套件字符串。留空则沿用 NGINX 默认值。            |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -205,6 +216,7 @@
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |        | multisite | 是   | **最大请求体大小（按 location）：** 此 location 的最大请求体大小（`0` 表示不限制）。为空时使用服务的 `MAX_CLIENT_SIZE`。                           |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。
@@ -213,6 +225,9 @@
         ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果**（并且仅当）**某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
 
         为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)，它们检查上传文件本身，而不是原始请求体。
+
+    !!! tip "按 URL 的请求体大小"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` 仅限制单个 URL 的请求体，因此专用的上传端点可以接收大文件，而服务的其余部分仍保持更严格的 `MAX_CLIENT_SIZE`。它还会设置该 location 的 ModSecurity 请求体限制，并覆盖服务级取值以及显式设置的 `MODSECURITY_SEC_REQUEST_BODY_LIMIT`，因此上传不会被 WAF 拒绝，而其他每个 URL 都保留自己的限制。有两个限制不受影响：JSON、XML 和表单编码的请求体仍受 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 限制（默认 `131072`，超出返回 `400`），而 `0` 会关闭该 location 的 ModSecurity 限制，此时它会缓冲任意大小的请求体。ModSecurity 会在请求被转发前读取完整的请求体，因此请将该值设置为端点实际需要的大小。
 
 === "缓存配置"
 
@@ -244,6 +259,9 @@
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+!!! tip "上游双向 TLS"
+    客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
 
 !!! danger "Docker Compose 用户 - NGINX 变量"
     当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (`$$`) 来转义美元符号 (`$`)。这适用于所有包含 NGINX 变量的设置，如 `$remote_addr`、`$proxy_add_x_forwarded_for` 等。

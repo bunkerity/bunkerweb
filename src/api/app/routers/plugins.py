@@ -19,8 +19,10 @@ from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
 # \Z, not $: Python's $ also matches before a trailing newline, so an id ending in one
-# passed and became a directory name in the pushed plugin tree.
-_PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}\Z")
+# passed and became a directory name in the pushed plugin tree. The ".bw-" prefix is the
+# instance-side swap's own bookkeeping namespace: an entry carrying it is exempt from the
+# stale-entry sweep, so a plugin named that way survives its own deletion.
+_PLUGIN_ID_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 _RECOGNIZED_TYPES = {"all", "external", "ui", "pro"}
 
 TMP_UI_ROOT = Path(sep, "var", "tmp", "bunkerweb", "ui")

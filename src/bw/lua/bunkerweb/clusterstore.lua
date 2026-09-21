@@ -211,34 +211,4 @@ function clusterstore:call(method, ...)
 	return res, err
 end
 
-function clusterstore:multi(calls)
-	-- Check if client is created
-	if not self.redis_client then
-		return false, "client is not instantiated"
-	end
-	-- Start transaction
-	local ok, err = self.redis_client:multi()
-	if not ok then
-		return false, "multi() failed : " .. err
-	end
-	-- Loop on calls
-	for _, call in ipairs(calls) do
-		local method = call[1]
-		local args = unpack(call[2])
-		ok, err = self.redis_client[method](self.redis_client, args)
-		if not ok then
-			return false, method .. "() failed : " .. err
-		end
-	end
-	-- Exec transaction
-	local exec, err = self.redis_client:exec()
-	if not exec then
-		return false, "exec() failed : " .. err
-	end
-	if type(exec) ~= "table" then
-		return false, "exec() result is not a table"
-	end
-	return true, "success", exec
-end
-
 return clusterstore

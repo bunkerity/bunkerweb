@@ -1,7 +1,7 @@
 # About
 
 The libmaxminddb library provides a C library for reading MaxMind DB files,
-including the GeoIP2 databases from MaxMind. This is a custom binary format
+including the GeoIP databases from MaxMind. This is a custom binary format
 designed to facilitate fast lookups of IP addresses while allowing for great
 flexibility in the type of data associated with an address.
 
@@ -9,7 +9,7 @@ The MaxMind DB format is an open format. The spec is available at
 https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
 Commons Attribution-ShareAlike 3.0 Unported License.
 
-See https://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
+See https://dev.maxmind.com/ for more details about MaxMind's GeoIP products.
 
 # License
 
@@ -128,7 +128,7 @@ You can install libmaxminddb on macOS using [Homebrew](https://brew.sh):
 brew install libmaxminddb
 ```
 
-Or with [MacPorts](https://ports.macports.org/port/libmaxminddb):
+Or with [MacPorts](https://ports.macports.org/port/libmaxminddb/):
 
 ```bash
 sudo port install libmaxminddb
