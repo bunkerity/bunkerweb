@@ -1,0 +1,64 @@
+name: Final Redis Sentinel regression
+
+on:
+  push:
+    branches: [audit/final-1.6.15-20260921b]
+    paths: [.github/workflows/final-redis-audit.yml]
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  AUDIT_SOURCE_SHA: dcca0bfd06eb816b113e5022fdede9965b332e52
+
+jobs:
+  redis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Pin exact dev images and fix only stale Sentinel transition
+        run: |
+          set -euo pipefail
+          for image in bunkerweb scheduler; do
+            ref="ghcr.io/bunkerity/${image}-tests:dev"
+            docker pull "$ref"
+            test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ref")" = "$AUDIT_SOURCE_SHA"
+            docker tag "$ref" "${image}-tests"
+          done
+          cd tests/core/redis
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("test.sh")
+          s=p.read_text()
+          needle='''    elif [ "$test" = "sentinel" ] ; then
+        echo "🧰 Running tests with redis' in sentinel mode ..."
+'''
+          repl=needle+'''        # Fixture reset: the previous SSL case leaves the master port at 6380
+        # while this Sentinel case returns the master itself to 6379.
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \\;
+'''
+          if needle not in s:
+              raise SystemExit("sentinel block not found")
+          p.write_text(s.replace(needle,repl,1))
+          PY
+      - name: Run complete existing Redis suite
+        run: |
+          set -o pipefail
+          cd tests/core/redis
+          chmod +x test.sh
+          timeout --signal=TERM --kill-after=30s 1800 ./test.sh docker 2>&1 | tee "$GITHUB_WORKSPACE/final-redis.log"
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: final-redis-sentinel
+          path: final-redis.log
+          retention-days: 1
+          if-no-files-found: error
