@@ -1,7 +1,6 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "en-GB"
-tone_instructions: "Be direct, technical, and actionable. Cite exact lines.
-  Prefer concrete guidance over vague suggestions. Use British English."
+tone_instructions: "Be direct, technical, and actionable. Cite exact changed-file lines and use British English."
 early_access: false
 
 knowledge_base:
@@ -10,6 +9,9 @@ knowledge_base:
     enabled: false
   code_guidelines:
     enabled: true
+    filePatterns:
+      - files: "AGENTS.md,CLAUDE.md,src/*/AGENTS.md"
+        applyTo: "**"
 
 code_generation:
   docstrings:
@@ -21,9 +23,9 @@ reviews:
   high_level_summary: true
   high_level_summary_in_walkthrough: true
   high_level_summary_instructions: |
-    Summarise the PR by BunkerWeb component (`src/api`, `src/ui`, `src/common`, `src/bw`, `src/linux`, `.github`, `tests`, `docs`, `examples`).
-    Always call out: security impact, user-visible behaviour changes, configuration or schema changes, packaging or deployment impact, and whether documentation/tests were updated.
-    Keep the summary terse, technical, and suitable for maintainers reviewing a security-critical WAF project.
+    Summarise only facts evidenced by changed-file lines, grouped by BunkerWeb component (`src/api`, `src/ui`, `src/common`, `src/bw`, `src/linux`, `.github`, `tests`, `docs`, `examples`).
+    State security impact, user-visible behaviour, configuration/schema, packaging/deployment, and docs/tests only when the diff establishes them; otherwise say "unverified".
+    Do not invent context, infer implementation outside the diff, or use speculative might/could language. Keep the summary terse and technical.
   review_status: true
   review_details: true
   collapse_walkthrough: false
@@ -31,14 +33,13 @@ reviews:
   sequence_diagrams: false
   estimate_code_review_effort: true
   assess_linked_issues: true
-  related_issues: true
-  related_prs: true
+  related_issues: false
+  related_prs: false
   suggested_labels: false
   suggested_reviewers: false
   enable_prompt_for_ai_agents: true
-  # Fun features — keep CodeRabbit cheerful
-  poem: true
-  in_progress_fortune: true
+  poem: false
+  in_progress_fortune: false
   commit_status: true
   fail_commit_status: false
   abort_on_close: true
@@ -48,6 +49,7 @@ reviews:
     auto_incremental_review: true
     auto_pause_after_reviewed_commits: 8
     base_branches:
+      - "1.7"
       - "staging"
       - "rc"
       - "dev"
@@ -71,7 +73,7 @@ reviews:
       requirements: |
         Use Conventional Commits or the "<component> - description" format already used in BunkerWeb history.
         Examples: "feat: add bunkernet retry backoff", "fix(ui): escape next param", "docs: update advanced guide", "bunkernet - harden anonymous report".
-        Keep titles under ~70 characters; put detail in the description.
+        Keep titles under ~80 characters; put detail in the description. A scoped Conventional Commits title that is a few characters over is fine, do not warn about it.
     description:
       mode: "warning"
     issue_assessment:
@@ -123,10 +125,14 @@ reviews:
     - "!misc/generated/**"
 
   path_instructions:
+    - path: "**/*"
+      instructions: |
+        A claimed defect needs a concrete failing input or execution path, quoted from the changed-file lines; never assert that a function, setting, file or behaviour exists without a quoted line, and mark context outside the diff as unverified. Do not report speculative might/could defects. This rule scopes defect claims only: it does not suppress the documentation, test, accessibility, migration-note and generated-source requests made by the blocks below.
+
     - path: "**/*.py"
       instructions: |
         Follow BunkerWeb's Python standards and security posture:
-          - Use snake_case for functions and variables, PascalCase for classes, and provide concise, accurate docstrings for public classes, functions, and methods.
+          - Use snake_case for functions and variables and PascalCase for classes. Add concise, accurate docstrings for newly introduced public classes, functions, and methods in non-test code, and update an existing public docstring when the PR changes that symbol's contract. Do not request a docstring merely because a pre-existing symbol lacks one.
           - Respect Black formatting with a 160-character line limit and the existing pre-commit conventions. Do not insist on adding type annotations to previously untyped code, but accept them when added consistently.
           - Catch specific exceptions; never use bare `except:`. Catching `Exception` is acceptable only at explicit process boundaries (for example scheduler loops, outer job runners, worker entrypoints, or graceful-shutdown boundaries) when the code logs enough context and either re-raises, returns an error status, or terminates safely.
           - Never use `os.system`, `subprocess.*(..., shell=True)`, `eval`, or `exec`. Pass subprocess arguments as a list and prefer explicit binary paths for privileged operations.
@@ -138,8 +144,10 @@ reviews:
           - Use `defusedxml` rather than stdlib XML parsers for untrusted XML.
           - For SQLAlchemy, use bound parameters and safe query construction. Never call `text()` with f-strings or `.format()`, and flag `.execute()` calls built from string concatenation. Do not recommend Django-specific APIs such as `full_clean()`, `select_related()`, or `prefetch_related()` — BunkerWeb uses SQLAlchemy, not Django.
           - For Jinja2, keep autoescaping enabled and never apply `|safe` to user-controlled data.
-          - Scrub secrets, tokens, cookies, database URIs, and `Authorization` headers from logs. Use the logging framework rather than `print()`.
+          - Scrub secrets, tokens, cookies, database URIs, and `Authorization` headers from logs. In non-test code, use the logging framework rather than `print()`.
           - Secrets, API keys, and credentials must never be hard-coded; use environment variables, Docker secrets, or configuration templates.
+          - Do NOT flag Black formatting, 160-character line length, flake8/refurb findings, or type annotations: pinned pre-commit hooks already enforce the first three, and existing untyped code is accepted.
+          - Do NOT suggest refactors, helper extraction, or docstring-only changes without a concrete behavioural, security, or maintenance failure.
 
     - path: "src/api/**/*.py"
       instructions: |
@@ -149,6 +157,16 @@ reviews:
           - Authentication, authorisation, CORS, and rate-limiting changes must preserve secure defaults.
           - Propagate bounded timeouts to any outbound calls and avoid retry loops without caps, jitter, and logging.
           - Be careful with streaming responses, file downloads, and proxy-like behaviour: validate content types, filenames, and upstream destinations.
+          - Keep plugin routers in `routers/plugin_loader.py`: its mount supplies the auth guard and limiter, and route-prefix collisions must be refused.
+
+    - path: "src/api/app/routers/plugin_loader.py"
+      instructions: |
+        Plugin API-router discovery is a security boundary; follow `src/common/core/AGENTS.md`:
+          - Load only declared `extensions.api` entries through `plugin_extensions`, never arbitrary plugin paths.
+          - Preserve the tier, integrity, and external-extension gates before importing plugin code.
+          - Mount plugin routers only with the API auth guard and rate limiter injected by this module.
+          - Refuse a plugin prefix that collides with an existing router; do not silently shadow routes.
+          - Log and skip one malformed plugin so it cannot prevent the API from starting.
 
     - path: "src/ui/**/*.py"
       instructions: |
@@ -158,6 +176,26 @@ reviews:
           - Redirect targets such as `next` parameters must be validated against an allowlist or local-path policy.
           - For templates and forms, escape user-controlled data, validate uploads by type and size, and keep files outside the web root unless there is a deliberate reviewed exception.
           - BunkerWeb uses `bcrypt`; flag any move towards weak password hashing or plaintext credential handling.
+          - UI code must use `app/api_client.py` for all data access; it must never connect to the database directly.
+          - Use Flask-Babel for server-rendered text and `window.BW_I18N` for browser catalogues; BunkerWeb does not use i18next.
+
+    - path: "src/ui/app/static/locales/*.json"
+      instructions: |
+        Browser locale catalogues follow `src/ui/app/static/locales/README.md`:
+          - `en.json` is the source of truth; every shipped catalogue must have exact key parity with it.
+          - Keep the catalogues valid JSON and preserve interpolation placeholders and HTML markup exactly.
+          - Do not add a locale without updating `src/ui/app/lang_config.py` and the locale README table.
+          - Treat translations as user-visible copy: keep names, security terms, and product terminology consistent.
+          - Report a missing or extra key on the locale file; do not paper over it in JavaScript.
+
+    - path: "src/ui/translations/**/*.po"
+      instructions: |
+        Flask-Babel catalogues are configured by `src/ui/app/i18n.py` and `src/ui/babel.cfg`:
+          - Preserve message ids, placeholders, plural forms, and contextual translations.
+          - Keep catalogues parseable by Babel and do not replace server-side translation with browser-only strings.
+          - Do not remove the final blank line: the end-of-file fixer excludes these catalogues (`.pre-commit-config.yaml:18`).
+          - Keep server translations aligned with the source English wording and the browser catalogues where both expose a string.
+          - Review locale-only changes for accidental English fallback, not just syntax.
 
     - path: "src/common/gen/**/*.py"
       instructions: |
@@ -167,13 +205,23 @@ reviews:
           - Any template change that depends on a new setting should come with the corresponding schema or plugin metadata update.
           - Be careful with escaping and quoting so user-supplied settings cannot break out of generated directives or file formats.
 
+    - path: "src/common/utils/plugin_extensions.py"
+      instructions: |
+        Plugin extensions are executable control-plane code; follow `src/common/core/AGENTS.md`:
+          - Discover only `extensions.api`, `db`, `config`, `activation`, and `certificate_source` declarations from fixed plugin roots.
+          - Keep core and PRO extensions enabled by default, but gate external API/DB extensions behind the explicit allow setting and checksum verification.
+          - Preserve deterministic discovery order and validate extension metadata before importing it.
+          - A broken extension must be logged and skipped rather than preventing the API, scheduler, or worker from starting.
+          - Do not make discovery roots environment-overridable or bypass the shared `extension_allowed` gate.
+
     - path: "src/common/db/alembic/**/*.py"
       instructions: |
-        Alembic migrations must be safe across supported databases:
-          - Make schema changes forward-safe, and keep downgrades sane when practical.
-          - Avoid long-running table rewrites or irreversible destructive operations without a strong justification in the PR.
-          - Backfills must be idempotent and chunked when data volume could be significant.
-          - Do not import current ORM models into old migrations; use explicit table definitions or migration-time constructs.
+        Alembic migrations span the four engine directories; follow `src/common/db/AGENTS.md`:
+          - Never hand-author a revision: `misc/migration/create.sh` is the only supported generator.
+          - Keep SQLite, PostgreSQL, MySQL, and MariaDB revisions aligned for the same schema transition.
+          - A downgrade must walk the actual executed revision path; do not assume revision names imply reachability.
+          - Do not import current ORM models into historical migrations; use migration-time constructs only.
+          - Exercise an upgrade from the previous release: a fresh schema build cannot validate a migration.
 
     - path: "**/tests/**/*.py"
       instructions: |
@@ -182,6 +230,26 @@ reviews:
           - Avoid broad exception swallowing, arbitrary sleeps, and unnecessary mocks.
           - Prefer local containers, fixtures, and deterministic inputs over external services.
           - When a PR fixes a regression, ask for a regression test that fails before the fix and passes after it.
+          - Do not ask for docstrings on test classes or test methods; a descriptive name is enough.
+          - Do NOT flag test-only `print()` diagnostics, formatting, annotations, or mock style when they do not hide a failed assertion; pre-commit covers formatting and test behaviour is the review target.
+
+    - path: "tests/unit/**/*.py"
+      instructions: |
+        Pytest unit tests follow `tests/AGENTS.md` and `tests/unit/README.md`:
+          - Run database-sensitive tests across `sqlite,postgresql,mariadb` when their behaviour depends on an engine.
+          - Keep `tests/unit/ui` and `tests/unit/api` in separate pytest invocations because their conftests share a basename.
+          - A regression test must demonstrably fail on the unfixed code, not merely exercise the changed path.
+          - Use deterministic fixtures and local containers; do not depend on external services or arbitrary sleeps.
+          - The legacy `tests/main.py`, `*Test.py`, and `tests/examples/` harness is deleted; do not request changes to it.
+
+    - path: "tests/unit/common/test_*lua.py"
+      instructions: |
+        Lua unit tests execute under plain Lua 5.4, not OpenResty or LuaJIT:
+          - Stub only the OpenResty surface the real module needs, then execute the real Lua code.
+          - Use `table.unpack` compatibility where required; plain Lua 5.4 has no global `unpack`.
+          - Do not introduce tests that require `ffi`, network access, or an NGINX worker to run.
+          - Keep harness inputs deterministic and assert observable decisions, not stub internals.
+          - Preserve explicit skips where a runtime-only LuaJIT dependency cannot be exercised locally.
 
     - path: "**/plugin.json"
       instructions: |
@@ -189,7 +257,8 @@ reviews:
           - Ensure setting IDs remain stable unless there is an intentional breaking change.
           - Each setting should declare the expected metadata (`context`, `type`, defaults, help text, validation rules) and keep backwards compatibility in mind.
           - Regex validators must be anchored where appropriate, compile cleanly, and avoid catastrophic backtracking. Default values must satisfy their own validators.
-          - When `jobs` are declared, verify schedule values, referenced scripts, and reload behaviour. Script paths must exist under the plugin tree.
+          - When `jobs` are declared, verify schedule values, referenced scripts, reload behaviour, and `async`: async jobs route to the heavy worker queue. Script paths must exist under the plugin tree.
+          - Review `extensions` declarations and plugin `order` alongside `src/common/core/AGENTS.md`; executable extension metadata must match the shared discovery contract.
           - If a PR changes a setting ID, type, context, accepted value shape, or compatibility behaviour, require migration notes and any necessary Alembic or config-migration work.
 
     - path: "**/*.lua"
@@ -205,6 +274,45 @@ reviews:
           - Use `pcall` or explicit error handling at safe boundaries so a malformed request or upstream failure does not crash worker processes.
           - Use `cjson` safely for JSON encode/decode and do not build JSON by string concatenation.
 
+    - path: "src/common/db/db_methods/**/*.py"
+      instructions: |
+        Database methods are mixins composed by `src/common/db/Database.py`:
+          - Preserve the mixin contract and keep mutations transactional through the supplied session.
+          - Authorise against the destination resource, not just the source resource, before moving or attaching data.
+          - Return stable, documented result shapes so API and scheduler callers do not infer database internals.
+          - Keep engine-specific SQL out of shared methods unless each supported engine is covered.
+          - Update mutation-time validation with its render-time mirror when they enforce the same namespace or invariant.
+
+    - path: "src/common/utils/location_claims.py"
+      instructions: &location_claims_instructions |
+        These files are the mutation-time and render-time mirrors of one location namespace:
+          - `reverseproxy`, `grpc`, and `redirect` claims must be checked across all families.
+          - Normalise rendered locations identically in both files; changing one mirror alone creates false refusals or invalid NGINX.
+          - Preserve numeric suffix ordering and service scoping when collecting claims.
+          - Check attached resources as well as inline plugin settings before accepting a location.
+          - Add paired tests for accepted and rejected paths when changing this guard.
+
+    - path: "src/common/db/db_methods/locations.py"
+      instructions: *location_claims_instructions
+
+    - path: "src/common/utils/default_server.py"
+      instructions: |
+        `default-server` is the reserved fallback pseudo-service:
+          - It exists only with `MULTISITE=yes`; do not seed or render it in single-site mode.
+          - Preserve the reserved id and refuse user mutations that delete, rename, draft, or bill this row.
+          - Keep its curated plugin subset and the three restricted rendering phases in sync with the Templator.
+          - Resolve default-server stream ports against every service so it cannot silently collide.
+          - Treat it as persisted service data, not a global-settings-only rendering shortcut.
+
+    - path: "src/worker/**/*.py"
+      instructions: |
+        The Celery worker executes scheduler-dispatched plugin jobs; follow `src/worker/AGENTS.md`:
+          - Keep `default` and `heavy` queue routing aligned with `src/common/utils/job_queues.py`; async jobs use `heavy`.
+          - Do not execute jobs in the scheduler process or bypass Celery task acknowledgement and retry semantics.
+          - Preserve the exit-code protocol: `1` changed and triggers cache delivery plus debounced reload, `0` means no change, other values fail.
+          - Keep job execution bounded, logged, and isolated so one plugin job cannot crash the worker.
+          - Validate cache delivery and reload behaviour end to end when changing worker task outcomes.
+
     - path: "**/*.sh"
       instructions: |
         Shell scripts must match BunkerWeb's portability expectations:
@@ -215,6 +323,7 @@ reviews:
           - Never use `curl | sh` or `wget | sh`; verify downloads by checksum or signature and avoid `-k` / `--insecure`.
           - Do not rely on inherited `PATH` in privileged contexts; set it explicitly where needed.
           - Avoid `eval` and unsafe command construction from untrusted data.
+          - Do NOT flag ShellCheck-style quoting, formatting, or portable syntax nits: the ShellCheck tool below and the pinned pre-commit hook (which skips `tests/`) cover them. Report only a demonstrated unsafe input or failed execution path.
 
     - path: "src/ui/**/*.js"
       instructions: |
@@ -242,17 +351,13 @@ reviews:
           - Prefer CSS custom properties and reusable patterns over copy-pasted values.
           - Keep responsiveness and accessibility in mind, especially focus states, contrast, and reduced-motion behaviour where relevant.
 
-    - path: ".github/workflows/**/*.yml"
-      instructions: &github_actions_instructions |
+    - path: ".github/workflows/**"
+      instructions: |
         GitHub Actions workflows must be reproducible and safe:
           - Pin third-party actions by commit SHA, not floating tags.
           - Declare an explicit top-level `permissions:` block and keep it minimal by default.
           - Be extremely careful with `pull_request_target`: do not combine untrusted PR code with repository secrets.
           - Do not interpolate `${{ github.event.* }}` values directly inside `run:` scripts; assign them via `env:` first to reduce script-injection risk.
-          - Use `concurrency` intentionally: cancel superseded PR jobs, but avoid cancelling release or deployment jobs that should run to completion.
-
-    - path: ".github/workflows/**/*.yaml"
-      instructions: *github_actions_instructions
 
     - path: ".pre-commit-config.yaml"
       instructions: |
@@ -269,6 +374,7 @@ reviews:
           - Never commit secrets in plaintext; use secret managers, encrypted values, or template/example files.
           - Docker Compose changes should prefer `read_only`, `no-new-privileges`, dropped capabilities, and minimal mounts where compatible.
           - Kubernetes manifests should prefer `runAsNonRoot`, `allowPrivilegeEscalation: false`, `seccompProfile: RuntimeDefault`, dropped capabilities, and explicit resource requests/limits.
+          - Do NOT flag quoting, indentation, key order, or line-wrapping style: the pinned Prettier hook owns formatting. Report only parse failures or a concrete semantic misconfiguration.
 
     - path: "**/*.yml"
       instructions: *yaml_instructions
@@ -323,6 +429,15 @@ reviews:
           - Ownership, permissions, service enablement, and directory creation must be explicit and conservative.
           - Do not remove user data on uninstall unless the operation is explicitly a purge.
 
+    - path: "src/linux/**"
+      instructions: |
+        Native packaging follows `src/linux/AGENTS.md`:
+          - Keep DEB and RPM lifecycle behaviour aligned, idempotent, and distribution-aware.
+          - Preserve `MANAGER_MODE`, `WORKER_MODE`, and `SERVICE_*` enablement in `scripts/postinstall.sh`.
+          - Packages ship the worker and its broker alongside BunkerWeb, Scheduler, API, and UI where their modes require them.
+          - Systemd units and service scripts must preserve the shared helper, environment-file, user, and runtime-path contracts.
+          - Do not remove user data on uninstall except for an explicit distro purge path.
+
     - path: "**/*.service"
       instructions: |
         systemd units should be hardened where compatible with the service:
@@ -331,6 +446,11 @@ reviews:
           - Restart behaviour should be explicit and sensible for long-running services.
           - Recommend additional sandboxing directives only when they are compatible with the service's actual needs.
 
+    - path: "docs/**/features.md"
+      instructions: |
+        `docs/features.md` and `docs/<lang>/features.md` are generated by `docs/json2md.py`; treat them as generated output.
+        When a PR changes them, require the corresponding source change in `src/common/README*.md`, `src/common/settings.json`, or `src/common/core/<plugin>/README*.md` or `plugin.json`, followed by regeneration of all five locales; do not propose a generated-file-only fix.
+
     - path: "**/*.md"
       instructions: |
         Documentation should be concise, accurate, and written in British English:
@@ -338,6 +458,8 @@ reviews:
           - Prefer concrete instructions, accurate examples, and explicit prerequisites.
           - Check that commands, paths, and references still match the codebase and supported deployment modes.
           - When a PR changes behaviour, defaults, packaging, or security posture, ask for the corresponding documentation update.
+          - `README.<lang>.md` and `docs/<lang>/` mirror the English file. When the same content defect appears in the English file and its translations, report it once on the English file. Still report translation, locale-only content, link, and anchor defects on each affected locale file.
+          - Do NOT flag prose, spelling, Markdown formatting, or table ordering unless they create a wrong instruction, broken link, or missing required generated source; Prettier and Codespell own mechanical style.
 
   tools:
     github-checks:
@@ -346,9 +468,12 @@ reviews:
     languagetool:
       enabled: true
       level: "default"
+      # GITHUB fires on every `.github/` path inside code spans
+      disabled_rules: ["GITHUB"]
     gitleaks:
       enabled: true
     luacheck:
+      # Kept on: pre-commit is not a CI gate on contributor PRs, and 435 Lua files sit on the WAF hot path.
       enabled: true
     shellcheck:
       enabled: true
@@ -359,13 +484,15 @@ reviews:
     actionlint:
       enabled: true
     markdownlint:
-      enabled: true
+      # Disabled: the evidence baseline classifies Markdown formatting as NITPICK; Prettier owns formatting.
+      enabled: false
     checkov:
       enabled: true
     osvScanner:
       enabled: true
     htmlhint:
-      enabled: true
+      # Disabled: most Jinja and lua-resty-template files (partials, components) have no doctype by design, so `doctype-first` fires on every one.
+      enabled: false
     dotenvLint:
       enabled: true
     flake8:
