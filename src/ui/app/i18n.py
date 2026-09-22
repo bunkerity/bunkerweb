@@ -14,6 +14,7 @@ from the same JSON files i18next loads.
 """
 
 from functools import lru_cache
+from hashlib import sha256
 from json import dumps, loads
 from logging import getLogger
 from os.path import join
@@ -125,6 +126,31 @@ def _plugin_roots() -> Tuple[Path, ...]:
     )
 
 
+def _plugin_dirs(roots: Optional[Tuple[Path, ...]] = None) -> Iterator[Tuple[int, Path]]:
+    """Yield `(root_index, plugin_dir)` for every readable plugin root."""
+    for root_index, root in enumerate(roots if roots is not None else _plugin_roots()):
+        if not root.is_dir():
+            continue
+        try:
+            plugin_dirs = sorted(entry for entry in root.iterdir() if entry.is_dir())
+        except OSError:
+            continue
+        yield from ((root_index, plugin_dir) for plugin_dir in plugin_dirs)
+
+
+def _plugin_catalog_paths(roots: Optional[Tuple[Path, ...]] = None) -> Iterator[Tuple[int, Path]]:
+    """Yield every plugin catalog path in the layouts understood by the loader."""
+    for root_index, plugin_dir in _plugin_dirs(roots):
+        for subpath in PLUGIN_LOCALES_SUBPATHS:
+            locales_dir = plugin_dir.joinpath(*subpath)
+            try:
+                for catalog_file in sorted(locales_dir.glob("*.json")):
+                    if catalog_file.is_file():
+                        yield root_index, catalog_file
+            except OSError:
+                continue
+
+
 def _plugin_catalog(plugin_dir: Path, lang: str) -> Optional[dict]:
     """The plugin's own catalog dict for `lang`, falling back to its `en.json`, or None if it
     ships neither (or ships this locale only, invalid), trying each of `PLUGIN_LOCALES_SUBPATHS`
@@ -165,17 +191,10 @@ def iter_plugin_catalogs(lang: str, roots: Optional[Tuple[Path, ...]] = None) ->
     """
     if lang not in SUPPORTED_LANGUAGE_CODES:
         lang = DEFAULT_LANGUAGE
-    for root in roots if roots is not None else _plugin_roots():
-        if not root.is_dir():
-            continue
-        try:
-            plugin_dirs = sorted(entry for entry in root.iterdir() if entry.is_dir())
-        except OSError:
-            continue
-        for plugin_dir in plugin_dirs:
-            catalog = _plugin_catalog(plugin_dir, lang)
-            if catalog is not None:
-                yield plugin_dir.name, catalog
+    for _, plugin_dir in _plugin_dirs(roots):
+        catalog = _plugin_catalog(plugin_dir, lang)
+        if catalog is not None:
+            yield plugin_dir.name, catalog
 
 
 def _plugin_catalogs_for_request(lang: str) -> List[Tuple[str, dict]]:
@@ -197,6 +216,35 @@ def _plugin_catalogs_for_request(lang: str) -> List[Tuple[str, dict]]:
     return cache[lang]
 
 
+def plugin_catalog_fingerprint() -> str:
+    """Return a short fingerprint of installed plugin catalog files.
+
+    # ponytail: size + mtime_ns can miss same-size rewrites in one coarse mtime tick; hash content
+    # if deployments need stronger invalidation than this cheap per-file stat sweep.
+    """
+    if has_app_context() and "_plugin_i18n_catalog_fingerprint" in g:
+        return g._plugin_i18n_catalog_fingerprint
+
+    roots = _plugin_roots()
+    entries = []
+    for root_index, catalog_file in _plugin_catalog_paths(roots):
+        try:
+            stat = catalog_file.stat()
+        except OSError:
+            continue
+        root = roots[root_index]
+        entries.append((f"{root_index}:{catalog_file.relative_to(root)}", stat.st_size, stat.st_mtime_ns))
+    if not entries:
+        fingerprint = "0"
+    else:
+        digest = sha256(repr(sorted(entries)).encode("utf-8")).hexdigest()
+        fingerprint = digest[:12]
+
+    if has_app_context():
+        g._plugin_i18n_catalog_fingerprint = fingerprint
+    return fingerprint
+
+
 # Suppresses a repeat WARNING for a collision this process has already logged once. Without it,
 # every `_()` miss re-runs the whole merge (`_merged_catalog` isn't cached, only the disk scan
 # is — see `_plugin_catalogs_for_request`), so a single page render with N missed keys against a
@@ -208,29 +256,107 @@ def _plugin_catalogs_for_request(lang: str) -> List[Tuple[str, dict]]:
 _WARNED_COLLISIONS: set = set()
 
 
-def _merge_plugin_catalog(base: dict, overlay: dict, plugin_id: str, path: str = "") -> dict:
+def _merge_plugin_catalog(base: dict, overlay: dict, plugin_id: str) -> dict:
     """`overlay` merged onto `base`, returned as a NEW dict — `base` is never mutated, because it
     may be `_core_catalog`'s cached, shared dict, or another plugin's already-merged result.
 
-    A leaf collides, not a whole top-level namespace: the merge descends into a key both sides
-    define as a dict, and only refuses (with a WARNING naming the dotted path and the plugin) at
-    the point where `base` already has a concrete value. A shallower, top-level-only rule was
-    tried first and measured against the 13 real PRO catalogs: 2 of them (`user_manager`,
-    `easy_resolve`) nest strings under top-level names BunkerWeb's own core catalog also uses
-    (`button`, `flash`, `footer`, ...) for unrelated keys, so a top-level rule silently dropped 179
-    real strings — 66% of one plugin's page. A leaf rule refuses only the 45 that are genuine
-    duplicates of an existing core (or earlier-plugin) leaf; the other 134 near-misses are new
-    keys under a shared namespace and now merge fine.
+    SEC-W20 F-04: an overlay may only contribute leaves under its OWN top-level id (`plugin_id.*`
+    — the plugin's directory name, the same string `iter_plugin_catalogs` yields it as). Every
+    other top-level key in `overlay` is refused wholesale, with ONE aggregate WARNING naming the
+    overlay plugin and the offending key prefixes — never per leaf, so a catalog with N bad keys
+    logs one line, not N. This is what stops a plugin directory named `aaa_evil` from claiming
+    `user_manager.page.title`: the top-level key `user_manager` isn't `aaa_evil`'s own id, so it
+    is refused before any leaf-level comparison runs — regardless of load order relative to the
+    real `user_manager` plugin. Before this guard, whichever plugin's catalog merged first won the
+    leaf, and the collision WARNING named the plugin that merged *second* (the victim), not the
+    shadower.
+
+    An earlier, broader rule let a plugin add a NEW leaf under a namespace core (or another
+    plugin) already owns — e.g. `button.new_action` from a plugin that isn't `button` — because 2
+    of the 13 real PRO catalogs (`user_manager`, `easy_resolve`) nest 179 of their own strings
+    under core top-level names (`button`, `flash`, `footer`, ...) for unrelated keys. That
+    broader rule is also what let `aaa_evil` claim `user_manager.*`, so it does not survive this
+    fix: those two plugins now need their own top-level namespace too (see docs/plugins.md
+    "Plugin translations") — security over convenience.
+
+    Every top-level key that isn't `plugin_id` is refused wholesale, once per distinct offending
+    set (Criticos round 1 R2): without dedup, an unmemoised miss (`_merged_catalog` isn't cached,
+    only the plugin disk scan is) re-runs this on every `_()` miss, so one page render against a
+    violating plugin would log once per miss rather than once — the exact flood
+    `_WARNED_COLLISIONS` already exists to prevent on the leaf path below.
+
+    `overlay[plugin_id]` and any value already at `base[plugin_id]` are both required to be a JSON
+    object before any merge happens (Criticos round 1 R1): a plugin catalog is untrusted, attacker-
+    controlled input past this point (any plugin install), and treating a non-dict there as a dict
+    would crash `_merge_plugin_leaf`'s `.items()` on every request — turning a malformed file into
+    a UI-wide denial of service — or silently discard a real core string.
+
+    Within the allowed `plugin_id.*` subtree, a leaf that already has a concrete value (set by
+    core, or by an earlier plugin sharing this exact plugin_id across two roots — see
+    `iter_plugin_catalogs`, first-root-wins is accepted there since `bw_plugins.id` is a primary
+    key and both install paths derive the directory name from it) is still refused leaf-by-leaf,
+    with its own WARNING — unchanged from before.
+
+    A `plugin_id` containing a dot (`PLUGIN_NAME_RX` in `src/ui/app/utils.py` allows one) gets a
+    catalog no lookup can ever reach: both `_dotted_lookup` below and the browser's `t()` split a
+    key on `.`, so only `{plugin_id: {...}}` is accepted by the guard above, and nothing under it
+    is reachable through the dotted path the dot itself implies (Criticos round 2 C1). Silently
+    merging it in would still cost the disk-scan and merge work for a catalog whose every string
+    forever renders as its own raw key — a plugin author's mistake stays invisible without this
+    WARNING, once per plugin like every other refusal here.
     """
+    if "." in plugin_id:
+        marker = (plugin_id, "dotted-id")
+        if marker not in _WARNED_COLLISIONS:
+            _WARNED_COLLISIONS.add(marker)
+            LOGGER.warning(f"Plugin '{plugin_id}' i18n catalog is unreachable: its own id contains '.', so no dotted lookup key can ever resolve into it")
+        return base
+
+    offending = sorted(key for key in overlay if key != plugin_id)
+    if offending:
+        marker = (plugin_id, "namespace", tuple(offending))
+        if marker not in _WARNED_COLLISIONS:
+            _WARNED_COLLISIONS.add(marker)
+            LOGGER.warning(f"Plugin '{plugin_id}' i18n catalog claims key(s) outside its own namespace ('{plugin_id}.*'); refusing: {', '.join(offending)}")
+
+    if plugin_id not in overlay:
+        return base
+
+    own = overlay[plugin_id]
+    if not isinstance(own, dict):
+        marker = (plugin_id, "own-not-an-object")
+        if marker not in _WARNED_COLLISIONS:
+            _WARNED_COLLISIONS.add(marker)
+            LOGGER.warning(f"Plugin '{plugin_id}' i18n catalog's own key '{plugin_id}' is not a JSON object; ignoring")
+        return base
+
+    existing = base.get(plugin_id, {})
+    if not isinstance(existing, dict):
+        marker = (plugin_id, "existing-not-an-object")
+        if marker not in _WARNED_COLLISIONS:
+            _WARNED_COLLISIONS.add(marker)
+            LOGGER.warning(f"Plugin '{plugin_id}' i18n key '{plugin_id}' collides with an existing non-namespace value; keeping the existing one")
+        return base
+
     merged = base.copy()
+    merged[plugin_id] = _merge_plugin_leaf(existing, own, plugin_id, plugin_id)
+    return merged
+
+
+def _merge_plugin_leaf(base, overlay: dict, plugin_id: str, path: str) -> dict:
+    """Leaf-level merge within a plugin's own `plugin_id.*` subtree — a leaf collides, not a whole
+    namespace: the merge descends into a key both sides define as a dict, and only refuses (with a
+    WARNING naming the dotted path and the plugin) at the point where `base` already has a
+    concrete value."""
+    merged = base.copy() if isinstance(base, dict) else {}
     for key, value in overlay.items():
-        full_path = f"{path}.{key}" if path else key
+        full_path = f"{path}.{key}"
         if key not in merged:
             merged[key] = value
             continue
         existing = merged[key]
         if isinstance(value, dict) and isinstance(existing, dict):
-            merged[key] = _merge_plugin_catalog(existing, value, plugin_id, full_path)
+            merged[key] = _merge_plugin_leaf(existing, value, plugin_id, full_path)
         else:
             collision = (plugin_id, full_path)
             if collision not in _WARNED_COLLISIONS:
@@ -259,11 +385,14 @@ def _core_catalog(static_folder: str, lang: str) -> Optional[dict]:
 
 
 def _merged_catalog(static_folder: str, lang: str) -> Optional[dict]:
-    """The core catalog with every loaded plugin's own catalog merged in (leaf-level, core wins —
-    see `_merge_plugin_catalog`), or None if there is no core catalog for `lang`. The one structure
-    `browser_catalog` serialises as-is and `gettext_or_plugin` walks one dotted key at a time, so a
-    key resolves (or doesn't) exactly the same way in both places — including between two plugins:
-    the second plugin loaded collides with the first's key the same way it would with a core one.
+    """The core catalog with every loaded plugin's own catalog merged in (own-namespace-only,
+    leaf-level within it, core wins — see `_merge_plugin_catalog`), or None if there is no core
+    catalog for `lang`. The one structure `browser_catalog` serialises as-is and `gettext_or_plugin`
+    walks one dotted key at a time, so a key resolves (or doesn't) exactly the same way in both
+    places. Two different plugins can no longer collide with each other (each only ever writes its
+    own top-level id): the only surviving inter-plugin collision is two catalogs sharing the exact
+    same plugin_id across two roots, which resolves first-root-wins the same way a plugin-vs-core
+    collision does.
     """
     core = _core_catalog(static_folder, lang)
     if core is None:
@@ -288,6 +417,10 @@ def _dotted_lookup(catalog: dict, key: str) -> Optional[str]:
 def browser_catalog(static_folder: str, lang: str) -> Optional[str]:
     """The JavaScript the browser loads for `lang`, or None if there is no core catalog.
 
+    This payload is a standalone JS response (`/locales/<lang>.js`), served as its own file and
+    never inlined into an HTML `<script>` body — never change that without re-adding HTML escaping
+    for `</script>` (SEC-W20 F-08).
+
     The JSON is emitted verbatim and still nested, because `t()` walks the dots: flattening it
     here would repeat every key's prefix on the wire for no gain. Served this way — a plain
     script rather than the XHR i18next used to make — the catalog is a parse-time constant, which
@@ -304,7 +437,14 @@ def browser_catalog(static_folder: str, lang: str) -> Optional[str]:
     # Re-serialised without the source file's indentation: this is a blocking script in front
     # of every page script, and the pretty-printing is a third of its weight (140 KB -> 90 KB
     # for French).
-    return f'window.BW_I18N={dumps(merged, separators=(",", ":"), ensure_ascii=False)};window.BW_LANG="{lang}";'
+    #
+    # U+2028/U+2029 are valid JSON but not valid inside a JS statement on engines predating
+    # ES2019 (SEC-W20 F-08): either one raw in a string literal terminates the statement early,
+    # turning the rest of a catalog value into a syntax error at parse time. `ensure_ascii=False`
+    # is what lets them through unescaped in the first place — everything else `dumps` emits is
+    # already JS-safe.
+    body = dumps(merged, separators=(",", ":"), ensure_ascii=False).replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+    return f'window.BW_I18N={body};window.BW_LANG="{lang}";'
 
 
 def init_i18n(app) -> Babel:

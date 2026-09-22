@@ -68,7 +68,7 @@ from app.utils import (
     stop,
     restart_workers,
 )
-from app.i18n import browser_catalog, init_i18n, translated
+from app.i18n import browser_catalog, init_i18n, plugin_catalog_fingerprint, translated
 from app.lang_config import SUPPORTED_LANGUAGES
 
 from app.routes.about import about
@@ -940,6 +940,7 @@ def inject_variables():
     app_env["custom_js"] = custom_js
     app_env["extra_styles"] = extra_styles
     app_env["custom_css"] = custom_css
+    app_env["i18n_catalog_version"] = f"{app_env.get('bw_version', '')}.{plugin_catalog_fingerprint()}"
 
     g._env = app_env
 

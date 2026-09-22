@@ -231,7 +231,7 @@
         {# The browser's message catalog, loaded synchronously so `t()` is defined before any page
            script runs. It used to be an XHR by i18next, which is why every table waited on
            `window.i18nextReady`. Versioned by release so the cached copy turns over on upgrade. #}
-        <script src="{{ url_for('i18n_catalog', lang=ui_locale_code | default('en', true)) }}?v={{ bw_version }}"
+        <script src="{{ url_for('i18n_catalog', lang=ui_locale_code | default('en', true)) }}?v={{ i18n_catalog_version }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/i18n.js') }}"
                 nonce="{{ script_nonce }}"></script>
