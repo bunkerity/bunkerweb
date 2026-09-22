@@ -29,7 +29,7 @@
       "help": "Minimum response size (in bytes) for Brotli compression to apply.",
       "id": "brotli-min-length",
       "label": "Minimum length",
-      "regex": "^[0-9]+\\Z",
+      "regex": "^\\d+$",
       "type": "number"
     },
     "BROTLI_COMP_LEVEL": {
