@@ -109,13 +109,13 @@ def test_the_strip_is_not_nested_inside_a_conditional_block():
     pytest.fail("the strip was never emitted at all")
 
 
-def _producer_lines():
+def _producer_lines(core=CORE):
     seen = []
     for glob in PRODUCER_GLOBS:
-        for path in CORE.glob(glob):
+        for path in core.glob(glob):
             for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
                 if re.search(r"set_header\s+X-SSL-", line, re.I):
-                    seen.append((path.relative_to(ROOT), number, line.strip()))
+                    seen.append((path.relative_to(core), number, line.strip()))
     return seen
 
 
@@ -136,5 +136,27 @@ def test_no_producer_reads_the_incoming_request_header():
     `$http_x_ssl_client_verify` is exactly the forged value the strip removed. A producer reading it
     would re-publish it to the backend and defeat the strip without touching it.
     """
-    offenders = [(path, number, line) for path, number, line in _producer_lines() if "$http_x_ssl" in line.lower()]
+    offenders = _non_handshake_producers(_producer_lines())
     assert not offenders, f"a producer re-publishes a client-supplied header: {offenders}"
+
+
+def _non_handshake_producers(producers):
+    offenders = []
+    for path, number, line in producers:
+        value = re.search(r"set_header\s+X-SSL-[\w-]+\s+([^;]+);", line, re.I)
+        if value is None or not re.fullmatch(r"\$ssl_client_[a-z_]+", value.group(1)):
+            offenders.append((path, number, line))
+    return offenders
+
+
+@pytest.mark.parametrize("source", ["$http_x_ssl_client_verify", "$remote_addr", "SUCCESS"])
+def test_producer_guard_rejects_non_handshake_sources(tmp_path, source):
+    template = tmp_path / "grpc/confs/server-http/grpc.conf"
+    template.parent.mkdir(parents=True)
+    # The live producer form: an inline directive, as the two templates emit it since the header
+    # override tags replaced the Jinja macros.
+    template.write_text("grpc_set_header X-SSL-Client-Verify " + source + ";\n")
+    # Use a real temporary template, so the scanner and guard both participate.
+    found = _producer_lines(tmp_path)
+    assert len(found) == 1
+    assert _non_handshake_producers(found)
