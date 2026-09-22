@@ -190,6 +190,25 @@
 - [BUGFIX] `ui`: a plugin page with `actions.py` but no `pre_render` no longer shows another plugin's data.
 - [MISC] `db`: the 1.6.15-rc3 and final 1.6.15 migration revisions are part of every supported upgrade chain.
 
+- [FEATURE] `config`: `CUSTOM_CONFIGS_DRIFT` controls whether changed projected `.conf` files are overwritten (`overwrite`) or left pending (`refuse`).
+- [FEATURE] `resources`: add built-in `ai-search-crawlers`, `ai-training-crawlers`, `ai-user-fetchers`, `good-bots` and `private-ranges` groups.
+- [FEATURE] `letsencrypt`: DNS-01 now uses `certbot-dns-multi` and the lego provider catalog, adding providers while retaining legacy names.
+- [DEPS] `bunkerweb`: vendored LuaJIT 2.1-20260701 → 2.1-20260724, Mbed TLS 4.1.0 → 4.2.0, lua-cjson 2.1.0.18 → 2.1.0.19, lua-resty-http 0.17.2 → 0.18.0 and lua-resty-openssl 1.8.0 → 1.9.0.
+- [FEATURE] `redis`: `REDIS_SSL_CA` lets Redis/Valkey TLS clients trust a private PEM CA bundle, including the NGINX Lua request path.
+- [FEATURE] `misc`: `SERVICE_MODE` declares whether a service is `standard` or `redirect_only` for PRO quota classification.
+- [FEATURE] `ui`: add a Timings page aggregating per-plugin phase costs from `METRICS_COLLECT_TIMINGS` across the fleet.
+- [FEATURE] `ui`: serve `/robots.txt`, `/security.txt` and `/.well-known/security.txt` without authentication.
+
+- [BUGFIX] `letsencrypt`: `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` now follows its help (`yes` blocks Public Suffix List domains, `no` allows them); 1.6 applied it inverted, so operators who set `no` to get the check must flip it to `yes`.
+- [FEATURE] `misc`: the default server now enforces `ALLOWED_METHODS` too, so an unknown `Host` or a by-IP request using another method is answered 405.
+- [SECURITY] `ui`: sessions without the `write` permission could still create, edit, import and delete custom configs, services and other resources; every write route now checks the permission, not only the database read-only flag.
+- [SECURITY] `ui`: a plugin's translation catalog can only translate keys under its own id and can no longer shadow another plugin's strings; the catalog script escapes line separators.
+- [BUGFIX] `ui`: the browser translation catalog cache is busted when an installed plugin catalog changes, so new plugin strings show up without waiting for the 24-hour cache.
+- [BUGFIX] `plugins`: an invalid `order` block in a plugin manifest is now refused whole by the Lua runtime as well as by the scheduler, instead of being partly applied, and its warnings are capped.
+- [BUGFIX] `api`: cache download filenames are quoted in the `Content-Disposition` header; plugin actions restore `sys.path` exactly; the plugin-name length message says 4 to 64 characters.
+- [BUGFIX] `db`: a database last run by 1.6.16-rc1 now upgrades to 1.7 (its revision is part of the 1.7 chain).
+- [FEATURE] `backup`: the controlled rollback now targets 1.6.15, the release right before 1.7, measured on the four engines (1.6.14 stays offered).
+
 ## v1.6.14~rc1 - 2026/07/??
 
 - [FEATURE] `metrics`: keep blocked-request reports flowing when Redis is full — an OOM-aware circuit breaker stops the log storm, timer stall, and report destruction previously triggered at `maxmemory`; reports blocked during the OOM window stay buffered per worker and sync once memory frees; list/facet updates are now atomic server-side scripts with per-cycle self-healing of facet counters; new `METRICS_REDIS_TTL` setting (default 30 days, `0` to disable) gives metrics keys a TTL refreshed on every sync. Note for `volatile-lru` operators: metrics keys previously had no TTL and were immune to eviction; they are now evictable under sustained memory pressure so Redis can recover instead of rejecting writes forever.
