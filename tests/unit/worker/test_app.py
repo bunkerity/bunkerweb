@@ -107,6 +107,15 @@ def test_route_job_uses_the_manifest_async_flag_when_present():
     assert APP.route_job("task", ("not-a-dict",), {}, {}) == {"queue": "default"}
 
 
+def test_task_routes_is_a_router_sequence_celery_can_evaluate():
+    # Celery's MapRoute does `dict(route)` on a dict's values, so a name-to-callable dict raised
+    # `TypeError: 'function' object is not iterable` on every publish through this app.
+    routes = APP.app.conf.task_routes
+    assert isinstance(routes, (list, tuple)), routes
+    assert all(callable(router) for router in routes), routes
+    assert routes[0]("worker.execute_job", ({"name": "backup-data"},), {}, {}) == {"queue": "heavy"}
+
+
 def test_worker_and_api_route_from_the_same_set():
     """The API used to carry a hand-synced copy of HEAVY_JOBS; both now import one set.
 

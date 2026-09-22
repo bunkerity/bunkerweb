@@ -83,7 +83,10 @@ def route_job(name: str, args: tuple[Any, ...], kwargs: dict[str, Any], options:
     return {"queue": queue_for(job_data.get("name", ""), is_async=job_data.get("async"))}
 
 
-app.conf.task_routes = {"worker.execute_job": route_job}
+# A tuple of router callables, not a name-to-callable dict: Celery reads a dict's values as route
+# mappings (`dict(route)`), so a callable there raised TypeError on every publish that went
+# through this app -- the worker's own re-dispatch of a deferred job among them.
+app.conf.task_routes = (route_job,)
 
 
 _worker_db = None
