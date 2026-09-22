@@ -131,6 +131,7 @@ def test_fetch_cache_file_resolves_a_folder_prefixed_name(monkeypatch):
 
     assert response.status_code == 200
     assert response.body == b"tarball-bytes"
+    assert response.headers["content-disposition"] == 'attachment; filename="folder%3A%2Fvar%2Fcache%2Fbunkerweb%2Fletsencrypt%2Fetc.tgz"'
     # The DB was queried with the exact stored name -- prefix included, proving the round trip.
     assert db.calls == [{"job_name": "certbot-renew", "file_name": STORED_NAME, "service_id": "", "plugin_id": "letsencrypt"}]
 
@@ -142,6 +143,20 @@ def test_fetch_cache_file_404s_when_the_name_genuinely_does_not_match(monkeypatc
     response = ROUTER.fetch_cache_file("global", "letsencrypt", "certbot-renew", ENCODED_NAME, download=True)
 
     assert response.status_code == 404
+
+
+def test_fetch_cache_file_quotes_download_filename(monkeypatch):
+    db = _FakeDB({"report %0d%0a injected.txt": b"content", "backup.json": b"content"})
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.fetch_cache_file("global", "test-plugin", "test-job", "report %0d%0a injected.txt", download=True)
+
+    assert response.status_code == 200
+    assert response.headers["content-disposition"] == 'attachment; filename="report%20%250d%250a%20injected.txt"'
+    plain = ROUTER.fetch_cache_file("global", "test-plugin", "test-job", "backup.json", download=True)
+    assert plain.headers["content-disposition"] == 'attachment; filename="backup.json"'
+    assert "\r" not in response.headers["content-disposition"]
+    assert "\n" not in response.headers["content-disposition"]
 
 
 def test_delete_cache_files_reaches_the_db_with_the_stored_name(monkeypatch):

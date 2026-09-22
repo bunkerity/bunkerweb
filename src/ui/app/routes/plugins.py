@@ -357,8 +357,8 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
     # dotted name, i.e. a submodule of a package that does not exist.
     module_name = f"bw_ui_actions_{plugin.replace('.', '_')}_{uuid4().hex}"
 
-    # `sys_path.append` is the first statement under the `try` on purpose: the `except` and the
-    # `finally` below both pop, and a failure before the append would pop an unrelated entry.
+    # `sys_path.append` is the first statement under the `try` so cleanup can remove this exact
+    # entry even when plugin code changes the path itself.
     try:
         sys_path.append(tmp_dir.as_posix())
         spec = spec_from_file_location(module_name, action_file)
@@ -366,7 +366,8 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         sys_modules[module_name] = actions
         spec.loader.exec_module(actions)
     except BaseException as e:
-        sys_path.pop()
+        if tmp_dir.as_posix() in sys_path:
+            sys_path.remove(tmp_dir.as_posix())
         sys_modules.pop(module_name, None)
         if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
             rmtree(tmp_dir, ignore_errors=True)
@@ -414,7 +415,8 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         message = "An error occurred while executing the plugin"
         exception = e
     finally:
-        sys_path.pop()
+        if tmp_dir.as_posix() in sys_path:
+            sys_path.remove(tmp_dir.as_posix())
         sys_modules.pop(module_name, None)
 
         # Only clean up temporary directories that aren't permanent plugin paths
@@ -876,7 +878,7 @@ def custom_plugin_page(plugin: str):
     rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
 
     if not PLUGIN_NAME_RX.match(plugin):
-        return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
+        return handle_error("Invalid plugin id, (must be between 4 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
 
     if request.method == "POST":
         if not current_user.admin:

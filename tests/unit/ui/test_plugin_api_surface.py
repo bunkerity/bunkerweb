@@ -348,6 +348,33 @@ def test_actions_receive_the_accessor(tmp_path, plugins_route):
     client.get_services.assert_called_with(with_drafts=True)
 
 
+def test_run_action_removes_only_its_own_sys_path_entry(tmp_path, plugins_route):
+    module, _ = plugins_route
+    owned_path = str(tmp_path / "plugin-owned")
+    ui_dir = _actions_plugin(tmp_path, "pathclean", f"import sys\nsys.path.append({owned_path!r})\ndef pre_render(**kwargs):\n    return {{}}\n")
+    before = list(sys.path)
+
+    try:
+        assert _run(module, ui_dir, "pathclean", "pre_render")["status"] == "ok"
+        assert sys.path == before + [owned_path]
+    finally:
+        while owned_path in sys.path:
+            sys.path.remove(owned_path)
+
+
+def test_invalid_plugin_message_matches_the_four_character_minimum(plugins_route, monkeypatch):
+    module, _ = plugins_route
+    monkeypatch.setattr(module, "handle_error", lambda message, _page: message)
+
+    from flask import Flask
+
+    app = Flask(__name__)
+    with app.test_request_context("/"):
+        message = module.custom_plugin_page.__wrapped__("abc")
+
+    assert "between 4 and 64 characters" in message
+
+
 def test_actions_dereferencing_db_fail_with_the_actionable_message(tmp_path, plugins_route, caplog):
     """(b) `kwargs["db"].get_config()` -- what `letsencrypt` and 6 PRO plugins still do."""
     module, _ = plugins_route

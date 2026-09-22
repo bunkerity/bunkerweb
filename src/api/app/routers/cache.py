@@ -1,6 +1,7 @@
 from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, Response
@@ -113,7 +114,7 @@ def fetch_cache_file(
         content = data.get("data") if isinstance(data, dict) else data
         if not isinstance(content, (bytes, bytearray)):
             content = b""
-        headers = {"Content-Disposition": f"attachment; filename={fname}"}
+        headers = {"Content-Disposition": f'attachment; filename="{quote(fname, safe="")}"'}
         return Response(status_code=200, content=content, media_type="application/octet-stream", headers=headers)
     # Return printable content only
     content = data.get("data") if isinstance(data, dict) else data
