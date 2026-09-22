@@ -62,11 +62,13 @@ PRERELEASE_VERSION = PRERELEASE_TAG.lstrip("v")
 RC3_TAG = "v1.6.15-rc3"
 RC3_VERSION = RC3_TAG.lstrip("v")
 
+# The first pre-release after the final 1.6.15: version-stamp only, but a real installable entry point whose
+# stamped version `entrypoint.sh` must resolve by filename or refuse to boot.
+RC1_1_6_16_TAG = "v1.6.16-rc1"
+RC1_1_6_16_VERSION = RC1_1_6_16_TAG.lstrip("v")
+
 FINAL_1_6_15_TAG = "v1.6.15"
 FINAL_1_6_15_VERSION = FINAL_1_6_15_TAG.lstrip("v")
-# No v1.6.15 tag was published on 2026-09-21. Replace this with the tag once it
-# exists, after asserting that it resolves to this commit or carries an identical model.py.
-FINAL_1_6_15_REF = "8132fdf5"
 
 
 def baseline_metadata(tag=None):
@@ -77,8 +79,7 @@ def baseline_metadata(tag=None):
     `create_all`-ing the current model, just less obvious.
     """
     tag = tag or BASELINE_TAG
-    model_ref = FINAL_1_6_15_REF if tag == FINAL_1_6_15_TAG else tag
-    source = run(["git", "show", f"{model_ref}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    source = run(["git", "show", f"{tag}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     module = ModuleType(f"bw_model_{tag.lstrip('v').replace('.', '_').replace('-', '_')}")
     exec(compile(source, f"<{tag}:src/common/db/model.py>", "exec"), module.__dict__)  # noqa: S102
     return module.Base.metadata

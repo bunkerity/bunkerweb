@@ -68,6 +68,8 @@ from db.alembic_baseline import (
     BASELINE_VERSION,
     FINAL_1_6_15_TAG,
     FINAL_1_6_15_VERSION,
+    RC1_1_6_16_TAG,
+    RC1_1_6_16_VERSION,
     LEGACY_TAG,
     PRERELEASE_TAG,
     PRERELEASE_VERSION,
@@ -188,6 +190,7 @@ STARTING_POINTS = {
     PRERELEASE_TAG: PRERELEASE_VERSION,
     RC3_TAG: RC3_VERSION,
     FINAL_1_6_15_TAG: FINAL_1_6_15_VERSION,
+    RC1_1_6_16_TAG: RC1_1_6_16_VERSION,
 }
 
 # The engines each start may run on. The 1.6.13 one runs everywhere. The 1.5.0-beta one runs
@@ -698,5 +701,13 @@ def test_no_engine_directory_has_two_migrations_for_the_same_version():
 def test_the_final_1_6_15_release_is_resolvable_for_every_engine(engine):
     """A database stamped by the final 1.6.15 release must have an entry into the 1.7 chain."""
     revision = revision_for("1.6.15", engine)
+
+    assert revision
+
+
+@pytest.mark.parametrize("engine", ("sqlite", "mariadb", "mysql", "postgresql"))
+def test_the_1_6_16_rc1_prerelease_is_resolvable_for_every_engine(engine):
+    """A database stamped by the 1.6.16~rc1 prerelease must have an entry into the 1.7 chain."""
+    revision = revision_for("1.6.16~rc1", engine)
 
     assert revision
