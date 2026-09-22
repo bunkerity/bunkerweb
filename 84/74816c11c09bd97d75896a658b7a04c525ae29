@@ -1,0 +1,47 @@
+src/common/core/jobs/jobs/push-configs.py
+  s_572f615b7168f2::t_2d9e5454e12f27 43,456-464,549
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_572f615b7168f2::t_2d9e5454e12f27 1381
+  s_572f615b7168f2::t_36daebcdca58c2 37
+tests/unit/push_configs/test_pending_changes.py
+  s_572f615b7168f2::t_2d9e5454e12f27 20,44-45
+tests/unit/push_configs/test_cache_push_publication_lock.py
+  s_572f615b7168f2::t_98d7bbb52d0cb0 1-84
+tests/unit/push_configs/test_lease.py
+  s_572f615b7168f2::t_2d9e5454e12f27 15,37-38
+tests/unit/letsencrypt/test_certbot_cache_publication_lock.py
+  s_572f615b7168f2::t_98d7bbb52d0cb0 1-84
+tests/unit/push_configs/test_push_configs_drift.py
+  s_572f615b7168f2::t_2d9e5454e12f27 19,46-47
+tests/unit/common/test_cache_publication_lock.py
+  s_795e2ccdb6801b::t_f80dbb3a040c17 239-284
+CHANGELOG.md
+  s_795e2ccdb6801b::t_4898d5585e5439 50
+src/common/core/letsencrypt/jobs/certbot-renew.py
+  s_572f615b7168f2::t_36daebcdca58c2 17
+  s_572f615b7168f2::t_2d9e5454e12f27 257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8474816c11c09bd97d75896a658b7a04c525ae29",
+  "prompts": {},
+  "sessions": {
+    "s_572f615b7168f2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ca1d-e460-7e11-8e9c-a87f1d97a30c",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
