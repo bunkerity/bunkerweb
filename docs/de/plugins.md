@@ -407,7 +407,7 @@ Jeder Job hat die folgenden Felder:
 | `file`  |      ja       | string | Name der Datei im Jobs-Ordner.                                                                                                                      |
 | `every` |      ja       | string | Häufigkeit der Job-Planung: `minute`, `hour`, `day`, `week` oder `once` (keine Häufigkeit, nur einmal vor der (Neu-)Generierung der Konfiguration). |
 | `reload` | nein | bool | Ob eine Änderung durch diesen Job einen Reload der BunkerWeb-Instanzen auslösen soll. Standardmäßig `false`. |
-| `async` | nein | bool | Der Job wird an die `heavy`-Worker-Queue geleitet; beide Queues teilen den Standard-Pool. Isolieren Sie sie mit `WORKER_QUEUES=heavy` oder `WORKER_QUEUES=default`. Standardmäßig `false`. |
+| `async` | nein | bool | Ob der Job an die `heavy`-Worker-Queue geleitet wird. Standardmäßig laufen getrennte default/heavy-Prozesse; siehe [Worker-Queue-Isolierung](concepts.md#worker-queue-isolation). Standardmäßig `false`. |
 | `regenerate` | nein | bool | Ob eine Änderung durch diesen Job erfordert, dass die NGINX-Konfiguration **erneut gerendert** wird, statt nur ausgeliefert zu werden. Standardmäßig `false`. |
 
 Core-Heavy-Jobs sind `backup-data`, `bunkernet-register`, `bunkernet-data`, `push-configs`, `certbot-new`, `certbot-renew`, `download-plugins`, `download-crs-plugins` und `download-pro-plugins`; die Weiterleitung folgt dem Manifest-Flag `async`, nicht dem Jobnamen.

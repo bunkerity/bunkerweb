@@ -88,17 +88,21 @@
 
 !!! warning "The Celery worker was not enabled on some installs"
 
-    `bunkerweb-worker` executes every job the scheduler dispatches. On installs where the
+    `bunkerweb-worker` and `bunkerweb-worker-heavy` execute every job the scheduler dispatches, on
+    the `default` and `heavy` queues respectively — see
+    [Worker queue isolation](concepts.md#worker-queue-isolation). On installs where the
     installer deferred service startup — `--redis`, an external database, CrowdSec, custom DNS
-    resolvers, and every `--manager` install — it was never enabled, so the stack came up
-    healthy and ran no background jobs at all. The installer now enables it alongside the
-    scheduler on those paths. Verify after upgrading:
+    resolvers, and every `--manager` install — they were never enabled, so the stack came up
+    healthy and ran no background jobs at all. The installer now enables both units alongside the
+    scheduler on those paths, and both need restarting after an upgrade that touches their
+    configuration. Verify after upgrading:
 
     ```bash
-    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker bunkerweb-worker-heavy
+    systemctl is-active bunkerweb-worker bunkerweb-worker-heavy
     ```
 
-    If it is missing or idle, see
+    If either is missing or idle, see
     [Background jobs never run](troubleshooting.md#background-jobs).
 
 !!! warning "The Docker, autoconf and Kubernetes stacks need three new components"
@@ -245,6 +249,12 @@ you see once 1.7 is running.
     - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`**: See the warning above for the 1.7 behavior and required setting.
     - **`ALLOWED_METHODS`**: the default has been `GET|POST|HEAD|QUERY` since 1.6.14, and in 1.7 the default server enforces it too: an unknown `Host` or a by-IP request using any other method is answered 405. Set it explicitly if you are coming from 1.6.13 or earlier and need the old method list.
     - **`KEEP_CONFIG_ON_RESTART`**: the default changed from `no` to `yes`, so the existing configuration is preserved on restart instead of generating a temporary configuration each time. Set it to `no` to keep the 1.6 reset behavior.
+    - **Stream upstream TLS**: a stream service with `REVERSE_PROXY_SSL_VERIFY: "yes"`, or a nonempty `REVERSE_PROXY_SSL_PROTOCOLS`/`REVERSE_PROXY_SSL_CIPHERS`, now enables TLS to the backend (`proxy_ssl on`) even without a client certificate pair. Previously those settings could be accepted while the connection stayed plaintext. Confirm the upstream port speaks TLS, or remove the setting to keep a plaintext backend.
+    - **gRPC gets its own upstream identity**: gRPC no longer reads `REVERSE_PROXY_SSL_CLIENT_*` for mutual TLS; it has its own `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` (or their `_DATA` variants), selected by `GRPC_SSL_CLIENT_CERT_PRIORITY`. Saved 1.6.15 values of `GRPC_SSL_CERT[_DATA/_PRIORITY]` and `GRPC_SSL_KEY[_DATA]` migrate to those names automatically (see the rename note below). A 1.7 pre-release service that relied on the reverse-proxy pair for gRPC must set the `GRPC_SSL_CLIENT_*` settings explicitly.
+    - **Custom headers now replace generated defaults (#3936)**: a `REVERSE_PROXY_HEADERS` or `GRPC_HEADERS` entry with the same name as a generated header (Host, forwarded client information, forwarded mTLS headers, gRPC `TE`, reverse-proxy `Upgrade`/`Connection`) replaces it case-insensitively instead of duplicating it; an explicit empty value suppresses that header. Review overrides that were meant to supplement, rather than replace, the generated value.
+    - **`underscores_in_headers` is emitted once**: `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` and `GRPC_UNDERSCORES_IN_HEADERS` now share one server-wide `underscores_in_headers` directive, rendered by the misc plugin. Either family requesting it enables it for the whole service; custom configs emitting the same directive should be reviewed. Reverse-proxy services also no longer force the directive off, so an `http`-level custom config setting `underscores_in_headers on;` now applies to them too.
+    - **Upstream client-certificate settings were renamed in both families**: `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` are now `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, and `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` are now `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Saved global and service values migrate automatically; the rename is **one-way** — a controlled downgrade to 1.6.15 has no reverse mapping, so the `CLIENT_*` values are cascade-deleted.
+    - **A dedicated heavy worker process**: `WORKER_QUEUES` now defaults to `default`; long jobs run in a second process controlled by the new `WORKER_HEAVY_*` settings. An explicit `WORKER_QUEUES=default,heavy` override keeps the previous single-process layout — change it to `default` to gain isolation, or set `WORKER_HEAVY_QUEUES=` to retain one process deliberately. Restart the worker container, the All-In-One container, or both `bunkerweb-worker` and `bunkerweb-worker-heavy` Linux units after changing these settings.
 
 !!! info "A reserved `default-server` service appears in multisite installs"
 

@@ -408,7 +408,7 @@ cd myplugin
 | `file`  |  是   | 字符串 | 作业文件夹内的文件名。                                                                            |
 | `every` |  是   | 字符串 | 作业调度频率：`minute`、`hour`、`day`、`week` 或 `once`（无频率，仅在（重新）生成配置之前一次）。 |
 | `reload` | 否 | bool | 该任务的变更是否应触发 BunkerWeb 实例的重载。默认为 `false`。 |
-| `async` | 否 | bool | 该任务会路由到 `heavy` worker 队列；两个队列共享默认 worker 池。可使用 `WORKER_QUEUES=heavy` 或 `WORKER_QUEUES=default` 隔离。默认为 `false`。 |
+| `async` | 否 | bool | 该任务是否路由到 `heavy` worker 队列。默认情况下运行独立的 default/heavy 进程；参见[Worker 队列隔离](concepts.md#worker-queue-isolation)。默认为 `false`。 |
 | `regenerate` | 否 | bool | 该任务的变更是否需要**重新渲染** NGINX 配置，而不仅仅是下发。默认为 `false`。 |
 
 核心 heavy 任务包括 `backup-data`、`bunkernet-register`、`bunkernet-data`、`push-configs`、`certbot-new`、`certbot-renew`、`download-plugins`、`download-crs-plugins` 和 `download-pro-plugins`；路由依据清单的 `async` 标志，而不是任务名称。

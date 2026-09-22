@@ -83,17 +83,21 @@
 
 !!! warning "El worker de Celery no estaba habilitado en algunas instalaciones"
 
-    `bunkerweb-worker` ejecuta cada job que despacha el scheduler. En instalaciones donde el instalador
-    aplazó el arranque de servicios — `--redis`, una base de datos externa, CrowdSec, resolutores DNS
-    personalizados, y toda instalación `--manager` — nunca se habilitó, así que el stack arrancaba sano
-    y no ejecutaba ningún job en segundo plano. El instalador ahora lo habilita junto al scheduler en
-    esos casos. Verifica tras actualizar:
+    `bunkerweb-worker` y `bunkerweb-worker-heavy` ejecutan cada job que despacha el scheduler, en las
+    colas `default` y `heavy` respectivamente — véase
+    [Aislamiento de colas de workers](concepts.md#worker-queue-isolation). En instalaciones donde el
+    instalador aplazó el arranque de servicios — `--redis`, una base de datos externa, CrowdSec,
+    resolutores DNS personalizados, y toda instalación `--manager` — nunca se habilitaron, así que el
+    stack arrancaba sano y no ejecutaba ningún job en segundo plano. El instalador ahora habilita ambas
+    unidades junto al scheduler en esos casos, y ambas deben reiniciarse tras una actualización que
+    afecte a su configuración. Verifica tras actualizar:
 
     ```bash
-    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker bunkerweb-worker-heavy
+    systemctl is-active bunkerweb-worker bunkerweb-worker-heavy
     ```
 
-    Si no existe o está inactivo, consulta
+    Si alguna de las dos no existe o está inactiva, consulta
     [Los jobs en segundo plano nunca se ejecutan](troubleshooting.md#background-jobs).
 
 !!! warning "Los stacks Docker, autoconf y Kubernetes necesitan tres componentes nuevos"
@@ -254,6 +258,12 @@ que verás con 1.7 en ejecución.
     - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`**: Consulta la advertencia anterior para conocer el comportamiento de 1.7 y el ajuste requerido.
     - **`ALLOWED_METHODS`**: el valor predeterminado es `GET|POST|HEAD|QUERY` desde 1.6.14, y en 1.7 el servidor predeterminado también lo aplica: una `Host` desconocida o una petición por IP con cualquier otro método recibe 405. Establécelo explícitamente si vienes de 1.6.13 o anterior y necesitas la lista de métodos antigua.
     - **`KEEP_CONFIG_ON_RESTART`**: el valor predeterminado cambió de `no` a `yes`, por lo que la configuración existente se conserva al reiniciar en lugar de generar una temporal cada vez. Establécelo en `no` para mantener el comportamiento de restablecimiento de 1.6.
+    - **TLS de upstream en stream**: un servicio stream con `REVERSE_PROXY_SSL_VERIFY: "yes"`, o un `REVERSE_PROXY_SSL_PROTOCOLS`/`REVERSE_PROXY_SSL_CIPHERS` no vacío, ahora habilita TLS hacia el backend (`proxy_ssl on`) incluso sin un par de certificado de cliente. Antes esos ajustes podían aceptarse mientras la conexión seguía en texto plano. Confirme que el puerto del upstream habla TLS, o elimine el ajuste para conservar un backend en texto plano.
+    - **gRPC obtiene su propia identidad de upstream**: gRPC ya no lee `REVERSE_PROXY_SSL_CLIENT_*` para TLS mutuo; tiene sus propios `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` (o sus variantes `_DATA`), seleccionados mediante `GRPC_SSL_CLIENT_CERT_PRIORITY`. Los valores guardados de 1.6.15 de `GRPC_SSL_CERT[_DATA/_PRIORITY]` y `GRPC_SSL_KEY[_DATA]` se migran automáticamente a esos nombres (véase la nota sobre el renombrado más abajo). Un servicio de una versión preliminar de 1.7 que dependiera del par del reverse proxy para gRPC debe establecer explícitamente los ajustes `GRPC_SSL_CLIENT_*`.
+    - **Los encabezados personalizados ahora reemplazan los valores generados por defecto (#3936)**: una entrada de `REVERSE_PROXY_HEADERS` o `GRPC_HEADERS` con el mismo nombre que un encabezado generado (Host, información de cliente reenviada, encabezados mTLS reenviados, `TE` de gRPC, `Upgrade`/`Connection` del reverse proxy) lo reemplaza sin distinguir mayúsculas/minúsculas en lugar de duplicarlo; un valor vacío explícito suprime ese encabezado. Revise los overrides pensados para complementar, en lugar de reemplazar, el valor generado.
+    - **`underscores_in_headers` se emite una sola vez**: `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` y `GRPC_UNDERSCORES_IN_HEADERS` ahora comparten una única directiva `underscores_in_headers` a nivel de servidor, renderizada por el plugin misc. Si cualquiera de las dos familias la solicita, se habilita para todo el servicio; revise las configuraciones personalizadas que emitan la misma directiva. Los servicios reverse proxy tampoco fuerzan ya la directiva a desactivada, por lo que una configuración personalizada a nivel `http` con `underscores_in_headers on;` ahora también se les aplica.
+    - **Los ajustes del certificado de cliente del upstream fueron renombrados en ambas familias**: `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` ahora son `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, y `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` ahora son `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Los valores globales y de servicio guardados se migran automáticamente; el renombrado es de **una sola dirección** — un downgrade controlado a 1.6.15 no tiene mapeo inverso, por lo que los valores `CLIENT_*` se eliminan en cascada.
+    - **Un proceso worker pesado dedicado**: `WORKER_QUEUES` ahora tiene por defecto `default`; los jobs largos se ejecutan en un segundo proceso controlado por los nuevos ajustes `WORKER_HEAVY_*`. Un override explícito `WORKER_QUEUES=default,heavy` mantiene el diseño de proceso único anterior — cámbielo a `default` para obtener aislamiento, o establezca `WORKER_HEAVY_QUEUES=` para conservar deliberadamente un solo proceso. Reinicie el contenedor worker, el contenedor All-In-One, o ambas unidades Linux `bunkerweb-worker` y `bunkerweb-worker-heavy` tras cambiar estos ajustes.
 
 !!! info "Un servicio reservado `default-server` aparece en instalaciones multisitio"
 

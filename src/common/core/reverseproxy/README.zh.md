@@ -40,9 +40,10 @@
 下面的 `REVERSE_PROXY_SSL_VERIFY` 系列设置校验的是*后端的*证书。若还要向后端出示证书——即双向 TLS——请配置客户端证书对：
 
 - 使用 `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` 指定调度器可读的文件路径，或使用 `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` 直接给出 base64 或明文 PEM，由 `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY`（`file` 或 `data`）决定取哪一种。
-- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。
+- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。BunkerWeb 会校验 CA 证书包中的每一张证书，并检查上游客户端证书是否与其私钥匹配；临时的文件读取失败会保留已缓存的 TLS 材料并报告任务失败，而清空设置或提供无效材料则会移除受影响的缓存。
 - **两半都必须提供。** 只有证书而没有对应的私钥（或反之）会被拒绝，而不会只应用一半，因为 NGINX 要么需要这两条指令，要么一条都不要。
-- 该身份是**按服务生效的，并与 gRPC 和 stream 共享**：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证。在 stream 上下文中，它同时也是启用到后端的 TLS（`proxy_ssl on`）的开关，因此未配置客户端证书对的服务会保持其现有的明文行为。
+- 反向代理的客户端身份按服务生效，供其 HTTP 和 stream 反向代理使用。gRPC 拥有自己的身份，通过 `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` 或其 `_DATA` 对应项配置，由 `GRPC_SSL_CLIENT_CERT_PRIORITY` 选择来源。
+- 在 stream 上下文中，已缓存的客户端证书/私钥对、`REVERSE_PROXY_SSL_VERIFY=yes`、非空的协议或加密套件设置都会启用到后端的 TLS（`proxy_ssl on`）。未配置以上任何一项的服务会保持其现有的明文行为。仅设置 CA 路径或 SNI 不会启用 stream TLS。
 - 清空这些设置后，下一次运行会删除这些文件，双向 TLS 随之关闭。
 
 这与 `mtls` 插件无关，后者认证的是*连接到 BunkerWeb 的客户端*——方向正好相反。
@@ -135,6 +136,10 @@
     | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | 否 | **客户端证书数据：** 直接以 base64 或 PEM 形式提供的客户端证书（例如通过 Web 界面）。 |
     | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | 否 | **客户端私钥路径：** 与客户端证书配对的 PEM 私钥路径，需可被调度器读取。 |
     | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | 否 | **客户端私钥数据：** 直接以 base64 或 PEM 形式提供的客户端私钥。条件允许时请优先使用文件路径：在此填入的私钥会作为设置值存储。 |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | 否 | **CRL 路径：** worker 可读的 PEM 证书吊销列表路径。优先于 `REVERSE_PROXY_SSL_CRL_DATA`；路径已设置但文件缺失时视为错误，不会回退使用数据；仅在启用上游证书验证时生效。 |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | 否 | **CRL 数据：** 以 base64 或明文 PEM 形式提供的证书吊销列表。仅在 `REVERSE_PROXY_SSL_CRL` 为空时使用。 |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | 否 | **上游 TLS 协议：** 提供给上游的 TLS 版本，以空格分隔，例如 `TLSv1.2 TLSv1.3`。留空则保持 NGINX 默认值。 |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | 否 | **上游 TLS 加密套件：** 提供给上游的 OpenSSL 加密套件字符串，例如 `HIGH:!MD5`。留空则保持 NGINX 默认值。 |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -143,8 +148,11 @@
         - **必需：** 必须提供受信任证书；NGINX 对上游验证没有隐式的系统存储。要验证公共上游，请将路径指向系统 CA 包（例如 `/etc/ssl/certs/ca-certificates.crt`）。
         - **名称：** 默认针对从 `REVERSE_PROXY_HOST` 获取的主机进行检查。如果后端证书的 CN/SAN 不同，请将 `REVERSE_PROXY_SSL_SNI` 设置为 `yes`，并将 `REVERSE_PROXY_SSL_SNI_NAME` 设置为预期名称。
         - **故障安全：** 如果没有可用的有效受信任证书，则会为该服务器禁用验证，而不是中断每个上游连接。
+        - **吊销：** 将 `REVERSE_PROXY_SSL_CRL` 设为 PEM 吊销列表路径，或通过 `REVERSE_PROXY_SSL_CRL_DATA` 提供 base64/明文 PEM。两者都设置时路径优先，没有单独的 CRL 优先级设置。worker 会验证并分发该 CRL。仅当 `REVERSE_PROXY_SSL_VERIFY=yes` 且存在有效的已缓存受信任 CA 时，NGINX 才会应用它。
 
         这些设置按服务生效：一个服务的所有上游条目（`REVERSE_PROXY_HOST`、`REVERSE_PROXY_HOST_1`、……）共享相同的验证配置。
+
+        TLS 协议、加密套件和吊销设置同样按服务生效，覆盖该服务的所有反向代理 location 及其挂载的上游池，无法为单个池分别选择不同的 TLS 策略。
 
     !!! info "SNI 解释"
         服务器名称指示 (SNI) 是 TLS 的一个扩展，它允许客户端在握手过程中指定它试图连接的主机名。这使服务器能够在同一个 IP 地址和端口上呈现多个证书，从而允许从单个 IP 地址提供多个安全 (HTTPS) 网站，而无需所有这些网站都使用相同的证书。
@@ -186,10 +194,10 @@
 
     | 设置                                   | 默认值    | 上下文    | 多选 | 描述                                                              |
     | -------------------------------------- | --------- | --------- | ---- | ----------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |           | multisite | 是   | **自定义标头：** 发送到后端的 HTTP 标头，用分号分隔。             |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | 是   | **自定义标头：** 发送到后端的 HTTP 标头，用分号分隔；匹配的生成标头（Host、转发的客户端信息、转发的 mTLS 标头、Upgrade/Connection 等）会被不区分大小写地替换，而不是重复添加。显式设为空值会抑制该标头。 |
     | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | 是   | **隐藏标头：** 从后端接收时向客户端隐藏的 HTTP 标头。             |
     | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | 是   | **客户端标头：** 发送给客户端的 HTTP 标头，用分号分隔。           |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | 否   | **标头中使用下划线：** 启用或禁用 `underscores_in_headers` 指令。 |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | 否   | **标头中使用下划线：** 启用或禁用 `underscores_in_headers` 指令。该指令在服务器范围内与 gRPC 和 misc 插件共享：只要某个服务为其中一个 location 启用，就会对整个服务生效。 |
 
     !!! warning "安全注意事项"
         使用反向代理功能时，请谨慎转发哪些标头到您的后端应用程序。某些标头可能会暴露有关您的基础架构的敏感信息或绕过安全控制。

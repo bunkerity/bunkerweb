@@ -228,6 +228,23 @@ Si vous utilisez l'interface utilisateur Web, vous pouvez gérer les tâches du 
   <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
 
+### Isolation des files de workers {#worker-queue-isolation}
+
+Le worker Docker, l'image All-In-One et les paquets Linux démarrent des processus Celery séparés pour les files `default` et `heavy`. Le processus par défaut dispose de deux slots d'exécution ; le processus heavy en a un seul, de sorte que les jobs longs routés vers `heavy` n'occupent pas les slots du processus par défaut. Sous Linux, les processus s'exécutent en tant que `bunkerweb-worker` et `bunkerweb-worker-heavy`, en partageant `/etc/bunkerweb/worker.env`.
+
+| Variable d'environnement | Défaut | Rôle |
+| --- | --- | --- |
+| `WORKER_QUEUES` | `default` | Files consommées par le premier processus. |
+| `WORKER_CONCURRENCY` | `2` | Slots d'exécution dans le premier processus. |
+| `WORKER_MAX_MEMORY_KB` | `300000` | Seuil de recyclage mémoire par enfant, en KiB. |
+| `WORKER_HEAVY_QUEUES` | `heavy` | Files consommées par le second processus ; une valeur explicitement vide le désactive. |
+| `WORKER_HEAVY_CONCURRENCY` | `1` | Slots d'exécution dans le second processus. |
+| `WORKER_HEAVY_MAX_MEMORY_KB` | Valeur de `WORKER_MAX_MEMORY_KB` | Seuil de recyclage mémoire du second processus. |
+| `WORKER_HEAVY_HOSTNAME` | `worker-heavy@%h` | Nom d'hôte Celery du second processus. |
+| `WORKER_FAILOVER_GRACE` | `30` | Docker : secondes laissées au processus survivant pour s'arrêter après l'échec d'un master, avant de forcer sa sortie ; un arrêt normal du conteneur reste à chaud. |
+
+Gardez les deux listes de files disjointes pour préserver l'isolation. Les déploiements existants qui définissent explicitement `WORKER_QUEUES=default,heavy` conservent cette surcharge : changez-la en `default` pour isoler les jobs heavy. Pour conserver l'ancienne disposition à processus unique, définissez à la fois `WORKER_QUEUES=default,heavy` et `WORKER_HEAVY_QUEUES=`. Redémarrez le conteneur worker, le conteneur All-In-One, ou les deux services worker Linux après avoir modifié ces valeurs. Les seuils mémoire recyclent les enfants après une tâche ; ce ne sont pas des limites strictes de mémoire process.
+
 ### Vérification de l'état des instances {#instances-health-check}
 
 Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.

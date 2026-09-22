@@ -82,18 +82,22 @@
 
 !!! warning "Le worker Celery n'était pas activé sur certaines installations"
 
-    `bunkerweb-worker` exécute chaque job envoyé par le scheduler. Sur les installations où
+    `bunkerweb-worker` et `bunkerweb-worker-heavy` exécutent chaque job envoyé par le scheduler, sur
+    les files `default` et `heavy` respectivement — voir
+    [Isolation des files de workers](concepts.md#worker-queue-isolation). Sur les installations où
     l'installeur différait le démarrage des services — `--redis`, une base de données externe,
-    CrowdSec, des résolveurs DNS personnalisés, et toute installation `--manager` — il n'était jamais
-    activé, si bien que la stack démarrait saine sans exécuter le moindre job en arrière-plan.
-    L'installeur l'active désormais aux côtés du scheduler sur ces chemins. Vérifiez après la mise à
-    niveau :
+    CrowdSec, des résolveurs DNS personnalisés, et toute installation `--manager` — ils n'étaient
+    jamais activés, si bien que la stack démarrait saine sans exécuter le moindre job en arrière-plan.
+    L'installeur active désormais les deux unités aux côtés du scheduler sur ces chemins, et les deux
+    doivent être redémarrées après une mise à niveau qui touche leur configuration. Vérifiez après la
+    mise à niveau :
 
     ```bash
-    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker bunkerweb-worker-heavy
+    systemctl is-active bunkerweb-worker bunkerweb-worker-heavy
     ```
 
-Si le Worker est absent ou inactif, consultez [Les jobs ne s'exécutent jamais](troubleshooting.md#background-jobs), également applicable aux conteneurs.
+Si l'une des deux est absente ou inactive, consultez [Les jobs ne s'exécutent jamais](troubleshooting.md#background-jobs), également applicable aux conteneurs.
 
 !!! warning "Docker, autoconf et Kubernetes nécessitent trois composants supplémentaires"
 
@@ -188,6 +192,12 @@ Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pou
     - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`** : consultez l’avertissement ci-dessus pour connaître le comportement en 1.7 et le réglage requis.
     - **`ALLOWED_METHODS`** : la valeur par défaut est `GET|POST|HEAD|QUERY` depuis 1.6.14 et, en 1.7, le serveur par défaut l’applique également : un `Host` inconnu ou une requête par IP utilisant toute autre méthode reçoit 405. Définissez-la explicitement si vous venez de 1.6.13 ou d’une version antérieure et devez conserver l’ancienne liste de méthodes.
     - **`KEEP_CONFIG_ON_RESTART`** : la valeur par défaut passe de `no` à `yes`, de sorte que la configuration existante est conservée au redémarrage au lieu de générer une configuration temporaire à chaque fois. Définissez `no` pour conserver le comportement de réinitialisation de 1.6.
+    - **TLS amont en stream** : un service stream avec `REVERSE_PROXY_SSL_VERIFY: "yes"`, ou un `REVERSE_PROXY_SSL_PROTOCOLS`/`REVERSE_PROXY_SSL_CIPHERS` non vide, active désormais TLS vers le backend (`proxy_ssl on`) même sans paire de certificat client. Auparavant, ces paramètres pouvaient être acceptés tandis que la connexion restait en clair. Vérifiez que le port amont parle TLS, ou retirez le paramètre pour conserver un backend en clair.
+    - **gRPC obtient sa propre identité amont** : gRPC ne lit plus `REVERSE_PROXY_SSL_CLIENT_*` pour le TLS mutuel ; il possède ses propres `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` (ou leurs variantes `_DATA`), sélectionnées par `GRPC_SSL_CLIENT_CERT_PRIORITY`. Les valeurs 1.6.15 enregistrées de `GRPC_SSL_CERT[_DATA/_PRIORITY]` et `GRPC_SSL_KEY[_DATA]` sont automatiquement migrées vers ces noms (voir la note sur le renommage ci-dessous). Un service d'une préversion 1.7 qui s'appuyait sur la paire du reverse proxy pour gRPC doit définir explicitement les paramètres `GRPC_SSL_CLIENT_*`.
+    - **Les en-têtes personnalisés remplacent désormais les valeurs générées par défaut (#3936)** : une entrée `REVERSE_PROXY_HEADERS` ou `GRPC_HEADERS` portant le même nom qu'un en-tête généré (Host, informations client transmises, en-têtes mTLS transmis, `TE` gRPC, `Upgrade`/`Connection` du reverse proxy) le remplace sans distinction de casse au lieu de le dupliquer ; une valeur explicitement vide supprime cet en-tête. Vérifiez les surcharges destinées à compléter, plutôt qu'à remplacer, la valeur générée.
+    - **`underscores_in_headers` n'est émis qu'une seule fois** : `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` et `GRPC_UNDERSCORES_IN_HEADERS` partagent désormais une seule directive `underscores_in_headers` à l'échelle du serveur, rendue par le plugin misc. Si l'une des deux familles la demande, elle s'applique à tout le service ; vérifiez les configurations personnalisées qui émettent la même directive. Les services reverse proxy ne forcent plus non plus la directive à désactivée, si bien qu'une configuration personnalisée `http` définissant `underscores_in_headers on;` s'applique désormais aussi à eux.
+    - **Les paramètres de certificat client amont ont été renommés dans les deux familles** : `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` deviennent `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, et `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` deviennent `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Les valeurs globales et de service enregistrées migrent automatiquement ; le renommage est **à sens unique** — un downgrade contrôlé vers 1.6.15 n'a pas de correspondance inverse, les valeurs `CLIENT_*` sont donc supprimées en cascade.
+    - **Un processus worker heavy dédié** : `WORKER_QUEUES` vaut désormais `default` par défaut ; les jobs longs s'exécutent dans un second processus contrôlé par les nouveaux paramètres `WORKER_HEAVY_*`. Une surcharge explicite `WORKER_QUEUES=default,heavy` conserve l'ancienne disposition à processus unique — changez-la en `default` pour obtenir l'isolation, ou définissez `WORKER_HEAVY_QUEUES=` pour conserver délibérément un seul processus. Redémarrez le conteneur worker, le conteneur All-In-One, ou les deux unités Linux `bunkerweb-worker` et `bunkerweb-worker-heavy` après avoir modifié ces paramètres.
 
 !!! info "Un service réservé `default-server` apparaît en multisite"
 

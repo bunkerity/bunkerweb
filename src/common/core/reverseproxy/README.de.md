@@ -40,9 +40,10 @@ Die Einstellungen unten richten ein `location` auf einen einzelnen Backend-Serve
 Die `REVERSE_PROXY_SSL_VERIFY`-Einstellungen unten prüfen das Zertifikat *des Backends*. Um dem Backend auch selbst ein Zertifikat vorzulegen — gegenseitiges TLS — setzen Sie das Client-Paar:
 
 - `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` für Dateipfade, die der Scheduler lesen kann, oder `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` für Base64- oder Klartext-PEM, ausgewählt über `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` oder `data`).
-- Das Paar wird mit OpenSSL validiert, zwischengespeichert und von demselben Job an jede Instanz verteilt, der auch die vertrauenswürdige CA behandelt, und dort mit Rechten nur für Eigentümer und Gruppe geschrieben.
+- Das Paar wird mit OpenSSL validiert, zwischengespeichert und von demselben Job an jede Instanz verteilt, der auch die vertrauenswürdige CA behandelt, und dort mit Rechten nur für Eigentümer und Gruppe geschrieben. BunkerWeb validiert jedes Zertifikat in einem CA-Bundle und prüft, ob das Client-Zertifikat des Upstreams zu seinem Schlüssel passt; vorübergehende Lesefehler bei Dateien behalten das zwischengespeicherte TLS-Material und melden einen Job-Fehler, während gelöschte Einstellungen oder ungültiges Material den betroffenen Cache entfernen.
 - **Beide Hälften sind erforderlich.** Ein Zertifikat ohne seinen Schlüssel (oder umgekehrt) wird abgelehnt statt halb angewendet, weil NGINX beide Direktiven braucht oder keine.
-- Die Identität gilt **pro Dienst und wird mit gRPC und Stream geteilt**: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt. Im Stream-Kontext ist dies zugleich das, was TLS zum Backend überhaupt erst aktiviert (`proxy_ssl on`), so dass ein Dienst ohne Client-Paar sein bisheriges Klartextverhalten behält.
+- Die Reverse-Proxy-Client-Identität gilt pro Dienst und wird von dessen HTTP- und Stream-Reverse-Proxys verwendet. gRPC hat eine eigene Identität, konfiguriert über `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` oder deren `_DATA`-Gegenstücke, ausgewählt über `GRPC_SSL_CLIENT_CERT_PRIORITY`.
+- Im Stream-Kontext aktiviert ein zwischengespeichertes Client-Zertifikat/Schlüssel-Paar, `REVERSE_PROXY_SSL_VERIFY=yes`, ein nicht leeres Protokoll- oder Cipher-Setting TLS zum Backend (`proxy_ssl on`). Ein Dienst ohne eines davon behält sein bisheriges Klartextverhalten. Nur einen CA-Pfad oder SNI zu setzen, aktiviert kein Stream-TLS.
 - Werden die Einstellungen geleert, entfernt der nächste Lauf die Dateien, womit gegenseitiges TLS wieder aus ist.
 
 Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich mit BunkerWeb verbinden* — die entgegengesetzte Richtung.
@@ -135,6 +136,10 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
     | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | nein | **Daten des Client-Zertifikats:** Client-Zertifikat direkt als Base64 oder PEM angegeben (z. B. über die Weboberfläche). |
     | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | nein | **Pfad des Client-Schlüssels:** Pfad zum privaten PEM-Schlüssel, der zum Client-Zertifikat passt, lesbar für den Scheduler. |
     | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | nein | **Daten des Client-Schlüssels:** Privater Client-Schlüssel direkt als Base64 oder PEM. Bevorzugen Sie nach Möglichkeit einen Dateipfad: ein hier gesetzter Schlüssel wird als Einstellungswert gespeichert. |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | nein | **CRL-Pfad:** Pfad zu einer PEM-Zertifikatssperrliste, die vom Worker lesbar ist. Hat Vorrang vor `REVERSE_PROXY_SSL_CRL_DATA`; ein gesetzter, aber fehlender Pfad ist ein Fehler, die Daten werden nicht als Fallback verwendet; wird nur angewendet, wenn die Upstream-Zertifikatsüberprüfung aktiviert ist. |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | nein | **CRL-Daten:** Zertifikatssperrliste als Base64 oder Klartext-PEM. Wird nur verwendet, wenn `REVERSE_PROXY_SSL_CRL` leer ist. |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | nein | **Upstream-TLS-Protokolle:** Durch Leerzeichen getrennte TLS-Versionen, die dem Upstream angeboten werden, z. B. `TLSv1.2 TLSv1.3`. Leer belässt den NGINX-Standard. |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | nein | **Upstream-TLS-Ciphers:** OpenSSL-Cipher-String, der dem Upstream angeboten wird, z. B. `HIGH:!MD5`. Leer belässt den NGINX-Standard. |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -143,8 +148,11 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
         - **Erforderlich:** ein vertrauenswürdiges Zertifikat ist Pflicht; NGINX hat keinen impliziten System-Speicher für die Upstream-Überprüfung. Um einen öffentlichen Upstream zu überprüfen, verweisen Sie den Pfad auf das System-CA-Bundle (z. B. `/etc/ssl/certs/ca-certificates.crt`).
         - **Name:** wird standardmäßig gegen den Host aus `REVERSE_PROXY_HOST` geprüft. Wenn der CN/SAN des Backend-Zertifikats abweicht, setzen Sie `REVERSE_PROXY_SSL_SNI` auf `yes` und `REVERSE_PROXY_SSL_SNI_NAME` auf den erwarteten Namen.
         - **Ausfallsicher:** Wenn kein gültiges vertrauenswürdiges Zertifikat verfügbar ist, wird die Überprüfung für diesen Server deaktiviert, anstatt jede Upstream-Verbindung zu unterbrechen.
+        - **Sperrung:** Setzen Sie `REVERSE_PROXY_SSL_CRL` auf einen PEM-Sperrlisten-Pfad, oder liefern Sie base64/Klartext-PEM über `REVERSE_PROXY_SSL_CRL_DATA`. Der Pfad gewinnt, wenn beide gesetzt sind; es gibt keine eigene CRL-Prioritätseinstellung. Der Worker validiert und verteilt die CRL. NGINX wendet sie nur an, wenn `REVERSE_PROXY_SSL_VERIFY=yes` ist und eine gültige zwischengespeicherte vertrauenswürdige CA verfügbar ist.
 
         Diese Einstellungen gelten pro Dienst: Alle Upstream-Einträge (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) teilen sich dieselbe Überprüfungskonfiguration.
+
+        TLS-Protokolle, Ciphers und Sperrungseinstellungen gelten ebenfalls pro Dienst, über alle seine Reverse-Proxy-Locations und angehängten Upstream-Pools hinweg. Sie können keine unterschiedlichen TLS-Richtlinien für einzelne Pools auswählen.
 
     !!! info "SNI erklärt"
         Server Name Indication (SNI) ist eine TLS-Erweiterung, die es einem Client ermöglicht, den Hostnamen anzugeben, mit dem er während des Handshake-Prozesses eine Verbindung herstellen möchte. Dies ermöglicht es Servern, mehrere Zertifikate auf derselben IP-Adresse und demselben Port zu präsentieren, sodass mehrere sichere (HTTPS-)Websites von einer einzigen IP-Adresse aus bedient werden können, ohne dass alle diese Websites dasselbe Zertifikat verwenden müssen.
@@ -186,10 +194,10 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
 
     | Einstellung                            | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                        |
     | -------------------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |           | multisite | ja       | **Benutzerdefinierte Header:** HTTP-Header, die durch Semikolons getrennt an das Backend gesendet werden.           |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | ja       | **Benutzerdefinierte Header:** HTTP-Header, die durch Semikolons getrennt an das Backend gesendet werden; passende generierte Header (Host, weitergegebene Client-Informationen, weitergegebene mTLS-Header, Upgrade/Connection, ...) werden dabei ohne Berücksichtigung der Groß-/Kleinschreibung ersetzt statt dupliziert. Ein explizit leerer Wert unterdrückt diesen Header. |
     | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | ja       | **Header ausblenden:** HTTP-Header, die vor Clients verborgen werden sollen, wenn sie vom Backend empfangen werden. |
     | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | ja       | **Client-Header:** HTTP-Header, die durch Semikolons getrennt an den Client gesendet werden.                        |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | nein     | **Unterstriche in Headern:** Aktiviert oder deaktiviert die `underscores_in_headers`-Direktive.                     |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | nein     | **Unterstriche in Headern:** Aktiviert oder deaktiviert die `underscores_in_headers`-Direktive. Serverweit mit den Plugins gRPC und misc geteilt: aktiviert ein Dienst sie für eine Location, gilt sie für den gesamten Dienst. |
 
     !!! warning "Sicherheitsüberlegungen"
         Seien Sie bei der Verwendung der Reverse-Proxy-Funktion vorsichtig, welche Header Sie an Ihre Backend-Anwendungen weiterleiten. Bestimmte Header können sensible Informationen über Ihre Infrastruktur preisgeben oder Sicherheitskontrollen umgehen.

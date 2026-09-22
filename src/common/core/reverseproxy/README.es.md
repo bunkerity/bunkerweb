@@ -40,9 +40,10 @@ Los ajustes de más abajo apuntan un `location` a un único backend. Cuando vari
 Los ajustes `REVERSE_PROXY_SSL_VERIFY` de más abajo comprueban el certificado *del backend*. Para presentar además un certificado **al** backend — TLS mutuo — configure el par de cliente:
 
 - `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` para rutas de archivo legibles por el planificador, o `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` para PEM en base64 o en texto plano, seleccionados por `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` o `data`).
-- El par se valida con OpenSSL, se cachea y se distribuye a todas las instancias por el mismo trabajo que gestiona la CA de confianza, y allí se escribe con permisos solo de propietario y grupo.
+- El par se valida con OpenSSL, se cachea y se distribuye a todas las instancias por el mismo trabajo que gestiona la CA de confianza, y allí se escribe con permisos solo de propietario y grupo. BunkerWeb valida cada certificado de un paquete de CA y comprueba que el certificado de cliente del upstream coincide con su clave; los fallos temporales de lectura de archivo conservan el material TLS en caché y notifican un fallo del job, mientras que borrar los ajustes o un material inválido elimina la caché afectada.
 - **Ambas mitades son obligatorias.** Un certificado sin su clave (o al revés) se rechaza en lugar de aplicarse a medias, porque NGINX necesita ambas directivas o ninguna.
-- La identidad es **por servicio, y se comparte con gRPC y stream**: un servicio se autentica ante sus backends con un único certificado, sea cual sea el complemento que enruta el tráfico. En el contexto stream esto es además lo que habilita TLS hacia el backend (`proxy_ssl on`), de modo que un servicio sin par de cliente conserva su comportamiento actual en texto plano.
+- La identidad de cliente del reverse proxy es por servicio y la usan sus reverse proxies HTTP y stream. gRPC tiene su propia identidad, configurada con `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` o sus variantes `_DATA`, seleccionada mediante `GRPC_SSL_CLIENT_CERT_PRIORITY`.
+- En el contexto stream, un par de certificado/clave de cliente en caché, `REVERSE_PROXY_SSL_VERIFY=yes`, o un ajuste de protocolo o cifrado no vacío habilita TLS hacia el backend (`proxy_ssl on`). Un servicio sin ninguno de ellos conserva su comportamiento actual en texto plano. Configurar solo una ruta de CA o SNI no habilita el TLS de stream.
 - Borrar los ajustes elimina los archivos en la siguiente ejecución, lo que vuelve a desactivar el TLS mutuo.
 
 Esto es independiente del complemento `mtls`, que autentica *a los clientes que se conectan a BunkerWeb* — la dirección opuesta.
@@ -135,6 +136,10 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
 | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | no | **Datos del certificado de cliente:** Certificado de cliente proporcionado directamente como base64 o PEM (p. ej. desde la interfaz web). |
 | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | no | **Ruta de la clave de cliente:** Ruta a la clave privada PEM que corresponde al certificado de cliente, legible por el planificador. |
 | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | no | **Datos de la clave de cliente:** Clave privada de cliente proporcionada directamente como base64 o PEM. Prefiera una ruta de archivo cuando sea posible: una clave puesta aquí se almacena como valor de ajuste. |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | no | **Ruta de la CRL:** Ruta a una lista de revocación de certificados en PEM, legible por el worker. Tiene prioridad sobre `REVERSE_PROXY_SSL_CRL_DATA`; una ruta definida pero ausente es un error y los datos no se usan como alternativa; solo se aplica cuando la verificación del certificado del upstream está activada. |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | no | **Datos de la CRL:** Lista de revocación de certificados proporcionada como base64 o PEM en texto plano. Solo se usa cuando `REVERSE_PROXY_SSL_CRL` está vacío. |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | no | **Protocolos TLS del upstream:** Versiones de TLS ofrecidas al upstream, separadas por espacios, por ejemplo `TLSv1.2 TLSv1.3`. Vacío mantiene el valor por defecto de NGINX. |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | no | **Cifrados TLS del upstream:** Cadena de cifrados OpenSSL ofrecida al upstream, por ejemplo `HIGH:!MD5`. Vacío mantiene el valor por defecto de NGINX. |
 
     !!! info "Verificación de Certificados"
         Cuando `REVERSE_PROXY_SSL_VERIFY` se establece en `yes`, NGINX valida tanto la cadena de certificados del upstream como su nombre:
@@ -143,8 +148,11 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
         - **Obligatorio:** se requiere un certificado de confianza; NGINX no tiene un almacén del sistema implícito para la verificación del upstream. Para verificar un upstream público, apunte la ruta al paquete de CA del sistema (p. ej. `/etc/ssl/certs/ca-certificates.crt`).
         - **Nombre:** se comprueba por defecto contra el host de `REVERSE_PROXY_HOST`. Si el CN/SAN del certificado del backend difiere, establezca `REVERSE_PROXY_SSL_SNI` en `yes` y `REVERSE_PROXY_SSL_SNI_NAME` con el nombre esperado.
         - **A prueba de fallos:** si no hay un certificado de confianza válido disponible, la verificación se deshabilita para ese servidor en lugar de romper cada conexión upstream.
+        - **Revocación:** Establezca `REVERSE_PROXY_SSL_CRL` con una ruta a una lista de revocación en PEM, o proporcione base64/PEM en texto plano mediante `REVERSE_PROXY_SSL_CRL_DATA`. La ruta prevalece cuando se establecen ambas; no existe un ajuste de prioridad para la CRL. El worker valida y distribuye la CRL. NGINX la aplica solo cuando `REVERSE_PROXY_SSL_VERIFY=yes` y hay una CA de confianza en caché válida disponible.
 
         Estos ajustes se aplican por servicio: todas las entradas de upstream (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) comparten la misma configuración de verificación.
+
+        Los protocolos, cifrados y ajustes de revocación TLS también se aplican por servicio, en todas sus ubicaciones de reverse proxy y grupos de upstream adjuntos. No pueden seleccionar políticas TLS distintas para grupos individuales.
 
     !!! info "SNI Explicado"
         La Indicación del Nombre del Servidor (SNI) es una extensión de TLS que permite a un cliente especificar el nombre de host al que intenta conectarse durante el proceso de handshake. Esto permite a los servidores presentar múltiples certificados en la misma dirección IP y puerto, lo que permite que múltiples sitios web seguros (HTTPS) se sirvan desde una única dirección IP sin requerir que todos esos sitios usen el mismo certificado.
@@ -186,10 +194,10 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
 
 | Ajuste                                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                          |
 | -------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `REVERSE_PROXY_HEADERS`                |                   | multisite | yes      | **Encabezados Personalizados:** Encabezados HTTP para enviar al backend separados por punto y coma.  |
+| `REVERSE_PROXY_HEADERS`                |                   | multisite | yes      | **Encabezados Personalizados:** Encabezados HTTP para enviar al backend separados por punto y coma; los encabezados generados coincidentes (Host, información de cliente reenviada, encabezados mTLS reenviados, Upgrade/Connection, ...) se reemplazan sin distinguir mayúsculas/minúsculas en lugar de duplicarse. Un valor vacío explícito suprime ese encabezado. |
 | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade`         | multisite | yes      | **Ocultar Encabezados:** Encabezados HTTP para ocultar a los clientes cuando se reciben del backend. |
 | `REVERSE_PROXY_HEADERS_CLIENT`         |                   | multisite | yes      | **Encabezados del Cliente:** Encabezados HTTP para enviar al cliente separados por punto y coma.     |
-| `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`              | multisite | no       | **Guiones Bajos en los Encabezados:** Habilite o deshabilite la directiva `underscores_in_headers`.  |
+| `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`              | multisite | no       | **Guiones Bajos en los Encabezados:** Habilite o deshabilite la directiva `underscores_in_headers`. Se comparte a nivel de servidor con los complementos gRPC y misc: si un servicio la habilita para una ubicación, se aplica a todo el servicio. |
 
     !!! warning "Consideraciones de Seguridad"
         Al usar la función de proxy inverso, tenga cuidado con los encabezados que reenvía a sus aplicaciones de backend. Ciertos encabezados pueden exponer información sensible sobre su infraestructura o eludir los controles de seguridad.

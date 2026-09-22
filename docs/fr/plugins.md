@@ -408,7 +408,7 @@ Chaque emploi comporte les champs suivants :
 | `file`  |     oui     | corde | Nom du fichier à l'intérieur du dossier jobs.                                                                                                                |
 | `every` |     oui     | corde | Fréquence de planification des tâches : `minute`, `hour`, `day` `week` , ou `once` (pas de fréquence, une seule fois avant de (ré)générer la configuration). |
 | `reload` | non | bool | Indique si un changement issu de ce job doit déclencher un reload des instances BunkerWeb. Par défaut `false`. |
-| `async` | non | bool | Le job est routé vers la file `heavy` ; les deux files partagent le pool par défaut. Isolez-les avec `WORKER_QUEUES=heavy` ou `WORKER_QUEUES=default`. Par défaut `false`. |
+| `async` | non | bool | Indique si le job est routé vers la file `heavy`. Des processus default/heavy séparés s'exécutent par défaut ; voir [Isolation des files de workers](concepts.md#worker-queue-isolation). Par défaut `false`. |
 | `regenerate` | non | bool | Indique si un changement issu de ce job nécessite que la configuration NGINX soit **rendue à nouveau**, et pas seulement livrée. Par défaut `false`. |
 
 Les tâches lourdes principales sont `backup-data`, `bunkernet-register`, `bunkernet-data`, `push-configs`, `certbot-new`, `certbot-renew`, `download-plugins`, `download-crs-plugins` et `download-pro-plugins` ; le routage suit le drapeau `async` du manifeste, pas le nom de la tâche.

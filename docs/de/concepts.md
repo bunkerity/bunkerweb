@@ -232,6 +232,23 @@ Wenn Sie die Web-Benutzeroberfläche verwenden, können Sie Scheduler-Jobs verwa
   <figcaption>Jobs über die Web-UI verwalten</figcaption>
 </figure>
 
+### Worker-Queue-Isolierung {#worker-queue-isolation}
+
+Der Docker-Worker, das All-In-One-Image und die Linux-Pakete starten separate Celery-Prozesse für die Queues `default` und `heavy`. Der Standardprozess hat zwei Ausführungs-Slots; der Heavy-Prozess hat einen, sodass lange, an `heavy` geroutete Jobs die Standard-Slots nicht belegen. Unter Linux laufen die Prozesse als `bunkerweb-worker` und `bunkerweb-worker-heavy` und teilen sich `/etc/bunkerweb/worker.env`.
+
+| Umgebungsvariable | Standard | Zweck |
+| --- | --- | --- |
+| `WORKER_QUEUES` | `default` | Von dem ersten Prozess konsumierte Queues. |
+| `WORKER_CONCURRENCY` | `2` | Ausführungs-Slots im ersten Prozess. |
+| `WORKER_MAX_MEMORY_KB` | `300000` | Schwellenwert für das Speicher-Recycling pro Child in KiB. |
+| `WORKER_HEAVY_QUEUES` | `heavy` | Von dem zweiten Prozess konsumierte Queues; ein explizit leerer Wert deaktiviert ihn. |
+| `WORKER_HEAVY_CONCURRENCY` | `1` | Ausführungs-Slots im zweiten Prozess. |
+| `WORKER_HEAVY_MAX_MEMORY_KB` | Wert von `WORKER_MAX_MEMORY_KB` | Schwellenwert für das Speicher-Recycling des zweiten Prozesses. |
+| `WORKER_HEAVY_HOSTNAME` | `worker-heavy@%h` | Celery-Hostname des zweiten Prozesses. |
+| `WORKER_FAILOVER_GRACE` | `30` | Docker: Sekunden, die dem überlebenden Prozess nach dem Ausfall eines Masters gegeben werden, bevor er zwangsweise beendet wird; ein normales Container-Shutdown bleibt warm. |
+
+Halten Sie die beiden Queue-Listen disjunkt, um die Isolierung zu erhalten. Bestehende Deployments, die explizit `WORKER_QUEUES=default,heavy` gesetzt haben, behalten dieses Override: Ändern Sie es auf `default`, um Heavy-Jobs zu isolieren. Um das bisherige Einzelprozess-Layout beizubehalten, setzen Sie sowohl `WORKER_QUEUES=default,heavy` als auch `WORKER_HEAVY_QUEUES=`. Starten Sie nach dem Ändern dieser Werte den Worker-Container, den All-In-One-Container oder beide Linux-Worker-Dienste neu. Die Speicherschwellenwerte recyceln Children nach einem Task; es handelt sich nicht um harte Prozess-Speicherlimits.
+
 ### Zustandsprüfung der Instanzen
 
 Seit Version 1.6.0 verfügt der Scheduler über ein integriertes System zur Zustandsprüfung, das den Zustand der Instanzen überwacht. Wenn eine Instanz ungesund wird, sendet der Scheduler die Konfiguration nicht mehr an sie. Wenn die Instanz wieder gesund wird, sendet der Scheduler die Konfiguration wieder.

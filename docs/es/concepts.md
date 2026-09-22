@@ -236,6 +236,23 @@ Si estás utilizando la interfaz de usuario web, puedes gestionar los trabajos d
   <figcaption>Gestionar trabajos desde la interfaz de usuario web</figcaption>
 </figure>
 
+### Aislamiento de colas de workers {#worker-queue-isolation}
+
+El worker de Docker, la imagen All-In-One y los paquetes Linux inician procesos Celery independientes para las colas `default` y `heavy`. El proceso predeterminado tiene dos ranuras de ejecución; el proceso pesado tiene una, de modo que los jobs largos enrutados a `heavy` no ocupan las ranuras del proceso predeterminado. En Linux los procesos se ejecutan como `bunkerweb-worker` y `bunkerweb-worker-heavy`, compartiendo `/etc/bunkerweb/worker.env`.
+
+| Variable de entorno | Por defecto | Propósito |
+| --- | --- | --- |
+| `WORKER_QUEUES` | `default` | Colas consumidas por el primer proceso. |
+| `WORKER_CONCURRENCY` | `2` | Ranuras de ejecución en el primer proceso. |
+| `WORKER_MAX_MEMORY_KB` | `300000` | Umbral de reciclaje de memoria por hijo, en KiB. |
+| `WORKER_HEAVY_QUEUES` | `heavy` | Colas consumidas por el segundo proceso; un valor explícitamente vacío lo deshabilita. |
+| `WORKER_HEAVY_CONCURRENCY` | `1` | Ranuras de ejecución en el segundo proceso. |
+| `WORKER_HEAVY_MAX_MEMORY_KB` | Valor de `WORKER_MAX_MEMORY_KB` | Umbral de reciclaje de memoria del segundo proceso. |
+| `WORKER_HEAVY_HOSTNAME` | `worker-heavy@%h` | Nombre de host Celery del segundo proceso. |
+| `WORKER_FAILOVER_GRACE` | `30` | Docker: segundos que se deja al proceso superviviente detenerse tras el fallo de un master, antes de forzar su salida; un apagado normal del contenedor permanece cálido. |
+
+Mantenga ambas listas de colas disjuntas para preservar el aislamiento. Los despliegues existentes que establecen explícitamente `WORKER_QUEUES=default,heavy` conservan ese override: cámbielo a `default` para aislar los jobs pesados. Para conservar el diseño de proceso único anterior, establezca tanto `WORKER_QUEUES=default,heavy` como `WORKER_HEAVY_QUEUES=`. Reinicie el contenedor worker, el contenedor All-In-One, o ambos servicios worker de Linux tras cambiar estos valores. Los umbrales de memoria reciclan los hijos tras una tarea; no son límites de memoria de proceso estrictos.
+
 ### Comprobación del estado de las instancias
 
 Desde la versión 1.6.0, el programador posee un sistema de comprobación de estado incorporado que monitorea la salud de las instancias. Si una instancia deja de estar saludable, el programador dejará de enviarle la configuración. Si la instancia vuelve a estar saludable, el programador reanudará el envío de la configuración.

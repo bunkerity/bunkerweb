@@ -228,6 +228,23 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
   <figcaption>从 Web UI 管理作业</figcaption>
 </figure>
 
+### Worker 队列隔离 {#worker-queue-isolation}
+
+Docker worker、All-In-One 镜像和 Linux 软件包会为 `default` 和 `heavy` 队列启动独立的 Celery 进程。默认进程有两个执行槽位；heavy 进程只有一个，因此路由到 `heavy` 的长任务不会占用默认槽位。在 Linux 上，这两个进程分别以 `bunkerweb-worker` 和 `bunkerweb-worker-heavy` 运行，共享 `/etc/bunkerweb/worker.env`。
+
+| 环境变量 | 默认值 | 作用 |
+| --- | --- | --- |
+| `WORKER_QUEUES` | `default` | 第一个进程消费的队列。 |
+| `WORKER_CONCURRENCY` | `2` | 第一个进程中的执行槽位数。 |
+| `WORKER_MAX_MEMORY_KB` | `300000` | 每个子进程的内存回收阈值（KiB）。 |
+| `WORKER_HEAVY_QUEUES` | `heavy` | 第二个进程消费的队列；显式设为空值将禁用该进程。 |
+| `WORKER_HEAVY_CONCURRENCY` | `1` | 第二个进程中的执行槽位数。 |
+| `WORKER_HEAVY_MAX_MEMORY_KB` | `WORKER_MAX_MEMORY_KB` 的值 | 第二个进程的每个子进程内存回收阈值。 |
+| `WORKER_HEAVY_HOSTNAME` | `worker-heavy@%h` | 第二个进程的 Celery 主机名。 |
+| `WORKER_FAILOVER_GRACE` | `30` | Docker：master 失败后，留给存活进程停止的秒数，超时后强制退出；正常的容器关闭仍保持热态。 |
+
+请保持两个队列列表互不重叠，以维持隔离效果。已有部署若显式设置了 `WORKER_QUEUES=default,heavy`，会保留该覆盖设置：将其改为 `default` 即可隔离 heavy 任务。若要保留此前的单进程布局，请同时设置 `WORKER_QUEUES=default,heavy` 和 `WORKER_HEAVY_QUEUES=`。更改这些值后，请重启 worker 容器、All-In-One 容器，或两个 Linux worker 服务。内存阈值只会在任务完成后回收子进程，并不是硬性的进程内存上限。
+
 ### 实例健康检查
 
 自 1.6.0 版本起，调度器内置了一个健康检查系统，用于监控实例的健康状况。如果一个实例变得不健康，调度器将停止向其发送配置。如果该实例恢复健康，调度器将恢复发送配置。

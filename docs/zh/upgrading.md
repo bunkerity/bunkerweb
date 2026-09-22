@@ -64,11 +64,14 @@
 
 !!! warning "部分安装未启用 Celery worker"
 
-    `bunkerweb-worker` 执行 scheduler 派发的每一个 job。在安装器推迟服务启动的安装场景中——`--redis`、外部数据库、CrowdSec、自定义 DNS 解析器，以及每种 `--manager` 安装——它从未被启用，因此整个 stack 健康启动却完全不运行任何后台任务。安装器现在会在这些路径上把它和 scheduler 一起启用。升级后请验证：
+    `bunkerweb-worker` 和 `bunkerweb-worker-heavy` 分别在 `default` 和 `heavy` 队列上执行 scheduler 派发的每一个 job——参见[Worker 队列隔离](concepts.md#worker-queue-isolation)。在安装器推迟服务启动的安装场景中——`--redis`、外部数据库、CrowdSec、自定义 DNS 解析器，以及每种 `--manager` 安装——它们从未被启用，因此整个 stack 健康启动却完全不运行任何后台任务。安装器现在会在这些路径上把两个单元都和 scheduler 一起启用，升级后凡是涉及其配置的改动都需要重启这两个单元。升级后请验证：
 
     ```bash
-    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker bunkerweb-worker-heavy
+    systemctl is-active bunkerweb-worker bunkerweb-worker-heavy
     ```
+
+    如果其中一个缺失或处于空闲状态，请参见[后台任务从不运行](troubleshooting.md#background-jobs)。
 
 !!! warning "Docker、autoconf 和 Kubernetes 堆栈需要三个新组件"
 
@@ -156,6 +159,12 @@
     - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`**：请参阅上面的警告，了解 1.7 的行为和所需设置。
     - **`ALLOWED_METHODS`**：默认值自 1.6.14 起就是 `GET|POST|HEAD|QUERY`，而在 1.7 中默认服务器也会强制执行该设置：未知 `Host` 或通过 IP 发出的其他方法请求会收到 405。如果您从 1.6.13 或更早版本升级且需要旧的方法列表，请显式设置它。
     - **`KEEP_CONFIG_ON_RESTART`**：默认值从 `no` 改为 `yes`，因此重启时会保留现有配置，而不是每次生成临时配置。要保留 1.6 的重置行为，请设置为 `no`。
+    - **stream 上游 TLS**：设置了 `REVERSE_PROXY_SSL_VERIFY: "yes"`，或设置了非空 `REVERSE_PROXY_SSL_PROTOCOLS`/`REVERSE_PROXY_SSL_CIPHERS` 的 stream 服务，现在即使没有客户端证书对，也会启用到后端的 TLS（`proxy_ssl on`）。此前这些设置可能被接受，但连接仍保持明文。请确认上游端口确实支持 TLS，或移除该设置以保留明文后端。
+    - **gRPC 拥有自己的上游身份**：gRPC 不再读取 `REVERSE_PROXY_SSL_CLIENT_*` 进行双向 TLS；它有自己的 `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY`（或其 `_DATA` 变体），由 `GRPC_SSL_CLIENT_CERT_PRIORITY` 选择。已保存的 1.6.15 `GRPC_SSL_CERT[_DATA/_PRIORITY]` 和 `GRPC_SSL_KEY[_DATA]` 值会自动迁移到这些名称（见下方的重命名说明）。依赖反向代理证书对来为 gRPC 提供服务的 1.7 预发布版本服务，必须显式设置 `GRPC_SSL_CLIENT_*` 设置。
+    - **自定义标头现在会替换生成的默认标头（#3936）**：与生成标头（Host、转发的客户端信息、转发的 mTLS 标头、gRPC 的 `TE`、反向代理的 `Upgrade`/`Connection`）同名的 `REVERSE_PROXY_HEADERS` 或 `GRPC_HEADERS` 条目，现在会不区分大小写地替换该标头，而不是重复添加；显式设为空值会抑制该标头。请检查那些原本只想补充、而非替换生成值的覆盖项。
+    - **`underscores_in_headers` 现在只下发一次**：`REVERSE_PROXY_UNDERSCORES_IN_HEADERS` 和 `GRPC_UNDERSCORES_IN_HEADERS` 现在共享由 misc 插件渲染的同一条服务器级 `underscores_in_headers` 指令。只要有一个插件族请求启用，就会对整个服务生效；请检查是否有自定义配置也下发了同一指令。反向代理服务也不再强制关闭该指令，因此 `http` 级别的自定义配置 `underscores_in_headers on;` 现在同样会对它们生效。
+    - **两组上游客户端证书设置均已重命名**：`REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` 现更名为 `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`，而 `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` 现更名为 `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`。已保存的全局和服务级值会自动迁移；此重命名是**单向的**——受控降级到 1.6.15 没有反向映射，因此 `CLIENT_*` 的值会被级联删除。
+    - **新增专用的 heavy worker 进程**：`WORKER_QUEUES` 现在默认值为 `default`；长任务改由新的 `WORKER_HEAVY_*` 设置控制的第二个进程运行。显式设置 `WORKER_QUEUES=default,heavy` 会保留此前的单进程布局——改为 `default` 以获得隔离效果，或设置 `WORKER_HEAVY_QUEUES=` 以有意保留单进程。更改这些设置后，请重启 worker 容器、All-In-One 容器，或 Linux 上的 `bunkerweb-worker` 和 `bunkerweb-worker-heavy` 两个单元。
 
 !!! info "多站点安装新增保留服务 `default-server`"
 
