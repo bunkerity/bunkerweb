@@ -1273,7 +1273,7 @@ function cleanup_stack () {
         # The API and the worker belong to every 1.7 stack, so they are stopped for every type:
         # a survivor keeps serving the previous action's configuration, and the API keeps the
         # token it read at startup — which the next action's variables.env has replaced.
-        for unit in bunkerweb-api bunkerweb-worker ; do
+        for unit in bunkerweb-api bunkerweb-worker bunkerweb-worker-heavy ; do
             docker exec -u 0 bunkerweb-linux systemctl stop "$unit"
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -2121,7 +2121,7 @@ function restart_stack () {
             # up. Restarting them after it would leave the scheduler talking to a process still
             # holding the previous action's token, which the client reports as a read-only
             # database rather than as an authentication failure.
-            for unit in bunkerweb-api bunkerweb-worker ; do
+            for unit in bunkerweb-api bunkerweb-worker bunkerweb-worker-heavy ; do
                 docker exec -u 0 bunkerweb-linux systemctl restart "$unit"
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
@@ -2514,7 +2514,7 @@ function log_stack () {
                     # The worker logs to the journal only (StandardOutput=journal+console, no
                     # /var/log/bunkerweb/worker.log), so this journal is its ONLY record.
                     log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Worker logs ..."
-                    docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-worker --no-pager
+                    docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-worker -u bunkerweb-worker-heavy --no-pager
 
                     # The broker unit name differs per distro -- same probe order as
                     # detect_broker_unit() in src/linux/scripts/postinstall.sh.

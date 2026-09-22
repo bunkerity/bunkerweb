@@ -101,7 +101,7 @@ attempt_count() {
 
 recover_persistence_test() {
 	"${compose[@]}" up -d >/dev/null 2>&1 || true
-	docker exec "$container" supervisorctl start broker worker scheduler >/dev/null 2>&1 || true
+	docker exec "$container" supervisorctl start broker worker worker-heavy scheduler >/dev/null 2>&1 || true
 }
 
 run_persistence_test() {
@@ -117,7 +117,8 @@ run_persistence_test() {
 	before_id="$(docker inspect --format '{{.Id}}' "$container")"
 	volume_before="$(docker volume inspect --format '{{.CreatedAt}}' bw-storage)"
 	runs_before="$(docker exec "$container" sqlite3 /var/lib/bunkerweb/db.sqlite3 'SELECT COUNT(*) FROM bw_jobs_runs;')"
-	docker exec "$container" supervisorctl stop worker >/dev/null
+	# Both consumers must stop, or the heavy lane drains its queue while the default one is being counted.
+	docker exec "$container" supervisorctl stop worker worker-heavy >/dev/null
 	docker exec "$container" supervisorctl restart scheduler >/dev/null
 
 	for _ in {1..60}; do

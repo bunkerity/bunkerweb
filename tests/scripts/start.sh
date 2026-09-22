@@ -702,7 +702,7 @@ else
         # job on the broker for the worker. Started before the scheduler, which waits for the API
         # to answer; the API in turn waits for the database the scheduler pre-initialises, so
         # neither order deadlocks.
-        for unit in bunkerweb-api bunkerweb-worker ; do
+        for unit in bunkerweb-api bunkerweb-worker bunkerweb-worker-heavy ; do
             docker exec -u 0 bunkerweb-linux systemctl start "$unit"
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
