@@ -42,7 +42,7 @@ def model_metadata():
 
 MANIFEST = loads((Path(__file__).resolve().parents[3] / "src" / "common" / "core" / "backup" / "downgrade-manifest.json").read_text(encoding="utf-8"))
 ROWS = MANIFEST["releases"]
-SQLITE_ROW = next(row for row in ROWS if row["engine"] == "sqlite")
+SQLITE_ROW = next(row for row in ROWS if row["engine"] == "sqlite" and row["to"] == "1.6.14")
 MANIFEST_COLUMNS = {table: sorted(names) for table, names in MANIFEST["data_loss_detail"]["columns"].items()}
 
 # Dropped by the 1.7 head's downgrade(); `bw_ui_user_preferences` is renamed rather than dropped,

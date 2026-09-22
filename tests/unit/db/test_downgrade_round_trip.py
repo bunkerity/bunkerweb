@@ -827,7 +827,7 @@ def test_the_head_downgrade_really_runs_and_removes_the_1_7_columns(db_engine, t
     No client binary is involved -- this is alembic against the database, not a dump -- so it runs
     on every configured engine, including ones the restore round trip above has to skip.
     """
-    row = next(r for r in MANIFEST["releases"] if r["engine"] == db_engine)
+    row = next(r for r in MANIFEST["releases"] if r["engine"] == db_engine and r["to"] == "1.6.14")
     expected = SEVENTEEN_ONLY_COLUMNS
 
     uri = product_uri(db_engine, tmp_path)

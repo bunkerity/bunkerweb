@@ -1193,7 +1193,7 @@ def execute_downgrade(
         #
         # The stamp alone is not enough. On MariaDB/MySQL the measured partial failure leaves
         # `alembic_version` at the 1.7 head (unchanged) while `bw_metadata.version` has already
-        # committed to `1.6.15~rc1` under non-transactional DDL, so a stamp-only comparison calls
+        # committed to `1.6.16~rc1` under non-transactional DDL, so a stamp-only comparison calls
         # that hybrid schema "restored" before any restore has run. `bw_metadata.version` is the
         # discriminator, so both have to come back.
         #

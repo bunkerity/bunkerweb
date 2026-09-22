@@ -36,7 +36,7 @@ status = 0
 
 try:
     parser = ArgumentParser(description="BunkerWeb's backup plugin in-place downgrade command line interface")
-    parser.add_argument("target", type=str, help="the version to go back to (e.g. 1.6.14)")
+    parser.add_argument("target", type=str, help="the version to go back to (e.g. 1.6.15)")
     parser.add_argument("--execute", action="store_true", help="actually downgrade; without it this only reports what the preflight found")
     parser.add_argument("--yes", action="store_true", help="with --execute: skip the confirmation prompt (for scripts)")
     parser.add_argument(
@@ -47,7 +47,7 @@ try:
 
     if not args.execute:
         # The safe half of the same command: say what would happen, change nothing. An operator
-        # who typed `downgrade 1.6.14` and meant it types it again with --execute.
+        # who typed `downgrade 1.6.15` and meant it types it again with --execute.
         report = preflight(args.target)
         if args.json:
             print(dumps(report, default=str, sort_keys=True))

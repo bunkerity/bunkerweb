@@ -24,7 +24,7 @@ status = 0
 
 try:
     parser = ArgumentParser(description="BunkerWeb's backup plugin downgrade preflight command line interface")
-    parser.add_argument("target", type=str, help="the version this installation would go back to (e.g. 1.6.12)")
+    parser.add_argument("target", type=str, help="the version this installation would go back to (e.g. 1.6.15)")
     parser.add_argument("--json", action="store_true", help="print the report as JSON instead of a table")
     parser.add_argument(
         "--execute",

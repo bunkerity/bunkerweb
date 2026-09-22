@@ -99,7 +99,7 @@ class TestEveryRowIsComplete:
     def test_every_supported_engine_has_a_row(self, engine):
         assert [r for r in ROWS if r["engine"] == engine], f"no manifest row for {engine}: it can never go back in place"
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['engine']}:{r['mode']}")
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}:{r['mode']}")
     def test_the_conception_s_fields_are_all_there(self, row):
         for field in ("from", "to", "engine", "mode", "data_loss", "required_backup", "plugin_api_target", "artifacts"):
             assert field in row, f"{row['engine']}: the conception's manifest shape requires {field}"
@@ -108,7 +108,7 @@ class TestEveryRowIsComplete:
         assert row["required_backup"] is True, "a downgrade without a restorable backup is not a supported path"
         assert set(row["artifacts"].values()) <= {"compatible", "rebuild", "conditional"}
 
-    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "restore_only"], ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "restore_only"], ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_a_restore_only_row_says_why(self, row):
         assert len(row.get("reason", "")) > 80, f"{row['engine']}: restore_only with no measured reason is an opinion, not a classification"
 
@@ -119,7 +119,7 @@ class TestItTracksTheProduct:
         version = (_REPO_ROOT / "src" / "VERSION").read_text(encoding="utf-8").strip()
         assert {r["from"] for r in ROWS} == {version}, f"the manifest describes {sorted({r['from'] for r in ROWS})} but this tree is {version}"
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_the_alembic_revisions_are_the_real_ones(self, row):
         chain = _chain(row["engine"])
         head, target = row["alembic"]["from_revision"], row["alembic"]["to_revision"]
@@ -128,13 +128,13 @@ class TestItTracksTheProduct:
         assert chain[head][1].name.endswith("_upgrade_to_version_1_7_0_beta.py")
         assert chain[target][1].name.endswith(f"_upgrade_to_version_{row['to'].replace('.', '_')}.py")
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_from_revision_is_the_head_of_its_chain(self, row):
         chain = _chain(row["engine"])
         children = {down for down, _ in chain.values()}
         assert row["alembic"]["from_revision"] not in children, f"{row['engine']}: from_revision is no longer the head, the manifest describes an older release"
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_the_manifest_is_not_older_than_the_head_it_describes(self, row):
         """`generated_at` is the date the measurement was taken. A head regenerated after it means
         the manifest describes an artifact that no longer exists.
@@ -159,10 +159,73 @@ class TestItTracksTheProduct:
             "it describes a head that no longer exists -- re-measure it"
         )
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_the_target_is_reachable_by_walking_back_from_the_head(self, row):
         seen = walk_back(row["engine"], row["alembic"]["from_revision"])
         assert row["alembic"]["to_revision"] in seen, f"{row['engine']}: to_revision is not an ancestor of the head"
+
+
+class TestBothTargetsAreOffered:
+    """1.6.15 is the release immediately preceding 1.7, so it is the rollback an operator reaches
+    for first; 1.6.14 stays offered because it was measured too. Two targets in one file is a new
+    shape for this manifest, and `manifest_row` returns the FIRST match on (from, to, engine) --
+    so the rows have to be distinguishable by more than the order they happen to be written in.
+    """
+
+    TARGETS = ("1.6.15", "1.6.14")
+
+    @pytest.mark.parametrize("target", TARGETS)
+    @pytest.mark.parametrize("engine", SUPPORTED_ENGINES)
+    def test_each_target_resolves_to_its_own_row(self, engine, target):
+        installed = (_REPO_ROOT / "src" / "VERSION").read_text(encoding="utf-8").strip()
+        row = manifest_row(MANIFEST, installed, target, engine)
+        assert row, f"{engine}: nothing offers a downgrade to {target}, so the CLI can only say restore_only"
+        assert row["to"] == target and row["engine"] == engine
+
+    @pytest.mark.parametrize("engine", SUPPORTED_ENGINES)
+    def test_the_two_targets_do_not_land_on_the_same_revision(self, engine):
+        """The copy-paste failure: a 1.6.15 row carrying 1.6.14's `to_revision` reads as a correct
+        manifest and sends `alembic downgrade` four revisions too far, silently."""
+        installed = (_REPO_ROOT / "src" / "VERSION").read_text(encoding="utf-8").strip()
+        revisions = {target: target_revision(manifest_row(MANIFEST, installed, target, engine)) for target in self.TARGETS}
+        assert all(revisions.values()), f"{engine}: a target names no revision to land on: {revisions}"
+        assert len(set(revisions.values())) == len(self.TARGETS), f"{engine}: two targets land on the same revision: {revisions}"
+
+    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "in_place_tested"], ids=lambda r: f"{r['to']}-{r['engine']}")
+    def test_the_fingerprint_landed_where_the_row_says_it_would(self, row):
+        """The fingerprint is the audit trail, so it has to be THIS row's measurement.
+
+        Of the 13 fingerprint fields, 9 are byte-identical between the two targets because they were
+        measured identical (29/28/29 rows, 15 -> 0 tables, one SELECT failure), so the counts cannot
+        discriminate them at all. This asserts on the two that name where the downgrade LANDED, which
+        is the pair a copy from the neighbouring target gets wrong."""
+        fingerprint = row["fingerprint"]
+        assert fingerprint["alembic_version_after"] == row["alembic"]["to_revision"], (
+            f"{row['engine']} -> {row['to']}: the fingerprint says the downgrade landed on "
+            f"{fingerprint['alembic_version_after']} but the row sends it to {row['alembic']['to_revision']}"
+        )
+        assert (
+            fingerprint["bw_metadata_version_after"] == row["to"]
+        ), f"{row['engine']} -> {row['to']}: the fingerprint says bw_metadata ended on {fingerprint['bw_metadata_version_after']}"
+
+    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "restore_only"], ids=lambda r: f"{r['to']}-{r['engine']}")
+    def test_the_partial_failure_state_names_the_version_the_head_really_writes(self, row):
+        """The rot this guard exists for has already happened once. `downgrade()`'s first statement
+        writes the version of the revision below the head, so every re-parent moves it -- and the
+        manifest's narration of the half-downgraded state does not move with it. It has moved twice:
+        1.6.15~rc1 -> 1.6.15 when the 1.6.15~rc3/1.6.15 revisions were ported, then -> 1.6.16~rc1
+        when 1.6.16~rc1 landed. The manifest was two moves stale. Read off the artifact."""
+        head = _chain(row["engine"])[row["alembic"]["from_revision"]][1]
+        body = head.read_text(encoding="utf-8").partition("def downgrade(")[2]
+        written = re_search(r"SET version = '([^']+)'", body)
+        assert written, f"{head.name}: downgrade() writes no bw_metadata version, so this guard cannot check the manifest"
+
+        state = row["fingerprint"]["state_after_failure"]
+        assert state["bw_metadata_version"] == written.group(1), (
+            f"{row['engine']} -> {row['to']}: the manifest says a failed attempt leaves bw_metadata at "
+            f"{state['bw_metadata_version']}, but {head.name}'s downgrade() writes {written.group(1)}"
+        )
+        assert state["alembic_version"] == row["alembic"]["from_revision"]
 
 
 class TestTheChainIsReadAtAll:
@@ -273,12 +336,12 @@ class TestWhatTheChecksMakeOfIt:
         assert manifest_row(MANIFEST, "1.7.0~beta", "1.5.0", "sqlite") is None
         assert check_manifest(None, "1.7.0~beta", "1.5.0", "sqlite").verdict == RESTORE_ONLY
 
-    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['engine']}:{r['mode']}")
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}:{r['mode']}")
     def test_the_check_agrees_with_the_row_s_own_mode(self, row):
         verdict = check_manifest(row, row["from"], row["to"], row["engine"]).verdict
         assert verdict == (IN_PLACE if row["mode"] == "in_place_tested" else RESTORE_ONLY)
 
-    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "in_place_tested"], ids=lambda r: r["engine"])
+    @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "in_place_tested"], ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_an_in_place_row_names_the_revision_the_executor_needs(self, row):
         assert target_revision(row), f"{row['engine']}: in_place_tested with no to_revision -- the executor would refuse"
 

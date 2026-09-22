@@ -434,7 +434,7 @@ class TestEveryFailureLeavesSomethingStartable:
         assert rig["restore"], "a stamp that is not the target must trigger the fallback"
 
     def test_a_success_that_did_not_land_on_the_version_counts_as_a_failure(self, rig, monkeypatch):
-        monkeypatch.setattr(downgrade, "run_alembic_downgrade", lambda e, u, r, **k: (rig["state"].update(stamp=r, version="1.6.15~rc1"), (0, "ok"))[1])
+        monkeypatch.setattr(downgrade, "run_alembic_downgrade", lambda e, u, r, **k: (rig["state"].update(stamp=r, version="1.6.16~rc1"), (0, "ok"))[1])
         result = run()
         assert result["end_state"] == RESTORED
         assert rig["restore"]
@@ -484,9 +484,9 @@ class TestEveryFailureLeavesSomethingStartable:
 
     def test_a_stamp_that_never_moved_is_not_proof_the_database_came_back(self, rig, monkeypatch):
         """The measured MariaDB/MySQL partial failure leaves alembic_version at the 1.7 head and
-        bw_metadata.version already committed to 1.6.15~rc1. Comparing the stamp alone calls that
+        bw_metadata.version already committed to 1.6.16~rc1. Comparing the stamp alone calls that
         hybrid schema "restored" before any restore has run."""
-        monkeypatch.setattr(downgrade, "run_alembic_downgrade", lambda e, u, r, **k: (rig["state"].update(version="1.6.15~rc1"), (1, "1553"))[1])
+        monkeypatch.setattr(downgrade, "run_alembic_downgrade", lambda e, u, r, **k: (rig["state"].update(version="1.6.16~rc1"), (1, "1553"))[1])
         monkeypatch.setattr(backup_module, "restore_database", lambda backup_file, db=None: db)
         result = run()
         assert result["end_state"] == MANUAL, "the stamp was unchanged, but bw_metadata says a version that never ran"
