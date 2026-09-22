@@ -16,6 +16,7 @@ no-change proof, because this projection runs before every single push.
 
 import ast
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
@@ -42,6 +43,8 @@ def _load_definitions():
     stubs["logger"].setup_logger = Mock(return_value=Mock())
     stubs["jobs"]._write_atomic = lambda target, data: Path(target).write_bytes(data if isinstance(data, bytes) else data.encode("utf-8"))
     stubs["jobs"].note_deferral = Mock()
+    stubs["jobs"].cache_publication_lock = lambda *a, **k: nullcontext(True)
+    stubs["jobs"].CachePublicationLockError = type("CachePublicationLockError", (RuntimeError,), {})
     stubs["letsencrypt_consistency"].le_cache_write_lock = Mock()
 
     module = ModuleType("bw_push_configs_drift")

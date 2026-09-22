@@ -14,7 +14,7 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from common_utils import file_hash  # type: ignore
 from logger import getLogger  # type: ignore
-from jobs import Job  # type: ignore
+from jobs import Job, cache_publication_lock  # type: ignore
 from certbot_concurrency import ensure_accounts_for_orphans
 from letsencrypt_utils import (
     CERTBOT_BIN,
@@ -254,7 +254,7 @@ try:
                         instances = [i for i in JOB.db.get_instances(with_credential=True) if i.get("status") != "down"]
                         if instances:
                             api_caller = ApiCaller([API.from_instance(i, token=token) for i in instances])
-                            with le_cache_write_lock():
+                            with le_cache_write_lock(), cache_publication_lock(LOGGER):
                                 pushed = bool(api_caller.send_files(str(CACHE_PATH.parent), "/cache"))
                             if not pushed:
                                 LOGGER.error("Failed to push renewed Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")

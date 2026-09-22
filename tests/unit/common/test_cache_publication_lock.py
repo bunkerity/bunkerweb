@@ -236,3 +236,49 @@ def test_contention_deadline_uses_monotonic_time(cache_root, monkeypatch):
             pytest.fail("entered protected body after deadline")
     assert jobs.flock.call_count == 2
     pause.assert_called_once_with(0.05)
+
+
+def test_every_cache_push_in_the_tree_holds_the_publication_lock():
+    """Inventory guard: no `send_files(..., "/cache")` outside a `cache_publication_lock` block.
+
+    The lock covered the worker's push from day one, and three other publishers were missed:
+    push-configs (normal push and failover rollback) and both certbot jobs -- their pushes deleted
+    fresh job output on all-in-one and Linux for weeks with every test green. A new sender lands
+    here first, or it is the same defect again.
+    """
+    import ast
+
+    src = Path(__file__).resolve().parents[3] / "src"
+    unlocked = []
+    for path in src.rglob("*.py"):
+        if "deps" in path.parts:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for parent in ast.walk(tree):
+            for child in ast.iter_child_nodes(parent):
+                child.bw_parent = parent  # type: ignore[attr-defined]
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "send_files" and len(node.args) >= 2):
+                continue
+            endpoint = node.args[1]
+            if isinstance(endpoint, ast.Constant) and endpoint.value != "/cache":
+                continue
+            ancestor, locked, excluded = node, False, False
+            while hasattr(ancestor, "bw_parent"):
+                ancestor = ancestor.bw_parent  # type: ignore[attr-defined]
+                if isinstance(ancestor, ast.With) and any(
+                    isinstance(i.context_expr, ast.Call) and getattr(i.context_expr.func, "id", "") == "cache_publication_lock" for i in ancestor.items
+                ):
+                    locked = True
+                # `if endpoint != "/cache": return send_files(...)`: this branch never publishes the cache.
+                if (
+                    isinstance(ancestor, ast.If)
+                    and isinstance(ancestor.test, ast.Compare)
+                    and isinstance(ancestor.test.ops[0], ast.NotEq)
+                    and ast.dump(ancestor.test.left) == ast.dump(endpoint)
+                    and getattr(ancestor.test.comparators[0], "value", None) == "/cache"
+                ):
+                    excluded = True
+            if not (locked or excluded):
+                unlocked.append(f"{path.relative_to(src)}:{node.lineno}")
+    assert not unlocked, f"/cache pushed outside cache_publication_lock: {unlocked}"

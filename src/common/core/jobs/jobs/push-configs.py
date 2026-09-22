@@ -40,7 +40,7 @@ from custom_configs_drift import (  # type: ignore
     write_projection,
 )
 from logger import setup_logger  # type: ignore
-from jobs import _write_atomic, note_deferral  # type: ignore
+from jobs import CachePublicationLockError, _write_atomic, cache_publication_lock, note_deferral  # type: ignore
 
 try:
     from letsencrypt_consistency import le_cache_write_lock  # type: ignore
@@ -453,7 +453,15 @@ def _push_one_kind(api_caller: ApiCaller, src: Path, endpoint: str) -> bool:
         LOGGER.warning(f"Skipping push of {src} → {endpoint}: source does not exist")
         return True
     LOGGER.info(f"Pushing {src} → {endpoint} ({len(api_caller.apis)} instance(s)) ...")
-    return bool(api_caller.send_files(src.as_posix(), endpoint, timeout=INSTANCE_PUSH_TIMEOUT))
+    if endpoint != "/cache":
+        return bool(api_caller.send_files(src.as_posix(), endpoint, timeout=INSTANCE_PUSH_TIMEOUT))
+    # A co-located instance (all-in-one, Linux) swaps THIS host's /var/cache/bunkerweb, so a job's
+    # `cache_file` landing between the tar and the swap is deleted: see `jobs.cache_publication_lock`.
+    try:
+        with cache_publication_lock(LOGGER):
+            return bool(api_caller.send_files(src.as_posix(), endpoint, timeout=INSTANCE_PUSH_TIMEOUT))
+    except CachePublicationLockError:
+        return False
 
 
 def _config_with_api_token(data: bytes, token: str) -> bytes:
@@ -538,7 +546,7 @@ def _restore_from_snapshot(snapshot: Path, api_caller: ApiCaller, instances) -> 
     if nginx_snap.is_dir():
         ok = _push_configs(instances, nginx_snap) and ok
     if cache_snap.is_dir():
-        ok = bool(api_caller.send_files(cache_snap.as_posix(), "/cache", timeout=INSTANCE_PUSH_TIMEOUT)) and ok
+        ok = _push_one_kind(api_caller, cache_snap, "/cache") and ok
     if not ok:
         LOGGER.error("Failed to ship failover snapshot to instances")
         return False

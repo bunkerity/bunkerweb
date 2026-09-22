@@ -34,7 +34,7 @@ from requests import get
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
-from jobs import Job, can_requeue, job_requeue_count, request_requeue  # type: ignore
+from jobs import Job, cache_publication_lock, can_requeue, job_requeue_count, request_requeue  # type: ignore
 from logger import getLogger  # type: ignore
 
 from letsencrypt_utils import (
@@ -1378,7 +1378,7 @@ try:
                             instances = [i for i in JOB.db.get_instances(with_credential=True) if i.get("status") != "down"]
                             if instances:
                                 api_caller = ApiCaller([API.from_instance(i, token=token) for i in instances])
-                                with le_cache_write_lock():
+                                with le_cache_write_lock(), cache_publication_lock(LOGGER):
                                     pushed = bool(api_caller.send_files(str(CACHE_PATH.parent), "/cache"))
                                 if not pushed:
                                     LOGGER.error("Failed to push Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")

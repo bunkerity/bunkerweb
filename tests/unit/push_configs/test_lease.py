@@ -12,6 +12,7 @@ whole mechanism: an owner match means "my own orphan" and can mean nothing else.
 
 import ast
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
@@ -33,6 +34,8 @@ def _load_definitions():
     stubs["logger"].setup_logger = Mock(return_value=Mock())
     stubs["jobs"]._write_atomic = Mock()
     stubs["jobs"].note_deferral = Mock()
+    stubs["jobs"].cache_publication_lock = lambda *a, **k: nullcontext(True)
+    stubs["jobs"].CachePublicationLockError = type("CachePublicationLockError", (RuntimeError,), {})
     stubs["letsencrypt_consistency"].le_cache_write_lock = Mock()
 
     module = ModuleType("bw_push_configs")
