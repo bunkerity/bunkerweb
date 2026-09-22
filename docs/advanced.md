@@ -1051,6 +1051,13 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
 To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](features.md#custom-configurations).
 
+`CUSTOM_CONFIGS_DRIFT` controls what happens when a projected `.conf` file changes outside BunkerWeb. The default `overwrite` policy records the drift and restores the database-backed content; choose `refuse` to leave the pending change in place until it is resolved.
+
+| Policy | Effect |
+| --- | --- |
+| `overwrite` | Log detected drift and rewrite the file from the database, or delete it when no active row replaces it. |
+| `refuse` | Write nothing from the database until the drift is resolved; log an error and retry the unacknowledged change. |
+
 Here are the available types of custom configurations:
 
 - **http**: Configurations at the HTTP level of NGINX.

@@ -1049,6 +1049,13 @@ systemctl status systemd-resolved
 
 要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见[此处](features.md#custom-configurations)。
 
+`CUSTOM_CONFIGS_DRIFT` 控制投影的 `.conf` 文件在 BunkerWeb 外部发生变化时的处理方式。默认策略 `overwrite` 会记录漂移并恢复数据库中的内容；选择 `refuse` 可在问题解决前保留待处理的更改。
+
+| 策略 | 效果 |
+| --- | --- |
+| `overwrite` | 记录检测到的漂移并从数据库重写文件；如果没有活动行替换它，则删除文件。 |
+| `refuse` | 漂移解决前不从数据库写入内容；记录错误，并重试未确认的更改。 |
+
 以下是可用的自定义配置类型：
 
 - **http**：NGINX 的 HTTP 级别的配置。
@@ -1468,6 +1475,10 @@ max_allowed_packet = 64M
 
 **为什么使用 Redis/Valkey？**
 
+!!! warning "持久，但并非无限"
+
+    数据库可以让封禁在重启后保留，但不会增加实例能够执行的封禁数量。执行过程仍使用 `datastore` 共享内存区域（默认 64 MB，该区域与其他插件的状态共享），大约可容纳 100,000 个封禁。如果预计数量更多，请增大 `DATASTORE_MEMORY_SIZE`；否则区域满后实例将停止接受新条目。
+
 Redis 和 Valkey 是功能强大的内存数据存储，通常用作数据库、缓存和消息代理。它们具有高度可扩展性，并支持多种数据结构，包括：
 
 - **字符串**：基本的键值对。
@@ -1538,6 +1549,10 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     LISTEN_STREAM_PORT_SSL_1=4344
     ...
     ```
+
+!!! tip "HTTP/HTTPS 和按服务配置也同样适用"
+
+    `HTTP_PORT` 和 `HTTPS_PORT` 同样支持数字后缀（`HTTP_PORT_1`、……），并且从 `1.7` 开始可以通过在前面加服务名来**按服务**设置（`app2.example.com_HTTPS_PORT=9443`）。与上面的 stream 端口不同，服务的 HTTP/HTTPS 列表会**替换**全局列表，而不是与其合并。有关详情、保留端口以及各集成需要发布的内容，请参阅 [features](features.md) 中的 “Multiple and Per-Service Ports” 选项卡。
 
 === "All-in-one"
 
@@ -5078,16 +5093,16 @@ BunkerWeb 的核心 Let's Encrypt 插件包含一个 NGINX location 块和一个
 
 #### 插件执行顺序
 
-ACME 插件会自动将自身重新排序，以在 `ssl_certificate` NGINX 阶段最先执行，确保 TLS-ALPN-01 挑战证书在其他证书提供插件（selfsigned、letsencrypt、customcert）短路循环之前被提供。
+通过清单中的 `order` 声明插件在阶段中的位置；初始化后计算出的顺序会被锁定。除非 `PLUGINS_ORDER_*` 覆盖项将其他插件列在前面，否则核心 `certificates` 插件保持在 `ssl_certificate` 阶段的开头（覆盖项会添加到计算顺序之前，因此请将 `certificates` 列在第一位）。
 
 当 ACME 与其他依赖有效 TLS 的 PRO 插件（如 OpenID Connect、UI SSO）一起使用时，建议在相关的阶段排序设置中，将 `acme` 明确放在 `customcert` 之后：
 
 ```env
-PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
+PLUGINS_ORDER_SSL_CERTIFICATE=certificates customcert acme letsencrypt selfsigned
 PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert acme letsencrypt selfsigned
 ```
 
-未列在 `PLUGINS_ORDER_*` 设置中的外部/PRO 插件会按字母顺序追加到已明确排序的核心插件之后。
+没有操作员覆盖项时，默认顺序为：PRO 插件按字母顺序、外部插件按字母顺序、核心插件按 `order.json` 顺序，最后是其余核心插件按字母顺序；随后应用清单中的 `order` 约束。
 
 !!! warning "不要在同一服务上同时启用 `USE_ACME` 和 `AUTO_LETS_ENCRYPT`"
     ACME 插件和内置 Let's Encrypt 插件使用各自独立的存储和挑战路径，但在同一服务上同时启用二者会导致冲突。请对每个服务只使用其中之一。在多站点模式下，不同服务可以使用不同的插件——例如 `app1.example.com_USE_ACME=yes` 和 `app2.example.com_AUTO_LETS_ENCRYPT=yes`。

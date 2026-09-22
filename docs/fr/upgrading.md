@@ -19,6 +19,10 @@
     REDIS_SSL_VERIFY: "no"
     ```
 
+!!! warning "`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` fonctionne désormais comme documenté"
+
+    En 1.6, ce paramètre était appliqué à l’envers ; les opérateurs qui avaient défini `no` pour activer le contrôle de la Public Suffix List doivent définir `yes` (la valeur par défaut). Avec la valeur par défaut `yes`, le contrôle s’exécute désormais réellement : un certificat dont le nom est lui-même un suffixe public n’est donc plus demandé.
+
 !!! warning "Le broker de jobs est désormais une instance distincte du datastore de la WAF"
 
     BunkerWeb utilise Redis/Valkey pour deux tâches sans rapport, qui exigent des réglages contradictoires :
@@ -179,6 +183,12 @@ Le nouveau broker démarre avant le Worker et s'arrête après lui. Son AOF surv
 
 Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pour la terminer.
 
+!!! warning "Changements de comportement à vérifier"
+
+    - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`** : consultez l’avertissement ci-dessus pour connaître le comportement en 1.7 et le réglage requis.
+    - **`ALLOWED_METHODS`** : la valeur par défaut est `GET|POST|HEAD|QUERY` depuis 1.6.14 et, en 1.7, le serveur par défaut l’applique également : un `Host` inconnu ou une requête par IP utilisant toute autre méthode reçoit 405. Définissez-la explicitement si vous venez de 1.6.13 ou d’une version antérieure et devez conserver l’ancienne liste de méthodes.
+    - **`KEEP_CONFIG_ON_RESTART`** : la valeur par défaut passe de `no` à `yes`, de sorte que la configuration existante est conservée au redémarrage au lieu de générer une configuration temporaire à chaque fois. Définissez `no` pour conserver le comportement de réinitialisation de 1.6.
+
 !!! info "Un service réservé `default-server` apparaît en multisite"
 
     Avec `MULTISITE=yes`, le serveur répondant aux noms d'hôte, IP ou en-têtes `Host` inconnus devient un service permanent. L'UI et `GET /services` l'affichent avec `reserved: true`. Il ne peut pas être supprimé, renommé ni passé en brouillon et ne compte jamais dans le quota PRO. Configurez son certificat, TLS, ses en-têtes et pages d'erreur : voir [API](api.md#api-surface-capability-map) et [interface Web](web-ui.md#the-default-server-entry).
@@ -205,7 +215,10 @@ Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pou
     - **Plusieurs modèles par service** : `USE_TEMPLATE` devient une liste ordonnée séparée par des espaces ; un modèle ultérieur remplace les valeurs d'un précédent.
     - **UI traduite côté serveur**, avec sélecteur de langue : voir [Traductions](web-ui.md#traductions-i18n).
 
-### Rétrogradation vers 1.6.14 {#rolling-back-to-1614}
+<!-- L'ancre reste figée sur #rolling-back-to-1614 : elle est référencée depuis cette page,
+     depuis les quatre traductions et depuis la doc publiée. Le titre ne nomme plus de version
+     afin de survivre au prochain changement de N-1. -->
+### Rétrogradation vers une version 1.6 {#rolling-back-to-1614}
 
 Une rétrogradation n'est pas l'inverse d'une mise à niveau. Deux voies existent, et BunkerWeb vous
 indique celle qui s'applique à votre installation plutôt que de vous laisser deviner.
@@ -216,24 +229,38 @@ que tout ce qui a été écrit depuis la mise à niveau est perdu. Voir [Rollbac
 ci-dessous pour la procédure manuelle par moteur de base de données.
 
 **La rétrogradation sur place** n'est proposée que pour les couples version/moteur mesurés comme
-sans perte, et uniquement vers la version immédiatement précédente. Pour 1.7.0, cela signifie
-1.6.14, sur **SQLite et PostgreSQL uniquement**. Sur MariaDB et MySQL, la migration 1.7 ne peut pas
-être rejouée à l'envers — elle s'interrompt en cours de route et laisse un schéma qui ne correspond
-à aucune des deux versions — ces installations doivent donc être restaurées depuis une sauvegarde.
+sans perte, et uniquement sur **SQLite et PostgreSQL**. Sur MariaDB et MySQL, la migration 1.7 ne
+peut pas être rejouée à l'envers — elle s'interrompt en cours de route et laisse un schéma qui ne
+correspond à aucune des deux versions — ces installations doivent donc être restaurées depuis une
+sauvegarde, quelle que soit la cible choisie.
+
+Deux cibles sont mesurées et proposées :
+
+| Cible | Quand l'utiliser |
+| ----- | ---------------- |
+| **1.6.15** | La version qui précède immédiatement 1.7.0, et celle à privilégier. Le chemin le plus court : deux étapes de migration au lieu de six, donc moins de choses susceptibles de mal tourner. |
+| **1.6.14** | Toujours mesurée et toujours proposée, pour une installation qui doit y revenir. Quatre étapes de migration supplémentaires, et l'une d'elles **refuse purement et simplement** si vous avez créé des brouillons de paramètres individuels sous 1.6.15~rc3 ou plus récent : ces lignes ne sont pas représentables en 1.6.14 et 1.7 n'a aucun moyen de les effacer. La commande de rétrogradation le détecte, restaure sa propre sauvegarde et vous laisse là où vous étiez — mais c'est la rétrogradation vers 1.6.15 qui aboutit. |
+
+Rien de plus ancien que 1.6.14 n'a de couple mesuré : la commande ne peut alors que vous demander
+de restaurer depuis une sauvegarde.
 
 Trois commandes, dans cet ordre :
 
 ```bash
 # 1. Cette installation peut-elle revenir en arrière ? Lecture seule : ne crée aucune base et n'écrit rien.
-bwcli plugin backup preflight 1.6.14
+bwcli plugin backup preflight 1.6.15
 
 # 2. Immobilisez les écritures. Reste au premier plan jusqu'à ce que vous appuyiez sur Ctrl-C.
-bwcli plugin backup quiesce 1.6.14
+bwcli plugin backup quiesce 1.6.15
 
 # 3. Dans un second shell, pendant que l'étape 2 tient toujours :
-bwcli plugin backup downgrade 1.6.14            # rapporte ; ne change rien
-bwcli plugin backup downgrade 1.6.14 --execute  # demande confirmation, puis migre
+bwcli plugin backup downgrade 1.6.15            # rapporte ; ne change rien
+bwcli plugin backup downgrade 1.6.15 --execute  # demande confirmation, puis migre
 ```
+
+Remplacez `1.6.15` par `1.6.14` dans les trois commandes pour viser la version plus ancienne ;
+la version doit être identique à chaque étape, car le gel de l'étape 2 est pris pour cette cible
+précise.
 
 L'étape 3 refuse tant que la retenue de l'étape 2 n'est pas en place pour cette même version, que
 le préflight qu'elle relance elle-même ne ressort pas propre, et que le manifeste de compatibilité
@@ -250,7 +277,7 @@ détenteur de jeton.
     pools d'upstream, workflows, groupes de ressources), toutes les métriques de requêtes et la
     carte des menaces, chaque passkey enregistrée et chaque identifiant d'instance stocké — les
     instances enrôlées devront être réenregistrées contre le `API_TOKEN` global ensuite. Les
-    préférences d'interface par utilisateur survivent mais perdent leur sens : 1.6.14 les lit toutes
+    préférences d'interface par utilisateur survivent mais perdent leur sens : 1.6.x les lit toutes
     comme des dispositions de colonnes par tableau. Les bans sont la seule perte partielle : le job
     `sync-bans` les réapprend depuis les instances, ne perdant que leur durée restante.
 
@@ -261,7 +288,7 @@ détenteur de jeton.
 **En dehors de la base de données.** Les caches de jobs et les plugins PRO sont reconstruits à la
 prochaine exécution. Les configurations personnalisées, le contenu `www`, l'état Let's Encrypt et
 les archives de sauvegarde restent inchangés entre les deux versions. Les plugins externes qui
-nécessitent une API 1.7 sont inutilisables sous 1.6.14 et doivent être supprimés ou rétrogradés eux
+nécessitent une API 1.7 sont inutilisables sous 1.6.x et doivent être supprimés ou rétrogradés eux
 aussi.
 
 ### Procédure
@@ -311,7 +338,7 @@ aussi.
                 * Lit la version réellement en cours d'exécution depuis le conteneur plutôt que de se fier au tag de l'image : un tag flottant (`latest`, `testing`) comme une mise à niveau précédente interrompue sont ainsi correctement détectés.
             2. Décision de mise à niveau
                 * Même version déjà en cours : l'état de la pile est affiché et le script s'arrête.
-                * Version cible plus ancienne : **refus**. L'installeur n'a pas d'automatisation de rétrogradation propre, et démarrer le scheduler contre un paquet plus ancien avec une base de données déjà migrée échoue et redémarre en boucle. Voir [Rétrogradation vers 1.6.14](#rolling-back-to-1614) pour restaurer d'abord la base de données, puis relancez l'installeur sur l'ancienne version.
+                * Version cible plus ancienne : **refus**. L'installeur n'a pas d'automatisation de rétrogradation propre, et démarrer le scheduler contre un paquet plus ancien avec une base de données déjà migrée échoue et redémarre en boucle. Voir [Rétrogradation vers une version 1.6](#rolling-back-to-1614) pour restaurer d'abord la base de données, puis relancez l'installeur sur l'ancienne version.
                 * Sinon : demande de confirmation (ou exécution directe avec `-y`).
             3. Sauvegarde préalable
                 * Exécute `bwcli plugin backup save` dans le conteneur du planificateur et copie l'archive sur l'hôte.
@@ -518,7 +545,7 @@ aussi.
             5. Suppression des verrous de colis
                 * Supprime temporairement `apt-mark hold` / `dnf versionlock` active `bunkerweb` et `nginx` permet ainsi d'installer la version ciblée.
             6. Exécution de la mise à niveau
-                * Installe uniquement la nouvelle version du package BunkerWeb (NGINX n'est pas réinstallé en mode de mise à niveau à moins qu'il ne soit manquant - cela évite de toucher à un NGINX correctement épinglé).
+                * Installe la nouvelle version du package BunkerWeb. NGINX n'est réinstallé que si la version de BunkerWeb visée épingle une version différente : 1.6.13 et 1.6.14 épinglent NGINX 1.30.4 alors que 1.7.0 exige 1.30.5, donc cette mise à niveau fait bien évoluer NGINX et le redémarre. Depuis 1.6.15, qui épingle déjà 1.30.5, NGINX n'est pas touché.
                 * Réapplique les blocages/verrous de version pour geler les versions mises à niveau.
             7. Finalisation et état d'avancement
                 * Affiche l'état de systemd pour les services principaux et les étapes suivantes.
@@ -528,7 +555,7 @@ aussi.
 
             * Le script ne modifie PAS le `/etc/bunkerweb/variables.env` contenu de votre base de données.
             * Si la sauvegarde automatique a échoué (ou a été désactivée), vous pouvez toujours effectuer une restauration manuelle à l'aide de la section Restauration ci-dessous.
-            * Le mode de mise à niveau évite intentionnellement de réinstaller ou de rétrograder NGINX en dehors de la version épinglée prise en charge déjà présente.
+            * Le mode de mise à niveau ne rétrograde jamais NGINX et n'installe jamais une version autre que celle épinglée par la version de BunkerWeb visée — les modules ne se chargent pas avec un NGINX qui ne correspond pas.
             * Les journaux de dépannage restent dans `/var/log/bunkerweb/`.
 
         * **Comportement selon le mode** :

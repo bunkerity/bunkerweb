@@ -23,6 +23,10 @@
     REDIS_SSL_VERIFY: "no"
     ```
 
+!!! warning "`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` now works as documented"
+
+    1.6 applied this setting inverted; operators who set `no` to get the Public Suffix List check must set `yes` (the default). On the default `yes` the check now really runs, so a certificate whose name is itself a public suffix is no longer requested.
+
 !!! warning "The job broker is now a separate instance from the WAF datastore"
 
     BunkerWeb uses Redis/Valkey for two unrelated jobs, and they need contradictory settings:
@@ -236,6 +240,12 @@ The new broker starts before the Worker and stops after it. Its AOF survives a c
 None of the following blocks the upgrade or needs action to complete it, but each one changes what
 you see once 1.7 is running.
 
+!!! warning "Behaviour changes to check"
+
+    - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`**: See the warning above for the 1.7 behavior and required setting.
+    - **`ALLOWED_METHODS`**: the default has been `GET|POST|HEAD|QUERY` since 1.6.14, and in 1.7 the default server enforces it too: an unknown `Host` or a by-IP request using any other method is answered 405. Set it explicitly if you are coming from 1.6.13 or earlier and need the old method list.
+    - **`KEEP_CONFIG_ON_RESTART`**: the default changed from `no` to `yes`, so the existing configuration is preserved on restart instead of generating a temporary configuration each time. Set it to `no` to keep the 1.6 reset behavior.
+
 !!! info "A reserved `default-server` service appears in multisite installs"
 
     With `MULTISITE=yes`, the block that answers requests matching no configured service — an
@@ -286,38 +296,52 @@ you see once 1.7 is running.
     - **A server-translated web UI** with a language selector. See
       [Translations](web-ui.md#translations-i18n).
 
-### Rolling back to 1.6.14
+<!-- The anchor is frozen at #rolling-back-to-1614: it is linked from this page, from the
+     four locale copies and from published docs. The heading no longer names a version so
+     that it survives the next N-1 bump. -->
+### Rolling back to a 1.6 release {#rolling-back-to-1614}
 
 A rollback is not the reverse of an upgrade. Two paths exist, and BunkerWeb tells you which one applies to your installation rather than letting you guess.
 
 **Restore from backup** works everywhere and is the supported path. It replays a backup taken *before* the upgrade over an emptied database, so everything written since the upgrade is lost. See [Rollback](#rollback) below for the manual procedure per database engine.
 
-**In-place downgrade** is offered only for version/engine pairs that have been measured lossless, and only back to the immediately preceding release. For 1.7.0 that means 1.6.14, on **SQLite and PostgreSQL only**. On MariaDB and MySQL the 1.7 migration cannot be replayed backwards — it aborts partway and leaves a schema that is neither version — so those installations must restore from a backup.
+**In-place downgrade** is offered only for version/engine pairs that have been measured lossless, and only on **SQLite and PostgreSQL**. On MariaDB and MySQL the 1.7 migration cannot be replayed backwards — it aborts partway and leaves a schema that is neither version — so those installations must restore from a backup, whichever target they pick.
+
+Two targets are measured and offered:
+
+| Target | When to use it |
+| ------ | -------------- |
+| **1.6.15** | The release immediately before 1.7.0, and the one to prefer. The shorter path: two migration steps instead of six, so there is less to go wrong. |
+| **1.6.14** | Still measured and still offered, for an installation that has to land on it. Four extra migration steps, and one of them **refuses outright** if you created individual setting drafts under 1.6.15~rc3 or later: those rows cannot be represented in 1.6.14 and 1.7 has no way to clear them. The downgrade command detects that, restores its own backup and leaves you where you started — but a rollback to 1.6.15 is the one that works. |
+
+Anything older than 1.6.14 has no measured pair, so the command can only tell you to restore from a backup.
 
 Three commands, in this order:
 
 ```bash
 # 1. Can this installation go back? Read-only: it creates no database and writes nothing.
-bwcli plugin backup preflight 1.6.14
+bwcli plugin backup preflight 1.6.15
 
 # 2. Hold the writers still. Stays in the foreground until you press Ctrl-C.
-bwcli plugin backup quiesce 1.6.14
+bwcli plugin backup quiesce 1.6.15
 
 # 3. In a second shell, while step 2 is still holding:
-bwcli plugin backup downgrade 1.6.14            # reports; changes nothing
-bwcli plugin backup downgrade 1.6.14 --execute  # asks for confirmation, then migrates
+bwcli plugin backup downgrade 1.6.15            # reports; changes nothing
+bwcli plugin backup downgrade 1.6.15 --execute  # asks for confirmation, then migrates
 ```
+
+Replace `1.6.15` with `1.6.14` in all three commands to target the older release; the version must be the same in every step, because the hold in step 2 is taken for that exact target.
 
 Step 3 refuses unless the hold from step 2 is in place for that same version, the preflight it re-runs itself comes back clean, and the compatibility manifest marks the pair as tested. It then takes its own backup immediately before migrating and restores it if anything goes wrong.
 
 Before starting, stop or firewall anything that writes to the API directly. The hold makes the API *report* the fleet read-only, which is what the scheduler, autoconf and the UI act on; it does not block a write made straight to the API by a token holder.
 
 !!! danger "What an in-place downgrade destroys"
-    Every centrally stored certificate, every attachable resource (redirects, upstream pools, workflows, resource groups), all request metrics and the threat map, every registered passkey, and every stored instance credential — enrolled instances must be re-registered against the global `API_TOKEN` afterwards. Per-user UI preferences survive but lose their meaning: 1.6.14 reads them all as per-table column layouts. Bans are the one soft loss: the `sync-bans` job relearns them from the instances, losing only their remaining durations.
+    Every centrally stored certificate, every attachable resource (redirects, upstream pools, workflows, resource groups), all request metrics and the threat map, every registered passkey, and every stored instance credential — enrolled instances must be re-registered against the global `API_TOKEN` afterwards. Per-user UI preferences survive but lose their meaning: 1.6.x reads them all as per-table column layouts. Bans are the one soft loss: the `sync-bans` job relearns them from the instances, losing only their remaining durations.
 
     The preflight counts what your installation actually holds and refuses an in-place downgrade while anything irreplaceable is still there, so the answer you get is about your data rather than about the release in the abstract.
 
-**Outside the database.** Job caches and PRO plugins are rebuilt on the next run. Custom configs, `www` content, Let's Encrypt state and backup archives are unchanged between the two versions. External plugins that need a 1.7 API are unusable on 1.6.14 and must be removed or downgraded too.
+**Outside the database.** Job caches and PRO plugins are rebuilt on the next run. Custom configs, `www` content, Let's Encrypt state and backup archives are unchanged between the two versions. External plugins that need a 1.7 API are unusable on 1.6.x and must be removed or downgraded too.
 
 ### Procedure
 
@@ -365,7 +389,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
                 * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`) and an interrupted previous upgrade are both detected correctly.
             2. Upgrade decision
                 * Same version already running: prints the stack status and exits.
-                * Older target version: **refuses**. The installer has no downgrade automation of its own, and starting the scheduler against an older package with an already-migrated database fails and restarts in a loop. See [Rolling back to 1.6.14](#rolling-back-to-1614) to bring the database back first, then re-run the installer at the older version.
+                * Older target version: **refuses**. The installer has no downgrade automation of its own, and starting the scheduler against an older package with an already-migrated database fails and restarts in a loop. See [Rolling back to a 1.6 release](#rolling-back-to-1614) to bring the database back first, then re-run the installer at the older version.
                 * Otherwise: asks for confirmation (or proceeds directly with `-y`).
             3. Pre-upgrade backup
                 * Runs `bwcli plugin backup save` inside the scheduler container and copies the archive to the host.
@@ -575,7 +599,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
             5. Package locks removal
                 * Temporarily removes `apt-mark hold` / `dnf versionlock` on `bunkerweb` and `nginx` so the targeted version can be installed.
             6. Upgrade execution
-                * Installs only the new BunkerWeb package version (NGINX is not reinstalled in upgrade mode unless missing—this avoids touching a correctly pinned NGINX).
+                * Installs the new BunkerWeb package version. NGINX is reinstalled only when the target BunkerWeb pins a different version: 1.6.13 and 1.6.14 pin NGINX 1.30.4 while 1.7.0 requires 1.30.5, so that upgrade does bump NGINX and restart it. Coming from 1.6.15, which already pins 1.30.5, NGINX is left alone.
                 * Re‑applies holds/versionlocks to freeze the upgraded versions.
             7. Finalization & status
                 * Displays systemd status for core services and next steps.
@@ -585,7 +609,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
 
             * The script does NOT modify your `/etc/bunkerweb/variables.env` or database content.
             * If automatic backup failed (or was disabled) you can still do a manual restore using the Rollback section below.
-            * Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.
+            * Upgrade mode never downgrades NGINX, and never installs a version other than the one the target BunkerWeb pins — the modules fail to load against a mismatched NGINX.
             * Logs for troubleshooting remain in `/var/log/bunkerweb/`.
 
         * **Mode-aware behavior**:

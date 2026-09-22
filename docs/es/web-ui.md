@@ -479,6 +479,16 @@ El alias tiene entre 1 y 64 letras, cifras, guiones o guiones bajos. `@EU`, `@G7
 están reservados. Se rechazan grupos inexistentes o sin entradas del tipo requerido y no se puede
 eliminar un grupo mientras lo use un ajuste o workflow.
 
+#### Grupos de recursos integrados
+
+| ID | Tipo | Propósito |
+| --- | --- | --- |
+| `ai-search-crawlers` | `user_agent` | Tokens User-Agent declarados para crawlers que indexan contenido para búsquedas asistidas por IA; los tokens se pueden falsificar. |
+| `ai-training-crawlers` | `user_agent` | Tokens User-Agent declarados para crawlers que recopilan contenido para entrenar modelos de IA o crear conjuntos de datos reutilizables; los tokens se pueden falsificar. |
+| `ai-user-fetchers` | `user_agent` | Tokens User-Agent declarados para servicios de IA que obtienen contenido a petición del usuario; los tokens se pueden falsificar. |
+| `good-bots` | `rdns` / `asn` | Crawlers legítimos identificados mediante sufijos DNS inversos y el ASN del crawler. |
+| `private-ranges` | `ip` | Rangos IP privados, de loopback y de enlace local para redes no públicas. |
+
 ### Upstreams
 
 En **Configure → Upstreams** mantén pools reutilizables HTTP, gRPC o stream y adjúntalos a varios

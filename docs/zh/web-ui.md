@@ -467,6 +467,16 @@ log {
 
 别名包含 1 到 64 个字母、数字、下划线或连字符；`@EU`、`@G7`、`@SCHENGEN` 等内置国家别名被保留。不存在或不含所需类型条目的资源组会被拒绝；被设置或工作流引用的组不能删除。
 
+#### 内置资源组
+
+| ID | 类型 | 用途 |
+| --- | --- | --- |
+| `ai-search-crawlers` | `user_agent` | 为 AI 辅助搜索抓取内容的爬虫声明的 User-Agent 标记；标记可以伪造。 |
+| `ai-training-crawlers` | `user_agent` | 为 AI 模型训练或可复用数据集收集内容的爬虫声明的 User-Agent 标记；标记可以伪造。 |
+| `ai-user-fetchers` | `user_agent` | 按用户请求获取内容的 AI 服务声明的 User-Agent 标记；标记可以伪造。 |
+| `good-bots` | `rdns` / `asn` | 通过反向 DNS 后缀和爬虫 ASN 识别的合法爬虫。 |
+| `private-ranges` | `ip` | 用于非公共网络的私有、回环和链路本地 IP 范围。 |
+
 ### 上游池
 
 打开**配置 → 上游池**可维护同时附加到多个服务的可复用 HTTP、gRPC 或 stream 后端池。每个池包括名称、协议 (`http`、`grpc`、`stream`)、负载均衡方式 (`round_robin`、`least_conn`、`ip_hash`)、最多 64 个成员（各自的权重、最大失败次数、失败超时，以及主用/备用/停用角色）、可选 keepalive 连接数和 `backend_ssl` 开关。附加时记录反向代理路径，默认为 `/`；一个池最多附加到 100 个服务。

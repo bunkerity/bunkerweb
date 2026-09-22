@@ -469,6 +469,16 @@ Utilisez son `@alias` dans les paramètres compatibles, par exemple `@office 203
 
 L'alias comporte de 1 à 64 lettres, chiffres, tirets bas ou tirets. `@EU`, `@G7` et `@SCHENGEN` sont réservés. Une référence est refusée si le groupe est absent ou n'a aucune entrée du type requis. Un groupe utilisé par un paramètre ou workflow ne peut pas être supprimé.
 
+#### Groupes de ressources intégrés
+
+| ID | Type | Objet |
+| --- | --- | --- |
+| `ai-search-crawlers` | `user_agent` | Tokens User-Agent déclarés pour les crawlers qui indexent du contenu pour la recherche assistée par IA ; les tokens sont falsifiables. |
+| `ai-training-crawlers` | `user_agent` | Tokens User-Agent déclarés pour les crawlers qui collectent du contenu pour l’entraînement de modèles IA ou des jeux de données réutilisables ; les tokens sont falsifiables. |
+| `ai-user-fetchers` | `user_agent` | Tokens User-Agent déclarés pour les services IA qui récupèrent du contenu à la demande d’un utilisateur ; les tokens sont falsifiables. |
+| `good-bots` | `rdns` / `asn` | Crawlers légitimes identifiés par des suffixes DNS inversés et l’ASN du crawler. |
+| `private-ranges` | `ip` | Plages IP privées, de bouclage et de liaison locale pour les réseaux non publics. |
+
 ### Upstreams
 
 Ouvrez **Configurer → Upstreams** pour gérer des pools de backends HTTP, gRPC ou stream partagés entre plusieurs services. Chaque pool possède un nom, un protocole (`http`, `grpc`, `stream`), une méthode (`round_robin`, `least_conn`, `ip_hash`), jusqu'à 64 serveurs (poids, nombre maximal d'échecs, délai d'échec, rôle principal/secours/indisponible), un nombre facultatif de connexions keepalive et l'option `backend_ssl`. L'attachement enregistre le chemin reverse proxy (`/` par défaut). Un pool peut être attaché à 100 services au maximum.

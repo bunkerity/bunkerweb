@@ -525,6 +525,16 @@ Länder-Aliase wie `@EU`, `@G7` und `@SCHENGEN` sind reserviert. Verweise auf ni
 oder Gruppen ohne Einträge des benötigten Typs werden abgelehnt. Verwendet eine Einstellung oder ein
 Workflow eine Gruppe, lässt sie sich nicht löschen.
 
+#### Eingebaute Ressourcengruppen
+
+| ID | Typ | Zweck |
+| --- | --- | --- |
+| `ai-search-crawlers` | `user_agent` | Gemeldete User-Agent-Tokens für Crawler, die Inhalte für KI-gestützte Suche indexieren; Tokens können gefälscht werden. |
+| `ai-training-crawlers` | `user_agent` | Gemeldete User-Agent-Tokens für Crawler, die Inhalte für KI-Training oder wiederverwendbare Datensätze sammeln; Tokens können gefälscht werden. |
+| `ai-user-fetchers` | `user_agent` | Gemeldete User-Agent-Tokens für KI-Dienste, die Inhalte auf Anfrage eines Benutzers abrufen; Tokens können gefälscht werden. |
+| `good-bots` | `rdns` / `asn` | Legitime Crawler, erkannt anhand von Reverse-DNS-Suffixen und der Crawler-ASN. |
+| `private-ranges` | `ip` | Private, Loopback- und Link-Local-IP-Bereiche für nicht öffentliche Netzwerke. |
+
 ### Upstreams
 
 Unter **Konfigurieren → Upstreams** pflegen Sie wiederverwendbare HTTP-, gRPC- oder Stream-Backend-Pools,

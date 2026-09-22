@@ -19,6 +19,10 @@
     REDIS_SSL_VERIFY: "no"
     ```
 
+!!! warning "`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` ahora funciona según la documentación"
+
+    1.6 aplicaba este ajuste al revés; quienes establecieron `no` para obtener la comprobación de la Public Suffix List deben establecer `yes` (el valor predeterminado). Con el valor predeterminado `yes`, la comprobación ahora se ejecuta realmente, por lo que ya no se solicita un certificado cuyo nombre sea un sufijo público.
+
 !!! warning "El broker de jobs ahora es una instancia separada del datastore de la WAF"
 
     BunkerWeb usa Redis/Valkey para dos tareas no relacionadas, que necesitan configuraciones contradictorias:
@@ -245,6 +249,12 @@ si conservas `/data`; la persistencia no traslada los jobs que quedaron en otro 
 Nada de lo siguiente bloquea la actualización ni exige acciones para completarla, pero cambia lo
 que verás con 1.7 en ejecución.
 
+!!! warning "Cambios de comportamiento que debes comprobar"
+
+    - **`LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`**: Consulta la advertencia anterior para conocer el comportamiento de 1.7 y el ajuste requerido.
+    - **`ALLOWED_METHODS`**: el valor predeterminado es `GET|POST|HEAD|QUERY` desde 1.6.14, y en 1.7 el servidor predeterminado también lo aplica: una `Host` desconocida o una petición por IP con cualquier otro método recibe 405. Establécelo explícitamente si vienes de 1.6.13 o anterior y necesitas la lista de métodos antigua.
+    - **`KEEP_CONFIG_ON_RESTART`**: el valor predeterminado cambió de `no` a `yes`, por lo que la configuración existente se conserva al reiniciar en lugar de generar una temporal cada vez. Establécelo en `no` para mantener el comportamiento de restablecimiento de 1.6.
+
 !!! info "Un servicio reservado `default-server` aparece en instalaciones multisitio"
 
     Con `MULTISITE=yes`, el bloque que responde a peticiones sin servicio coincidente — hostname
@@ -292,7 +302,10 @@ que verás con 1.7 en ejecución.
     - **Interfaz traducida en el servidor** con selector de idioma. Consulta
       [Traducciones](web-ui.md#translations-i18n).
 
-### Reversión a 1.6.14 {#rolling-back-to-1614}
+<!-- El ancla queda fijada en #rolling-back-to-1614: está enlazada desde esta página, desde las
+     cuatro traducciones y desde la documentación publicada. El título ya no nombra una versión
+     para que sobreviva al próximo cambio de N-1. -->
+### Reversión a una versión 1.6 {#rolling-back-to-1614}
 
 Una reversión no es lo contrario de una actualización. Existen dos vías, y BunkerWeb te indica
 cuál se aplica a tu instalación en lugar de dejarte adivinar.
@@ -303,25 +316,38 @@ pierde todo lo escrito desde la actualización. Consulta [Reversión](#rollback)
 procedimiento manual por motor de base de datos.
 
 **La reversión sin restauración** solo se ofrece para las combinaciones de versión/motor que se
-han medido como no destructivas, y solo hasta la versión inmediatamente anterior. Para 1.7.0 eso
-significa 1.6.14, solo en **SQLite y PostgreSQL**. En MariaDB y MySQL la migración de 1.7 no se
-puede reproducir hacia atrás — se interrumpe a mitad de camino y deja un esquema que no
-corresponde a ninguna de las dos versiones — así que esas instalaciones deben restaurarse desde
-una copia de seguridad.
+han medido como no destructivas, y solo en **SQLite y PostgreSQL**. En MariaDB y MySQL la
+migración de 1.7 no se puede reproducir hacia atrás — se interrumpe a mitad de camino y deja un
+esquema que no corresponde a ninguna de las dos versiones — así que esas instalaciones deben
+restaurarse desde una copia de seguridad, sea cual sea el destino elegido.
+
+Hay dos destinos medidos y ofrecidos:
+
+| Destino | Cuándo usarlo |
+| ------- | ------------- |
+| **1.6.15** | La versión inmediatamente anterior a 1.7.0, y la que conviene elegir. El camino más corto: dos pasos de migración en lugar de seis, así que hay menos margen de error. |
+| **1.6.14** | Sigue medida y sigue ofreciéndose, para una instalación que tenga que aterrizar ahí. Cuatro pasos de migración adicionales, y uno de ellos **se niega por completo** si creaste borradores de ajustes individuales con 1.6.15~rc3 o posterior: esas filas no se pueden representar en 1.6.14 y 1.7 no tiene forma de borrarlas. El comando de reversión lo detecta, restaura su propia copia de seguridad y te deja donde estabas — pero la que funciona es la reversión a 1.6.15. |
+
+Nada anterior a 1.6.14 tiene una combinación medida, así que el comando solo puede pedirte que
+restaures desde una copia de seguridad.
 
 Tres comandos, en este orden:
 
 ```bash
 # 1. ¿Puede esta instalación revertirse? Solo lectura: no crea ninguna base de datos ni escribe nada.
-bwcli plugin backup preflight 1.6.14
+bwcli plugin backup preflight 1.6.15
 
 # 2. Detén los escritores. Permanece en primer plano hasta que pulses Ctrl-C.
-bwcli plugin backup quiesce 1.6.14
+bwcli plugin backup quiesce 1.6.15
 
 # 3. En una segunda shell, mientras el paso 2 sigue reteniendo:
-bwcli plugin backup downgrade 1.6.14            # informa; no cambia nada
-bwcli plugin backup downgrade 1.6.14 --execute  # pide confirmación y luego migra
+bwcli plugin backup downgrade 1.6.15            # informa; no cambia nada
+bwcli plugin backup downgrade 1.6.15 --execute  # pide confirmación y luego migra
 ```
+
+Sustituye `1.6.15` por `1.6.14` en los tres comandos para apuntar a la versión más antigua; la
+versión debe ser la misma en cada paso, porque la pausa del paso 2 se toma para ese destino
+exacto.
 
 El paso 3 se rechaza a menos que la retención del paso 2 siga activa para esa misma versión, el
 preflight que vuelve a ejecutar por su cuenta salga limpio, y el manifiesto de compatibilidad
@@ -339,7 +365,7 @@ API por quien posea un token.
     peticiones y el mapa de amenazas, todas las passkeys registradas y toda credencial de instancia
     almacenada — las instancias inscritas deberán volver a registrarse contra el `API_TOKEN` global
     después. Las preferencias de interfaz por usuario sobreviven pero pierden su significado:
-    1.6.14 las lee todas como disposiciones de columnas por tabla. Los bans son la única pérdida
+    1.6.x las lee todas como disposiciones de columnas por tabla. Los bans son la única pérdida
     leve: el job `sync-bans` los reaprende de las instancias, perdiendo solo su duración restante.
 
     El preflight cuenta lo que tu instalación realmente contiene y rechaza una reversión sin
@@ -349,7 +375,7 @@ API por quien posea un token.
 **Fuera de la base de datos.** Las cachés de jobs y los plugins PRO se reconstruyen en la
 siguiente ejecución. Las configuraciones personalizadas, el contenido de `www`, el estado de Let's
 Encrypt y los archivos de copia de seguridad no cambian entre ambas versiones. Los plugins
-externos que necesitan una API de 1.7 no funcionan en 1.6.14 y deben eliminarse o revertirse
+externos que necesitan una API de 1.7 no funcionan en 1.6.x y deben eliminarse o revertirse
 también.
 
 ### Procedimiento
@@ -399,7 +425,7 @@ también.
                 * Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (`latest`, `testing`) como una actualización anterior interrumpida.
             2. Decisión de actualización
                 * Ya se ejecuta la misma versión: muestra el estado del stack y termina.
-                * Versión de destino más antigua: **se rechaza**. El instalador no tiene automatización de reversión propia, y arrancar el scheduler contra un paquete más antiguo con una base de datos ya migrada falla y entra en un bucle de reinicios. Consulta [Reversión a 1.6.14](#rolling-back-to-1614) para restaurar antes la base de datos, y luego vuelve a ejecutar el instalador en la versión anterior.
+                * Versión de destino más antigua: **se rechaza**. El instalador no tiene automatización de reversión propia, y arrancar el scheduler contra un paquete más antiguo con una base de datos ya migrada falla y entra en un bucle de reinicios. Consulta [Reversión a una versión 1.6](#rolling-back-to-1614) para restaurar antes la base de datos, y luego vuelve a ejecutar el instalador en la versión anterior.
                 * En cualquier otro caso: pide confirmación (o continúa directamente con `-y`).
             3. Copia de seguridad previa
                 * Ejecuta `bwcli plugin backup save` dentro del contenedor del scheduler y copia el archivo al host.
@@ -606,7 +632,7 @@ también.
             5. Eliminación de bloqueos de paquetes
                 * Elimina temporalmente `apt-mark hold` / `dnf versionlock` en `bunkerweb` y `nginx` para que se pueda instalar la versión de destino.
             6. Ejecución de la actualización
-                * Instala solo la nueva versión del paquete de BunkerWeb (NGINX no se reinstala en modo de actualización a menos que falte, esto evita tocar un NGINX correctamente anclado).
+                * Instala la nueva versión del paquete de BunkerWeb. NGINX solo se reinstala cuando la versión de BunkerWeb de destino ancla una versión distinta: 1.6.13 y 1.6.14 anclan NGINX 1.30.4 mientras que 1.7.0 exige 1.30.5, así que esa actualización sí sube NGINX y lo reinicia. Viniendo de 1.6.15, que ya ancla 1.30.5, NGINX no se toca.
                 * Vuelve a aplicar los bloqueos/versionlocks para congelar las versiones actualizadas.
             7. Finalización y estado
                 * Muestra el estado de systemd para los servicios principales y los próximos pasos.
@@ -616,7 +642,7 @@ también.
 
             * El script NO modifica tu `/etc/bunkerweb/variables.env` ni el contenido de la base de datos.
             * Si la copia de seguridad automática falló (o se deshabilitó), aún puedes hacer una restauración manual usando la sección de Reversión a continuación.
-            * El modo de actualización evita intencionadamente reinstalar o degradar NGINX fuera de la versión anclada compatible ya presente.
+            * El modo de actualización nunca degrada NGINX ni instala una versión distinta de la que ancla el BunkerWeb de destino: los módulos no cargan contra un NGINX que no coincide.
             * Los registros para la solución de problemas permanecen en `/var/log/bunkerweb/`.
 
         * **Comportamiento según el modo**:

@@ -1049,6 +1049,13 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
 
 Pour personnaliser et ajouter des configurations personnalisées à BunkerWeb, vous pouvez profiter de sa base NGINX. Des configurations NGINX personnalisées peuvent être ajoutées dans différents contextes NGINX, y compris des configurations pour le pare-feu d'applications Web (WAF) ModSecurity, qui est un composant central de BunkerWeb. Vous trouverez plus de détails sur les configurations de ModSecurity [ici](features.md#custom-configurations).
 
+`CUSTOM_CONFIGS_DRIFT` contrôle ce qui se passe lorsqu’un fichier `.conf` projeté est modifié en dehors de BunkerWeb. La politique par défaut `overwrite` journalise l’écart et restaure le contenu issu de la base de données ; choisissez `refuse` pour laisser la modification en attente jusqu’à sa résolution.
+
+| Politique | Effet |
+| --- | --- |
+| `overwrite` | Journaliser l’écart détecté et réécrire le fichier depuis la base de données, ou le supprimer si aucune ligne active ne le remplace. |
+| `refuse` | Ne rien écrire depuis la base de données tant que l’écart n’est pas résolu ; journaliser une erreur et réessayer la modification non acquittée. |
+
 Voici les types de configurations personnalisées disponibles :
 
 - **http** : Configurations au niveau HTTP de NGINX.
@@ -1469,6 +1476,10 @@ Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin 
 
 **Pourquoi utiliser Redis/Valkey ?**
 
+!!! warning "Durable, mais pas illimité"
+
+    La base de données permet aux bannissements de survivre à un redémarrage, mais n’augmente pas le nombre de bannissements qu’une instance peut appliquer. L’application utilise toujours la zone de mémoire partagée `datastore` (64 Mo par défaut), partagée avec l’état des autres plug-ins, qui peut contenir environ 100 000 bannissements. Augmentez `DATASTORE_MEMORY_SIZE` si vous en prévoyez davantage ; sinon, l’instance cessera d’accepter de nouvelles entrées lorsque la zone sera pleine.
+
 Redis et Valkey sont de puissants magasins de données en mémoire couramment utilisés comme bases de données, caches et courtiers de messages. Ils sont hautement évolutifs et prennent en charge une variété de structures de données, notamment :
 
 - **Chaînes**: paires clé-valeur de base.
@@ -1539,6 +1550,10 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     LISTEN_STREAM_PORT_SSL_1=4344
     ...
     ```
+
+!!! tip "Cela fonctionne aussi pour HTTP/HTTPS et par service"
+
+    `HTTP_PORT` et `HTTPS_PORT` acceptent également des suffixes numériques (`HTTP_PORT_1`, ...), et depuis `1.7` peuvent être définis **par service** en préfixant le nom du service (`app2.example.com_HTTPS_PORT=9443`). Contrairement aux ports stream ci-dessus, la liste HTTP/HTTPS d’un service **remplace** la liste globale au lieu de la fusionner. Consultez l’onglet "Multiple and Per-Service Ports" dans [features](features.md) pour les détails, les ports réservés et ce que chaque intégration doit publier.
 
 === "Tout-en-un"
 
@@ -5080,16 +5095,16 @@ Ce paramètre reproduit le comportement du `LETS_ENCRYPT_PASSTHROUGH` du cœur O
 
 #### Ordre d'exécution des plugins
 
-Le plugin ACME se réordonne automatiquement pour s'exécuter en premier dans la phase NGINX `ssl_certificate`, garantissant que les certificats de challenge TLS-ALPN-01 sont servis avant que d'autres plugins fournisseurs de certificats (selfsigned, letsencrypt, customcert) ne court-circuitent la boucle.
+Déclarez la position d'un plugin dans une phase avec `order` dans son manifeste ; l'ordre calculé est figé après l'initialisation et le plugin cœur `certificates` conserve la tête de la phase `ssl_certificate`, sauf si un override `PLUGINS_ORDER_*` place d'autres plugins avant lui (l'override est ajouté avant l'ordre calculé : placez donc `certificates` en premier).
 
 Lorsque vous utilisez ACME aux côtés d'autres plugins PRO nécessitant un TLS valide (par ex. OpenID Connect, UI SSO), il est recommandé d'ajouter explicitement `acme` juste après `customcert` dans les paramètres d'ordre des phases concernées :
 
 ```env
-PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
+PLUGINS_ORDER_SSL_CERTIFICATE=certificates customcert acme letsencrypt selfsigned
 PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert acme letsencrypt selfsigned
 ```
 
-Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont ajoutés par ordre alphabétique après les plugins principaux explicitement ordonnés.
+Sans override de l'opérateur, l'ordre par défaut est : plugins PRO par ordre alphabétique, plugins externes par ordre alphabétique, plugins cœur selon `order.json`, puis les autres plugins cœur par ordre alphabétique ; les contraintes `order` du manifeste sont ensuite appliquées.
 
 !!! warning "N'activez pas `USE_ACME` et `AUTO_LETS_ENCRYPT` sur le même service"
     Le plugin ACME et le plugin Let's Encrypt intégré utilisent des stockages et des chemins de challenge séparés, mais les activer tous les deux sur le même service provoquera des conflits. Utilisez l'un ou l'autre par service. En mode multisite, différents services peuvent utiliser différents plugins -- par exemple, `app1.example.com_USE_ACME=yes` et `app2.example.com_AUTO_LETS_ENCRYPT=yes`.

@@ -479,6 +479,16 @@ Reference a group from a supported list setting with its `@alias`, for example `
 
 The alias contains 1 to 64 letters, digits, underscores, or dashes. Built-in country aliases such as `@EU`, `@G7`, and `@SCHENGEN` are reserved. BunkerWeb refuses a reference when the group does not exist or has no entries of the required type. It also prevents deleting a group while a setting or workflow uses it.
 
+#### Built-in resource groups
+
+| ID | Kind | Purpose |
+| --- | --- | --- |
+| `ai-search-crawlers` | `user_agent` | Declared User-Agent tokens for crawlers that index content for AI-assisted search; tokens are spoofable. |
+| `ai-training-crawlers` | `user_agent` | Declared User-Agent tokens for crawlers collecting content for AI training or reusable datasets; tokens are spoofable. |
+| `ai-user-fetchers` | `user_agent` | Declared User-Agent tokens for AI services fetching content at a user’s request; tokens are spoofable. |
+| `good-bots` | `rdns` / `asn` | Legitimate crawlers identified by reverse-DNS suffixes and crawler ASN. |
+| `private-ranges` | `ip` | Private, loopback, and link-local IP ranges for non-public networks. |
+
 ### Upstreams
 
 Open **Configure → Upstreams** to maintain reusable HTTP, gRPC, or stream backend pools, attachable to several services at once instead of re-typing the same backend list on each one. Each pool has a name, a protocol (`http`, `grpc`, or `stream`), a load-balancing method (`round_robin`, `least_conn`, or `ip_hash`), up to 64 member servers (each with a weight, a max-fails count, a fail-timeout, and a primary/backup/down role), an optional keepalive connection count, and a `backend_ssl` switch. Attaching a pool to a service records the reverse-proxy path it answers under (`/` by default); a pool can be attached to up to 100 services.
