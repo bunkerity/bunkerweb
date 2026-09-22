@@ -22,9 +22,52 @@
 	<br />
 	<a href="https://www.star-history.com/bunkerity/bunkerweb">
 		<picture>
-		<source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=bunkerity/bunkerweb&theme=dark" />
-		<source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=bunkerity/bunkerweb" />
-		<img alt="Star History Rank" src="https://api.star-history.com/badge?repo=bunkerity/bunkerweb" width=140 />
+			<source
+				media="(prefers-color-scheme: dark)"
+				srcset="
+					https://api.star-history.com/badge?repo=bunkerity/bunkerweb&theme=dark
+				"
+			/>
+			<source
+				media="(prefers-color-scheme: light)"
+				srcset="https://api.star-history.com/badge?repo=bunkerity/bunkerweb"
+			/>
+			<p align="center">
+				<a href="https://www.star-history.com/bunkerity/bunkerweb">
+					<picture
+						><source
+							media="(prefers-color-scheme: dark)"
+							srcset="
+								https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=rank&theme=dark
+							" />
+						<source
+							media="(prefers-color-scheme: light)"
+							srcset="
+								https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=rank
+							" />
+						<img
+							alt="Star History Rank"
+							src="https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=rank"
+							height=40
+					/></picture>
+					<picture
+						><source
+							media="(prefers-color-scheme: dark)"
+							srcset="
+								https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=trending&theme=dark
+							" />
+						<source
+							media="(prefers-color-scheme: light)"
+							srcset="
+								https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=trending
+							" />
+						<img
+							alt="GitHub Trending Repository of the Day"
+							src="https://api.star-history.com/badge?repo=bunkerity/bunkerweb&type=trending"
+							height=40
+					/></picture>
+				</a>
+			</p>
 		</picture>
 	</a>
 </p>
