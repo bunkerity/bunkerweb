@@ -428,10 +428,19 @@ local function restore_counter(self, key, counter, wid)
 		)
 		return false
 	end
+	-- An unparsable value is not a transient failure: no later cycle makes it parse. Older
+	-- releases could store the literal string "nil" here, and refusing to restore left the
+	-- counter unrestored, which also skips its own SET, so the bad value survived every cycle
+	-- and the key was logged forever while this worker's counts never reached Redis. Discard
+	-- it instead and let the sync below overwrite the key with the live value.
 	local baseline = stored == null and 0 or tonumber(stored)
 	if not baseline then
-		self:log_throttled(ERR, "counter_restore", "Invalid Redis metric counter " .. key)
-		return false
+		self:log_throttled(
+			WARN,
+			"counter_discard",
+			"Discarding invalid Redis metric counter " .. key .. ", overwriting it with the local value"
+		)
+		baseline = 0
 	end
 	-- log() can increment or evict this record while GET yields. Never reinsert a
 	-- stale record, and merge the live increments only after the reply arrives.

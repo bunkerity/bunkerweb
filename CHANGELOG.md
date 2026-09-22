@@ -1,13 +1,17 @@
 # Changelog
 
-## v1.6.16~rc1 - 2026/09/??
+## v1.6.16~rc2 - 2026/09/??
 
-- [BUGFIX] `grpc`, `reverseproxy`: gRPC and the reverse proxy on the same service no longer fail the NGINX configuration check. (Fixes #3950)
+- [BUGFIX] `metrics`: a counter whose Redis value cannot be parsed is now discarded and rewritten with the live count instead of being retried forever, ending the `Invalid Redis metric counter` error logged every 5s on instances upgraded from 1.6.13 or older, where that counter also stopped reaching Redis entirely.
 - [UI] Responses are compressed (brotli/gzip) and static assets carry a versioned, long-lived cache header, so the Web UI stays fast when reached directly; the API gains gzip.
 - [MISC] Duration settings accept nginx-style time suffixes (ms, s, m, h, d, w, M, y): antibot, badbehavior, sessions, cors, reversescan, redis, metrics, crowdsec, db, letsencrypt, selfsigned and the scheduler timeouts. A bare number keeps its previous unit.
 - [BREAKING] `METRICS_REDIS_TTL` now takes time units: `m` means minutes, not millions. Values stored in the database are migrated; values set through the environment are not.
 
-## v1.6.15 - 2026/09/??
+## v1.6.16~rc1 - 2026/09/21
+
+- [BUGFIX] `grpc`, `reverseproxy`: gRPC and the reverse proxy on the same service no longer fail the NGINX configuration check. (Fixes #3950)
+
+## v1.6.15 - 2026/09/21
 
 - [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
 - [SECURITY] `api`: moving a custom config with `PATCH /configs` needs `config_update` on the destination service; a body without `service` keeps the current one, not global.
@@ -249,7 +253,7 @@
 - [UI] Removed vendored front-end assets that were never loaded: 28 unused ACE extensions, keybindings and themes, the ACE stylesheet directory, the 45 ApexCharts locale files, and the unminified topojson-client build.
 - [CONTRIBUTION] Thank you [xabru](https://github.com/xabru) for your contribution regarding wildcard SNI fallback for custom certificates. (#3745)
 
-## v1.6.14~rc1 - 2026/07/23
+## v1.6.14~rc1 - 2026/07/28
 
 - [BUGFIX] `mtls`: the Scheduler now validates the client CA bundle and CRL, caches them, and distributes them to every instance instead of shipping the raw configured path straight into the NGINX configuration, so a Scheduler-only mount works as documented instead of causing "cannot load certificate" errors on instances that cannot read that path. Adds `MTLS_CA_CERTIFICATE_DATA` and `MTLS_CRL_DATA` to supply either file inline as base64 or plaintext PEM.
 - [BUGFIX] `backup`: support MySQL 9 and MariaDB 12 backup/restore with current authentication, TLS, and privilege defaults while preserving compatibility with older servers; refresh the documented database compatibility matrix, including PostgreSQL 18.
@@ -291,7 +295,7 @@
 - [DEPS] Updated LuaJIT version to v2.1-20260701
 - [DEPS] Updated Modsecurity version to v3.0.16
 
-## v1.6.12~rc3 - 2026/06/18
+## v1.6.12~rc3 - 2026/06/19
 
 - [SECURITY] `nginx`: update nginx to 1.30.3 (except for Fedora, which stays on 1.30.2 until it is available in its repositories) to fix CVE-2026-42055 — a heap buffer overflow in `ngx_http_proxy_v2_module`/`ngx_http_grpc_module` — and CVE-2026-48142 — a heap buffer overread in `ngx_http_charset_module`.
 - [FEATURE] `antibot`: `ANTIBOT_IGNORE_URI` can now match full request URIs including query strings. (Fixes #3374)
@@ -335,7 +339,7 @@
 - [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies. (#3623)
 - [CONTRIBUTION] Thank you [immanuwell](https://github.com/immanuwell) for your contribution regarding parsing the `DEBUG` environment variable as a boolean in the `Gunicorn` configuration (UI and API), so a string value no longer always enables debug logging. (#3589)
 
-## v1.6.12~rc1 - 2026/06/03
+## v1.6.12~rc1 - 2026/06/08
 
 - [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
 - [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.
@@ -367,7 +371,7 @@
 - [DEPS] Updated lua-resty-string version to v0.18
 - [DEPS] Updated coreruleset-v4 version to v4.27.0
 
-## v1.6.11 - 2026/05/23
+## v1.6.11 - 2026/05/25
 
 - [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
 
@@ -598,7 +602,7 @@
 - [API] Fix redis sentinel issue when a password is set on the master node
 - [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors) (Fixes #1963)
 
-## v1.6.8 - 2026/02/06
+## v1.6.8 - 2026/02/13
 
 - [DOCS] Add forward proxy configuration for outgoing traffic (Fixes #2535)
 - [DEPS] Update coreruleset-v4 version to v4.23.0
@@ -777,7 +781,7 @@
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 - [DEPS] Update Mbed TLS version to v3.6.5
 
-## v1.6.5 - 2025/10/03
+## v1.6.5 - 2025/10/06
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
@@ -853,7 +857,7 @@
 - [LINUX] Support RHEL 10.0
 - [LINUX] Support Debian 13 (Trixie)
 
-## v1.6.3 - 2025/08/05
+## v1.6.3 - 2025/08/08
 
 - [BUGFIX] Fix connection error shenanigans regarding the `Let's Encrypt` plugin when generating wildcard domains by adding the `--expand` flag to the certbot command.
 - [BUGFIX] Fix errors with `PostgreSQL` database, ensuring that suffixes are stored as integers for consistency.
@@ -956,7 +960,7 @@
 - [BUGFIX] Enhance cache robustness by using dict.get() for lookups to avoid KeyError exceptions during cache operations.
 - [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
 
-## v1.6.2-rc5 - 2025/06/17
+## v1.6.2-rc5 - 2025/06/16
 
 - [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
@@ -1138,7 +1142,7 @@
 - [MISC] Update regex for `SERVER_NAME` to improve accuracy and avoid issues
 - [MISC] Revamped DNS credential validation to minimize configuration errors and enhance overall reliability.
 
-## v1.6.0 - 2025/02/13
+## v1.6.0 - 2025/02/14
 
 - [BUGFIX] Fix CRS plugins not being included correctly in ModSecurity configuration
 - [FEATURE] Add mCaptcha antibot mode
@@ -1244,7 +1248,7 @@
 - [SECURITY] Fix CVE-2024-53254
 - [UI] Fix issues in several pages because of a wrong key being used to fetch the data
 
-## v1.5.11 - 2024/11/08
+## v1.5.11 - 2024/11/10
 
 - [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
 - [UI] Fix missing settings when a service is published online
@@ -1257,7 +1261,7 @@
 - [DEPS] Updated coreruleset-v4 version to v4.8.0
 - [DEPS] Updated coreruleset-v3 version to v3.3.7
 
-## v1.5.10 - 2024/08/17
+## v1.5.10 - 2024/09/17
 
 - [UI] Fix setup wizard bug related to certificate
 - [UI] Fix bug when adding more than 3 reverse proxies URLs
@@ -1281,7 +1285,7 @@
 - [DEPS] Updated ModSecurity version to v3.0.13
 - [DEPS] Start managing Mbed TLS as a dependency for ModSecurity (v3.6.1)
 
-## v1.5.9 - 2024/07/22
+## v1.5.9 - 2024/07/24
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
 - [BUGFIX] Fix potential issues with multiple settings in helpers.load_variables when multiple settings have the same suffix (the issue is only present in future external plugins)
@@ -1448,7 +1452,7 @@
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
 - [DEPS] Updated ModSecurity to v3.0.11
 
-## v1.5.4 - 2023/12/04
+## v1.5.4 - 2023/12/05
 
 - [UI] Add an optional setup wizard for the web UI
 - [BUGFIX] Fix issues with the Linux integration and external databases
@@ -1461,7 +1465,7 @@
 - [MISC] Updated python dependencies
 - [MISC] Updated Python Docker image to 3.12.0-alpine3.18 in Dockerfiles
 
-## v1.5.3 - 2023/10/31
+## v1.5.3 - 2023/10/30
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI
@@ -1682,7 +1686,7 @@
 - Improve documentation for Linux integration
 - Various fixes in the documentation
 
-## v1.4.0 - 2022/06/06
+## v1.4.0 - 2022/06/05
 
 - Project renamed to BunkerWeb
 - Internal architecture fully revised with a modular approach
@@ -1744,7 +1748,7 @@
 - Fix bug in autoconf (missing instances parameter to reload function)
 - Remove old .env files when generating a new configuration
 
-## v1.2.7 - 2021/06/14
+## v1.2.7 - 2021/06/15
 
 - Add custom robots.txt and sitemap to RTD
 - Fix missing GeoIP DB bug when using BLACKLIST/WHITELIST_COUNTRY
@@ -1759,7 +1763,7 @@
 - Bump modsecurity-nginx to v1.0.2
 - Community chat with bridged platforms
 
-## v1.2.6 - 2021/06/06
+## v1.2.6 - 2021/06/07
 
 - Move from "ghetto-style" shell scripts to generic jinja2 templating
 - Init work on a basic plugins system
