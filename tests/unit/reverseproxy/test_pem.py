@@ -5,6 +5,9 @@ private key, so the kind check — not merely "does this look like PEM" — is t
 """
 
 from base64 import b64encode
+from pathlib import Path
+
+import pytest
 
 from reverseproxy_pem import is_pem, process_pem_data  # type: ignore
 
@@ -47,8 +50,8 @@ def test_material_of_the_wrong_kind_is_refused():
     assert process_pem_data(b64encode(CERT).decode(), None, "app1", kind="key", label="client key") is None
 
 
-def test_missing_file_and_empty_data_resolve_to_nothing():
-    assert process_pem_data("", "/nope/missing.pem", "app1") is None
+def test_missing_file_remains_distinct_from_invalid_or_empty_data():
+    assert process_pem_data("", "/nope/missing.pem", "app1") == Path("/nope/missing.pem")
     assert process_pem_data("", None, "app1") is None
 
 
@@ -57,3 +60,28 @@ def test_an_existing_file_is_returned_as_a_path(tmp_path):
     target = tmp_path / "client-cert.pem"
     target.write_bytes(CERT)
     assert process_pem_data("", str(target), "app1") == target
+
+
+CRL = b"-----BEGIN X509 CRL-----\nMIIB\n-----END X509 CRL-----\n"
+
+
+def test_crl_kind_is_distinct_from_certificate_and_key():
+    assert is_pem(CRL, "crl")
+    assert not is_pem(CERT, "crl")
+    assert not is_pem(KEY, "crl")
+    assert not is_pem(CRL, "certificate")
+    assert not is_pem(CRL, "key")
+    assert not is_pem(b"not pem", "crl")
+
+
+def test_plain_and_base64_crl_data():
+    for data in (CRL.decode(), b64encode(CRL).decode()):
+        assert process_pem_data(data, None, "app1", kind="crl", label="CRL") == CRL
+    assert process_pem_data(CERT.decode(), None, "app1", kind="crl", label="CRL") is None
+
+
+def test_invalid_certificate_bundle_raises():
+    from reverseproxy_pem import validate_certificate_bundle
+
+    with pytest.raises(ValueError):
+        validate_certificate_bundle(CERT + CERT)

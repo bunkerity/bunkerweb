@@ -18,6 +18,10 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from cryptography import x509
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
+
 from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("REVERSE-PROXY.pem")
@@ -37,6 +41,8 @@ def is_pem(blob: bytes, kind: str = "certificate") -> bool:
     if kind == "key":
         parts = blob.split(b"-----", 2)
         return len(parts) > 1 and parts[1].endswith(b"PRIVATE KEY")
+    if kind == "crl":
+        return blob.startswith(b"-----BEGIN X509 CRL-----")
     return blob.startswith(b"-----BEGIN CERTIFICATE-----")
 
 
@@ -51,11 +57,7 @@ def process_pem_data(
     """Resolve PEM material from a file path or from direct data (base64 or plain PEM)."""
     try:
         if file_path:
-            path_obj = Path(file_path)
-            if not path_obj.is_file():
-                LOGGER.error(f"{label.capitalize()} file {file_path} is not a valid file for {server_name}")
-                return None
-            return path_obj
+            return Path(file_path)
 
         if not data:
             return None
@@ -87,3 +89,21 @@ def process_pem_data(
         LOGGER.debug(format_exc())
         LOGGER.error(f"Error processing {label} for {server_name}: {e}")
         return None
+
+
+def validate_certificate_bundle(data: bytes) -> None:
+    """Reject a bundle if any certificate fails to parse, including trailing blocks."""
+    x509.load_pem_x509_certificates(data)
+
+
+def validate_certificate_pair(cert_data: bytes, key_data: bytes) -> None:
+    """Validate the entire chain and match its leaf certificate to an unencrypted key."""
+    try:
+        certificates = x509.load_pem_x509_certificates(cert_data)
+        key = load_pem_private_key(key_data, password=None)
+        if certificates[0].public_key().public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo) != key.public_key().public_bytes(
+            Encoding.DER, PublicFormat.SubjectPublicKeyInfo
+        ):
+            raise ValueError("Client private key does not match the certificate")
+    except (TypeError, UnsupportedAlgorithm) as err:
+        raise ValueError(f"Invalid client certificate pair: {err}") from err

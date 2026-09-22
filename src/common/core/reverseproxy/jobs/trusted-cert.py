@@ -16,12 +16,17 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
-from reverseproxy_pem import process_pem_data  # type: ignore
+from reverseproxy_pem import process_pem_data, validate_certificate_bundle, validate_certificate_pair  # type: ignore
 
 LOGGER = getLogger("REVERSE-PROXY.trusted-cert")
 JOB = Job(LOGGER, __file__)
 
 CACHE_NAME = "trusted-ca.pem"
+CRL_CACHE_NAME = "crl.pem"
+GRPC_CA_CACHE_NAME = "grpc-trusted-ca.pem"
+GRPC_CRL_CACHE_NAME = "grpc-crl.pem"
+GRPC_CLIENT_CERT_CACHE_NAME = "grpc-client.pem"
+GRPC_CLIENT_KEY_CACHE_NAME = "grpc-client.key"
 CLIENT_CERT_CACHE_NAME = "client-cert.pem"
 CLIENT_KEY_CACHE_NAME = "client-key.pem"
 
@@ -39,28 +44,29 @@ def check_pem(
     openssl_cmd: str = "x509",
     label: str = "trusted certificate",
 ) -> Tuple[bool, Union[str, BaseException]]:
-    """Validate PEM material with OpenSSL and cache it (disk + DB) for distribution to instances."""
+    """Validate PEM material and cache it (disk + DB) for distribution to instances."""
+    if isinstance(pem_file, Path):
+        pem_file = pem_file.read_bytes()
     try:
-        if isinstance(pem_file, Path):
-            if not pem_file.is_file():
-                return False, f"{label.capitalize()} file {pem_file} is not a valid file, ignoring"
-            pem_file = pem_file.read_bytes()
 
-        with NamedTemporaryFile(delete=False) as pem_temp:
-            try:
-                pem_temp.write(pem_file)
-                pem_temp.flush()
-                result = run(
-                    ["openssl", openssl_cmd, "-noout", "-in", pem_temp.name],
-                    stdin=DEVNULL,
-                    stderr=DEVNULL,
-                    check=False,
-                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                )
-                if result.returncode != 0:
-                    return False, f"{label.capitalize()} is invalid."
-            finally:
-                Path(pem_temp.name).unlink(missing_ok=True)
+        if openssl_cmd == "x509":
+            validate_certificate_bundle(pem_file)
+        else:
+            with NamedTemporaryFile(delete=False) as pem_temp:
+                try:
+                    pem_temp.write(pem_file)
+                    pem_temp.flush()
+                    result = run(
+                        ["openssl", openssl_cmd, "-noout", "-in", pem_temp.name],
+                        stdin=DEVNULL,
+                        stderr=DEVNULL,
+                        check=False,
+                        env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                    )
+                    if result.returncode != 0:
+                        return False, f"{label.capitalize()} is invalid."
+                finally:
+                    Path(pem_temp.name).unlink(missing_ok=True)
 
         pem_hash = bytes_hash(pem_file)
         old_hash = JOB.cache_hash(cache_name, service_id=first_server)
@@ -77,23 +83,25 @@ def check_pem(
         return False, e
 
 
-def check_ca(ca_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
-    """Validate the CA bundle with OpenSSL and cache it for distribution to instances."""
-    return check_pem(ca_file, first_server)
-
-
-def handle_client_material(first_server: str, get) -> Tuple[bool, bool, bool]:
+def handle_client_material(
+    first_server: str,
+    get,
+    *,
+    prefix: str = "REVERSE_PROXY",
+    cert_cache_name: str = CLIENT_CERT_CACHE_NAME,
+    key_cache_name: str = CLIENT_KEY_CACHE_NAME,
+) -> Tuple[bool, bool, bool]:
     """Materialize the client certificate and key used for mutual TLS with the upstream.
 
-    Returns ``(need_reload, failed, configured)``. Both halves are required: a certificate
+    Returns ``(need_reload, failed, usable)``. Both halves are required: a certificate
     without its key (or the reverse) is refused rather than half-written, because NGINX needs
     both directives or neither. The pair is cached and distributed like every other job
     artifact, which lands it on the instances with owner/group-only permissions.
     """
-    priority = get(first_server, "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY", "file")
+    priority = get(first_server, f"{prefix}_SSL_CLIENT_CERT_PRIORITY", "file")
     pairs = (
-        (CLIENT_CERT_CACHE_NAME, "REVERSE_PROXY_SSL_CLIENT_CERT", "certificate", "x509", "client certificate"),
-        (CLIENT_KEY_CACHE_NAME, "REVERSE_PROXY_SSL_CLIENT_KEY", "key", "pkey", "client key"),
+        (cert_cache_name, f"{prefix}_SSL_CLIENT_CERT", "certificate", "x509", "client certificate"),
+        (key_cache_name, f"{prefix}_SSL_CLIENT_KEY", "key", "pkey", "client key"),
     )
 
     configured = [setting for _, setting, _, _, _ in pairs if get(first_server, setting) or get(first_server, f"{setting}_DATA")]
@@ -101,9 +109,9 @@ def handle_client_material(first_server: str, get) -> Tuple[bool, bool, bool]:
         return False, False, False
     if len(configured) != len(pairs):
         LOGGER.error(f"Service {first_server} sets only one half of the upstream client certificate pair, ignoring it")
-        return False, True, True
+        return False, True, False
 
-    need_reload = False
+    materials = []
     for cache_name, setting, kind, openssl_cmd, label in pairs:
         path_value = get(first_server, setting)
         data_value = get(first_server, f"{setting}_DATA")
@@ -111,20 +119,78 @@ def handle_client_material(first_server: str, get) -> Tuple[bool, bool, bool]:
         material = process_pem_data(data_value if not use_file else "", path_value if use_file else None, first_server, kind=kind, label=label)
         if not material:
             LOGGER.warning(f"No valid {label} for {first_server}; mutual TLS with the upstream will be disabled for that server")
-            return False, True, True
+            return False, True, False
 
+        materials.append(material.read_bytes() if isinstance(material, Path) else material)
+
+    try:
+        validate_certificate_pair(*materials)
+    except ValueError as err:
+        LOGGER.warning(f"Invalid {prefix} client certificate pair for {first_server}: {err}")
+        return False, True, False
+
+    need_reload = False
+    for (cache_name, _, _, openssl_cmd, label), material in zip(pairs, materials):
         changed, err = check_pem(material, first_server, cache_name=cache_name, openssl_cmd=openssl_cmd, label=label)
         if isinstance(err, BaseException):
             LOGGER.error(f"Exception while checking {first_server}'s {label}, skipping ... \n{err}")
-            return False, True, True
+            return False, True, False
         elif err:
             LOGGER.warning(f"Error while checking {first_server}'s {label} : {err}")
-            return False, True, True
+            return False, True, False
         need_reload = need_reload or changed
 
     if need_reload:
         LOGGER.info(f"Detected change in {first_server}'s upstream client certificate")
     return need_reload, False, True
+
+
+def handle_trusted_certificate(first_server: str, get, *, prefix: str, cache_name: str) -> Tuple[bool, bool, bool]:
+    """Return (changed, failed, usable) for this plugin's upstream CA."""
+    if get(first_server, f"{prefix}_SSL_VERIFY", "no") != "yes":
+        return False, False, False
+    priority = get(first_server, f"{prefix}_SSL_TRUSTED_CERTIFICATE_PRIORITY", "file")
+    ca_path = get(first_server, f"{prefix}_SSL_TRUSTED_CERTIFICATE")
+    ca_data = get(first_server, f"{prefix}_SSL_TRUSTED_CERTIFICATE_DATA")
+    if not ca_path and not ca_data:
+        LOGGER.info(f"Service {first_server} has no {prefix} trusted certificate; upstream verification will be disabled")
+        return False, False, False
+    use_file = priority == "file" and ca_path
+    ca_file = process_ca_data(ca_data if not use_file else "", ca_path if use_file else None, first_server)
+    if not ca_file:
+        LOGGER.warning(f"No valid {prefix} trusted certificate for {first_server}; upstream verification will be disabled")
+        return False, True, False
+    changed, err = check_pem(ca_file, first_server, cache_name=cache_name)
+    if err:
+        LOGGER.warning(f"Error while checking {first_server}'s {prefix} trusted certificate: {err}")
+    return changed, bool(err), not bool(err)
+
+
+def handle_crl(first_server: str, get, *, prefix: str = "REVERSE_PROXY", cache_name: str = CRL_CACHE_NAME) -> Tuple[bool, bool, bool]:
+    """Resolve a CRL, preferring its path over data; it has no priority setting."""
+    crl_path = get(first_server, f"{prefix}_SSL_CRL")
+    crl_data = get(first_server, f"{prefix}_SSL_CRL_DATA")
+    if not crl_path and not crl_data:
+        return False, False, False
+    if get(first_server, f"{prefix}_SSL_VERIFY", "no") != "yes":
+        LOGGER.warning(f"Service {first_server} sets {prefix}_SSL_CRL or _DATA without {prefix}_SSL_VERIFY=yes; the CRL is ignored")
+        return False, False, False
+    material = process_pem_data("" if crl_path else crl_data, crl_path or None, first_server, kind="crl", label="CRL")
+    if not material:
+        return False, True, False
+    changed, err = check_pem(material, first_server, cache_name=cache_name, openssl_cmd="crl", label="CRL")
+    if err:
+        LOGGER.warning(f"Error while checking {first_server}'s {prefix} CRL: {err}")
+    return changed, bool(err), not bool(err)
+
+
+def handle_material(handler, first_server, get, **kwargs) -> Tuple[bool, bool, bool]:
+    """An unavailable input keeps the last cached artifact usable for this run."""
+    try:
+        return handler(first_server, get, **kwargs)
+    except OSError as err:
+        LOGGER.error(f"Could not read {kwargs['prefix']} TLS material for {first_server}; keeping cached material: {err}")
+        return False, True, True
 
 
 status = 0
@@ -145,60 +211,64 @@ try:
 
     skipped_servers = []
     skipped_client_servers = []
+    skipped_crl_servers = []
+    skipped_grpc_servers = []
+    skipped_grpc_client_servers = []
+    skipped_grpc_crl_servers = []
     for first_server in all_domains:
-        # Mutual TLS towards the upstream is independent of upstream verification, and applies
-        # to gRPC services too — they share this one client identity per service.
-        if "yes" in (_get(first_server, "USE_REVERSE_PROXY", "no"), _get(first_server, "USE_GRPC", "no")):
-            client_reload, client_failed, client_configured = handle_client_material(first_server, _get)
-            if client_failed or not client_configured:
-                skipped_client_servers.append(first_server)
-            if client_failed:
-                status = 2
-            elif client_reload and status == 0:
-                status = 1
-        else:
-            skipped_client_servers.append(first_server)
+        # Each proxy family owns its CA, revocation list and client identity independently.
+        for prefix, ca_name, crl_name, cert_name, key_name, skipped_ca, skipped_client, skipped_crl in (
+            (
+                "REVERSE_PROXY",
+                CACHE_NAME,
+                CRL_CACHE_NAME,
+                CLIENT_CERT_CACHE_NAME,
+                CLIENT_KEY_CACHE_NAME,
+                skipped_servers,
+                skipped_client_servers,
+                skipped_crl_servers,
+            ),
+            (
+                "GRPC",
+                GRPC_CA_CACHE_NAME,
+                GRPC_CRL_CACHE_NAME,
+                GRPC_CLIENT_CERT_CACHE_NAME,
+                GRPC_CLIENT_KEY_CACHE_NAME,
+                skipped_grpc_servers,
+                skipped_grpc_client_servers,
+                skipped_grpc_crl_servers,
+            ),
+        ):
+            if _get(first_server, f"USE_{prefix}", "no") != "yes":
+                skipped_ca.append(first_server)
+                skipped_client.append(first_server)
+                skipped_crl.append(first_server)
+                continue
 
-        if _get(first_server, "USE_REVERSE_PROXY", "no") != "yes" or _get(first_server, "REVERSE_PROXY_SSL_VERIFY", "no") != "yes":
-            skipped_servers.append(first_server)
-            continue
+            changed, failed, usable = handle_material(
+                handle_client_material, first_server, _get, prefix=prefix, cert_cache_name=cert_name, key_cache_name=key_name
+            )
+            if not usable:
+                skipped_client.append(first_server)
+            status = max(status, 2 if failed else int(changed))
 
-        priority = _get(first_server, "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY", "file")
-        ca_path = _get(first_server, "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE")
-        ca_data = _get(first_server, "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA")
+            changed, failed, usable = handle_material(handle_trusted_certificate, first_server, _get, prefix=prefix, cache_name=ca_name)
+            if not usable:
+                skipped_ca.append(first_server)
+            status = max(status, 2 if failed else int(changed))
 
-        # No CA configured: upstream verification falls back to the system CA store, nothing to cache.
-        if not ca_path and not ca_data:
-            LOGGER.info(f"Service {first_server} verifies the upstream against the system CA store (no trusted certificate set)")
-            skipped_servers.append(first_server)
-            continue
+            if not usable and _get(first_server, f"{prefix}_SSL_VERIFY", "no") == "yes":
+                skipped_crl.append(first_server)
+                continue
 
-        use_file = priority == "file" and ca_path
-        ca_file = process_ca_data(ca_data if not use_file else "", ca_path if use_file else None, first_server)
-        if not ca_file:
-            LOGGER.warning(f"No valid trusted certificate for {first_server}; upstream verification will be disabled for that server")
-            skipped_servers.append(first_server)
-            status = 2
-            continue
+            if failed:
+                # A transient CA failure must also retain its last known revocation list.
+                continue
 
-        LOGGER.info(f"Checking trusted certificate for {first_server} ...")
-        need_reload, err = check_ca(ca_file, first_server)
-        if isinstance(err, BaseException):
-            LOGGER.error(f"Exception while checking {first_server}'s trusted certificate, skipping ... \n{err}")
-            skipped_servers.append(first_server)
-            status = 2
-            continue
-        elif err:
-            LOGGER.warning(f"Error while checking {first_server}'s trusted certificate : {err}")
-            skipped_servers.append(first_server)
-            status = 2
-            continue
-        elif need_reload:
-            LOGGER.info(f"Detected change in {first_server}'s trusted certificate")
-            status = 1
-            continue
-
-        LOGGER.info(f"No change in {first_server}'s trusted certificate")
+            changed, failed, usable = handle_material(handle_crl, first_server, _get, prefix=prefix, cache_name=crl_name)
+            if not usable:
+                skipped_crl.append(first_server)
+            status = max(status, 2 if failed else int(changed))
 
     # A removal changes the rendered conf exactly as much as an addition does, so it has to be
     # noticed. del_cache reports success even when there was nothing to delete, so ask the disk
@@ -222,6 +292,17 @@ try:
 
     if removed and status == 0:
         status = 1
+
+    for skipped, cache_names in (
+        (skipped_crl_servers, (CRL_CACHE_NAME,)),
+        (skipped_grpc_servers, (GRPC_CA_CACHE_NAME,)),
+        (skipped_grpc_crl_servers, (GRPC_CRL_CACHE_NAME,)),
+        (skipped_grpc_client_servers, (GRPC_CLIENT_CERT_CACHE_NAME, GRPC_CLIENT_KEY_CACHE_NAME)),
+    ):
+        for first_server in skipped:
+            for cache_name in cache_names:
+                if drop_cache(first_server, cache_name) and status == 0:
+                    status = 1
 
     # New (or dropped) PEM material needs a RE-RENDER, not just a push. Both templates gate on
     # is_file() at render time (confs/server-http/reverse-proxy.conf:27 and :43, and the stream
