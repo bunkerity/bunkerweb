@@ -36,6 +36,14 @@ def web_cache_route():
         yield module, client
 
 
+@pytest.fixture(autouse=True)
+def _a_writing_session(web_cache_route, monkeypatch):
+    """The route also refuses a session without the `write` permission
+    (app/utils.py:is_readonly_request). Nothing logs in here, so stub it on the database flag
+    alone; the permission half is pinned by tests/unit/ui/test_configs_write_permission.py."""
+    monkeypatch.setattr(web_cache_route[0], "is_readonly_request", lambda api_readonly: api_readonly)
+
+
 @pytest.fixture
 def route_app(web_cache_route):
     module, client = web_cache_route

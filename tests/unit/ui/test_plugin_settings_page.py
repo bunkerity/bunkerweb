@@ -332,7 +332,7 @@ def route_app():
     return _services_module, app
 
 
-def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, plugin="antibot"):
+def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, plugin="antibot", permissions=("read", "write")):
     """POST the real route and return the Mock executor, with the route's response attached."""
     api = Mock()
     api.readonly = False
@@ -345,7 +345,7 @@ def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, pl
     monkeypatch.setattr(module, "BW_CONFIG", bw_config)
     monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
-    monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=["read", "write"]))
+    monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=list(permissions)))
 
     data = {"csrf_token": "x"} | (form or {})
     with app.test_request_context(f"/services/app.example.com/plugins/{plugin}", method="POST", data=data):
@@ -356,6 +356,23 @@ def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, pl
 def _redirect_next(response):
     """The `next` the loading page will bounce to once the save finishes."""
     return parse_qs(urlsplit(response.headers["Location"]).query).get("next")
+
+
+def test_a_user_without_write_permission_is_refused_before_the_save(route_app, monkeypatch):
+    """The empty scope this page computes is not a refusal: `restore_unowned_settings`
+    (models/save_scope.py:155) only ADDS stored keys back, so every posted value still reached
+    `update_service` -- and `IS_DRAFT` is popped and passed positionally, never through the scope
+    at all, so a `{"read"}` session could draft a live service with one forged POST."""
+    module, app = route_app
+    executor = _post_plugin_page(
+        module,
+        app,
+        monkeypatch,
+        form={"SERVER_NAME": "app.example.com", "USE_ANTIBOT": "no", "IS_DRAFT": "yes"},
+        permissions=("read",),
+    )
+
+    assert not executor.submit.called
 
 
 def test_a_rename_sends_the_user_to_the_service_list(route_app, monkeypatch):

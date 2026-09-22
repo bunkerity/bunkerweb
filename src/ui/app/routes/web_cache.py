@@ -3,7 +3,7 @@ from flask_login import login_required
 
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 # Web cache = the NGINX proxy response cache (reverseproxy plugin), distinct from
 # the "cache" blueprint which manages the job file cache.
@@ -99,6 +99,8 @@ def web_cache_page():
 def web_cache_purge():
     if API_CLIENT.readonly:
         return Response("Database is in read-only mode", status=403)
+    if is_readonly_request(API_CLIENT.readonly):
+        return Response("You do not have the write permission", status=403)
 
     scope = request.form.get("scope", "all")
     urls = None

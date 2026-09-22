@@ -5,7 +5,7 @@ from default_server import is_reserved_default_server  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 upstreams = Blueprint("upstreams", __name__)
 
@@ -20,10 +20,14 @@ def _redirect():
 
 
 def _readonly():
-    if not API_CLIENT.readonly:
-        return False
-    flash("Database is in read-only mode", "error")
-    return True
+    if API_CLIENT.readonly:
+        flash("Database is in read-only mode", "error")
+        return True
+    if is_readonly_request(API_CLIENT.readonly):
+        # Two causes, two messages: the database is fine here, the session's permission is not.
+        flash("You do not have the write permission", "error")
+        return True
+    return False
 
 
 def _servers():

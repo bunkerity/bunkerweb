@@ -153,6 +153,12 @@ def global_settings_page():
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "global_settings")
+        # Not covered by the `is_readonly` the shelf scope carries below: that branch only runs in
+        # `compose` mode, and this page SAVES as `advanced` by default (resolve_save_mode), where
+        # `scope` stays None -- the historical "this payload is the complete desired state" save.
+        # A session without `write` reaching here therefore writes every key it posted.
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "global_settings")
         DATA.load_from_file()
 
         # Check variables
@@ -253,6 +259,13 @@ def global_settings_plugin_page(plugin: str):
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "global_settings")
+        # The empty scope computed below is NOT a refusal: `restore_unowned_settings`
+        # (models/save_scope.py:155) opens with `variables = dict(payload)` and from there only
+        # ADDS stored keys back -- it never drops a posted one. The scope suppresses DELETIONS,
+        # nothing else, so without this gate every value a forged POST carried was written. At
+        # global scope that is a whole plugin's configuration.
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "global_settings")
 
         DATA.load_from_file()
         variables = request.form.to_dict().copy()

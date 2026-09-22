@@ -11,7 +11,7 @@ from default_server import is_reserved_default_server  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 certificates = Blueprint("certificates", __name__)
 CERTIFICATE_UPLOAD_MAX_BODY_SIZE = (2 * 1024 * 1024) + (64 * 1024)
@@ -46,10 +46,14 @@ def _valid_days(default=365):
 
 
 def _readonly():
-    if not API_CLIENT.readonly:
-        return False
-    flash("Database is in read-only mode", "error")
-    return True
+    if API_CLIENT.readonly:
+        flash("Database is in read-only mode", "error")
+        return True
+    if is_readonly_request(API_CLIENT.readonly):
+        # Two causes, two messages: the database is fine here, the session's permission is not.
+        flash("You do not have the write permission", "error")
+        return True
+    return False
 
 
 @certificates.route("/certificates", methods=["GET"])

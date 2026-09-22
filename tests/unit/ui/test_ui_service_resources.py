@@ -18,6 +18,14 @@ from app.utils import is_editable_method
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
 
 
+@pytest.fixture(autouse=True)
+def _a_writing_session(services_route, monkeypatch):
+    """The route also refuses a session without the `write` permission
+    (app/utils.py:is_readonly_request). Nothing logs in here, so stub it on the database flag
+    alone; the permission half is pinned by tests/unit/ui/test_configs_write_permission.py."""
+    monkeypatch.setattr(services_route[0], "is_readonly_request", lambda api_readonly: api_readonly)
+
+
 @pytest.fixture(scope="module")
 def services_route():
     client = Mock()

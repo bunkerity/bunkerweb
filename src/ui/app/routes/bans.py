@@ -15,7 +15,7 @@ from flask_login import login_required
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
 from app.i18n import translated
-from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
+from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash, is_readonly_request
 
 from app.routes.utils import (
     cors_required,
@@ -749,6 +749,8 @@ def bans_ban():
     # Check database state
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "bans")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":
@@ -825,6 +827,8 @@ def bans_unban():
     # Check database state
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "bans")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":
@@ -892,6 +896,8 @@ def bans_update_duration():
     # Check database state
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "bans")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":

@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from app.dependencies import API_CLIENT, BW_CONFIG
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 cache = Blueprint("cache", __name__)
 
@@ -72,6 +72,8 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
 def cache_delete_bulk():
     if API_CLIENT.readonly:
         return Response("Database is in read-only mode", status=403)
+    if is_readonly_request(API_CLIENT.readonly):
+        return Response("You do not have the write permission", status=403)
 
     try:
         cache_files = loads(request.form.get("cache_files", "[]"))

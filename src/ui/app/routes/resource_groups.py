@@ -8,7 +8,7 @@ from flask_login import login_required
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
 from app.routes.utils import cors_required
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 resource_groups = Blueprint("resource_groups", __name__)
 
@@ -85,6 +85,9 @@ def resource_groups_save():
     if API_CLIENT.readonly:
         flash("Database is in read-only mode", "error")
         return _redirect()
+    if is_readonly_request(API_CLIENT.readonly):
+        flash("You do not have the write permission", "error")
+        return _redirect()
 
     try:
         entries = _entries(request.form.get("entries"))
@@ -113,6 +116,9 @@ def resource_groups_clone():
     if API_CLIENT.readonly:
         flash("Database is in read-only mode", "error")
         return _redirect()
+    if is_readonly_request(API_CLIENT.readonly):
+        flash("You do not have the write permission", "error")
+        return _redirect()
     try:
         source_id = (request.form.get("source_id") or "").strip()
         if not source_id:
@@ -132,6 +138,9 @@ def resource_groups_clone():
 def resource_groups_delete():
     if API_CLIENT.readonly:
         flash("Database is in read-only mode", "error")
+        return _redirect()
+    if is_readonly_request(API_CLIENT.readonly):
+        flash("You do not have the write permission", "error")
         return _redirect()
     group_id = (request.form.get("group_id") or "").strip()
     if not group_id:

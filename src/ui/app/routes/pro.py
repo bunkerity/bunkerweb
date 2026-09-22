@@ -9,7 +9,7 @@ from default_server import is_reserved_default_server  # type: ignore
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
-from app.utils import billable_service_count, flash
+from app.utils import billable_service_count, flash, is_readonly_request
 
 pro = Blueprint("pro", __name__)
 
@@ -73,6 +73,8 @@ def pro_page():
 def pro_key():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "pro")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "pro")
 
     verify_data_in_form(
         data={"PRO_LICENSE_KEY": None},
@@ -159,6 +161,8 @@ def pro_key():
 def force_check():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "pro")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "pro")
 
     try:
         API_CLIENT.update_metadata({"last_pro_check": None})
@@ -176,6 +180,8 @@ def force_check():
 def force_update():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "pro")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "pro")
 
     try:
         API_CLIENT.update_metadata({"force_pro_update": True})
@@ -194,6 +200,8 @@ def force_update():
 def refresh_ui():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "pro")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "pro")
 
     # safe_reload_plugins() latches on IS_RELOADING_PLUGINS and only ever clears it on
     # worker import, so a UI that already reloaded once since boot would consume the flag

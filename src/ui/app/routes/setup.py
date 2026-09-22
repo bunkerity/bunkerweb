@@ -16,7 +16,15 @@ from default_server import DEFAULT_SERVER_RESERVED_MESSAGE, is_default_server  #
 
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
+from app.utils import (
+    LOGGER,
+    MAX_PASSWORD_BYTES,
+    USER_PASSWORD_RX,
+    gen_password_hash,
+    is_readonly_request,
+    password_exceeds_bcrypt_limit,
+    _sanitize_internal_next,
+)
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
@@ -120,6 +128,14 @@ def setup_page():
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "setup")
+        # The wizard has no `@login_required`, and for the anonymous first install that is the
+        # whole point -- there is no session to hold a permission. But the branch above only
+        # bounces an ANONYMOUS caller to the login page when an admin already exists and no UI
+        # service does; an AUTHENTICATED one falls straight through to here, where the POST edits
+        # the global config and creates a service. Guarded on `is_authenticated` so the first
+        # install is untouched and only a real session is asked for `write`.
+        if current_user.is_authenticated and is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "setup")
 
         required_keys = ["theme"]
         if not ui_reverse_proxy:

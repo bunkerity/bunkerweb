@@ -54,6 +54,14 @@ def bans_route():
         yield module
 
 
+@pytest.fixture(autouse=True)
+def _a_writing_session(bans_route, monkeypatch):
+    """The route also refuses a session without the `write` permission
+    (app/utils.py:is_readonly_request). Nothing logs in here, so stub it on the database flag
+    alone; the permission half is pinned by tests/unit/ui/test_configs_write_permission.py."""
+    monkeypatch.setattr(bans_route, "is_readonly_request", lambda api_readonly: api_readonly)
+
+
 @pytest.fixture
 def route_app(bans_route):
     app = Flask(__name__)

@@ -179,7 +179,7 @@ def test_identical_repost_takes_the_no_change_short_circuit():
 # copied from the service page.
 
 
-def _post_global_page(monkeypatch, *, query="", form=None, permissions=("read", "write")):
+def _post_global_page(monkeypatch, *, query="", form=None, permissions=("read", "write"), expect_submit=True):
     """POST the real route and return the (args, kwargs) handed to the executor."""
     from flask import Flask
 
@@ -204,6 +204,9 @@ def _post_global_page(monkeypatch, *, query="", form=None, permissions=("read", 
         "app.utils.current_user", SimpleNamespace(list_permissions=list(permissions))
     ):
         _MODULE.global_settings_page.__wrapped__()
+    if not expect_submit:
+        assert not executor.submit.called, "the route saved anyway"
+        return None
     assert executor.submit.called, "the route returned before submitting -- this test proves nothing"
     return executor.submit.call_args
 
@@ -242,10 +245,58 @@ def test_the_global_raw_pane_still_claims_everything(monkeypatch):
     assert _post_global_page(monkeypatch, query="?mode=raw").kwargs["scope"] is None
 
 
-def test_a_readonly_global_user_gets_an_empty_scope(monkeypatch):
-    """At global scope this is the sharp one: "in scope but not posted" means DELETE, so a
-    read-only POST with a claimed scope wipes a plugin's whole global configuration."""
-    assert _post_global_page(monkeypatch, query="?mode=compose", permissions=("read",)).kwargs["scope"] == set()
+def _post_global_plugin_page(monkeypatch, *, plugin="antibot", form=None, permissions=("read", "write")):
+    """POST the per-plugin global page and return the Mock executor."""
+    from flask import Flask
+
+    api = Mock()
+    api.readonly = False
+    api.get_global_settings.return_value = {"LOG_LEVEL": {"value": "info", "method": "ui", "global": True}}
+    api.get_metadata.return_value = {"is_pro": False}
+    bw_config = Mock()
+    bw_config.get_plugins.return_value = _REAL_PLUGINS
+    executor = Mock()
+    monkeypatch.setattr(_MODULE, "API_CLIENT", api)
+    monkeypatch.setattr(_MODULE, "BW_CONFIG", bw_config)
+    monkeypatch.setattr(_MODULE, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(_MODULE, "DATA", _FakeData(TO_FLASH=[]))
+
+    app = Flask(__name__)
+    app.secret_key = "test"
+    app.register_blueprint(_MODULE.global_settings)
+    app.add_url_rule("/loading", "loading", lambda: "")
+    data = {"csrf_token": "x"} | (form or {})
+    with app.test_request_context(f"/global-settings/plugins/{plugin}", method="POST", data=data), patch(
+        "app.utils.current_user", SimpleNamespace(list_permissions=list(permissions))
+    ):
+        _MODULE.global_settings_plugin_page.__wrapped__(plugin)
+    return executor
+
+
+def test_the_global_plugin_page_still_saves_for_a_writing_user(monkeypatch):
+    """The control: without it the refusal test below passes on a route that refuses everyone."""
+    assert _post_global_plugin_page(monkeypatch, form={"LOG_LEVEL": "debug"}).submit.called
+
+
+def test_a_readonly_user_is_refused_on_the_global_plugin_page(monkeypatch):
+    """This page computes an empty scope for a user without `write`, which is NOT a refusal:
+    `restore_unowned_settings` (models/save_scope.py:155) opens with `variables = dict(payload)`
+    and only ever ADDS stored keys back, so every posted value still reached
+    `update_global_config` and was written. At global scope that is a plugin's whole
+    configuration."""
+    executor = _post_global_plugin_page(monkeypatch, form={"LOG_LEVEL": "debug"}, permissions=("read",))
+
+    assert not executor.submit.called
+
+
+def test_a_readonly_global_user_is_refused_before_the_save(monkeypatch):
+    """Was "gets an empty scope". The empty scope only ever covered `compose`, and this page SAVES
+    as `advanced` by default (resolve_save_mode), where `scope` stays None -- so a session without
+    `write` wrote every key it posted. The route refuses the POST outright now, so a read-only
+    session never reaches the scope call. Both panes are checked, because only `compose` was
+    ever covered."""
+    for query in ("?mode=compose", "?mode=advanced"):
+        _post_global_page(monkeypatch, query=query, permissions=("read",), expect_submit=False)
 
 
 def test_the_global_restore_skip_does_not_pick_up_the_service_control_keys():

@@ -831,7 +831,7 @@ def service_route_app():
     return app
 
 
-def _post_service_page(app, monkeypatch, *, service="app.example.com", query="", form=None, permissions=("read", "write"), module=None):
+def _post_service_page(app, monkeypatch, *, service="app.example.com", query="", form=None, permissions=("read", "write"), module=None, expect_submit=True):
     module = module or _services
     api = Mock()
     api.readonly = False
@@ -848,6 +848,9 @@ def _post_service_page(app, monkeypatch, *, service="app.example.com", query="",
     data = {"csrf_token": "x"} | (form or {})
     with app.test_request_context(f"/services/{service}{query}", method="POST", data=data), _with_permissions(*permissions):
         module.services_service_page.__wrapped__(service)
+    if not expect_submit:
+        assert not executor.submit.called, "the route saved anyway"
+        return None, api
     assert executor.submit.called, "the route returned before submitting -- this test proves nothing"
     return executor.submit.call_args, api
 
@@ -900,11 +903,21 @@ def test_raw_still_claims_the_whole_config(service_route_app, monkeypatch):
     assert call.kwargs["scope"] is None
 
 
-def test_a_readonly_user_gets_an_empty_scope_from_the_route(service_route_app, monkeypatch):
-    """The route WIRING for is_readonly. `postable_scope`'s own version of this gap already
-    produced one Critical: the predicate being unit-tested says nothing about the route using it."""
-    call, _ = _post_service_page(service_route_app, monkeypatch, query="?mode=compose", permissions=("read",), form={"SERVER_NAME": "app.example.com"})
-    assert call.kwargs["scope"] == set()
+def test_a_readonly_user_is_refused_before_the_save(service_route_app, monkeypatch):
+    """Was "gets an empty scope from the route". The empty scope only ever covered `compose` on an
+    EXISTING service -- `easy`/`advanced`/`raw`, and every save of "new", keep `scope=None` and
+    would have written whatever was posted. The route refuses the POST outright now
+    (routes/services.py, the `is_readonly_request` gate), so a read-only session never reaches the
+    scope call at all. Both panes are checked, because only `compose` was ever covered."""
+    for query in ("?mode=compose", "?mode=advanced"):
+        _post_service_page(
+            service_route_app,
+            monkeypatch,
+            query=query,
+            permissions=("read",),
+            form={"SERVER_NAME": "app.example.com"},
+            expect_submit=False,
+        )
 
 
 def test_a_new_service_declares_no_scope(service_route_app, monkeypatch):

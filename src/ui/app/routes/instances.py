@@ -7,7 +7,7 @@ from flask_login import login_required
 from common_utils import parse_host  # type: ignore
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import flash, is_ui_api_method
+from app.utils import flash, is_readonly_request, is_ui_api_method
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
@@ -38,6 +38,8 @@ def instances_page():
 def instances_new():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "instances")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "instances")
     verify_data_in_form(
         data={"hostname": None},
         err_message="Missing instance hostname parameter on /instances/new.",
@@ -121,6 +123,8 @@ def instances_new():
 def instances_enroll(hostname: str):
     if API_CLIENT.readonly:
         return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    if is_readonly_request(API_CLIENT.readonly):
+        return jsonify({"status": "error", "message": "You do not have the write permission"}), 403
     try:
         data = API_CLIENT.enroll_instance(hostname)
     except (ApiClientError, ApiUnavailableError) as e:
@@ -133,6 +137,8 @@ def instances_enroll(hostname: str):
 def instances_rotate(hostname: str):
     if API_CLIENT.readonly:
         return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    if is_readonly_request(API_CLIENT.readonly):
+        return jsonify({"status": "error", "message": "You do not have the write permission"}), 403
     try:
         API_CLIENT.rotate_instance_credential(hostname)
     except (ApiClientError, ApiUnavailableError) as e:
@@ -145,6 +151,8 @@ def instances_rotate(hostname: str):
 def instances_revoke(hostname: str):
     if API_CLIENT.readonly:
         return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    if is_readonly_request(API_CLIENT.readonly):
+        return jsonify({"status": "error", "message": "You do not have the write permission"}), 403
     try:
         API_CLIENT.revoke_instance_credential(hostname)
     except (ApiClientError, ApiUnavailableError) as e:
@@ -157,6 +165,8 @@ def instances_revoke(hostname: str):
 def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "instances")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "instances")
 
     verify_data_in_form(
         data={"instances": None},

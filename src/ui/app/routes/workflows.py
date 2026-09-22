@@ -6,7 +6,7 @@ from default_server import is_reserved_default_server  # type: ignore
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
 from app.routes.utils import cors_required
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 workflows = Blueprint("workflows", __name__)
 
@@ -18,10 +18,14 @@ def _redirect():
 
 
 def _readonly():
-    if not API_CLIENT.readonly:
-        return False
-    flash("Database is in read-only mode", "error")
-    return True
+    if API_CLIENT.readonly:
+        flash("Database is in read-only mode", "error")
+        return True
+    if is_readonly_request(API_CLIENT.readonly):
+        # Two causes, two messages: the database is fine here, the session's permission is not.
+        flash("You do not have the write permission", "error")
+        return True
+    return False
 
 
 def _services():
@@ -249,6 +253,10 @@ def workflows_save(workflow_id):
     """Store the rules. The API re-validates: this endpoint never trusts the editor."""
     if API_CLIENT.readonly:
         return jsonify({"status": "error", "message": "Database is in read-only mode"}), 409
+    if is_readonly_request(API_CLIENT.readonly):
+        # 403, not the database gate's 409: this is a permission refusal, not a transient
+        # conflict the caller can retry (same split as routes/templates.py:_check_permissions).
+        return jsonify({"status": "error", "message": "You do not have the write permission"}), 403
     definition = (request.get_json(silent=True) or {}).get("definition")
     if not isinstance(definition, dict):
         return jsonify({"status": "error", "message": "A definition object is required"}), 400

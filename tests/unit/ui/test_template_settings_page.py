@@ -571,7 +571,7 @@ def route_app():
     return _services_module, app
 
 
-def _post_template_page(module, app, monkeypatch, *, db_config, form=None, permissions=("read", "write"), template="low"):
+def _post_template_page(module, app, monkeypatch, *, db_config, form=None, permissions=("read", "write"), template="low", expect_submit=True):
     api = Mock()
     api.readonly = False
     # Raw API payloads, with no `dom_id`: the POST path returns before inject_template_dom_ids,
@@ -590,6 +590,8 @@ def _post_template_page(module, app, monkeypatch, *, db_config, form=None, permi
         # rename branch is observable. Hung off the Mock rather than returned so every existing
         # caller keeps unpacking a plain `executor`.
         executor.response = module.services_template_page.__wrapped__("app.example.com", template)
+    if not expect_submit:
+        assert not executor.submit.called, "the route saved anyway"
     return executor
 
 
@@ -633,14 +635,25 @@ def test_route_passes_the_blacklist_to_the_scope_call(route_app, monkeypatch):
     assert "SERVER_NAME" in executor.submit.call_args.kwargs["scope"]
 
 
-def test_route_yields_an_empty_scope_for_a_user_without_write_permission(route_app, monkeypatch):
-    """`is_readonly` is recomputed on POST from the same formula the GET used (main.py:1283), and
-    it must reach the scope call: a form that somehow submitted while read-only posts nothing, so
-    a non-empty scope would delete every ui-method row the template names."""
+def test_a_user_without_write_permission_is_refused_before_the_save(route_app, monkeypatch):
+    """Was "yields an empty scope". An empty scope is NOT a refusal: `restore_unowned_settings`
+    (models/save_scope.py:155) opens with `variables = dict(payload)` and from there only ADDS
+    stored keys back -- it never drops a posted one. So the posted values still reached
+    `update_service`, and `IS_DRAFT` (routes/services.py) never consults the scope at all: a
+    forged POST from a `{"read"}` session could take a live service offline. The route refuses
+    outright now."""
     module, app = route_app
-    executor = _post_template_page(module, app, monkeypatch, db_config=_STORED, permissions=("read",))
+    executor = _post_template_page(
+        module,
+        app,
+        monkeypatch,
+        db_config=_STORED,
+        permissions=("read",),
+        form={"SERVER_NAME": "app.example.com", "USE_ANTIBOT": "no", "IS_DRAFT": "yes"},
+        expect_submit=False,
+    )
 
-    assert executor.submit.call_args.kwargs["scope"] == set()
+    assert not executor.submit.called
 
 
 def test_route_yields_an_empty_scope_when_the_service_is_locked_to_another_template(route_app, monkeypatch):

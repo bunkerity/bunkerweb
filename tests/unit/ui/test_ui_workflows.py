@@ -32,6 +32,11 @@ def workflows_route():
     dependencies.API_CLIENT = client
     app_utils = ModuleType("app.utils")
     app_utils.flash = Mock()
+    # The route now also refuses a session without the `write` permission
+    # (app/utils.py:is_readonly_request). There is no logged-in user in this harness, so stub it
+    # on the database flag alone -- the permission half is pinned by
+    # tests/unit/ui/test_configs_write_permission.py.
+    app_utils.is_readonly_request = lambda api_readonly: api_readonly
     # app.routes.utils pulls in qrcode (TOTP QR codes), which the unit venv does not carry;
     # only the CORS decorator is needed here and it is a pass-through in tests.
     routes_utils = ModuleType("app.routes.utils")

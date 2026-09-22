@@ -4,7 +4,7 @@ from flask_login import login_required
 
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import flash
+from app.utils import flash, is_readonly_request
 
 from app.routes.utils import handle_error, verify_data_in_form
 
@@ -28,6 +28,8 @@ def jobs_page():
 def jobs_run():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "jobs")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "jobs")
 
     verify_data_in_form(
         data={"jobs": None},

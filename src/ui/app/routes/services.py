@@ -632,6 +632,8 @@ def services_redirect():
 def services_convert():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "services")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "services")
 
     verify_data_in_form(
         data={"services": None},
@@ -806,6 +808,8 @@ def services_mode_convert(service: str):
 def services_delete():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "services")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "services")
 
     verify_data_in_form(
         data={"services": None},
@@ -922,6 +926,8 @@ def detach_service_resource(service: str, family: str, resource_id: str, match_p
         raise ValueError(f"Unknown resource family {family!r}")
     if API_CLIENT.readonly:
         raise PermissionError("The API is in read-only mode")
+    if is_readonly_request(API_CLIENT.readonly):
+        raise PermissionError("You do not have the write permission")
 
     method = getattr(API_CLIENT, _DETACH_METHODS[family])
     if family == "upstream":
@@ -939,8 +945,10 @@ def services_resource_detach(service: str):
     try:
         detach_service_resource(service, family, resource_id, match_path)
         flash(f"Detached the {family} from {service}.", "success")
-    except PermissionError:
-        flash("The API is in read-only mode, cannot detach.", "error")
+    except PermissionError as exc:
+        # The helper raises one of two reasons -- read-only database, or a session without the
+        # `write` permission -- so carry its message instead of naming only the first.
+        flash(f"Cannot detach: {exc}", "error")
     except ValueError:
         flash("Unknown resource type.", "error")
     except (ApiClientError, ApiUnavailableError) as exc:
@@ -968,6 +976,8 @@ def attach_service_resource(service: str, family: str, resource_id: str, *, matc
         raise ValueError(f"Unknown resource family {family!r}")
     if API_CLIENT.readonly:
         raise PermissionError("The API is in read-only mode")
+    if is_readonly_request(API_CLIENT.readonly):
+        raise PermissionError("You do not have the write permission")
 
     method = getattr(API_CLIENT, _ATTACH_METHODS[family])
     if family == "upstream":
@@ -988,8 +998,10 @@ def services_resource_attach(service: str):
     try:
         attach_service_resource(service, family, resource_id, match_path=match_path, primary=primary)
         flash(f"Attached the {family} to {service}.", "success")
-    except PermissionError:
-        flash("The API is in read-only mode, cannot attach.", "error")
+    except PermissionError as exc:
+        # The helper raises one of two reasons -- read-only database, or a session without the
+        # `write` permission -- so carry its message instead of naming only the first.
+        flash(f"Cannot attach: {exc}", "error")
     except ValueError:
         flash("Unknown resource type.", "error")
     except (ApiClientError, ApiUnavailableError) as exc:
@@ -1744,6 +1756,12 @@ def services_service_page(service: str):
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "services")
+        # Same reason as the global settings page: the `is_readonly` handed to `postable_shelf_scope`
+        # below only applies in `compose` mode on an EXISTING service. `easy`/`advanced`/`raw`, and
+        # every save of "new", keep `scope=None`, so without this a session without `write` creates
+        # and edits services at will.
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "services")
 
         DATA.load_from_file()
 
@@ -2048,6 +2066,13 @@ def services_plugin_page(service: str, plugin: str):
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "services")
+        # Same as the global plugin page: the empty scope below suppresses DELETIONS only
+        # (`restore_unowned_settings`, models/save_scope.py:155, only ever ADDS stored keys back),
+        # so every posted value still reached `update_service`. `IS_DRAFT` never touches the scope
+        # at all -- it is popped below and passed positionally -- so without this gate a forged
+        # POST from a session without `write` could take a live service offline.
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "services")
 
         DATA.load_from_file()
         variables = request.form.to_dict().copy()
@@ -2157,6 +2182,13 @@ def services_template_page(service: str, template: str):
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "services")
+        # Same as the global plugin page: the empty scope below suppresses DELETIONS only
+        # (`restore_unowned_settings`, models/save_scope.py:155, only ever ADDS stored keys back),
+        # so every posted value still reached `update_service`. `IS_DRAFT` never touches the scope
+        # at all -- it is popped below and passed positionally -- so without this gate a forged
+        # POST from a session without `write` could take a live service offline.
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "services")
 
         DATA.load_from_file()
         variables = request.form.to_dict().copy()
@@ -2309,6 +2341,8 @@ def services_service_export():
 def services_service_import():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "services")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "services")
 
     services_file = request.files.get("services_file")
     if not services_file or not services_file.filename:

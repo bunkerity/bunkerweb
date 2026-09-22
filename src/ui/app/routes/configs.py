@@ -13,7 +13,7 @@ from common_utils import bytes_hash  # type: ignore
 from custom_configs_validation import NAME_RX  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
-from app.utils import flash, is_editable_method
+from app.utils import flash, is_editable_method, is_readonly_request
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 
@@ -259,8 +259,18 @@ def configs_page():
 @configs.route("/configs/convert", methods=["POST"])
 @login_required
 def configs_convert():
+    # BOTH halves, at every write path on this page. `API_CLIENT.readonly` is the DATABASE's flag;
+    # `is_readonly_request` (app/utils.py) also covers a session whose permissions lack `write`, and
+    # that is the one that matters here -- the UI holds a single process-wide bearer token, so the
+    # API cannot tell a viewer's request from an admin's. A custom config is raw NGINX/ModSecurity
+    # dropped into the server block; "the page dimmed the button" is not a gate.
+    #
+    # Split into two checks on purpose, as `services_mode_convert` does: one message for both causes
+    # sends an operator looking at the wrong thing.
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "configs")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "configs")
 
     verify_data_in_form(
         data={"configs": None},
@@ -379,6 +389,8 @@ def configs_convert():
 def configs_delete():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "configs")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "configs")
 
     verify_data_in_form(
         data={"configs": None},
@@ -445,6 +457,8 @@ def configs_new():
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "configs")
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "configs")
 
         verify_data_in_form(
             data={"service": None},
@@ -588,6 +602,8 @@ def configs_edit(service: str, config_type: str, name: str):
     if request.method == "POST":
         if API_CLIENT.readonly:
             return handle_error("Database is in read-only mode", "configs")
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "configs")
 
         if not db_config["template"] and not is_editable_method(db_config["method"]):
             return handle_error(
@@ -780,6 +796,8 @@ def configs_export():
 def configs_import():
     if API_CLIENT.readonly:
         return handle_error("Database is in read-only mode", "configs")
+    if is_readonly_request(API_CLIENT.readonly):
+        return handle_error("You do not have the write permission", "configs")
 
     configs_file = request.files.get("configs_file")
     if not configs_file or not configs_file.filename:

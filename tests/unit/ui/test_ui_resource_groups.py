@@ -32,6 +32,11 @@ def resource_groups_route():
     route_utils.cors_required = lambda function: function
     app_utils = ModuleType("app.utils")
     app_utils.flash = Mock()
+    # The route now also refuses a session without the `write` permission
+    # (app/utils.py:is_readonly_request). There is no logged-in user in this harness, so stub it
+    # on the database flag alone -- the permission half is pinned by
+    # tests/unit/ui/test_configs_write_permission.py.
+    app_utils.is_readonly_request = lambda api_readonly: api_readonly
     module_name = "app.routes._resource_groups_test"
     route_path = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "routes" / "resource_groups.py"
     spec = importlib.util.spec_from_file_location(module_name, route_path)
