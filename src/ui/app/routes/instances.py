@@ -163,10 +163,13 @@ def instances_revoke(hostname: str):
 @instances.route("/instances/<string:action>", methods=["POST"])
 @login_required
 def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart
-    if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "instances")
-    if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "instances")
+    # `ping` reads instance health and changes nothing, so a view-only session keeps it; the
+    # other three actions mutate the instances and stay behind both gates.
+    if action != "ping":
+        if API_CLIENT.readonly:
+            return handle_error("Database is in read-only mode", "instances")
+        if is_readonly_request(API_CLIENT.readonly):
+            return handle_error("You do not have the write permission", "instances")
 
     verify_data_in_form(
         data={"instances": None},
