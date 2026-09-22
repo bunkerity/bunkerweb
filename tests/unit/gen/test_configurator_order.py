@@ -10,6 +10,8 @@ key, keep the plugin.
 import json
 import logging
 
+import pytest
+
 from Configurator import Configurator  # type: ignore
 
 LOGGER = logging.getLogger("cfg-order-test")
@@ -123,6 +125,37 @@ class TestInvalidOrderIsDroppedNotRefused:
     def test_constraint_item_is_not_a_plugin_id(self, tmp_path, caplog):
         self._dropped(tmp_path, {"access": {"before": ["not a plugin id!"]}}, caplog)
 
+    def test_a_huge_offending_entry_is_truncated_in_the_message(self, tmp_path):
+        """A refused entry is unbounded (the 64-char cap is what it failed), so it must not be
+        echoed whole into the log. Same bound on the Lua side."""
+        configurator = _configurator(tmp_path)
+        ok, msg = configurator._Configurator__validate_plugin_order("myplug", {"access": {"before": ["a" * 100000]}})
+        assert not ok
+        assert len(msg) < 400, len(msg)
+        assert "(truncated)" in msg
+
+    def test_a_huge_phase_name_is_truncated_in_the_message(self, tmp_path):
+        configurator = _configurator(tmp_path)
+        ok, msg = configurator._Configurator__validate_plugin_order("myplug", {"z" * 5000: {"before": ["*"]}})
+        assert not ok
+        assert len(msg) < 400, len(msg)
+
+    def test_a_flood_of_unknown_constraint_keys_is_capped_in_the_message(self, tmp_path):
+        configurator = _configurator(tmp_path)
+        order = {"access": {"k%d" % i: 1 for i in range(5000)}}
+        ok, msg = configurator._Configurator__validate_plugin_order("myplug", order)
+        assert not ok
+        assert len(msg) < 400, len(msg)
+
+    def test_a_control_byte_cannot_forge_a_second_log_line(self, tmp_path):
+        """Same as the Lua half: the message goes to a log handler unescaped."""
+        configurator = _configurator(tmp_path)
+        forged = "x\n2026/09/21 10:00:00 [error] 1#1: *1 [ALL] client 1.2.3.4 banned by an admin"
+        for order in ({forged: {"before": ["*"]}}, {"access": {forged: 1}}, {"access": {"before": [forged]}}):
+            ok, msg = configurator._Configurator__validate_plugin_order("myplug", order)
+            assert not ok
+            assert "\n" not in msg, msg
+
     def test_double_asterisk_is_not_the_wildcard(self, tmp_path, caplog):
         """Only the literal ``"*"`` is special-cased ; a near-miss stays a rejected plugin id."""
         self._dropped(tmp_path, {"access": {"before": ["**"]}}, caplog)
@@ -134,3 +167,84 @@ class TestPluginStillLoads:
         ok, msg, plugin = _validate(tmp_path, "nonsense")
         assert ok, msg
         assert plugin["id"] == "myplug"
+
+
+# --- the other half of the verdict (SEC F-09) ---------------------------------------
+# Python pops an invalid ``order`` from the plugin dict, but the Lua runtime re-reads the same
+# plugin.json from disk (init-lua.conf) and never sees that pop -- so "ignoring the order
+# declaration" was only true on the Python side. The shared table below is walked by both suites:
+# here against ``__validate_plugin_order``, and in tests/unit/common/test_order_plugins.py against
+# the real helpers.lua. A shape that leaves this file's REJECTED list must leave the Lua one too.
+
+import importlib.util  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+_HARNESS_PATH = Path(__file__).resolve().parents[1] / "common" / "test_order_plugins.py"
+# Loaded by path, under a name of its own: the same file is also collected by pytest as
+# ``test_order_plugins``, and reusing that name would hand one of the two a half-built module.
+_spec = importlib.util.spec_from_file_location("_order_lua_harness", _HARNESS_PATH)
+assert _spec is not None and _spec.loader is not None, f"the Lua order harness moved: {_HARNESS_PATH}"
+_harness = importlib.util.module_from_spec(_spec)
+# Registered before it is executed, as the importlib docs prescribe: a module that looks itself up
+# in sys.modules (dataclasses, pickle, ...) must find itself there.
+sys.modules[_spec.name] = _harness
+try:
+    _spec.loader.exec_module(_harness)
+except BaseException:
+    del sys.modules[_spec.name]
+    raise
+
+
+def _verdict(tmp_path, order):
+    configurator = _configurator(tmp_path)
+    return configurator._Configurator__validate_plugin_order("myplug", order)[0]
+
+
+class TestPythonLuaParity:
+    """One manifest, one verdict. Red before SEC-ORDER-PARITY: the Lua half salvaged the valid
+    entries of a block Python had refused whole."""
+
+    @pytest.mark.parametrize("label", sorted(_harness.REJECTED_ORDERS))
+    def test_both_halves_refuse(self, tmp_path, label):
+        order = _harness.REJECTED_ORDERS[label]
+        assert not _verdict(tmp_path, order), f"{label}: the Python validator must refuse it"
+        result = _lua_verdict(order)
+        assert result is False, f"{label}: the Lua parser must refuse it too"
+
+    @pytest.mark.parametrize("label", sorted(_harness.ALLOWED_ORDERS))
+    def test_both_halves_accept(self, tmp_path, label):
+        order = _harness.ALLOWED_ORDERS[label]
+        assert _verdict(tmp_path, order), f"{label}: the Python validator must accept it"
+        assert _lua_verdict(order) is True, f"{label}: the Lua parser must accept it too"
+
+    def test_an_empty_container_cannot_smuggle_a_sibling_phase(self, tmp_path):
+        """Criticos round 1 — the divergence that survived the first fix. cjson cannot tell JSON
+        ``[]`` from JSON ``{}``, so the Lua half reads every empty container as "no constraint".
+        While Python refused those three shapes, a manifest pairing one of them with a perfectly
+        valid *sibling* phase had the sibling applied by the runtime and reported as ignored by the
+        generator -- F-09 again, with ``[]`` in the place of ``123`` and much easier to hit by
+        accident."""
+        smuggled = ({"access": [], "log": {"before": ["*"]}}, {"access": {"before": {}}, "log": {"before": ["*"]}}, [])
+        for index, order in enumerate(smuggled):
+            # One Configurator per case: _configurator() mkdir()s its own core directory.
+            case = tmp_path / f"case{index}"
+            case.mkdir()
+            assert _verdict(case, order), f"{order}: Python must accept what Lua cannot refuse"
+            assert _lua_verdict(order) is True, f"{order}: Lua accepts it"
+
+    def test_the_finding_manifest(self, tmp_path):
+        """``{"access": {"before": ["whitelist", 123]}}`` — Python said "ignoring the order
+        declaration" while Lua applied ``whitelist`` and reordered the access phase."""
+        order = {"access": {"before": ["whitelist", 123]}}
+        assert not _verdict(tmp_path, order)
+        assert _lua_verdict(order) is False
+
+
+def _lua_verdict(order):
+    """``True`` if the real helpers.lua kept the declaration, ``False`` if it refused it."""
+    if _harness.LUA is None:
+        pytest.skip("no stand-alone lua/luajit on PATH")
+    plugins = [_harness._plugin(pid, ["access", "header"], order=order if pid == "authbasic" else None) for pid in _harness.CORE_ACCESS]
+    result = _harness._capture_order({"access": _harness.CORE_ACCESS}, plugins, {})
+    return not [w for w in result["warnings"] if _harness.IGNORED in w]

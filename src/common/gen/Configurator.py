@@ -51,9 +51,30 @@ MANIFEST_CAPS = {
 }
 
 
+# How many unknown constraint keys a refusal names before the rest become "and N more".
+# KEEP IN SYNC with MAX_UNKNOWN_ORDER_WARNINGS in src/bw/lua/bunkerweb/helpers.lua.
+_MAX_SHOWN_ORDER_KEYS = 5
+
+# Control bytes in a value a refusal quotes: a log line is written verbatim, so a newline would
+# forge a second one. Mirrored by the %c substitution in helpers.shown_order_value.
+_CONTROL_RX = re_compile(r"[\x00-\x1f\x7f]")
+
+
 def _byte_len(value: str) -> int:
     """UTF-8 byte length -- matches Lua's ``#`` operator, unlike ``len()`` on a str."""
     return len(value.encode("utf-8"))
+
+
+def _shown_order_value(value: str) -> str:
+    """Bound a manifest-supplied value before a refusal quotes it into the log.
+
+    The offending entry, the phase name and an unknown constraint key are all unbounded -- the
+    64-byte cap is precisely the check a refused one failed -- and each refusal becomes one
+    error.log line per configuration load. Mirrored by ``shown_order_value`` in
+    src/bw/lua/bunkerweb/helpers.lua."""
+    # Cut before escaping: the value can be megabytes long and the tail is dropped anyway.
+    text = _CONTROL_RX.sub("?", value[:64])
+    return text + "... (truncated)" if len(value) > 64 else text
 
 
 class Configurator:
@@ -779,31 +800,61 @@ class Configurator:
 
         Shape: ``{"<phase>": {"before": ["<id>", ...], "after": ["<id>", ...]}}``. The operator's
         ``PLUGINS_ORDER_<PHASE>`` still has the last word, so this is a hint, not a guarantee --
-        hence the caller warns and drops instead of refusing the plugin."""
+        hence the caller warns and drops instead of refusing the plugin.
+
+        Mirrored by hand in helpers.parse_declared_order (src/bw/lua/bunkerweb/helpers.lua): the
+        runtime re-reads plugin.json from disk and never sees the ``pop`` below, so a shape refused
+        here and accepted there reorders a phase while this warning says it was ignored. The EMPTY
+        container is the one place the mirror cannot be exact -- cjson decodes JSON ``[]`` and JSON
+        ``{}`` into the same empty Lua table -- so the three guards below accept it wherever it can
+        appear, which is the side the Lua half is forced onto. A non-empty container of the wrong
+        kind is still refused by both."""
+        if isinstance(order, list) and not order:
+            return (True, "ok")
         if not isinstance(order, dict):
             return (False, f"Invalid order for plugin {plugin_id} (Must be an object)")
 
         for phase, constraints in order.items():
             if phase not in self.__valid_order_phases:
-                return (False, f"Invalid order phase {phase} for plugin {plugin_id} (Must be one of {', '.join(sorted(self.__valid_order_phases))})")
+                return (
+                    False,
+                    f"Invalid order phase {_shown_order_value(str(phase))} for plugin {plugin_id} "
+                    f"(Must be one of {', '.join(sorted(self.__valid_order_phases))})",
+                )
+            if isinstance(constraints, list) and not constraints:
+                continue
             if not isinstance(constraints, dict):
-                return (False, f"Invalid order for phase {phase} in plugin {plugin_id} (Must be an object with before and/or after)")
+                return (False, f"Invalid order for phase {_shown_order_value(str(phase))} in plugin {plugin_id} (Must be an object with before and/or after)")
 
-            unknown_keys = sorted(set(constraints) - self.__valid_order_keys)
+            unknown_keys = [_shown_order_value(str(key)) for key in sorted(set(constraints) - self.__valid_order_keys)]
             if unknown_keys:
-                return (False, f"Unknown order key(s) {', '.join(unknown_keys)} for phase {phase} in plugin {plugin_id} (Allowed: after, before)")
+                # Bounded in count as well as in length: a manifest may declare any number of keys.
+                extra = len(unknown_keys) - _MAX_SHOWN_ORDER_KEYS
+                if extra > 0:
+                    unknown_keys = unknown_keys[:_MAX_SHOWN_ORDER_KEYS] + [f"and {extra} more"]
+                return (
+                    False,
+                    f"Unknown order key(s) {', '.join(unknown_keys)} for phase {_shown_order_value(str(phase))} "
+                    f"in plugin {plugin_id} (Allowed: after, before)",
+                )
 
             for key, ids in constraints.items():
+                if isinstance(ids, dict) and not ids:
+                    continue
                 if not isinstance(ids, list):
-                    return (False, f"Invalid order {key} for phase {phase} in plugin {plugin_id} (Must be a list of plugin ids)")
+                    return (False, f"Invalid order {key} for phase {_shown_order_value(str(phase))} in plugin {plugin_id} (Must be a list of plugin ids)")
                 for other_id in ids:
                     # "*" is the wildcard token (every other plugin implementing the phase that
                     # is not itself constrained relative to me) -- a valid id on its own, not a
                     # regex-matchable plugin id.
                     if not isinstance(other_id, str) or not (other_id == "*" or self.__plugin_id_rx.match(other_id)):
+                        # Bounded before repr() rather than after: repr() of a 50 MB entry is a
+                        # second 50 MB allocation, and slicing its output would cut the closing
+                        # quote off. See _shown_order_value.
+                        shown = repr(_shown_order_value(other_id)) if isinstance(other_id, str) else _shown_order_value(repr(other_id))
                         return (
                             False,
-                            f"Invalid order {key} entry {other_id!r} for phase {phase} in plugin {plugin_id} "
+                            f"Invalid order {key} entry {shown} for phase {_shown_order_value(str(phase))} in plugin {plugin_id} "
                             '(Can only contain numbers, letters, underscores, dots and hyphens (min 1 characters and max 64), or the wildcard "*")',
                         )
 

@@ -136,6 +136,80 @@ def _run_order(order_json: dict, plugins: list, variables: dict, body: str) -> N
     _run_lua(preamble + head + body, str(HELPERS_LUA))
 
 
+# The four core ``access`` plugins of the SEC F-09 proof, in order.json order.
+CORE_ACCESS = ["whitelist", "blacklist", "antibot", "authbasic"]
+
+# The marker both halves now share: Configurator logs ``f"{msg}, ignoring the order declaration"``
+# and drops the whole ``order`` key; the Lua parser returns the same tail in a warning and keeps
+# the default list. Grepping for it is how a test tells "refused" from "applied".
+IGNORED = "ignoring the order declaration"
+
+# One entry per check ``Configurator.__validate_plugin_order`` performs. Both suites walk this
+# table: the Lua one asserts the declaration had no effect, the Python one
+# (``tests/unit/gen/test_configurator_order.py``) asserts the validator refuses the same shapes.
+# Before SEC-ORDER-PARITY the Lua half applied most of these while Python said it had ignored them.
+REJECTED_ORDERS = {
+    "order is not an object": ["access"],
+    "phase is not a phase name": {"not_a_phase": {"before": ["whitelist"]}},
+    "phase value is not an object": {"access": ["whitelist"]},
+    "unknown constraint key": {"access": {"beside": ["whitelist"]}},
+    "constraint is not a list": {"access": {"before": "whitelist"}},
+    "constraint is an object": {"access": {"before": {"1": "whitelist"}}},
+    "entry is not a string": {"access": {"before": ["whitelist", 123]}},
+    "entry is not a plugin id": {"access": {"before": ["not a plugin id!"]}},
+    "entry is a near-miss wildcard": {"access": {"before": ["**"]}},
+    "entry is longer than 64 bytes": {"access": {"before": ["p" * 65]}},
+    "one bad phase poisons the valid ones": {"header": {"before": ["*"]}, "access": {"before": [123]}},
+    # The mirror of the line above: the parser sorts the phase names, so here it walks a VALID
+    # phase first and must still discard what it already built when the second one fails.
+    "a valid phase sorts before the defect": {"access": {"before": ["*"]}, "log": {"before": [123]}},
+}
+
+# The mirror image: shapes both halves must keep accepting, so the parity fix cannot be "refuse
+# everything".
+ALLOWED_ORDERS = {
+    "explicit id": {"access": {"before": ["whitelist"]}},
+    "wildcard": {"access": {"before": ["*"]}},
+    "both sides at once": {"access": {"before": ["whitelist"], "after": ["blacklist"]}},
+    "headers alias": {"headers": {"before": ["*"]}},
+    "empty order block": {},
+    "empty constraint list": {"access": {"before": []}},
+    # cjson maps JSON `[]` and JSON `{}` to the same empty Lua table, so the Lua half cannot tell
+    # an empty list from an empty object and reads both as "no constraint". The Python half can
+    # tell them apart -- and used to refuse three of them, which put the whole declaration
+    # (including its *other*, well-formed phases) on one side only. Both halves now accept the
+    # empty container everywhere it can appear; a NON-empty one of the wrong kind is still
+    # refused on both sides (see REJECTED_ORDERS).
+    "order is an empty list": [],
+    "empty list as the phase value": {"access": []},
+    "empty object as the constraint value": {"access": {"before": {}}},
+    "id of exactly 64 bytes": {"access": {"before": ["p" * 64]}},
+}
+
+
+def _capture_order(order_json: dict, plugins: list, variables: dict, phase: str = "access") -> dict:
+    """Run the real ``order_plugins`` and hand the result back to Python.
+
+    Returns ``{"order": [...ids of `phase`...], "warnings": [...]}``. Same chunk as
+    ``_run_order``, only the body differs -- the assertions live in Python instead of in Lua.
+    Also imported by file path from ``tests/unit/gen/test_configurator_order.py``, which needs
+    the Lua verdict next to the Python one to assert the two halves agree (SEC F-09).
+    """
+    assert LUA is not None
+    preamble = ORDER_PREAMBLE.replace("--[[ORDER_JSON]]", _lua(order_json)).replace("--[[PHASES]]", _lua(PHASES))
+    head = (
+        f"local plugins = {_lua(plugins)}\nlocal variables = {_lua(variables)}\n"
+        "local ok, orders, missing, warnings = helpers.order_plugins(plugins, variables)\nassert(ok, tostring(orders))\n"
+    )
+    # \1 separates the two sections : a warning may contain any punctuation, but not a control
+    # character, so this is the one delimiter the payload cannot forge.
+    body = f'io.write(table.concat(orders[{json.dumps(phase)}] or {{}}, ","), "\\1")\n' 'io.write(table.concat(warnings or {}, "\\n"))\n'
+    result = subprocess.run([LUA, "-", str(HELPERS_LUA)], input=preamble + head + body, capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    computed, _, warned = result.stdout.partition("\1")
+    return {"order": [pid for pid in computed.split(",") if pid], "warnings": [w for w in warned.split("\n") if w]}
+
+
 def _plugin(pid: str, phases: list, ptype: str = "core", order=None) -> dict:
     plugin = {"id": pid, "phases": phases, "type": ptype}
     if order is not None:
@@ -677,3 +751,123 @@ assert(logged("acme"), "the refusal must name the calling plugin")
 """,
             str(plugin_dir / "acme.lua"),
         )
+
+
+def _declares(order, phases=("access", "header")):
+    """The F-09 fixture: four core ``access`` plugins, ``authbasic`` carrying the declaration."""
+    return [_plugin(pid, list(phases), order=order if pid == "authbasic" else None) for pid in CORE_ACCESS]
+
+
+@needs_lua
+class TestInvalidDeclarationIsRefusedNotSalvaged:
+    """SEC F-09 — the Lua parser used to drop the offending entry and apply the rest, while the
+    Python half logged "ignoring the order declaration" and popped the key. A plugin could
+    therefore reorder the access phase *while the operator's log said it had been ignored*.
+    Both halves now return the same verdict on the same manifest."""
+
+    @pytest.mark.parametrize("label", sorted(REJECTED_ORDERS))
+    def test_a_shape_python_refuses_has_no_effect_in_lua(self, label):
+        result = _capture_order({"access": CORE_ACCESS}, _declares(REJECTED_ORDERS[label]), {})
+        assert result["order"] == CORE_ACCESS, f"{label}: the declaration must not be applied"
+        assert [w for w in result["warnings"] if IGNORED in w], f"{label}: the refusal must be warned about"
+
+    @pytest.mark.parametrize("label", sorted(ALLOWED_ORDERS))
+    def test_a_shape_python_accepts_is_never_refused_in_lua(self, label):
+        result = _capture_order({"access": CORE_ACCESS}, _declares(ALLOWED_ORDERS[label]), {})
+        assert not [w for w in result["warnings"] if IGNORED in w], f"{label}: must not be refused"
+
+    def test_an_accepted_declaration_is_actually_applied(self):
+        """The guard the parametrised "not refused" assertion above cannot give: "accept it then
+        ignore it" would keep that one green."""
+        result = _capture_order({"access": CORE_ACCESS}, _declares({"access": {"before": ["whitelist"]}}), {})
+        assert result["order"] == ["blacklist", "antibot", "authbasic", "whitelist"]
+
+    def test_the_finding_manifest_leaves_the_access_order_alone(self):
+        """The exact manifest of the finding: ``{"access": {"before": ["whitelist", 123]}}``
+        used to yield ``blacklist,antibot,authbasic,whitelist``."""
+        result = _capture_order({"access": CORE_ACCESS}, _declares({"access": {"before": ["whitelist", 123]}}), {})
+        assert result["order"] == CORE_ACCESS
+
+    def test_a_valid_phase_is_dropped_with_an_invalid_sibling(self):
+        """Python pops the whole ``order`` key on the first defect, so a valid ``header`` block
+        sitting next to a broken ``access`` one must not survive on the Lua side either."""
+        order = {"header": {"before": ["*"]}, "access": {"before": [123]}}
+        header = _capture_order({"access": CORE_ACCESS}, _declares(order), {}, phase="header")
+        assert header["order"] == sorted(CORE_ACCESS), "the valid sibling phase must be dropped too"
+
+    def test_the_warning_names_the_plugin_and_the_defect(self):
+        result = _capture_order({"access": CORE_ACCESS}, _declares({"access": {"before": ["whitelist", 123]}}), {})
+        refusal = [w for w in result["warnings"] if IGNORED in w]
+        assert len(refusal) == 1, result["warnings"]
+        assert "authbasic" in refusal[0] and "access" in refusal[0], refusal[0]
+
+    def test_a_huge_offending_entry_is_truncated_in_the_warning(self):
+        """Criticos round 1, OPTIONAL-1 — the 64-byte cap only binds a *valid* id, so a refused
+        entry can be megabytes long. Echoing it whole is the F-10 flood again at one entry."""
+        result = _capture_order({"access": CORE_ACCESS}, _declares({"access": {"before": ["a" * 100000]}}), {})
+        refusal = [w for w in result["warnings"] if IGNORED in w]
+        assert len(refusal) == 1, result["warnings"]
+        assert len(refusal[0]) < 400, len(refusal[0])
+        assert "(truncated)" in refusal[0]
+
+    def test_a_huge_phase_name_is_truncated_in_the_warning(self):
+        """Criticos round 2 — the entry is not the only manifest value echoed into the refusal.
+        The phase name is attacker-controlled too, and unbounded."""
+        result = _capture_order({"access": CORE_ACCESS}, _declares({"z" * 5000: {"before": ["*"]}}), {})
+        refusal = [w for w in result["warnings"] if IGNORED in w]
+        assert len(refusal) == 1, result["warnings"]
+        assert len(refusal[0]) < 400, len(refusal[0])
+
+    def test_a_flood_of_unknown_constraint_keys_is_capped_in_the_warning(self):
+        """Same class: the unknown-key list is unbounded in length *and* in count."""
+        order = {"access": {"k%d" % i: 1 for i in range(5000)}}
+        result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+        refusal = [w for w in result["warnings"] if IGNORED in w]
+        assert len(refusal) == 1, result["warnings"]
+        assert len(refusal[0]) < 400, len(refusal[0])
+
+    def test_a_control_byte_cannot_forge_a_second_log_line(self):
+        """Criticos round 3, OPTIONAL-1 — logger:log hands the message to ngx_log_error as
+        ``"%*s"``, verbatim, so a newline in a manifest value writes a second error.log line that
+        is indistinguishable from a real one."""
+        forged = "x\n2026/09/21 10:00:00 [error] 1#1: *1 [ALL] client 1.2.3.4 banned by an admin"
+        for order in ({forged: {"before": ["*"]}}, {"access": {forged: 1}}, {"access": {"before": [forged]}}):
+            result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+            assert len(result["warnings"]) == 1, result["warnings"]
+            assert "x?2026" in result["warnings"][0], result["warnings"][0]
+
+    def test_a_refused_declaration_does_not_refuse_the_plugin(self):
+        """The whole point of the Python half warning instead of refusing: the plugin stays."""
+        result = _capture_order({"access": CORE_ACCESS}, _declares("nonsense"), {})
+        assert "authbasic" in result["order"]
+
+
+@needs_lua
+class TestUnknownIdWarningsAreCapped:
+    """SEC F-10 — one WARNING per unknown id per phase, uncapped: a 200 000-entry ``before`` list
+    measured 27.5 MB of error.log per configuration load, times every phase, on every reload."""
+
+    def test_at_most_six_lines_for_fifty_unknown_ids(self):
+        order = {"access": {"before": ["nope%d" % i for i in range(50)]}}
+        result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+        about_access = [w for w in result["warnings"] if "authbasic" in w and "access" in w]
+        assert len(about_access) == 6, about_access
+        assert [w for w in about_access if "45 more" in w], about_access
+
+    def test_the_cap_does_not_hide_a_short_list(self):
+        order = {"access": {"before": ["nope1", "nope2"]}}
+        result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+        named = [w for w in result["warnings"] if "nope1" in w or "nope2" in w]
+        assert len(named) == 2, named
+        assert not [w for w in result["warnings"] if "more" in w], result["warnings"]
+
+    def test_the_same_unknown_id_on_both_sides_warns_once(self):
+        order = {"access": {"before": ["nope"], "after": ["nope"]}}
+        result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+        assert len([w for w in result["warnings"] if "nope" in w]) == 1, result["warnings"]
+
+    def test_the_cap_is_per_phase_not_global(self):
+        """A plugin declaring junk in two phases still gets both phases reported."""
+        order = {phase: {"before": ["nope%d" % i for i in range(50)]} for phase in ("access", "header")}
+        result = _capture_order({"access": CORE_ACCESS}, _declares(order), {})
+        assert len([w for w in result["warnings"] if "more unknown" in w]) == 2, result["warnings"]

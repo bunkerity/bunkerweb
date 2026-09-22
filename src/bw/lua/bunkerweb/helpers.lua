@@ -299,33 +299,168 @@ end
 -- a known origin sorts with core, which is the conservative end of the list.
 local ORIGIN_RANK = { pro = 1, external = 2, core = 3 }
 
--- Normalise a plugin.json "order" block into { [phase] = { before = {...}, after = {...} } }.
--- Shape errors are dropped silently : the Python validator (Configurator.__validate_plugin) is
--- the half that warns about them, and the Lua runtime must never refuse a plugin over an
--- optional field -- that asymmetry is exactly what makes a plugin "disappear" on one side only.
-local function parse_declared_order(order, phases_set, phase_aliases)
-	local declared = {}
-	if type(order) ~= "table" then
-		return declared
+-- How many unknown ids of one (plugin, phase) get a line of their own before the rest are
+-- summarised. The list a manifest may declare is unbounded, error.log is not.
+local MAX_UNKNOWN_ORDER_WARNINGS = 5
+
+-- cjson decodes a JSON array and a JSON object into the same Lua table type, so "is this a list?"
+-- is "are its keys exactly 1..#t?". An empty object and an empty array stay indistinguishable --
+-- the one shape the two validators cannot be made to agree on, and a harmless one: both halves
+-- read it as "no constraint".
+local function is_list(value)
+	if type(value) ~= "table" then
+		return false
 	end
-	for phase, constraints in pairs(order) do
+	local count = 0
+	for key in pairs(value) do
+		if type(key) ~= "number" then
+			return false
+		end
+		count = count + 1
+	end
+	return count == #value
+end
+
+-- Only the literal "*" is the wildcard; anything else must be a plugin id -- same shape and same
+-- 64-byte cap as helpers.load_plugin and Configurator.__plugin_id_rx (compiled with re.ASCII, so
+-- its \w is ASCII-only and Lua's %w agrees).
+local function is_order_entry(id)
+	-- Length first, pattern second : the pattern is O(n) and n is attacker-controlled, while the
+	-- cap is the check that refuses it anyway. Same verdict, O(1) on a hostile entry.
+	return type(id) == "string" and (id == "*" or (#id <= 64 and id:match("^[%w_.-]+$") ~= nil))
+end
+
+-- Every manifest-supplied value these refusals quote -- the offending entry, the phase name, an
+-- unknown constraint key -- is unbounded : the 64-byte cap is precisely the check the refused one
+-- failed. Each refusal is one error.log line per configuration load, so quoting one whole is the
+-- same flood MAX_UNKNOWN_ORDER_WARNINGS closes, reached through a single value.
+-- The cut is on bytes, so a multibyte value can leave a partial UTF-8 sequence in the log : that
+-- is cosmetic, and LuaJIT has no utf8 library to do better cheaply.
+-- Configurator.__validate_plugin_order bounds the same three values the same way.
+local function shown_order_value(value)
+	local text = tostring(value)
+	local truncated = #text > 64
+	if truncated then
+		-- Cut before escaping : the value can be megabytes long and the tail is dropped anyway.
+		text = text:sub(1, 64)
+	end
+	-- Control bytes are replaced, not merely truncated : logger:log hands the message to
+	-- ngx_log_error as "%*s", which copies it verbatim, so a newline in a manifest value would
+	-- forge a second, genuine-looking error.log line.
+	text = text:gsub("%c", "?")
+	if truncated then
+		return text .. "... (truncated)"
+	end
+	return text
+end
+
+-- Normalise a plugin.json "order" block into { [phase] = { before = {...}, after = {...} } }.
+-- Returns the map, or nil plus a message. Any defect refuses the WHOLE declaration, exactly like
+-- Configurator.__validate_plugin_order, whose caller returns on the first one and pops the `order`
+-- key. Anything looser and that caller's "ignoring the order declaration" log line is a lie: the
+-- Lua runtime re-reads plugin.json from disk and never sees the pop, so a plugin could reorder a
+-- phase while the operator's log said the declaration had been ignored (SEC F-09). A refusal is
+-- never fatal to the plugin -- the declaration is dropped and the default order stands, which is
+-- why the Python half warns instead of refusing too.
+local function parse_declared_order(plugin_id, order, phases_set, phase_aliases)
+	if type(order) ~= "table" then
+		return nil, "Invalid order for plugin " .. plugin_id .. " (Must be an object)"
+	end
+	-- Sorted, not raw `pairs()` order (hash-seeded per process) : with two defects in one block
+	-- the message must name the same one across restarts. It does NOT make that one match
+	-- Python's (which walks the JSON's own insertion order) -- only the verdict is guaranteed to
+	-- agree, which is what the split-brain needs.
+	local phase_names = {}
+	for phase in pairs(order) do
+		if type(phase) ~= "string" then
+			-- A JSON array, or any non-object : Python's isinstance(order, dict) refuses it.
+			return nil, "Invalid order for plugin " .. plugin_id .. " (Must be an object)"
+		end
+		table.insert(phase_names, phase)
+	end
+	table.sort(phase_names)
+
+	local declared = {}
+	for _, phase in ipairs(phase_names) do
+		local constraints = order[phase]
 		local canonical_phase = phase_aliases[phase] or phase
-		if phases_set[canonical_phase] and type(constraints) == "table" then
-			-- Reused, not replaced : a manifest may spell the same phase twice (`header` and its
-			-- `headers` alias) and Lua randomises the hash seed, so overwriting would drop one of
-			-- the two -- a different one on every restart.
-			local entry = declared[canonical_phase] or { before = {}, after = {} }
-			for _, side in ipairs({ "before", "after" }) do
-				if type(constraints[side]) == "table" then
-					for _, id in ipairs(constraints[side]) do
-						if type(id) == "string" then
-							table.insert(entry[side], id)
-						end
+		if not phases_set[canonical_phase] then
+			return nil,
+				"Invalid order phase "
+					.. shown_order_value(phase)
+					.. " for plugin "
+					.. plugin_id
+					.. " (Must be one of the plugin phases)"
+		end
+		if type(constraints) ~= "table" then
+			return nil,
+				"Invalid order for phase "
+					.. shown_order_value(phase)
+					.. " in plugin "
+					.. plugin_id
+					.. " (Must be an object with before and/or after)"
+		end
+		local unknown_keys = {}
+		for key in pairs(constraints) do
+			if key ~= "before" and key ~= "after" then
+				table.insert(unknown_keys, shown_order_value(key))
+			end
+		end
+		if #unknown_keys > 0 then
+			table.sort(unknown_keys)
+			-- Bounded like the unknown-id warnings : the NUMBER of keys is attacker-controlled too.
+			local extra = #unknown_keys - MAX_UNKNOWN_ORDER_WARNINGS
+			if extra > 0 then
+				for _ = 1, extra do
+					table.remove(unknown_keys)
+				end
+				table.insert(unknown_keys, "and " .. extra .. " more")
+			end
+			return nil,
+				"Unknown order key(s) "
+					.. table.concat(unknown_keys, ", ")
+					.. " for phase "
+					.. shown_order_value(phase)
+					.. " in plugin "
+					.. plugin_id
+					.. " (Allowed: after, before)"
+		end
+		-- Reused, not replaced : a manifest may spell the same phase twice (`header` and its
+		-- `headers` alias) and Lua randomises the hash seed, so overwriting would drop one of
+		-- the two -- a different one on every restart.
+		local entry = declared[canonical_phase] or { before = {}, after = {} }
+		for _, side in ipairs({ "before", "after" }) do
+			local ids = constraints[side]
+			if ids ~= nil then
+				if not is_list(ids) then
+					return nil,
+						"Invalid order "
+							.. side
+							.. " for phase "
+							.. shown_order_value(phase)
+							.. " in plugin "
+							.. plugin_id
+							.. " (Must be a list of plugin ids)"
+				end
+				for _, id in ipairs(ids) do
+					if not is_order_entry(id) then
+						return nil,
+							"Invalid order "
+								.. side
+								.. " entry "
+								.. shown_order_value(id)
+								.. " for phase "
+								.. shown_order_value(phase)
+								.. " in plugin "
+								.. plugin_id
+								.. " (Can only contain numbers, letters, underscores, dots and hyphens "
+								.. '(min 1 characters and max 64), or the wildcard "*")'
 					end
+					table.insert(entry[side], id)
 				end
 			end
-			declared[canonical_phase] = entry
 		end
+		declared[canonical_phase] = entry
 	end
 	return declared
 end
@@ -494,6 +629,10 @@ helpers.order_plugins = function(plugins, variables)
 		end
 	end
 
+	-- Warnings are returned to the caller rather than logged here : helpers has no logger, and the
+	-- two init confs already own the reporting of the PLUGINS_ORDER_* misses.
+	local order_warnings = {}
+
 	-- Compute plugins/id/phases table
 	local plugins_phases = {}
 	local plugin_lookup = {}
@@ -505,7 +644,13 @@ helpers.order_plugins = function(plugins, variables)
 			plugins_phases[plugin.id][phase] = true
 		end
 		if plugin.order ~= nil then
-			declared_orders[plugin.id] = parse_declared_order(plugin.order, phases_set, phase_aliases)
+			local declared, order_err = parse_declared_order(plugin.id, plugin.order, phases_set, phase_aliases)
+			if declared then
+				declared_orders[plugin.id] = declared
+			else
+				-- Same tail as Configurator's warning, so an operator grepping one finds the other.
+				table.insert(order_warnings, order_err .. ", ignoring the order declaration")
+			end
 		end
 	end
 
@@ -555,10 +700,7 @@ helpers.order_plugins = function(plugins, variables)
 		return list
 	end
 
-	-- Apply the plugins' own declarations to a phase's default list. Warnings are returned to the
-	-- caller rather than logged here : helpers has no logger, and the two init confs already own
-	-- the reporting of the PLUGINS_ORDER_* misses.
-	local order_warnings = {}
+	-- Apply the plugins' own declarations to a phase's default list.
 	local function apply_declared_order(phase, list)
 		local in_phase = {}
 		for _, id in ipairs(list) do
@@ -569,24 +711,44 @@ helpers.order_plugins = function(plugins, variables)
 		for _, id in ipairs(list) do
 			local entry = declared_orders[id] and declared_orders[id][phase]
 			if entry then
+				-- Capped and deduplicated per (plugin, phase) : one line per unknown id, uncapped,
+				-- meant a manifest naming 200 000 ids wrote 27.5 MB of error.log per phase per
+				-- configuration load, and a load happens on every reload (SEC F-10).
+				local seen_unknown, unknown_count = {}, 0
 				for _, side in ipairs({ "before", "after" }) do
 					for _, other in ipairs(entry[side]) do
 						-- "*" is the wildcard token, not a plugin id : never reported as missing.
-						if other ~= "*" and not in_phase[other] then
-							table.insert(
-								order_warnings,
-								"plugin "
-									.. id
-									.. " declares order."
-									.. phase
-									.. "."
-									.. side
-									.. " = "
-									.. other
-									.. " but that plugin is not available or doesn't implement the phase, ignoring it"
-							)
+						if other ~= "*" and not in_phase[other] and not seen_unknown[other] then
+							seen_unknown[other] = true
+							unknown_count = unknown_count + 1
+							if unknown_count <= MAX_UNKNOWN_ORDER_WARNINGS then
+								table.insert(
+									order_warnings,
+									"plugin "
+										.. id
+										.. " declares order."
+										.. phase
+										.. "."
+										.. side
+										.. " = "
+										.. other
+										.. " but that plugin is not available or doesn't implement the phase, ignoring it"
+								)
+							end
 						end
 					end
+				end
+				if unknown_count > MAX_UNKNOWN_ORDER_WARNINGS then
+					table.insert(
+						order_warnings,
+						"plugin "
+							.. id
+							.. " declares "
+							.. (unknown_count - MAX_UNKNOWN_ORDER_WARNINGS)
+							.. " more unknown order id(s) for phase "
+							.. phase
+							.. ", not listing them"
+					)
 				end
 				constrained[id] = entry
 			end
