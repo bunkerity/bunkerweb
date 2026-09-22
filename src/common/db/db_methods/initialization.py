@@ -15,6 +15,24 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from .common import DatabaseMixinBase, bulk_add_in_fk_order, canonicalize_setting_value
 
+# Each entry must change the setting id (and therefore its unique name): both
+# rows coexist during apply, so a same-id destination would fail init_tables
+# with an IntegrityError. A destination value collision is a hard boot failure
+# by design and cannot occur on a genuine 1.6.15 upgrade.
+RENAMED_SETTINGS = {
+    ("modsecurity", "MODSECURITY_CRS_PLUGIN_URLS"): "MODSECURITY_CRS_PLUGINS",
+    ("reverseproxy", "REVERSE_PROXY_SSL_CERT"): "REVERSE_PROXY_SSL_CLIENT_CERT",
+    ("reverseproxy", "REVERSE_PROXY_SSL_CERT_DATA"): "REVERSE_PROXY_SSL_CLIENT_CERT_DATA",
+    ("reverseproxy", "REVERSE_PROXY_SSL_CERT_PRIORITY"): "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY",
+    ("reverseproxy", "REVERSE_PROXY_SSL_KEY"): "REVERSE_PROXY_SSL_CLIENT_KEY",
+    ("reverseproxy", "REVERSE_PROXY_SSL_KEY_DATA"): "REVERSE_PROXY_SSL_CLIENT_KEY_DATA",
+    ("grpc", "GRPC_SSL_CERT"): "GRPC_SSL_CLIENT_CERT",
+    ("grpc", "GRPC_SSL_CERT_DATA"): "GRPC_SSL_CLIENT_CERT_DATA",
+    ("grpc", "GRPC_SSL_CERT_PRIORITY"): "GRPC_SSL_CLIENT_CERT_PRIORITY",
+    ("grpc", "GRPC_SSL_KEY"): "GRPC_SSL_CLIENT_KEY",
+    ("grpc", "GRPC_SSL_KEY_DATA"): "GRPC_SSL_CLIENT_KEY_DATA",
+}
+
 
 class DatabaseInitTablesMixin(DatabaseMixinBase):
     """Schema creation and core plugin/settings/template seeding (init_tables)."""
@@ -40,6 +58,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         to_put = []
         to_update = []
         to_delete = []
+        to_rename = []
 
         with self._db_session() as session:
             old = self._it_index_old_data(old_data)
@@ -56,7 +75,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
 
             # Compute differences between old and desired data
             self._it_diff_plugins(old, desired, to_put, to_update, to_delete)
-            self._it_diff_settings(old, desired, to_put, to_update, to_delete)
+            self._it_diff_settings(old, desired, to_put, to_update, to_delete, to_rename)
             self._it_diff_selects_multiselects(old, desired, to_put, to_update, to_delete)
             self._it_diff_jobs(old, desired, to_put, to_update, to_delete)
             self._it_diff_plugin_pages(old, desired, to_put, to_update, to_delete)
@@ -73,12 +92,21 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 self._it_apply_deletes(session, to_delete)
                 # Insert parents before children to avoid FK errors on some DBs.
                 bulk_add_in_fk_order(session, to_put)
+                # Only renamed settings defer deletion: both parent rows must exist
+                # while values move. Other deletes still precede their replacement puts.
+                for plugin_id, old_id, new_id in to_rename:
+                    for model in (Global_values, Services_settings, Template_settings):
+                        session.execute(update(model).filter_by(setting_id=old_id).values(setting_id=new_id))
+                    session.execute(delete(Settings).filter_by(plugin_id=plugin_id, id=old_id))
                 self._it_apply_updates(session, to_update)
                 session.commit()
             except SQLAlchemyError as e:
                 self.logger.debug(format_exc())
                 session.rollback()
                 return False, str(e)
+
+            for _, old_id, new_id in to_rename:
+                self.logger.warning(f"{old_id} setting has been renamed to {new_id}, migrating data")
 
         # ? Check if all templates settings are valid
         with self._db_session() as session:
@@ -89,7 +117,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             except BaseException as e:
                 return False, str(e)
 
-        if not to_put and not to_update and not to_delete:
+        if not to_put and not to_update and not to_delete and not to_rename:
             return False, ""
         return True, ""
 
@@ -772,8 +800,8 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
                 to_delete.append({"type": "plugin", "filter": {"id": pid}})
 
-    def _it_diff_settings(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
-        """Compute differences for SETTINGS (including the MODSECURITY_CRS_PLUGIN_URLS rename migration)."""
+    def _it_diff_settings(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list, to_rename: list) -> None:
+        """Compute differences for SETTINGS, retaining rename sources until values move."""
         old_settings = old["settings"]
         desired_settings = desired["settings"]
 
@@ -792,23 +820,11 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
 
         # Settings to delete
         for sk in old_setting_keys - new_setting_keys:
-            to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
-            if sk[1] == "MODSECURITY_CRS_PLUGIN_URLS":
-                self.logger.warning("MODSECURITY_CRS_PLUGIN_URLS setting has been renamed to MODSECURITY_CRS_PLUGINS, migrating data")
-                to_update.extend(
-                    [
-                        {
-                            "type": "global_value",
-                            "filter": {"setting_id": "MODSECURITY_CRS_PLUGIN_URLS"},
-                            "data": {"setting_id": "MODSECURITY_CRS_PLUGINS"},
-                        },
-                        {
-                            "type": "service_setting",
-                            "filter": {"setting_id": "MODSECURITY_CRS_PLUGIN_URLS"},
-                            "data": {"setting_id": "MODSECURITY_CRS_PLUGINS"},
-                        },
-                    ]
-                )
+            new_id = RENAMED_SETTINGS.get(sk)
+            if new_id and (sk[0], new_id) in new_setting_keys:
+                to_rename.append((sk[0], sk[1], new_id))
+            else:
+                to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
 
     def _it_diff_selects_multiselects(self, old: dict, desired: dict, to_put: list, to_update: list, to_delete: list) -> None:
         """Compute differences for SELECTS and MULTISELECTS."""
@@ -1206,10 +1222,6 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                 session.execute(update(Plugins).filter_by(**update_op["filter"]).values(update_op["data"]))
             elif t == "template":
                 session.execute(update(Templates).filter_by(**update_op["filter"]).values(update_op["data"]))
-            elif t == "global_value":
-                session.execute(update(Global_values).filter_by(**update_op["filter"]).values(update_op["data"]))
-            elif t == "service_setting":
-                session.execute(update(Services_settings).filter_by(**update_op["filter"]).values(update_op["data"]))
 
     def _it_validate_template_settings(self, session) -> None:
         """Delete invalid template settings and canonicalize valid defaults."""
