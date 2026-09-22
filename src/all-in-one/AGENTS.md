@@ -99,7 +99,7 @@ Exposed ports: `8080` HTTP, `8443` HTTPS (TCP + UDP/QUIC), `7000` UI, `8888` API
 
 - `SERVICE_UI`, `SERVICE_SCHEDULER`, `SERVICE_API` — per-service toggles. `SERVICE_API=no` is the image-level default, but the default Scheduler auto-enables it.
 - `SERVICE_WORKER` — the Celery worker. `entrypoint.sh` defaults it to `yes` only when `SERVICE_SCHEDULER=yes`; set it explicitly to override.
-- `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES` — worker tuning. **The AIO worker hostname is hardcoded to `worker@%%h` in `supervisor.d/worker.ini`; there is no `WORKER_HOSTNAME` override here.**
+- `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES` — worker tuning. `WORKER_HEAVY_QUEUES` / `WORKER_HEAVY_CONCURRENCY` / `WORKER_HEAVY_MAX_MEMORY_KB` tune the second, heavy-only worker program in `supervisor.d/worker.ini`; `WORKER_HEAVY_HOSTNAME` overrides the heavy worker's Celery hostname; the main AIO worker stays hardcoded to `worker@%%h` (no `WORKER_HOSTNAME` here, unlike the Docker and Linux lanes).
 - `AUTOCONF_MODE` — enables the autoconf service.
 - `USE_CROWDSEC` / `CROWDSEC_API` / `CROWDSEC_API_KEY` / `CROWDSEC_APPSEC_URL`, plus `CROWDSEC_EXTRA_COLLECTIONS` / `CROWDSEC_DISABLE_PARSERS` (space-separated).
 - `USE_REDIS` / `REDIS_HOST` — defaults to local `127.0.0.1`.

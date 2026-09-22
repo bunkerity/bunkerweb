@@ -14,11 +14,17 @@ export PYTHON_BIN
 BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
 export PYTHONPATH="/usr/share/bunkerweb:${BW_PYTHONPATH}:/usr/share/bunkerweb/db:/usr/share/bunkerweb/utils:/usr/share/bunkerweb/api"
 
-WORKER_PID_FILE=/var/run/bunkerweb/worker.pid
+# The second argument selects an independent process and pidfile.
+WORKER_LANE="${2:-default}"
+case "$WORKER_LANE" in
+    default) WORKER_PID_FILE=/var/run/bunkerweb/worker.pid ;;
+    heavy) WORKER_PID_FILE=/var/run/bunkerweb/worker-heavy.pid ;;
+    *) echo "Invalid worker lane: $WORKER_LANE" >&2; exit 1 ;;
+esac
 
 # Display usage information
 function display_help() {
-    echo "Usage: $(basename "$0") [start|stop|reload|restart]"
+    echo "Usage: $(basename "$0") [start|stop|reload|restart] [default|heavy]"
     echo "Options:"
     echo "  start:   Start the bunkerweb worker (Celery) service."
     echo "  stop:    Stop the bunkerweb worker service."
@@ -70,8 +76,18 @@ function start() {
     : "${LOG_LEVEL:=info}"
     : "${WORKER_CONCURRENCY:=2}"
     : "${WORKER_MAX_MEMORY_KB:=300000}"
-    : "${WORKER_QUEUES:=default,heavy}"
+    : "${WORKER_QUEUES:=default}"
     : "${WORKER_HOSTNAME:=worker@%h}"
+
+    if [ "$WORKER_LANE" = "heavy" ]; then
+        WORKER_QUEUES="${WORKER_HEAVY_QUEUES-heavy}"
+        [ -n "$WORKER_QUEUES" ] || exit 3
+        WORKER_CONCURRENCY="${WORKER_HEAVY_CONCURRENCY:-1}"
+        WORKER_MAX_MEMORY_KB="${WORKER_HEAVY_MAX_MEMORY_KB:-$WORKER_MAX_MEMORY_KB}"
+        WORKER_HOSTNAME="${WORKER_HEAVY_HOSTNAME:-worker-heavy@%h}"
+        : "${LOG_SYSLOG_TAG:=bw-worker-heavy}"
+    fi
+
     : "${LOG_SYSLOG_TAG:=bw-worker}"
 
     export CELERY_BROKER_URL BUNKERWEB_INSTANCES DATABASE_URI

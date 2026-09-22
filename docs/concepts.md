@@ -232,6 +232,23 @@ If you are using the web User Interface, you can manage scheduler jobs by clicki
   <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
 
+### Worker queue isolation
+
+The Docker worker, All-In-One image and Linux packages start separate Celery processes for the `default` and `heavy` queues. The default process has two execution slots; the heavy process has one, so long jobs routed to `heavy` do not occupy the default slots. On Linux the processes run as `bunkerweb-worker` and `bunkerweb-worker-heavy`, sharing `/etc/bunkerweb/worker.env`.
+
+| Environment variable | Default | Purpose |
+| --- | --- | --- |
+| `WORKER_QUEUES` | `default` | Queues consumed by the first process. |
+| `WORKER_CONCURRENCY` | `2` | Execution slots in the first process. |
+| `WORKER_MAX_MEMORY_KB` | `300000` | Per-child memory recycling threshold in KiB. |
+| `WORKER_HEAVY_QUEUES` | `heavy` | Queues consumed by the second process; an explicitly empty value disables it. |
+| `WORKER_HEAVY_CONCURRENCY` | `1` | Execution slots in the second process. |
+| `WORKER_HEAVY_MAX_MEMORY_KB` | Value of `WORKER_MAX_MEMORY_KB` | Per-child memory recycling threshold for the second process. |
+| `WORKER_HEAVY_HOSTNAME` | `worker-heavy@%h` | Celery hostname of the second process. |
+| `WORKER_FAILOVER_GRACE` | `30` | Docker: seconds to let the surviving process stop after a master fails, before forcing its exit; normal container shutdown remains warm. |
+
+Keep the two queue lists disjoint to preserve isolation. Existing deployments that explicitly set `WORKER_QUEUES=default,heavy` retain that override: change it to `default` to isolate heavy jobs. To retain the previous single-process layout, set both `WORKER_QUEUES=default,heavy` and `WORKER_HEAVY_QUEUES=`. Restart the worker container, All-In-One container, or both Linux worker services after changing these values. The memory thresholds recycle children after a task; they are not hard process memory limits.
+
 ### Instances health check
 
 Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.

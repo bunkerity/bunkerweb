@@ -120,6 +120,7 @@ function manage_scheduler_and_worker() {
 
             echo "🚀 Enabling and starting the BunkerWeb Worker service..."
             do_and_check_cmd systemctl enable --now bunkerweb-worker
+            do_and_check_cmd systemctl enable --now bunkerweb-worker-heavy
 
             # Clean up scheduler enablement flag if it exists
             if [ -f "${BW_ENABLE_SCHEDULER_FLAG}" ]; then
@@ -155,13 +156,19 @@ function manage_scheduler_and_worker() {
             # `enable --now` on a unit that is somehow already up only enables it — the start
             # is a no-op, not a restart — which is what this branch has always done; the elif
             # restarts an already-enabled, already-running one.
-            if [ "$enable_new_units" = "yes" ] && ! systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; then
-                echo "🚀 Enabling and starting the BunkerWeb Worker service..."
-                do_and_check_cmd systemctl enable --now bunkerweb-worker
-            elif systemctl is-active --quiet bunkerweb-worker; then
-                echo "📋 Restarting the BunkerWeb Worker service after upgrade..."
-                do_and_check_cmd systemctl restart bunkerweb-worker
-            fi
+            local worker_unit
+            for worker_unit in bunkerweb-worker bunkerweb-worker-heavy; do
+                if [ "$worker_unit" = "bunkerweb-worker-heavy" ] && ! systemctl is-enabled --quiet "$worker_unit" 2>/dev/null && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null && systemctl is-active --quiet bunkerweb-worker; then
+                    echo "🚀 Enabling and starting the BunkerWeb Heavy Worker service..."
+                    do_and_check_cmd systemctl enable --now "$worker_unit"
+                elif [ "$enable_new_units" = "yes" ] && ! systemctl is-enabled --quiet "$worker_unit" 2>/dev/null; then
+                    echo "🚀 Enabling and starting the BunkerWeb Worker service..."
+                    do_and_check_cmd systemctl enable --now "$worker_unit"
+                elif systemctl is-active --quiet "$worker_unit"; then
+                    echo "📋 Restarting the BunkerWeb Worker service after upgrade..."
+                    do_and_check_cmd systemctl restart "$worker_unit"
+                fi
+            done
         fi
     # Disable scheduler if it shouldn't be running but is still active, or — only when the
     # topology was declared this run — enabled-but-stopped. An enabled-but-stopped scheduler
@@ -171,17 +178,21 @@ function manage_scheduler_and_worker() {
         echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
         do_and_check_cmd systemctl disable --now bunkerweb-scheduler
         # Tear the worker down alongside the scheduler (same self-heal gating).
-        if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
-            echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
-            do_and_check_cmd systemctl disable --now bunkerweb-worker
-        fi
+        for worker_unit in bunkerweb-worker bunkerweb-worker-heavy; do
+            if systemctl is-active --quiet "$worker_unit" || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet "$worker_unit" 2>/dev/null; }; then
+                echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+                do_and_check_cmd systemctl disable --now "$worker_unit"
+            fi
+        done
     else
         echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
         # Self-heal a leftover-enabled worker when the scheduler isn't running here either.
-        if systemctl is-active --quiet bunkerweb-worker || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-worker 2>/dev/null; }; then
-            echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
-            do_and_check_cmd systemctl disable --now bunkerweb-worker
-        fi
+        for worker_unit in bunkerweb-worker bunkerweb-worker-heavy; do
+            if systemctl is-active --quiet "$worker_unit" || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet "$worker_unit" 2>/dev/null; }; then
+                echo "🛑 Disabling and stopping the BunkerWeb Worker service..."
+                do_and_check_cmd systemctl disable --now "$worker_unit"
+            fi
+        done
     fi
 }
 
@@ -407,7 +418,7 @@ EOF
             # The scheduler and worker were enabled before this default variables.env (which
             # carries the shared API_TOKEN) existed; restart them so they re-read it and stop
             # looping on 401 / "Database is not initialized".
-            for _bw_svc in bunkerweb-scheduler bunkerweb-worker; do
+            for _bw_svc in bunkerweb-scheduler bunkerweb-worker bunkerweb-worker-heavy; do
                 if systemctl is-enabled --quiet "$_bw_svc" 2>/dev/null; then
                     do_and_check_cmd systemctl restart "$_bw_svc"
                 fi

@@ -145,7 +145,7 @@ def test_no_distro_redis_is_touched_on_a_bare_instance_only_upgrade(tmp_path):
 def test_a_negative_marker_still_restarts_a_scheduler_that_is_actually_running(tmp_path):
     # The deciding cell: the marker says this host runs no control plane, but a scheduler and
     # a Celery worker are up on it anyway (hand-added, or left over from a pre-fix upgrade).
-    # The marker keeps its negative authority over *enabling* -- no broker, nothing new -- but
+    # The marker keeps its negative authority over *enabling* -- no broker and no default worker -- but
     # dpkg just replaced the code under those two units and the scheduler runs its database
     # migration at startup, so refusing to restart them would silently leave the old code
     # running until a reboot.
@@ -155,14 +155,24 @@ def test_a_negative_marker_still_restarts_a_scheduler_that_is_actually_running(t
         enabled=("bunkerweb-scheduler", "bunkerweb-worker"),
         active=("bunkerweb-scheduler", "bunkerweb-worker"),
     )
-    assert _enabled_now(calls) == []
+    assert _enabled_now(calls) == ["bunkerweb-worker-heavy"]
     assert _restarted(calls) == ["bunkerweb-scheduler", "bunkerweb-worker"]
 
 
 def test_bare_upgrade_of_a_manager_host_still_enables_broker_and_worker(tmp_path):
     calls, _ = _run(tmp_path, marker=None, enabled=("bunkerweb-scheduler",), active=("bunkerweb-scheduler",))
-    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker"]
+    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker", "bunkerweb-worker-heavy"]
     assert "bunkerweb-scheduler" in _restarted(calls)
+
+
+def test_upgrade_starts_the_heavy_worker_with_an_active_default_worker(tmp_path):
+    calls, _ = _run(
+        tmp_path,
+        marker="ui",
+        enabled=("bunkerweb-worker",),
+        active=("bunkerweb-worker",),
+    )
+    assert "bunkerweb-worker-heavy" in _enabled_now(calls)
 
 
 def test_an_enabled_but_stopped_worker_is_left_alone(tmp_path):
@@ -171,7 +181,7 @@ def test_an_enabled_but_stopped_worker_is_left_alone(tmp_path):
     calls, _ = _run(
         tmp_path,
         marker=None,
-        enabled=("bunkerweb-scheduler", "bunkerweb-worker"),
+        enabled=("bunkerweb-scheduler", "bunkerweb-worker", "bunkerweb-worker-heavy"),
         active=("bunkerweb-scheduler",),
     )
     assert _enabled_now(calls) == ["bunkerweb-broker"]
@@ -182,12 +192,12 @@ def test_a_manager_marker_wins_over_a_stopped_scheduler(tmp_path):
     # The marker states the topology outright: a manager whose scheduler happens to be down
     # must still get its broker and worker back, or the fix would break recovery.
     calls, _ = _run(tmp_path, marker="manager")
-    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker"]
+    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker", "bunkerweb-worker-heavy"]
 
 
 def test_fresh_install_is_unchanged(tmp_path):
     calls, _ = _run(tmp_path, marker=None, upgrade=False)
-    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-scheduler", "bunkerweb-worker"]
+    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-scheduler", "bunkerweb-worker", "bunkerweb-worker-heavy"]
 
 
 def test_explicit_worker_mode_is_unchanged(tmp_path):
@@ -199,7 +209,7 @@ def test_explicit_manager_mode_is_unchanged(tmp_path):
     # Declared topology, scheduler not up yet: today's behaviour is to enable both, and the
     # gate must not fire on a declared run.
     calls, _ = _run(tmp_path, marker=None, env={"MANAGER_MODE": "yes", "WORKER_MODE": "no"})
-    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker"]
+    assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker", "bunkerweb-worker-heavy"]
 
 
 # --- the wiring, so the functions above stay the ones the script actually runs ------------

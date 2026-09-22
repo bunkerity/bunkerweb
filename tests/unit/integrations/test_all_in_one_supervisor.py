@@ -41,9 +41,17 @@ TRUNCATING_UNIT = (
 )
 
 
-def declared_command(text: str) -> str:
+def declared_command(text: str, program: str) -> str:
     """The `command=` value as a human reading the file sees it."""
-    return next(line.removeprefix("command=") for line in text.splitlines() if line.startswith("command="))
+    parser = ConfigParser(strict=False, interpolation=None)
+    parser.read_string(text)
+    return parser.get(f"program:{program}", "command")
+
+
+def programs(text: str) -> list[str]:
+    parser = ConfigParser(strict=False, interpolation=None)
+    parser.read_string(text)
+    return [section.removeprefix("program:") for section in parser.sections() if section.startswith("program:")]
 
 
 def parsed_command(text: str, program: str) -> str:
@@ -57,9 +65,10 @@ def truncated_units(units_dir: Path = UNITS_DIR) -> list:
     losses = []
     for unit in sorted(units_dir.glob("*.ini")):
         text = unit.read_text(encoding="utf-8")
-        declared, parsed = declared_command(text), parsed_command(text, unit.stem)
-        if declared != parsed:
-            losses.append((unit.stem, len(declared), len(parsed)))
+        for program in programs(text):
+            declared, parsed = declared_command(text, program), parsed_command(text, program)
+            if declared != parsed:
+                losses.append((program, len(declared), len(parsed)))
     return losses
 
 
@@ -85,6 +94,13 @@ def test_the_detector_still_catches_the_shape_that_broke_crowdsec(tmp_path):
     fixed = TRUNCATING_UNIT.replace(" ;;", ";;")
     unit.write_text(fixed, encoding="utf-8")
     assert truncated_units(tmp_path) == [], "removing the space did not stop the truncation -- the parser rule assumed here is wrong"
+
+
+def test_the_detector_checks_every_program_in_a_unit(tmp_path):
+    unit = tmp_path / "worker.ini"
+    text = (UNITS_DIR / "worker.ini").read_text(encoding="utf-8")
+    unit.write_text(text.replace('"; else echo "[WORKER] Heavy', '" ;; else echo "[WORKER] Heavy'), encoding="utf-8")
+    assert [name for name, _, _ in truncated_units(tmp_path)] == ["worker-heavy"]
 
 
 def test_the_stand_in_agrees_with_the_real_supervisor_parser():

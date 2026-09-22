@@ -96,17 +96,20 @@ def test_worker_enabled_on_deferred_full_install():
     # external DB, CrowdSec, ...), which is exactly when postinstall skips its enable block.
     text = INSTALLER.read_text(encoding="utf-8")
     body = text.split("configure_full_config() {")[1].split("\n}\n")[0]
-    assert "svc_restart_or_start bunkerweb-worker" in body
+    assert "svc_restart_or_start bunkerweb-worker\n" in body
+    assert "svc_restart_or_start bunkerweb-worker-heavy\n" in body
 
 
 def test_worker_enabled_on_manager_install():
     text = INSTALLER.read_text(encoding="utf-8")
     body = text.split("configure_manager_api_defaults() {")[1].split("\n}\n")[0]
-    assert "systemctl enable --now bunkerweb-worker" in body
+    assert "systemctl enable --now bunkerweb-worker bunkerweb-worker-heavy\n" in body
 
 
 def test_worker_drained_before_package_upgrade():
-    assert "for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-worker bunkerweb-scheduler; do" in INSTALLER.read_text(encoding="utf-8")
+    assert "for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-worker bunkerweb-worker-heavy bunkerweb-scheduler; do" in INSTALLER.read_text(
+        encoding="utf-8"
+    )
 
 
 # --- wiring on the packaged side --------------------------------------------------------

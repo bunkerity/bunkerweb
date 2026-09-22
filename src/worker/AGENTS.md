@@ -26,7 +26,7 @@ The Worker executes plugin jobs. It replaces the in-process execution that used 
 - `app.py` — Celery app: broker URL, the `default`/`heavy` queues, time limits, prefork tuning, `task_routes` wired to the shared `queue_for`, and the `worker_process_init` / `worker_process_shutdown` lifecycle hooks.
 - `tasks.py` — the single task `worker.execute_job`: snapshots `os.environ`, strips `SENSITIVE_ENV_KEYS`, overlays `job_data["env"]`, runs the job through `JobExecutor`, persists every run via `db.add_job_run`, and triggers the debounced cache+reload broadcast when the job returns `1` — or when an earlier push is still owed (`bw:reload_owed`), which lets a run that changed nothing carry it.
 - `executor.py` — `JobExecutor`: sandboxed dynamic loader. Resolves the job file, refuses anything outside `ALLOWED_ROOTS`, imports it under a hashed module name, restores `sys.path` afterwards.
-- `entrypoint.sh` — writes the `INTEGRATION` file, waits for the database, then `exec`s `celery -A worker.app worker` with the prefork pool on `default,heavy`.
+- `entrypoint.sh` — writes the `INTEGRATION` file, waits for the database, then supervises separate Celery prefork workers for `default` and `heavy`, forwarding shutdown and failing if either master exits.
 - `Dockerfile` — multi-stage **Debian-slim**, not Alpine: the certbot-dns-multi Go/CGO bridge cannot load on musl. Runs as UID/GID `101`, the same ids as the scheduler, API and UI images, so a SQLite stack can share one `/data` volume.
 - `healthcheck-worker.sh` — `celery inspect ping --destination worker@<hostname>`, grepped for `pong`.
 
@@ -34,7 +34,7 @@ The Worker executes plugin jobs. It replaces the in-process execution that used 
 
 ### Queues
 
-Two queues: `default` for fast maintenance jobs, `heavy` for long or resource-intensive ones (certbot, backups, plugin/blocklist downloads, `push-configs`). `route_job` asks the shared `queue_for(job_data["name"])`. Both are consumed by the same pool via `-Q default,heavy` (override with `WORKER_QUEUES`).
+Two queues: `default` for fast maintenance jobs, `heavy` for long or resource-intensive ones (certbot, backups, plugin/blocklist downloads, `push-configs`). `route_job` asks the shared `queue_for(job_data["name"])`. Separate processes consume `default` (two slots) and `heavy` (one slot); `WORKER_QUEUES` and `WORKER_HEAVY_QUEUES` override their queues, and an explicitly empty `WORKER_HEAVY_QUEUES` disables the second process.
 
 ### Celery knobs that carry a reason
 
@@ -124,8 +124,12 @@ certbot and certbot-dns-multi are direct dependencies here because the worker ru
 | `JOBS_HMAC_SECRET`                                  | (empty)                    | Sensitive — stripped from the per-job env                                                                  |
 | `WORKER_CONCURRENCY`                                | `2`                        | `celery worker --concurrency`                                                                              |
 | `WORKER_MAX_MEMORY_KB`                              | `300000`                   | `--max-memory-per-child` (KB)                                                                              |
-| `WORKER_QUEUES`                                     | `default,heavy`            | `-Q` argument                                                                                              |
+| `WORKER_QUEUES`                                     | `default`                  | `-Q` argument                                                                                              |
 | `WORKER_HOSTNAME`                                   | `worker@%h`                | `--hostname` argument                                                                                      |
+| `WORKER_HEAVY_QUEUES`                               | `heavy`                    | Second process queues; explicitly empty disables it                                                        |
+| `WORKER_HEAVY_CONCURRENCY`                          | `1`                        | Second process execution slots                                                                             |
+| `WORKER_HEAVY_MAX_MEMORY_KB`                        | `WORKER_MAX_MEMORY_KB`     | Second process per-child memory threshold                                                                  |
+| `WORKER_HEAVY_HOSTNAME`                             | `worker-heavy@%h`          | Second process hostname                                                                                    |
 | `WORKER_MAX_DELIVERY_ATTEMPTS`                      | `3`                        | Redelivery ceiling before the job is dropped and recorded failed                                           |
 | `DATABASE_URI`                                      | (empty)                    | Without it, job-run persistence is skipped                                                                 |
 | `DATABASE_POOL_SIZE` / `DATABASE_POOL_MAX_OVERFLOW` | `5`                        | Defaulted at child init if unset                                                                           |

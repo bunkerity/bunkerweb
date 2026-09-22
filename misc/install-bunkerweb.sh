@@ -6005,7 +6005,7 @@ configure_manager_api_defaults() {
     # Peer of the scheduler: it executes every job the scheduler dispatches. Manager installs
     # always export SERVICE_SCHEDULER=no, so postinstall's enable leg is skipped and this is the
     # only place the worker gets enabled.
-    run_cmd systemctl enable --now bunkerweb-worker
+    run_cmd systemctl enable --now bunkerweb-worker bunkerweb-worker-heavy
     sleep 2
     systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
     systemctl status bunkerweb-worker --no-pager -l || print_warning "BunkerWeb Worker may not be running"
@@ -6093,6 +6093,7 @@ configure_full_config() {
         # SERVICE_SCHEDULER=no to defer the start — so without this call the worker stays
         # disabled and no background job (certbot, blocklists, backups) ever runs.
         svc_restart_or_start bunkerweb-worker
+        svc_restart_or_start bunkerweb-worker-heavy
         svc_restart_or_start bunkerweb
         if [ "$FULL_API_DEFERRED" = "yes" ]; then
             svc_restart_or_start bunkerweb-api
@@ -9137,7 +9138,7 @@ to /etc/bunkerweb and the database schema."
     # Skipping the snapshot would leave services down — package postinst only restarts if-active.
     print_step "Stopping services prior to upgrade"
     local _restart_after_upgrade=""
-    for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-worker bunkerweb-scheduler; do
+    for svc in bunkerweb bunkerweb-api bunkerweb-ui bunkerweb-worker bunkerweb-worker-heavy bunkerweb-scheduler; do
         # is-active is safe for absent units; the old `list-units | grep "^name"` guard
         # never matched (list-units indents every line with spaces or a ● bullet), so the
         # whole drain/restart sequence was dead code.
