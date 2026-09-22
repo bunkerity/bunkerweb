@@ -191,8 +191,8 @@ Choisissez la saveur adaptée à votre environnement.
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
 - Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
 
-!!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
+!!! danger "Ces permissions d’écriture sont équivalentes à celles d’un administrateur"
+    Accorder l’une des permissions suivantes revient à accorder un accès administratif complet. Le contenu qu’elles écrivent — configurations personnalisées, variables de service (par ex. `REVERSE_PROXY_URL`), plug-ins téléversés et paramètres globaux — est intégré **tel quel** dans une configuration brute NGINX / OpenResty Lua exécutée sur les workers et le scheduler BunkerWeb. Un token qui en détient une peut donc exécuter n’importe quel code avec l’utilisateur du processus BunkerWeb. Les portées d’écriture des instances sont équivalentes à des droits d’administrateur pour une autre raison : chaque appel à une instance enregistrée porte la surcharge administrateur `API_TOKEN`, et le scheduler pousse la configuration générée ainsi que le cache (y compris les clés privées TLS) vers chaque instance de la base de données ; l’enregistrement d’un seul endpoint permet donc de tout collecter :
 
     - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
@@ -200,7 +200,7 @@ Choisissez la saveur adaptée à votre environnement.
     - `plugins`: `plugin_create`
     - `global_config`: `global_config_update`
 
-    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+    Traitez-les exactement comme des droits d’administrateur : **ne les accordez jamais à une partie à laquelle vous ne feriez pas confiance comme à un administrateur.** Réservez les portées de lecture (`*_read`, `service_export`, `cache_read`, …) aux tokens limités ou d’automatisation. Accorder l’une de ces permissions à un utilisateur non administrateur émet un avertissement dans les journaux de l’API.
 
 !!! tip "Mots de passe de bootstrap pré-hachés"
     Remplacez le `password` en clair d'un utilisateur par un **hash bcrypt** via `password_hash` (ou `password_bcrypt`) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (`$2a$`/`$2b$`/`$2y$`) dont le coût est d'au moins `10` (`12`+ recommandé). Un hash mal formé ou trop faible est **ignoré** : le chargeur se rabat sur le `password` en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un `password` en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement `API_PASSWORD` de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.
@@ -232,6 +232,9 @@ Choisissez la saveur adaptée à votre environnement.
       }
     }
     ```
+
+!!! warning "L’exemple ci-dessus accorde une portée équivalente à celle d’un administrateur"
+    `config_update` permet l’exécution de code ; l’utilisateur `ci` dispose donc des mêmes pouvoirs qu’un administrateur pour les écritures de configuration — ne délivrez un tel token qu’à une automatisation à laquelle vous faites entièrement confiance. Pour une intégration en lecture seule, supprimez `config_update` et conservez uniquement les portées `*_read`.
 
 ## Identifiants par instance et épinglage TLS
 

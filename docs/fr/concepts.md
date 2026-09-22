@@ -115,6 +115,10 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
   <figcaption>Appliquer un paramètre à tous les services à partir de l'interface utilisateur web</figcaption>
 </figure>
 
+!!! info "Le service réservé `default-server`"
+
+    En plus des services que vous créez, le mode multisite comporte toujours un service réservé nommé `default-server`. Il répond aux requêtes qui ne correspondent à **aucun** service configuré — un nom d’hôte inconnu, une adresse IP directe ou un en-tête `Host` que personne ne sert — et est exposé comme un service afin que son certificat, ses paramètres TLS, ses en-têtes de réponse et ses pages d’erreur puissent être configurés comme ceux de n’importe quel autre service. Il est fixé en haut de la liste des services dans l’interface Web, ne peut être créé, renommé, mis en brouillon ou supprimé, et n’est jamais comptabilisé dans le quota de services PRO. Voir [Configuring the Default Server](features.md#miscellaneous).
+
 !!! info "Aller plus loin"
 
     Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples) du dépôt.

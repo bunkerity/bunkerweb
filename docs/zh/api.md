@@ -191,8 +191,8 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - `resource_id` 通常是第二个路径段（如 `/services/{id}`）；"*" 表示全局访问。
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
 
-!!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
+!!! danger "这些写权限等同于管理员权限"
+    授予以下任一权限都等同于授予完整的管理员访问权限。它们写入的内容 — 自定义配置、服务变量（例如 `REVERSE_PROXY_URL`）、上传的插件和全局设置 — 会**原样**写入在 BunkerWeb 工作进程和调度器上运行的原始 NGINX / OpenResty Lua 配置。因此，持有其中任一权限的令牌可以以 BunkerWeb 进程用户身份执行任意代码。实例写权限因另一原因等同于管理员权限：每次调用已注册实例时都会携带管理员覆盖令牌 `API_TOKEN`，调度器还会将生成的配置和缓存（包括 TLS 私钥）推送到数据库中的每个实例，因此注册单个端点即可收集全部内容：
 
     - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
@@ -200,7 +200,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     - `plugins`: `plugin_create`
     - `global_config`: `global_config_update`
 
-    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+    请将这些权限完全按管理员权限对待：**绝不要将其授予您不会像信任管理员一样信任的对象。** 将读取权限范围（`*_read`、`service_export`、`cache_read`、…）保留给受限令牌或自动化令牌。向非管理员用户授予其中任一权限会在 API 日志中发出警告。
 
 !!! tip "预先哈希的启动密码"
     通过 `password_hash`（或 `password_bcrypt`）将用户的明文 `password` 替换为 **bcrypt 哈希**，这样凭据就不会以明文形式留在文件中。该哈希必须是有效的 bcrypt 哈希（`$2a$`/`$2b$`/`$2y$`），且其成本因子至少为 `10`（建议 `12`+）。格式错误或强度过弱的哈希将**被忽略**：加载器会回退到该用户的明文 `password`（若存在）；否则，新用户会获得一个你无法得知的安全随机密码，而已存在的用户则保留其当前密码。明文 `password` 会进行强度校验（至少 8 个字符，包含大写、小写、数字和特殊字符）。管理员的 `API_PASSWORD` 环境变量仅接受明文——预先哈希仅适用于这些 ACL 用户。
@@ -232,6 +232,9 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       }
     }
     ```
+
+!!! warning "上面的示例授予了等同于管理员的权限范围"
+    `config_update` 是可执行代码的权限，因此用户 `ci` 对配置写入拥有与管理员相同的能力 — 仅向完全信任的自动化程序发放此类令牌。对于只读集成，请删除 `config_update`，仅保留 `*_read` 权限范围。
 
 ## 按实例凭据与 TLS 指纹固定
 

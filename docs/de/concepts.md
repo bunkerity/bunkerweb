@@ -119,6 +119,10 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
   <figcaption>Anwenden einer Einstellung auf alle Dienste über die Web-UI</figcaption>
 </figure>
 
+!!! info "Der reservierte Dienst `default-server`"
+
+    Neben den von Ihnen erstellten Diensten führt der Multisite-Modus immer einen reservierten Dienst namens `default-server`. Er beantwortet Anfragen, die zu **keinem** konfigurierten Dienst passen — einen unbekannten Hostnamen, eine direkte IP-Adresse oder einen `Host`, den niemand bereitstellt — und wird als Dienst angezeigt, sodass sein Zertifikat, seine TLS-Einstellungen, Antwort-Header und Fehlerseiten wie bei jedem anderen Dienst konfiguriert werden können. In der Web-UI ist er oben in der Dienstliste fixiert; er kann weder erstellt, umbenannt, als Entwurf angelegt noch gelöscht werden und wird nie auf das PRO-Dienstkontingent angerechnet. Siehe [Configuring the Default Server](features.md#miscellaneous).
+
 !!! info "Weiterführende Informationen"
 
     Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples)-Verzeichnis des Repositorys.

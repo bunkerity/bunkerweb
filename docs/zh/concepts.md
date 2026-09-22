@@ -115,6 +115,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   <figcaption>从 Web UI 将设置应用于所有服务</figcaption>
 </figure>
 
+!!! info "保留的 `default-server` 服务"
+
+    除了您创建的服务，多站点模式始终包含一个名为 `default-server` 的保留服务。它处理与**任何**已配置服务都不匹配的请求 — 未知主机名、直接 IP 地址或没有服务响应的 `Host` — 并作为服务公开，因此可以像其他服务一样配置其证书、TLS 设置、响应标头和错误页面。它固定在 Web UI 服务列表的顶部，不能创建、重命名、设为草稿或删除，也不会计入 PRO 服务配额。请参阅 [Configuring the Default Server](features.md#miscellaneous)。
+
 !!! info "更进一步"
 
     您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples) 目录中找到多站点模式的具体示例。
