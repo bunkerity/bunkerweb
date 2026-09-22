@@ -377,8 +377,8 @@ A plugin may declare where it wants to sit inside a phase. The key is optional; 
 ```
 
 - Phase names are `init`, `init_worker`, `set`, `rewrite`, `access`, `content`, `ssl_client_hello_default`, `ssl_certificate`, `ssl_certificate_default`, `header`, `log`, `preread`, `log_stream`, `log_default`, `timer` and `init_workers`. `headers` is accepted as an alias of `header`, as in `order.json`.
-- `before` / `after` are lists of plugin ids. An unavailable plugin, or one that does not implement the phase, is ignored with a warning in the BunkerWeb error log.
-- Mutually contradictory declarations (a cycle) are dropped with a warning: the declarations of the plugins on the cycle are skipped and the order is recomputed with every other plugin's constraints still applied; only if that retry fails too is the default order kept. A malformed `order` block is also warned about and dropped; the plugin still loads.
+- `before` / `after` are lists of plugin ids. An unavailable plugin, or one that does not implement the phase, is ignored with a warning in the BunkerWeb error log. At most five such ids are named per plugin and per phase; the rest are summarised in a single `… more unknown order id(s) for phase <phase>` line, so a long list cannot flood the log.
+- Mutually contradictory declarations (a cycle) are dropped with a warning: the declarations of the plugins on the cycle are skipped and the order is recomputed with every other plugin's constraints still applied; only if that retry fails too is the default order kept. A malformed `order` block is also warned about and dropped; the plugin still loads. The check is all-or-nothing and identical in the configuration generator and in the runtime: a single invalid entry — a value that is not a string, an id that is not `[A-Za-z0-9_.-]{1,64}` or `"*"`, an unknown phase name, an unknown key next to `before`/`after`, a `before`/`after` that is not a list — drops **the whole `order` key**, including the phases that were well formed. Fix the reported entry and the rest of the declaration comes back. An empty `before`/`after` list, an empty phase object and an empty `order` are all accepted and mean "no constraint".
 - `before` / `after` may contain the wildcard `"*"`, meaning every other plugin implementing this phase that is not itself constrained relative to me. `"before": ["*"]` puts a plugin ahead of every plugin that does not pin itself and `"after": ["*"]` puts it last. Plugins with the same wildcard keep their default-list order; an explicit plugin id wins over another plugin's wildcard.
 
 After initialization, the computed `plugins_order` is sealed: declare `order` in the manifest instead of trying to change it from plugin code.
@@ -959,14 +959,14 @@ In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_
 
 ### Plugin translations
 
-A plugin can ship its own translation catalog and have it merged into the admin UI, both in the browser (`t()`) and server-side (`_()` in a Jinja template). No `plugin.json` declaration or build step is needed.
+A plugin can ship its own translation catalog and have it merged into the admin UI, both in the browser (`t()`) and server-side (`_()` in a Jinja template). No `plugin.json` declaration or build step is needed. The browser-served catalog URL carries a file fingerprint, so browser caches refresh automatically whenever an installed plugin's catalog changes.
 
 Two layouts are supported, in order:
 
 1. `ui/blueprints/static/locales/<lang>.json` for a plugin with a Flask blueprint.
 2. `ui/static/locales/<lang>.json` for a simple `ui/template.html` page.
 
-`en.json` is the required fallback; every other language file is optional. Keep keys under your plugin id, such as `{"my_plugin": {"title": "..."}}`. A colliding leaf cannot override a core key or an already-loaded plugin key: its value is dropped with a warning. New leaves under an existing namespace merge normally.
+`en.json` is the required fallback; every other language file is optional. Every top-level key in your catalog MUST be your plugin id, such as `{"my_plugin": {"title": "..."}}`. Any other top-level key is refused wholesale — not merged, not just the colliding leaf — with one warning naming your plugin and the offending key(s); this is what stops one plugin's catalog from claiming or shadowing another plugin's (or core's) namespace. Within your own namespace, a leaf that collides with an existing value (core's, or an earlier-loaded plugin sharing your exact plugin id) is dropped with a warning; a new leaf under your own namespace always merges. A plugin id containing a `.` cannot have a reachable catalog (both `_()` and `t()` split a lookup key on `.`) and is refused entirely, with a warning.
 
 Server-side `_()` cannot interpolate `{{var}}` placeholders as the browser's `t()` can. Use `t()` in the browser for strings requiring substitution.
 

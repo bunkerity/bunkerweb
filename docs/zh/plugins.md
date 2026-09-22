@@ -18,6 +18,21 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 | **VirusTotal** | 1.11 | 使用 VirusTotal API 自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                       | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
 |  **WebHook**   | 1.11 | 使用 Webhook 将安全通知发送到自定义 HTTP 端点。                                                |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
+## Web UI 管理与社区目录
+
+**插件**页面将安装与启用分开：
+
+- 外部插件、UI 插件和 PRO 插件可以在不删除其已存储包的情况下启用或禁用。调度器会将已禁用的插件从实际生成的插件目录中省略，当您重新启用它们时再从数据库中恢复。
+- 核心插件是 BunkerWeb 镜像的一部分，无法在安装层被禁用。当插件提供启用开关时，请使用该插件的全局设置。
+- 插件可以在其文件夹根目录下提供 `icon.svg`、`icon.png`、`logo.svg` 或 `logo.png`。BunkerWeb 会按此顺序检测这些名称，并通过经过身份验证的图标端点提供最多 512 KiB 的内容。当不存在受支持的文件时，Web UI 会回退到内置图标。
+
+社区目录列出了来自两个固定 GitHub 仓库的最新发布版本：[`bunkerity/bunkerweb-plugins`](https://github.com/bunkerity/bunkerweb-plugins) 和 [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates)。这两个仓库本身就是目录。不存在单独的清单或发布者。BunkerWeb 会从发布归档中读取每个条目的 `plugin.json` 或 `template.json`，应用插件兼容性检查，并仅通过现有的上传路径安装所选条目。
+
+将 Web UI 环境变量 `USE_PLUGIN_CATALOG` 设置为 `no`，可禁用目录请求、隐藏两个目录区块并拒绝目录安装。`off`、`false` 和 `0` 同样可以禁用它。此开关不会移除任何已安装的内容。超过 24 小时的缓存列表仍然可见，但在刷新成功之前无法安装任何内容。
+
+!!! warning "目录信任模型"
+    到 GitHub 的 HTTPS 连接以及精确的仓库白名单共同保护下载路径。在刷新时，BunkerWeb 会记录发布归档的 SHA-256 摘要；在安装时，它会重新获取已固定的标签，如果摘要发生变化则拒绝该条目。此检查证明已安装的字节与所列出的字节一致，但并不能证明其作者身份。对这两个 `bunkerity` 仓库的写入权限即为信任根，一个恶意的仓库发布者仍会被信任。Ed25519 签名被有意推迟。
+
 ## 如何使用插件
 
 ### 自动
@@ -344,6 +359,33 @@ cd myplugin
 |    `jobs`     |  否   |  列表  | 您的插件的作业列表。                                                        |
 |    `bwcli`    |  否   |  字典  | 将 CLI 命令名称映射到存储在插件 'bwcli' 目录中的文件，以公开 CLI 插件。     |
 
+### 执行顺序
+
+插件可以声明自己想在某个阶段中所处的位置。该键是可选的；以下内容只是提示，而非保证。
+
+```json
+{
+  "id": "myplugin",
+  "order": {
+    "ssl_certificate": { "after": ["certificates"] },
+    "access": { "before": ["antibot"] }
+  }
+}
+```
+
+- 阶段名称包括 `init`、`init_worker`、`set`、`rewrite`、`access`、`content`、`ssl_client_hello_default`、`ssl_certificate`、`ssl_certificate_default`、`header`、`log`、`preread`、`log_stream`、`log_default`、`timer` 和 `init_workers`。`headers` 被接受为 `header` 的别名，与 `order.json` 中一致。
+- `before` / `after` 是插件 ID 列表。不可用的插件，或未实现该阶段的插件，会被忽略并在 BunkerWeb 错误日志中记录一条警告。每个插件、每个阶段最多按名称列出五个这样的 ID；其余的会被汇总为一行 `… more unknown order id(s) for phase <phase>`，因此过长的列表不会刷屏日志。
+- 相互矛盾的声明（形成循环）会被丢弃并记录警告：循环中各插件的声明会被跳过，顺序会在保留其余所有插件约束的情况下重新计算；只有当这次重试也失败时，才会保留默认顺序。格式错误的 `order` 块同样会被警告并丢弃；插件仍会正常加载。该检查是全有或全无的，配置生成器和运行时的行为完全一致：只要有一个条目无效——值不是字符串、ID 不匹配 `[A-Za-z0-9_.-]{1,64}` 或 `"*"`、阶段名称未知、`before`/`after` 旁出现未知键、`before`/`after` 不是列表——就会丢弃**整个 `order` 键**，包括其中格式正确的阶段。修复被报告的条目后，声明的其余部分就会恢复生效。空的 `before`/`after` 列表、空的阶段对象和空的 `order` 均被接受，表示"无约束"。
+- `before` / `after` 可以包含通配符 `"*"`，表示实现该阶段且未相对于自身受约束的所有其他插件。`"before": ["*"]` 会将插件排在所有未自我固定位置的插件之前，`"after": ["*"]` 则将其排在最后。共享同一通配符的插件保持其默认列表顺序；显式的插件 ID 优先于另一个插件的通配符。
+
+初始化完成后，计算出的 `plugins_order` 会被锁定：请在清单中声明 `order`，而不要尝试从插件代码中修改它。
+
+**阶段内的优先级**，从高到低：
+
+1. 操作员设置的 `PLUGINS_ORDER_<PHASE>`（全局或按服务）；
+2. 声明的 `order` 约束，通过稳定排序解析；
+3. PRO 插件按字母顺序，然后外部插件按字母顺序，然后核心插件按 `order.json` 顺序，最后是其余核心插件按字母顺序。
+
 每个设置都有以下字段（键是在配置中使用的设置的 ID）：
 
 |    字段    | 强制  |  类型  | 描述                                                  |
@@ -366,8 +408,37 @@ cd myplugin
 | `file`  |  是   | 字符串 | 作业文件夹内的文件名。                                                                            |
 | `every` |  是   | 字符串 | 作业调度频率：`minute`、`hour`、`day`、`week` 或 `once`（无频率，仅在（重新）生成配置之前一次）。 |
 | `reload` | 否 | bool | 该任务的变更是否应触发 BunkerWeb 实例的重载。默认为 `false`。 |
-| `async` | 否 | bool | 该任务是否可以运行在 `heavy` worker 队列上，而不是阻塞默认队列。默认为 `false`。 |
+| `async` | 否 | bool | 该任务会路由到 `heavy` worker 队列；两个队列共享默认 worker 池。可使用 `WORKER_QUEUES=heavy` 或 `WORKER_QUEUES=default` 隔离。默认为 `false`。 |
 | `regenerate` | 否 | bool | 该任务的变更是否需要**重新渲染** NGINX 配置，而不仅仅是下发。默认为 `false`。 |
+
+核心 heavy 任务包括 `backup-data`、`bunkernet-register`、`bunkernet-data`、`push-configs`、`certbot-new`、`certbot-renew`、`download-plugins`、`download-crs-plugins` 和 `download-pro-plugins`；路由依据清单的 `async` 标志，而不是任务名称。
+
+!!! info "被拒绝的清单在任何地方都会被拒绝"
+
+    未通过以下任一限制的 `plugin.json` 会同时被配置生成器（Python）和 NGINX 运行时（Lua）拒绝：
+    它会从生成的配置中移除，永远不会被加载、排序或执行。拒绝会被记录为一条 `ERROR`，其中会
+    指明插件 ID、文件、失败的字段和对应的限制。
+
+    长度限制按 **UTF-8 字节**计算，而不是字符数。`id`、`version` 和设置的 `id` 只允许 ASCII
+    字符，因此这些字段的字节数和字符数始终一致。
+
+    | 字段 | 限制 |
+    | :---: | :--- |
+    | `id` | 仅限 ASCII 字母、数字、`.`、`_`、`-`，1-64 字节 |
+    | `name` | 最多 128 字节 |
+    | `description` | 最多 256 字节 |
+    | `version` | 必须匹配 `\d+\.\d+(\.\d+)?`（仅限 ASCII 数字） |
+    | `stream` | `yes`、`no`、`partial` 之一 |
+    | 设置 `id` | 仅限 ASCII 大写字母、数字、`_`，1-256 字节 |
+    | 设置 `context` | `global`、`multisite` 之一 |
+    | 设置 `default` | 最多 4096 字节 |
+    | 设置 `help` | 最多 512 字节 |
+    | 设置 `label` | 最多 256 字节 |
+    | 设置 `regex` | 最多 1024 字节 |
+    | 设置 `type` | `password`、`text`、`number`、`file`、`check`、`select`、`multiselect`、`multivalue`、`size`、`duration` 之一 |
+
+    `extensions` 仅在 Python 端校验：NGINX 运行时从不读取它。作业字段（`jobs[]`）同样仅限
+    Python 端，因为是 Worker 负责调度它们。
 
 ### CLI 命令
 
@@ -596,7 +667,8 @@ BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbo
 例如，您可以在模板中像这样获取请求参数：
 
 ```html
-<p>请求参数 : {{ request.args.get() }}.</p>```
+<p>请求参数 : {{ request.args.get() }}.</p>
+```
 
 #### Actions.py
 
@@ -647,8 +719,10 @@ return jsonify({"message": "ok", "data": <plugin_id_data>}), 200
 以下是在 action.py 函数上传递和访问的参数：
 
 ```python
-function(app=app, args=request.args.to_dict() or request.json or None)
+function(app=app, db=db, api_client=api_client, bw_instances_utils=bw_instances_utils, args=args, data=data)
 ```
+
+`db` 是已退役的句柄，使用时会抛出 `RetiredDBError`；请改用 `api_client`。
 
 !!! info "可用的 Python 库"
 
@@ -876,3 +950,52 @@ plugin /
 ```
 
 在这种结构中，`user_auth.py` 包含 `user_auth` 蓝图，而 `user_auth.html` 是相关的模板，遵循了推荐的命名约定。
+
+### 插件翻译
+
+插件可以附带自己的翻译目录，并将其合并到管理界面中——无论是在浏览器端（`t()`）还是服务器端（Jinja 模板中的 `_()`）。无需在 `plugin.json` 中声明，也无需构建步骤。浏览器端提供的目录 URL 带有文件指纹，因此每当已安装插件的目录发生变化时，浏览器缓存都会自动刷新。
+
+支持两种目录结构，按以下顺序查找：
+
+1. `ui/blueprints/static/locales/<lang>.json`，适用于带 Flask 蓝图的插件。
+2. `ui/static/locales/<lang>.json`，适用于简单的 `ui/template.html` 页面。
+
+`en.json` 是必需的回退文件；其他语言文件均为可选。您目录中的每个顶层键**必须**是您的插件 ID，例如 `{"my_plugin": {"title": "..."}}`。任何其他顶层键都会被整体拒绝——不会被合并，也不只是冲突的叶子键——并记录一条命名您的插件及涉及键的警告；这正是为了防止一个插件的目录侵占或遮蔽另一个插件（或核心）的命名空间。在您自己的命名空间内，与现有值冲突的叶子键（核心的值，或先前加载的、与您插件 ID 完全相同的插件的值）会被丢弃并记录一条警告；您自己命名空间下的新叶子键则始终会被合并。包含 `.` 的插件 ID 无法拥有可访问的目录（`_()` 和 `t()` 都会按 `.` 拆分查找键），会被整体拒绝，并记录一条警告。
+
+服务器端的 `_()` 无法像浏览器端的 `t()` 那样插值 `{{var}}` 占位符。需要替换内容的字符串请在浏览器端使用 `t()`。
+
+### UI 插件支持的接口
+
+Web UI 不持有数据库连接。插件的 UI 代码通过 **`PLUGIN_API`** 访问中央 API：
+
+```python
+from app.dependencies import PLUGIN_API
+
+
+def my_page():
+    return PLUGIN_API.get_services(with_drafts=True)
+```
+
+`ui/actions.py` 会以 `api_client` 的形式接收它：
+
+```python
+def pre_render(**kwargs):
+    return {"services": kwargs["api_client"].get_services(with_drafts=True)}
+```
+
+这些方法是不同小版本之间的兼容性承诺；其他 UI 客户端方法均为内部方法。`PLUGIN_API` 并非安全边界：插件代码运行在 UI 进程中，因此只应安装您信任的插件。
+
+| 方法 | 返回内容 |
+| --- | --- |
+| `get_global_settings(full=False, methods=False, with_drafts=False, filtered_settings=None, global_only=True)` | 以扁平字典形式返回的配置。 |
+| `get_plugins(type="all", with_data=False, only_enabled=False, with_settings=True)` | 已安装的插件及其设置模式。 |
+| `get_services(with_drafts=True)` / `get_service(service_id, full=False, methods=True, with_drafts=True)` | 服务列表或单个服务的配置。 |
+| `get_configs(service=None, type=None, with_drafts=True, with_data=False)` / `get_config_item(service, type, name, with_data=True)` | 自定义配置。 |
+| `create_config(**kwargs)` / `update_config(service, type, name, body=None, **kwargs)` / `delete_config(service, type, name)` | 自定义配置的写入操作。 |
+| `get_cache_files(service=None, plugin=None, job_name=None, with_data=False)` / `get_cache_file(service, plugin, job, filename, download=False)` | 作业缓存条目。 |
+| `get_jobs()` / `get_last_job_run(name)` | 已注册的作业及其最近一次运行记录。 |
+| `readonly` | 数据库为只读时为 `True`。 |
+
+设置项不会通过 `PLUGIN_API` 写入：请使用会先进行校验的 `BW_CONFIG.edit_global_conf()` 或 `BW_CONFIG.edit_service()`。
+
+**从 1.6 迁移。** `app.dependencies.DB` 已退役；使用它会抛出一个指明插件名称的 `RuntimeError`。请将 `DB.get_config(...)` 替换为 `PLUGIN_API.get_global_settings(...)` 或 `PLUGIN_API.get_service(...)`，将自定义配置相关调用替换为对应的 `get_config*` / 配置写入方法，将作业缓存相关调用替换为 `get_cache_files(..., with_data=True)`，并将 `ui/actions.py` 中的 `kwargs["db"]` 替换为 `kwargs["api_client"]`。`DB._db_session()` 没有替代方案：UI 没有数据库会话。`DB` 本身为 falsy，因此在访问它之前，请将 `if DB is not None:` 替换为 `if DB:`。

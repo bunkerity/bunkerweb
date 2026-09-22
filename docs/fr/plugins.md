@@ -18,6 +18,21 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 | **VirusTotal**  |  1.11   | Analyse automatiquement les fichiers téléchargés à l'aide de l'API VirusTotal et rejette la demande lorsqu'un fichier est détecté comme malveillant.      | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
 | **Crochet Web** |  1.11   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                  |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
+## Gestion depuis l'UI web et catalogue communautaire
+
+La page **Plugins** sépare l'installation de l'activation :
+
+- Les plugins externes, UI et PRO peuvent être activés ou désactivés sans supprimer leur paquet stocké. Le planificateur omet les plugins désactivés des répertoires de plugins matérialisés, puis les restaure depuis la base de données lorsque vous les réactivez.
+- Les plugins cœur font partie de l'image BunkerWeb et ne peuvent pas être désactivés au niveau de l'installation. Utilisez les paramètres globaux du plugin lorsqu'il expose un interrupteur d'activation.
+- Un plugin peut fournir `icon.svg`, `icon.png`, `logo.svg` ou `logo.png` à la racine de son dossier. BunkerWeb détecte ces noms dans cet ordre et sert au maximum 512 Kio via le point de terminaison d'icône authentifié. L'UI web se rabat sur une icône intégrée lorsqu'aucun fichier pris en charge n'existe.
+
+Le catalogue communautaire liste les dernières versions publiées depuis deux dépôts GitHub fixes : [`bunkerity/bunkerweb-plugins`](https://github.com/bunkerity/bunkerweb-plugins) et [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates). Les dépôts eux-mêmes constituent le catalogue. Il n'existe pas de manifeste ni de producteur séparé. BunkerWeb lit le `plugin.json` ou le `template.json` de chaque élément depuis l'archive de la version publiée, applique le filtre de compatibilité des plugins, et n'installe que l'élément sélectionné via le chemin d'upload existant.
+
+Définissez la variable d'environnement de l'UI web `USE_PLUGIN_CATALOG=no` pour désactiver les requêtes vers le catalogue, masquer les deux sections du catalogue et refuser les installations depuis le catalogue. `off`, `false` et `0` la désactivent également. Cet interrupteur ne supprime rien de ce qui est déjà installé. Un listing en cache vieux de plus de 24 heures reste visible mais ne peut rien installer tant qu'une actualisation n'a pas réussi.
+
+!!! warning "Modèle de confiance du catalogue"
+    HTTPS vers GitHub et une liste blanche exacte de dépôts protègent le chemin de téléchargement. Au moment de l'actualisation, BunkerWeb enregistre l'empreinte SHA-256 de l'archive de la version publiée ; au moment de l'installation, il récupère à nouveau le tag épinglé et rejette l'élément si l'empreinte a changé. Cette vérification prouve que les octets installés correspondent aux octets qui avaient été listés. Elle ne prouve pas qui en est l'auteur. L'accès en écriture aux deux dépôts `bunkerity` est la racine de confiance, et un éditeur de dépôt malveillant reste digne de confiance. La signature Ed25519 est délibérément différée.
+
 ## Comment utiliser un plugin
 
 ### Automatique
@@ -344,6 +359,33 @@ Voici le détail des champs :
 |    `jobs`     |     Non     | liste | Liste des jobs de votre plugin.                                                                                                       |
 |    `bwcli`    |     Non     | dict  | Associer les noms de commandes CLI aux fichiers stockés dans le répertoire 'bwcli' du plugin pour exposer les plugins CLI.            |
 
+### Ordre d'exécution
+
+Un plugin peut déclarer sa position dans une phase. La clé est facultative ; tout ce qui suit est une indication, pas une garantie.
+
+```json
+{
+  "id": "myplugin",
+  "order": {
+    "ssl_certificate": { "after": ["certificates"] },
+    "access": { "before": ["antibot"] }
+  }
+}
+```
+
+- Les noms de phase sont `init`, `init_worker`, `set`, `rewrite`, `access`, `content`, `ssl_client_hello_default`, `ssl_certificate`, `ssl_certificate_default`, `header`, `log`, `preread`, `log_stream`, `log_default`, `timer` et `init_workers`. `headers` est accepté comme alias de `header`, comme dans `order.json`.
+- `before` / `after` sont des listes d'identifiants de plugins. Un plugin indisponible, ou qui n'implémente pas la phase, est ignoré avec un avertissement dans le journal d'erreurs de BunkerWeb. Au plus cinq de ces identifiants sont nommés par plugin et par phase ; le reste est résumé dans une seule ligne `… more unknown order id(s) for phase <phase>`, afin qu'une longue liste ne puisse pas inonder le journal.
+- Les déclarations mutuellement contradictoires (un cycle) sont abandonnées avec un avertissement : les déclarations des plugins du cycle sont ignorées et l'ordre est recalculé en tenant compte des contraintes de tous les autres plugins ; ce n'est que si cette nouvelle tentative échoue aussi que l'ordre par défaut est conservé. Un bloc `order` malformé est également signalé par un avertissement puis abandonné ; le plugin continue de se charger. La vérification est tout-ou-rien et identique dans le générateur de configuration et dans le runtime : une seule entrée invalide — une valeur qui n'est pas une chaîne, un identifiant qui ne correspond pas à `[A-Za-z0-9_.-]{1,64}` ou `"*"`, un nom de phase inconnu, une clé inconnue à côté de `before`/`after`, un `before`/`after` qui n'est pas une liste — supprime **la totalité de la clé `order`**, y compris les phases qui étaient bien formées. Corrigez l'entrée signalée et le reste de la déclaration revient. Une liste `before`/`after` vide, un objet de phase vide et un `order` vide sont tous acceptés et signifient « aucune contrainte ».
+- `before` / `after` peuvent contenir le joker `"*"`, qui désigne tout autre plugin implémentant cette phase et n'étant pas lui-même contraint par rapport à moi. `"before": ["*"]` place un plugin avant tout plugin qui ne s'épingle pas lui-même, et `"after": ["*"]` le place en dernier. Les plugins partageant le même joker conservent leur ordre de liste par défaut ; un identifiant de plugin explicite l'emporte sur le joker d'un autre plugin.
+
+Une fois l'initialisation terminée, le `plugins_order` calculé est figé : déclarez `order` dans le manifeste plutôt que d'essayer de le modifier depuis le code du plugin.
+
+**Priorité dans une phase**, de la plus forte à la plus faible :
+
+1. le paramètre `PLUGINS_ORDER_<PHASE>` de l'opérateur (global ou par service) ;
+2. les contraintes `order` déclarées, résolues par un tri stable ;
+3. les plugins PRO par ordre alphabétique, puis les plugins externes par ordre alphabétique, puis les plugins cœur selon `order.json`, puis les plugins cœur restants par ordre alphabétique.
+
 Chaque paramètre comporte les champs suivants (la clé est l'ID des paramètres utilisés dans une configuration) :
 
 |   Champ    | Obligatoire | Type  | Description                                                                       |
@@ -366,8 +408,39 @@ Chaque emploi comporte les champs suivants :
 | `file`  |     oui     | corde | Nom du fichier à l'intérieur du dossier jobs.                                                                                                                |
 | `every` |     oui     | corde | Fréquence de planification des tâches : `minute`, `hour`, `day` `week` , ou `once` (pas de fréquence, une seule fois avant de (ré)générer la configuration). |
 | `reload` | non | bool | Indique si un changement issu de ce job doit déclencher un reload des instances BunkerWeb. Par défaut `false`. |
-| `async` | non | bool | Indique si le job peut s'exécuter sur la file de workers `heavy` plutôt que de bloquer la file par défaut. Par défaut `false`. |
+| `async` | non | bool | Le job est routé vers la file `heavy` ; les deux files partagent le pool par défaut. Isolez-les avec `WORKER_QUEUES=heavy` ou `WORKER_QUEUES=default`. Par défaut `false`. |
 | `regenerate` | non | bool | Indique si un changement issu de ce job nécessite que la configuration NGINX soit **rendue à nouveau**, et pas seulement livrée. Par défaut `false`. |
+
+Les tâches lourdes principales sont `backup-data`, `bunkernet-register`, `bunkernet-data`, `push-configs`, `certbot-new`, `certbot-renew`, `download-plugins`, `download-crs-plugins` et `download-pro-plugins` ; le routage suit le drapeau `async` du manifeste, pas le nom de la tâche.
+
+!!! info "Un manifeste refusé est refusé partout"
+
+    Un `plugin.json` qui échoue à l'une des limites ci-dessous est refusé à la fois par le générateur
+    de configuration (Python) et par le runtime NGINX (Lua) : il est retiré de la configuration
+    générée et n'est jamais chargé, ordonné ni exécuté. Le refus est journalisé comme une erreur
+    `ERROR` nommant l'identifiant du plugin, le fichier, le champ en échec et la limite.
+
+    Les limites de longueur sont mesurées en **octets UTF-8**, pas en caractères. `id`, `version`
+    et l'`id` du paramètre sont exclusivement ASCII, donc le nombre d'octets et de caractères
+    coïncide toujours pour ces champs.
+
+    | Champ | Limite |
+    | :---: | :--- |
+    | `id` | lettres ASCII, chiffres, `.`, `_`, `-` uniquement, 1-64 octets |
+    | `name` | 128 octets max |
+    | `description` | 256 octets max |
+    | `version` | doit correspondre à `\d+\.\d+(\.\d+)?` (chiffres ASCII uniquement) |
+    | `stream` | l'une des valeurs `yes`, `no`, `partial` |
+    | `id` du paramètre | lettres ASCII majuscules, chiffres, `_` uniquement, 1-256 octets |
+    | `context` du paramètre | l'une des valeurs `global`, `multisite` |
+    | `default` du paramètre | 4096 octets max |
+    | `help` du paramètre | 512 octets max |
+    | `label` du paramètre | 256 octets max |
+    | `regex` du paramètre | 1024 octets max |
+    | `type` du paramètre | l'une des valeurs `password`, `text`, `number`, `file`, `check`, `select`, `multiselect`, `multivalue`, `size`, `duration` |
+
+    `extensions` n'est validé que côté Python : le runtime NGINX ne le lit jamais. Les champs de
+    job (`jobs[]`) sont également réservés à Python car c'est le Worker qui les distribue.
 
 ### Commandes CLI
 
@@ -648,8 +721,10 @@ return jsonify({"message": "ok", "data": <plugin_id_data>}), 200
 Voici les arguments qui sont passés et auxquels on accède sur action.py fonctions :
 
 ```python
-function(app=app, args=request.args.to_dict() or request.json or None)
+function(app=app, db=db, api_client=api_client, bw_instances_utils=bw_instances_utils, args=args, data=data)
 ```
+
+`db` est la référence retirée et lève `RetiredDBError` si elle est utilisée ; utilisez `api_client` à la place.
 
 !!! info "Bibliothèques Python Disponibles"
 
@@ -877,3 +952,52 @@ plugin /
 ```
 
 Dans cette structure, `user_auth.py` contient le `user_auth` blueprint et `user_auth.html` est le modèle associé, en respectant les conventions de nommage recommandées.
+
+### Traductions des plugins
+
+Un plugin peut fournir son propre catalogue de traduction et le faire fusionner dans l'UI d'administration, à la fois dans le navigateur (`t()`) et côté serveur (`_()` dans un template Jinja). Aucune déclaration dans `plugin.json` ni aucune étape de build n'est nécessaire. L'URL du catalogue servie au navigateur porte une empreinte de fichier, si bien que les caches du navigateur se rafraîchissent automatiquement dès que le catalogue d'un plugin installé change.
+
+Deux emplacements sont pris en charge, dans cet ordre :
+
+1. `ui/blueprints/static/locales/<lang>.json` pour un plugin avec un blueprint Flask.
+2. `ui/static/locales/<lang>.json` pour une simple page `ui/template.html`.
+
+`en.json` est le fallback obligatoire ; tout autre fichier de langue est facultatif. Chaque clé de premier niveau de votre catalogue DOIT être votre identifiant de plugin, par exemple `{"my_plugin": {"title": "..."}}`. Toute autre clé de premier niveau est intégralement refusée — non fusionnée, pas seulement la feuille en collision — avec un seul avertissement nommant votre plugin et la ou les clés en cause ; c'est ce qui empêche le catalogue d'un plugin de s'approprier ou de masquer l'espace de noms d'un autre plugin (ou du cœur). À l'intérieur de votre propre espace de noms, une feuille qui entre en collision avec une valeur existante (celle du cœur, ou celle d'un plugin chargé plus tôt et partageant exactement votre identifiant de plugin) est abandonnée avec un avertissement ; une nouvelle feuille sous votre propre espace de noms fusionne toujours. Un identifiant de plugin contenant un `.` ne peut pas avoir de catalogue accessible (`_()` comme `t()` découpent une clé de recherche sur `.`) et est intégralement refusé, avec un avertissement.
+
+Le `_()` côté serveur ne peut pas interpoler les paramètres `{{var}}` comme le fait le `t()` du navigateur. Utilisez `t()` côté navigateur pour les chaînes nécessitant une substitution.
+
+### Surface prise en charge des plugins UI
+
+L'UI web ne dispose d'aucune connexion à la base de données. Le code UI d'un plugin accède à l'API centrale via **`PLUGIN_API`** :
+
+```python
+from app.dependencies import PLUGIN_API
+
+
+def my_page():
+    return PLUGIN_API.get_services(with_drafts=True)
+```
+
+`ui/actions.py` la reçoit sous le nom `api_client` :
+
+```python
+def pre_render(**kwargs):
+    return {"services": kwargs["api_client"].get_services(with_drafts=True)}
+```
+
+Ces méthodes constituent la promesse de compatibilité entre versions mineures ; les autres méthodes du client UI sont internes. `PLUGIN_API` n'est pas une frontière de sécurité : le code du plugin s'exécute dans le processus UI, n'installez donc que des plugins de confiance.
+
+| Méthode | Ce qu'elle renvoie |
+| --- | --- |
+| `get_global_settings(full=False, methods=False, with_drafts=False, filtered_settings=None, global_only=True)` | La configuration sous forme de dict à plat. |
+| `get_plugins(type="all", with_data=False, only_enabled=False, with_settings=True)` | Les plugins installés et leur schéma de paramètres. |
+| `get_services(with_drafts=True)` / `get_service(service_id, full=False, methods=True, with_drafts=True)` | Les services ou la configuration d'un service. |
+| `get_configs(service=None, type=None, with_drafts=True, with_data=False)` / `get_config_item(service, type, name, with_data=True)` | Les configurations personnalisées. |
+| `create_config(**kwargs)` / `update_config(service, type, name, body=None, **kwargs)` / `delete_config(service, type, name)` | Les écritures de configurations personnalisées. |
+| `get_cache_files(service=None, plugin=None, job_name=None, with_data=False)` / `get_cache_file(service, plugin, job, filename, download=False)` | Les entrées du cache des jobs. |
+| `get_jobs()` / `get_last_job_run(name)` | Les jobs enregistrés et leur dernière exécution. |
+| `readonly` | `True` lorsque la base de données est en lecture seule. |
+
+Les paramètres ne sont pas écrits via `PLUGIN_API` : utilisez `BW_CONFIG.edit_global_conf()` ou `BW_CONFIG.edit_service()`, qui les valident d'abord.
+
+**Migration depuis la 1.6.** `app.dependencies.DB` est retiré ; l'utiliser lève une `RuntimeError` nommant le plugin. Remplacez `DB.get_config(...)` par `PLUGIN_API.get_global_settings(...)` ou `PLUGIN_API.get_service(...)`, les appels de configurations personnalisées par les méthodes `get_config*` / d'écriture de configuration correspondantes, les appels de cache de job par `get_cache_files(..., with_data=True)`, et `kwargs["db"]` dans `ui/actions.py` par `kwargs["api_client"]`. `DB._db_session()` n'a pas de remplacement : l'UI n'a pas de session de base de données. `DB` est falsy, remplacez donc `if DB is not None:` par `if DB:` avant d'y accéder.
