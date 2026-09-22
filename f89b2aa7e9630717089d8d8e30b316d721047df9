@@ -1,0 +1,104 @@
+docs/es/advanced.md
+  s_bc6e31460fef3d::t_14f5caa91dddbb 1480-1483,1555-1557
+  s_f11623f9cc147d::t_f40480984c0e5d 5099,5104,5108
+  s_795e2ccdb6801b::t_d78436c677a6bf 1052-1058,1558
+docs/zh/advanced.md
+  s_bc6e31460fef3d::t_14f5caa91dddbb 1478-1481,1553-1555
+  s_f11623f9cc147d::t_f40480984c0e5d 5096,5101,5105
+  s_bc6e31460fef3d::t_0180ddf7e051aa 1052-1058
+  s_795e2ccdb6801b::t_8cf6d9a56a4b84 1556
+docs/es/web-ui.md
+  s_bc6e31460fef3d::t_6a9636c1f5f638 482-491
+docs/fr/advanced.md
+  s_bc6e31460fef3d::t_14f5caa91dddbb 1479-1482,1554-1556
+  s_f11623f9cc147d::t_f40480984c0e5d 5098,5103,5107
+  s_795e2ccdb6801b::t_570b26a96239dc 1052-1058,1557
+docs/de/upgrading.md
+  s_bc6e31460fef3d::t_759f275e6628e3 22-25,241-242
+  s_10d9be7dc00bdd::t_c69a98608f5d2e 294-297,308-317,319-321,327,330,333-334,337-340,356,366,417,626,636
+  s_bc6e31460fef3d::t_674fd7a494b5be 239-240,243,318
+  s_bc6e31460fef3d::t_22474d569d3a86 244
+docs/fr/upgrading.md
+  s_10d9be7dc00bdd::t_c69a98608f5d2e 218-221,232-241,243-245,251,254,257-258,261-264,280,291,341,548,558
+  s_bc6e31460fef3d::t_759f275e6628e3 22-25,188-189
+  s_bc6e31460fef3d::t_674fd7a494b5be 186-187,190,242
+  s_bc6e31460fef3d::t_21e628af23f140 191
+docs/zh/upgrading.md
+  s_bc6e31460fef3d::t_759f275e6628e3 22-25,156-157
+  s_10d9be7dc00bdd::t_9166809c085b8d 183-185,192-200,202-203,209,212,215-216,219-221,232,240,289,490,500
+  s_bc6e31460fef3d::t_674fd7a494b5be 154-155,158,201
+  s_bc6e31460fef3d::t_4b863d32d5db4c 159
+docs/de/advanced.md
+  s_bc6e31460fef3d::t_14f5caa91dddbb 1480-1483,1555-1557
+  s_f11623f9cc147d::t_f40480984c0e5d 5099,5104,5108
+  s_795e2ccdb6801b::t_4bce9b84c76ed6 1052-1058,1558
+docs/zh/web-ui.md
+  s_bc6e31460fef3d::t_6a9636c1f5f638 470-479
+docs/web-ui.md
+  s_bc6e31460fef3d::t_6a9636c1f5f638 482-491
+docs/es/upgrading.md
+  s_10d9be7dc00bdd::t_9166809c085b8d 305-308,319-328,330-332,338,341,344-345,348-351,368,378,428,635,645
+  s_bc6e31460fef3d::t_674fd7a494b5be 252-253,256,329
+  s_bc6e31460fef3d::t_759f275e6628e3 22-25,254-255
+  s_bc6e31460fef3d::t_53718c4710cc70 257
+docs/de/web-ui.md
+  s_bc6e31460fef3d::t_6a9636c1f5f638 528-537
+docs/upgrading.md
+  s_bc6e31460fef3d::t_674fd7a494b5be 243-244,247,315
+  s_bc6e31460fef3d::t_759f275e6628e3 26-29,245-246
+  s_10d9be7dc00bdd::t_8a0c17cc48a7e8 299-302,308-313,316-317,323,326,329-330,333-334,340,344,392,602,612
+  s_10d9be7dc00bdd::t_9871301a41277f 314
+  s_bc6e31460fef3d::t_d976b67a4b5af3 248
+docs/fr/web-ui.md
+  s_bc6e31460fef3d::t_6a9636c1f5f638 472-481
+docs/advanced.md
+  s_bd45e79822d60b::t_1ed7ccfafbeaeb 1054-1060
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f89b2aa7e9630717089d8d8e30b316d721047df9",
+  "prompts": {},
+  "sessions": {
+    "s_10d9be7dc00bdd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aeccb8db-b831-4720-9c32-a66ceaca2ae1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bc6e31460fef3d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c535-c7c3-7de3-9a5d-71a04c4f20fe",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bd45e79822d60b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a848345d-feea-4051-96bc-705f5ca25957",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f11623f9cc147d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c527-d745-75a2-9047-df84c2781da2",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
