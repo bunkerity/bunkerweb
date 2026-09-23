@@ -86,6 +86,11 @@
   // call site instead of in a lookup table read somewhere else.
   const SOURCES = {
     appsec: () => t("crowdsec.reason.source.appsec", "CrowdSec AppSec"),
+    failure_policy: () =>
+      t(
+        "crowdsec.reason.source.failure_policy",
+        "CrowdSec AppSec failure policy",
+      ),
     lapi: () => t("crowdsec.reason.source.lapi", "CrowdSec LAPI"),
   };
   const ACTIONS = {

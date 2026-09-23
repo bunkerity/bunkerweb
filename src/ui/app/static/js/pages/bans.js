@@ -8,6 +8,7 @@ $(document).ready(function () {
   var actionLock = false;
   let addBanNumber = 1;
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const crowdsecUrl = $("#crowdsec-url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
@@ -1107,9 +1108,19 @@ $(document).ready(function () {
                     "tooltip.button.update_ban_duration",
                     "Update ban duration",
                   );
+              const investigateUrl = `${crowdsecUrl}?ip=${encodeURIComponent(
+                String(row.ip || ""),
+              )}`;
 
               return `
                 <div class="d-flex justify-content-evenly">
+                  <a class="btn btn-outline-primary btn-sm me-1"
+                     href="${investigateUrl}">
+                    <i class="bx bx-search-alt bx-xs me-1" aria-hidden="true"></i>${t(
+                      "crowdsec.investigation.submit",
+                      "Investigate",
+                    )}
+                  </a>
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
                           data-ip="${row.ip}"

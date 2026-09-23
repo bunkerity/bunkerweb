@@ -109,6 +109,13 @@ class TestTheSentence:
         (sentence,) = render(node, [{"reason": "crowdsec", "data": {"source": "lapi", "action": "captcha"}}])
         assert sentence == "CrowdSec LAPI: captcha challenge"
 
+    def test_a_failure_policy_deny_has_its_own_appsec_failure_label(self, node):
+        (sentence,) = render(
+            node,
+            [{"reason": "crowdsec", "data": {"source": "failure_policy", "action": "ban"}}],
+        )
+        assert sentence == "CrowdSec AppSec failure policy: request blocked"
+
     def test_a_json_string_payload_is_parsed(self, node):
         """The Reports table gets `data` as a dict; a ban row could carry it as stored JSON text."""
         (sentence,) = render(node, [{"reason": "crowdsec", "data": '{"source": "appsec", "action": "ban"}'}])

@@ -75,6 +75,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.certificates import certificates
+from app.routes.crowdsec import crowdsec
 from app.routes.threatmap import threatmap
 from app.routes.timings import timings
 from app.routes.web_cache import web_cache
@@ -122,6 +123,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     resource_groups,
     totp,
     home,
@@ -780,7 +782,7 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     # Templates name a *page* by its short name — `url_for("bans")` means `bans.bans_page` — which
     # is why this exists at all. But an endpoint that is already fully qualified and is not a page

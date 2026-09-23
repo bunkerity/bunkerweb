@@ -152,8 +152,10 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 2645 adds the 11 keys of the explicit redirect-only declaration (roadmap row 41, lot D): the
     # services-list candidate badge and its tooltip, the `service.mode.*` card on the service
     # settings page, its two action labels and confirm button, and the confirmation modal.
+    # CS-2's original 2,786 count included 141 CrowdSec messages. The final 2,779 removes eight
+    # unused report/connection keys and adds one distinct failure-policy source label.
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2645
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2779
 
 
 @pytest.mark.parametrize("code", CODES)

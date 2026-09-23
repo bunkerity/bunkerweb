@@ -142,6 +142,52 @@ class ApiClient(BaseApiClient):
     def unban(self, unbans: list):
         return self._post("/bans/unban", json=unbans)
 
+    # ── CrowdSec ───────────────────────────────────────────────────────
+
+    def get_crowdsec_connections(self) -> dict:
+        return self._get("/crowdsec")
+
+    def get_crowdsec_decisions(
+        self,
+        connection_id: str,
+        *,
+        ip: str = "",
+        origin: str = "",
+        scenario: str = "",
+        offset: int = 0,
+        limit: int = 50,
+    ) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._get(
+            f"/crowdsec/{connection}/decisions",
+            params={"ip": ip, "origin": origin, "scenario": scenario, "offset": offset, "limit": limit},
+        )
+
+    def get_crowdsec_alerts(self, connection_id: str, alert_id: int) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._get(f"/crowdsec/{connection}/alerts/{alert_id}")
+
+    def get_crowdsec_investigation(self, connection_id: str, ip: str) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._get(f"/crowdsec/{connection}/ips/{quote(ip, safe='')}")
+
+    def get_crowdsec_allowlists(self, connection_id: str, *, offset: int = 0, limit: int = 50) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._get(f"/crowdsec/{connection}/allowlists", params={"offset": offset, "limit": limit})
+
+    def check_crowdsec_allowlist(self, connection_id: str, ip: str) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._get(f"/crowdsec/{connection}/allowlists/check", params={"ip": ip})
+
+    def remove_crowdsec_decision(self, connection_id: str, decision_id: int, selection: dict) -> dict:
+        connection = quote(connection_id, safe="")
+        return self._request(
+            "DELETE",
+            f"/crowdsec/{connection}/decisions/{decision_id}",
+            json=selection,
+            retry=False,
+        )
+
     # ── Cache ───────────────────────────────────────────────────────────
 
     def get_cache_files(self, service=None, plugin=None, job_name=None, with_data=False):

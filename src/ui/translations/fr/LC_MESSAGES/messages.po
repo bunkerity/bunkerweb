@@ -313,6 +313,9 @@ msgstr "Cache"
 msgid "breadcrumb.configs"
 msgstr "Configurations"
 
+msgid "breadcrumb.crowdsec"
+msgstr "CrowdSec"
+
 msgid "breadcrumb.extra_pages"
 msgstr "Pages supplémentaires"
 
@@ -1816,6 +1819,306 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "crowdsec.alert.id"
+msgstr "Identifiant de l'alerte"
+
+msgid "crowdsec.alert.load"
+msgstr "Charger toutes les preuves"
+
+msgid "crowdsec.alert.started"
+msgstr "Début"
+
+msgid "crowdsec.alert.stopped"
+msgstr "Fin"
+
+msgid "crowdsec.allowlists.allowed"
+msgstr "Autorisée par CrowdSec"
+
+msgid "crowdsec.allowlists.comment"
+msgstr "Commentaire"
+
+msgid "crowdsec.allowlists.console"
+msgstr "Gérée par la Console"
+
+msgid "crowdsec.allowlists.empty"
+msgstr "Aucune liste d’autorisation sur ce moteur."
+
+msgid "crowdsec.allowlists.guide.add"
+msgstr "Ajoutez des IP ou des réseaux CIDR de confiance."
+
+msgid "crowdsec.allowlists.guide.console"
+msgstr "Modifiez les listes gérées par la Console dans la Console CrowdSec."
+
+msgid "crowdsec.allowlists.guide.create"
+msgstr "Créez une liste une seule fois, ou utilisez une liste existante gérée localement."
+
+msgid "crowdsec.allowlists.guide.docs"
+msgstr "Documentation des listes d’autorisation CrowdSec"
+
+msgid "crowdsec.allowlists.guide.expiration"
+msgstr "Dans cet exemple, les entrées expirent après 24 heures. Omettez --expiration pour une entrée sans expiration. IPv4 et IPv6 sont pris en charge."
+
+msgid "crowdsec.allowlists.guide.inspect"
+msgstr "Consultez la liste et les dates d’expiration."
+
+msgid "crowdsec.allowlists.guide.intro"
+msgstr "Vous pouvez consulter les listes et vérifier les IP ici. Pour ajouter ou retirer des entrées, utilisez cscli sur le moteur CrowdSec."
+
+msgid "crowdsec.allowlists.guide.refresh"
+msgstr "Après une modification, actualisez les listes et vérifiez à nouveau l’IP. Retirer une exception permet de futures décisions CrowdSec ; cela ne crée pas de bannissement. Les bannissements locaux BunkerWeb et les autres protections restent distincts."
+
+msgid "crowdsec.allowlists.guide.remove"
+msgstr "Retirez une exception devenue inutile."
+
+msgid "crowdsec.allowlists.guide.title"
+msgstr "Comment gérer les IP et réseaux de confiance"
+
+msgid "crowdsec.allowlists.guide.where"
+msgstr "CrowdSec 1.7 ou ultérieur est requis. Exécutez ces commandes sur l’hôte ou dans le conteneur qui héberge l’API locale (LAPI) du moteur sélectionné, avec accès à sa configuration et à sa base CrowdSec. Remplacez le nom de liste, l’IP et le réseau donnés en exemple par les vôtres."
+
+msgid "crowdsec.allowlists.help"
+msgstr "Adresses IP et réseaux de confiance pour le moteur sélectionné. Ces exceptions s’appliquent à tous ses services et bouncers."
+
+msgid "crowdsec.allowlists.impact"
+msgstr "Cette exception s’applique à tout le moteur. Les bannissements BunkerWeb locaux, les autres protections ou les décisions en cache peuvent encore bloquer cette IP."
+
+msgid "crowdsec.allowlists.local"
+msgstr "Gérée localement"
+
+msgid "crowdsec.allowlists.never"
+msgstr "Jamais"
+
+msgid "crowdsec.allowlists.no_entries"
+msgstr "Aucune entrée active."
+
+msgid "crowdsec.allowlists.not_allowed"
+msgstr "Cette IP ne correspond à aucune liste d’autorisation CrowdSec."
+
+msgid "crowdsec.allowlists.pages"
+msgstr "Pages des listes d’autorisation"
+
+msgid "crowdsec.allowlists.refresh"
+msgstr "Actualiser les listes"
+
+msgid "crowdsec.allowlists.title"
+msgstr "Listes d’autorisation CrowdSec"
+
+msgid "crowdsec.allowlists.unknown"
+msgstr "Le statut d’autorisation est indisponible."
+
+msgid "crowdsec.captured_history"
+msgstr "Historique capturé"
+
+msgid "crowdsec.captured_history_help"
+msgstr "Les données capturées décrivent ce qui a été observé lors de la requête ; elles ne prouvent pas l'état actuel de la décision."
+
+msgid "crowdsec.connection.appsec"
+msgstr "Dernière observation AppSec"
+
+msgid "crowdsec.connection.configured"
+msgstr "Configurée"
+
+msgid "crowdsec.connection.connected"
+msgstr "Connecté"
+
+msgid "crowdsec.connection.connection_error"
+msgstr "Erreur de connexion"
+
+msgid "crowdsec.connection.filter"
+msgstr "Filtrer les connexions par nom d’hôte ou service"
+
+msgid "crowdsec.connection.global"
+msgstr "tous les services"
+
+msgid "crowdsec.connection.label"
+msgstr "Connexion CrowdSec"
+
+msgid "crowdsec.connection.last_sync"
+msgstr "Dernière synchronisation réussie"
+
+msgid "crowdsec.connection.local_api"
+msgstr "API locale"
+
+msgid "crowdsec.connection.management"
+msgstr "Gestion"
+
+msgid "crowdsec.connection.mode"
+msgstr "Mode"
+
+msgid "crowdsec.connection.none"
+msgstr "Aucune connexion CrowdSec utilisable n'a été trouvée. Vérifiez les erreurs des instances et la configuration du plugin."
+
+msgid "crowdsec.connection.read_only"
+msgstr "Lecture seule"
+
+msgid "crowdsec.connection.required"
+msgstr "Choisissez d'abord une connexion CrowdSec."
+
+msgid "crowdsec.connection.scope_help"
+msgstr "La connexion sélectionnée s’applique aux décisions, aux listes d’autorisation et à l’analyse des IP ci-dessous."
+
+msgid "crowdsec.connection.selected"
+msgstr "Connexion sélectionnée"
+
+msgid "crowdsec.connection.sync"
+msgstr "Synchronisation des décisions"
+
+msgid "crowdsec.connection.sync_current"
+msgstr "À jour"
+
+msgid "crowdsec.connection.sync_not_synchronized"
+msgstr "Pas encore synchronisé"
+
+msgid "crowdsec.connection.sync_stale"
+msgstr "Obsolète"
+
+msgid "crowdsec.current_state"
+msgstr "État actuel"
+
+msgid "crowdsec.current_state_help"
+msgstr "L'état actuel peut changer après cette observation."
+
+msgid "crowdsec.decision.duration"
+msgstr "Durée"
+
+msgid "crowdsec.decision.expires"
+msgstr "Expiration"
+
+msgid "crowdsec.decision.id"
+msgstr "Identifiant de la décision"
+
+msgid "crowdsec.decision.origin"
+msgstr "Origine"
+
+msgid "crowdsec.decision.scenario"
+msgstr "Scénario"
+
+msgid "crowdsec.decision.scope"
+msgstr "Périmètre"
+
+msgid "crowdsec.decision.target"
+msgstr "Cible"
+
+msgid "crowdsec.decision.type"
+msgstr "Type"
+
+msgid "crowdsec.decisions.count"
+msgstr "Affichage de %(start)s à %(end)s sur %(total)s"
+
+msgid "crowdsec.decisions.help"
+msgstr "Il s'agit de l'état actuel lu directement depuis le moteur CrowdSec sélectionné."
+
+msgid "crowdsec.decisions.none"
+msgstr "Aucune décision active ne correspond à ces filtres."
+
+msgid "crowdsec.decisions.pagination"
+msgstr "Pages des décisions"
+
+msgid "crowdsec.decisions.title"
+msgstr "Décisions actives"
+
+msgid "crowdsec.error.request"
+msgstr "La requête CrowdSec a échoué."
+
+msgid "crowdsec.investigation.alerts"
+msgstr "Preuves d'alerte CrowdSec disponibles"
+
+msgid "crowdsec.investigation.current_decisions"
+msgstr "Décisions CrowdSec actuelles"
+
+msgid "crowdsec.investigation.help"
+msgstr "Les décisions CrowdSec actuelles sont vérifiées avec les bannissements locaux et les rapports capturés."
+
+msgid "crowdsec.investigation.ip"
+msgstr "Adresse IP"
+
+msgid "crowdsec.investigation.local_bans"
+msgstr "Bannissements locaux BunkerWeb actuels"
+
+msgid "crowdsec.investigation.no_alerts"
+msgstr "Aucune preuve d'alerte n'est disponible."
+
+msgid "crowdsec.investigation.no_bans"
+msgstr "Aucun bannissement local actuel n'a été trouvé."
+
+msgid "crowdsec.investigation.no_decisions"
+msgstr "Aucune décision CrowdSec actuelle n'a été trouvée."
+
+msgid "crowdsec.investigation.no_reports"
+msgstr "Aucun rapport capturé récent n'a été trouvé."
+
+msgid "crowdsec.investigation.placeholder"
+msgstr "192.0.2.10"
+
+msgid "crowdsec.investigation.reports"
+msgstr "Rapports BunkerWeb récents"
+
+msgid "crowdsec.investigation.result"
+msgstr "Investigation pour %(ip)s"
+
+msgid "crowdsec.investigation.submit"
+msgstr "Investiguer"
+
+msgid "crowdsec.investigation.summary"
+msgstr "Éléments trouvés pour cette IP"
+
+msgid "crowdsec.investigation.summary_active"
+msgstr "%(total)s en cours"
+
+msgid "crowdsec.investigation.summary_alerts"
+msgstr "Preuves d'alerte CrowdSec"
+
+msgid "crowdsec.investigation.summary_available"
+msgstr "%(total)s disponibles"
+
+msgid "crowdsec.investigation.summary_bans"
+msgstr "Bannissements locaux BunkerWeb"
+
+msgid "crowdsec.investigation.summary_captured"
+msgstr "%(total)s capturés"
+
+msgid "crowdsec.investigation.summary_decisions"
+msgstr "Décisions CrowdSec"
+
+msgid "crowdsec.investigation.summary_help"
+msgstr "Cette vue couvre la connexion CrowdSec sélectionnée et les bannissements locaux de BunkerWeb. Les autres protections ne sont pas vérifiées ici, et une donnée illisible ne prouve pas que cette IP est autorisée."
+
+msgid "crowdsec.investigation.summary_none"
+msgstr "Aucun élément trouvé"
+
+msgid "crowdsec.investigation.summary_reports"
+msgstr "Rapports BunkerWeb"
+
+msgid "crowdsec.investigation.summary_unreadable"
+msgstr "Lecture impossible"
+
+msgid "crowdsec.investigation.title"
+msgstr "Investiguer une IP"
+
+msgid "crowdsec.investigation.truncated"
+msgstr "Affichage de %(shown)s résultats sur %(total)s (limite de la source : %(limit)s)."
+
+msgid "crowdsec.investigation.unavailable"
+msgstr "Indisponible : %(error)s"
+
+msgid "crowdsec.local_ban.expires"
+msgstr "Expiration"
+
+msgid "crowdsec.local_ban.reason"
+msgstr "Motif"
+
+msgid "crowdsec.local_ban.service"
+msgstr "Service"
+
+msgid "crowdsec.next"
+msgstr "Suivant"
+
+msgid "crowdsec.observed_at"
+msgstr "Observé le %(time)s"
+
+msgid "crowdsec.previous"
+msgstr "Précédent"
+
 msgid "crowdsec.reason.action.ban"
 msgstr "requête bloquée"
 
@@ -1834,8 +2137,92 @@ msgstr "%(source)s : %(action)s (scénario : %(scenario)s)"
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
+msgid "crowdsec.reason.source.failure_policy"
+msgstr "Politique d’échec AppSec"
+
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
+
+msgid "crowdsec.refresh"
+msgstr "Actualiser l'état"
+
+msgid "crowdsec.remove.action"
+msgstr "Retirer"
+
+msgid "crowdsec.remove.confirm"
+msgstr "Je comprends et souhaite retirer cette décision."
+
+msgid "crowdsec.remove.impact"
+msgstr "Cette action retire la décision du moteur CrowdSec partagé et affecte tous les bouncers connectés. Des décisions en cache, une autre plage, des bannissements locaux ou AppSec peuvent encore bloquer la cible."
+
+msgid "crowdsec.remove.selection"
+msgstr "Retirer %(scope)s %(value)s (%(type)s), scénario %(scenario)s, origine %(origin)s, depuis %(source)s (%(engine)s) ?"
+
+msgid "crowdsec.remove.submit"
+msgstr "Retirer la décision"
+
+msgid "crowdsec.remove.success"
+msgstr "Décision retirée à la source CrowdSec. La propagation est %(status)s (%(mode)s, intervalle %(interval)s). Décisions correspondantes restantes : %(remaining)s ; les bannissements locaux ou AppSec peuvent encore bloquer."
+
+msgid "crowdsec.remove.title"
+msgstr "Retirer une décision CrowdSec"
+
+msgid "crowdsec.report.captured"
+msgstr "Capturé le"
+
+msgid "crowdsec.report.date"
+msgstr "Heure du rapport"
+
+msgid "crowdsec.report.decisions"
+msgstr "Décisions capturées"
+
+msgid "crowdsec.report.entry"
+msgstr "Rapport de sécurité"
+
+msgid "crowdsec.report.identifier"
+msgstr "Identifiant du rapport"
+
+msgid "crowdsec.report.matched_target"
+msgstr "Cible correspondante"
+
+msgid "crowdsec.report.metadata"
+msgstr "Métadonnées de la décision"
+
+msgid "crowdsec.report.metadata_complete"
+msgstr "Complètes"
+
+msgid "crowdsec.report.metadata_incomplete"
+msgstr "Incomplètes"
+
+msgid "crowdsec.report.metadata_unavailable"
+msgstr "Les métadonnées de l'instantané CrowdSec ne sont pas disponibles pour cet ancien rapport."
+
+msgid "crowdsec.report.metadata_warning"
+msgstr "Certaines métadonnées de décision n'étaient pas disponibles lors de la requête."
+
+msgid "crowdsec.report.reason"
+msgstr "Motif"
+
+msgid "crowdsec.report.remediation"
+msgstr "Remédiation capturée"
+
+msgid "crowdsec.report.scope"
+msgstr "Périmètre de service capturé"
+
+msgid "crowdsec.report.service"
+msgstr "Service"
+
+msgid "crowdsec.report.source"
+msgstr "Source capturée"
+
+msgid "crowdsec.subtitle"
+msgstr "Inspectez chaque moteur CrowdSec configuré et investiguez une IP à partir de l'état actuel et des preuves capturées."
+
+msgid "crowdsec.title"
+msgstr "Opérateur CrowdSec"
+
+msgid "crowdsec.unknown"
+msgstr "Inconnu"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "Une ou plusieurs tâches ont échoué lors de leur dernière exécution."
@@ -3262,6 +3649,9 @@ msgstr "Configurations"
 msgid "navigation.configure"
 msgstr "Configurer"
 
+msgid "navigation.crowdsec"
+msgstr "CrowdSec"
+
 msgid "navigation.edition_community"
 msgstr "Communauté"
 
@@ -3915,6 +4305,18 @@ msgstr "Bloqué"
 
 msgid "reports.chart.timeseries.title"
 msgstr "Requêtes bloquées au fil du temps"
+
+msgid "reports.crowdsec.source_appsec"
+msgstr "Inspection AppSec"
+
+msgid "reports.crowdsec.source_failure_policy"
+msgstr "Politique d’échec AppSec"
+
+msgid "reports.crowdsec.source_lapi"
+msgstr "Décision de l’API locale"
+
+msgid "reports.crowdsec.technical_details"
+msgstr "Détails techniques"
 
 msgid "reports.security_incident"
 msgstr "Incident de sécurité"

@@ -121,6 +121,10 @@
                                             {% if ping_subtitle %}
                                                 <p class="card-text small mb-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ ping_subtitle }}</p>
                                             {% endif %}
+                                            {% set action_url = value.get("action_url", "") %}
+                                            {% if action_url and action_url.startswith("/") and not action_url.startswith("//") and "\\" not in action_url and value.get("action_i18n") %}
+                                                <a class="btn btn-outline-primary btn-sm mt-2" href="{{ action_url }}">{{ _(value.get("action_i18n")) }}</a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

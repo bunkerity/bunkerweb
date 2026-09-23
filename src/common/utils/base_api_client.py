@@ -92,6 +92,8 @@ class BaseApiClient:
         self.session = Session()
         self.session.headers["Authorization"] = f"Bearer {api_token}"
         self.session.headers["Content-Type"] = "application/json"
+        self._no_retry_session = Session()
+        self._no_retry_session.headers.update(self.session.headers)
 
         # Connection pooling with 1 retry on 5xx/connection errors.
         # respect_retry_after_header is OFF on purpose: urllib3 retries 429 whenever the response
@@ -104,6 +106,9 @@ class BaseApiClient:
         adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
+        no_retry_adapter = HTTPAdapter(max_retries=0, pool_connections=10, pool_maxsize=10)
+        self._no_retry_session.mount("http://", no_retry_adapter)
+        self._no_retry_session.mount("https://", no_retry_adapter)
 
         self._readonly_cache = None
         self._readonly_cache_ttl = 5  # seconds
@@ -129,7 +134,7 @@ class BaseApiClient:
 
     # ── Core request methods ─────────────────────────────────────────────
 
-    def _request(self, method: str, path: str, **kwargs):
+    def _request(self, method: str, path: str, *, retry: bool = True, **kwargs):
         """Central request method with error handling.
 
         Returns the parsed JSON response dict on success.
@@ -158,7 +163,8 @@ class BaseApiClient:
 
         started = perf_counter()
         try:
-            resp = self.session.request(method, url, **kwargs)
+            session = self.session if retry else self._no_retry_session
+            resp = session.request(method, url, **kwargs)
         except (RequestsConnectionError, Timeout, RetryError) as e:
             # `RetryError` belongs here, not with the status handling below. The retry policy has
             # `status_forcelist=[502, 503, 504]`, and once those retries are spent requests does not

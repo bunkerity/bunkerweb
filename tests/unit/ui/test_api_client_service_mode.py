@@ -26,6 +26,7 @@ def client():
         yield api_client
     finally:
         api_client.session.close()
+        api_client._no_retry_session.close()
 
 
 def _respond(client, payload, *, status_code=200):
@@ -81,3 +82,52 @@ class TestRedirectCandidates:
 
         with pytest.raises(ApiUnavailableError):
             client.get_redirect_candidates()
+
+
+class TestCrowdSecMethods:
+    def test_methods_use_the_api_routes_and_preserve_request_parameters(self, client):
+        request = _respond(client, {"status": "success"})
+        response = Mock(status_code=200, content=b"{}")
+        response.json.return_value = {"status": "success"}
+        removal_request = Mock(return_value=response)
+        client._no_retry_session.request = removal_request
+        connection = "host:instance/1"
+
+        client.get_crowdsec_connections()
+        client.get_crowdsec_decisions(connection, ip="2001:db8::1", origin="lists", scenario="scan", offset=10, limit=20)
+        client.get_crowdsec_alerts(connection, 7)
+        client.get_crowdsec_investigation(connection, "2001:db8::1")
+        client.get_crowdsec_allowlists(connection, offset=5, limit=15)
+        client.check_crowdsec_allowlist(connection, "2001:db8::1")
+        client.remove_crowdsec_decision(connection, 9, {"scope": "Range", "value": "2001:db8::/64", "decision_type": "ban"})
+
+        calls = request.call_args_list
+        assert [(call.args[0], call.args[1]) for call in calls] == [
+            ("GET", "http://api.test/crowdsec"),
+            ("GET", "http://api.test/crowdsec/host%3Ainstance%2F1/decisions"),
+            ("GET", "http://api.test/crowdsec/host%3Ainstance%2F1/alerts/7"),
+            ("GET", "http://api.test/crowdsec/host%3Ainstance%2F1/ips/2001%3Adb8%3A%3A1"),
+            ("GET", "http://api.test/crowdsec/host%3Ainstance%2F1/allowlists"),
+            ("GET", "http://api.test/crowdsec/host%3Ainstance%2F1/allowlists/check"),
+        ]
+        assert calls[1].kwargs["params"] == {"ip": "2001:db8::1", "origin": "lists", "scenario": "scan", "offset": 10, "limit": 20}
+        assert calls[4].kwargs["params"] == {"offset": 5, "limit": 15}
+        assert calls[5].kwargs["params"] == {"ip": "2001:db8::1"}
+        assert removal_request.call_args.args[:2] == (
+            "DELETE",
+            "http://api.test/crowdsec/host%3Ainstance%2F1/decisions/9",
+        )
+        assert removal_request.call_args.kwargs["json"] == {
+            "scope": "Range",
+            "value": "2001:db8::/64",
+            "decision_type": "ban",
+        }
+        removal_request.assert_called_once()
+        assert client._no_retry_session.get_adapter("http://api.test").max_retries.total == 0
+        assert client.session.get_adapter("http://api.test").max_retries.total == 1
+
+    def test_connections_use_the_base_retry_error_path(self, client):
+        client.session.request = Mock(side_effect=RetryError("spent"))
+
+        with pytest.raises(ApiUnavailableError):
+            client.get_crowdsec_connections()
