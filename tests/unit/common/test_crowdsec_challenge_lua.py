@@ -67,6 +67,7 @@ local CAPTURED = { headers = {} }
 ngx = {
   ERR = "ERR", DEBUG = "DEBUG", ALERT = "ALERT", WARN = "WARN", NOTICE = "NOTICE",
   OK = 0, HTTP_OK = 200, HTTP_FORBIDDEN = 403, HTTP_GET = "GET",
+  time = function() return 123 end,
   status = nil,
   log = function(level, msg) LOGS[#LOGS + 1] = level .. " " .. tostring(msg) end,
   print = function(b) PRINTED[#PRINTED + 1] = tostring(b) end,
@@ -111,6 +112,8 @@ cjson.decode = function(body)
   if APPSEC_JSON == nil then error("not json") end
   return APPSEC_JSON
 end
+decision_cache = { array = function() return {} end }
+cjson.encode = function() return "{}" end
 
 flag = {
   BOUNCER_SOURCE = 1, APPSEC_SOURCE = 2,
@@ -650,7 +653,9 @@ class TestNoRenderNeverWritesABody:
             '      "not rendered, remediation was \'" .. tostring(remediation) .. "\'",\n'
             '      remediation ~= "allow",\n'
             "      nil,\n"
-            "      verdict\n"
+            "      verdict,\n"
+            "      nil,\n"
+            "      evidence\n"
             "  end\n",
             "",
         )

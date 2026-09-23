@@ -27,6 +27,7 @@ HARNESS = """
 local logs = {}
 
 ngx = { ERR = "ERR", WARN = "WARN", OK = 0, HTTP_OK = 200, HTTP_INTERNAL_SERVER_ERROR = 500 }
+package.loaded["cjson.safe"] = { decode = function() return nil end, array_mt = {} }
 
 package.loaded["middleclass"] = function(_, parent)
     local klass = {}

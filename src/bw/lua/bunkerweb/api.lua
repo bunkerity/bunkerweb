@@ -1487,6 +1487,7 @@ function api:do_api_call()
 							resp["status"] = "error"
 						end
 						resp["msg"] = ret.msg
+						resp["data"] = ret.data
 						return ret.status == HTTP_OK, resp["status"], ret.status, encode(resp)
 					end
 				end

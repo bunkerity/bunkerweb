@@ -36,7 +36,10 @@ SOURCE = CROWDSEC_LUA.read_text(encoding="utf-8")
 HARNESS = """
 local LOGS = {}
 
-ngx = { ERR = "ERR", WARN = "WARN", OK = 0, HTTP_OK = 200, HTTP_INTERNAL_SERVER_ERROR = 500 }
+ngx = { ERR = "ERR", WARN = "WARN", OK = 0, HTTP_OK = 200, HTTP_INTERNAL_SERVER_ERROR = 500,
+  var = { hostname = "test-instance" },
+  req = { read_body = function() end, get_body_data = function() return "{}" end, get_body_file = function() return nil end } }
+package.loaded["cjson.safe"] = { decode = function() return BODY_PARAMS end, array_mt = {} }
 
 -- read_file() binds io.open as an upvalue when the chunk loads, so the fleet's rendered
 -- configurations are served from here and nothing touches the filesystem.
@@ -57,6 +60,7 @@ end
 -- The real cache_partition needs resty.sha256, which the plain lua binary has not got. What is
 -- under test here is what init() does with its ANSWERS, so the answers are the fixture.
 package.loaded["crowdsec.cache_partition"] = {
+  hash = function() return string.rep("a", 64) end,
   api_url = function(content) return content:match("API_URL=(%%S*)") or "" end,
   prefixes = function(api_urls)
     if COLLIDE then return nil, "CrowdSec cache namespace collision" end
@@ -82,7 +86,7 @@ package.loaded["crowdsec.cache_partition"] = {
 
 package.loaded["bunkerweb.plugin"] = {
   initialize = function(self) self.logger = { log = function(_, level, msg) LOGS[#LOGS + 1] = level .. " " .. msg end } end,
-  ret = function(_, ok, msg, status) return { ret = ok, msg = msg, status = status } end,
+  ret = function(_, ok, msg, status, _, data) return { ret = ok, msg = msg, status = status, data = data } end,
   log_throttled = function() end,
 }
 
@@ -104,6 +108,9 @@ package.preload["crowdsec.lib.bouncer"] = function()
   instance.init = function(conf_file) INIT_CALLS[#INIT_CALLS + 1] = conf_file return BOUNCER_INIT_OK, "bouncer init refused" end
   instance.GetCaptchaTemplate = function() return CAPTCHA_TEMPLATE end
   instance.Health = function() return HEALTH_OK, HEALTH_ERR, HEALTH_CHECKED_LAPI end
+  instance.ConnectionInfo = function() return { lapi_url = "http://127.0.0.1:8080", appsec_url = "http://127.0.0.1:7422" } end
+  instance.Allow = function() return true, "denied", true, nil,
+    { source = "appsec", action = "ban" }, nil, { source = "failure_policy" } end
   return instance
 end
 
@@ -142,6 +149,7 @@ DEFAULTS = {
     "INIT_CALLS": "{}",
     "CHALLENGE_CALLS": "{}",
     "CAPTCHA_TEMPLATE": '"TPL"',
+    "BODY_PARAMS": "{}",
 }
 
 RENDERED = "API_URL=http://127.0.0.1:8080\nAPPSEC_URL=http://127.0.0.1:7422\n"

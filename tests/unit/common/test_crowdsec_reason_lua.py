@@ -5,7 +5,7 @@ bot-detection challenge and a captcha were indistinguishable in Reports, and the
 end on a 403 were not even shown. Two things had to hold:
 
 * ``csmod.Allow()`` must hand back a verdict table (``source``, ``action``, ``http_status``, plus
-  ``scenario``/``origin``/``duration`` on a live LAPI decision) on every remediation, including
+  ``scenario``/``origin``/remaining ``duration`` when LAPI metadata is present) on every remediation, including
   the ``no_render`` path that ``SECURITY_MODE=detect`` takes — detect is precisely where the
   bouncer's own ALERT lines never fire, so the verdict is the *only* record of which remediation
   was suppressed.
@@ -24,18 +24,19 @@ the dispatcher, and what matters there is the wiring, not a re-execution of it.
 import re
 from pathlib import Path
 
-from test_crowdsec_challenge_lua import CHALLENGE_JSON, field, run  # noqa: E402
+from test_crowdsec_challenge_lua import CHALLENGE_JSON, field, run, to_lua  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
 CROWDSEC_LUA = ROOT / "src" / "common" / "core" / "crowdsec" / "crowdsec.lua"
 
-# A live LAPI decision, the shape lib/bouncer.lua's live_query() hands back to Allow().
+# A captured LAPI decision, as live_query() and decision_cache.get() hand back to Allow().
 LAPI_DECISION = {
     "type": "ban",
     "scenario": "crowdsecurity/http-probing",
     "origin": "crowdsec",
-    "duration": "3h59m",
+    "expires_at": 14463,  # harness ngx.time() is 123; 3h59m remain
 }
+LAPI_EVIDENCE = {"source": "lapi", "decisions": [LAPI_DECISION]}
 
 VERDICT_DUMP = """
 local ok, msg, banned, served, verdict = csmod.Allow("1.2.3.4", NO_RENDER_ARG, nil, CHALLENGE_PREFIX)
@@ -55,9 +56,9 @@ dump()
 
 
 def _lapi_body(no_render: bool) -> str:
-    """Override the harness' allowIp stub with one that also returns the decoded decision, the
-    fourth value live_query() carries so Allow() can name the scenario."""
-    decision = "{ " + ", ".join(f'["{k}"] = "{v}"' for k, v in LAPI_DECISION.items()) + " }"
+    """Override the harness' allowIp stub with the captured evidence shape returned by
+    live_query() and decision_cache.get()."""
+    decision = to_lua(LAPI_EVIDENCE)
     return (
         "csmod.allowIp = function() return false, "
         + f'"{LAPI_DECISION["type"]}", nil, {decision} end\n'
@@ -83,7 +84,7 @@ class TestTheVerdictReachesTheCaller:
         assert field(out, "VERDICT_ACTION") == "ban"
         assert field(out, "VERDICT_SCENARIO") == LAPI_DECISION["scenario"]
         assert field(out, "VERDICT_ORIGIN") == LAPI_DECISION["origin"]
-        assert field(out, "VERDICT_DURATION") == LAPI_DECISION["duration"]
+        assert field(out, "VERDICT_DURATION") == "14340s"
 
     def test_detect_mode_still_gets_the_verdict(self):
         """no_render returns before anything is written. The bouncer's ALERT lines are inside the
