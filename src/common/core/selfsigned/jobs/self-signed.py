@@ -6,6 +6,7 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
+from tempfile import TemporaryDirectory
 from traceback import format_exc
 from typing import Tuple
 
@@ -147,60 +148,66 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 return True, 0
 
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
-    server_path.mkdir(parents=True, exist_ok=True)
+    temp_root = Path(sep, "var", "tmp", "bunkerweb")
+    temp_root.mkdir(parents=True, exist_ok=True)
 
-    # Prepare openssl command based on the selected algorithm
-    openssl_cmd = [
-        "openssl",
-        "req",
-        "-nodes",
-        "-x509",
-        "-newkey",
-    ]
+    with TemporaryDirectory(prefix="selfsigned-", dir=temp_root) as temp_dir:
+        generated_path = Path(temp_dir)
+        cert_path = generated_path.joinpath("cert.pem")
+        key_path = generated_path.joinpath("key.pem")
 
-    # Add algorithm-specific options
-    if algorithm.startswith("ec-"):
-        curve = algorithm.split("-")[1]
-        openssl_cmd.extend(["ec", "-pkeyopt", f"ec_paramgen_curve:{curve}"])
-    elif algorithm.startswith("rsa-"):
-        bits = algorithm.split("-")[1]
-        openssl_cmd.extend(["rsa", "-pkeyopt", f"rsa_keygen_bits:{bits}"])
-
-    # Add the rest of the common options
-    openssl_cmd.extend(
-        [
-            "-keyout",
-            key_path.as_posix(),
-            "-out",
-            cert_path.as_posix(),
-            "-days",
-            days,
-            "-subj",
-            subj,
+        # Prepare openssl command based on the selected algorithm
+        openssl_cmd = [
+            "openssl",
+            "req",
+            "-nodes",
+            "-x509",
+            "-newkey",
         ]
-    )
 
-    if (
-        run(
-            openssl_cmd,
-            stdin=DEVNULL,
-            stderr=DEVNULL,
-            check=False,
-            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-        ).returncode
-        != 0
-    ):
-        LOGGER.error(f"Self-signed certificate generation failed for {first_server}")
-        return False, 2
+        # Add algorithm-specific options
+        if algorithm.startswith("ec-"):
+            curve = algorithm.split("-")[1]
+            openssl_cmd.extend(["ec", "-pkeyopt", f"ec_paramgen_curve:{curve}"])
+        elif algorithm.startswith("rsa-"):
+            bits = algorithm.split("-")[1]
+            openssl_cmd.extend(["rsa", "-pkeyopt", f"rsa_keygen_bits:{bits}"])
 
-    # Update db
-    cached, err = JOB.cache_file("cert.pem", self_signed_path.joinpath(first_server, "cert.pem"), service_id=first_server, overwrite_file=False)
-    if not cached:
-        LOGGER.error(f"Error while caching self-signed cert.pem file for {first_server} : {err}")
+        # Add the rest of the common options
+        openssl_cmd.extend(
+            [
+                "-keyout",
+                key_path.as_posix(),
+                "-out",
+                cert_path.as_posix(),
+                "-days",
+                days,
+                "-subj",
+                subj,
+            ]
+        )
 
-    cached, err = JOB.cache_file("key.pem", self_signed_path.joinpath(first_server, "key.pem"), service_id=first_server, overwrite_file=False)
-    if not cached:
-        LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
+        if (
+            run(
+                openssl_cmd,
+                stdin=DEVNULL,
+                stderr=DEVNULL,
+                check=False,
+                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+            ).returncode
+            != 0
+        ):
+            LOGGER.error(f"Self-signed certificate generation failed for {first_server}")
+            return False, 2
+
+        # Cache bytes so a cache-tree swap cannot remove either source between calls.
+        cached, err = JOB.cache_file("cert.pem", cert_path.read_bytes(), service_id=first_server)
+        if not cached:
+            LOGGER.error(f"Error while caching self-signed cert.pem file for {first_server} : {err}")
+
+        cached, err = JOB.cache_file("key.pem", key_path.read_bytes(), service_id=first_server)
+        if not cached:
+            LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
 
     LOGGER.info(f"Successfully generated self-signed certificate for {first_server}")
     return True, 1

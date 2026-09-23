@@ -57,12 +57,12 @@ def ping(_id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dic
     return request("GET", "/ping", _id=_id or get_id())
 
 
-def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
-    return request("GET", "/db", _id=get_id())
+def data(_id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("GET", "/db", _id=_id if _id is not None else get_id())
 
 
-def send_reports(reports: List[Dict[str, Any]]) -> Tuple[bool, Optional[int], Union[str, dict]]:
-    return request("POST", "/report", _id=get_id(), additional_data={"reports": reports})
+def send_reports(reports: List[Dict[str, Any]], _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("POST", "/report", _id=_id if _id is not None else get_id(), additional_data={"reports": reports})
 
 
 def get_id() -> str:

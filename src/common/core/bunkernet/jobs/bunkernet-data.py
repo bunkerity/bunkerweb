@@ -2,7 +2,6 @@
 
 from os import getenv, sep
 from os.path import join
-from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -35,26 +34,17 @@ try:
         LOGGER.info("BunkerNet is not activated, skipping download...")
         sys_exit(0)
 
-    # Create directory if it doesn't exist
-    bunkernet_path = Path(sep, "var", "cache", "bunkerweb", "bunkernet")
-    bunkernet_path.mkdir(parents=True, exist_ok=True)
-
     JOB = Job(LOGGER, __file__)
 
-    # Create empty file in case it doesn't exist
-    ip_list_path = bunkernet_path.joinpath("ip.list")
-
     # Get ID from cache
-    bunkernet_id = None
-    bunkernet_id = JOB.get_cache("instance.id")
+    bunkernet_id = JOB.get_cache("instance.id", job_name="bunkernet-register")
     if bunkernet_id:
-        bunkernet_path.joinpath("instance.id").write_bytes(bunkernet_id)
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
         LOGGER.info("No BunkerNet ID found in db cache")
 
     # Check if ID is present
-    if not bunkernet_path.joinpath("instance.id").is_file():
+    if not bunkernet_id:
         LOGGER.warning("Not downloading BunkerNet data because instance is not registered")
         sys_exit(2)
 
@@ -67,7 +57,7 @@ try:
 
     # Download data
     LOGGER.info("Downloading BunkerNet data ...")
-    ok, status, data = data()
+    ok, status, data = data(bunkernet_id.decode("utf-8").strip())
     LOGGER.debug(f"Data API reply - ok: {ok}, status: {status}, data: {data}")
     if not ok:
         LOGGER.error(f"Error while sending data request to BunkerNet API : {data}")

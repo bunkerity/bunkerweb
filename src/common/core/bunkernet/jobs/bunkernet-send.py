@@ -5,7 +5,6 @@ from itertools import chain
 from json import dumps, loads
 from os import getenv, sep
 from os.path import join
-from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -94,10 +93,6 @@ try:
         LOGGER.info("BunkerNet is not activated, skipping download...")
         sys_exit(0)
 
-    # Create directory if it doesn't exist
-    bunkernet_path = Path(sep, "var", "cache", "bunkerweb", "bunkernet")
-    bunkernet_path.mkdir(parents=True, exist_ok=True)
-
     JOB = Job(LOGGER, __file__)
 
     db_metadata = JOB.db.get_metadata()
@@ -107,18 +102,18 @@ try:
         sys_exit(0)
 
     # Get ID from cache
-    bunkernet_id = None
-    bunkernet_id = JOB.get_cache("instance.id")
+    bunkernet_id = JOB.get_cache("instance.id", job_name="bunkernet-register")
     if bunkernet_id:
-        bunkernet_path.joinpath("instance.id").write_bytes(bunkernet_id)
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
         LOGGER.info("No BunkerNet ID found in db cache")
 
     # Check if ID is present
-    if not bunkernet_path.joinpath("instance.id").is_file():
+    if not bunkernet_id:
         LOGGER.warning("Not sending BunkerNet data because instance is not registered")
         sys_exit(2)
+
+    instance_id = bunkernet_id.decode("utf-8").strip()
 
     # Create API instances for each database instance (HTTPS-aware)
     apis = [API.from_instance(instance) for instance in JOB.db.get_instances(with_credential=True)]
@@ -155,7 +150,7 @@ try:
             LOGGER.error(f"Failed to cache reports.json :\n{err}")
         return cached
 
-    reports, cache_failed = send_pending_reports(reports, force_send, send_reports, cache_remaining_reports, LOGGER)
+    reports, cache_failed = send_pending_reports(reports, force_send, lambda batch: send_reports(batch, instance_id), cache_remaining_reports, LOGGER)
     if cache_failed:
         exit_status = 2
 
