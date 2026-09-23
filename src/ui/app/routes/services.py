@@ -680,7 +680,8 @@ def services_service_page(service: str):
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
-            if "SERVER_NAME" not in variables:
+            # A blank name can skip check_variables: on the first service it equals the empty global.
+            if not _first_service_id(variables.get("SERVER_NAME")):
                 if service == "new":
                     DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
                     DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -794,10 +795,10 @@ def services_service_page(service: str):
 
         new_service = False
         if service == "new":
-            if "SERVER_NAME" not in variables:
+            if not _first_service_id(variables.get("SERVER_NAME")):
                 return redirect(url_for("loading", next=url_for("services.services_page")))
             new_service = True
-            service = variables["SERVER_NAME"].split(" ")[0]
+            service = _first_service_id(variables["SERVER_NAME"])
 
         arguments = {}
         if mode != "easy":

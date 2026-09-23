@@ -3231,6 +3231,18 @@ class Database:
                     for key, value in multisite_defaults.items():
                         # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
                         config.setdefault(f"{service_id}_{key}", value)
+                    # A service without its own SERVER_NAME row is named by its id. Inheriting the global
+                    # list instead renders "server_name ;" when that list is empty (the Linux variables.env
+                    # ships "SERVER_NAME="), and nginx then rejects the whole configuration.
+                    config[f"{service_id}_SERVER_NAME"] = {
+                        "value": service_id,
+                        "file_name": "",
+                        "global": False,
+                        "method": "default",
+                        "default": service_id,
+                        "template": None,
+                        "is_draft": False,
+                    }
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -3431,6 +3443,9 @@ class Database:
                         tmpl_settings = template_settings_map.get(tmpl_id, [])
                         for service_id in service_ids:
                             for setting in tmpl_settings:
+                                # A template cannot name a service: its placeholder would replace the service's id.
+                                if setting.setting_id == "SERVER_NAME":
+                                    continue
                                 key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
                                 if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                     continue

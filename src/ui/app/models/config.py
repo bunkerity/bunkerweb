@@ -240,6 +240,12 @@ class Config:
                 variables.pop(key, None)
                 continue
 
+            # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+            if setting == "SERVER_NAME" and not global_config and not value.strip():
+                report_error("The server name of a service can't be empty.")
+                variables.pop(key, None)
+                continue
+
             if plugins_settings[setting].get("type") != "file":
                 stripped_value = value.rstrip("\r\n")
                 if "\n" in stripped_value or "\r" in stripped_value:
