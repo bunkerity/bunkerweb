@@ -9,6 +9,9 @@ import sys
 import os
 import httpx
 
+# Same directory, run by path from upgrade.sh: sys.path[0] is this directory.
+from latest_stable import request_headers  # noqa: E402
+
 REPO = os.getenv("REPO", "bunkerity/bunkerweb")
 API_ROOT = f"https://api.github.com/repos/{REPO}"
 HEADERS = {
@@ -20,10 +23,16 @@ HEADERS = {
 
 def fetch(path: str) -> str:
     # Use httpx for web requests with a short timeout and HTTP/2 enabled
-    with httpx.Client(base_url=API_ROOT, headers=HEADERS, timeout=httpx.Timeout(15.0), http2=True) as client:
-        r = client.get(path)
-        r.raise_for_status()
-        return r.text
+    # Authenticated when GITHUB_TOKEN is set (see latest_stable.py), and loud on failure: the
+    # callers below suppress the exception, so this line is the only trace a rate limit leaves.
+    try:
+        with httpx.Client(base_url=API_ROOT, headers=request_headers(), timeout=httpx.Timeout(15.0), http2=True) as client:
+            r = client.get(path)
+            r.raise_for_status()
+            return r.text
+    except Exception as e:
+        print(f"latest_prerelease: GET {path} failed: {e!r}", file=sys.stderr)
+        raise
 
 
 def main() -> int:

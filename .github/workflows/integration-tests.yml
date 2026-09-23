@@ -400,6 +400,9 @@ jobs:
           RELEASE: ${{ inputs.RELEASE }}
           TEST: ${{ needs.setup.outputs.test }}
           IN_CICD: "1"
+          # tests/scripts/before/latest_stable.py: authenticated GitHub API (1000 req/h per repo) instead
+          # of the 60 req/h per-IP budget every hosted runner shares.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           chmod +x ./tests/scripts/*.sh
           if [ -n "${{ runner.debug }}" ] && [ "${{ runner.debug }}" -eq 1 ] ; then
