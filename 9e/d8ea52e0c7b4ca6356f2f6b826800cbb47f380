@@ -1,0 +1,59 @@
+src/common/core/letsencrypt/README.md
+  s_30377042a38551::t_ca8320f249ee77 71
+CHANGELOG.md
+  s_30377042a38551::t_138456bf23f56f 7
+src/common/core/letsencrypt/README.fr.md
+  s_30377042a38551::t_ca8320f249ee77 71
+docs/de/features.md
+  s_30377042a38551::t_ca8320f249ee77 3372
+docs/zh/features.md
+  s_30377042a38551::t_ca8320f249ee77 3435
+docs/fr/features.md
+  s_30377042a38551::t_ca8320f249ee77 3325
+docs/es/features.md
+  s_30377042a38551::t_ca8320f249ee77 3425
+docs/features.md
+  s_30377042a38551::t_ca8320f249ee77 3442
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_30377042a38551::t_6e2673cc493d3b 84-86
+  s_30377042a38551::t_5b69c671d06ff8 87
+  s_30377042a38551::t_41a18d6fcda4db 88-89
+  s_30377042a38551::t_2f17cfd7fdd825 146
+  s_32554f85a9397e::t_422a8c9604ebc3 83
+src/common/core/letsencrypt/README.de.md
+  s_30377042a38551::t_ca8320f249ee77 71
+src/common/core/letsencrypt/README.es.md
+  s_30377042a38551::t_ca8320f249ee77 71
+src/common/core/letsencrypt/README.zh.md
+  s_30377042a38551::t_ca8320f249ee77 71
+src/common/core/letsencrypt/letsencrypt.lua
+  s_30377042a38551::t_73e8f776fbd17e 242,269
+  s_30377042a38551::t_d4569991866156 254-255,257-259,268
+  s_30377042a38551::t_609def80fafc19 256,260-267
+  s_30377042a38551::t_d4a1312d031a97 243-246,248-253
+  s_30377042a38551::t_1140f8bb78cca8 247
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9ed8ea52e0c7b4ca6356f2f6b826800cbb47f380",
+  "prompts": {},
+  "sessions": {
+    "s_30377042a38551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94740ecb-c201-464c-aa45-f384124ead14",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_32554f85a9397e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd18-b9e1-7d20-9c97-2b05dcdf095f",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
