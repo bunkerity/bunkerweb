@@ -1,6 +1,8 @@
 from logging import getLogger
 from traceback import format_exc
 
+from flask import url_for
+
 
 def pre_render(**kwargs):
     logger = getLogger("UI")
@@ -10,6 +12,9 @@ def pre_render(**kwargs):
             "value": "error",
             "col-size": "col-12 col-md-6",
             "card-classes": "h-100",
+            "action_url": url_for("crowdsec.crowdsec_page"),
+            "action_label": "Open operator console",
+            "action_i18n": "crowdsec.title",
         },
     }
     try:

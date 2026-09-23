@@ -1055,6 +1055,10 @@ API_PERMISSION_ENUM = Enum(
     "ban_read",
     "ban_update",
     "ban_delete",
+    # CrowdSec decisions live on a SHARED engine: distinct names, so a plain ban_delete grant
+    # (global fallback in check_api_permission) never carries over to deleting a decision.
+    "crowdsec_read",
+    "crowdsec_delete",
     # Job permissions
     "job_read",
     "job_run",

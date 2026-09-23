@@ -12,6 +12,8 @@ which freezes on a start-time snapshot of the job environment).
 SETTINGS = {
     "CROWDSEC_API": "http://crowdsec:8080",
     "CROWDSEC_API_KEY": "",
+    "CROWDSEC_MANAGEMENT_LOGIN": "",
+    "CROWDSEC_MANAGEMENT_PASSWORD": "",
     "CROWDSEC_MODE": "live",
     "CROWDSEC_ENABLE_INTERNAL": "no",
     "CROWDSEC_REQUEST_TIMEOUT": "1000",

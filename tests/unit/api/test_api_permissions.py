@@ -68,9 +68,11 @@ class TestGrantRevoke:
             ("resource_group_clone", "resource_groups"),
             ("certificate_download", "certificates"),
             ("certificate_revoke", "certificates"),
+            ("crowdsec_read", "bans"),
+            ("crowdsec_delete", "bans"),
         ],
     )
-    def test_resource_group_and_certificate_permissions(self, adb, permission, resource_type):
+    def test_extended_resource_permissions(self, adb, permission, resource_type):
         assert adb.grant_api_permission("alice", permission, resource_type=resource_type) == ""
         assert adb.check_api_permission("alice", permission, resource_type=resource_type) is True
 

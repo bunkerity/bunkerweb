@@ -12,6 +12,7 @@ from .plugins import router as plugins_router
 from .cache import router as cache_router
 from .web_cache import router as web_cache_router
 from .jobs import router as jobs_router
+from .crowdsec import router as crowdsec_router
 from .system import router as system_router
 from .users import router as users_router
 from .templates import router as templates_router
@@ -52,6 +53,7 @@ router.include_router(plugins_router)
 router.include_router(cache_router)
 router.include_router(web_cache_router)
 router.include_router(jobs_router)
+router.include_router(crowdsec_router)
 router.include_router(system_router)
 router.include_router(users_router)
 router.include_router(templates_router)
