@@ -2116,6 +2116,9 @@ class Database:
 
                             if hard_delete_ids:
                                 self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
+                                # Their settings are bulk-deleted below; deleting the loaded objects later can
+                                # delete new rows when SQLite reuses the freed integer primary keys.
+                                service_settings_to_delete = [row for row in service_settings_to_delete if row.service_id not in hard_delete_ids]
                                 # Remove services that are no longer in the list
                                 session.query(Services).filter(Services.id.in_(hard_delete_ids)).delete(synchronize_session=False)
                                 session.query(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
