@@ -1,0 +1,82 @@
+src/common/core/crowdsec/control.lua
+  s_377e4c49e945c6::t_321b8cb4b3c3e7 164-169,174-201
+  s_377e4c49e945c6::t_fbd11d97d23b75 1-163,170-173,202-204
+  s_377e4c49e945c6::t_9fab5b819e33ec 205-521
+src/common/core/crowdsec/lib/config.lua
+  s_377e4c49e945c6::t_7f3f63a08ed700 2,43,87-93
+src/common/core/crowdsec/lib/stream_lock.lua
+  s_377e4c49e945c6::t_6d1ea96126859a 1-33
+tests/unit/common/test_crowdsec_defer_lua.py
+  s_377e4c49e945c6::t_4f46f20e6d90de 30
+src/common/core/crowdsec/crowdsec.lua
+  s_377e4c49e945c6::t_53f9f591d99f2a 26,49-73,339,366-375,532-606
+src/common/core/crowdsec/lib/bouncer.lua
+  s_377e4c49e945c6::t_71959a1d971eb2 580,594
+  s_377e4c49e945c6::t_beb5120965b231 588,592,597
+  s_377e4c49e945c6::t_f9082054dfd640 352-354,422-424,624-627,633-634,636,645-646
+  s_377e4c49e945c6::t_fbd11d97d23b75 4-6,10-11,13,67-68,84-89,150,207-208,230,236,239,261,263-267,271-276,280-293,295-305,310-311,313-322,324-349,351,355-362,364-375,379-380,384-387,389-392,394-397,399-417,420-421,425,492-495,497-507,510,512-513,565-579,607,611,619,692,716,726,776,792-794,856,864,879,916,924,926,928-953
+  s_377e4c49e945c6::t_cb0380640d5863 640-641,766-767,779-781,925
+  s_377e4c49e945c6::t_f00e81db2f4388 927
+  s_377e4c49e945c6::t_a1541545f25c4e 954
+tests/unit/common/test_crowdsec_evidence_lua.py
+  s_795e2ccdb6801b::t_e3d469f88bd87a 70,73,82,107
+  s_377e4c49e945c6::t_ecebefe25f9b4e 10,49-60,62-64
+  s_377e4c49e945c6::t_0884e7a6dfe074 66-69,71-72,74-76
+  s_377e4c49e945c6::t_febab6779bb961 9,29-31,33-34,36-37,39-40,42-43,45-48
+  s_377e4c49e945c6::t_e6e5ea41b408de 1-3,6,11-28,38
+  s_377e4c49e945c6::t_1e25f8eac3e493 61,65
+  s_32554f85a9397e::t_093c0faf45013c 32,35,41,44
+  s_377e4c49e945c6::t_68a1d8cbe9e58c 4-5,7-8,77-81,83-106,108-109
+src/bw/lua/bunkerweb/api.lua
+  s_377e4c49e945c6::t_8e98990b2e6f2a 1490
+tests/unit/common/test_crowdsec_reason_lua.py
+  s_377e4c49e945c6::t_629d41f2cbe40b 8,59-60
+  s_377e4c49e945c6::t_bca6c33c18f91f 27,32,37,39,61,87
+tests/unit/common/test_crowdsec_init_health_lua.py
+  s_377e4c49e945c6::t_1e25f8eac3e493 89
+  s_377e4c49e945c6::t_ecebefe25f9b4e 39-42,63,111-113,152
+src/common/core/crowdsec/lib/decision_cache.lua
+  s_377e4c49e945c6::t_6d1ea96126859a 1-116
+tests/unit/common/test_crowdsec_control_lua.py
+  s_377e4c49e945c6::t_e6e5ea41b408de 1-3,6,8,11-13,15-16,18,23-29
+  s_377e4c49e945c6::t_febab6779bb961 4-5,7,35-38,40-42,44,53,70
+  s_377e4c49e945c6::t_20f9f94b68d721 30-34
+  s_32554f85a9397e::t_093c0faf45013c 39,52
+  s_377e4c49e945c6::t_cb0380640d5863 14,19,22
+  s_377e4c49e945c6::t_8d39c6866797d4 9-10,17,20-21,43,45-51,54-69,71-73
+tests/unit/common/test_crowdsec_challenge_lua.py
+  s_377e4c49e945c6::t_71959a1d971eb2 656-658
+  s_377e4c49e945c6::t_4f46f20e6d90de 70,115-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "605646f0c314197525cc71cb04483f39288954d9",
+  "prompts": {},
+  "sessions": {
+    "s_32554f85a9397e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd18-b9e1-7d20-9c97-2b05dcdf095f",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_377e4c49e945c6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd23-ecf1-7f42-907e-dab692557c1c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
