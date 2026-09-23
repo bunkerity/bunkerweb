@@ -239,6 +239,34 @@ function letsencrypt:set()
 		ngx.var.is_whitelisted = "yes"
 		self.ctx.bw.is_whitelisted = "yes"
 		env_set("is_whitelisted", "yes")
+		-- The backend solver validates the challenge against the requested name, so a
+		-- REVERSE_PROXY_CUSTOM_HOST must not replace it. Same condition as the reverseproxy
+		-- template that declares $bw_reverse_proxy_host (literal hosts only): reading the
+		-- variable itself would log an "uninitialized variable" warning on services that do
+		-- not set it, and writing it where no server declares it raises an error.
+		local custom_host = get_variable("REVERSE_PROXY_CUSTOM_HOST", true, self.ctx)
+		if
+			custom_host
+			and custom_host ~= ""
+			and not custom_host:find("$", 1, true)
+			and get_variable("USE_REVERSE_PROXY", true, self.ctx) == "yes"
+		then
+			-- During a reload, a worker still running the previous configuration may not declare
+			-- the variable yet: that request keeps the configured host.
+			local ok, err = pcall(function()
+				ngx.var.bw_reverse_proxy_host = ngx.var.host
+			end)
+			if not ok then
+				if tostring(err):find("not found for writing", 1, true) then
+					self.logger:log(
+						NOTICE,
+						"$bw_reverse_proxy_host not declared by this configuration, keeping REVERSE_PROXY_CUSTOM_HOST"
+					)
+				else
+					self.logger:log(ERR, "can't override $bw_reverse_proxy_host : " .. tostring(err))
+				end
+			end
+		end
 		return self:ret(true, "ACME challenge passed through, whitelisted")
 	end
 	return self:ret(true, "set https_configured to " .. https_configured)
