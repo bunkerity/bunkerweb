@@ -54,7 +54,7 @@
     Check for it with:
 
     ```bash
-    journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
+    journalctl -u bunkerweb-worker -u bunkerweb-worker-heavy | grep -i 'NOAUTH\|AuthenticationError'
     ```
 
     The same diagnostic, for containers as well, is in
@@ -76,7 +76,7 @@
     ```
 
     ```bash
-    systemctl restart bunkerweb-worker bunkerweb-api
+    systemctl restart bunkerweb-worker bunkerweb-worker-heavy bunkerweb-api
     ```
 
     TLS is supported with the `rediss://` scheme. **Set `ssl_cert_reqs` explicitly** — a bare

@@ -70,7 +70,6 @@ services:
       CELERY_BROKER_URL: "redis://redis:6379/0"
       BUNKERWEB_INSTANCES: "bunkerweb"
       WORKER_CONCURRENCY: "2"
-      WORKER_QUEUES: "default,heavy"
     restart: "unless-stopped"
     networks:
       - bw-universe
