@@ -7,6 +7,7 @@
 - [UI] Responses are compressed (brotli/gzip) and static assets carry a versioned, long-lived cache header, so the Web UI stays fast when reached directly; the API gains gzip.
 - [MISC] Duration settings accept nginx-style time suffixes (ms, s, m, h, d, w, M, y): antibot, badbehavior, sessions, cors, reversescan, redis, metrics, crowdsec, db, letsencrypt, selfsigned and the scheduler timeouts. A bare number keeps its previous unit.
 - [BREAKING] `METRICS_REDIS_TTL` now takes time units: `m` means minutes, not millions. Values stored in the database are migrated; values set through the environment are not.
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for anchoring the `BROTLI_MIN_LENGTH` regex so trailing garbage is rejected. (#3959)
 
 ## v1.6.16~rc1 - 2026/09/21
 
