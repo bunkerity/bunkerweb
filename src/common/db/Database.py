@@ -1721,6 +1721,7 @@ class Database:
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
         rename: Optional[Tuple[str, str]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1749,6 +1750,8 @@ class Database:
                              deletes an existing draft row. A missing map preserves the
                              existing per-setting draft state.
             rename: Move a service and its dependent rows inside this save transaction.
+            custom_config_changes: Optional custom config edits to apply in the same
+                                   transaction as a rename.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
@@ -1876,6 +1879,36 @@ class Database:
                     return str(e)
                 if rename_error:
                     return rename_error
+
+            if custom_config_changes:
+                if not rename:
+                    return "Custom config changes require a service rename"
+
+                for change in custom_config_changes:
+                    config_type = str(change["type"]).strip().replace("-", "_").lower()
+                    name = str(change["name"])
+                    service_id = rename[1]
+                    custom_config = session.query(Custom_configs).filter_by(service_id=service_id, type=config_type, name=name).first()
+                    config_data = change["config"]
+                    data = config_data["data"].encode("utf-8") if isinstance(config_data["data"], str) else config_data["data"]
+                    checksum = config_data.get("checksum") or bytes_hash(data, algorithm="sha256")
+                    if custom_config is None:
+                        session.add(
+                            Custom_configs(
+                                service_id=service_id,
+                                type=config_type,
+                                name=name,
+                                data=data,
+                                checksum=checksum,
+                                method=config_data["method"],
+                                is_draft=bool(config_data.get("is_draft", False)),
+                            )
+                        )
+                    else:
+                        custom_config.data = data
+                        custom_config.checksum = checksum
+                        custom_config.method = config_data["method"]
+                        custom_config.is_draft = bool(config_data.get("is_draft", False))
 
             def aborted_save():
                 # A data-loss guard below returns the changed set without committing, and the
@@ -2923,6 +2956,7 @@ class Database:
                 draft_settings=draft_settings,
                 retry_on_conflict=False,
                 rename=rename,
+                custom_config_changes=custom_config_changes,
             )
 
         return changed_plugins

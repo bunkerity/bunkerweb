@@ -3,6 +3,7 @@
 ## v1.6.16~rc2 - 2026/09/??
 
 - [BUGFIX] `db`: on SQLite, settings written in the same save as a service rename or removal are no longer deleted by reused row ids, which could leave a renamed service without any settings and make the reload fall back to failover.
+- [BUGFIX] `ui`: renaming a service moves its settings, custom configs and job cache in one transaction, in every editor mode, instead of deleting and recreating the service, which dropped its per-service certificates and job cache.
 - [BUGFIX] `metrics`: a counter whose Redis value cannot be parsed is now discarded and rewritten with the live count instead of being retried forever, ending the `Invalid Redis metric counter` error logged every 5s on instances upgraded from 1.6.13 or older, where that counter also stopped reaching Redis entirely.
 - [BUGFIX] A service without its own `SERVER_NAME` is named by its id instead of inheriting the global value, empty on Linux, which rendered `server_name ;`, failed every reload and got the service deleted or renamed by the next Web UI save. An empty `SERVER_NAME` is now refused for a service, still allowed globally.
 - [BUGFIX] `letsencrypt`: a passed-through ACME challenge keeps the client `Host` instead of a fixed `REVERSE_PROXY_CUSTOM_HOST`. (Fixes #3957)

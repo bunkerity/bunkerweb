@@ -5,7 +5,7 @@ from os import getenv, sep
 from json import loads as json_loads
 from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
-from typing import Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from app.utils import flash, get_blacklisted_settings, is_editable_method
 
@@ -64,6 +64,8 @@ class Config:
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
+        rename: Optional[Tuple[str, str]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -108,6 +110,10 @@ class Config:
         save_kwargs = {"changed": check_changes, "file_names": file_name_map}
         if draft_settings is not None:
             save_kwargs["draft_settings"] = draft_settings
+        if rename is not None:
+            save_kwargs["rename"] = rename
+        if custom_config_changes is not None:
+            save_kwargs["custom_config_changes"] = custom_config_changes
         return self.__db.save_config(conf, override_method, **save_kwargs)
 
     def get_plugins_settings(self) -> dict:
@@ -320,6 +326,7 @@ class Config:
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Tuple[str, int]:
         """Edits a service
 
@@ -356,6 +363,10 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
+        rename = None
+        if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
+            rename = (old_server_name_splitted[0], server_name_splitted[0])
+
         ret = self.gen_conf(
             config,
             services,
@@ -364,6 +375,8 @@ class Config:
             override_method=override_method,
             file_name_map=file_name_map,
             draft_settings=draft_settings,
+            rename=rename,
+            custom_config_changes=custom_config_changes,
         )
         if isinstance(ret, str):
             return ret, 1
