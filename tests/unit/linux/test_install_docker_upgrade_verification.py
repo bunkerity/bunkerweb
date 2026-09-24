@@ -157,7 +157,7 @@ _STUBS = """
         print_warning() {{ echo "WARN: $*"; }}
         print_status() {{ :; }}
         UPGRADE_SCENARIO="yes"
-        DOCKER_IMAGE_TAG="1.7.0-beta"
+        DOCKER_IMAGE_TAG="1.7.0-alpha"
         {declarations}
         _docker_compose() {{
             case "$1 $2" in
@@ -197,9 +197,9 @@ def test_a_digest_pinned_image_is_refused():
     ("image", "expected"),
     (
         # Stripping at the FIRST colon left the repository as "localhost", which matches nothing.
-        ("localhost:5000/bunkerity/bunkerweb:1.7.0-beta", "health=yes"),
+        ("localhost:5000/bunkerity/bunkerweb:1.7.0-alpha", "health=yes"),
         # Negative control: the guard really is the repository match, not the service name.
-        ("localhost:5000/someone/else:1.7.0-beta", "health=no"),
+        ("localhost:5000/someone/else:1.7.0-alpha", "health=no"),
     ),
 )
 def test_a_registry_port_survives_the_tag_strip(image, expected):
@@ -244,7 +244,7 @@ def test_a_hand_edited_tag_is_refused():
 
 def test_a_matching_tag_is_accepted():
     """Control: the same path with the requested tag resolves and records a baseline."""
-    out = _run(_verification_script("bunkerity/bunkerweb:1.7.0-beta") + """
+    out = _run(_verification_script("bunkerity/bunkerweb:1.7.0-alpha") + """
         _docker_prepare_upgrade_verification
         echo "baseline=${_DOCKER_RESTART_COUNTS[cid-bunkerweb]:-unset}"
         """)

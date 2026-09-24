@@ -333,8 +333,8 @@ class TestWhatTheChecksMakeOfIt:
             assert found is not None and found["mode"] == row["mode"]
 
     def test_an_unknown_pair_refuses_in_place_before_anything_is_mutated(self):
-        assert manifest_row(MANIFEST, "1.7.0~beta", "1.5.0", "sqlite") is None
-        assert check_manifest(None, "1.7.0~beta", "1.5.0", "sqlite").verdict == RESTORE_ONLY
+        assert manifest_row(MANIFEST, "1.7.0~alpha", "1.5.0", "sqlite") is None
+        assert check_manifest(None, "1.7.0~alpha", "1.5.0", "sqlite").verdict == RESTORE_ONLY
 
     @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}:{r['mode']}")
     def test_the_check_agrees_with_the_row_s_own_mode(self, row):
@@ -365,7 +365,7 @@ class TestWhatTheChecksMakeOfIt:
         so the report has to say so where the verdict is read."""
         rendered = downgrade.render_report(
             {
-                "installed": "1.7.0~beta",
+                "installed": "1.7.0~alpha",
                 "target": "1.6.14",
                 "generated_at": "2026-09-06T12:00:00+02:00",
                 "verdict": IN_PLACE,
@@ -381,7 +381,7 @@ class TestWhatTheChecksMakeOfIt:
         """ "Destroyed all the same" is about a downgrade that will happen. A refused one will not."""
         rendered = downgrade.render_report(
             {
-                "installed": "1.7.0~beta",
+                "installed": "1.7.0~alpha",
                 "target": "1.6.14",
                 "generated_at": "x",
                 "verdict": downgrade.REFUSE,
@@ -393,7 +393,7 @@ class TestWhatTheChecksMakeOfIt:
 
     def test_a_report_without_them_still_renders(self):
         """Old callers and a missing manifest must not crash the report."""
-        assert "VERDICT" in downgrade.render_report({"installed": "1.7.0~beta", "target": "1.6.14", "generated_at": "x", "verdict": IN_PLACE, "checks": []})
+        assert "VERDICT" in downgrade.render_report({"installed": "1.7.0~alpha", "target": "1.6.14", "generated_at": "x", "verdict": IN_PLACE, "checks": []})
 
     def test_a_table_the_manifest_forgot_is_treated_as_certain(self):
         """Safe default: silence in the manifest is not permission."""

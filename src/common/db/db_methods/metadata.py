@@ -129,7 +129,7 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                 metadata = session.execute(select(Metadata.version).filter_by(id=1).limit(1)).first()
                 if metadata:
                     return metadata.version
-                return "1.7.0~beta"
+                return "1.7.0~alpha"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -291,7 +291,7 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
             "last_certificates_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.7.0~beta",
+            "version": "1.7.0~alpha",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }

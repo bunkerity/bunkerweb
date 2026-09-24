@@ -96,7 +96,7 @@ def rig(monkeypatch, tmp_path):
     # The database's own state, so "did the fallback land?" is a question the rig can answer
     # wrongly. A constant stub would make `execute_downgrade`'s post-restore check pass for free,
     # which is exactly the check the MANUAL verdict rests on.
-    state = {"stamp": HEAD, "version": "1.7.0~beta"}
+    state = {"stamp": HEAD, "version": "1.7.0~alpha"}
     calls["state"] = state
 
     monkeypatch.setattr(downgrade, "hold_status", lambda client: {"target": TARGET, "started_at": "2026-09-06T11:00:00+02:00"})
@@ -112,7 +112,7 @@ def rig(monkeypatch, tmp_path):
         "preflight",
         lambda target, db=None, client=None, now=None: {
             "verdict": IN_PLACE,
-            "installed": "1.7.0~beta",
+            "installed": "1.7.0~alpha",
             "engine": "sqlite",
             "target": target,
             "checks": [],
@@ -132,7 +132,7 @@ def rig(monkeypatch, tmp_path):
 
     def fake_restore(backup_file, db=None):
         calls["restore"].append(Path(backup_file))
-        state.update(stamp=HEAD, version="1.7.0~beta")
+        state.update(stamp=HEAD, version="1.7.0~alpha")
         return db
 
     def fake_alembic(engine, uri, revision, alembic_dir=None, timeout=1800.0):
@@ -213,7 +213,7 @@ class TestItRefusesBeforeMutating:
             "preflight",
             lambda target, db=None, client=None, now=None: {
                 "verdict": verdict,
-                "installed": "1.7.0~beta",
+                "installed": "1.7.0~alpha",
                 "engine": "sqlite",
                 "target": target,
                 "generated_at": NOW.isoformat(),
@@ -232,7 +232,7 @@ class TestItRefusesBeforeMutating:
             "preflight",
             lambda target, db=None, client=None, now=None: {
                 "verdict": IN_PLACE,
-                "installed": "1.7.0~beta",
+                "installed": "1.7.0~alpha",
                 "engine": "mariadb",
                 "target": target,
                 "checks": [],
@@ -250,7 +250,7 @@ class TestItRefusesBeforeMutating:
             "preflight",
             lambda target, db=None, client=None, now=None: {
                 "verdict": IN_PLACE,
-                "installed": "1.7.0~beta",
+                "installed": "1.7.0~alpha",
                 "engine": "sqlite",
                 "target": target,
                 "checks": [],
@@ -391,7 +391,7 @@ class TestTheGateReadsTheDatabaseItWillMigrate:
                 refused = any(counts.values())
                 return {
                     "verdict": "refuse" if refused else IN_PLACE,
-                    "installed": "1.7.0~beta",
+                    "installed": "1.7.0~alpha",
                     "engine": "sqlite",
                     "target": target,
                     "generated_at": NOW.isoformat(),
@@ -446,7 +446,7 @@ class TestEveryFailureLeavesSomethingStartable:
         monkeypatch.setattr(downgrade, "run_alembic_downgrade", lambda *a, **k: (1, "boom"))
 
         def noisy(backup_file, db=None):
-            rig["state"].update(stamp=HEAD, version="1.7.0~beta")
+            rig["state"].update(stamp=HEAD, version="1.7.0~alpha")
             raise RuntimeError("Unknown column 'bw_metadata.certificates_changed' in 'field list'")
 
         monkeypatch.setattr(backup_module, "restore_database", noisy)

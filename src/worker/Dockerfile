@@ -121,7 +121,7 @@ COPY --chown=root:worker --chmod=550 src/worker/healthcheck-worker.sh /usr/share
 COPY --chown=root:worker --chmod=550 src/bw/misc/root-ca.pem /usr/share/bunkerweb/misc/root-ca.pem
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.7.0~beta"
+LABEL version="1.7.0~alpha"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="worker"
 

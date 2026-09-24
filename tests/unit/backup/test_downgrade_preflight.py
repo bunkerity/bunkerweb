@@ -61,7 +61,7 @@ def test_the_version_ladder_is_populated():
 
 
 class TestVersionOrdering:
-    """BunkerWeb versions are Debian-flavoured: `1.7.0~beta` comes BEFORE `1.7.0`."""
+    """BunkerWeb versions are Debian-flavoured: `1.7.0~alpha` comes BEFORE `1.7.0`."""
 
     @pytest.mark.parametrize(("lower", "higher"), list(zip(ORDERED_VERSIONS, ORDERED_VERSIONS[1:])))
     def test_the_ladder_is_strictly_increasing(self, lower, higher):
@@ -69,8 +69,8 @@ class TestVersionOrdering:
 
     def test_a_tilde_suffix_sorts_before_the_bare_release(self):
         """A PEP 440 parser gets this backwards, and backwards here calls an upgrade a downgrade."""
-        assert is_downgrade("1.7.0", "1.7.0~beta")
-        assert not is_downgrade("1.7.0~beta", "1.7.0")
+        assert is_downgrade("1.7.0", "1.7.0~alpha")
+        assert not is_downgrade("1.7.0~alpha", "1.7.0")
 
     def test_the_same_version_is_not_a_downgrade(self):
         assert not is_downgrade("1.7.0", "1.7.0")
@@ -333,7 +333,7 @@ class TestCollectorsAgainstARealDatabase:
 
         from model import Metadata  # noqa: PLC0415 - conftest puts src/common/db on the path
 
-        installed = "1.7.0~beta"
+        installed = "1.7.0~alpha"
         with db._db_session() as session:
             # The shape is BUILT, not hoped for. PostgreSQL and MariaDB are one shared database for
             # the whole session and a migration test earlier in the run can leave `alembic_version`

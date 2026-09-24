@@ -2,7 +2,7 @@
 
 A fixture would prove nothing here: the failure this guards against is a heading written by
 hand in a slightly different shape, which drops a whole release in silence. The real file mixes
-`v1.7.0-beta` with `v1.6.14~rc1` and carries `??` placeholders in dates, so it is the only
+`v1.7.0-alpha` with `v1.6.14~rc1` and carries `??` placeholders in dates, so it is the only
 input worth asserting on.
 """
 

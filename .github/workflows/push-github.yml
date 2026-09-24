@@ -68,8 +68,8 @@ jobs:
           # Extract the changelog content
           VERSION="${{ inputs.VERSION }}"
 
-          # Check if this is a stable release (no -rc/-beta or ~rc/~beta suffix)
-          if [[ ! "$VERSION" =~ [-~](rc|beta) ]]; then
+          # Check if this is a stable release (no -rc/-beta/-alpha or ~rc/~beta/~alpha suffix)
+          if [[ ! "$VERSION" =~ [-~](rc|beta|alpha) ]]; then
             # For stable releases, extract the stable section and all related RC/beta sections
             # Extract major.minor.patch version (e.g., 1.6.5 from 1.6.5)
             BASE_VERSION=$(echo "$VERSION" | grep -oP '^\d+\.\d+\.\d+')
@@ -99,7 +99,7 @@ jobs:
               content=$(awk -v start="$start_line" -v end="$end_line" 'NR >= start && NR < end' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
             fi
           else
-            # For RC/beta releases, extract only the specific section
+            # For RC/beta/alpha releases, extract only the specific section
             # Find the line number of the specific version header
             start_line=$(grep -n "^## v${VERSION}" CHANGELOG.md | head -1 | cut -d: -f1)
 

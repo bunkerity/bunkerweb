@@ -2132,7 +2132,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2149,7 +2149,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2404,7 +2404,7 @@ docker run -d --name bunkerweb-aio \
   -e USE_CROWDSEC=yes \
   -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 Beim ersten Aktivieren der Bot-Erkennung leitet der Entrypoint außerdem ein stabiles `master_secret`

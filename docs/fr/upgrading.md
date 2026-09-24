@@ -103,7 +103,7 @@ Si l'une des deux est absente ou inactive, consultez [Les jobs ne s'exécutent j
 
     Une stack 1.6 contient `bunkerweb` et `bw-scheduler`. En 1.7, ajoutez l'**API**, le **Worker** et le **broker de jobs** : `bw-api`, `bw-worker`, `bw-jobs-broker` dans Compose ; `bunkerweb-api`, `bunkerweb-worker`, `bunkerweb-jobs-broker` dans Kubernetes. Le Worker exécute les jobs auparavant lancés dans le Scheduler. Chaque composant BunkerWeb reçoit `API_URL`, `API_TOKEN`, `CELERY_BROKER_URL`, et l'instance reçoit un volume `bw-instance-data` monté sur `/data`.
 
-    Changer uniquement les tags laisse une stack saine qui n'exécute **aucun job** : ni renouvellement de certificat, ni actualisation des listes, ni sauvegarde. Redéployez depuis les références [Docker](integrations.md#docker), [autoconf](integrations.md#docker-autoconf), [Kubernetes](integrations.md#kubernetes) ou [Swarm](integrations.md#swarm), disponibles dans [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations), avec une variante par moteur de base de données.
+    Changer uniquement les tags laisse une stack saine qui n'exécute **aucun job** : ni renouvellement de certificat, ni actualisation des listes, ni sauvegarde. Redéployez depuis les références [Docker](integrations.md#docker), [autoconf](integrations.md#docker-autoconf), [Kubernetes](integrations.md#kubernetes) ou [Swarm](integrations.md#swarm), disponibles dans [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations), avec une variante par moteur de base de données.
 
     **L'image All-In-One contient déjà ces composants** : elle supervise API et Worker dans le même conteneur, avec un Redis dédié aux jobs. Remplacez simplement le conteneur en conservant `/data`.
 
@@ -454,7 +454,7 @@ aussi.
 
             4. **Téléchargez la nouvelle image** :
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
             5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
@@ -465,7 +465,7 @@ aussi.
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
         === "Docker Compose"
@@ -474,7 +474,7 @@ aussi.
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                        image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                         ...
                 ```
 
@@ -597,20 +597,20 @@ aussi.
             Exemples:
 
             ```bash
-            # Upgrade to 1.7.0~beta interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.7.0~beta
+            # Upgrade to 1.7.0~alpha interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.7.0~alpha
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta -y -q
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --dry-run
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --no-auto-backup -y
             ```
 
             !!! warning "Sauter les sauvegardes"
@@ -692,7 +692,7 @@ aussi.
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -718,7 +718,7 @@ aussi.
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -1192,16 +1192,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.7.0-beta
+                        image: bunkerity/bunkerweb:1.7.0-alpha
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.7.0-beta
+                        image: bunkerity/bunkerweb-ui:1.7.0-alpha
                         ...
                 ```
 
@@ -1238,7 +1238,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -1264,7 +1264,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :

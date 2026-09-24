@@ -1,6 +1,6 @@
 services:
   bunkerweb-all-in-one:
-    image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+    image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     restart: "unless-stopped"
     ports:
       - "80:8080/tcp"

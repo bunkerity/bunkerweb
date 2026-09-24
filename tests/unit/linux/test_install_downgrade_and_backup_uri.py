@@ -79,7 +79,7 @@ def test_a_downgrade_is_recognised(installed, target):
         ("1.7.0~beta", "1.7.0~rc1"),
         ("1.7.0~alpha1", "1.7.0~beta"),
         ("1.7.0~beta1", "1.7.0~beta2"),
-        ("1.7.0~beta", "1.7.0"),
+        ("1.7.0~alpha", "1.7.0"),
         # Floating tags have no comparable core and stay unordered.
         ("latest", "1.6.15"),
         ("1.6.15", "testing"),

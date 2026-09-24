@@ -18,7 +18,7 @@
 
 保护已经可以通过 HTTP(S) 协议访问的现有 Web 应用程序是 BunkerWeb 的主要目标：它将充当一个带有额外安全功能的经典[反向代理](https://en.wikipedia.org/wiki/Reverse_proxy)。
 
-有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples)。
+有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/examples)。
 
 ## 基本设置
 
@@ -33,7 +33,7 @@
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.7.0-beta
+      bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     ```
 
     默认情况下，容器暴露：
@@ -51,8 +51,8 @@
 
     ```bash
     # 下载脚本及其校验和
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-alpha/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-alpha/install-bunkerweb.sh.sha256
 
     # 验证校验和
     sha256sum -c install-bunkerweb.sh.sha256
@@ -93,7 +93,7 @@
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -109,7 +109,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -127,7 +127,7 @@
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.7.0-beta
+        image: bunkerity/bunkerweb-api:1.7.0-alpha
         restart: "unless-stopped"
         environment:
           <<: *bw-env
@@ -138,7 +138,7 @@
           - bw-db
 
       bw-worker:
-        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        image: bunkerity/bunkerweb-worker:1.7.0-alpha
         restart: "unless-stopped"
         depends_on:
           - bw-api
@@ -187,7 +187,7 @@
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.7.0-beta
+        image: bunkerity/bunkerweb-ui:1.7.0-alpha
         environment:
           <<: *bw-env
         volumes:
@@ -266,7 +266,7 @@
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -284,7 +284,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -302,7 +302,7 @@
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
         depends_on:
           - bw-docker
         environment:
@@ -315,7 +315,7 @@
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.7.0-beta
+        image: bunkerity/bunkerweb-api:1.7.0-alpha
         restart: "unless-stopped"
         environment:
           <<: *bw-ui-env
@@ -326,7 +326,7 @@
           - bw-db
 
       bw-worker:
-        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        image: bunkerity/bunkerweb-worker:1.7.0-alpha
         restart: "unless-stopped"
         depends_on:
           - bw-api
@@ -384,7 +384,7 @@
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.7.0-beta
+        image: bunkerity/bunkerweb-ui:1.7.0-alpha
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -643,7 +643,7 @@
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- 包括任何其他现有的用于 UI、Redis、CrowdSec 等的环境变量 ---
-      bunkerity/bunkerweb-all-in-one:1.7.0-beta
+      bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     ```
 
     您的应用程序容器 (`myapp`) 和 `bunkerweb-aio` 容器必须在同一个 Docker 网络上，以便 BunkerWeb 能够使用主机名 `myapp` 访问它。
@@ -665,7 +665,7 @@
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... （如上主示例所示的所有其他相关环境变量）...
-      bunkerity/bunkerweb-all-in-one:1.7.0-beta
+      bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     ```
 
     请确保将 `myapp` 替换为您的应用程序容器的实际名称或 IP，并将 `http://myapp:8080` 替换为其正确的地址和端口。

@@ -105,7 +105,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.7.0~beta"
+DEFAULT_BUNKERWEB_VERSION="1.7.0~alpha"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""

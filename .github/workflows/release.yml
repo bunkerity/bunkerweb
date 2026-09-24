@@ -95,6 +95,7 @@ jobs:
           fi
 
           case "$TAG" in
+            *-alpha*) CHANNEL=alpha ; PRERELEASE=true  ; HIDDEN=true  ;;
             *-rc*)   CHANNEL=rc     ; PRERELEASE=true  ; HIDDEN=true  ;;
             *-beta*) CHANNEL=beta   ; PRERELEASE=true  ; HIDDEN=false ;;
             *)       CHANNEL=latest ; PRERELEASE=false ; HIDDEN=false ;;

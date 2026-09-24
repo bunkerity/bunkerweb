@@ -816,7 +816,7 @@ class Metadata(Base):
     failover: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
     failover_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
     integration: Mapped[str] = mapped_column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version: Mapped[str] = mapped_column(String(32), default="1.7.0~beta", nullable=False)
+    version: Mapped[str] = mapped_column(String(32), default="1.7.0~alpha", nullable=False)
     # AES-256-GCM keyring protecting stored private keys (bw_certificates) and per-instance
     # credentials (bw_instances). Only consulted when CERTIFICATE_ENCRYPTION_KEYS and
     # CERTIFICATE_ENCRYPTION_ACTIVE_KEY are absent from the environment: an operator-provided

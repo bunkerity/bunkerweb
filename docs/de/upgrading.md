@@ -118,7 +118,7 @@
     [Docker](integrations.md#docker), [Docker autoconf](integrations.md#docker-autoconf),
     [Kubernetes](integrations.md#kubernetes) oder [Swarm](integrations.md#swarm). Alle Stacks liegen
     im Repository unter
-    [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations),
+    [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations),
     mit einer Datei pro Datenbank-Engine.
 
     **Das All-In-One-Image ist nicht betroffen**: Es überwacht API und Worker im selben Container
@@ -532,7 +532,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
 
             4. **Laden Sie das neue Image herunter**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
             5. **Erstellen Sie den Container neu** mit denselben Optionen und verwenden Sie dasselbe `/data`-Volume, dieselben Ports und dieselben Umgebungsvariablen wie zuvor:
@@ -543,7 +543,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
         === "Docker Compose"
@@ -552,7 +552,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                        image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                         ...
                 ```
 
@@ -675,20 +675,20 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
             Beispiele:
 
             ```bash
-            # Interaktiv auf 1.7.0~beta aktualisieren (fragt nach Sicherung)
-            sudo ./install-bunkerweb.sh --version 1.7.0~beta
+            # Interaktiv auf 1.7.0~alpha aktualisieren (fragt nach Sicherung)
+            sudo ./install-bunkerweb.sh --version 1.7.0~alpha
 
             # Nicht-interaktives Upgrade mit automatischer Sicherung in ein benutzerdefiniertes Verzeichnis
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --backup-dir /var/backups/bw-2025-01 -y
 
             # Stilles unbeaufsichtigtes Upgrade (Protokolle unterdrückt) – verlässt sich auf die standardmäßige automatische Sicherung
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta -y -q
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha -y -q
 
             # Einen Probelauf (Plan) durchführen, ohne Änderungen anzuwenden
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --dry-run
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --dry-run
 
             # Upgrade unter Überspringen der automatischen Sicherung (NICHT empfohlen)
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --no-auto-backup -y
             ```
 
             !!! warning "Überspringen von Sicherungen"
@@ -770,7 +770,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -796,7 +796,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -1270,16 +1270,16 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.7.0-beta
+                        image: bunkerity/bunkerweb:1.7.0-alpha
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.7.0-beta
+                        image: bunkerity/bunkerweb-ui:1.7.0-alpha
                         ...
                 ```
 
@@ -1316,7 +1316,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -1342,7 +1342,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:

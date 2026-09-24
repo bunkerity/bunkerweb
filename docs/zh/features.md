@@ -2075,7 +2075,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2092,7 +2092,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2349,7 +2349,7 @@ docker run -d --name bunkerweb-aio \
   -e USE_CROWDSEC=yes \
   -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 首次启用机器人检测时，入口脚本还会为挑战运行时生成稳定的 `master_secret`，并保存到 `/var/lib/bunkerweb`（与一体化镜像的其他持久状态使用同一卷）。否则 CrowdSec 每次重启都会生成新密钥，使所有未完成的挑战 Cookie 失效。请为 `/data` 挂载持久卷，让此密钥及实例身份在重建后保留。

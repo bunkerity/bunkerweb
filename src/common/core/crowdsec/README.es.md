@@ -137,7 +137,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -154,7 +154,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -411,7 +411,7 @@ docker run -d --name bunkerweb-aio \
   -e USE_CROWDSEC=yes \
   -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 El entrypoint también deriva un `master_secret` estable para los desafíos la primera vez que se

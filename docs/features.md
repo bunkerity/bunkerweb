@@ -2223,7 +2223,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2240,7 +2240,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2499,7 +2499,7 @@ docker run -d --name bunkerweb-aio \
   -e USE_CROWDSEC=yes \
   -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 The entrypoint also derives a stable `master_secret` for the challenge runtime the first time bot detection is enabled, and persists it under `/var/lib/bunkerweb` (the same volume as everything else the all-in-one image keeps). Without it, CrowdSec generates a new one on every restart and invalidates every outstanding challenge cookie; give the container a persistent volume for `/data` so the secret — and the rest of the instance's identity — survives a recreation.

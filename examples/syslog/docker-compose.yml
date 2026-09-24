@@ -10,7 +10,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.7.0-beta
+    image: bunkerity/bunkerweb:1.7.0-alpha
     container_name: bunkerweb
     depends_on:
       - mysyslog
@@ -31,7 +31,7 @@ services:
         syslog-address: "udp://10.10.10.254:514"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     depends_on:
       - bunkerweb
       - mysyslog
@@ -58,7 +58,7 @@ services:
         syslog-address: "udp://10.10.10.254:514"
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.7.0-beta
+    image: bunkerity/bunkerweb-api:1.7.0-alpha
     restart: "unless-stopped"
     volumes:
       # The scheduler, the API and the worker share this volume because the SQLite database
@@ -72,7 +72,7 @@ services:
       - bw-universe
 
   bw-worker:
-    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    image: bunkerity/bunkerweb-worker:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bw-api

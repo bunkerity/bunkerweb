@@ -81,7 +81,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 770 /var/lib/bunkerweb /var/lib/bunkerweb/backups /var/tmp/bunkerweb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.7.0~beta"
+LABEL version="1.7.0~alpha"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bwcli"
 
@@ -159,7 +159,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.7.0~beta"
+LABEL version="1.7.0~alpha"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

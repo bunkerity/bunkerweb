@@ -51,7 +51,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -67,7 +67,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
           - bw-services
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.7.0-beta
+        image: bunkerity/bunkerweb-api:1.7.0-alpha
         restart: "unless-stopped"
         environment:
           <<: *service-env
@@ -78,7 +78,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
           - bw-db
 
       bw-worker:
-        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        image: bunkerity/bunkerweb-worker:1.7.0-alpha
         restart: "unless-stopped"
         depends_on:
           - bw-api
@@ -128,7 +128,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -150,7 +150,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.7.0-beta
+        image: bunkerity/bunkerweb-ui:1.7.0-alpha
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"

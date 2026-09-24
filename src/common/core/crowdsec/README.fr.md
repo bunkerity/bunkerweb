@@ -141,7 +141,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -158,7 +158,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -415,7 +415,7 @@ docker run -d --name bunkerweb-aio \
   -e USE_CROWDSEC=yes \
   -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 L'entrypoint dérive également un `master_secret` stable lors de la première activation de la détection de bots et le conserve sous `/var/lib/bunkerweb`. Sans cette persistance, CrowdSec génère un secret à chaque redémarrage et invalide les cookies des défis en cours. Montez un volume persistant sur `/data` pour conserver ce secret et l'identité de l'instance lors d'une recréation.

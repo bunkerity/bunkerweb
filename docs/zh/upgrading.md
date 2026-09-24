@@ -77,7 +77,7 @@
 
     1.6 堆栈包含 `bunkerweb` 和 `bw-scheduler`。1.7 还需要 **API**、**Worker** 和**任务代理**：Compose 堆栈中的 `bw-api`、`bw-worker`、`bw-jobs-broker`，或 Kubernetes 中的 `bunkerweb-api`、`bunkerweb-worker`、`bunkerweb-jobs-broker`。Worker 执行以前由调度器进程直接运行的所有任务，任务代理传递派发消息。每个 BunkerWeb 组件都获得 `API_URL`、`API_TOKEN` 和 `CELERY_BROKER_URL`，`bunkerweb` 实例还需要挂载到 `/data` 的 `bw-instance-data` 卷。
 
-    仅修改镜像标签会留下一个显示健康却**完全不运行后台任务**的堆栈：没有证书续期、封禁列表刷新或备份（[诊断方法](troubleshooting.md#background-jobs)）。请使用对应集成的 1.7 参考堆栈重新部署：[Docker](integrations.md#docker)、[Docker autoconf](integrations.md#docker-autoconf)、[Kubernetes](integrations.md#kubernetes) 或 [Swarm](integrations.md#swarm)。各数据库引擎的参考文件位于仓库的 [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations)。
+    仅修改镜像标签会留下一个显示健康却**完全不运行后台任务**的堆栈：没有证书续期、封禁列表刷新或备份（[诊断方法](troubleshooting.md#background-jobs)）。请使用对应集成的 1.7 参考堆栈重新部署：[Docker](integrations.md#docker)、[Docker autoconf](integrations.md#docker-autoconf)、[Kubernetes](integrations.md#kubernetes) 或 [Swarm](integrations.md#swarm)。各数据库引擎的参考文件位于仓库的 [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations)。
 
     **All-In-One 镜像不受此影响**：它在单个容器内管理 API、Worker 和专用内嵌 Redis 任务代理。保留 `/data` 并替换容器即可完成升级，无需新增组件。
 
@@ -395,7 +395,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -406,7 +406,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
         === "Docker Compose"
@@ -415,7 +415,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                        image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                         ...
                 ```
 
@@ -538,20 +538,20 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
             示例：
 
             ```bash
-            # 交互式升级到 1.7.0~beta（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.7.0~beta
+            # 交互式升级到 1.7.0~alpha（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.7.0~alpha
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta -y -q
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --dry-run
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -633,7 +633,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -659,7 +659,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -1133,16 +1133,16 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.7.0-beta
+                        image: bunkerity/bunkerweb:1.7.0-alpha
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.7.0-beta
+                        image: bunkerity/bunkerweb-ui:1.7.0-alpha
                         ...
                 ```
 
@@ -1179,7 +1179,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -1205,7 +1205,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

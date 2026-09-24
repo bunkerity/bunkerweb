@@ -39,7 +39,7 @@ actions:
   verify_1_7_sqlite:
     type: database
     query: "SELECT version FROM bw_metadata WHERE id = 1"
-    result: "1.7.0~beta"
+    result: "1.7.0~alpha"
     integrations:
       - "Linux"
       - "Docker"

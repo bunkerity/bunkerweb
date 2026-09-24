@@ -121,7 +121,7 @@
     [Docker](integrations.md#docker), [Docker autoconf](integrations.md#docker-autoconf),
     [Kubernetes](integrations.md#kubernetes) or [Swarm](integrations.md#swarm). Every stack is kept
     in the repository under
-    [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations),
+    [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations),
     one file per database engine.
 
     **The All-In-One image is not affected**: it supervises the API and the Worker inside the single
@@ -508,7 +508,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
 
             4. **Pull the new image**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                docker pull bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
             5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -519,7 +519,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                 ```
 
         === "Docker Compose"
@@ -528,7 +528,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+                        image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
                         ...
                 ```
 
@@ -651,20 +651,20 @@ Before starting, stop or firewall anything that writes to the API directly. The 
             Examples:
 
             ```bash
-            # Upgrade to 1.7.0~beta interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.7.0~beta
+            # Upgrade to 1.7.0~alpha interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.7.0~alpha
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta -y -q
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --dry-run
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.7.0~beta --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.7.0~alpha --no-auto-backup -y
             ```
 
             !!! warning "Skipping backups"
@@ -746,7 +746,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                        sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -772,7 +772,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                        sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -1247,16 +1247,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.7.0-beta
+                        image: bunkerity/bunkerweb:1.7.0-alpha
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+                        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+                        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.7.0-beta
+                        image: bunkerity/bunkerweb-ui:1.7.0-alpha
                         ...
                 ```
 
@@ -1293,7 +1293,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+                    sudo apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -1319,7 +1319,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~beta
+                    sudo dnf install -y --allowerasing bunkerweb-1.7.0~alpha
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

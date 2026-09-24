@@ -1275,7 +1275,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 By default, the container exposes:
@@ -1304,7 +1304,7 @@ A named volume (or bind mount) is required to persist the SQLite database, cache
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+    image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1376,7 +1376,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it instead:
@@ -1384,7 +1384,7 @@ Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it ins
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.7.0-beta
+    image: bunkerity/bunkerweb-all-in-one:1.7.0-alpha
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1479,7 +1479,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 * When `USE_CROWDSEC=yes`, the entrypoint will:
@@ -1538,7 +1538,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 !!! info "How it works internally"
@@ -1560,7 +1560,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 `crowdsecurity/appsec-bot-challenge` rejects at a score of 75; `…-strict` at 45 and `…-permissive` at 100 are alternatives, not layers. The entrypoint installs the collection and adds the AppSec configurations it ships to `/etc/crowdsec/acquis.d/appsec.yaml`, so nothing else is required. Confirm rejections with `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection`.
@@ -1586,7 +1586,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 Notes:
@@ -1608,7 +1608,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 This is the same variable name used by the official CrowdSec images, so an existing configuration carries over.
@@ -1647,7 +1647,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+  bunkerity/bunkerweb-all-in-one:1.7.0-alpha
 ```
 
 * **Local registration** is skipped when `CROWDSEC_API` is not `127.0.0.1` or `localhost`.
@@ -1681,13 +1681,13 @@ By accessing these prebuilt images from Docker Hub, you can quickly pull and run
 Whether you're conducting tests, developing applications, or deploying BunkerWeb in production, the Docker containerization option provides flexibility and ease of use. Embracing this method empowers you to take full advantage of BunkerWeb's features while leveraging the benefits of Docker technology.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.7.0-beta
+docker pull bunkerity/bunkerweb:1.7.0-alpha
 ```
 
 Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address:
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.7.0-beta
+docker pull ghcr.io/bunkerity/bunkerweb:1.7.0-alpha
 ```
 
 Key concepts for Docker integration include:
@@ -1697,7 +1697,7 @@ Key concepts for Docker integration include:
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
-    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) of the repository for more information.
+    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations) of the repository for more information.
 
 ### Environment variables
 
@@ -1707,7 +1707,7 @@ Settings are passed to the Scheduler using Docker environment variables:
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1751,7 +1751,7 @@ This ensures sensitive settings are kept out of the environment and logs.
 The [scheduler](concepts.md#scheduler) runs in its own container, which is also available on Docker Hub:
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.7.0-beta
+docker pull bunkerity/bunkerweb-scheduler:1.7.0-alpha
 ```
 
 !!! info "BunkerWeb settings"
@@ -1772,7 +1772,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.7.0-beta
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         environment:
           # This will set the API settings for the BunkerWeb container
           <<: *bw-api-env
@@ -1781,7 +1781,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.7.0-beta
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+        image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
         environment:
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
@@ -1799,7 +1799,7 @@ A volume is needed to store the SQLite database and backups used by the schedule
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     volumes:
       - bw-storage:/data
 ...
@@ -1993,7 +1993,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.7.0-beta
+    image: bunkerity/bunkerweb:1.7.0-alpha
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2006,7 +2006,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2032,7 +2032,7 @@ networks:
 
 ### Full compose file
 
-Here is the stack boilerplate, kept in the repository at [`misc/integrations/docker.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/docker.yml) and swept by the test suite like every other reference stack. It uses SQLite; MariaDB, MySQL, PostgreSQL and Oracle variants live next to it (`docker.mariadb.yml` and siblings), and a `.ui.yml` sibling of each adds the embedded web UI.
+Here is the stack boilerplate, kept in the repository at [`misc/integrations/docker.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations/docker.yml) and swept by the test suite like every other reference stack. It uses SQLite; MariaDB, MySQL, PostgreSQL and Oracle variants live next to it (`docker.mariadb.yml` and siblings), and a `.ui.yml` sibling of each adds the embedded web UI.
 
 ```yaml
 x-env: &env
@@ -2048,7 +2048,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.7.0-beta
+    image: bunkerity/bunkerweb:1.7.0-alpha
     restart: "unless-stopped"
     ports:
       - 80:8080
@@ -2064,7 +2064,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bunkerweb
@@ -2078,7 +2078,7 @@ services:
       - bw-universe
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.7.0-beta
+    image: bunkerity/bunkerweb-api:1.7.0-alpha
     restart: "unless-stopped"
     volumes:
       # The shared DATABASE_URI selects SQLite at
@@ -2095,7 +2095,7 @@ services:
       - bw-universe
 
   bw-worker:
-    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    image: bunkerity/bunkerweb-worker:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bw-api
@@ -2195,8 +2195,8 @@ To get started, download the installation script and its checksum, then verify t
 
 ```bash
 # Download the script and its checksum
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-alpha/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-alpha/install-bunkerweb.sh.sha256
 
 # Verify the checksum
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2276,7 +2276,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 | Option                  | Description                                                                                            |
 | ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.7.0~beta`).                                           |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.7.0~alpha`).                                           |
 | `-w, --enable-wizard`   | Enables the setup wizard.                                                                              |
 | `-n, --no-wizard`       | Disables the setup wizard.                                                                             |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.                                    |
@@ -2388,7 +2388,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
-sudo ./install-bunkerweb.sh --version 1.7.0~beta
+sudo ./install-bunkerweb.sh --version 1.7.0~alpha
 
 # Manager setup with remote worker instances (optional at install time)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2612,12 +2612,12 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.7.0~beta:
+    And finally install BunkerWeb 1.7.0~alpha:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -2660,12 +2660,12 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.7.0~beta:
+    And finally install BunkerWeb 1.7.0~alpha:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.7.0~beta
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.7.0~alpha
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -2696,12 +2696,12 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.7.0~beta:
+    And finally install BunkerWeb 1.7.0~alpha:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.7.0~beta
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.7.0~alpha
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -2746,12 +2746,12 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.7.0~beta:
+    And finally install BunkerWeb 1.7.0~alpha:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.7.0~beta
+    sudo -E dnf install -y --allowerasing bunkerweb-1.7.0~alpha
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -2844,13 +2844,13 @@ By adopting this approach, you can enjoy real-time reconfiguration of BunkerWeb 
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](concepts.md#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations) of the repository for more information.
 
 To enable automated configuration updates, include an additional container called `bw-autoconf` in the stack. This container hosts the autoconf service, which manages dynamic configuration changes for BunkerWeb.
 
 To support this functionality, use a dedicated "real" database backend (e.g., MariaDB, MySQL, or PostgreSQL) for synchronized configuration storage. By integrating `bw-autoconf` and a suitable database backend, you establish the infrastructure for seamless automated configuration management in BunkerWeb.
 
-Here is the stack boilerplate, kept in the repository at [`misc/integrations/autoconf.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/autoconf.mariadb.yml) and swept by the test suite like every other reference stack. MySQL, PostgreSQL and Oracle variants live next to it (`autoconf.mysql.yml`, `autoconf.postgres.yml`, `autoconf.oracle.yml`), and a `.ui.yml` sibling of each adds the embedded web UI.
+Here is the stack boilerplate, kept in the repository at [`misc/integrations/autoconf.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations/autoconf.mariadb.yml) and swept by the test suite like every other reference stack. MySQL, PostgreSQL and Oracle variants live next to it (`autoconf.mysql.yml`, `autoconf.postgres.yml`, `autoconf.oracle.yml`), and a `.ui.yml` sibling of each adds the embedded web UI.
 
 ```yaml
 x-env: &env
@@ -2862,7 +2862,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.7.0-beta
+    image: bunkerity/bunkerweb:1.7.0-alpha
     restart: "unless-stopped"
     ports:
       - 80:8080
@@ -2879,7 +2879,7 @@ services:
       - bw-services
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bunkerweb
@@ -2893,7 +2893,7 @@ services:
       - bw-db
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bunkerweb
@@ -2910,7 +2910,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.7.0-beta
+    image: bunkerity/bunkerweb-api:1.7.0-alpha
     restart: "unless-stopped"
     environment:
       <<: *env
@@ -2921,7 +2921,7 @@ services:
       - bw-db
 
   bw-worker:
-    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    image: bunkerity/bunkerweb-worker:1.7.0-alpha
     restart: "unless-stopped"
     depends_on:
       - bw-api
@@ -3125,7 +3125,7 @@ Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes th
 ```yaml
 services:
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
     environment:
       AUTOCONF_MODE: "yes"
       AUTOCONF_DISABLE_CLEANUP: "yes" # keep removed services as drafts
@@ -3161,13 +3161,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance so the autoconf service can detect it
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
@@ -3222,7 +3222,7 @@ longer executes jobs itself, it dispatches them through the API onto the broker 
 executes them. The reference manifests declare them as the `bunkerweb-api`, `bunkerweb-worker` and
 `bunkerweb-jobs-broker` Deployments, with the matching `svc-bunkerweb-api` and
 `svc-bunkerweb-jobs-broker` Services
-([`misc/integrations/k8s.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/k8s.mariadb.yml)).
+([`misc/integrations/k8s.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations/k8s.mariadb.yml)).
 A stack without them comes up healthy and runs no background job at all — no certificate renewal, no
 blocklist refresh, no backup.
 
@@ -3262,7 +3262,7 @@ Further information about the Redis/Valkey settings can be found [here](features
     as configured by the `DATABASE_URI` setting.
     However, we understand that you may prefer to utilize alternative backends for your Docker integration.
     If that is the case, rest assured that other database backends are still possible.
-    See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations)
+    See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations)
     of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
@@ -3379,7 +3379,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.7.0~beta"
+  tag: "1.7.0~alpha"
 ```
 
 2. For each sidecar, add:
@@ -3472,7 +3472,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.7.0~beta"
+  tag: "1.7.0~alpha"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -3516,7 +3516,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.7.0-beta
+          image: bunkerity/bunkerweb:1.7.0-alpha
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3568,7 +3568,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.7.0-beta
+          image: bunkerity/bunkerweb:1.7.0-alpha
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3787,7 +3787,7 @@ To add a new application protected by BunkerWeb:
 
 #### Full YAML files
 
-Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
+Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
 
 !!! warning "DNS_RESOLVERS must name the cluster DNS Service"
 
@@ -3939,7 +3939,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+              image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -4114,11 +4114,11 @@ service:
 
 # BunkerWeb settings
 bunkerweb:
-  tag: 1.7.0~beta
+  tag: 1.7.0~alpha
 
 # Scheduler settings
 scheduler:
-  tag: 1.7.0~beta
+  tag: 1.7.0~alpha
   extraEnvs:
     # Enable real IP module to get real IP of clients
     - name: USE_REAL_IP
@@ -4126,11 +4126,11 @@ scheduler:
 
 # Controller settings
 controller:
-  tag: 1.7.0~beta
+  tag: 1.7.0~alpha
 
 # UI settings
 ui:
-  tag: 1.7.0~beta
+  tag: 1.7.0~alpha
 ```
 
 Install BunkerWeb with custom values:
@@ -4748,11 +4748,11 @@ Since multiple instances of BunkerWeb are running, a shared data store implement
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
-Here is the stack boilerplate, kept in the repository at [`misc/integrations/swarm.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/swarm.mariadb.yml) and swept by the test suite like every other reference stack. Deploy it with `docker stack deploy -c swarm.mariadb.yml bunkerweb`, **not** `docker compose up`: a stack deploy silently ignores `container_name`, `depends_on`, `links`, `profiles` and the top-level `restart:` key, so none of those appear below — ordering comes from each component's own readiness loop plus `deploy.restart_policy`. MySQL, PostgreSQL and Oracle variants live next to it (`swarm.mysql.yml`, `swarm.postgres.yml`, `swarm.oracle.yml`), and a `.ui.yml` sibling of each adds the embedded web UI.
+Here is the stack boilerplate, kept in the repository at [`misc/integrations/swarm.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/misc/integrations/swarm.mariadb.yml) and swept by the test suite like every other reference stack. Deploy it with `docker stack deploy -c swarm.mariadb.yml bunkerweb`, **not** `docker compose up`: a stack deploy silently ignores `container_name`, `depends_on`, `links`, `profiles` and the top-level `restart:` key, so none of those appear below — ordering comes from each component's own readiness loop plus `deploy.restart_policy`. MySQL, PostgreSQL and Oracle variants live next to it (`swarm.mysql.yml`, `swarm.postgres.yml`, `swarm.oracle.yml`), and a `.ui.yml` sibling of each adds the embedded web UI.
 
 Before deploying, label the node that will hold the stateful services once:
 
@@ -4770,7 +4770,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.7.0-beta
+    image: bunkerity/bunkerweb:1.7.0-alpha
     # `mode: global` is REQUIRED, not a recommendation. The autoconf controller registers each
     # instance under the task's DNS name `<service>.<NodeID>.<TaskID>`, which only resolves for a
     # global service; a replicated one produces `<service>.<slot>.<TaskID>` and the control plane
@@ -4806,7 +4806,7 @@ services:
       - bw-services
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
     deploy:
       # The controller talks to the Swarm API, which only a manager serves.
       placement:
@@ -4823,7 +4823,7 @@ services:
       - bw-db
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    image: bunkerity/bunkerweb-scheduler:1.7.0-alpha
     deploy:
       placement:
         constraints:
@@ -4843,7 +4843,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.7.0-beta
+    image: bunkerity/bunkerweb-api:1.7.0-alpha
     deploy:
       restart_policy:
         condition: any
@@ -4856,7 +4856,7 @@ services:
       - bw-db
 
   bw-worker:
-    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    image: bunkerity/bunkerweb-worker:1.7.0-alpha
     deploy:
       placement:
         constraints:
@@ -5053,7 +5053,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
+        image: bunkerity/bunkerweb:1.7.0-alpha
         ...
         deploy:
           mode: global
@@ -5065,7 +5065,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+        image: bunkerity/bunkerweb-autoconf:1.7.0-alpha
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
           ...
