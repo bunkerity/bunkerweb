@@ -37,7 +37,19 @@
     "ALLOWED_METHODS": "GET|POST|HEAD|PATCH|DELETE|QUERY",
     "MAX_CLIENT_SIZE": "1G",
     "CONTENT_SECURITY_POLICY": "",
-    "PERMISSIONS_POLICY": ""
+    "PERMISSIONS_POLICY": "",
+    "USE_WHITELIST": "yes",
+    "WHITELIST_IP": "",
+    "WHITELIST_RDNS": "",
+    "WHITELIST_ASN": "",
+    "WHITELIST_USER_AGENT": "",
+    "WHITELIST_URI": "",
+    "WHITELIST_HEADER_VALUE": "",
+    "WHITELIST_IP_URLS": "",
+    "WHITELIST_RDNS_URLS": "",
+    "WHITELIST_ASN_URLS": "",
+    "WHITELIST_USER_AGENT_URLS": "",
+    "WHITELIST_URI_URLS": ""
   },
   "configs": ["modsec/api.conf", "modsec-crs/api.conf"],
   "steps": [
@@ -89,6 +101,24 @@
         "LIMIT_CONN_MAX_HTTP1",
         "LIMIT_CONN_MAX_HTTP2",
         "LIMIT_CONN_MAX_HTTP3"
+      ]
+    },
+    {
+      "title": "Security - Whitelisting",
+      "subtitle": "Configure the settings related to the external whitelists.",
+      "settings": [
+        "USE_WHITELIST",
+        "WHITELIST_IP",
+        "WHITELIST_RDNS",
+        "WHITELIST_ASN",
+        "WHITELIST_USER_AGENT",
+        "WHITELIST_URI",
+        "WHITELIST_HEADER_VALUE",
+        "WHITELIST_IP_URLS",
+        "WHITELIST_RDNS_URLS",
+        "WHITELIST_ASN_URLS",
+        "WHITELIST_USER_AGENT_URLS",
+        "WHITELIST_URI_URLS"
       ]
     },
     {
