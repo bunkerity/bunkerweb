@@ -13,6 +13,7 @@ read the same message ids, because `misc/dev/i18n/json_to_po.py` generates the g
 from the same JSON files i18next loads.
 """
 
+from contextlib import suppress
 from functools import lru_cache
 from hashlib import sha256
 from json import dumps, loads
@@ -75,13 +76,11 @@ def resolve_locale() -> str:
     if language in SUPPORTED_LANGUAGE_CODES:
         return babel_locale(language)
 
-    try:
+    with suppress(Exception):
         if current_user and current_user.is_authenticated:
             language = getattr(current_user, "language", None)
             if language in SUPPORTED_LANGUAGE_CODES:
                 return babel_locale(language)
-    except Exception:  # a login backend that is not ready yet must not break the render
-        pass
 
     best = request.accept_languages.best_match(SUPPORTED_LOCALES)
     if best:

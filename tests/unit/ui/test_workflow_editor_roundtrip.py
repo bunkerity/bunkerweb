@@ -69,7 +69,7 @@ DEFINITION = {
 
 GROUP_INDEX = {"office": {"ip": ["203.0.113.0/24"]}}
 
-HARNESS = """
+HARNESS = r"""
 globalThis.window = globalThis;
 // The editor builds its condition and operator labels through `t()` at module scope, so the
 // translator has to exist before the file is required — same category of stub as `window`,
@@ -165,7 +165,7 @@ def test_a_not_leaf_survives_as_a_not_group(node, tmp_path):
         assert negation["node"]["op"] == "any"
 
 
-CONVERT_HARNESS = """
+CONVERT_HARNESS = r"""
 globalThis.window = globalThis;
 // The editor builds its condition and operator labels through `t()` at module scope, so the
 // translator has to exist before the file is required — same category of stub as `window`,
@@ -236,7 +236,7 @@ def test_changing_a_predicate_type_keeps_the_values_it_can(node, tmp_path):
 # Enough of a DOM to run the editor's DOMContentLoaded path and capture what it draws. The
 # ladder is built by string concatenation into innerHTML, so a mangled quote in one of the
 # ~30 aria-label/title attributes produces markup no unit test would otherwise see.
-RENDER_HARNESS = """
+RENDER_HARNESS = r"""
 const store = {};
 function el(id) {
   return store[id] || (store[id] = {
@@ -292,7 +292,7 @@ el("wf-readonly").value = "no";
 el("wf-groups").value = JSON.stringify({});
 el("wf-definition").value = process.argv[3];
 ready();
-process.stdout.write(el("wf-rules").innerHTML + "\\n<!--CAP-->\\n" + el("wf-cap").innerHTML);
+process.stdout.write(el("wf-rules").innerHTML + "\n<!--CAP-->\n" + el("wf-cap").innerHTML);
 """
 
 

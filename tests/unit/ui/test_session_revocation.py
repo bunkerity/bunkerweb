@@ -68,11 +68,7 @@ def test_no_real_remember_cookie_is_configured():
 def test_login_does_not_ask_flask_login_to_remember():
     """`remember=` on `login_user` is what issues the cookie. `session.permanent` is the feature."""
     source = LOGIN_PY.read_text(encoding="utf-8")
-    calls = [
-        node
-        for node in ast.walk(ast.parse(source))
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "login_user"
-    ]
+    calls = [node for node in ast.walk(ast.parse(source)) if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "login_user"]
     assert calls, "login_user is not called any more -- this test is checking nothing"
     for call in calls:
         assert not any(kw.arg == "remember" for kw in call.keywords), "login_user(remember=...) issues the unrevocable cookie again"

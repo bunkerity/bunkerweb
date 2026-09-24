@@ -106,7 +106,7 @@ def expand_service_redirects(config: Dict[str, Any], db: Any, logger: Any = None
         # another redirect: NGINX refuses two location blocks with the same URI whoever emitted
         # them. Upstream pools are flattened into these same settings before this runs.
         foreign = claimed_paths(out, prefixes, families={label: pair for label, pair in LOCATION_FAMILIES.items() if label != "redirect"})
-        claimed = dict(taken)
+        claimed = taken.copy()
         next_index = 0
         for rule in rules:
             from_path = rule["from_path"]

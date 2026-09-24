@@ -27,7 +27,7 @@ def bunkernet_stats(
         .ext("bunkernet")
         .get_stats(
             metric=metric or None,
-            instance_hostname=instance_hostname if instance_hostname else None,
+            instance_hostname=instance_hostname or None,
             since=since or None,
             limit=limit,
         )

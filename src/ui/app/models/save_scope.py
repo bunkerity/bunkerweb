@@ -152,7 +152,7 @@ def restore_unowned_settings(
         unclearable everywhere.
     """
     restore_skip = restore_skip or set()
-    variables = dict(payload)
+    variables = payload.copy()
 
     for setting, entry in db_config.items():
         if setting in variables or setting in restore_skip:

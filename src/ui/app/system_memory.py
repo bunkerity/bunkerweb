@@ -10,6 +10,7 @@ stats`` makes -- ``memory.current`` on its own drifts up to the limit as soon as
 reads files, which would make the card cry wolf permanently.
 """
 
+from contextlib import suppress
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -35,13 +36,11 @@ def _read_int(path: Path) -> Optional[int]:
 
 def _stat_field(path: Path, field: str) -> int:
     """Read one ``<key> <value>`` line out of a cgroup ``memory.stat``; 0 when absent."""
-    try:
+    with suppress(OSError, ValueError):
         for line in path.read_text(encoding="utf-8").splitlines():
             key, _, value = line.partition(" ")
             if key == field:
                 return int(value)
-    except (OSError, ValueError):
-        pass
     return 0
 
 

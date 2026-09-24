@@ -286,7 +286,7 @@
     if (!node) return;
     var target = node.querySelector(".bw-kpi-value") || node;
     target.textContent = value;
-    // A server_name or a reason can be 256 characters. The tile ellipsises them (see the page
+    // A server_name or a reason can be 256 characters. The tile truncates them (see the page
     // CSS), so the full value has to stay reachable somewhere.
     target.setAttribute("title", value);
   }

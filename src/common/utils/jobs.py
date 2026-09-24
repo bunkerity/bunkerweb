@@ -149,7 +149,7 @@ _PENDING_ACKS: List[str] = []
 
 def drain_pending_acks() -> List[str]:
     """Take what the job that just ran deferred. Worker side."""
-    drained = list(_PENDING_ACKS)
+    drained = _PENDING_ACKS.copy()
     _PENDING_ACKS.clear()
     return drained
 
@@ -177,9 +177,9 @@ def defer_change_acknowledgement(keys: Tuple[str, ...], snapshot: Dict[str, Any]
         for key, value in snapshot.items():
             if isinstance(value, datetime):
                 serializable[key] = value.isoformat()
-            elif isinstance(value, (bool, str, int, float, type(None))):
+            elif value is None or isinstance(value, (bool, str, int, float)):
                 serializable[key] = value
-            elif any(key == f"{k}_changed" or key == f"last_{k}_change" for k in keys):
+            elif any(key in (f"{k}_changed", f"last_{k}_change") for k in keys):
                 return f"cannot defer {key}: {type(value).__name__} does not survive the broker, and dropping it would silently no-op the acknowledgement"
 
         _PENDING_ACKS.append(json_dumps({"keys": list(keys), "snapshot": serializable}))
@@ -253,7 +253,7 @@ def request_requeue(delay_seconds: int, reason: str, logger: Logger) -> None:
     """
     remaining = MAX_JOB_REQUEUES - job_requeue_count()
     logger.warning(f"Deferring this run by {delay_seconds}s: {reason} (deferrals left: {max(0, remaining - 1)})")
-    _PENDING_REQUEUE.append({"delay": max(1, int(delay_seconds)), "reason": reason})
+    _PENDING_REQUEUE.append({"delay": max(1, int(delay_seconds)), "reason": reason})  # noqa: FURB123 — third-party job scripts may pass a string
 
 
 # Why a job that exited 0 left its change flags raised instead of applying them (e.g.

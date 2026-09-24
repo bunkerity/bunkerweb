@@ -138,7 +138,13 @@ class TestItNeverFollowsASymlink:
             st_uid = owner_uid
             st_gid = owner_gid
 
-        monkeypatch.setattr(backup, "os_stat", lambda _path: _Owner())
+        real_stat = Path.stat
+        reference = backup.DB_LOCK_FILE.parent
+
+        def _stat(path, *args, **kwargs):
+            return _Owner() if path == reference else real_stat(path, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "stat", _stat)
         return calls
 
     def test_a_real_directory_is_still_chowned(self, tmp_path, monkeypatch):

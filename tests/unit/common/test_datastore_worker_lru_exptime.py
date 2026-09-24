@@ -128,12 +128,10 @@ def test_a_non_positive_exptime_is_normalised_before_it_reaches_the_lru(exptime)
 
     The mutant this catches is `exptime <= 0` weakened back to `exptime < 0` -- zero then reaches
     lrucache verbatim, as a ttl that elapsed the instant it was written."""
-    out = _run(
-        f"""
+    out = _run(f"""
         store:set("k", "v", {exptime}, true)
         print(tostring(RECORDED_TTL))
-        """
-    )
+        """)
     assert out == "nil", f"datastore passed ttl={out!r} to lrucache for exptime={exptime}; only nil means no expiry there"
 
 
@@ -144,34 +142,28 @@ def test_a_value_written_with_no_expiry_survives_the_passage_of_time(exptime):
 
     With the fix reverted, `exptime = 0` yields `expire = ngx.now()`, and one tick later
     `expire < ngx.now()` holds -- so this is the case that goes red on the mutant."""
-    out = _run(
-        f"""
+    out = _run(f"""
         store:set("k", "v", {exptime}, true)
         NOW = NOW + 3600
         print(tostring(store:get("k", true)))
-        """
-    )
+        """)
     assert out == "v", f"exptime={exptime} expired despite meaning no-expiry: {out!r}"
 
 
 @needs_lua
 def test_a_positive_exptime_is_still_honoured():
     """Anti-vacuity: the normalisation must not turn every write into a permanent one."""
-    fresh = _run(
-        """
+    fresh = _run("""
         store:set("k", "v", 60, true)
         print(tostring(store:get("k", true)))
-        """
-    )
+        """)
     assert fresh == "v", "a live value must read back"
 
-    stale = _run(
-        """
+    stale = _run("""
         store:set("k", "v", 60, true)
         NOW = NOW + 61
         print(tostring(store:get("k", true)))
-        """
-    )
+        """)
     assert stale == "nil", "a 60s ttl must still expire after 61s -- the normalisation swallowed it"
 
 

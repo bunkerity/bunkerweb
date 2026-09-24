@@ -762,7 +762,7 @@ def fetch_archive(repo: str, tag: str) -> bytes:
 
     Raises ValueError on policy failure, RequestException on network failure.
     """
-    if not RELEASE_TAG_RX.match(tag or ""):
+    if not RELEASE_TAG_RX.match(tag or ""):  # noqa: FURB143 - keep None input on the ValueError path
         raise ValueError(f"invalid tag {tag!r}")
     return _get_allowlisted(archive_url(repo, tag), timeout=ARCHIVE_TIMEOUT, cap=ARCHIVE_MAX)
 
@@ -911,7 +911,7 @@ def repack_plugin(payload: Any, plugin_id: str) -> Tuple[Optional[bytes], Option
     dropped rather than copied. A plugin has no business shipping one, and a symlink is how an
     archive reaches a path its member names never mention.
     """
-    if not CATALOG_ID_RX.match(plugin_id or ""):
+    if not CATALOG_ID_RX.match(plugin_id or ""):  # noqa: FURB143 - keep None input on the error-return path
         return None, f"invalid plugin id {plugin_id!r}"
 
     tar = _open_archive(payload)
@@ -996,7 +996,7 @@ def template_payload(payload: Any, template_id: str) -> Tuple[Optional[Dict[str,
     Only the five fields ``create_template`` takes are carried across. The rest of an upstream
     ``template.json`` is left where it is.
     """
-    if not CATALOG_ID_RX.match(template_id or ""):
+    if not CATALOG_ID_RX.match(template_id or ""):  # noqa: FURB143 - keep None input on the error-return path
         return None, f"invalid template id {template_id!r}"
 
     base = f"{SOURCES['templates']['subdir']}/{template_id}"

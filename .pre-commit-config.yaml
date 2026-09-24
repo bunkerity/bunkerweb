@@ -75,7 +75,8 @@ repos:
     hooks:
       - id: flake8
         name: Flake8 Python Linter
-        args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
+        args:
+          ["--max-line-length=160", "--ignore=E203,E266,E402,E501,E722,W503"]
         exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
 
   - repo: https://github.com/dosisod/refurb
@@ -92,7 +93,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+|src/ui/app/static/locales/.+|src/ui/translations/.+|docs/.+/.+|src/common/README\..+\.md|src/common/core/.+/README\..+\.md)$
-        entry: codespell --ignore-regex="(tabEl|Widgits|fpr|TE|STING|SUPPOR|FO|EXPEC|ND|AKS|DOCUMEN|unparseable)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js,docs/json2md.py,src/common/core/letsencrypt/jobs/lego/lego_providers.json,src/common/core/letsencrypt/jobs/lego/legacy_aliases.json,src/common/core/letsencrypt/plugin.json,misc/dev/docker-compose.db-mount.yml
+        entry: codespell --ignore-words-list=BU,caf,mis --ignore-regex="(tabEl|Widgits|fpr|TE|STING|SUPPOR|FO|EXPEC|ND|AKS|DOCUMEN|unparseable)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js,docs/json2md.py,src/common/core/letsencrypt/jobs/lego/lego_providers.json,src/common/core/letsencrypt/jobs/lego/legacy_aliases.json,src/common/core/letsencrypt/plugin.json,misc/dev/docker-compose.db-mount.yml
         language: python
         types: [text]
 

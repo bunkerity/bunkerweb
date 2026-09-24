@@ -196,14 +196,14 @@ class DatabaseRedirectsMixin(DatabaseMixinBase):
             if session.execute(select(Resources.id).where(Resources.type == "redirect", Resources.name == normalized).limit(1)).first():
                 return "", f"Redirect name {normalized} already exists"
 
-            values = {"from_path": from_path.strip() or "/", "to_url": to_url.strip(), "status_code": str(status_code).strip()}
+            values = {"from_path": from_path.strip() or "/", "to_url": to_url.strip(), "status_code": status_code.strip()}
             if error := self._validate_redirect_fields(session, values):
                 return "", error
 
             resource_id = str(uuid4())
             now = datetime.now(timezone.utc)
             session.add(Resources(id=resource_id, type="redirect", name=normalized, description=description, creation_date=now, last_update=now))
-            session.add(Redirects(resource_id=resource_id, append_request_uri=bool(append_request_uri), **values))
+            session.add(Redirects(resource_id=resource_id, append_request_uri=append_request_uri, **values))
             try:
                 # No config_changed flag: a resource attached to nothing renders nothing, so
                 # creation alone must not trigger a generation and a reload.

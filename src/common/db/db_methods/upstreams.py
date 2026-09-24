@@ -358,7 +358,7 @@ class DatabaseUpstreamsMixin(DatabaseMixinBase):
             resource_id = str(uuid4())
             now = datetime.now(timezone.utc)
             session.add(Resources(id=resource_id, type="upstream", name=normalized, description=description, creation_date=now, last_update=now))
-            session.add(Upstreams(resource_id=resource_id, protocol=protocol, backend_ssl=bool(backend_ssl), method=method, keepalive=keepalive))
+            session.add(Upstreams(resource_id=resource_id, protocol=protocol, backend_ssl=backend_ssl, method=method, keepalive=keepalive))
             self._replace_servers(session, resource_id, servers)
             try:
                 # No config_changed flag: a pool attached to nothing renders nothing, so

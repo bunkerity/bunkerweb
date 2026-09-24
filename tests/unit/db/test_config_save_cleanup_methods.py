@@ -21,8 +21,6 @@ The controls matter as much as the cases: "scheduler" and "autoconf" are deliber
 would pass every positive case here while destroying that guarantee.
 """
 
-from pathlib import Path
-
 import pytest
 
 from sqlalchemy import select

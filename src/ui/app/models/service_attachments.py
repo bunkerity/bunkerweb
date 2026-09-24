@@ -183,7 +183,7 @@ def template_overlap_context(templates: Dict[str, Dict[str, Any]]) -> Dict[str, 
     Pairs with no overlap are omitted, so a typical map is small and mostly empty. Built from
     the templates dict the page already fetched -- no extra query.
     """
-    keys = {template_id: set((data or {}).get("settings") or {}) for template_id, data in (templates or {}).items()}
+    keys = {template_id: set(data.get("settings") or {}) for template_id, data in templates.items()}
     overlaps: Dict[str, Dict[str, int]] = {}
     for template_id, own in keys.items():
         if not own:

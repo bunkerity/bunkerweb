@@ -3,7 +3,8 @@
 from datetime import datetime, timedelta
 import re
 from json import dumps, loads
-from os import O_DIRECTORY, O_NOFOLLOW, O_RDONLY, close as os_close, fchown, fstat, geteuid, getenv, open as os_open, replace, stat as os_stat
+from operator import itemgetter
+from os import O_DIRECTORY, O_NOFOLLOW, O_RDONLY, close as os_close, fchown, fstat, geteuid, getenv, open as os_open, replace
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
@@ -67,7 +68,7 @@ def ensure_backup_dir(directory: Path = BACKUP_DIR) -> Path:
         return directory
     reference = DB_LOCK_FILE.parent
     try:
-        owner = os_stat(reference)
+        owner = reference.stat()
         fd = os_open(directory, O_RDONLY | O_NOFOLLOW | O_DIRECTORY)
         try:
             current = fstat(fd)
@@ -194,7 +195,7 @@ def newest_per_period(dated_backups: list, period: timedelta) -> dict:
     are a single restore point as far as rotation is concerned, and the freshest of them is it.
     """
     by_period = {}
-    for taken, backup in sorted(dated_backups, key=lambda dated: dated[0]):
+    for taken, backup in sorted(dated_backups, key=itemgetter(0)):
         by_period[period_index(taken, period)] = backup
     return by_period
 
@@ -284,7 +285,7 @@ def rotation_victims(dated_backups: list, rotation: int, strategy: str = "hanoi"
     other value -- including a typo the setting's `select` regex would have rejected -- is FIFO,
     which is the conservative half of a choice that deletes the same number of files either way.
     """
-    ordered = sorted(dated_backups, key=lambda dated: dated[0])
+    ordered = sorted(dated_backups, key=itemgetter(0))
     excess = len(ordered) - rotation
     if excess <= 0:
         return []
@@ -314,7 +315,7 @@ def rotation_victims(dated_backups: list, rotation: int, strategy: str = "hanoi"
             level, rank = hanoi_rank(index, indices, rotation - 1)
             reason = f"period {index} is off the Hanoi ladder: closest at level {level} (blocks of {1 << level} period(s)), {rank} blocks behind the newest, and only the last 2 are kept"
         victims.append((last_of_period, taken, backup, reason))
-    victims.sort(key=lambda victim: victim[:2])
+    victims.sort(key=itemgetter(slice(None, 2)))
     return [(backup, reason) for _, _, backup, reason in victims[:excess]]
 
 

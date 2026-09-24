@@ -3,6 +3,7 @@
 
 from base64 import b64decode
 from configparser import ConfigParser, Error as ConfigParserError
+from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from json import JSONDecodeError, loads
@@ -264,14 +265,12 @@ def read_certbot_cache(data: bytes) -> list[dict]:
             renewal_name = f"renewal/{cert_name}.conf"
             if renewal_name in members:
                 config = ConfigParser(interpolation=None)
-                try:
+                with suppress(ConfigParserError, UnicodeDecodeError, ValueError):
                     config.read_string(_tar_member_bytes(archive, members, renewal_name).decode("utf-8"))
                     params = config["renewalparams"] if config.has_section("renewalparams") else {}
                     for key in ("server", "authenticator", "pref_challs", "key_type", "preferred_profile"):
                         if params.get(key):
                             metadata[key] = params.get(key)
-                except (ConfigParserError, UnicodeDecodeError, ValueError):
-                    pass
             records.append(
                 {
                     "name": cert_name,

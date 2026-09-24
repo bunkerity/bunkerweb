@@ -38,6 +38,7 @@ its own; it must not be passed in as a service here, or it would be handed an
 ownership its block never renders.
 """
 
+from operator import itemgetter
 from typing import Any, Dict, FrozenSet, List, Mapping, NamedTuple, Optional, Sequence, Tuple
 
 __all__ = (
@@ -159,7 +160,7 @@ def collect_ports(config: Mapping[str, Any], setting: str) -> List[str]:
         port = str(value).strip()
         if port:
             indexed.append((suffix, port))
-    return [port for _, port in sorted(indexed, key=lambda entry: entry[0])]
+    return [port for _, port in sorted(indexed, key=itemgetter(0))]
 
 
 def port_list_setting(key: str) -> Optional[str]:
@@ -548,7 +549,7 @@ def services_from_config(
 
     services: Dict[str, Dict[str, Any]] = {}
     for name in server_names:
-        merged = dict(globals_only)
+        merged = globals_only.copy()
         merged.update(per_service[name])
         # Same rule the renderer applies (Templator._get_server_config): a service that declares a
         # port list replaces the inherited one. Reporting and the write-path refusals have to see

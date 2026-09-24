@@ -4,7 +4,7 @@
  * id-scoped to #requests-map and still use the legacy .dark-style selector, and the home
  * page stays deliberately untouched by this chantier. */
 
-/* Arc palette. Kept as tokens so the shot colour can be retuned (or rethemed) in one place
+/* Arc palette. Kept as tokens so the shot colour can be adjusted (or rethemed) in one place
  * rather than in four rules. */
 :root {
   --bw-threat-arc: #ff6b4a;

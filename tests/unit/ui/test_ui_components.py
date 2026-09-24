@@ -927,7 +927,7 @@ def test_every_data_i18n_key_resolves_in_en_json():
     a data-i18n="<key>" attribute (client-side) or by a `_("<key>")` call (server-side).
 
     The server-side half matters more than the client one: gettext answers a missing key with
-    the key itself, so a typo renders `button.svae` in the page rather than failing anywhere.
+    the key itself, so a typo renders `button.unknown` in the page rather than failing anywhere.
 
     Dynamic keys built from Jinja/JS expressions (containing "{") are skipped -- they can't be
     resolved statically. Occurrences inside {# ... #} Jinja comments (macro docs that show

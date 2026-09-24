@@ -59,11 +59,7 @@ package.loaded["bunkerweb.datastore"] = {
 
 
 def test_stream_timer_skips_http_only_plugins():
-    script = (
-        PREAMBLE
-        + "\nlocal function run()\n"
-        + _lua_block(CONF, "init_worker")
-        + r"""
+    script = PREAMBLE + "\nlocal function run()\n" + _lua_block(CONF, "init_worker") + r"""
 end
 run()
 assert(#scheduled == 1 and scheduled[1][1] == 0, "initial timer was not scheduled")
@@ -71,7 +67,6 @@ scheduled[1][2](false)
 assert(table.concat(calls, ",") == "badbehavior,metrics,sessions", "only Stream-capable timers must run")
 print("OK")
 """
-    )
     result = subprocess.run([LUA, "-"], input=script, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == "OK"

@@ -415,10 +415,7 @@ class TestGetConfigMultipleGroupRematerialisation:
                 )
                 == ""
             )
-        assert (
-            db.create_template("svc", name="Svc", settings={"USE_REVERSE_PROXY": "yes"}, steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}])
-            == ""
-        )
+        assert db.create_template("svc", name="Svc", settings={"USE_REVERSE_PROXY": "yes"}, steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"]}]) == ""
 
         add_global_value(db, setting_id="USE_TEMPLATE", value="g1 g2")
         add_service(db, "app3.example.com")

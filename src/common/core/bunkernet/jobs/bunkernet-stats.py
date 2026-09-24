@@ -53,9 +53,10 @@ try:
 
     # Deployment-level contribution/health metrics, read from the existing BunkerNet job
     # caches (DB-backed; no instance round-trip needed).
-    rows = []
-    rows.append({"metric": "blocklist_size", "value": _count_lines(JOB.db.get_job_cache_file("bunkernet-data", "ip.list"))})
-    rows.append({"metric": "reports_pending", "value": _count_reports(JOB.db.get_job_cache_file("bunkernet-send", "reports.json"))})
+    rows = [
+        {"metric": "blocklist_size", "value": _count_lines(JOB.db.get_job_cache_file("bunkernet-data", "ip.list"))},
+        {"metric": "reports_pending", "value": _count_reports(JOB.db.get_job_cache_file("bunkernet-send", "reports.json"))},
+    ]
     instance_id = JOB.db.get_job_cache_file("bunkernet-register", "instance.id")
     registered = bool(instance_id and instance_id.strip())
     rows.append({"metric": "registered", "value": 1 if registered else 0})
