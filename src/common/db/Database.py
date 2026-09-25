@@ -2965,6 +2965,19 @@ class Database:
         self, keys: Set[Tuple[Optional[str], str, str]]
     ) -> Tuple[str, Set[Tuple[Optional[str], str, str]], Set[Tuple[Optional[str], str, str]]]:
         """Delete exact UI/API custom config keys."""
+        for key in keys:
+            if not isinstance(key, tuple) or len(key) != 3:
+                return "Invalid custom config key: expected (service, type, name)", set(), set()
+            service_id, config_type, name = key
+            if (
+                (service_id is not None and not isinstance(service_id, str))
+                or not isinstance(config_type, str)
+                or not config_type
+                or not isinstance(name, str)
+                or not name
+            ):
+                return "Invalid custom config key: service must be a string or None; type and name must be non-empty strings", set(), set()
+
         normalized_keys = {
             (None if service_id in (None, "", "global") else service_id, config_type.strip().replace("-", "_").lower(), name)
             for service_id, config_type, name in keys
