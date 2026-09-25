@@ -2738,6 +2738,9 @@ El controlador `bw-autoconf` vigila tu orquestador y escribe cambios en la base 
 | `KUBERNETES_INGRESS_CLASS`              | Procesar solo los ingress con esta clase                                                        | Cadena                                             | unset (todas)   |
 | `KUBERNETES_GATEWAY_MODE`               | Usar el controlador de Gateway API en lugar de Ingress                                          | `yes` o `no`                                       | `no`            |
 | `KUBERNETES_GATEWAY_CLASS`              | Procesar solo los Gateways con esta clase                                                       | Cadena                                             | unset (todas)   |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | Si es `yes` y no hay filtro de clase definido, omite los Ingress y Gateways cuya IngressClass o GatewayClass pertenezca a otro controlador. Requiere get/list/watch sobre `ingressclasses` / `gatewayclasses` | `yes` o `no`                                       | `no`            |
+| `KUBERNETES_INGRESS_CONTROLLER`         | ID de controlador que marca una IngressClass como propia de BunkerWeb (`spec.controller`)       | Cadena                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | ID de controlador que marca una GatewayClass como propia de BunkerWeb (`spec.controllerName`)   | Cadena                                             | `bunkerweb.io/gateway-controller` |
 | `KUBERNETES_GATEWAY_API_VERSION`        | Versión de la Gateway API a usar (fallback automático si falta)                                 | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | Sufijo de dominio del clúster al construir hosts upstream                                       | Cadena                                             | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | Esquema usado para los hosts de reverse proxy generados                                         | `http` o `https`                                   | `http`          |
@@ -3711,6 +3714,8 @@ spec:
                   number: 8000
 ```
 
+Cuando `KUBERNETES_INGRESS_CLASS` no está definido, establece `KUBERNETES_SKIP_FOREIGN_CLASSES=yes` para dejar en paz los Ingress que pertenecen a otro controlador en lugar de servirlos todos. Un Ingress se procesa cuando no tiene clase, cuando su clase nombra un objeto `IngressClass` que no existe, o cuando el `spec.controller` de ese objeto coincide con `KUBERNETES_INGRESS_CONTROLLER`; se omite cuando el objeto existe y apunta a otro controlador. La anotación heredada `kubernetes.io/ingress.class` se lee de la misma forma cuando `ingressClassName` no está definido. Esto requiere `get`/`list`/`watch` sobre `ingressclasses`; sin ese RBAC el controlador registra una única advertencia y procesa todos los Ingress, como si el ajuste fuera `no`. Activarlo puede dejar de servir un Ingress que conservó una clase obsoleta (por ejemplo, una `IngressClass` `nginx` sobrante tras eliminar ingress-nginx): establece `ingressClassName: bunkerweb` en él, o elimina la `IngressClass` obsoleta.
+
 ### Clase de Gateway {#gateway-class}
 
 Cuando uses la Gateway API, BunkerWeb espera una `GatewayClass` que apunte a su controlador:
@@ -3740,6 +3745,8 @@ spec:
       port: 80
       hostname: www.example.com
 ```
+
+Las mismas reglas de `KUBERNETES_SKIP_FOREIGN_CLASSES` se aplican a los Gateways: con `KUBERNETES_GATEWAY_CLASS` sin definir, un Gateway se omite cuando su `gatewayClassName` nombra una `GatewayClass` cuyo `spec.controllerName` no es `KUBERNETES_GATEWAY_CONTROLLER`. Sin `get`/`list`/`watch` sobre `gatewayclasses`, el controlador registra una única advertencia y procesa todos los Gateways.
 
 ### Nombre de dominio personalizado
 

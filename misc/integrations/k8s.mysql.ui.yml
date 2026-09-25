@@ -12,6 +12,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses/status"]
     verbs: ["patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingressclasses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -174,6 +177,8 @@ spec:
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
+              value: "yes"
+            - name: KUBERNETES_SKIP_FOREIGN_CLASSES
               value: "yes"
             - name: "DATABASE_URI"
               value: "mysql+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"

@@ -9,6 +9,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingressclasses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -171,6 +174,8 @@ spec:
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
+              value: "yes"
+            - name: KUBERNETES_SKIP_FOREIGN_CLASSES
               value: "yes"
             - name: "DATABASE_URI"
               value: "oracle://bunkerweb:changeme@svc-bunkerweb-db:1521?service_name=FREEPDB1"
