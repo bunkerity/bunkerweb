@@ -12,6 +12,7 @@ typedef struct {
     ngx_flag_t samesite;
     ngx_flag_t samesite_lax;
     ngx_flag_t samesite_strict;
+    ngx_flag_t samesite_none;
 } ngx_http_cookie_t;
 
 typedef struct {
@@ -165,6 +166,7 @@ ngx_http_cookie_flag_filter_cmd(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cookie->samesite = 0;
     cookie->samesite_lax = 0;
     cookie->samesite_strict = 0;
+    cookie->samesite_none = 0;
 
     // normalize and check 2nd and 3rd parameters
     for (i = 2; i < cf->args->nelts; i++) {
@@ -178,6 +180,8 @@ ngx_http_cookie_flag_filter_cmd(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             cookie->samesite_lax = 1;
         } else if (ngx_strncasecmp(value[i].data, (u_char *) "samesite=strict", 15) == 0 && value[i].len == 15) {
             cookie->samesite_strict = 1;
+        } else if (ngx_strncasecmp(value[i].data, (u_char *) "samesite=none", 13) == 0 && value[i].len == 13) {
+            cookie->samesite_none = 1;
         } else {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "The parameter value \"%V\" is incorrect", &value[i]);
             return NGX_CONF_ERROR;
@@ -283,6 +287,16 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; SameSite=Strict", &header->value) - tmp.data;
+        header->value.data = tmp.data;
+        header->value.len = tmp.len;
+    }
+
+    if (cookie->samesite_none == 1 && ngx_strcasestrn(header->value.data, "; SameSite=None", 15 - 1) == NULL) {
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=None") - 1);
+        if (tmp.data == NULL) {
+            return NGX_ERROR;
+        }
+        tmp.len = ngx_sprintf(tmp.data, "%V; SameSite=None", &header->value) - tmp.data;
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
