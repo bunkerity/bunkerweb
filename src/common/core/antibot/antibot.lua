@@ -230,7 +230,7 @@ function antibot:header()
 	-- Get session data
 	self.session_data = self.ctx.bw.antibot_session_data
 	if not self.session_data then
-		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
+		return self:ret(true, "no session data available, skipping CSP header override")
 	end
 
 	-- Don't go further if client resolved the challenge. The header_filter phase
