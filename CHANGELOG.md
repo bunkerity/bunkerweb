@@ -10,6 +10,7 @@
 - [BUGFIX] `ui`: no startup crash while the database is still migrating (`no such column: bw_global_values.is_draft`).
 - [BUGFIX] A service without its own `SERVER_NAME` is named by its id instead of inheriting the global value, empty on Linux, which rendered `server_name ;`, failed every reload and got the service deleted or renamed by the next Web UI save. An empty `SERVER_NAME` is now refused for a service, still allowed globally.
 - [BUGFIX] `letsencrypt`: a passed-through ACME challenge keeps the client `Host` instead of a fixed `REVERSE_PROXY_CUSTOM_HOST`. (Fixes #3957)
+- [BUGFIX] `whitelist`, `greylist`, `antibot`, `blacklist`: rDNS rules now confirm IPv6 clients instead of treating them as spoofing their reverse DNS.
 - [FEATURE] `antibot`: `ANTIBOT_JAVASCRIPT_DIFFICULTY` (16 to 28 bits) raises the JavaScript challenge cost. Regenerate custom JavaScript pages first.
 - [FEATURE] `antibot`: redesigned challenge pages that follow browser preferences (theme, reduced motion, contrast, text size), with a discreet reload link.
 - [UI] Responses are compressed (brotli/gzip) and static assets carry a versioned, long-lived cache header, so the Web UI stays fast when reached directly; the API gains gzip.

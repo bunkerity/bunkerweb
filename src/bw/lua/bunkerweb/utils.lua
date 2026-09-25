@@ -790,18 +790,29 @@ utils.get_rdns = function(ip, ctx, pool)
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6, ctx, pool)
-	-- Check cache
+utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
+	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
+	if ipv6 == nil then
+		ipv6 = true
+	end
+	local query_aaaa = force_ipv6 == true
+	if ipv6 and not query_aaaa then
+		-- luacheck: ignore 421
+		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
+		if not use_ipv6 then
+			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
+		else
+			query_aaaa = use_ipv6 == "yes"
+		end
+	end
+	-- Cache entries must match the qtype set; A-only lookups cannot serve AAAA clients.
+	local cache_key = "dns_" .. (query_aaaa and "46_" or "4_") .. fqdn
 	local cachestore = utils.new_cachestore(ctx, pool)
-	local ok, value = cachestore:get("dns_" .. fqdn)
+	local ok, value = cachestore:get(cache_key)
 	if not ok then
 		logger:log(ERR, "can't get dns from cachestore : " .. value)
 	elseif value then
 		return decode(value), "success"
-	end
-	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
-	if ipv6 == nil then
-		ipv6 = true
 	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
@@ -819,14 +830,8 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 	end
 	-- Get query types : AAAA and A if using IPv6 / only A if not using IPv6
 	local qtypes = {}
-	if ipv6 then
-		-- luacheck: ignore 421
-		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
-		if not use_ipv6 then
-			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
-		elseif use_ipv6 == "yes" then
-			table.insert(qtypes, res.TYPE_AAAA)
-		end
+	if query_aaaa then
+		table.insert(qtypes, res.TYPE_AAAA)
 	end
 	table.insert(qtypes, res.TYPE_A)
 	-- Loop on qtypes
@@ -860,7 +865,7 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 		end
 	end
 	-- Save to cache
-	ok, err = cachestore:set("dns_" .. fqdn, encode(ips), 3600)
+	ok, err = cachestore:set(cache_key, encode(ips), 3600)
 	if not ok then
 		logger:log(ERR, "can't set dns into cachestore : " .. err)
 	end
@@ -878,21 +883,29 @@ utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr
 	if not rdns_list or not suffix_list then
 		return nil
 	end
+	local log_logger = plugin_logger or logger
 	for _, rdns in ipairs(rdns_list) do
 		for _, suffix in ipairs(suffix_list) do
 			if rdns:sub(-#suffix) == suffix then
-				local ip_list, err = utils.get_ips(rdns, nil, ctx, true)
+				local force_ipv6 = remote_addr:find(":", 1, true) ~= nil
+				local ip_list, err = utils.get_ips(rdns, nil, ctx, true, force_ipv6)
 				if ip_list then
-					for _, ip in ipairs(ip_list) do
-						if ip == remote_addr then
+					local matcher, matcher_err = ipmatcher_new(ip_list)
+					if not matcher then
+						log_logger:log(ERR, "can't build rdns forward matcher : " .. matcher_err)
+					else
+						local matched, match_err = matcher:match(remote_addr)
+						if match_err then
+							log_logger:log(ERR, "can't match IP in rdns forward check : " .. match_err)
+						elseif matched then
 							return suffix, rdns
 						end
 					end
 					if plugin_logger then
 						plugin_logger:log(WARN, "IP " .. remote_addr .. " may spoof reverse DNS " .. rdns)
 					end
-				elseif plugin_logger then
-					plugin_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
+				else
+					log_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
 				end
 			end
 		end
