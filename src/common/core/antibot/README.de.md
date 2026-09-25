@@ -124,11 +124,14 @@ Beispiele:
     - Die Herausforderung generiert dynamisch eine einzigartige Aufgabe für jeden Client.
     - Die Rechenaufgabe beinhaltet ein Hashing mit spezifischen Bedingungen (z. B. das Finden eines Hashes mit einem bestimmten Präfix).
 
+    Die Kosten der Herausforderung werden über `ANTIBOT_JAVASCRIPT_DIFFICULTY` festgelegt, in führenden Null-Bits (16 bis 28, Standard 16); jedes zusätzliche Bit verdoppelt die durchschnittliche Lösungszeit. Wenn Sie PRO-eigene JavaScript-Herausforderungsseiten verwenden, regenerieren Sie diese, bevor Sie diese Einstellung über den Standardwert hinaus erhöhen, sonst belegen sie weiterhin die alte, niedrigere Schwierigkeit und werden abgelehnt.
+
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
-    | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | Parameter                        | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
+    | :-------------------------------- | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                     | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`   | `16`     | Multisite | nein     | JavaScript-Schwierigkeit: Proof-of-Work-Schwierigkeit in führenden Null-Bits (16 bis 28). |
 
     Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 

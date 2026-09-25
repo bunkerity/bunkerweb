@@ -124,11 +124,14 @@ Exemples :
     - Le défi génère dynamiquement une tâche unique pour chaque client.
     - La tâche de calcul implique un hachage avec des conditions spécifiques (par exemple, trouver un hachage avec un certain préfixe).
 
+    Le coût du défi se règle avec `ANTIBOT_JAVASCRIPT_DIFFICULTY`, en bits de zéros de poids fort (16 à 28, défaut 16) ; chaque bit supplémentaire double le temps moyen de résolution. Si vous utilisez des pages de défi JavaScript personnalisées PRO, régénérez-les avant d'augmenter ce réglage au-dessus de la valeur par défaut, sinon elles continuent de prouver l'ancienne difficulté, plus basse, et sont rejetées.
+
     **Paramètres :**
 
-    | Paramètre     | Défaut | Contexte  | Multiple | Description                                                           |
-    | ------------- | ------ | --------- | -------- | --------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`   | multisite | non      | Activer Antibot : définir sur `javascript` pour activer ce mécanisme. |
+    | Paramètre                       | Défaut | Contexte  | Multiple | Description                                                           |
+    | ------------------------------ | ------ | --------- | -------- | --------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                   | `no`   | multisite | non      | Activer Antibot : définir sur `javascript` pour activer ce mécanisme. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY` | `16`   | multisite | non      | Difficulté JavaScript : difficulté de preuve de travail en bits de zéros de poids fort (16 à 28). |
 
     Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
 

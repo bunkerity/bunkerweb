@@ -124,11 +124,14 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
     - The challenge dynamically generates a unique task for each client.
     - The computational task involves hashing with specific conditions (e.g., finding a hash with a certain prefix).
 
+    The cost of the challenge is set by `ANTIBOT_JAVASCRIPT_DIFFICULTY`, in leading zero bits (16 to 28, default 16); each extra bit doubles the average solve time. If you run PRO custom JavaScript challenge pages, regenerate them before raising this setting above the default, otherwise they keep proving the old, lower difficulty and are rejected.
+
     **Configuration Settings:**
 
-    | Setting       | Default | Context   | Multiple | Description                                                                 |
-    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge. |
+    | Setting                         | Default | Context   | Multiple | Description                                                                              |
+    | -------------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                    | `no`    | multisite | no       | **Enable Antibot:** Set to `javascript` to enable the JavaScript challenge.               |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`  | `16`    | multisite | no       | **JavaScript difficulty:** Proof-of-work difficulty in leading zero bits (16 to 28).       |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 

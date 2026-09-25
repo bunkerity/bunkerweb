@@ -120,11 +120,14 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
     *   El desafío genera dinámicamente una tarea única para cada cliente.
     *   La tarea computacional implica hashing con condiciones específicas (p. ej., encontrar un hash con un prefijo determinado).
 
+    El coste del desafío se fija con `ANTIBOT_JAVASCRIPT_DIFFICULTY`, en bits ceros iniciales (16 a 28, por defecto 16); cada bit adicional duplica el tiempo medio de resolución. Si usa páginas de desafío JavaScript personalizadas PRO, regenérelas antes de subir este ajuste por encima del valor por defecto, o seguirán demostrando la dificultad antigua y más baja y serán rechazadas.
+
     **Ajustes de configuración:**
 
-    | Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
-    | ------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-    | `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | Configuración                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
+    | ------------------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`                        | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`      | `16`               | multisite | no       | **Dificultad JavaScript:** Dificultad de prueba de trabajo en bits ceros iniciales (16 a 28). |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 

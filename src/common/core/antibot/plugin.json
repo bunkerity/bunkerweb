@@ -70,6 +70,15 @@
       "regex": "^[a-zA-Z2-9+/=%\"'&_(),.;:?!§`^ÄÖÜßäöüé''‚\"\"„-]+$",
       "type": "text"
     },
+    "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+      "context": "multisite",
+      "default": "16",
+      "help": "Proof-of-work difficulty of the JavaScript challenge, in leading zero bits (16 to 28). Each extra bit doubles the average solve time for clients. Regenerate custom JavaScript challenge pages before raising it.",
+      "id": "antibot-javascript-difficulty",
+      "label": "JavaScript difficulty",
+      "regex": "^(1[6-9]|2[0-8])$",
+      "type": "number"
+    },
     "ANTIBOT_IGNORE_URI": {
       "context": "multisite",
       "default": "",
