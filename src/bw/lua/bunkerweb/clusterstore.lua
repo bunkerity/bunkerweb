@@ -9,6 +9,7 @@ local clusterstore = class("clusterstore")
 local logger = clogger:new("CLUSTERSTORE")
 
 local get_variable = utils.get_variable
+local parse_duration = utils.parse_duration
 local is_cosocket_available = utils.is_cosocket_available
 local is_connection_error = utils.is_connection_error
 local ERR = ngx.ERR
@@ -61,10 +62,10 @@ function clusterstore:initialize(pool)
 	end
 	-- Compute options
 	local options = {
-		connect_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		read_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		send_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+		connect_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		read_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		send_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		keepalive_timeout = parse_duration(self.variables["REDIS_KEEPALIVE_IDLE"], "ms"),
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
 			ssl = self.variables["REDIS_SSL"] == "yes",

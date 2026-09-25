@@ -489,7 +489,7 @@ $(document).ready(function () {
     if (actionLock) return; // Prevent overlapping actions
     actionLock = true; // Lock action
 
-    const template = $(this).data("template-id");
+    const template = $(this).attr("data-template-id");
     setupDeletionModal([template]);
     actionLock = false; // Unlock after modal setup
   });

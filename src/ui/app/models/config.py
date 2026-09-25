@@ -5,7 +5,7 @@ from os import getenv, sep
 from json import loads as json_loads
 from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
-from typing import Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from app.utils import flash, get_blacklisted_settings, is_editable_method
 
@@ -22,7 +22,7 @@ class Config:
         # entry per _type. Only the with_data=False catalog is cached.
         self.__plugins_cache: dict = {}
 
-    def _plugins_cache_version(self):
+    def _plugins_cache_version(self, metadata=None):
         """A value that changes only when the plugin catalog itself changes
         (plugins installed/removed/updated/reloaded), NOT when setting values are
         edited. Returns None if it can't be determined, in which case get_plugins
@@ -35,10 +35,11 @@ class Config:
         A future "hot-reload core plugins without restart" feature would need a
         signal added here.
         """
-        try:
-            metadata = self.__db.get_metadata()
-        except Exception:
-            return None
+        if metadata is None:
+            try:
+                metadata = self.__db.get_metadata()
+            except Exception:
+                return None
         # get_metadata swallows read errors and returns its default dict flagged
         # with "default": don't cache against an unreliable version, recompute.
         if metadata.get("default"):
@@ -63,6 +64,8 @@ class Config:
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
+        rename: Optional[Tuple[str, str]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -107,6 +110,10 @@ class Config:
         save_kwargs = {"changed": check_changes, "file_names": file_name_map}
         if draft_settings is not None:
             save_kwargs["draft_settings"] = draft_settings
+        if rename is not None:
+            save_kwargs["rename"] = rename
+        if custom_config_changes is not None:
+            save_kwargs["custom_config_changes"] = custom_config_changes
         return self.__db.save_config(conf, override_method, **save_kwargs)
 
     def get_plugins_settings(self) -> dict:
@@ -115,11 +122,11 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False, metadata=None) -> dict:
         # with_data payloads are large and only requested on specific user actions
         # (plugin/template pages), never on the per-request render path, so they are
         # not cached. The hot path is get_plugins() (with_data=False) on every request.
-        version = None if with_data else self._plugins_cache_version()
+        version = None if with_data else self._plugins_cache_version(metadata)
 
         db_plugins = None
         if version is not None:
@@ -239,6 +246,12 @@ class Config:
                 variables.pop(key, None)
                 continue
 
+            # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+            if setting == "SERVER_NAME" and not global_config and not value.strip():
+                report_error("The server name of a service can't be empty.")
+                variables.pop(key, None)
+                continue
+
             if plugins_settings[setting].get("type") != "file":
                 stripped_value = value.rstrip("\r\n")
                 if "\n" in stripped_value or "\r" in stripped_value:
@@ -313,6 +326,7 @@ class Config:
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Tuple[str, int]:
         """Edits a service
 
@@ -349,6 +363,10 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
+        rename = None
+        if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
+            rename = (old_server_name_splitted[0], server_name_splitted[0])
+
         ret = self.gen_conf(
             config,
             services,
@@ -357,6 +375,8 @@ class Config:
             override_method=override_method,
             file_name_map=file_name_map,
             draft_settings=draft_settings,
+            rename=rename,
+            custom_config_changes=custom_config_changes,
         )
         if isinstance(ret, str):
             return ret, 1

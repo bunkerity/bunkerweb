@@ -42,6 +42,22 @@ CONFIG_TYPES = {
 }
 
 
+def _valid_config_selection(configs: object) -> bool:
+    if not isinstance(configs, list) or not configs:
+        return False
+
+    allowed_types = {config_type.lower() for config_type in CONFIG_TYPES}
+    return all(
+        isinstance(config, dict)
+        and isinstance(config.get("name"), str)
+        and match(CONFIG_NAME_RX, config["name"])
+        and isinstance(config.get("type"), str)
+        and config["type"].strip().replace("-", "_").lower() in allowed_types
+        and (config.get("service") is None or isinstance(config.get("service"), str))
+        for config in configs
+    )
+
+
 def parse_configs_export(content: str) -> Tuple[List[Dict], List[str]]:
     """Parse a custom-configs export payload.
 
@@ -260,6 +276,8 @@ def configs_convert():
         configs = loads(raw_configs)
     except JSONDecodeError:
         return handle_error("Invalid configs parameter on /configs/convert.", "configs", True)
+    if not _valid_config_selection(configs):
+        return handle_error("Invalid configs parameter on /configs/convert.", "configs", True)
 
     convert_to = request.form["convert_to"]
     if convert_to not in ("online", "draft"):
@@ -371,12 +389,14 @@ def configs_delete():
         configs = loads(configs)
     except JSONDecodeError:
         return handle_error("Invalid configs parameter on /configs/delete.", "configs", True)
+    if not _valid_config_selection(configs):
+        return handle_error("Invalid configs parameter on /configs/delete.", "configs", True)
     DATA.load_from_file()
 
     def delete_configs(configs: List[Dict[str, str]]):
         wait_applying()
 
-        keys = {(config["service"], config["type"], config["name"]) for config in configs}
+        keys = {(config.get("service"), config["type"], config["name"]) for config in configs}
         error, deleted_keys, protected_keys = DB.delete_custom_configs(keys)
         configs_to_delete = {f"{(service_id + '/') if service_id else ''}{config_type}/{name}" for service_id, config_type, name in deleted_keys}
         non_editable_configs = {f"{(service_id + '/') if service_id else ''}{config_type}/{name}" for service_id, config_type, name in protected_keys}

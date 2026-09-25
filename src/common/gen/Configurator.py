@@ -180,7 +180,7 @@ class Configurator:
 
             # Use get() with default instead of 'in' check
             server_name_var = f"{server_name}_SERVER_NAME"
-            names_str = self.__variables.get(server_name_var, server_name).strip()
+            names_str = self.__variables.get(server_name_var, server_name).strip() or server_name
 
             if names_str == server_name:
                 servers[server_name] = [server_name]
@@ -402,6 +402,9 @@ class Configurator:
             return False, f"variable name {variable} doesn't exist"
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite"
+        # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+        elif prefixed and real_var == "SERVER_NAME" and not value.strip():
+            return False, f"{variable} can't be empty"
 
         if self.__has_embedded_newline(value, where[real_var].get("type")):
             return False, f"value of {variable} contains a newline"

@@ -10,6 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
+from common_utils import parse_duration  # type: ignore
 from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("DB.CLEANUP-EXPIRED-UI-SESSIONS")
@@ -17,7 +18,11 @@ status = 0
 
 try:
     DB = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
-    max_age_days = int(getenv("DATABASE_MAX_SESSION_AGE_DAYS", "14"))
+    try:
+        max_age_days = parse_duration(getenv("DATABASE_MAX_SESSION_AGE_DAYS", "14"), "d")
+    except ValueError:
+        LOGGER.warning("Invalid DATABASE_MAX_SESSION_AGE_DAYS value, using default value (14)")
+        max_age_days = 14
     ret = DB.cleanup_expired_ui_sessions(max_age_days)
     if not ret.startswith("Removed"):
         LOGGER.error(ret)

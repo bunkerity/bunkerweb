@@ -71,12 +71,12 @@
     },
     "CROWDSEC_REQUEST_TIMEOUT": {
       "context": "multisite",
-      "default": "1000",
-      "help": "Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API.",
+      "default": "1s",
+      "help": "Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-request-timeout",
       "label": "CrowdSec live request timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_EXCLUDE_LOCATION": {
       "context": "multisite",
@@ -90,21 +90,21 @@
     },
     "CROWDSEC_CACHE_EXPIRATION": {
       "context": "multisite",
-      "default": "1",
-      "help": "The cache expiration, in second, for IPs that the bouncer store in cache in live mode.",
+      "default": "1s",
+      "help": "The cache expiration, in second, for IPs that the bouncer store in cache in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "crowdsec-cache-expiration",
       "label": "CrowdSec cache-expiration",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_UPDATE_FREQUENCY": {
       "context": "multisite",
-      "default": "10",
-      "help": "The frequency of update, in second, to pull new/old IPs from the CrowdSec local API.",
+      "default": "10s",
+      "help": "The frequency of update, in second, to pull new/old IPs from the CrowdSec local API. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "crowdsec-update-frequency",
       "label": "CrowdSec request timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_APPSEC_URL": {
       "context": "multisite",
@@ -127,30 +127,30 @@
     },
     "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
       "context": "multisite",
-      "default": "100",
-      "help": "The timeout in milliseconds of the connection between the remediation component and AppSec Component.",
+      "default": "100ms",
+      "help": "The timeout in milliseconds of the connection between the remediation component and AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-connect-timeout",
       "label": "AppSec connect timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_APPSEC_SEND_TIMEOUT": {
       "context": "multisite",
-      "default": "100",
-      "help": "The timeout in milliseconds to send data from the remediation component to the AppSec Component.",
+      "default": "100ms",
+      "help": "The timeout in milliseconds to send data from the remediation component to the AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-send-timeout",
       "label": "AppSec send timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
       "context": "multisite",
-      "default": "500",
-      "help": "The timeout in milliseconds to process the request from the remediation component to the AppSec Component.",
+      "default": "500ms",
+      "help": "The timeout in milliseconds to process the request from the remediation component to the AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-process-timeout",
       "label": "AppSec process timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
       "context": "multisite",

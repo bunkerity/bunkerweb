@@ -27,7 +27,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
         sys_path.append(deps_path)
 
 from cache_restore import cache_tree  # type: ignore
-from common_utils import effective_cpu_count  # type: ignore
+from common_utils import effective_cpu_count, parse_duration  # type: ignore
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
@@ -255,10 +255,10 @@ class JobScheduler(ApiCaller):
 
     def __reload(self) -> bool:
         self.__logger.info("Reloading nginx...")
-        reload_min_timeout = self.env.get("RELOAD_MIN_TIMEOUT", "5")
-
-        if not reload_min_timeout.isdigit():
-            self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+        try:
+            reload_min_timeout = parse_duration(self.env.get("RELOAD_MIN_TIMEOUT", "5"), "s")
+        except ValueError:
+            self.__logger.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
             reload_min_timeout = 5
 
         reload_success = self.send_to_apis(
@@ -514,10 +514,11 @@ class JobScheduler(ApiCaller):
             # instance that answers "loading"; latching the flags here only burns main-loop ticks.
             return True
 
-        send_files_min_timeout = self.env.get("SEND_FILES_MIN_TIMEOUT", "30")
-        if not send_files_min_timeout.isdigit():
-            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
-            send_files_min_timeout = "30"
+        try:
+            send_files_min_timeout = parse_duration(self.env.get("SEND_FILES_MIN_TIMEOUT", "30"), "s")
+        except ValueError:
+            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 30")
+            send_files_min_timeout = 30
         paths = [(os.path.join(os.sep, "var", "cache", "bunkerweb"), "/cache")]
         if self.__job_regenerate:
             paths.append((os.path.join(os.sep, "etc", "nginx"), "/confs"))

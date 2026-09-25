@@ -12,6 +12,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses/status"]
     verbs: ["patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingressclasses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -111,7 +114,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.16-rc1
+          image: bunkerity/bunkerweb:1.6.16-rc2
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -170,10 +173,12 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+          image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
+              value: "yes"
+            - name: KUBERNETES_SKIP_FOREIGN_CLASSES
               value: "yes"
             - name: "DATABASE_URI"
               value: "mysql+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
@@ -205,7 +210,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -316,7 +321,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.6.16-rc1
+          image: bunkerity/bunkerweb-ui:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE

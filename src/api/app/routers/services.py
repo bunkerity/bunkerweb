@@ -107,6 +107,9 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
 
     if "SERVER_NAME" not in (req.variables or {}):
         conf[f"{name}_SERVER_NAME"] = name
+    # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+    elif not str(conf[f"{name}_SERVER_NAME"]).strip():
+        return JSONResponse(status_code=422, content={"status": "error", "message": "SERVER_NAME can't be empty"})
 
     conf["SERVER_NAME"] = " ".join(sorted(existing | {name}))
 

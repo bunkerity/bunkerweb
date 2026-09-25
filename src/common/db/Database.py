@@ -49,7 +49,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -220,7 +220,7 @@ class Database:
 
         request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
         try:
-            self._request_retry_delay = max(0.0, float(request_retry_delay))
+            self._request_retry_delay = max(0.0, parse_duration(request_retry_delay, "s"))
         except ValueError:
             self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
@@ -325,19 +325,24 @@ class Database:
 
         # Pool timeout
         pool_timeout = getenv("DATABASE_POOL_TIMEOUT", str(DEFAULT_POOL_TIMEOUT))
-        if pool_timeout.isdigit() and int(pool_timeout) >= 0:
-            pool_timeout = int(pool_timeout)
-        else:
+        try:
+            pool_timeout = parse_duration(pool_timeout, "s")
+            if pool_timeout < 0:
+                raise ValueError("negative")
+        except ValueError:
             self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value ({DEFAULT_POOL_TIMEOUT})")
             pool_timeout = DEFAULT_POOL_TIMEOUT
 
         # Pool recycle
         pool_recycle = getenv("DATABASE_POOL_RECYCLE", str(DEFAULT_POOL_RECYCLE))
-        try:
-            pool_recycle = int(pool_recycle)
-        except ValueError:
-            self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
-            pool_recycle = DEFAULT_POOL_RECYCLE
+        if pool_recycle.strip() == "-1":
+            pool_recycle = -1
+        else:
+            try:
+                pool_recycle = parse_duration(pool_recycle, "s")
+            except ValueError:
+                self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
+                pool_recycle = DEFAULT_POOL_RECYCLE
 
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
@@ -386,11 +391,11 @@ class Database:
             _exit(1)
 
         DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
-        if not DATABASE_RETRY_TIMEOUT.isdigit():
+        try:
+            DATABASE_RETRY_TIMEOUT = parse_duration(DATABASE_RETRY_TIMEOUT, "s")
+        except ValueError:
             self.logger.warning(f"Invalid DATABASE_RETRY_TIMEOUT value: {DATABASE_RETRY_TIMEOUT}, using default value (60)")
-            DATABASE_RETRY_TIMEOUT = "60"
-
-        DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
+            DATABASE_RETRY_TIMEOUT = 60
 
         current_time = datetime.now().astimezone()
         not_connected = True
@@ -739,7 +744,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.16~rc1"
+                return "1.6.16~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -773,7 +778,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.16~rc1",
+            "version": "1.6.16~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1716,6 +1721,7 @@ class Database:
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
         rename: Optional[Tuple[str, str]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1744,6 +1750,8 @@ class Database:
                              deletes an existing draft row. A missing map preserves the
                              existing per-setting draft state.
             rename: Move a service and its dependent rows inside this save transaction.
+            custom_config_changes: Optional custom config edits to apply in the same
+                                   transaction as a rename.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
@@ -1871,6 +1879,36 @@ class Database:
                     return str(e)
                 if rename_error:
                     return rename_error
+
+            if custom_config_changes:
+                if not rename:
+                    return "Custom config changes require a service rename"
+
+                for change in custom_config_changes:
+                    config_type = str(change["type"]).strip().replace("-", "_").lower()
+                    name = str(change["name"])
+                    service_id = rename[1]
+                    custom_config = session.query(Custom_configs).filter_by(service_id=service_id, type=config_type, name=name).first()
+                    config_data = change["config"]
+                    data = config_data["data"].encode("utf-8") if isinstance(config_data["data"], str) else config_data["data"]
+                    checksum = config_data.get("checksum") or bytes_hash(data, algorithm="sha256")
+                    if custom_config is None:
+                        session.add(
+                            Custom_configs(
+                                service_id=service_id,
+                                type=config_type,
+                                name=name,
+                                data=data,
+                                checksum=checksum,
+                                method=config_data["method"],
+                                is_draft=bool(config_data.get("is_draft", False)),
+                            )
+                        )
+                    else:
+                        custom_config.data = data
+                        custom_config.checksum = checksum
+                        custom_config.method = config_data["method"]
+                        custom_config.is_draft = bool(config_data.get("is_draft", False))
 
             def aborted_save():
                 # A data-loss guard below returns the changed set without committing, and the
@@ -2111,6 +2149,9 @@ class Database:
 
                             if hard_delete_ids:
                                 self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
+                                # Their settings are bulk-deleted below; deleting the loaded objects later can
+                                # delete new rows when SQLite reuses the freed integer primary keys.
+                                service_settings_to_delete = [row for row in service_settings_to_delete if row.service_id not in hard_delete_ids]
                                 # Remove services that are no longer in the list
                                 session.query(Services).filter(Services.id.in_(hard_delete_ids)).delete(synchronize_session=False)
                                 session.query(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
@@ -2915,6 +2956,7 @@ class Database:
                 draft_settings=draft_settings,
                 retry_on_conflict=False,
                 rename=rename,
+                custom_config_changes=custom_config_changes,
             )
 
         return changed_plugins
@@ -2923,6 +2965,19 @@ class Database:
         self, keys: Set[Tuple[Optional[str], str, str]]
     ) -> Tuple[str, Set[Tuple[Optional[str], str, str]], Set[Tuple[Optional[str], str, str]]]:
         """Delete exact UI/API custom config keys."""
+        for key in keys:
+            if not isinstance(key, tuple) or len(key) != 3:
+                return "Invalid custom config key: expected (service, type, name)", set(), set()
+            service_id, config_type, name = key
+            if (
+                (service_id is not None and not isinstance(service_id, str))
+                or not isinstance(config_type, str)
+                or not config_type
+                or not isinstance(name, str)
+                or not name
+            ):
+                return "Invalid custom config key: service must be a string or None; type and name must be non-empty strings", set(), set()
+
         normalized_keys = {
             (None if service_id in (None, "", "global") else service_id, config_type.strip().replace("-", "_").lower(), name)
             for service_id, config_type, name in keys
@@ -3226,6 +3281,18 @@ class Database:
                     for key, value in multisite_defaults.items():
                         # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
                         config.setdefault(f"{service_id}_{key}", value)
+                    # A service without its own SERVER_NAME row is named by its id. Inheriting the global
+                    # list instead renders "server_name ;" when that list is empty (the Linux variables.env
+                    # ships "SERVER_NAME="), and nginx then rejects the whole configuration.
+                    config[f"{service_id}_SERVER_NAME"] = {
+                        "value": service_id,
+                        "file_name": "",
+                        "global": False,
+                        "method": "default",
+                        "default": service_id,
+                        "template": None,
+                        "is_draft": False,
+                    }
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -3426,6 +3493,9 @@ class Database:
                         tmpl_settings = template_settings_map.get(tmpl_id, [])
                         for service_id in service_ids:
                             for setting in tmpl_settings:
+                                # A template cannot name a service: its placeholder would replace the service's id.
+                                if setting.setting_id == "SERVER_NAME":
+                                    continue
                                 key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
                                 if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                     continue

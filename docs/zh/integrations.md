@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 默认情况下，容器暴露：
@@ -1284,7 +1284,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1362,7 +1362,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
@@ -1370,7 +1370,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1457,7 +1457,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 * **内置的 CrowdSec 代理仅在**容器设置了无前缀的环境变量 `USE_CROWDSEC=yes` 且 `CROWDSEC_API` 指向本地时才会启动。仅为单个服务启用 CrowdSec（`www.example.com_USE_CROWDSEC=yes`）不会启动它。
@@ -1517,7 +1517,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 !!! info "内部工作原理"
@@ -1539,7 +1539,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 注意：
@@ -1561,7 +1561,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 这与 CrowdSec 官方镜像使用的变量名相同，现有配置可以直接沿用。
@@ -1600,7 +1600,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.16-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -1634,13 +1634,13 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.16-rc1
+docker pull bunkerity/bunkerweb:1.6.16-rc2
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.16-rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.16-rc2
 ```
 
 Docker 集成的关键概念包括：
@@ -1650,7 +1650,7 @@ Docker 集成的关键概念包括：
 - **网络**：Docker 网络在 BunkerWeb 的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游 Web 服务。通过公开端口，BunkerWeb 可以接受来自客户端的传入请求，允许他们访问受保护的 Web 服务。此外，通过连接到上游 Web 服务，BunkerWeb 可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
 ### 环境变量
 
@@ -1660,7 +1660,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1704,7 +1704,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc2
 ```
 
 !!! info "BunkerWeb 设置"
@@ -1725,7 +1725,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16-rc1
+        image: bunkerity/bunkerweb:1.6.16-rc2
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -1734,7 +1734,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -1752,7 +1752,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc1
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1900,7 +1900,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.16-rc1
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1913,7 +1913,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -1946,7 +1946,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.16-rc1
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1959,7 +1959,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     depends_on:
       - bunkerweb
     environment:
@@ -2026,8 +2026,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc1/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc1/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2116,7 +2116,7 @@ sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
 
 | 选项                    | 描述                                                            |
 | ----------------------- | --------------------------------------------------------------- |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.16~rc1`）。              |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.16~rc2`）。              |
 | `-w, --enable-wizard`   | 启用设置向导。                                                  |
 | `-n, --no-wizard`       | 禁用设置向导。                                                  |
 | `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。                      |
@@ -2183,7 +2183,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # 安装一个特定版本
-sudo ./install-bunkerweb.sh --version 1.6.16~rc1
+sudo ./install-bunkerweb.sh --version 1.6.16~rc2
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2327,12 +2327,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.16~rc1：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc2
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2375,12 +2375,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.16~rc1：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc2
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2411,12 +2411,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.16~rc1：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
 	sudo dnf makecache && \
-	sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc1
+	sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc2
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2461,12 +2461,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.16~rc1：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc1
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc2
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2565,7 +2565,7 @@ export SERVICE_UI=yes
     Docker 自动配置集成意味着使用**多站点模式**。有关更多信息，请参阅文档的[多站点部分](concepts.md#multisite-mode)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
 要启用自动配置更新，请在堆栈中包含一个名为 `bw-autoconf` 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。
 
@@ -2579,7 +2579,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.16-rc1
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2594,7 +2594,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -2609,7 +2609,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2737,6 +2737,9 @@ networks:
 | `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
 | `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
 | `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | 为 `yes` 且未设置类过滤器时，跳过其 IngressClass 或 GatewayClass 属于其他控制器的 Ingress 和 Gateway。需要对 `ingressclasses` / `gatewayclasses` 的 get/list/watch 权限 | `yes` 或 `no`                                      | `no`            |
+| `KUBERNETES_INGRESS_CONTROLLER`         | 标记某个 IngressClass 属于 BunkerWeb 的控制器 id（`spec.controller`）      | 字符串                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | 标记某个 GatewayClass 属于 BunkerWeb 的控制器 id（`spec.controllerName`）  | 字符串                                             | `bunkerweb.io/gateway-controller` |
 | `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
@@ -2778,7 +2781,7 @@ networks:
 ```yaml
 services:
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
     environment:
       AUTOCONF_MODE: "yes"
       AUTOCONF_DISABLE_CLEANUP: "yes" # 将被移除的服务保留为草稿
@@ -2814,13 +2817,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16-rc1
+        image: bunkerity/bunkerweb:1.6.16-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -2889,7 +2892,7 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
     ```
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -3004,7 +3007,7 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.16~rc1"
+  tag: "1.6.16~rc2"
 ```
 
 2. For each sidecar, add:
@@ -3174,7 +3177,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.16~rc1"
+  tag: "1.6.16~rc2"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -3218,7 +3221,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.16-rc1
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3500,7 +3503,7 @@ To add a new application protected by BunkerWeb:
 
 #### 完整的 YAML 文件
 
-除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc1/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
 !!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
 
@@ -3652,7 +3655,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3707,6 +3710,8 @@ spec:
                   number: 8000
 ```
 
+未设置 `KUBERNETES_INGRESS_CLASS` 时，设置 `KUBERNETES_SKIP_FOREIGN_CLASSES=yes` 可让属于其他控制器的 Ingress 保持不变，而不是全部处理。以下情况会被处理：没有类；类指向不存在的 `IngressClass` 对象；或该对象的 `spec.controller` 与 `KUBERNETES_INGRESS_CONTROLLER` 相符。若该对象存在且指向其他控制器，则会被跳过。未设置 `ingressClassName` 时，旧版注解 `kubernetes.io/ingress.class` 按相同方式读取。此功能需要对 `ingressclasses` 的 `get`/`list`/`watch` 权限；若缺少该 RBAC，控制器只记录一条警告并处理所有 Ingress，效果等同于设为 `no`。开启此设置可能导致保留过期类的 Ingress 不再被处理（例如移除 ingress-nginx 后残留的 `nginx` `IngressClass`）：将其 `ingressClassName` 设为 `bunkerweb`，或删除过期的 `IngressClass`。
+
 ### Gateway 类 {#gateway-class}
 
 当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 `GatewayClass`：
@@ -3736,6 +3741,8 @@ spec:
       port: 80
       hostname: www.example.com
 ```
+
+相同的 `KUBERNETES_SKIP_FOREIGN_CLASSES` 规则也适用于 Gateway：未设置 `KUBERNETES_GATEWAY_CLASS` 时，若 Gateway 的 `gatewayClassName` 指向的 `GatewayClass` 的 `spec.controllerName` 不是 `KUBERNETES_GATEWAY_CONTROLLER`，该 Gateway 会被跳过。若缺少对 `gatewayclasses` 的 `get`/`list`/`watch` 权限，控制器只记录一条警告并处理所有 Gateway。
 
 ### 自定义域名
 
@@ -3827,11 +3834,11 @@ service:
 
 # BunkerWeb 设置
 bunkerweb:
-  tag: 1.6.16~rc1
+  tag: 1.6.16~rc2
 
 # 调度器设置
 scheduler:
-  tag: 1.6.16~rc1
+  tag: 1.6.16~rc2
   extraEnvs:
     # 启用 real IP 模块以获取客户端的真实 IP
     - name: USE_REAL_IP
@@ -3839,11 +3846,11 @@ scheduler:
 
 # 控制器设置
 controller:
-  tag: 1.6.16~rc1
+  tag: 1.6.16~rc2
 
 # UI 设置
 ui:
-  tag: 1.6.16~rc1
+  tag: 1.6.16~rc2
 ```
 
 使用自定义值安装 BunkerWeb：
@@ -4465,7 +4472,7 @@ kubectl delete ingress <old-ingress> -n <namespace>
 至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc1/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -4479,7 +4486,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.16-rc1
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - published: 80
         target: 8080
@@ -4508,7 +4515,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -4529,7 +4536,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -4678,7 +4685,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16-rc1
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ...
         deploy:
           mode: global
@@ -4690,7 +4697,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...

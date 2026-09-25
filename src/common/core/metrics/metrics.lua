@@ -54,6 +54,7 @@ local get_country = utils.get_country
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
 local is_oom_error = utils.is_oom_error
+local parse_duration = utils.parse_duration
 local encode = cjson.encode
 local decode = cjson.decode
 
@@ -157,34 +158,37 @@ local TRIM_SCRIPT = [==[
   local healthy = ok and type(state) == 'table' and state.version == 2 and state.length == nb
       and type(state.valid) == 'number' and type(state.nonfast) == 'number'
   redis.call('DEL', 'requests:facets:initialized')
-  local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
   local seen = {}
   local removed_valid = 0
   local removed_nonfast = 0
-  for _, raw in ipairs(items) do
-    -- Same predicate as REBUILD_SCRIPT, over the same prefix it counted first.
-    local decoded, req = pcall(cjson.decode, raw)
-    local object = decoded and type(req) == 'table' and string.match(raw, '^%s*{')
-    local id = object and req.id
-    if id == cjson.null then id = nil end
-    local date = object and tonumber(req.date)
-    local finite = date and date == date and math.abs(date) ~= math.huge
-    local counted = object and (finite or req.date == nil or req.date == cjson.null)
-        and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id])
-    -- Same fast-pageable predicate as REBUILD_SCRIPT, evaluated before this row joins seen.
-    local pageable = finite and type(id) == 'string' and id ~= '' and not seen[id]
-    if healthy and not pageable then removed_nonfast = removed_nonfast + 1 end
-    if healthy and counted then
-      if id ~= nil then seen[id] = true end
-      removed_valid = removed_valid + 1
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local n = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
-        if type(n) ~= 'number' or n < 0 then healthy = false; break end
-        if n == 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+  -- Sliced for the same reason as REBUILD_SCRIPT: a lowered cap can drop most of the list at once.
+  for start = 0, to_remove - 1, 256 do
+    for _, raw in ipairs(redis.call('LRANGE', KEYS[1], start, math.min(start + 255, to_remove - 1))) do
+      -- Same predicate as REBUILD_SCRIPT, over the same prefix it counted first.
+      local decoded, req = pcall(cjson.decode, raw)
+      local object = decoded and type(req) == 'table' and string.match(raw, '^%s*{')
+      local id = object and req.id
+      if id == cjson.null then id = nil end
+      local date = object and tonumber(req.date)
+      local finite = date and date == date and math.abs(date) ~= math.huge
+      local counted = object and (finite or req.date == nil or req.date == cjson.null)
+          and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id])
+      -- Same fast-pageable predicate as REBUILD_SCRIPT, evaluated before this row joins seen.
+      local pageable = finite and type(id) == 'string' and id ~= '' and not seen[id]
+      if healthy and not pageable then removed_nonfast = removed_nonfast + 1 end
+      if healthy and counted then
+        if id ~= nil then seen[id] = true end
+        removed_valid = removed_valid + 1
+        for i = 1, #fields do
+          local v = req[fields[i]]
+          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+          local n = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
+          if type(n) ~= 'number' or n < 0 then healthy = false; break end
+          if n == 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+        end
       end
     end
+    collectgarbage('collect')
   end
   redis.call('LTRIM', KEYS[1], to_remove, -1)
   if healthy and state.valid >= removed_valid and state.nonfast >= removed_nonfast then
@@ -198,8 +202,8 @@ local TRIM_SCRIPT = [==[
 
 -- Marker invalidated up-front so an OOM-aborted rebuild retries next cycle instead
 -- of latching a partial result.
--- ponytail: one atomic LRANGE + 8xN HINCRBY blocks Redis; fine as it only fires on
--- rare facet desync, and chunking would break atomicity.
+-- ponytail: one EVAL + 8xN HINCRBY blocks Redis for the whole list; fine as it only
+-- fires on facet desync, and splitting it across EVALs would break atomicity.
 local REBUILD_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   -- Every worker checks health then rebuilds in two separate EVALs, so on a restart or an
@@ -229,33 +233,39 @@ local REBUILD_SCRIPT = [==[
   if type(probe) == 'table' and probe.err then return probe end
   redis.call('DEL', 'requests:facets:initialized')
   for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
-  local items = redis.call('LRANGE', KEYS[1], 0, -1)
+  -- Read in slices so the Lua heap holds one slice instead of the whole list: Redis
+  -- counts script memory against maxmemory, and a full decode made it evict keys,
+  -- the list itself included.
+  local total = redis.call('LLEN', KEYS[1])
   local seen = {}
-  local state = {version=2,length=#items,valid=0,nonfast=0,tail=''}
-  for _, raw in ipairs(items) do
-    local ok, req = pcall(cjson.decode, raw)
-    local object = ok and type(req) == 'table' and string.match(raw, '^%s*{')
-    local id = object and req.id
-    if id == cjson.null then id = nil end
-    local date = object and tonumber(req.date)
-    local finite = date and date == date and math.abs(date) ~= math.huge
-    if not date or date ~= date or math.abs(date) == math.huge
-        or type(id) ~= 'string' or id == '' or seen[id] then state.nonfast = state.nonfast + 1 end
-    if object and (finite or req.date == nil or req.date == cjson.null)
-        and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id]) then
-      if id ~= nil then seen[id] = true end
-      state.tail = type(id) == 'string' and id or ''
-      state.valid = state.valid + 1
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
-        if type(r) == 'table' and r.err then return r end
+  local state = {version=2,length=total,valid=0,nonfast=0,tail=''}
+  for start = 0, total - 1, 256 do
+    for _, raw in ipairs(redis.call('LRANGE', KEYS[1], start, start + 255)) do
+      local ok, req = pcall(cjson.decode, raw)
+      local object = ok and type(req) == 'table' and string.match(raw, '^%s*{')
+      local id = object and req.id
+      if id == cjson.null then id = nil end
+      local date = object and tonumber(req.date)
+      local finite = date and date == date and math.abs(date) ~= math.huge
+      if not date or date ~= date or math.abs(date) == math.huge
+          or type(id) ~= 'string' or id == '' or seen[id] then state.nonfast = state.nonfast + 1 end
+      if object and (finite or req.date == nil or req.date == cjson.null)
+          and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id]) then
+        if id ~= nil then seen[id] = true end
+        state.tail = type(id) == 'string' and id or ''
+        state.valid = state.valid + 1
+        for i = 1, #fields do
+          local v = req[fields[i]]
+          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+          local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
+          if type(r) == 'table' and r.err then return r end
+        end
       end
     end
+    collectgarbage('collect')
   end
   redis.call('SET', 'requests:facets:initialized', cjson.encode(state))
-  return #items
+  return total
 ]==]
 
 -- O(8) on every worker tick, independent of retained history/cardinality. Writers
@@ -427,10 +437,19 @@ local function restore_counter(self, key, counter, wid)
 		)
 		return false
 	end
+	-- An unparsable value is not a transient failure: no later cycle makes it parse. Older
+	-- releases could store the literal string "nil" here, and refusing to restore left the
+	-- counter unrestored, which also skips its own SET, so the bad value survived every cycle
+	-- and the key was logged forever while this worker's counts never reached Redis. Discard
+	-- it instead and let the sync below overwrite the key with the live value.
 	local baseline = stored == null and 0 or tonumber(stored)
 	if not baseline then
-		self:log_throttled(ERR, "counter_restore", "Invalid Redis metric counter " .. key)
-		return false
+		self:log_throttled(
+			WARN,
+			"counter_discard",
+			"Discarding invalid Redis metric counter " .. key .. ", overwriting it with the local value"
+		)
+		baseline = 0
 	end
 	-- log() can increment or evict this record while GET yields. Never reinsert a
 	-- stale record, and merge the live increments only after the reply arrives.
@@ -768,7 +787,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
 	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()

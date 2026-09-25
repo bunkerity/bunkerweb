@@ -16,6 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
+from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -53,6 +54,11 @@ def normalize_algorithm_name(algorithm: str) -> str:
 
 
 def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
+    try:
+        days = str(parse_duration_int(days, "d"))
+    except ValueError:
+        LOGGER.warning(f"Invalid SELF_SIGNED_SSL_EXPIRY value: {days}, using default value (365)")
+        days = "365"
     server_path = self_signed_path.joinpath(first_server)
     cert_path = server_path.joinpath("cert.pem")
     key_path = server_path.joinpath("key.pem")

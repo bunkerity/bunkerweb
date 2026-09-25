@@ -34,12 +34,39 @@ from threading import Lock
 from time import monotonic, sleep
 from typing import Dict, List, Optional, Tuple, Union, Any
 from urllib.parse import urlsplit
-from math import ceil
+from math import ceil, isfinite
 import logging
 
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 # Underscores are accepted because Docker/internal DNS commonly uses them in container names.
 _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
+_DURATION_RX = re_compile(r"^(\d+(?:\.\d+)?)(ms|[smhdwMy])?$")
+_DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
+
+
+def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
+    """Return a duration expressed in ``default_unit``.
+
+    Examples: ``parse_duration("2m") == 120`` and ``parse_duration("1500ms") == 1.5``.
+    """
+    if default_unit not in _DURATION_UNITS_MS:
+        raise ValueError(f"Unknown duration unit: {default_unit}")
+    match = _DURATION_RX.fullmatch(str(value).strip())
+    if not match:
+        raise ValueError(f"Invalid duration: {value}")
+    result = float(match.group(1)) * _DURATION_UNITS_MS[match.group(2) or default_unit] / _DURATION_UNITS_MS[default_unit]
+    if not isfinite(result):
+        raise ValueError(f"Duration out of range: {value}")
+    return int(result) if result.is_integer() else result
+
+
+def parse_duration_int(value: Any, default_unit: str = "s") -> int:
+    """Return a duration as a whole count of ``default_unit``, floored like the Lua parser.
+
+    0 means permanent or disabled to the callers, so a non-zero duration below the unit gives 1.
+    """
+    result = parse_duration(value, default_unit)
+    return max(1, int(result)) if result > 0 else 0
 
 
 def has_url_userinfo(value: Any) -> bool:
@@ -772,7 +799,7 @@ def get_redis_client(
             redis_db = int(redis_db)
 
         if isinstance(redis_timeout, str):
-            redis_timeout = float(redis_timeout)
+            redis_timeout = float(parse_duration(redis_timeout, "ms"))
 
         if isinstance(redis_keepalive_pool, str):
             redis_keepalive_pool = int(redis_keepalive_pool)

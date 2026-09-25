@@ -26,12 +26,12 @@
     },
     "SELF_SIGNED_SSL_EXPIRY": {
       "context": "multisite",
-      "default": "365",
-      "help": "Self-signed certificate expiry in days.",
+      "default": "1y",
+      "help": "Self-signed certificate expiry in days. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is days.",
       "id": "self-signed-ssl-expiry",
       "label": "Certificate expiry",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "SELF_SIGNED_SSL_SUBJ": {
       "context": "multisite",

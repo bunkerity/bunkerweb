@@ -11,6 +11,7 @@ local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
 local shared = ngx.shared
 local get_variable = utils.get_variable
+local parse_duration = utils.parse_duration
 local session_init = session.init
 local tonumber = tonumber
 local encode = cjson.encode
@@ -92,9 +93,9 @@ function sessions:init()
 	local config = {
 		secret = self.variables["SESSIONS_SECRET"],
 		cookie_name = self.variables["SESSIONS_NAME"],
-		idling_timeout = tonumber(self.variables["SESSIONS_IDLING_TIMEOUT"]),
-		rolling_timeout = tonumber(self.variables["SESSIONS_ROLLING_TIMEOUT"]),
-		absolute_timeout = tonumber(self.variables["SESSIONS_ABSOLUTE_TIMEOUT"]),
+		idling_timeout = parse_duration(self.variables["SESSIONS_IDLING_TIMEOUT"], "s"),
+		rolling_timeout = parse_duration(self.variables["SESSIONS_ROLLING_TIMEOUT"], "s"),
+		absolute_timeout = parse_duration(self.variables["SESSIONS_ABSOLUTE_TIMEOUT"], "s"),
 	}
 	if self.variables["SESSIONS_SECRET"] == "random" then
 		if self.randoms["SESSIONS_SECRET"] then
@@ -126,10 +127,10 @@ function sessions:init()
 			prefix = "sessions_",
 			username = redis_vars["REDIS_USERNAME"],
 			password = redis_vars["REDIS_PASSWORD"],
-			connect_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
-			send_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
-			read_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
-			keepalive_timeout = tonumber(redis_vars["REDIS_KEEPALIVE_IDLE"]),
+			connect_timeout = parse_duration(redis_vars["REDIS_TIMEOUT"], "ms"),
+			send_timeout = parse_duration(redis_vars["REDIS_TIMEOUT"], "ms"),
+			read_timeout = parse_duration(redis_vars["REDIS_TIMEOUT"], "ms"),
+			keepalive_timeout = parse_duration(redis_vars["REDIS_KEEPALIVE_IDLE"], "ms"),
 			pool_size = tonumber(redis_vars["REDIS_KEEPALIVE_POOL"]),
 			ssl = redis_vars["REDIS_SSL"] == "yes",
 			ssl_verify = redis_vars["REDIS_SSL_VERIFY"] == "yes",

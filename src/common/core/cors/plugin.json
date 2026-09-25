@@ -94,12 +94,12 @@
     },
     "CORS_MAX_AGE": {
       "context": "multisite",
-      "default": "86400",
-      "help": "Value of the Access-Control-Max-Age header.",
+      "default": "1d",
+      "help": "Value of the Access-Control-Max-Age header. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "cors-max-age",
       "label": "Access-Control-Max-Age value",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "CORS_DENY_REQUEST": {
       "context": "multisite",
