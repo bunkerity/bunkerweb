@@ -114,7 +114,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.16-rc1
+          image: bunkerity/bunkerweb:1.6.16-rc2
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -173,7 +173,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.16-rc1
+          image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -210,7 +210,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.16-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -317,7 +317,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.6.16-rc1
+          image: bunkerity/bunkerweb-ui:1.6.16-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE

@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.16~rc2 - 2026/09/??
+## v1.6.16~rc2 - 2026/09/25
 
 - [BUGFIX] `db`: on SQLite, settings written in the same save as a service rename or removal are no longer deleted by reused row ids, which could leave a renamed service without any settings and make the reload fall back to failover.
 - [BUGFIX] `ui`: renaming a service moves its settings, custom configs and job cache in one transaction, in every editor mode, instead of deleting and recreating the service, which dropped its per-service certificates and job cache.
