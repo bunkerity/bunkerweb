@@ -8,7 +8,7 @@ with just ``src/common/utils`` on the path; callers pass ``os.getenv`` (never a 
 which freezes on a start-time snapshot of the job environment).
 """
 
-from common_utils import parse_duration  # type: ignore
+from common_utils import parse_duration_int  # type: ignore
 
 # Template variable -> plugin.json default
 SETTINGS = {
@@ -91,8 +91,8 @@ def render_variables(getenv, service: str = ""):
         elif name in DURATION_SETTINGS:
             unit = DURATION_SETTINGS[name]
             try:
-                value = str(int(parse_duration(value, unit)))
+                value = str(parse_duration_int(value, unit))
             except ValueError:
-                value = str(int(parse_duration(default, unit)))
+                value = str(parse_duration_int(default, unit))
         variables[name] = value
     return variables

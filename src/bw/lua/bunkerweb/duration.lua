@@ -25,7 +25,13 @@ function duration.parse_duration(value, default_unit)
 	if not amount or not default_factor or not factor then
 		return nil
 	end
-	return floor(tonumber(amount) * factor / default_factor)
+	amount = tonumber(amount)
+	local result = floor(amount * factor / default_factor)
+	-- 0 means permanent or disabled to the callers: a non-zero duration below the unit must not become it
+	if result == 0 and amount > 0 then
+		return 1
+	end
+	return result
 end
 
 return duration

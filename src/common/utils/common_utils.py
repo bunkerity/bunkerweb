@@ -60,6 +60,15 @@ def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
     return int(result) if result.is_integer() else result
 
 
+def parse_duration_int(value: Any, default_unit: str = "s") -> int:
+    """Return a duration as a whole count of ``default_unit``, floored like the Lua parser.
+
+    0 means permanent or disabled to the callers, so a non-zero duration below the unit gives 1.
+    """
+    result = parse_duration(value, default_unit)
+    return max(1, int(result)) if result > 0 else 0
+
+
 def has_url_userinfo(value: Any) -> bool:
     """Return whether a hostname or URL contains a userinfo delimiter."""
     return isinstance(value, str) and "@" in value
