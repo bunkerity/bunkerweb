@@ -12,6 +12,7 @@
 - [BUGFIX] `letsencrypt`: a passed-through ACME challenge keeps the client `Host` instead of a fixed `REVERSE_PROXY_CUSTOM_HOST`. (Fixes #3957)
 - [BUGFIX] `whitelist`, `greylist`, `antibot`, `blacklist`: rDNS rules now confirm IPv6 clients instead of treating them as spoofing their reverse DNS.
 - [BUGFIX] `ui`: deleting a custom config with a digit-only name no longer deletes other configs of that service and type on MariaDB.
+- [BUGFIX] `ui`: row actions on the jobs, plugins, templates, services and bans pages keep digit-only ids as text.
 - [FEATURE] `antibot`: `ANTIBOT_JAVASCRIPT_DIFFICULTY` (16 to 28 bits) raises the JavaScript challenge cost. Regenerate custom JavaScript pages first.
 - [FEATURE] `antibot`: redesigned challenge pages that follow browser preferences (theme, reduced motion, contrast, text size), with a discreet reload link.
 - [UI] Responses are compressed (brotli/gzip) and static assets carry a versioned, long-lived cache header, so the Web UI stays fast when reached directly; the API gains gzip.

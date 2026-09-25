@@ -321,7 +321,7 @@ $(document).ready(function () {
       .nodes()
       .to$()
       .each(function () {
-        const plugin = $(this).find("td:eq(2)").data("id");
+        const plugin = $(this).find("td:eq(2)").attr("data-id");
         if (plugin) {
           plugins.push(plugin);
         }
@@ -566,7 +566,7 @@ $(document).ready(function () {
       return;
     }
     const $this = $(this);
-    setupDeletionModal([$this.data("plugin-id")]);
+    setupDeletionModal([$this.attr("data-plugin-id")]);
   });
 
   // Open file dialog on click

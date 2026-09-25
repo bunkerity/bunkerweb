@@ -1769,7 +1769,7 @@ $(document).ready(function () {
 
     const ip = $(this).data("ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
 
     const ban = {
       ip: ip,
@@ -1797,7 +1797,7 @@ $(document).ready(function () {
 
     const ip = $(this).data("ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
     const isPermanent = $(this).data("permanent");
 
     const ban = {
