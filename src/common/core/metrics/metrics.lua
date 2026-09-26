@@ -32,15 +32,8 @@ local synced_redis_keys = {}
 local synced_tables = {}
 -- Last value each counter wrote to Redis, so an idle counter costs no SET every tick.
 local synced_counters = {}
--- Values per RPUSH, well under LuaJIT's unpack() limit.
-local RPUSH_BATCH = 500
--- Without a TTL there is no per-tick EXPIRE reply to reveal a lost key, so each worker keeps a
--- marker key instead: when it is gone (FLUSHDB, restart without persistence), everything is
--- resynced. Named per worker process, not per worker id, because several instances can share
--- one Redis with the same ids, and the first to recreate a shared marker would hide the loss
--- from the others. Its own TTL reaps the markers of dead workers.
-local sync_marker
-local SYNC_MARKER_TTL = 86400
+-- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
+local REDIS_BATCH = 500
 
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
@@ -435,22 +428,33 @@ local function reap_evicted_redis_keys(self, wid, live_keys)
 	synced_redis_keys = live_keys
 end
 
--- One EXISTS per tick. A missing marker (or a first tick) drops every synced state, so the
--- sync below rewrites all tables and counters in full, then the marker is recreated.
-local function check_sync_marker(self)
-	if not sync_marker then
-		sync_marker = "metrics:sync_marker:" .. worker.pid() .. "_" .. utils.rand(12)
+-- Without a TTL there is no per-tick EXPIRE reply to reveal a lost key, so one EXISTS over every
+-- key this worker believes is in Redis does it instead. Any missing one (FLUSHDB, restart without
+-- persistence, maxmemory eviction) drops every synced state, and the sync below rewrites all
+-- tables and counters in full.
+local function check_synced_keys(self, wid)
+	local keys = {}
+	for key, state in pairs(synced_tables) do
+		-- An empty table was only DEL'd: it has no key to find.
+		if state.len > 0 then
+			keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
+		end
 	end
-	local exists = self:redis_call("exists", sync_marker)
-	if exists ~= 0 then
-		-- 1 is the healthy case; an error proves nothing, so keep the state until next tick.
-		return
+	for key in pairs(synced_counters) do
+		keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
 	end
-	synced_tables = {}
-	synced_counters = {}
-	local ok, err = self:redis_call("set", sync_marker, "1", "EX", SYNC_MARKER_TTL)
-	if not ok then
-		self:log_throttled(ERR, "sync_marker", "Can't set metrics sync marker: " .. (err or "unknown error"))
+	for i = 1, #keys, REDIS_BATCH do
+		local last = math.min(i + REDIS_BATCH - 1, #keys)
+		local found = self:redis_call("exists", unpack(keys, i, last))
+		-- An error proves nothing: keep the state until the next tick.
+		if type(found) ~= "number" then
+			return
+		end
+		if found < last - i + 1 then
+			synced_tables = {}
+			synced_counters = {}
+			return
+		end
 	end
 end
 
@@ -490,13 +494,13 @@ local function sync_table(self, key, redis_key, value)
 			return false, "can't clear metric table " .. key .. " in Redis: " .. (err or "unknown error")
 		end
 	end
-	for i = 1, #payload, RPUSH_BATCH do
+	for i = 1, #payload, REDIS_BATCH do
 		local pushed, err =
-			self:redis_call("rpush", redis_key, unpack(payload, i, math.min(i + RPUSH_BATCH - 1, #payload)))
+			self:redis_call("rpush", redis_key, unpack(payload, i, math.min(i + REDIS_BATCH - 1, #payload)))
 		if not pushed then
 			return false, "can't push metric table " .. key .. " to Redis: " .. (err or "unknown error")
 		end
-		redis_len = redis_len + math.min(RPUSH_BATCH, #payload - i + 1)
+		redis_len = redis_len + math.min(REDIS_BATCH, #payload - i + 1)
 		if pushed ~= redis_len then
 			-- The list is not what was synced last (lost, or a replayed push): start over.
 			if first > 1 then
@@ -913,7 +917,7 @@ function metrics:timer()
 			self_heal_request_facets(self)
 			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
 			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
-				check_sync_marker(self)
+				check_synced_keys(self, wid)
 			end
 		end
 	end
