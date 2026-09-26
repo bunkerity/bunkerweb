@@ -231,6 +231,16 @@ function crowdsec:init()
 	return self:ret(true, msg)
 end
 
+-- init_workers runs after the scheduler pushes real config (IS_LOADING=no) and the
+-- master receives SIGHUP. init_by_lua runs once at startup with IS_LOADING=yes, so
+-- any plugin that only initializes there stays uninitialized in Docker mode where
+-- the entrypoint forces IS_LOADING=yes until the scheduler pushes IS_LOADING=no.
+-- Delegate to init(): is_needed() returns true when IS_LOADING=no in internalstore,
+-- so the bouncer instances get created here.
+function crowdsec:init_workers()
+	return self:init()
+end
+
 function crowdsec:access()
 	-- Check if CS is activated
 	if not self:is_needed() then
