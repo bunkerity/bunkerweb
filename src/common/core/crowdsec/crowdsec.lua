@@ -231,6 +231,18 @@ function crowdsec:init()
 	return self:ret(true, msg)
 end
 
+-- init_by_lua re-runs on HUP reload: OpenResty re-creates the Lua VM, so when the
+-- scheduler pushes IS_LOADING=no and the API sends HUP to nginx, init() already
+-- created bouncer instances in the master process. Workers inherit them via
+-- copy-on-write, so only delegate to init() when that didn't happen — e.g. on a
+-- fresh start where init_by_lua ran with IS_LOADING=yes, or when init() failed.
+function crowdsec:init_workers()
+	if next(bouncers) ~= nil then
+		return self:ret(true, "bouncers already initialized in init_by_lua phase")
+	end
+	return self:init()
+end
+
 function crowdsec:access()
 	-- Check if CS is activated
 	if not self:is_needed() then
