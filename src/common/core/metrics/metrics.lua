@@ -34,6 +34,13 @@ local synced_tables = {}
 local synced_counters = {}
 -- Values per RPUSH, well under LuaJIT's unpack() limit.
 local RPUSH_BATCH = 500
+-- Without a TTL there is no per-tick EXPIRE reply to reveal a lost key, so each worker keeps a
+-- marker key instead: when it is gone (FLUSHDB, restart without persistence), everything is
+-- resynced. Named per worker process, not per worker id, because several instances can share
+-- one Redis with the same ids, and the first to recreate a shared marker would hide the loss
+-- from the others. Its own TTL reaps the markers of dead workers.
+local sync_marker
+local SYNC_MARKER_TTL = 86400
 
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
@@ -426,6 +433,25 @@ local function reap_evicted_redis_keys(self, wid, live_keys)
 		end
 	end
 	synced_redis_keys = live_keys
+end
+
+-- One EXISTS per tick. A missing marker (or a first tick) drops every synced state, so the
+-- sync below rewrites all tables and counters in full, then the marker is recreated.
+local function check_sync_marker(self)
+	if not sync_marker then
+		sync_marker = "metrics:sync_marker:" .. worker.pid() .. "_" .. utils.rand(12)
+	end
+	local exists = self:redis_call("exists", sync_marker)
+	if exists ~= 0 then
+		-- 1 is the healthy case; an error proves nothing, so keep the state until next tick.
+		return
+	end
+	synced_tables = {}
+	synced_counters = {}
+	local ok, err = self:redis_call("set", sync_marker, "1", "EX", SYNC_MARKER_TTL)
+	if not ok then
+		self:log_throttled(ERR, "sync_marker", "Can't set metrics sync marker: " .. (err or "unknown error"))
+	end
 end
 
 -- Mirror a table metric into its Redis list. Unchanged since the last sync: no command at all.
@@ -885,6 +911,10 @@ function metrics:timer()
 				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
 			end
 			self_heal_request_facets(self)
+			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
+				check_sync_marker(self)
+			end
 		end
 	end
 
