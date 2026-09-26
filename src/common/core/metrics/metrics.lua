@@ -502,11 +502,13 @@ local function sync_table(self, key, redis_key, value)
 		end
 		redis_len = redis_len + math.min(REDIS_BATCH, #payload - i + 1)
 		if pushed ~= redis_len then
-			-- The list is not what was synced last (lost, or a replayed push): start over.
+			-- The list is not what this sync expects (lost, replayed push or another writer).
+			-- Incremental: start over now. Full rewrite: a replayed batch sits mid-list where no
+			-- trim can reach it, so leave the key unsynced and let the next tick rewrite it.
 			if first > 1 then
 				return sync_table(self, key, redis_key, value)
 			end
-			redis_len = pushed
+			return true
 		end
 	end
 	if redis_len > len then
