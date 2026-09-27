@@ -1077,6 +1077,7 @@ try:
                         break
                 ensure_zerossl_accounts(required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
         start_progress_monitor()
+        issued_any = False
         try:
             if concurrent_requests and len(pending_services) > 1:
                 max_workers = max(1, min(len(pending_services), effective_cpu_count()))
@@ -1092,6 +1093,7 @@ try:
                             success = False
                         config["exists"] = success
                         if success:
+                            issued_any = True
                             status = 1 if status == 0 else status
                         else:
                             status = 2
@@ -1099,6 +1101,7 @@ try:
                 for service, config in pending_services:
                     config["exists"] = generate_certificate(service, config, cmd_env)
                     if config["exists"]:
+                        issued_any = True
                         status = 1 if status == 0 else status
                     else:
                         status = 2
@@ -1162,7 +1165,7 @@ try:
 
         # * Trigger OCSP stapling refresh for newly issued certificates (AFTER database save)
         # OCSP job will compare new certs with cached ones and process differential updates
-        if status == 1 and _ocsp_stapling_enabled_anywhere():
+        if issued_any and _ocsp_stapling_enabled_anywhere():
             LOGGER.info("🔄 OCSP triggering refresh for newly issued certificates")
             try:
                 import sys

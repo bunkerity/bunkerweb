@@ -104,6 +104,7 @@ try:
         process.kill()
         stdout, stderr = process.communicate()
         status = 2
+    renewed_any = False
     if stdout:
         for line in stdout.splitlines():
             line_str = line.strip()
@@ -111,6 +112,7 @@ try:
                 LOGGER_CERTBOT.info(line_str)
                 if "(success)" in line_str or "Congratulations" in line_str:
                     status = 1
+                    renewed_any = True
     if stderr:
         for line in stderr.splitlines():
             LOGGER_CERTBOT.info(line.strip())
@@ -129,7 +131,7 @@ try:
 
     # Trigger OCSP refresh after successful renewal (AFTER database save)
     # OCSP job will compare new certs with cached ones and process differential updates
-    if status == 1 and _ocsp_stapling_enabled_anywhere():
+    if renewed_any and _ocsp_stapling_enabled_anywhere():
         LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
 
         try:

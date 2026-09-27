@@ -43,8 +43,19 @@ local function pem_blocks(cert_pem)
 	return blocks
 end
 
+local function is_fp64(fp)
+	return type(fp) == "string" and #fp == 64 and fp:match("^%x+$") ~= nil
+end
+
+local function to_hex(bin)
+	local hex = {}
+	for i = 1, #bin do
+		hex[i] = string.format("%02x", string.byte(bin, i))
+	end
+	return table.concat(hex)
+end
+
 -- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
--- Cached so later handshakes for the same PEM do not spawn openssl.
 local function spki_fingerprint(cert_pem, internalstore)
 	local md5 = ngx.md5 and ngx.md5(cert_pem) or nil
 	local cache_key = md5 and ("TLS:SSL:ocsp_spki:" .. md5) or nil
@@ -52,52 +63,47 @@ local function spki_fingerprint(cert_pem, internalstore)
 		local ok, cached = pcall(function()
 			return internalstore:get(cache_key, true)
 		end)
-		if ok and type(cached) == "string" and cached:match("^[0-9a-f]{64}$") then
-			return cached
+		if ok and is_fp64(cached) then
+			return cached:lower()
 		end
 	end
 
 	local fingerprint = nil
-	pcall(function()
-		local tmp = "/tmp/ocsp_spki_" .. tostring(ngx.worker.pid()) .. ".pem"
-		local f = io.open(tmp, "w")
-		if not f then
+	local ok_fp, err = pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local digest_lib = require("resty.openssl.digest")
+		local cert_obj = x509.new(cert_pem)
+		if not cert_obj then
 			return
 		end
-		f:write(cert_pem)
-		f:close()
-		local cmd = "openssl x509 -pubkey -noout -in " .. tmp .. " 2>/dev/null"
-			.. " | openssl pkey -pubin -outform DER 2>/dev/null"
-			.. " | openssl dgst -sha256 2>/dev/null"
-		local handle = io.popen(cmd, "r")
-		if handle then
-			local out = handle:read("*a")
-			handle:close()
-			if out then
-				local fp = out:match("=%s*([0-9A-Fa-f]{64})")
-				if fp then
-					fingerprint = fp:lower()
-				end
-			end
+		local pub = cert_obj:get_pubkey()
+		local spki = pub and pub:tostring("public", "DER")
+		if not spki then
+			return
 		end
-		os.remove(tmp)
+		local digest_ctx = digest_lib.new("sha256")
+		digest_ctx:update(spki)
+		fingerprint = to_hex(digest_ctx:final())
 	end)
+	if not ok_fp then
+		log(ngx.DEBUG, "OCSP SPKI fingerprint failed: " .. tostring(err))
+	end
 
-	if cache_key and fingerprint then
+	if cache_key and is_fp64(fingerprint) then
 		pcall(function()
 			internalstore:set(cache_key, fingerprint, 86400, true)
 		end)
+		return fingerprint
 	end
-	return fingerprint
+	return nil
 end
 
 local function read_file(path)
-	local data = nil
 	local f = io.open(path, "rb")
 	if not f then
 		return nil
 	end
-	data = f:read("*a")
+	local data = f:read("*a")
 	f:close()
 	if data and #data > 0 then
 		return data

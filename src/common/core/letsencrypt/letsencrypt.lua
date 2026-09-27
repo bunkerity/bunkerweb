@@ -501,14 +501,16 @@ function letsencrypt:load_data(data, server_name)
 	local cert_fingerprint = nil
 	pcall(function()
 		local x509 = require("resty.openssl.x509")
+		local digest_lib = require("resty.openssl.digest")
 		local leaf_pem = data[1]:match("(%-%-%-%-%-BEGIN CERTIFICATE%-%-%-%-%-.-%-%-%-%-%-END CERTIFICATE%-%-%-%-%-)")
 		if leaf_pem then
 			local cert_obj = x509.new(leaf_pem)
-			if cert_obj then
-				local digest_bytes = cert_obj:pubkey_digest("sha256")
-				if digest_bytes then
-					cert_fingerprint = to_hex(digest_bytes):lower()
-				end
+			local pub = cert_obj and cert_obj:get_pubkey()
+			local spki = pub and pub:tostring("public", "DER")
+			if spki then
+				local digest_ctx = digest_lib.new("sha256")
+				digest_ctx:update(spki)
+				cert_fingerprint = to_hex(digest_ctx:final())
 			end
 		end
 	end)
