@@ -2420,22 +2420,17 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                         cert_name,
                     )
                     cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
-                elif current_ttl <= current_refresh_threshold:
+                else:
+                    # Still within nextUpdate — keep stapling even inside the soft refresh
+                    # window. Deleting here caused self-inflicted staple outages on transient
+                    # responder failures.
                     log_warning(
-                        "🚨 OCSP CRITICAL: Cached response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]) and refresh failed. "
-                        "Removing from cache to prevent stapling expired data.",
+                        "⚠️ OCSP could NOT refresh response for %s (TTL=%ds, refresh_threshold=%ds [20%% of %ds]); "
+                        "keeping existing cache until nextUpdate",
                         cert_name,
                         current_ttl,
                         current_refresh_threshold,
                         total_lifetime,
-                    )
-                    cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
-                else:
-                    log_warning(
-                        "⚠️ OCSP could NOT refresh response for %s, keeping existing cache (TTL=%ds, above threshold %ds) for now",
-                        cert_name,
-                        current_ttl,
-                        current_refresh_threshold,
                     )
                     _ensure_issuer_pem(pem_data, fingerprint, cert_name, db)
                 return (cert_name, None, current_ttl, cert_checksum, pem_data, ocsp_url, True)
