@@ -675,12 +675,46 @@ local function meta_expires_unix(meta)
 	return ts + tonumber(ttl_str)
 end
 
--- False when we know nextUpdate/expires is past. Unknown expiry → true (PEM validate may still enforce).
+-- Wall-clock stop from published_unix + max age (independent of nextUpdate).
+local function meta_max_age_unix(meta)
+	if type(meta) ~= "table" then
+		return nil
+	end
+	local u = meta.max_age_unix
+	if type(u) == "number" and u > 0 then
+		return math.floor(u)
+	end
+	if type(u) == "string" then
+		local n = tonumber(u)
+		if n and n > 0 then
+			return math.floor(n)
+		end
+	end
+	local published = meta.published_unix
+	if type(published) == "string" then
+		published = tonumber(published)
+	end
+	if type(published) == "number" and published > 0 then
+		-- Match PREVIOUS_GOOD_MAX_AGE_SECONDS in ocsp-refresh.py (24h).
+		return math.floor(published) + 86400
+	end
+	return nil
+end
+
+-- False when nextUpdate/expires or wall-clock max-age is past. Unknown → true.
 local function resp_still_fresh(expires_unix, fingerprint, meta)
+	meta = meta or (fingerprint and read_ocsp_json(fingerprint)) or nil
 	local exp = expires_unix
 	if not exp then
-		meta = meta or read_ocsp_json(fingerprint)
 		exp = meta_expires_unix(meta)
+	end
+	local max_age = meta_max_age_unix(meta)
+	if exp and max_age then
+		if max_age < exp then
+			exp = max_age
+		end
+	elseif max_age and not exp then
+		exp = max_age
 	end
 	if not exp then
 		return true
@@ -689,6 +723,18 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 		return false
 	end
 	return true
+end
+
+local function meta_effective_expires_unix(meta, expires_unix)
+	local exp = expires_unix or meta_expires_unix(meta)
+	local max_age = meta_max_age_unix(meta)
+	if exp and max_age then
+		if max_age < exp then
+			return max_age
+		end
+		return exp
+	end
+	return exp or max_age
 end
 
 local function normalize_fp_hint(cert_fp_hint)
@@ -979,7 +1025,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 					return ocsp.set_ocsp_status_resp(cached)
 				end)
 				if ok_set and set_ok then
-					local exp = cached_expires or meta_expires_unix(meta)
+					local exp = meta_effective_expires_unix(meta, cached_expires)
 					-- Only re-warm verified if crypto already proved this body.
 					if verified then
 						warm_cache(internalstore, fingerprint, cached, true, exp)
@@ -1022,7 +1068,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
 			if ok_set and set_ok then
-				warm_cache(internalstore, fingerprint, resp, verified, meta_expires_unix(meta))
+				warm_cache(internalstore, fingerprint, resp, verified, meta_effective_expires_unix(meta))
 				return true
 			end
 			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
@@ -1079,7 +1125,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
 			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
 			if result == true then
-				warm_cache(internalstore, fingerprint, cached, true, cached_expires or meta_expires_unix(read_ocsp_json(fingerprint)))
+				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(read_ocsp_json(fingerprint), cached_expires))
 				return true
 			end
 			if result == false then
@@ -1111,7 +1157,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		end
 		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 		if result == true then
-			warm_cache(internalstore, fingerprint, resp, true, meta_expires_unix(meta))
+			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
 			return true
 		end
 		if result == false then

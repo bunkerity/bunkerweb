@@ -1507,6 +1507,10 @@ DEFAULT_OCSP_TTL = 86400
 # Backoff duration after certain HTTP errors (e.g. responder temporarily bad)
 HTTP_ERROR_BACKOFF_SECONDS = 300  # 5 minutes
 
+# Wall-clock cap on how long a published GOOD body may be retained/served, even when
+# nextUpdate is still in the future. Failed refreshes cannot keep last-good forever.
+PREVIOUS_GOOD_MAX_AGE_SECONDS = 24 * 3600
+
 # Verified CertStatus != GOOD. REVOKED tombstones immediately; UNKNOWN waits
 # so a single "responder unsure" answer does not drop a usable staple.
 _NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
@@ -1585,15 +1589,45 @@ def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
     Fields handshake Lua uses to refuse stapling past nextUpdate.
 
     expires: legacy human/TTL string for cleanup
-    expires_unix: absolute UTC unix time (prefer for ssl_certificate checks)
+    expires_unix: absolute UTC unix time from nextUpdate (prefer for ssl_certificate checks)
+    published_unix / max_age_unix: wall-clock stop independent of nextUpdate
     """
     if not ttl or ttl <= 0:
         return {"expires": "unknown"}
     now = datetime.now(timezone.utc)
+    published = int(now.timestamp())
     return {
         "expires": now.isoformat() + f" + {int(ttl)}s",
-        "expires_unix": int(now.timestamp()) + int(ttl),
+        "expires_unix": published + int(ttl),
+        "published_unix": published,
+        "max_age_unix": published + PREVIOUS_GOOD_MAX_AGE_SECONDS,
     }
+
+
+def _meta_int_unix(meta: Dict[str, Any], key: str) -> Optional[int]:
+    raw = meta.get(key)
+    if isinstance(raw, (int, float)) and int(raw) > 0:
+        return int(raw)
+    if isinstance(raw, str) and raw.isdigit():
+        return int(raw)
+    return None
+
+
+def _wall_clock_remaining(meta: Optional[Dict[str, Any]], now_unix: Optional[int] = None) -> Optional[int]:
+    """
+    Remaining seconds until published_unix + PREVIOUS_GOOD_MAX_AGE.
+    None when meta has no publish age (pre-upgrade); caller keeps nextUpdate-only behavior.
+    """
+    if not isinstance(meta, dict):
+        return None
+    now = int(now_unix if now_unix is not None else datetime.now(timezone.utc).timestamp())
+    max_age = _meta_int_unix(meta, "max_age_unix")
+    if max_age is None:
+        published = _meta_int_unix(meta, "published_unix")
+        if published is None:
+            return None
+        max_age = published + PREVIOUS_GOOD_MAX_AGE_SECONDS
+    return max(0, max_age - now)
 
 
 def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
@@ -1713,6 +1747,12 @@ def _write_ocsp_http_error_backoff(
                         meta["expires_unix"] = int(old_exp_unix)
                     elif isinstance(old_exp_unix, str) and old_exp_unix.isdigit() and old.get("error_type") != "http_backoff":
                         meta["expires_unix"] = int(old_exp_unix)
+                    for age_key in ("published_unix", "max_age_unix"):
+                        old_age = old.get(age_key)
+                        if isinstance(old_age, (int, float)) and int(old_age) > 0 and old.get("error_type") != "http_backoff":
+                            meta[age_key] = int(old_age)
+                        elif isinstance(old_age, str) and old_age.isdigit() and old.get("error_type") != "http_backoff":
+                            meta[age_key] = int(old_age)
         except Exception:
             pass
 
@@ -2197,6 +2237,25 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
         # Type assertion: after None checks above, these are guaranteed to be int
         assert remaining is not None
         assert total_lifetime is not None
+
+        # Wall-clock max-age can expire a previous-good body before nextUpdate.
+        meta_path = _get_sharded_ocsp_path(fingerprint) / "ocsp.json"
+        if meta_path.is_file():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            except Exception:
+                meta = None
+            wall_remaining = _wall_clock_remaining(meta if isinstance(meta, dict) else None)
+            if wall_remaining is not None and wall_remaining < remaining:
+                log_info(
+                    "⚡ OCSP cached response for %s: fp=%s wall-clock max-age remaining=%ds "
+                    "(nextUpdate remaining=%ds); using the shorter window",
+                    cert_name,
+                    (fingerprint[:16] + "...") if fingerprint else "unknown",
+                    wall_remaining,
+                    remaining,
+                )
+                remaining = wall_remaining
 
         log_info(
             "⚡ OCSP cached response for %s: fp=%s remaining=%ds (%.1f days), total_lifetime=%ds (%.1f days)",
@@ -2873,7 +2932,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 else:
                     log_warning(
                         "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; "
-                        "keeping existing cache until nextUpdate",
+                        "keeping existing cache until effective expiry",
                         verified_nongood.status_name,
                         cert_name,
                     )
@@ -2890,17 +2949,19 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
                 if current_ttl <= 0:
                     log_warning(
-                        "🧹 OCSP cached response for %s is already expired and refresh failed. Cleaning up invalid cache.",
+                        "🧹 OCSP cached response for %s is already expired (nextUpdate or wall-clock max-age) "
+                        "and refresh failed. Cleaning up invalid cache.",
                         cert_name,
                     )
                     cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
                 else:
-                    # Still within nextUpdate — keep stapling even inside the soft refresh
-                    # window. Deleting here caused self-inflicted staple outages on transient
-                    # responder failures.
+                    # Still within the effective window — keep stapling even inside the soft
+                    # refresh window. Deleting here caused self-inflicted staple outages on
+                    # transient responder failures. Wall-clock max-age is already folded into
+                    # current_ttl via get_cached_ocsp_ttl.
                     log_warning(
                         "⚠️ OCSP could NOT refresh response for %s (TTL=%ds, refresh_threshold=%ds [20%% of %ds]); "
-                        "keeping existing cache until nextUpdate",
+                        "keeping existing cache until effective expiry (nextUpdate and wall-clock max-age)",
                         cert_name,
                         current_ttl,
                         current_refresh_threshold,
@@ -4137,12 +4198,26 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
         remaining = max(0, expires_unix - now_unix)
         if remaining <= 0:
             return 0
+        wall_remaining = _wall_clock_remaining(meta, now_unix)
+        if wall_remaining is not None:
+            remaining = min(remaining, wall_remaining)
+            if remaining <= 0:
+                return 0
         if meta.get("ttl_halved_after_nongood") is True:
             # Already shortened once for this cached body; do not quarter it.
             return remaining
 
         new_remaining = max(1, remaining // 2)
+        # Shorten expires only; keep published_unix / max_age_unix for the same body.
+        published = _meta_int_unix(meta, "published_unix")
+        max_age = _meta_int_unix(meta, "max_age_unix")
         meta.update(_ocsp_expiry_meta(new_remaining))
+        if published is not None:
+            meta["published_unix"] = published
+        if max_age is not None:
+            meta["max_age_unix"] = max_age
+        elif published is not None:
+            meta["max_age_unix"] = published + PREVIOUS_GOOD_MAX_AGE_SECONDS
         meta["fingerprint"] = normalized
         meta["ttl_halved_after_nongood"] = True
         meta["ttl_halved_from"] = remaining
