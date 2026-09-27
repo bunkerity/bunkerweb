@@ -1507,6 +1507,19 @@ DEFAULT_OCSP_TTL = 86400
 # Backoff duration after certain HTTP errors (e.g. responder temporarily bad)
 HTTP_ERROR_BACKOFF_SECONDS = 300  # 5 minutes
 
+# Verified CertStatus != GOOD. REVOKED tombstones immediately; UNKNOWN waits
+# so a single "responder unsure" answer does not drop a usable staple.
+_NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
+
+
+class _VerifiedNonGood(Exception):
+    """OCSP response verified, but CertStatus is not GOOD. Not a transport failure."""
+
+    def __init__(self, status_name: str, serial: Optional[int]):
+        self.status_name = status_name
+        self.serial = serial
+        super().__init__(status_name)
+
 
 def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Optional[int], Optional[int]]:
     """
@@ -1816,8 +1829,9 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
     Returns (raw DER bytes or None, ttl_seconds, issuer PEM or None).
 
     Only returns DER when responseStatus is SUCCESSFUL, the signature verifies,
-    CertStatus is good, and the response serial matches the leaf. Revoked/unknown
-    responses are discarded so they are never published as staples.
+    CertStatus is good, and the response serial matches the leaf. A verified
+    revoked/unknown response raises _VerifiedNonGood so the caller can tombstone
+    the previous GOOD staple. Transport and signature failures return None.
     """
     try:
         leaf, issuer = _parse_chain(pem_data, cert_name)
@@ -2017,13 +2031,14 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             )
             return None, 0, None
         if cert_status != x509_ocsp.OCSPCertStatus.GOOD:
+            status_name = getattr(cert_status, "name", None) or str(cert_status)
             log_error(
                 "❌ OCSP CertStatus=%s for %s (serial=%s); refusing to publish non-good staple.",
-                cert_status,
+                status_name,
                 cert_name,
                 leaf.serial_number,
             )
-            return None, 0, None
+            raise _VerifiedNonGood(status_name, leaf.serial_number)
         try:
             resp_serial = ocsp_response.serial_number
         except (ValueError, AttributeError):
@@ -2049,6 +2064,8 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         time.sleep(2)
 
         return ocsp_der, ttl, issuer.public_bytes(Encoding.PEM)
+    except _VerifiedNonGood:
+        raise
     except HTTPError as e:
         # HTTP error code — OCSP responder returned an error
         error_desc = f"HTTP {e.code}"
@@ -2778,16 +2795,43 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         ocsp_der: Optional[bytes] = None
         ttl: int = 0
 
-        # Use a timeout of 10 seconds per attempt, retry once after 10 seconds
+        # Use a timeout of 10 seconds per attempt, retry once after 10 seconds.
+        # A verified non-GOOD answer is not a transport failure: count it once and do not retry.
+        verified_nongood: Optional[_VerifiedNonGood] = None
         for attempt in (1, 2):
-            ocsp_der, ttl, _issuer_pem = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
+            try:
+                ocsp_der, ttl, _issuer_pem = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
+            except _VerifiedNonGood as exc:
+                verified_nongood = exc
+                break
             if ocsp_der:
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
+                _clear_nongood_marker(fingerprint)
                 break
             if attempt == 1:
                 log_warning("⚠️ OCSP fetch failed for %s, retrying once after 2 seconds ...", cert_name)
                 time.sleep(2)
+
+        if verified_nongood is not None:
+            tombstoned = _note_verified_nongood(
+                fingerprint,
+                verified_nongood.serial,
+                verified_nongood.status_name,
+                cert_name,
+                db,
+            )
+            if tombstoned:
+                stats["ocsp_tombstoned"] = stats.get("ocsp_tombstoned", 0) + 1
+                return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
+            if cached_ttl is not None and cached_ttl > 0:
+                log_warning(
+                    "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; keeping existing cache until nextUpdate",
+                    verified_nongood.status_name,
+                    cert_name,
+                )
+                return (cert_name, None, cast(int, cached_ttl), cert_checksum, pem_data, ocsp_url, True)
+            return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
         if not ocsp_der:
             log_error("❌ OCSP failed to fetch response for %s after retries", cert_name)
@@ -3788,6 +3832,156 @@ def _bump_ocsp_cache_epoch() -> None:
         _atomic_write_text(CONFIGS_SSL_BASE / ".ocsp_epoch", str(time.time_ns()), mode=0o640)
     except Exception as e:
         log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
+
+
+def _nongood_marker_path(fingerprint: str) -> Optional[Path]:
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return None
+    return _get_sharded_ocsp_path(normalized) / "nongood.json"
+
+
+def _clear_nongood_marker(fingerprint: Optional[str]) -> None:
+    """A verified GOOD answer resets the non-GOOD streak for this SPKI."""
+    if not fingerprint:
+        return
+    path = _nongood_marker_path(fingerprint)
+    if path is None or not path.is_file():
+        return
+    try:
+        path.unlink()
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clear non-GOOD marker for %s: %s", fingerprint[:16], e)
+
+
+def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> None:
+    """Drop stored DER so end-of-job restore cannot put a tombstoned staple back."""
+    if db is None or not fingerprint:
+        return
+    names = [f"ocsp/{fingerprint}"]
+    rel = _ocsp_cache_relpath(fingerprint, "ocsp.der")
+    if rel:
+        names.append(rel)
+    for name in names:
+        try:
+            db.delete_job_cache(file_name=name, job_name="ocsp-refresh")
+        except Exception:
+            pass
+
+
+def _tombstone_ocsp_shard(fingerprint: str, serial: Optional[int], status_name: str, cert_name: str, db: Optional[Any]) -> bool:
+    """
+    Remove the published staple for this SPKI. Keeps must_staple in ocsp.json
+    (without der_sha256) so Must-Staple still fail-closes, and bumps the epoch
+    so HTTP and stream L1 drop the previous GOOD body.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    lock = _acquire_cert_lock(normalized)
+    if lock is None:
+        log_error("❌ OCSP could not lock shard to tombstone %s", cert_name)
+        return False
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        shard.mkdir(parents=True, exist_ok=True)
+        # Strip der_sha256 before unlinking ocsp.der. L1 treats a matching
+        # ocsp.json hash as proof the cached body is still current and will
+        # not open the file.
+        meta_path = shard / "ocsp.json"
+        meta: Dict[str, Any] = {"fingerprint": normalized, "tombstoned": True, "cert_status": status_name}
+        if serial is not None:
+            meta["serial"] = str(serial)
+        try:
+            if meta_path.is_file():
+                old = json.loads(meta_path.read_text(encoding="utf-8"))
+                if isinstance(old, dict) and old.get("must_staple") is True:
+                    meta["must_staple"] = True
+        except Exception:
+            pass
+        _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        der_path = shard / "ocsp.der"
+        try:
+            if der_path.is_file():
+                der_path.unlink()
+        except Exception as e:
+            log_error("❌ OCSP could not remove ocsp.der while tombstoning %s: %s", cert_name, e)
+            return False
+        _delete_ocsp_der_db_rows(db, normalized)
+        _bump_ocsp_cache_epoch()
+        log_error(
+            "🧹 OCSP tombstoned shard for %s (fp=%s..., CertStatus=%s, serial=%s); previous GOOD staple removed",
+            cert_name,
+            normalized[:16],
+            status_name,
+            serial,
+        )
+        return True
+    except Exception as e:
+        log_error("❌ OCSP tombstone failed for %s: %s", cert_name, e)
+        return False
+    finally:
+        _release_cert_lock(lock, normalized)
+
+
+def _note_verified_nongood(
+    fingerprint: Optional[str],
+    serial: Optional[int],
+    status_name: str,
+    cert_name: str,
+    db: Optional[Any],
+) -> bool:
+    """
+    Count one verified non-GOOD answer. Tombstone the shard at the threshold.
+    Returns True when the staple was removed.
+    """
+    if not fingerprint:
+        log_error("❌ OCSP CertStatus=%s for %s but fingerprint is missing; cannot tombstone", status_name, cert_name)
+        return False
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    threshold = _NON_GOOD_TOMBSTONE_AFTER.get(status_name, 1)
+    path = _nongood_marker_path(normalized)
+    if path is None:
+        return False
+    consecutive = 1
+    try:
+        if path.is_file():
+            old = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(old, dict):
+                old_serial = str(old.get("serial")) if old.get("serial") is not None else None
+                new_serial = str(serial) if serial is not None else None
+                same_serial = old_serial == new_serial
+                same_status = old.get("status") == status_name
+                if same_serial and same_status:
+                    try:
+                        consecutive = int(old.get("consecutive") or 0) + 1
+                    except (TypeError, ValueError):
+                        consecutive = 1
+    except Exception:
+        consecutive = 1
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(
+            path,
+            json.dumps({"consecutive": consecutive, "status": status_name, "serial": None if serial is None else str(serial)}),
+            mode=0o640,
+        )
+    except Exception as e:
+        log_error("❌ OCSP could not record non-GOOD streak for %s: %s", cert_name, e)
+        return False
+    log_error(
+        "❌ OCSP verified CertStatus=%s for %s (serial=%s) streak=%d/%d",
+        status_name,
+        cert_name,
+        serial,
+        consecutive,
+        threshold,
+    )
+    if consecutive < threshold:
+        return False
+    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db)
 
 
 def _persist_ocsp_results_to_disk(
