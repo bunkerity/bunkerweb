@@ -7,6 +7,38 @@ local function log(level, msg)
 end
 
 -- variables["global"] and variables["<server name>"], same layout as utils.get_variable.
+-- Per-site keys are the primary service id (first SERVER_NAME token). SNI may be a
+-- secondary name on that service — resolve before looking up site overrides.
+local function resolve_multisite_service_id(vars, sni)
+	if not sni or type(vars) ~= "table" then
+		return nil
+	end
+	if type(vars[sni]) == "table" then
+		return sni
+	end
+	local sni_lower = tostring(sni):lower()
+	for primary, site_vars in pairs(vars) do
+		if primary ~= "global" and type(primary) == "string" and type(site_vars) == "table" then
+			if primary:lower() == sni_lower then
+				return primary
+			end
+		end
+	end
+	for primary, site_vars in pairs(vars) do
+		if primary ~= "global" and type(site_vars) == "table" then
+			local names = site_vars["SERVER_NAME"]
+			if type(names) == "string" then
+				for name in names:gmatch("%S+") do
+					if name == sni or name:lower() == sni_lower then
+						return primary
+					end
+				end
+			end
+		end
+	end
+	return nil
+end
+
 -- A per-site value wins. The plugin default is "no".
 local function stapling_enabled(internalstore, server_name)
 	local ok, vars = pcall(function()
@@ -16,10 +48,13 @@ local function stapling_enabled(internalstore, server_name)
 		return false
 	end
 	local value = vars["global"]["SSL_USE_OCSP_STAPLING"]
-	if vars["global"]["MULTISITE"] == "yes" and server_name and type(vars[server_name]) == "table" then
-		local site_value = vars[server_name]["SSL_USE_OCSP_STAPLING"]
-		if site_value ~= nil then
-			value = site_value
+	if vars["global"]["MULTISITE"] == "yes" and server_name then
+		local service_id = resolve_multisite_service_id(vars, server_name)
+		if service_id and type(vars[service_id]) == "table" then
+			local site_value = vars[service_id]["SSL_USE_OCSP_STAPLING"]
+			if site_value ~= nil then
+				value = site_value
+			end
 		end
 	end
 	if type(value) == "boolean" then
