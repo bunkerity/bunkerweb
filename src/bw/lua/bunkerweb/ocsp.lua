@@ -197,18 +197,36 @@ local function warm_cache(internalstore, fingerprint, resp)
 	end)
 end
 
+-- Throttle L1 disk freshness checks (re-read ocsp.json at most this often per fp).
+local L1_DISK_CHECK_SECONDS = 5
+
+local function l1_disk_check_key(fingerprint)
+	return "TLS:SSL:ocsp_diskcheck:" .. fingerprint
+end
+
 local function drop_cache(internalstore, fingerprint)
 	pcall(function()
 		internalstore:delete(cache_key(fingerprint))
 		internalstore:delete(verified_key(fingerprint))
+		internalstore:delete(l1_disk_check_key(fingerprint))
 	end)
 end
 
 -- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
-local function l1_matches_disk(fingerprint, resp)
+local function l1_matches_disk(internalstore, fingerprint, resp)
 	local binding = resp_binding(resp)
 	if not binding then
 		return false
+	end
+
+	-- Skip repeated disk I/O within the throttle window when last check said OK.
+	if internalstore then
+		local ok_cached, cached_binding = pcall(function()
+			return internalstore:get(l1_disk_check_key(fingerprint), true)
+		end)
+		if ok_cached and cached_binding == binding then
+			return true
+		end
 	end
 
 	local disk_sha = nil
@@ -235,15 +253,24 @@ local function l1_matches_disk(fingerprint, resp)
 		end
 	end)
 
+	local matches
 	if disk_sha then
-		return disk_sha == binding
+		matches = disk_sha == binding
+	else
+		local data = read_file(ocsp_path(fingerprint))
+		if not data then
+			matches = false
+		else
+			matches = resp_binding(data) == binding
+		end
 	end
 
-	local data = read_file(ocsp_path(fingerprint))
-	if not data then
-		return false
+	if matches and internalstore then
+		pcall(function()
+			internalstore:set(l1_disk_check_key(fingerprint), binding, L1_DISK_CHECK_SECONDS, true)
+		end)
 	end
-	return resp_binding(data) == binding
+	return matches
 end
 
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
@@ -343,13 +370,11 @@ local function read_ocsp_json(fingerprint)
 	return nil
 end
 
-local function ocsp_json_must_staple(fingerprint)
-	local meta = read_ocsp_json(fingerprint)
+local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
 end
 
-local function ocsp_json_fingerprint_matches(fingerprint)
-	local meta = read_ocsp_json(fingerprint)
+local function ocsp_json_fingerprint_matches(meta, fingerprint)
 	if not meta or type(meta.fingerprint) ~= "string" then
 		return false
 	end
@@ -413,6 +438,8 @@ end
 
 -- ngx.ocsp has one status slot. Prefer ECDSA when RSA+ECDSA leaves are both present.
 local function select_preferred_leaf(blocks)
+	-- Prefer ECDSA among *leaves* (key-matched PEMs from set_certs_from_pem).
+	-- Callers that pass a fullchain must use the first block only — see staple().
 	if not blocks or #blocks == 0 then
 		return nil
 	end
@@ -530,22 +557,18 @@ function _M.set_certs_from_pem(cert_pem, key_pem)
 
 	local leaves = {}
 	local intermediates = {}
-	local keys_used = {}
 	for _, block in ipairs(certs) do
 		local fp = cert_spki_fingerprint(block)
 		local matched_key = nil
-		local matched_idx = nil
 		if fp then
 			for key_idx, key_fp in ipairs(key_fps) do
 				if key_fp and key_fp == fp then
 					matched_key = keys[key_idx]
-					matched_idx = key_idx
 					break
 				end
 			end
 		end
 		if matched_key then
-			keys_used[matched_idx] = true
 			leaves[#leaves + 1] = { pem = block, key = matched_key, fp = fp }
 		else
 			intermediates[#intermediates + 1] = block
@@ -596,7 +619,8 @@ end
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
 -- Must-Staple comes from ocsp.json; response acceptance requires L1 verified binding or matching meta.
 local function staple_from_fingerprint(internalstore, server_name, fingerprint)
-	local must_staple = ocsp_json_must_staple(fingerprint)
+	local meta = read_ocsp_json(fingerprint)
+	local must_staple = ocsp_json_must_staple(meta)
 	if must_staple then
 		log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
 	end
@@ -620,9 +644,9 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 
 	local cached = get_cached_resp(internalstore, fingerprint)
 	if cached then
-		if not l1_matches_disk(fingerprint, cached) then
+		if not l1_matches_disk(internalstore, fingerprint, cached) then
 			drop_cache(internalstore, fingerprint)
-		elseif is_verified(internalstore, fingerprint, cached) or ocsp_json_fingerprint_matches(fingerprint) then
+		elseif is_verified(internalstore, fingerprint, cached) or ocsp_json_fingerprint_matches(meta, fingerprint) then
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(cached)
 			end)
@@ -638,7 +662,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	end
 
 	local resp = read_file(ocsp_path(fingerprint))
-	if resp and (is_verified(internalstore, fingerprint, resp) or ocsp_json_fingerprint_matches(fingerprint)) then
+	if resp and (is_verified(internalstore, fingerprint, resp) or ocsp_json_fingerprint_matches(meta, fingerprint)) then
 		local ok_set, set_ok, set_err = pcall(function()
 			return ocsp.set_ocsp_status_resp(resp)
 		end)
@@ -667,7 +691,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	local issuers = nil
 	local cached = get_cached_resp(internalstore, fingerprint)
 	if cached then
-		if not l1_matches_disk(fingerprint, cached) then
+		if not l1_matches_disk(internalstore, fingerprint, cached) then
 			drop_cache(internalstore, fingerprint)
 		elseif is_verified(internalstore, fingerprint, cached) then
 			local ok_set, set_ok, set_err = pcall(function()
@@ -736,7 +760,9 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 
 	local blocks = pem_blocks(cert_pem)
-	local leaf_pem = select_preferred_leaf(blocks)
+	-- Fullchain order: first block is the leaf. Do not scan intermediates for key type
+	-- (an ECDSA intermediate would steal the staple from an RSA leaf).
+	local leaf_pem = blocks[1]
 	if not leaf_pem then
 		return false
 	end

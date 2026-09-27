@@ -427,12 +427,33 @@ def generate_caches():
 
     # Clean orphans and normalize modes for every plugin that had cache rows — not only the last
     # plugin_id left in the loop variable (previous bug left other plugin trees skewed).
-    ignored_prefix = tuple(ignored_dirs) if ignored_dirs else ()
+    ignored_resolved = set()
+    for ignored in ignored_dirs:
+        try:
+            ignored_resolved.add(Path(ignored).resolve())
+        except Exception:
+            ignored_resolved.add(Path(ignored))
+
+    def _is_under_ignored(path: Path) -> bool:
+        if not ignored_resolved:
+            return False
+        try:
+            resolved = path.resolve()
+        except Exception:
+            resolved = path
+        for ignored in ignored_resolved:
+            try:
+                resolved.relative_to(ignored)
+                return True
+            except ValueError:
+                continue
+        return False
+
     for job_path in plugin_paths:
         if not job_path.is_dir():
             continue
         for resource_path in list(job_path.rglob("*")):
-            if ignored_prefix and resource_path.as_posix().startswith(ignored_prefix):
+            if _is_under_ignored(resource_path):
                 continue
 
             LOGGER.debug(f"Checking if {resource_path} should be removed")

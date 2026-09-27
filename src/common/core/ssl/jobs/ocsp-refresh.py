@@ -1324,10 +1324,11 @@ def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
             prefix=f".{path.name}.",
             suffix=".tmp",
         ) as tmp_file:
+            # Record path before write so a mid-write failure still cleans up the tmp.
+            tmp_path = Path(tmp_file.name)
             tmp_file.write(data)
             tmp_file.flush()
             os.fsync(tmp_file.fileno())
-            tmp_path = Path(tmp_file.name)
         tmp_path.chmod(mode)
         tmp_path.replace(path)
         tmp_path = None
@@ -1494,26 +1495,25 @@ def _write_issuer_pem(
     issuer_pem: bytes,
     db: Optional[Any] = None,
     already_locked: bool = False,
-) -> None:
+) -> bool:
     """Persist the issuer certificate used to verify an OCSP response.
 
-    The handshake re-checks ocsp.der with ngx.ocsp.validate_ocsp_response, which needs
-    the issuer. Leaf-only custom certificates do not include it, so it is stored beside
-    ocsp.der and mirrored in the job cache for restore.
+    Returns True on successful disk write. False means the caller must not publish
+    ocsp.der for this fingerprint (handshake validate needs issuer.pem).
 
     When already_locked is False, acquires the per-fingerprint cert lock so issuer.pem
     is not swapped while a concurrent publisher is writing ocsp.der / ocsp.json.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized or not issuer_pem:
-        return
+        return False
 
     lock_fd: Optional[int] = None
     if not already_locked:
         lock_fd = _acquire_cert_lock(normalized)
         if lock_fd is None:
             log_debug("⚠️ OCSP could not lock for issuer.pem write (fp=%s)", normalized[:16] + "...")
-            return
+            return False
 
     try:
         try:
@@ -1522,10 +1522,10 @@ def _write_issuer_pem(
             _atomic_write_bytes(ocsp_dir / "issuer.pem", issuer_pem)
         except Exception as e:
             log_debug("⚠️ OCSP could not write issuer.pem for %s: %s", normalized[:16], e)
-            return
+            return False
 
         if db is None:
-            return
+            return True
         try:
             db.upsert_job_cache(
                 service_id=None,
@@ -1540,6 +1540,8 @@ def _write_issuer_pem(
                 pass
         except Exception as e:
             log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
+            # Disk issuer is present; DB mirror failure must not block handshake publish.
+        return True
     finally:
         if lock_fd is not None:
             _release_cert_lock(lock_fd, normalized)
@@ -3520,6 +3522,7 @@ def _persist_ocsp_results_to_disk(
                 )
                 continue
             try:
+                publish_error_logged = False
                 # Create sharded directory using fingerprint (0-f distribution)
                 # Example: /var/cache/bunkerweb/ssl/0/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/ocsp.der
                 ocsp_cert_dir = _get_sharded_ocsp_path(cert_fp)
@@ -3528,60 +3531,81 @@ def _persist_ocsp_results_to_disk(
                 except Exception as e:
                     log_error("❌ OCSP error while creating sharded directory %s: %s", ocsp_cert_dir, e)
                     stats["errors"] = stats.get("errors", 0) + 1
-                    raise  # Let finally block release the lock before skipping this cert
+                    publish_error_logged = True
+                    raise
 
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
                 meta_path = ocsp_cert_dir / "ocsp.json"
+                previous_der: Optional[bytes] = None
                 try:
-                    # 1) issuer.pem first so validate_ocsp_response can pair with the new DER
-                    try:
-                        _leaf, issuer = _parse_chain(cleaned_pem, cert_name)
-                        _write_issuer_pem(
-                            cert_fp,
-                            issuer.public_bytes(Encoding.PEM),
-                            db=db,
-                            already_locked=True,
-                        )
-                    except Exception as issuer_err:
-                        log_debug(
-                            "⚠️ OCSP could not publish issuer.pem with response for %s: %s",
-                            cert_name,
-                            issuer_err,
-                        )
+                    if ocsp_path.is_file():
+                        previous_der = ocsp_path.read_bytes()
+                except Exception:
+                    previous_der = None
 
-                    # 2) ocsp.der (atomic)
-                    _atomic_write_bytes(ocsp_path, ocsp_der)
-                    log_info(
-                        "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
+                # 1) issuer.pem first — abort publish if it fails (validate needs issuer).
+                try:
+                    _leaf, issuer = _parse_chain(cleaned_pem, cert_name)
+                    if not _write_issuer_pem(
+                        cert_fp,
+                        issuer.public_bytes(Encoding.PEM),
+                        db=db,
+                        already_locked=True,
+                    ):
+                        raise RuntimeError("issuer.pem publish failed")
+                except Exception as issuer_err:
+                    log_error(
+                        "❌ OCSP refusing to publish ocsp.der for %s without issuer.pem: %s",
                         cert_name,
-                        ocsp_path,
-                        cert_fp[:16] + "...",
+                        issuer_err,
                     )
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    publish_error_logged = True
+                    raise
 
-                    # 3) ocsp.json last (atomic) — commit marker with der_sha256 for L1 freshness
-                    try:
-                        meta = _extract_cert_metadata(cleaned_pem, cert_name)
-                        meta["fingerprint"] = cert_fp
-                        meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                        meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
-                        _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
-                        log_debug(
-                            "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
-                            cert_name,
-                            cert_fp[:16] + "...",
-                            meta.get("serial") or "unknown",
-                            meta.get("must_staple"),
-                        )
-                    except Exception as e:
-                        log_debug("⚠️ OCSP metadata write failed for %s: %s", cert_name, e)
+                # 2) ocsp.der (atomic)
+                _atomic_write_bytes(ocsp_path, ocsp_der)
+                log_info(
+                    "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
+                    cert_name,
+                    ocsp_path,
+                    cert_fp[:16] + "...",
+                )
 
+                # 3) ocsp.json last (atomic) — commit marker with der_sha256 for L1 freshness
+                try:
+                    meta = _extract_cert_metadata(cleaned_pem, cert_name)
+                    meta["fingerprint"] = cert_fp
+                    meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
+                    meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
+                    _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
+                    log_debug(
+                        "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
+                        cert_name,
+                        cert_fp[:16] + "...",
+                        meta.get("serial") or "unknown",
+                        meta.get("must_staple"),
+                    )
                 except Exception as e:
-                    # Clean up any leftover temp files on error (existing files remain intact)
+                    # Keep DER and meta consistent: restore prior DER or remove the new one.
+                    log_error("❌ OCSP metadata write failed for %s; rolling back ocsp.der: %s", cert_name, e)
                     try:
-                        for tmp_file in ocsp_cert_dir.glob(".*.tmp"):
-                            tmp_file.unlink()
-                    except Exception:
-                        pass  # Ignore cleanup errors
+                        if previous_der is not None:
+                            _atomic_write_bytes(ocsp_path, previous_der)
+                        elif ocsp_path.is_file():
+                            ocsp_path.unlink()
+                    except Exception as rb_err:
+                        log_error("❌ OCSP could not roll back ocsp.der for %s: %s", cert_name, rb_err)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    publish_error_logged = True
+                    raise
+            except Exception as e:
+                try:
+                    for tmp_file in ocsp_cert_dir.glob(".*.tmp"):
+                        tmp_file.unlink()
+                except Exception:
+                    pass
+                if not publish_error_logged:
                     log_error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
                     log_info("ℹ️ OCSP kept existing OCSP response file for %s (new fetch failed)", cert_name)
                     stats["errors"] = stats.get("errors", 0) + 1
