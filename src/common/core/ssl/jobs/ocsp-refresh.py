@@ -1511,6 +1511,12 @@ HTTP_ERROR_BACKOFF_SECONDS = 300  # 5 minutes
 # nextUpdate is still in the future. Failed refreshes cannot keep last-good forever.
 PREVIOUS_GOOD_MAX_AGE_SECONDS = 24 * 3600
 
+# Declared clock-skew budget before treating expires_unix / max_age_unix / nextUpdate
+# as past. Handshake Lua uses the same value (OCSP_CLOCK_SKEW_SECONDS). Stored meta
+# keeps the true absolute time; trust extends to absolute + skew so a worker clock
+# ahead of the CA by up to this amount does not false-expire Must-Staple staples.
+OCSP_CLOCK_SKEW_SECONDS = 300
+
 # Verified CertStatus != GOOD. REVOKED tombstones immediately; UNKNOWN waits
 # so a single "responder unsure" answer does not drop a usable staple.
 _NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
@@ -1613,9 +1619,18 @@ def _meta_int_unix(meta: Dict[str, Any], key: str) -> Optional[int]:
     return None
 
 
+def _trusted_remaining_until(absolute_unix: int, now_unix: Optional[int] = None) -> int:
+    """
+    Seconds until absolute_unix + OCSP_CLOCK_SKEW_SECONDS.
+    <= 0 means past the skew-adjusted deadline (do not trust).
+    """
+    now = int(now_unix if now_unix is not None else datetime.now(timezone.utc).timestamp())
+    return int(absolute_unix) + OCSP_CLOCK_SKEW_SECONDS - now
+
+
 def _wall_clock_remaining(meta: Optional[Dict[str, Any]], now_unix: Optional[int] = None) -> Optional[int]:
     """
-    Remaining seconds until published_unix + PREVIOUS_GOOD_MAX_AGE.
+    Remaining seconds until max_age_unix + clock-skew budget.
     None when meta has no publish age (pre-upgrade); caller keeps nextUpdate-only behavior.
     """
     if not isinstance(meta, dict):
@@ -1627,7 +1642,7 @@ def _wall_clock_remaining(meta: Optional[Dict[str, Any]], now_unix: Optional[int
         if published is None:
             return None
         max_age = published + PREVIOUS_GOOD_MAX_AGE_SECONDS
-    return max(0, max_age - now)
+    return max(0, _trusted_remaining_until(max_age, now))
 
 
 def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
@@ -2238,6 +2253,9 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
         assert remaining is not None
         assert total_lifetime is not None
 
+        # Skew budget: usable until nextUpdate + OCSP_CLOCK_SKEW_SECONDS (meta stays exact).
+        remaining = remaining + OCSP_CLOCK_SKEW_SECONDS
+
         # Wall-clock max-age can expire a previous-good body before nextUpdate.
         meta_path = _get_sharded_ocsp_path(fingerprint) / "ocsp.json"
         if meta_path.is_file():
@@ -2249,7 +2267,7 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
             if wall_remaining is not None and wall_remaining < remaining:
                 log_info(
                     "⚡ OCSP cached response for %s: fp=%s wall-clock max-age remaining=%ds "
-                    "(nextUpdate remaining=%ds); using the shorter window",
+                    "(nextUpdate+skew remaining=%ds); using the shorter window",
                     cert_name,
                     (fingerprint[:16] + "...") if fingerprint else "unknown",
                     wall_remaining,
@@ -2258,11 +2276,13 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
                 remaining = wall_remaining
 
         log_info(
-            "⚡ OCSP cached response for %s: fp=%s remaining=%ds (%.1f days), total_lifetime=%ds (%.1f days)",
+            "⚡ OCSP cached response for %s: fp=%s remaining=%ds (%.1f days, skew=%ds), "
+            "total_lifetime=%ds (%.1f days)",
             cert_name,
             (fingerprint[:16] + "...") if fingerprint else "unknown",
             remaining,
             remaining / 86400.0,
+            OCSP_CLOCK_SKEW_SECONDS,
             total_lifetime,
             total_lifetime / 86400.0,
         )
@@ -3482,7 +3502,8 @@ def _cleanup_expired_ocsp_entries(
                 ocsp_data = ocsp_der.read_bytes()
                 ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_data)
                 remaining, _ = _ocsp_response_lifetimes(ocsp_response)
-                if remaining is not None and remaining <= 0:
+                # Skew budget: do not purge until nextUpdate + OCSP_CLOCK_SKEW_SECONDS.
+                if remaining is not None and remaining + OCSP_CLOCK_SKEW_SECONDS <= 0:
                     _delete_fingerprint_cache(fingerprint)
             except Exception:
                 continue
@@ -3513,7 +3534,7 @@ def _cleanup_expired_ocsp_entries(
                 # Marker entries should not reach here (we require a valid fingerprint key).
                 ocsp_response = x509_ocsp.load_der_ocsp_response(data)
                 remaining, _ = _ocsp_response_lifetimes(ocsp_response)
-                if remaining is not None and remaining <= 0:
+                if remaining is not None and remaining + OCSP_CLOCK_SKEW_SECONDS <= 0:
                     _delete_fingerprint_cache(fingerprint)
             except Exception:
                 continue
@@ -3753,8 +3774,14 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
             try:
                 ocsp_response = x509_ocsp.load_der_ocsp_response(data)
                 remaining, _ = _ocsp_response_lifetimes(ocsp_response)
-                if remaining is not None and remaining <= 0:
-                    log_warning("🧹 OCSP response in database for %s is expired (remaining=%ds). Skipping restoration to disk.", cert_name_raw, remaining)
+                if remaining is not None and remaining + OCSP_CLOCK_SKEW_SECONDS <= 0:
+                    log_warning(
+                        "🧹 OCSP response in database for %s is expired past clock-skew budget "
+                        "(raw remaining=%ds, skew=%ds). Skipping restoration to disk.",
+                        cert_name_raw,
+                        remaining,
+                        OCSP_CLOCK_SKEW_SECONDS,
+                    )
                     # Optionally remove from database to prevent future attempts
                     if db:
                         try:
@@ -4195,7 +4222,7 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
             except Exception:
                 return None
 
-        remaining = max(0, expires_unix - now_unix)
+        remaining = max(0, _trusted_remaining_until(expires_unix, now_unix))
         if remaining <= 0:
             return 0
         wall_remaining = _wall_clock_remaining(meta, now_unix)

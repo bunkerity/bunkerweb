@@ -5658,6 +5658,8 @@ Follow these steps to configure and use the SSL feature:
 | `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Use OCSP stapling:** When set to `yes`, staple a cached OCSP response during the TLS handshake for certificates that advertise an OCSP responder. Applies to HTTP and stream TLS, including Let's Encrypt, custom, and self-signed certificates. |
 | `OCSP_STAPLE_MODE`            | `normal`          | multisite | no       | **OCSP staple mode:** Must-Staple fuse for HTTP and stream. `normal` refuses the handshake when Must-Staple is unmet; `staple_only` keeps stapling but does not abort; `open` disables Must-Staple enforcement (recovery). |
 
+Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 seconds (`OCSP_CLOCK_SKEW_SECONDS`): `expires_unix` / `max_age_unix` in `ocsp.json` stay exact, but a staple is trusted until that absolute time plus the budget so small NTP drift does not false-expire Must-Staple sites.
+
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
 

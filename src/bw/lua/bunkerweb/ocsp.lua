@@ -221,6 +221,11 @@ local function resp_binding(resp)
 	return nil
 end
 
+-- Declared clock-skew budget before treating expires_unix / max_age as past.
+-- Must match ocsp-refresh.py OCSP_CLOCK_SKEW_SECONDS. Meta stores the true
+-- absolute time; trust extends to absolute + skew.
+local OCSP_CLOCK_SKEW_SECONDS = 300
+
 -- One shm value = epoch + optional verified binding + expires_unix + DER.
 -- Evicting this key cannot orphan verified from DER (or gen from DER).
 -- Layout v2: "bw2\0" .. epoch .. "\0" .. binding .. "\0" .. expires_unix .. "\0" .. der
@@ -234,7 +239,8 @@ local function l1_shm_ttl(expires_unix)
 	if type(expires_unix) ~= "number" or expires_unix <= 0 then
 		return L1_MAX_TTL
 	end
-	local remaining = expires_unix - ngx.time()
+	-- Keep L1 until the skew-adjusted deadline (same budget as resp_still_fresh).
+	local remaining = expires_unix + OCSP_CLOCK_SKEW_SECONDS - ngx.time()
 	if remaining <= 0 then
 		return nil
 	end
@@ -466,8 +472,8 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
 	if not ok_call or validate_ok ~= true then
 		return false
 	end
-	if type(next_update) == "number" and next_update > 0 and next_update <= ngx.time() then
-		log(ngx.DEBUG, "OCSP validate rejected: nextUpdate in the past")
+	if type(next_update) == "number" and next_update > 0 and next_update + OCSP_CLOCK_SKEW_SECONDS <= ngx.time() then
+		log(ngx.DEBUG, "OCSP validate rejected: nextUpdate past clock-skew budget")
 		return false
 	end
 	return true
@@ -775,7 +781,8 @@ local function meta_max_age_unix(meta)
 	return nil
 end
 
--- False when nextUpdate/expires or wall-clock max-age is past. Unknown → true.
+-- False when nextUpdate/expires or wall-clock max-age is past the skew budget.
+-- Unknown → true. Trust until absolute + OCSP_CLOCK_SKEW_SECONDS.
 local function resp_still_fresh(expires_unix, fingerprint, meta)
 	meta = meta or (fingerprint and read_ocsp_json(fingerprint)) or nil
 	local exp = expires_unix
@@ -793,7 +800,7 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	if not exp then
 		return true
 	end
-	if ngx.time() >= exp then
+	if ngx.time() >= exp + OCSP_CLOCK_SKEW_SECONDS then
 		return false
 	end
 	return true
