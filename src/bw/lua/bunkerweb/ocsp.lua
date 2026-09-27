@@ -361,6 +361,216 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 	return nil
 end
 
+-- Classify leaf PEM as "ec", "rsa", or nil (for dual-cert staple selection).
+local function cert_pubkey_kind(cert_pem)
+	if type(cert_pem) ~= "string" or cert_pem == "" then
+		return nil
+	end
+	local kind = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local cert_obj = x509.new(cert_pem)
+		local pub = cert_obj and cert_obj:get_pubkey()
+		if not pub then
+			return
+		end
+		local key_type = pub.get_key_type and pub:get_key_type() or nil
+		local label = key_type
+		if type(key_type) == "table" then
+			label = key_type.sn or key_type.ln or key_type.nid
+		end
+		label = tostring(label or ""):lower()
+		if label:find("ec", 1, true) or label:find("id-ec", 1, true) then
+			kind = "ec"
+		elseif label:find("rsa", 1, true) then
+			kind = "rsa"
+		end
+	end)
+	return kind
+end
+
+-- ngx.ocsp has one status slot. Prefer ECDSA when RSA+ECDSA leaves are both present.
+local function select_preferred_leaf(blocks)
+	if not blocks or #blocks == 0 then
+		return nil
+	end
+	if #blocks == 1 then
+		return blocks[1]
+	end
+	local ec_leaf, rsa_leaf, other_leaf = nil, nil, nil
+	for _, block in ipairs(blocks) do
+		local kind = cert_pubkey_kind(block)
+		if kind == "ec" and not ec_leaf then
+			ec_leaf = block
+		elseif kind == "rsa" and not rsa_leaf then
+			rsa_leaf = block
+		elseif not other_leaf then
+			other_leaf = block
+		end
+	end
+	if ec_leaf and rsa_leaf then
+		log(
+			ngx.NOTICE,
+			"OCSP multi-certificate PEM: stapling ECDSA leaf only "
+				.. "(ngx.ocsp has one status slot; RSA leaf will not be stapled)"
+		)
+		return ec_leaf
+	end
+	return ec_leaf or rsa_leaf or other_leaf or blocks[1]
+end
+
+local function parse_pem_keys(pem_data)
+	local keys = {}
+	if type(pem_data) ~= "string" or pem_data == "" then
+		return keys
+	end
+	local current_key = nil
+	local in_key = false
+	for line in pem_data:gmatch("[^\n]+") do
+		if line:find("-----BEGIN", 1, true) and line:find("PRIVATE KEY", 1, true) then
+			in_key = true
+			current_key = line
+		elseif in_key and current_key then
+			current_key = current_key .. "\n" .. line
+			if line:find("-----END", 1, true) and line:find("PRIVATE KEY", 1, true) then
+				keys[#keys + 1] = current_key
+				current_key = nil
+				in_key = false
+			end
+		end
+	end
+	return keys
+end
+
+local function key_spki_fingerprint(key_pem)
+	local fingerprint = nil
+	pcall(function()
+		local pkey = require("resty.openssl.pkey")
+		local digest_lib = require("resty.openssl.digest")
+		local key_obj = pkey.new(key_pem)
+		if not key_obj then
+			return
+		end
+		local pubkey_der = key_obj:tostring(false, "DER")
+		if not pubkey_der then
+			return
+		end
+		local digest_ctx = digest_lib.new("sha256")
+		digest_ctx:update(pubkey_der)
+		fingerprint = to_hex(digest_ctx:final())
+	end)
+	return fingerprint
+end
+
+local function cert_spki_fingerprint(cert_pem)
+	local fingerprint = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local digest_lib = require("resty.openssl.digest")
+		local cert_obj = x509.new(cert_pem)
+		local pub = cert_obj and cert_obj:get_pubkey()
+		local spki = pub and pub:tostring("public", "DER")
+		if not spki then
+			return
+		end
+		local digest_ctx = digest_lib.new("sha256")
+		digest_ctx:update(spki)
+		fingerprint = to_hex(digest_ctx:final())
+	end)
+	return fingerprint
+end
+
+-- Install all leaf/key pairs from PEM (dual-cert aware). Returns preferred leaf PEM + SPKI fp
+-- for OCSP (ECDSA preferred when both RSA and ECDSA leaves are present).
+-- Returns: true, leaf_pem, leaf_fp  OR  false, err_msg
+function _M.set_certs_from_pem(cert_pem, key_pem)
+	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
+		return false, "cert_pem and key_pem strings are required"
+	end
+	local ssl = require "ngx.ssl"
+	if not ssl.parse_pem_cert or not ssl.parse_pem_priv_key or not ssl.set_cert or not ssl.set_priv_key then
+		return false, "ngx.ssl PEM helpers are unavailable"
+	end
+
+	local certs = pem_blocks(cert_pem)
+	local keys = parse_pem_keys(key_pem)
+	if #certs == 0 then
+		return false, "no certificates found in PEM"
+	end
+	if #keys == 0 then
+		return false, "no private keys found in PEM"
+	end
+
+	local key_fps = {}
+	for i, key in ipairs(keys) do
+		key_fps[i] = key_spki_fingerprint(key)
+	end
+
+	local leaves = {}
+	local intermediates = {}
+	local keys_used = {}
+	for _, block in ipairs(certs) do
+		local fp = cert_spki_fingerprint(block)
+		local matched_key = nil
+		local matched_idx = nil
+		if fp then
+			for key_idx, key_fp in ipairs(key_fps) do
+				if key_fp and key_fp == fp then
+					matched_key = keys[key_idx]
+					matched_idx = key_idx
+					break
+				end
+			end
+		end
+		if matched_key then
+			keys_used[matched_idx] = true
+			leaves[#leaves + 1] = { pem = block, key = matched_key, fp = fp }
+		else
+			intermediates[#intermediates + 1] = block
+		end
+	end
+
+	if #leaves == 0 then
+		return false, "no certificate matched any private key"
+	end
+
+	local installed = {}
+	for _, leaf in ipairs(leaves) do
+		local chain_pem = leaf.pem
+		for _, intermediate in ipairs(intermediates) do
+			chain_pem = chain_pem .. "\n" .. intermediate
+		end
+		local parsed_cert, cert_err = ssl.parse_pem_cert(chain_pem)
+		local parsed_key, key_err = ssl.parse_pem_priv_key(leaf.key)
+		if not parsed_cert or not parsed_key then
+			return false, "failed to parse cert/key: " .. tostring(cert_err or key_err)
+		end
+		local ok_cert, err_cert = ssl.set_cert(parsed_cert)
+		if not ok_cert then
+			return false, "set_cert failed: " .. tostring(err_cert)
+		end
+		local ok_key, err_key = ssl.set_priv_key(parsed_key)
+		if not ok_key then
+			return false, "set_priv_key failed: " .. tostring(err_key)
+		end
+		installed[#installed + 1] = leaf
+	end
+
+	local leaf_pems = {}
+	for _, leaf in ipairs(installed) do
+		leaf_pems[#leaf_pems + 1] = leaf.pem
+	end
+	local preferred_pem = select_preferred_leaf(leaf_pems)
+	local preferred_fp = nil
+	for _, leaf in ipairs(installed) do
+		if leaf.pem == preferred_pem then
+			preferred_fp = leaf.fp
+			break
+		end
+	end
+	return true, preferred_pem, preferred_fp
+end
+
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
 -- Must-Staple comes from ocsp.json; response acceptance requires L1 verified binding or matching meta.
 local function staple_from_fingerprint(internalstore, server_name, fingerprint)
@@ -428,11 +638,65 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	return false
 end
 
+local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple)
+	if not fingerprint then
+		return nil
+	end
+	local issuers = nil
+	local cached = get_cached_resp(internalstore, fingerprint)
+	if cached then
+		if not l1_matches_disk(fingerprint, cached) then
+			drop_cache(internalstore, fingerprint)
+		elseif is_verified(internalstore, fingerprint, cached) then
+			local ok_set, set_ok, set_err = pcall(function()
+				return ocsp.set_ocsp_status_resp(cached)
+			end)
+			if ok_set and set_ok then
+				return true
+			end
+			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
+			drop_cache(internalstore, fingerprint)
+		else
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
+			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
+			if result == true then
+				warm_cache(internalstore, fingerprint, cached)
+				return true
+			end
+			if result == false then
+				if must_staple then
+					return false, "must_staple"
+				end
+				return false
+			end
+			drop_cache(internalstore, fingerprint)
+		end
+	end
+
+	local resp = read_file(ocsp_path(fingerprint))
+	if resp then
+		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
+		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+		if result == true then
+			warm_cache(internalstore, fingerprint, resp)
+			return true
+		end
+		if result == false then
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
+		end
+	end
+	return nil
+end
+
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
 -- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
 -- ocsp_verified stores sha256(DER); L1 is dropped when on-disk der_sha256 (or file hash) diverges.
 -- Optional cert_fp_hint (plugin status[5]) enforces Must-Staple via ocsp.json when PEM is absent.
+-- Dual-cert PEMs staple the ECDSA leaf only (one ngx.ocsp status slot).
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
 function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if not internalstore then
@@ -450,7 +714,10 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 
 	local blocks = pem_blocks(cert_pem)
-	local leaf_pem = blocks[1]
+	local leaf_pem = select_preferred_leaf(blocks)
+	if not leaf_pem then
+		return false
+	end
 	local must_staple = has_must_staple(leaf_pem)
 
 	if not stapling_enabled(internalstore, server_name) then
@@ -471,106 +738,20 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 	local ssl = require "ngx.ssl"
 
-	-- Prefer plugin fingerprint hint first when present
-	if fp_hint then
-		local issuers = nil
-		local cached = get_cached_resp(internalstore, fp_hint)
-		if cached then
-			if not l1_matches_disk(fp_hint, cached) then
-				drop_cache(internalstore, fp_hint)
-			elseif is_verified(internalstore, fp_hint, cached) then
-				local ok_set, set_ok, set_err = pcall(function()
-					return ocsp.set_ocsp_status_resp(cached)
-				end)
-				if ok_set and set_ok then
-					return true
-				end
-				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
-				drop_cache(internalstore, fp_hint)
-			else
-				issuers = issuer_candidates(blocks, leaf_pem, fp_hint)
-				local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
-				if result == true then
-					warm_cache(internalstore, fp_hint, cached)
-					return true
-				end
-				if result == false then
-					if must_staple then
-						return false, "must_staple"
-					end
-					return false
-				end
-				drop_cache(internalstore, fp_hint)
-			end
-		end
-
-		local resp = read_file(ocsp_path(fp_hint))
-		if resp then
-			issuers = issuers or issuer_candidates(blocks, leaf_pem, fp_hint)
-			local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
-			if result == true then
-				warm_cache(internalstore, fp_hint, resp)
-				return true
-			end
-			if result == false then
-				if must_staple then
-					return false, "must_staple"
-				end
-				return false
-			end
-		end
+	-- Prefer fingerprint of the selected leaf; fall back to plugin hint only if it matches that leaf.
+	local leaf_fp = spki_fingerprint(leaf_pem, internalstore)
+	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
+		-- Plugin hint is often the first PEM block (may be RSA). Ignore it for dual-cert ECDSA prefer.
+		fp_hint = nil
 	end
+	local fingerprint = leaf_fp or fp_hint
 
-	for _, block_pem in ipairs(blocks) do
-		local fingerprint = spki_fingerprint(block_pem, internalstore)
-		if fingerprint and fingerprint ~= fp_hint then
-			local issuers = nil
-			local cached = get_cached_resp(internalstore, fingerprint)
-			if cached then
-				if not l1_matches_disk(fingerprint, cached) then
-					drop_cache(internalstore, fingerprint)
-				elseif is_verified(internalstore, fingerprint, cached) then
-					local ok_set, set_ok, set_err = pcall(function()
-						return ocsp.set_ocsp_status_resp(cached)
-					end)
-					if ok_set and set_ok then
-						return true
-					end
-					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
-					drop_cache(internalstore, fingerprint)
-				else
-					issuers = issuer_candidates(blocks, block_pem, fingerprint)
-					local result = try_staple(ocsp, ssl, cached, block_pem, issuers)
-					if result == true then
-						warm_cache(internalstore, fingerprint, cached)
-						return true
-					end
-					if result == false then
-						if must_staple then
-							return false, "must_staple"
-						end
-						return false
-					end
-					drop_cache(internalstore, fingerprint)
-				end
-			end
-
-			local resp = read_file(ocsp_path(fingerprint))
-			if resp then
-				issuers = issuers or issuer_candidates(blocks, block_pem, fingerprint)
-				local result = try_staple(ocsp, ssl, resp, block_pem, issuers)
-				if result == true then
-					warm_cache(internalstore, fingerprint, resp)
-					return true
-				end
-				if result == false then
-					if must_staple then
-						return false, "must_staple"
-					end
-					return false
-				end
-			end
-		end
+	local result, reason = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple)
+	if result == true then
+		return true
+	end
+	if result == false then
+		return false, reason
 	end
 
 	if must_staple then
