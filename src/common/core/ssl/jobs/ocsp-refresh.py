@@ -3478,6 +3478,20 @@ def _persist_ocsp_results_to_db(
             log_debug("⚠️ OCSP exception while storing cert checksum for %s: %s", cert_name, e)
 
 
+def _bump_ocsp_cache_epoch() -> None:
+    """
+    Bump a shared on-disk generation counter so HTTP and stream L1 caches
+    (separate lua_shared_dict zones) both drop stale OCSP entries after publish.
+    Workers compare TLS:SSL:ocsp_gen:{fp} to this file; they cannot cross-delete
+    each other's shared dicts, so disk is the coherence bus.
+    """
+    try:
+        CONFIGS_SSL_BASE.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(CONFIGS_SSL_BASE / ".ocsp_epoch", str(time.time_ns()), mode=0o640)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
+
+
 def _persist_ocsp_results_to_disk(
     all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]],
     stats: Optional[Dict[str, int]] = None,
@@ -3497,6 +3511,7 @@ def _persist_ocsp_results_to_disk(
     if stats is None:
         stats = {}
 
+    published_any = False
     for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
         if not ocsp_der:
             continue
@@ -3579,6 +3594,7 @@ def _persist_ocsp_results_to_disk(
                     meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                     meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
                     _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
+                    published_any = True
                     log_debug(
                         "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
                         cert_name,
@@ -3615,6 +3631,10 @@ def _persist_ocsp_results_to_disk(
         except Exception as e:
             log_error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
             stats["errors"] = stats.get("errors", 0) + 1
+
+    # One bump per persist batch: HTTP and stream L1 zones both re-check after this.
+    if published_any:
+        _bump_ocsp_cache_epoch()
 
 
 def main() -> int:

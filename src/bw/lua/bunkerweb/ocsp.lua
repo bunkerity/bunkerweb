@@ -187,6 +187,34 @@ local function is_verified(internalstore, fingerprint, resp)
 	return ok and stored == binding
 end
 
+-- Shared with the HTTP ssl_certificate path: job bumps this file so both
+-- internalstore and internalstore_stream drop stale L1 without cross-dict APIs.
+local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
+
+local function gen_key(fingerprint)
+	return "TLS:SSL:ocsp_gen:" .. fingerprint
+end
+
+local function current_ocsp_epoch()
+	if ngx.ctx.bw_ocsp_epoch ~= nil then
+		return ngx.ctx.bw_ocsp_epoch
+	end
+	local epoch = "0"
+	pcall(function()
+		local f = io.open(OCSP_EPOCH_PATH, "r")
+		if not f then
+			return
+		end
+		local raw = f:read("*l")
+		f:close()
+		if type(raw) == "string" and #raw > 0 then
+			epoch = raw:match("^%S+") or "0"
+		end
+	end)
+	ngx.ctx.bw_ocsp_epoch = epoch
+	return epoch
+end
+
 local function warm_cache(internalstore, fingerprint, resp, mark_verified)
 	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
 	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
@@ -194,8 +222,10 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified)
 		mark_verified = true
 	end
 	local binding = resp_binding(resp)
+	local epoch = current_ocsp_epoch()
 	pcall(function()
 		internalstore:set(cache_key(fingerprint), resp, 300, true)
+		internalstore:set(gen_key(fingerprint), epoch, 300, true)
 		if mark_verified and binding then
 			internalstore:set(verified_key(fingerprint), binding, 300, true)
 		end
@@ -214,6 +244,7 @@ local function drop_cache(internalstore, fingerprint)
 		internalstore:delete(cache_key(fingerprint))
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(l1_disk_check_key(fingerprint))
+		internalstore:delete(gen_key(fingerprint))
 	end)
 end
 
@@ -222,6 +253,16 @@ local function l1_matches_disk(internalstore, fingerprint, resp)
 	local binding = resp_binding(resp)
 	if not binding then
 		return false
+	end
+
+	-- Cross-zone coherence: job cannot delete the other lua_shared_dict; epoch is the bus.
+	if internalstore then
+		local ok_gen, stored_gen = pcall(function()
+			return internalstore:get(gen_key(fingerprint), true)
+		end)
+		if not ok_gen or stored_gen ~= current_ocsp_epoch() then
+			return false
+		end
 	end
 
 	-- Skip repeated disk I/O within the throttle window when last check said OK.
