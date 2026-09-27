@@ -873,10 +873,17 @@ local function cert_pubkey_kind(cert_pem)
 	return kind
 end
 
--- Audit which leaf was stapled (or skipped) — kind + full SPKI + der_sha256.
+-- Audit which leaf was stapled — kind + SPKI + der_sha256 + epoch this node served.
 local function log_ocsp_stapled(server_name, kind, fp, resp)
 	local der = resp_binding(resp) or "-"
 	local fp_s = (type(fp) == "string" and #fp == 64) and fp or "-"
+	local epoch = current_ocsp_epoch() or "0"
+	local worker = "-"
+	pcall(function()
+		if ngx.worker and ngx.worker.id then
+			worker = tostring(ngx.worker.id())
+		end
+	end)
 	log(
 		ngx.INFO,
 		"OCSP_STAPLED kind="
@@ -885,6 +892,10 @@ local function log_ocsp_stapled(server_name, kind, fp, resp)
 			.. fp_s
 			.. " der_sha256="
 			.. der
+			.. " epoch="
+			.. tostring(epoch)
+			.. " worker="
+			.. worker
 			.. " server_name="
 			.. tostring(server_name or "nil")
 	)
