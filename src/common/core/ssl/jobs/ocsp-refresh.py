@@ -421,6 +421,66 @@ def _get_sharded_ocsp_path(fingerprint: str) -> Path:
 	return CONFIGS_SSL_BASE / hex1 / hex2 / normalized
 
 
+def _ocsp_cache_relpath(fingerprint: str, leaf: str) -> Optional[str]:
+	"""Job-cache file_name that generate_caches writes to the path the handshake opens.
+
+	plugin cache root is /var/cache/bunkerweb/ssl, so
+	{hex1}/{hex2}/{fingerprint}/ocsp.der becomes the sharded ocsp.der Lua reads.
+	"""
+	normalized = _normalize_fingerprint(fingerprint)
+	if not normalized or leaf not in ("ocsp.der", "issuer.pem", "ocsp.json"):
+		return None
+	return f"{normalized[0]}/{normalized[1]}/{normalized}/{leaf}"
+
+
+def _fingerprint_from_ocsp_der_name(file_name: str) -> Optional[str]:
+	"""Fingerprint for a response row: sharded ocsp.der, or the legacy ocsp/<fingerprint> key."""
+	if file_name.startswith("ocsp/"):
+		return _normalize_fingerprint(file_name[len("ocsp/") :])
+	parts = file_name.split("/")
+	if len(parts) == 4 and parts[3] == "ocsp.der":
+		return _normalize_fingerprint(parts[2])
+	return None
+
+
+def _fingerprint_from_issuer_name(file_name: str) -> Optional[str]:
+	"""Fingerprint for an issuer row: sharded issuer.pem, or the legacy issuer/<fingerprint> key."""
+	if file_name.startswith("issuer/"):
+		return _normalize_fingerprint(file_name[len("issuer/") :])
+	parts = file_name.split("/")
+	if len(parts) == 4 and parts[3] == "issuer.pem":
+		return _normalize_fingerprint(parts[2])
+	return None
+
+
+def _fingerprint_from_meta_name(file_name: str) -> Optional[str]:
+	"""Fingerprint for a sharded ocsp.json metadata row."""
+	parts = file_name.split("/")
+	if len(parts) == 4 and parts[3] == "ocsp.json":
+		return _normalize_fingerprint(parts[2])
+	return None
+
+
+def _delete_fingerprint_db_rows(db: Any, fingerprint: str) -> None:
+	"""Drop response, issuer, metadata, and checksum rows for one certificate."""
+	if db is None or not fingerprint:
+		return
+	names = [
+		f"ocsp/{fingerprint}",
+		f"issuer/{fingerprint}",
+		f"cert_checksum/{fingerprint}",
+	]
+	for leaf in ("ocsp.der", "issuer.pem", "ocsp.json"):
+		rel = _ocsp_cache_relpath(fingerprint, leaf)
+		if rel:
+			names.append(rel)
+	for name in names:
+		try:
+			db.delete_job_cache(file_name=name, job_name="ocsp-refresh")
+		except Exception:
+			pass
+
+
 def _init_sharded_ocsp_directories() -> bool:
 	"""
 	Initialize tree-structured sharded subdirectories for OCSP response distribution.
@@ -1334,11 +1394,15 @@ def _write_issuer_pem(fingerprint: Optional[str], issuer_pem: bytes, db: Optiona
     try:
         db.upsert_job_cache(
             service_id=None,
-            file_name=f"issuer/{normalized}",
+            file_name=_ocsp_cache_relpath(normalized, "issuer.pem"),
             data=issuer_pem,
             job_name="ocsp-refresh",
             checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
         )
+        try:
+            db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
+        except Exception:
+            pass
     except Exception as e:
         log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
 
@@ -2052,10 +2116,10 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
-            if file_name.startswith("issuer/") and entry.get("data"):
-                issuer_fp = _normalize_fingerprint(file_name[len("issuer/"):])
-                if not issuer_fp:
-                    continue
+            if not entry.get("data"):
+                continue
+            issuer_fp = _fingerprint_from_issuer_name(file_name)
+            if issuer_fp:
                 try:
                     issuer_path = _get_sharded_ocsp_path(issuer_fp) / "issuer.pem"
                     issuer_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2063,16 +2127,35 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                         issuer_path.write_bytes(entry["data"])
                         issuer_path.chmod(0o644)
                         log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
+                    if file_name.startswith("issuer/"):
+                        new_name = _ocsp_cache_relpath(issuer_fp, "issuer.pem")
+                        if new_name:
+                            db.upsert_job_cache(
+                                service_id=None,
+                                file_name=new_name,
+                                data=entry["data"],
+                                job_name="ocsp-refresh",
+                                checksum=hashlib.sha256(entry["data"]).hexdigest().lower(),
+                            )
+                            db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore issuer certificate for %s: %s", file_name, e)
                 continue
-            if not file_name.startswith("ocsp/") or not entry.get("data"):
+            meta_fp = _fingerprint_from_meta_name(file_name)
+            if meta_fp:
+                try:
+                    meta_path = _get_sharded_ocsp_path(meta_fp) / "ocsp.json"
+                    meta_path.parent.mkdir(parents=True, exist_ok=True)
+                    if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
+                        meta_path.write_bytes(entry["data"])
+                        meta_path.chmod(0o644)
+                        log_debug("✓ OCSP restored metadata for %s", meta_fp[:16])
+                except Exception as e:
+                    log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
                 continue
-            cert_or_fp_raw = file_name[len("ocsp/"):]
-            # We only restore actual OCSP responses from database.
-            # Marker entries are stored as: ocsp/{cert_name} (data contains the fingerprint).
-            # Response entries are stored as: ocsp/{fingerprint}.
-            fingerprint = _normalize_fingerprint(cert_or_fp_raw)
+            # Marker entries stay as ocsp/{cert_name} and are not files the handshake reads.
+            # Response entries are {hex1}/{hex2}/{fingerprint}/ocsp.der, or the legacy ocsp/{fingerprint} key.
+            fingerprint = _fingerprint_from_ocsp_der_name(file_name)
             if not fingerprint:
                 continue
 
@@ -2089,12 +2172,12 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     if disk_checksum == db_checksum:
                         ok_count += 1
                         log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", fingerprint, db_checksum[:8])
-                        continue
-                    # Checksum mismatch — replace with database version
-                    log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", fingerprint, disk_checksum[:8], db_checksum[:8])
-                    ocsp_path.write_bytes(db_data)
-                    ocsp_path.chmod(0o644)
-                    replaced_count += 1
+                    else:
+                        # Checksum mismatch — replace with database version
+                        log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", fingerprint, disk_checksum[:8], db_checksum[:8])
+                        ocsp_path.write_bytes(db_data)
+                        ocsp_path.chmod(0o644)
+                        replaced_count += 1
                 else:
                     # File missing — restore from database
                     ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
@@ -2102,6 +2185,17 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     ocsp_path.chmod(0o644)
                     restored_count += 1
                     log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
+                if file_name.startswith("ocsp/"):
+                    new_name = _ocsp_cache_relpath(fingerprint, "ocsp.der")
+                    if new_name:
+                        db.upsert_job_cache(
+                            service_id=None,
+                            file_name=new_name,
+                            data=db_data,
+                            job_name="ocsp-refresh",
+                            checksum=db_checksum,
+                        )
+                        db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
             except Exception as e:
                 log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
 
@@ -2574,18 +2668,7 @@ def cleanup_ocsp_cache(
                 )
                 # If we resolved a fingerprint, also remove the corresponding response+checksum.
                 if resolved_fp:
-                    db.delete_job_cache(
-                        file_name=f"ocsp/{resolved_fp}",
-                        job_name="ocsp-refresh",
-                    )
-                    db.delete_job_cache(
-                        file_name=f"cert_checksum/{resolved_fp}",
-                        job_name="ocsp-refresh",
-                    )
-                    db.delete_job_cache(
-                        file_name=f"issuer/{resolved_fp}",
-                        job_name="ocsp-refresh",
-                    )
+                    _delete_fingerprint_db_rows(db, resolved_fp)
                 log_debug("🧹 OCSP database records removed for %s (fingerprint resolved=%s)", cert_name, bool(resolved_fp))
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
@@ -2631,7 +2714,15 @@ def cleanup_ocsp_cache(
                 job_cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh")
                 for cache_file in job_cache_files:
                     file_name = cache_file.get("file_name", "")
-                    if file_name.startswith("ocsp/") or file_name.startswith("issuer/") or file_name.startswith("cert_checksum/") or file_name == "last_full_refresh":
+                    if (
+                        file_name.startswith("ocsp/")
+                        or file_name.startswith("issuer/")
+                        or file_name.startswith("cert_checksum/")
+                        or file_name == "last_full_refresh"
+                        or _fingerprint_from_ocsp_der_name(file_name)
+                        or _fingerprint_from_issuer_name(file_name)
+                        or _fingerprint_from_meta_name(file_name)
+                    ):
                         try:
                             db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
                             log_debug("🧹 OCSP removed database entry %s", file_name)
@@ -2726,10 +2817,7 @@ def _cleanup_expired_ocsp_entries(
             pass
 
         if db:
-            try:
-                db.delete_job_cache(file_name=f"ocsp/{fingerprint}", job_name="ocsp-refresh")
-            except Exception:
-                pass
+            _delete_fingerprint_db_rows(db, fingerprint)
 
         expired_fingerprints.add(fingerprint)
         expired_cleaned_count += 1
@@ -2810,10 +2898,7 @@ def _cleanup_expired_ocsp_entries(
         for entry in cache_files:
             try:
                 file_name = entry.get("file_name", "")
-                if not file_name.startswith("ocsp/"):
-                    continue
-                fp_raw = file_name[len("ocsp/"):]
-                fingerprint = _normalize_fingerprint(fp_raw)
+                fingerprint = _fingerprint_from_ocsp_der_name(file_name)
                 if not fingerprint or fingerprint in expired_fingerprints:
                     continue
 
@@ -2907,14 +2992,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                 if resolved_fp:
                     # Orphaned OCSP response entry: remove DB record + checksum (disk cleanup is fingerprint-aware below).
                     try:
-                        db.delete_job_cache(
-                            file_name=f"ocsp/{resolved_fp}",
-                            job_name="ocsp-refresh",
-                        )
-                        db.delete_job_cache(
-                            file_name=f"cert_checksum/{resolved_fp}",
-                            job_name="ocsp-refresh",
-                        )
+                        _delete_fingerprint_db_rows(db, resolved_fp)
                         log_info("🧹 OCSP removed orphaned fingerprint DB entries: fp=%s", resolved_fp[:16] + "...")
                         orphaned_count += 1
                     except Exception as e:
@@ -2991,7 +3069,7 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
         # Get all OCSP entries from database
         # Get all entries and filter for actual OCSP responses
         all_entries = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
-        ocsp_entries = [e for e in all_entries if e.get("file_name", "").startswith("ocsp/")]
+        ocsp_entries = [e for e in all_entries if _fingerprint_from_ocsp_der_name(e.get("file_name", ""))]
         if not ocsp_entries:
             log_info("ℹ️ OCSP no cache entries in database to verify")
             return
@@ -3000,10 +3078,10 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
 
         for entry in ocsp_entries:
             file_name = entry.get("file_name", "")
-            if not file_name.startswith("ocsp/"):
+            if not _fingerprint_from_ocsp_der_name(file_name):
                 continue
 
-            cert_name_raw = file_name[len("ocsp/"):]
+            cert_name_raw = _fingerprint_from_ocsp_der_name(file_name) or file_name
             data = entry.get("data")
             db_checksum = entry.get("checksum", "")
 
@@ -3151,7 +3229,7 @@ def _persist_ocsp_results_to_db(
 
         # 1. Update OCSP response if we have a new one (using fingerprint-based key)
         if ocsp_der and ttl > 0:
-            cache_key = f"ocsp/{cert_fp}"  # Use fingerprint instead of cert_name
+            cache_key = _ocsp_cache_relpath(cert_fp, "ocsp.der")
             try:
                 ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
                 err = db.upsert_job_cache(
@@ -3161,6 +3239,25 @@ def _persist_ocsp_results_to_db(
                     job_name="ocsp-refresh",
                     checksum=ocsp_checksum,
                 )
+                if not err:
+                    try:
+                        db.delete_job_cache(file_name=f"ocsp/{cert_fp}", job_name="ocsp-refresh")
+                    except Exception:
+                        pass
+                    try:
+                        meta = _extract_cert_metadata(pem_data, cert_name)
+                        meta["fingerprint"] = cert_fp
+                        meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
+                        meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
+                        db.upsert_job_cache(
+                            service_id=None,
+                            file_name=_ocsp_cache_relpath(cert_fp, "ocsp.json"),
+                            data=meta_bytes,
+                            job_name="ocsp-refresh",
+                            checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
+                        )
+                    except Exception as meta_err:
+                        log_debug("⚠️ OCSP could not store metadata for %s: %s", cert_name, meta_err)
 
                 if err:
                     log_error("❌ OCSP error while storing response for %s (fingerprint: %s) in database: %s", cert_name, cert_fp[:16] + "...", err)
