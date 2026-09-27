@@ -2848,7 +2848,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 time.sleep(2)
 
         if verified_nongood is not None:
-            tombstoned = _note_verified_nongood(
+            tombstoned, halved_ttl = _note_verified_nongood(
                 fingerprint,
                 verified_nongood.serial,
                 verified_nongood.status_name,
@@ -2859,13 +2859,25 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
             if tombstoned:
                 stats["ocsp_tombstoned"] = stats.get("ocsp_tombstoned", 0) + 1
                 return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
-            if cached_ttl is not None and cached_ttl > 0:
-                log_warning(
-                    "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; keeping existing cache until nextUpdate",
-                    verified_nongood.status_name,
-                    cert_name,
-                )
-                return (cert_name, None, cast(int, cached_ttl), cert_checksum, pem_data, ocsp_url, True)
+            keep_ttl = halved_ttl if halved_ttl is not None else cached_ttl
+            if keep_ttl is not None and keep_ttl > 0:
+                if halved_ttl is not None:
+                    stats["ocsp_ttl_halved"] = stats.get("ocsp_ttl_halved", 0) + 1
+                    log_warning(
+                        "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; "
+                        "keeping existing cache with halved TTL=%ds",
+                        verified_nongood.status_name,
+                        cert_name,
+                        keep_ttl,
+                    )
+                else:
+                    log_warning(
+                        "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; "
+                        "keeping existing cache until nextUpdate",
+                        verified_nongood.status_name,
+                        cert_name,
+                    )
+                return (cert_name, None, cast(int, keep_ttl), cert_checksum, pem_data, ocsp_url, True)
             return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
         if not ocsp_der:
@@ -4078,6 +4090,79 @@ def _tombstone_ocsp_shard(
         _release_cert_lock(lock, normalized)
 
 
+def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
+    """
+    First verified non-GOOD that does not yet tombstone: cut leftover GOOD TTL in half.
+    Keeps ocsp.der; rewrites expires / expires_unix and bumps the epoch so L1 reloads.
+    Returns the new remaining seconds, or None when there was nothing to shorten.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return None
+    lock = _acquire_cert_lock(normalized)
+    if lock is None:
+        log_warning("⚠️ OCSP could not lock shard to halve TTL for %s", cert_name)
+        return None
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        der_path = shard / "ocsp.der"
+        meta_path = shard / "ocsp.json"
+        if not der_path.is_file():
+            return None
+
+        now_unix = int(datetime.now(timezone.utc).timestamp())
+        expires_unix: Optional[int] = None
+        meta: Dict[str, Any] = {}
+        if meta_path.is_file():
+            try:
+                loaded = json.loads(meta_path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    meta = loaded
+                    raw_exp = meta.get("expires_unix")
+                    if isinstance(raw_exp, (int, float)) and int(raw_exp) > 0:
+                        expires_unix = int(raw_exp)
+                    elif isinstance(raw_exp, str) and raw_exp.isdigit():
+                        expires_unix = int(raw_exp)
+            except Exception:
+                meta = {}
+
+        if expires_unix is None:
+            try:
+                remaining, _ = _ocsp_response_lifetimes(x509_ocsp.load_der_ocsp_response(der_path.read_bytes()))
+                if remaining is not None:
+                    expires_unix = now_unix + int(remaining)
+            except Exception:
+                return None
+
+        remaining = max(0, expires_unix - now_unix)
+        if remaining <= 0:
+            return 0
+        if meta.get("ttl_halved_after_nongood") is True:
+            # Already shortened once for this cached body; do not quarter it.
+            return remaining
+
+        new_remaining = max(1, remaining // 2)
+        meta.update(_ocsp_expiry_meta(new_remaining))
+        meta["fingerprint"] = normalized
+        meta["ttl_halved_after_nongood"] = True
+        meta["ttl_halved_from"] = remaining
+        _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        _bump_ocsp_cache_epoch()
+        log_warning(
+            "⚠️ OCSP halved leftover staple TTL for %s after first non-GOOD (fp=%s... %ds → %ds)",
+            cert_name,
+            normalized[:16],
+            remaining,
+            new_remaining,
+        )
+        return new_remaining
+    except Exception as e:
+        log_warning("⚠️ OCSP could not halve leftover TTL for %s: %s", cert_name, e)
+        return None
+    finally:
+        _release_cert_lock(lock, normalized)
+
+
 def _note_verified_nongood(
     fingerprint: Optional[str],
     serial: Optional[int],
@@ -4085,21 +4170,22 @@ def _note_verified_nongood(
     cert_name: str,
     db: Optional[Any],
     this_update_unix: Optional[int] = None,
-) -> bool:
+) -> Tuple[bool, Optional[int]]:
     """
     Count one verified non-GOOD answer. Tombstone the shard at the threshold.
-    Returns True when the staple was removed.
+    On the first sighting below that threshold, halve leftover GOOD TTL.
+    Returns (tombstoned, remaining_ttl_after_halve_or_None).
     """
     if not fingerprint:
         log_error("❌ OCSP CertStatus=%s for %s but fingerprint is missing; cannot tombstone", status_name, cert_name)
-        return False
+        return False, None
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
-        return False
+        return False, None
     threshold = _NON_GOOD_TOMBSTONE_AFTER.get(status_name, 1)
     path = _nongood_marker_path(normalized)
     if path is None:
-        return False
+        return False, None
     consecutive = 1
     try:
         if path.is_file():
@@ -4125,7 +4211,7 @@ def _note_verified_nongood(
         )
     except Exception as e:
         log_error("❌ OCSP could not record non-GOOD streak for %s: %s", cert_name, e)
-        return False
+        return False, None
     log_error(
         "❌ OCSP verified CertStatus=%s for %s (serial=%s) streak=%d/%d",
         status_name,
@@ -4135,8 +4221,11 @@ def _note_verified_nongood(
         threshold,
     )
     if consecutive < threshold:
-        return False
-    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix)
+        halved = None
+        if consecutive == 1:
+            halved = _halve_cached_staple_ttl(normalized, cert_name)
+        return False, halved
+    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix), None
 
 
 def _persist_ocsp_results_to_disk(
