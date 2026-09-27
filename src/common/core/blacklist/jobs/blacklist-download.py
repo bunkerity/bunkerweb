@@ -213,6 +213,7 @@ try:
             "total_urls": 0,
             "downloaded_urls": 0,
             "skipped_urls": 0,
+            "not_modified": 0,
             "failed_count": 0,
             "total_lines": 0,
         }
@@ -328,9 +329,9 @@ try:
 
                         if not failed:
                             if handle_304:
-                                LOGGER.debug(f"URL {url} returned 304 Not Modified, using cached data.")
+                                LOGGER.info(f"URL {url} returned 304 Not Modified, using cached data.")
                                 if url not in processed_urls:
-                                    aggregated_recap[kind]["skipped_urls"] += 1
+                                    aggregated_recap[kind]["not_modified"] += 1
                                 if old_cached_data:
                                     # Re-save to bump last_update timestamp so the 1-hour check stays fresh
                                     cached, err = JOB.cache_file(url_file, old_cached_data)
@@ -413,11 +414,12 @@ try:
             continue
         successful = recap["downloaded_urls"]
         skipped = recap["skipped_urls"]
+        not_modified = recap["not_modified"]
         failed = recap["failed_count"]
         total_lines = recap["total_lines"]
         LOGGER.info(
             f"Recap for {kind} urls: Total Services: {service_count}, Successful: {successful}, "
-            f"Skipped (cached): {skipped}, Failed: {failed}, Total Lines: {total_lines}"
+            f"Skipped (cached): {skipped}, Not modified: {not_modified}, Failed: {failed}, Total Lines: {total_lines}"
         )
 
     # Remove old files
