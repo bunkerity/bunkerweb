@@ -1287,6 +1287,44 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     return remaining, total_lifetime
 
 
+def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o644) -> None:
+    """Write bytes via tempfile + replace so readers never see a partial file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path: Optional[Path] = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent,
+            delete=False,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+        ) as tmp_file:
+            tmp_file.write(data)
+            tmp_file.flush()
+            os.fsync(tmp_file.fileno())
+            tmp_path = Path(tmp_file.name)
+        tmp_path.chmod(mode)
+        tmp_path.replace(path)
+        tmp_path = None
+    finally:
+        if tmp_path is not None:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except TypeError:
+                # Python < 3.8 compatibility (should not apply, but keep safe).
+                try:
+                    if tmp_path.exists():
+                        tmp_path.unlink()
+                except Exception:
+                    pass
+            except Exception:
+                pass
+
+
+def _atomic_write_text(path: Path, text: str, mode: int = 0o644) -> None:
+    """Atomic text write (UTF-8)."""
+    _atomic_write_bytes(path, text.encode("utf-8"), mode=mode)
+
+
 def _write_ocsp_http_error_backoff(
     cert_fp: Optional[str],
     ocsp_url: str,
@@ -1302,6 +1340,11 @@ def _write_ocsp_http_error_backoff(
     after certain transient/non-transient HTTP failures (e.g. 400/500).
     """
     if not cert_fp:
+        return
+
+    lock_fd = _acquire_cert_lock(cert_fp)
+    if lock_fd is None:
+        log_debug("⚠️ OCSP could not lock for http_error backoff metadata (fp=%s)", cert_fp[:16] + "...")
         return
 
     try:
@@ -1331,10 +1374,11 @@ def _write_ocsp_http_error_backoff(
         except Exception:
             pass
 
-        meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
-        meta_path.chmod(0o644)
+        _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
     except Exception as e:
         log_debug("⚠️ OCSP could not write http_error backoff metadata: %s", e)
+    finally:
+        _release_cert_lock(lock_fd, cert_fp)
 
 
 def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
@@ -1375,45 +1419,60 @@ def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
         return 0
 
 
-def _write_issuer_pem(fingerprint: Optional[str], issuer_pem: bytes, db: Optional[Any] = None) -> None:
+def _write_issuer_pem(
+    fingerprint: Optional[str],
+    issuer_pem: bytes,
+    db: Optional[Any] = None,
+    already_locked: bool = False,
+) -> None:
     """Persist the issuer certificate used to verify an OCSP response.
 
     The handshake re-checks ocsp.der with ngx.ocsp.validate_ocsp_response, which needs
     the issuer. Leaf-only custom certificates do not include it, so it is stored beside
     ocsp.der and mirrored in the job cache for restore.
+
+    When already_locked is False, acquires the per-fingerprint cert lock so issuer.pem
+    is not swapped while a concurrent publisher is writing ocsp.der / ocsp.json.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized or not issuer_pem:
         return
 
-    try:
-        ocsp_dir = _get_sharded_ocsp_path(normalized)
-        ocsp_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = ocsp_dir / ".issuer.pem.tmp"
-        issuer_path = ocsp_dir / "issuer.pem"
-        tmp_path.write_bytes(issuer_pem)
-        tmp_path.chmod(0o644)
-        tmp_path.replace(issuer_path)
-    except Exception as e:
-        log_debug("⚠️ OCSP could not write issuer.pem for %s: %s", normalized[:16], e)
-        return
+    lock_fd: Optional[int] = None
+    if not already_locked:
+        lock_fd = _acquire_cert_lock(normalized)
+        if lock_fd is None:
+            log_debug("⚠️ OCSP could not lock for issuer.pem write (fp=%s)", normalized[:16] + "...")
+            return
 
-    if db is None:
-        return
     try:
-        db.upsert_job_cache(
-            service_id=None,
-            file_name=_ocsp_cache_relpath(normalized, "issuer.pem"),
-            data=issuer_pem,
-            job_name="ocsp-refresh",
-            checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
-        )
         try:
-            db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
-        except Exception:
-            pass
-    except Exception as e:
-        log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
+            ocsp_dir = _get_sharded_ocsp_path(normalized)
+            ocsp_dir.mkdir(parents=True, exist_ok=True)
+            _atomic_write_bytes(ocsp_dir / "issuer.pem", issuer_pem)
+        except Exception as e:
+            log_debug("⚠️ OCSP could not write issuer.pem for %s: %s", normalized[:16], e)
+            return
+
+        if db is None:
+            return
+        try:
+            db.upsert_job_cache(
+                service_id=None,
+                file_name=_ocsp_cache_relpath(normalized, "issuer.pem"),
+                data=issuer_pem,
+                job_name="ocsp-refresh",
+                checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
+            )
+            try:
+                db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
+            except Exception:
+                pass
+        except Exception as e:
+            log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
+    finally:
+        if lock_fd is not None:
+            _release_cert_lock(lock_fd, normalized)
 
 
 def _ensure_issuer_pem(pem_data: bytes, fingerprint: Optional[str], cert_name: str = "", db: Optional[Any] = None) -> None:
@@ -2326,12 +2385,11 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 log_info("🔄 OCSP response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]), attempting aggressive refresh", cert_name, cached_ttl, refresh_threshold, total_lifetime)
 
         ocsp_der: Optional[bytes] = None
-        issuer_pem: Optional[bytes] = None
         ttl: int = 0
 
         # Use a timeout of 10 seconds per attempt, retry once after 10 seconds
         for attempt in (1, 2):
-            ocsp_der, ttl, issuer_pem = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
+            ocsp_der, ttl, _issuer_pem = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
             if ocsp_der:
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
@@ -2376,8 +2434,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 
             return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
-        if issuer_pem:
-            _write_issuer_pem(fingerprint, issuer_pem, db)
+        # Issuer is published with ocsp.der / ocsp.json under the cert lock in _persist_ocsp_results_to_disk.
 
         # Calculate checksum for integrity verification (lowercase for consistency)
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
@@ -3339,12 +3396,15 @@ def _persist_ocsp_results_to_db(
 def _persist_ocsp_results_to_disk(
     all_ocsp_results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]],
     stats: Optional[Dict[str, int]] = None,
+    db: Optional[Any] = None,
 ) -> None:
     """
-    Write OCSP responses to disk cache files (atomic writes with temporary files).
-    Ensures existing files are only replaced when new fetches complete successfully.
-    On any write error, keeps existing OCSP files intact with remaining TTL.
-    Called both at normal completion and when timeout occurs.
+    Write OCSP cache files as one locked snapshot per fingerprint:
+    issuer.pem → ocsp.der → ocsp.json (each via tempfile + replace).
+
+    Holding the cert lock across all three avoids unlocked issuer swaps and
+    non-atomic metadata writes racing the DER publish. Existing files are kept
+    intact if any step fails. Called at normal completion and on timeout.
     """
     if not all_ocsp_results:
         return
@@ -3356,8 +3416,9 @@ def _persist_ocsp_results_to_disk(
         if not ocsp_der:
             continue
         try:
+            cleaned_pem = _clean_pem(pem_data)
             # Compute certificate public key fingerprint for storage location
-            cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+            cert_fp = _get_cert_pubkey_fingerprint(cleaned_pem)
             if not cert_fp:
                 log_error("❌ OCSP cannot store response for %s: failed to compute fingerprint", cert_name)
                 stats["errors"] = stats.get("errors", 0) + 1
@@ -3367,7 +3428,7 @@ def _persist_ocsp_results_to_disk(
             # Lock is keyed by certificate public key fingerprint (not hostname/cert_name).
             lock_fd = _acquire_cert_lock(cert_fp)
             if lock_fd is None:
-                # Avoid writing ocsp.der / ocsp.json without a lock.
+                # Avoid writing ocsp.der / ocsp.json / issuer.pem without a lock.
                 stats["errors"] = stats.get("errors", 0) + 1
                 log_warning(
                     "⏭️ OCSP skipping disk write for %s (fingerprint: %s) due to lock acquisition failure",
@@ -3386,36 +3447,41 @@ def _persist_ocsp_results_to_disk(
                     stats["errors"] = stats.get("errors", 0) + 1
                     raise  # Let finally block release the lock before skipping this cert
 
-                # Write OCSP response to sharded cache location (atomic write with temp file)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
+                meta_path = ocsp_cert_dir / "ocsp.json"
                 try:
-                    # Write to temporary file first, then atomically move to final location
-                    # This ensures existing file is only replaced if write succeeds completely
-                    with tempfile.NamedTemporaryFile(dir=ocsp_cert_dir, delete=False, prefix=".ocsp_", suffix=".tmp") as tmp_file:
-                        tmp_file.write(ocsp_der)
-                        tmp_file.flush()
-                        os.fsync(tmp_file.fileno())  # Ensure write is persisted
-                        tmp_path = Path(tmp_file.name)
-
-                    # Set permissions on temp file before moving
-                    tmp_path.chmod(0o644)  # Readable by nginx
-
-                    # Atomically move temp file to final location (overwrites only on success)
-                    tmp_path.replace(ocsp_path)
-                    log_info("✓ OCSP saved response for %s to disk at %s (fingerprint: %s)", cert_name, ocsp_path, cert_fp[:16] + "...")
-
-                    # Write OCSP metadata to cache/ssl/{fingerprint}/ocsp.json
-                    # Metadata includes cert_name, serial, fingerprint, expires, and must_staple flag
-                    meta_path = ocsp_cert_dir / "ocsp.json"
+                    # 1) issuer.pem first so validate_ocsp_response can pair with the new DER
                     try:
-                        meta = _extract_cert_metadata(pem_data, cert_name)
-                        # Add fingerprint reference for debugging/verification
+                        _leaf, issuer = _parse_chain(cleaned_pem, cert_name)
+                        _write_issuer_pem(
+                            cert_fp,
+                            issuer.public_bytes(Encoding.PEM),
+                            db=db,
+                            already_locked=True,
+                        )
+                    except Exception as issuer_err:
+                        log_debug(
+                            "⚠️ OCSP could not publish issuer.pem with response for %s: %s",
+                            cert_name,
+                            issuer_err,
+                        )
+
+                    # 2) ocsp.der (atomic)
+                    _atomic_write_bytes(ocsp_path, ocsp_der)
+                    log_info(
+                        "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
+                        cert_name,
+                        ocsp_path,
+                        cert_fp[:16] + "...",
+                    )
+
+                    # 3) ocsp.json last (atomic) — commit marker with der_sha256 for L1 freshness
+                    try:
+                        meta = _extract_cert_metadata(cleaned_pem, cert_name)
                         meta["fingerprint"] = cert_fp
-                        # der_sha256 lets NGINX L1 detect atomic ocsp.der replaces without re-reading DER
                         meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                         meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
-                        meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
-                        meta_path.chmod(0o644)
+                        _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
                         log_debug(
                             "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
                             cert_name,
@@ -3426,13 +3492,10 @@ def _persist_ocsp_results_to_disk(
                     except Exception as e:
                         log_debug("⚠️ OCSP metadata write failed for %s: %s", cert_name, e)
 
-                    # Note: With fingerprint-based storage, SAN symlinks are no longer needed
-                    # The NGINX code directly looks up OCSP responses by certificate fingerprint
-                    # (previous implementation left here for reference but not executed)
                 except Exception as e:
-                    # Clean up any leftover temp files on error (existing ocsp.der remains intact)
+                    # Clean up any leftover temp files on error (existing files remain intact)
                     try:
-                        for tmp_file in ocsp_cert_dir.glob(".ocsp_*.tmp"):
+                        for tmp_file in ocsp_cert_dir.glob(".*.tmp"):
                             tmp_file.unlink()
                     except Exception:
                         pass  # Ignore cleanup errors
@@ -3807,7 +3870,7 @@ def main() -> int:
         if check_job_timeout("after processing phase"):
             log_warning("⏱️ OCSP job timeout during processing. Saving partial results (%d cert(s)) to database and disk.", len(all_ocsp_results))
             _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
-            _persist_ocsp_results_to_disk(all_ocsp_results, stats)
+            _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
             # Return early with partial results saved
             elapsed = time.time() - job_start_time
             log_warning("📊 OCSP partial job completed in %.3fs with %d results saved", elapsed, len(all_ocsp_results))
@@ -3815,7 +3878,7 @@ def main() -> int:
 
         # === Persist all OCSP responses to database and disk ===
         _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
-        _persist_ocsp_results_to_disk(all_ocsp_results, stats)
+        _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
 
         # Check timeout before cleanup
         if not check_job_timeout("before orphaned cleanup"):
