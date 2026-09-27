@@ -253,6 +253,32 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint)
 	return issuers
 end
 
+-- True when TLS Feature text asserts status_request (Must-Staple / feature id 5).
+-- Do not substring-match "5": that false-positives on OIDs and other digits.
+local function tls_feature_is_must_staple(text)
+	if type(text) ~= "string" or text == "" then
+		return false
+	end
+	if text:find("OCSP status request", 1, true) then
+		return true
+	end
+	-- Named forms; exclude status_request_v2 / statusRequestV2
+	if text:find("status_request%f[^%w_]") or text:match("status_request%s*$") then
+		return true
+	end
+	if text:find("statusRequest%f[^%w]") or text:match("%.?statusRequest%s*$") then
+		return true
+	end
+	-- Feature id 5 as a whole decimal token (e.g. "5", "5, 17") — callers must pass
+	-- extension text or TLS Feature value line(s), never a full openssl dump.
+	for token in text:gmatch("%d+") do
+		if token == "5" then
+			return true
+		end
+	end
+	return false
+end
+
 local function has_must_staple(cert_pem)
 	local must = false
 	pcall(function()
@@ -265,10 +291,7 @@ local function has_must_staple(cert_pem)
 		if not tls_feature_ext then
 			return
 		end
-		local tls_feature_text = tls_feature_ext:text() or ""
-		if tls_feature_text:find("OCSP status request", 1, true) or tls_feature_text:find("5", 1, true) then
-			must = true
-		end
+		must = tls_feature_is_must_staple(tls_feature_ext:text() or "")
 	end)
 	return must
 end
