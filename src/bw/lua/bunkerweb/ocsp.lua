@@ -1624,13 +1624,17 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 	local ssl = require "ngx.ssl"
 
-	-- Prefer fingerprint of the selected leaf; fall back to plugin hint only if it matches that leaf.
+	-- Staple only this leaf's SPKI. Never use a dual-cert sibling hint (RSA hint on ECDSA leaf).
 	local leaf_fp = spki_fingerprint(leaf_pem, internalstore)
 	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
-		-- Plugin hint is often the first PEM block (may be RSA). Ignore it for dual-cert ECDSA prefer.
+		log_ocsp_staple_skip(cert_pubkey_kind(leaf_pem) == "ec" and "rsa" or "ec", fp_hint, "wrong_key_type_hint", server_name)
 		fp_hint = nil
 	end
-	local fingerprint = leaf_fp or fp_hint
+	local fingerprint = leaf_fp
+	if not fingerprint and fp_hint then
+		-- No SPKI from PEM; fingerprint-only path (no sibling borrow possible without a second leaf).
+		fingerprint = fp_hint
+	end
 	if not must_staple and fingerprint then
 		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
 		if must_staple then
