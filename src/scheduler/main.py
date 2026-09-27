@@ -389,9 +389,13 @@ def generate_caches():
     job_cache_files = SCHEDULER.db.get_jobs_cache_files()
     plugin_cache_files = set()
     ignored_dirs = set()
+    plugin_paths = set()
+    file_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
+    dir_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
+        plugin_paths.add(job_path)
         cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
         plugin_cache_files.add(cache_path)
 
@@ -415,16 +419,20 @@ def generate_caches():
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
             _write_atomic(cache_path, job_cache_file["data"])
-            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
-            if cache_path.stat().st_mode & 0o777 != desired_perms:
-                cache_path.chmod(desired_perms)
+            if cache_path.stat().st_mode & 0o777 != file_perms:
+                cache_path.chmod(file_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
-    if job_path.is_dir():
+    # Clean orphans and normalize modes for every plugin that had cache rows — not only the last
+    # plugin_id left in the loop variable (previous bug left other plugin trees skewed).
+    ignored_prefix = tuple(ignored_dirs) if ignored_dirs else ()
+    for job_path in plugin_paths:
+        if not job_path.is_dir():
+            continue
         for resource_path in list(job_path.rglob("*")):
-            if resource_path.as_posix().startswith(tuple(ignored_dirs)):
+            if ignored_prefix and resource_path.as_posix().startswith(ignored_prefix):
                 continue
 
             LOGGER.debug(f"Checking if {resource_path} should be removed")
@@ -442,9 +450,11 @@ def generate_caches():
                 rmtree(resource_path, ignore_errors=True)
                 continue
 
-            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
-            if resource_path.stat().st_mode & 0o777 != desired_perms:
-                resource_path.chmod(desired_perms)
+            if resource_path.is_dir():
+                if resource_path.stat().st_mode & 0o777 != dir_perms:
+                    resource_path.chmod(dir_perms)
+            elif resource_path.is_file() and resource_path.stat().st_mode & 0o777 != file_perms:
+                resource_path.chmod(file_perms)
 
 
 def generate_configs(logger: Logger = LOGGER) -> bool:

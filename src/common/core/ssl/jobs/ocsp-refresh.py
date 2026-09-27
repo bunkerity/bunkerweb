@@ -1291,7 +1291,7 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     return remaining, total_lifetime
 
 
-def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o644) -> None:
+def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
     """Write bytes via tempfile + replace so readers never see a partial file."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path: Optional[Path] = None
@@ -1324,7 +1324,7 @@ def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o644) -> None:
                 pass
 
 
-def _atomic_write_text(path: Path, text: str, mode: int = 0o644) -> None:
+def _atomic_write_text(path: Path, text: str, mode: int = 0o640) -> None:
     """Atomic text write (UTF-8)."""
     _atomic_write_bytes(path, text.encode("utf-8"), mode=mode)
 
@@ -2205,7 +2205,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     issuer_path.parent.mkdir(parents=True, exist_ok=True)
                     if not issuer_path.is_file() or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
                         issuer_path.write_bytes(entry["data"])
-                        issuer_path.chmod(0o644)
+                        issuer_path.chmod(0o640)
                         log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
                     if file_name.startswith("issuer/"):
                         new_name = _ocsp_cache_relpath(issuer_fp, "issuer.pem")
@@ -2228,7 +2228,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     meta_path.parent.mkdir(parents=True, exist_ok=True)
                     if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
                         meta_path.write_bytes(entry["data"])
-                        meta_path.chmod(0o644)
+                        meta_path.chmod(0o640)
                         log_debug("✓ OCSP restored metadata for %s", meta_fp[:16])
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
@@ -2256,13 +2256,13 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                         # Checksum mismatch — replace with database version
                         log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", fingerprint, disk_checksum[:8], db_checksum[:8])
                         ocsp_path.write_bytes(db_data)
-                        ocsp_path.chmod(0o644)
+                        ocsp_path.chmod(0o640)
                         replaced_count += 1
                 else:
                     # File missing — restore from database
                     ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                     ocsp_path.write_bytes(db_data)
-                    ocsp_path.chmod(0o644)
+                    ocsp_path.chmod(0o640)
                     restored_count += 1
                     log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
                 if file_name.startswith("ocsp/"):
@@ -3239,7 +3239,7 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                     try:
                         ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                         ocsp_path.write_bytes(data)
-                        ocsp_path.chmod(0o644)
+                        ocsp_path.chmod(0o640)
                         # Verify checksum after restoration
                         written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
                         if written_checksum != db_checksum:
@@ -3266,7 +3266,7 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                         )
                         try:
                             ocsp_path.write_bytes(data)
-                            ocsp_path.chmod(0o644)
+                            ocsp_path.chmod(0o640)
                             # Verify checksum after restoration
                             written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
                             if written_checksum != db_checksum:
