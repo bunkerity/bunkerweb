@@ -177,6 +177,22 @@ end
 -- Layout v1 (legacy): "bw1\0" .. epoch .. "\0" .. binding .. "\0" .. der
 local L1_MAGIC = "bw2\0"
 local L1_MAGIC_V1 = "bw1\0"
+-- Cap DRAM residence; never longer than remaining OCSP life when known.
+local L1_MAX_TTL = 300
+
+local function l1_shm_ttl(expires_unix)
+	if type(expires_unix) ~= "number" or expires_unix <= 0 then
+		return L1_MAX_TTL
+	end
+	local remaining = expires_unix - ngx.time()
+	if remaining <= 0 then
+		return nil
+	end
+	if remaining > L1_MAX_TTL then
+		return L1_MAX_TTL
+	end
+	return remaining
+end
 
 local function pack_l1(epoch, verified_binding, der, expires_unix)
 	local exp = ""
@@ -279,7 +295,10 @@ local function get_l1(internalstore, fingerprint)
 		end
 	end)
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), 300, true)
+		local ttl = l1_shm_ttl(nil)
+		if ttl then
+			internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), ttl, true)
+		end
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
 	end)
@@ -300,13 +319,18 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	if type(resp) ~= "string" or #resp == 0 then
 		return
 	end
+	local ttl = l1_shm_ttl(expires_unix)
+	if not ttl then
+		-- Response already past nextUpdate; do not park it in L1.
+		return
+	end
 	local binding = nil
 	if mark_verified then
 		binding = resp_binding(resp)
 	end
 	local epoch = current_ocsp_epoch()
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), 300, true)
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl, true)
 		-- Drop pre-composite siblings so they cannot outlive / contradict this entry.
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
@@ -990,7 +1014,8 @@ end
 
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
--- (TLS:SSL:ocsp: composite of epoch|verified|DER) so each subsystem warms its own L1 for 300s.
+-- (TLS:SSL:ocsp: composite of epoch|verified|expires|DER) so each subsystem warms its own L1.
+-- Shm TTL is min(300s, remaining until expires_unix) so DRAM cannot outlive nextUpdate.
 -- Verified binding is sha256(DER) packed with the body; L1 drops when epoch or der_sha256 diverges.
 -- Optional cert_fp_hint (plugin status[5]) enforces Must-Staple via ocsp.json when PEM is absent.
 -- Dual-cert PEMs staple the ECDSA leaf only (one ngx.ocsp status slot).
