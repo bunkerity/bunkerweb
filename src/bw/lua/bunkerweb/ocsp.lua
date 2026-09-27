@@ -145,8 +145,13 @@ local function cache_key(fingerprint)
 	return "TLS:SSL:ocsp:" .. fingerprint
 end
 
+-- Legacy sibling keys (pre-composite L1). Still deleted on write/drop for upgrades.
 local function verified_key(fingerprint)
 	return "TLS:SSL:ocsp_verified:" .. fingerprint
+end
+
+local function gen_key(fingerprint)
+	return "TLS:SSL:ocsp_gen:" .. fingerprint
 end
 
 -- Bind verified flag to OCSP DER bytes (not SPKI alone). Same-key renewals keep the fingerprint.
@@ -166,34 +171,32 @@ local function resp_binding(resp)
 	return nil
 end
 
-local function get_cached_resp(internalstore, fingerprint)
-	local ok, resp = pcall(function()
-		return internalstore:get(cache_key(fingerprint), true)
-	end)
-	if ok and type(resp) == "string" and #resp > 0 then
-		return resp
-	end
-	return nil
+-- One shm value = epoch + optional verified binding + DER.
+-- Evicting this key cannot orphan verified from DER (or gen from DER).
+-- Layout: "bw1\0" .. epoch .. "\0" .. binding_or_empty .. "\0" .. der
+local L1_MAGIC = "bw1\0"
+
+local function pack_l1(epoch, verified_binding, der)
+	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. der
 end
 
-local function is_verified(internalstore, fingerprint, resp)
-	local binding = resp_binding(resp)
-	if not binding then
-		return false
+local function unpack_l1(blob)
+	if type(blob) ~= "string" or #blob < 4 or blob:sub(1, 4) ~= L1_MAGIC then
+		return nil, nil, nil
 	end
-	local ok, stored = pcall(function()
-		return internalstore:get(verified_key(fingerprint), true)
-	end)
-	return ok and stored == binding
+	local epoch, binding, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0(.*)$")
+	if type(der) ~= "string" or #der == 0 then
+		return nil, nil, nil
+	end
+	if binding == "" then
+		binding = nil
+	end
+	return epoch or "0", binding, der
 end
 
 -- Shared with the HTTP ssl_certificate path: job bumps this file so both
 -- internalstore and internalstore_stream drop stale L1 without cross-dict APIs.
 local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
-
-local function gen_key(fingerprint)
-	return "TLS:SSL:ocsp_gen:" .. fingerprint
-end
 
 local function current_ocsp_epoch()
 	if ngx.ctx.bw_ocsp_epoch ~= nil then
@@ -215,20 +218,72 @@ local function current_ocsp_epoch()
 	return epoch
 end
 
+-- Returns der, verified_binding, epoch (or nil).
+-- Legacy raw-DER (+ sibling verified/gen keys) is promoted to the composite once.
+local function get_l1(internalstore, fingerprint)
+	if not internalstore or not fingerprint then
+		return nil
+	end
+	local ok, blob = pcall(function()
+		return internalstore:get(cache_key(fingerprint), true)
+	end)
+	if not ok or type(blob) ~= "string" or #blob == 0 then
+		return nil
+	end
+
+	local epoch, verified, der = unpack_l1(blob)
+	if der then
+		return der, verified, epoch
+	end
+
+	-- Legacy: bare DER body under the same key.
+	der = blob
+	local binding = nil
+	pcall(function()
+		local stored = internalstore:get(verified_key(fingerprint), true)
+		if type(stored) == "string" and stored == resp_binding(der) then
+			binding = stored
+		end
+	end)
+	epoch = "0"
+	pcall(function()
+		local stored_gen = internalstore:get(gen_key(fingerprint), true)
+		if type(stored_gen) == "string" and #stored_gen > 0 then
+			epoch = stored_gen
+		end
+	end)
+	pcall(function()
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der), 300, true)
+		internalstore:delete(verified_key(fingerprint))
+		internalstore:delete(gen_key(fingerprint))
+	end)
+	return der, binding, epoch
+end
+
+local function entry_verified(stored_binding, resp)
+	local binding = resp_binding(resp)
+	return binding ~= nil and stored_binding == binding
+end
+
 local function warm_cache(internalstore, fingerprint, resp, mark_verified)
 	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
 	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
 	if mark_verified == nil then
 		mark_verified = true
 	end
-	local binding = resp_binding(resp)
+	if type(resp) ~= "string" or #resp == 0 then
+		return
+	end
+	local binding = nil
+	if mark_verified then
+		binding = resp_binding(resp)
+	end
 	local epoch = current_ocsp_epoch()
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), resp, 300, true)
-		internalstore:set(gen_key(fingerprint), epoch, 300, true)
-		if mark_verified and binding then
-			internalstore:set(verified_key(fingerprint), binding, 300, true)
-		end
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp), 300, true)
+		-- Drop pre-composite siblings so they cannot outlive / contradict this entry.
+		internalstore:delete(verified_key(fingerprint))
+		internalstore:delete(gen_key(fingerprint))
 	end)
 end
 
@@ -249,20 +304,15 @@ local function drop_cache(internalstore, fingerprint)
 end
 
 -- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
-local function l1_matches_disk(internalstore, fingerprint, resp)
+local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
 		return false
 	end
 
 	-- Cross-zone coherence: job cannot delete the other lua_shared_dict; epoch is the bus.
-	if internalstore then
-		local ok_gen, stored_gen = pcall(function()
-			return internalstore:get(gen_key(fingerprint), true)
-		end)
-		if not ok_gen or stored_gen ~= current_ocsp_epoch() then
-			return false
-		end
+	if (stored_epoch or "") ~= current_ocsp_epoch() then
+		return false
 	end
 
 	-- Skip repeated disk I/O within the throttle window when last check said OK.
@@ -707,12 +757,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		return false
 	end
 
-	local cached = get_cached_resp(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch = get_l1(internalstore, fingerprint)
 	if cached then
-		if not l1_matches_disk(internalstore, fingerprint, cached) then
+		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
 		else
-			local verified = is_verified(internalstore, fingerprint, cached)
+			local verified = entry_verified(cached_verified, cached)
 			local authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
 			if verified or authorized then
 				local ok_set, set_ok, set_err = pcall(function()
@@ -735,7 +785,10 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
-		local verified = is_verified(internalstore, fingerprint, resp)
+		-- Disk path: verified binding only exists in L1; after drop/miss, require meta authorize
+		-- or a leftover legacy sibling (get_l1 already promoted). Re-check composite if rewarmed.
+		local _, disk_verified = get_l1(internalstore, fingerprint)
+		local verified = entry_verified(disk_verified, resp)
 		local authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
 		if verified or authorized then
 			local ok_set, set_ok, set_err = pcall(function()
@@ -765,11 +818,11 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		return nil
 	end
 	local issuers = nil
-	local cached = get_cached_resp(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch = get_l1(internalstore, fingerprint)
 	if cached then
-		if not l1_matches_disk(internalstore, fingerprint, cached) then
+		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
-		elseif is_verified(internalstore, fingerprint, cached) then
+		elseif entry_verified(cached_verified, cached) then
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(cached)
 			end)
@@ -815,8 +868,8 @@ end
 
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
--- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
--- ocsp_verified stores sha256(DER); L1 is dropped when on-disk der_sha256 (or file hash) diverges.
+-- (TLS:SSL:ocsp: composite of epoch|verified|DER) so each subsystem warms its own L1 for 300s.
+-- Verified binding is sha256(DER) packed with the body; L1 drops when epoch or der_sha256 diverges.
 -- Optional cert_fp_hint (plugin status[5]) enforces Must-Staple via ocsp.json when PEM is absent.
 -- Dual-cert PEMs staple the ECDSA leaf only (one ngx.ocsp status slot).
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
