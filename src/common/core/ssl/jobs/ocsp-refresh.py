@@ -137,6 +137,9 @@ _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
 DNS_CACHE_TTL = 300  # 5 minutes: limit poisoning / stale DNS impact during a job
 _OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
+# Cert-name markers for differential tracking. Must not share ocsp/<token> with legacy
+# fingerprint DER rows (a 64-hex hostname would collide).
+OCSP_MARKER_PREFIX = "ocsp-marker/"
 
 
 def _is_safe_ip_str(ip_str: str) -> bool:
@@ -531,6 +534,81 @@ def _sanitize_filename(name: str) -> str:
     Specifically replaces '*' with '_wildcard_' for wildcard certificates.
     """
     return name.replace("*", "_wildcard_")
+
+
+def _ocsp_marker_relpath(cert_name: str) -> Optional[str]:
+    """DB file_name for a cert-name marker (data = fingerprint hex)."""
+    if not cert_name or not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+        return None
+    return f"{OCSP_MARKER_PREFIX}{_sanitize_filename(cert_name)}"
+
+
+def _legacy_ocsp_marker_relpath(cert_name: str) -> Optional[str]:
+    """Pre-fix marker key ocsp/<name> (collides with legacy DER when name is 64 hex)."""
+    if not cert_name or not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
+        return None
+    return f"ocsp/{_sanitize_filename(cert_name)}"
+
+
+def _read_cert_name_marker(db: Any, cert_name: str) -> Optional[str]:
+    """Return fingerprint hex from ocsp-marker/ or legacy ocsp/<name> marker rows."""
+    if db is None:
+        return None
+    for key in (_ocsp_marker_relpath(cert_name), _legacy_ocsp_marker_relpath(cert_name)):
+        if not key:
+            continue
+        # Never treat ocsp/<64-hex> as a marker — that key may hold DER bytes.
+        if key.startswith("ocsp/") and _normalize_fingerprint(key[len("ocsp/") :]):
+            continue
+        try:
+            marker_data = db.get_job_cache_file(file_name=key, job_name="ocsp-refresh")
+            if not marker_data:
+                continue
+            decoded = marker_data.decode("utf-8", errors="ignore").strip()
+            fp = _normalize_fingerprint(decoded)
+            if fp:
+                return fp
+        except Exception:
+            continue
+    return None
+
+
+def _upsert_cert_name_marker(db: Any, cert_name: str, fingerprint: str) -> None:
+    """Store cert_name → fingerprint under ocsp-marker/; drop safe legacy marker keys."""
+    if db is None or not fingerprint:
+        return
+    marker_key = _ocsp_marker_relpath(cert_name)
+    if not marker_key:
+        return
+    db.upsert_job_cache(
+        service_id=None,
+        file_name=marker_key,
+        data=fingerprint.encode("utf-8"),
+        job_name="ocsp-refresh",
+        checksum=hashlib.sha256(fingerprint.encode("utf-8")).hexdigest().lower(),
+    )
+    legacy = _legacy_ocsp_marker_relpath(cert_name)
+    # Only delete legacy marker when it cannot be a fingerprint DER row.
+    if legacy and not _normalize_fingerprint(_sanitize_filename(cert_name)):
+        try:
+            db.delete_job_cache(file_name=legacy, job_name="ocsp-refresh")
+        except Exception:
+            pass
+
+
+def _delete_cert_name_marker(db: Any, cert_name: str) -> None:
+    """Remove new and legacy cert-name marker rows."""
+    if db is None:
+        return
+    for key in (_ocsp_marker_relpath(cert_name), _legacy_ocsp_marker_relpath(cert_name)):
+        if not key:
+            continue
+        if key.startswith("ocsp/") and _normalize_fingerprint(key[len("ocsp/") :]):
+            continue
+        try:
+            db.delete_job_cache(file_name=key, job_name="ocsp-refresh")
+        except Exception:
+            pass
 
 
 def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
@@ -1870,11 +1948,17 @@ def _get_cached_ocsp_certs(db: Any) -> set:
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
-            if file_name.startswith("ocsp/"):
-                cert_name_raw = file_name[len("ocsp/"):]
-                # Prevent path traversal from crafted database entries
-                if re.match(r"^[A-Za-z0-9_.*-]+$", cert_name_raw):
-                    cached_certs.add(cert_name_raw)
+            cert_name_raw = None
+            if file_name.startswith(OCSP_MARKER_PREFIX):
+                cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
+            elif file_name.startswith("ocsp/"):
+                # Legacy marker ocsp/<name> — skip fingerprint-shaped keys (those are DER rows).
+                candidate = file_name[len("ocsp/") :]
+                if _normalize_fingerprint(candidate):
+                    continue
+                cert_name_raw = candidate
+            if cert_name_raw and re.match(r"^[A-Za-z0-9_.*-]+$", cert_name_raw):
+                cached_certs.add(cert_name_raw)
     except Exception as e:
         log_warning("⚠️ OCSP could not retrieve cached certificate list from database: %s", e)
 
@@ -2233,7 +2317,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
                 continue
-            # Marker entries stay as ocsp/{cert_name} and are not files the handshake reads.
+            # Marker entries live under ocsp-marker/<cert_name> (not ocsp/<name>).
             # Response entries are {hex1}/{hex2}/{fingerprint}/ocsp.der, or the legacy ocsp/{fingerprint} key.
             fingerprint = _fingerprint_from_ocsp_der_name(file_name)
             if not fingerprint:
@@ -2685,16 +2769,9 @@ def cleanup_ocsp_cache(
         resolved_fp = _normalize_fingerprint(fingerprint)
 
         # If fingerprint wasn't provided, try to resolve it from the marker stored in DB.
-        # Marker entries are stored as: ocsp/{cert_name} with data = fingerprint (ASCII hex).
         if not resolved_fp and db and purge_db:
             try:
-                marker_data = db.get_job_cache_file(
-                    file_name=f"ocsp/{sanitized_name}",
-                    job_name="ocsp-refresh",
-                )
-                if marker_data:
-                    decoded = marker_data.decode("utf-8", errors="ignore").strip()
-                    resolved_fp = _normalize_fingerprint(decoded)
+                resolved_fp = _read_cert_name_marker(db, cert_name)
             except Exception as e:
                 log_debug("⚠️ OCSP could not resolve fingerprint marker for %s: %s", cert_name, e)
                 resolved_fp = None
@@ -2739,10 +2816,7 @@ def cleanup_ocsp_cache(
         if db and purge_db:
             try:
                 # Always remove the cert-name marker (differential tracking).
-                db.delete_job_cache(
-                    file_name=f"ocsp/{sanitized_name}",
-                    job_name="ocsp-refresh",
-                )
+                _delete_cert_name_marker(db, cert_name)
                 # If we resolved a fingerprint, also remove the corresponding response+checksum.
                 if resolved_fp:
                     _delete_fingerprint_db_rows(db, resolved_fp)
@@ -2793,6 +2867,7 @@ def cleanup_ocsp_cache(
                     file_name = cache_file.get("file_name", "")
                     if (
                         file_name.startswith("ocsp/")
+                        or file_name.startswith(OCSP_MARKER_PREFIX)
                         or file_name.startswith("issuer/")
                         or file_name.startswith("cert_checksum/")
                         or file_name == "last_full_refresh"
@@ -3094,11 +3169,19 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                             _drop_orphan_fingerprint(related_fp)
                         continue
 
-                if not file_name.startswith("ocsp/"):
+                cert_name_raw = None
+                if file_name.startswith(OCSP_MARKER_PREFIX):
+                    cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
+                elif file_name.startswith("ocsp/"):
+                    candidate = file_name[len("ocsp/") :]
+                    # Fingerprint-shaped ocsp/ keys are response rows (handled above).
+                    if _normalize_fingerprint(candidate):
+                        continue
+                    cert_name_raw = candidate
+                else:
                     continue
-                cert_name_raw = file_name[len("ocsp/"):]
 
-                # Marker entries are ocsp/<cert_name> (data = fingerprint).
+                # Marker entries map cert_name → fingerprint.
                 if cert_name_raw in valid_cert_names:
                     continue
 
@@ -3370,16 +3453,9 @@ def _persist_ocsp_results_to_db(
                     log_info("✓ OCSP stored response for %s in database (fingerprint: %s, TTL=%ds)", cert_name, cert_fp[:16] + "...", ttl)
 
                     # Also store a marker entry with cert_name for differential tracking
-                    # This allows _get_cached_ocsp_certs() to identify cached certificates
-                    sanitized_name = _sanitize_filename(cert_name)
+                    # (ocsp-marker/<name>, not ocsp/<name> — that prefix is legacy DER).
                     try:
-                        db.upsert_job_cache(
-                            service_id=None,
-                            file_name=f"ocsp/{sanitized_name}",
-                            data=cert_fp.encode("utf-8"),  # Store fingerprint reference
-                            job_name="ocsp-refresh",
-                            checksum=hashlib.sha256(cert_fp.encode("utf-8")).hexdigest().lower(),
-                        )
+                        _upsert_cert_name_marker(db, cert_name, cert_fp)
                         log_debug("✓ OCSP stored cert_name marker for %s (fingerprint: %s)", cert_name, cert_fp[:16] + "...")
                     except Exception as e:
                         log_debug("⚠️ OCSP could not store cert_name marker for %s: %s", cert_name, e)
