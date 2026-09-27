@@ -135,7 +135,8 @@ OPENSSL_BIN = "/usr/bin/openssl"
 
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
-DNS_CACHE_TTL = 300  # 5 minutes: limit poisoning / stale DNS impact during a job
+DNS_CACHE_TTL = 300  # 5 minutes for successful resolutions
+DNS_CACHE_NEGATIVE_TTL = 15  # brief; empty/failed lookups must not poison the whole job batch
 _OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
 # Cert-name markers for differential tracking. Must not share ocsp/<token> with legacy
 # fingerprint DER rows (a 64-hex hostname would collide).
@@ -211,7 +212,11 @@ def _get_ocsp_responder_ips(ocsp_url: str, default_port: int) -> Tuple[str, List
     if hostname in _OCSP_RESPONDER_DNS_CACHE:
         # Refresh LRU position
         ips, cached_at = _OCSP_RESPONDER_DNS_CACHE[hostname]
-        if time.time() - cached_at < DNS_CACHE_TTL:
+        # Successful resolutions keep the long TTL; empty/failed lookups use a short
+        # negative TTL so one transient getaddrinfo blip cannot fail every cert that
+        # shares this OCSP hostname for the rest of the job.
+        ttl = DNS_CACHE_TTL if ips else DNS_CACHE_NEGATIVE_TTL
+        if time.time() - cached_at < ttl:
             _OCSP_RESPONDER_DNS_CACHE.move_to_end(hostname)
             return hostname, ips
         # Expired — re-resolve
