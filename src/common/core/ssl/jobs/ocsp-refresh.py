@@ -1814,6 +1814,10 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
     """
     Fetch OCSP response using cryptography + urllib.
     Returns (raw DER bytes or None, ttl_seconds, issuer PEM or None).
+
+    Only returns DER when responseStatus is SUCCESSFUL, the signature verifies,
+    CertStatus is good, and the response serial matches the leaf. Revoked/unknown
+    responses are discarded so they are never published as staples.
     """
     try:
         leaf, issuer = _parse_chain(pem_data, cert_name)
@@ -2000,6 +2004,38 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             if p.returncode != 0:
                 log_error("❌ OCSP response cryptographic signature verification failed for %s. Discarding forged/invalid response. OpenSSL Error: %s", cert_name, p.stderr.strip() or p.stdout.strip())
                 return None, 0, None
+
+        # responseStatus=SUCCESSFUL ≠ CertStatus=good (RFC 6960). Only publish staples
+        # that attest the leaf is good; revoked/unknown must not replace a usable cache.
+        try:
+            cert_status = ocsp_response.certificate_status
+        except (ValueError, AttributeError) as e:
+            log_error(
+                "❌ OCSP response for %s has no usable CertStatus after SUCCESSFUL outer status: %s. Discarding.",
+                cert_name,
+                e,
+            )
+            return None, 0, None
+        if cert_status != x509_ocsp.OCSPCertStatus.GOOD:
+            log_error(
+                "❌ OCSP CertStatus=%s for %s (serial=%s); refusing to publish non-good staple.",
+                cert_status,
+                cert_name,
+                leaf.serial_number,
+            )
+            return None, 0, None
+        try:
+            resp_serial = ocsp_response.serial_number
+        except (ValueError, AttributeError):
+            resp_serial = None
+        if resp_serial is not None and resp_serial != leaf.serial_number:
+            log_error(
+                "❌ OCSP response serial %s does not match leaf serial %s for %s. Discarding.",
+                resp_serial,
+                leaf.serial_number,
+                cert_name,
+            )
+            return None, 0, None
 
         # Extract TTL
         remaining, _ = _ocsp_response_lifetimes(ocsp_response)
