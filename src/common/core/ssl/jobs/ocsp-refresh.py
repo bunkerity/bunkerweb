@@ -3963,19 +3963,32 @@ def main() -> int:
             log_warning("⏱️ OCSP job timeout during processing. Saving partial results (%d cert(s)) to database and disk.", len(all_ocsp_results))
             _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
             _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
+            # Still prune orphans on soft timeout: deleted services must not keep growing
+            # sharded cache just because the fetch phase ran long.
+            try:
+                _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
+            except Exception as e:
+                log_warning("⚠️ OCSP orphaned cleanup after soft timeout failed: %s", e)
             # Return early with partial results saved — non-zero so callers do not treat this as success
             elapsed = time.time() - job_start_time
-            log_warning("📊 OCSP partial job completed in %.3fs with %d results saved", elapsed, len(all_ocsp_results))
+            log_warning(
+                "📊 OCSP partial job completed in %.3fs with %d results saved (orphaned_cleaned=%d)",
+                elapsed,
+                len(all_ocsp_results),
+                stats.get("orphaned_cleaned", 0),
+            )
             return 1 if status == 0 else status
 
         # === Persist all OCSP responses to database and disk ===
         _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
         _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
 
-        # Check timeout before cleanup
-        if not check_job_timeout("before orphaned cleanup"):
-            # Clean up orphaned OCSP entries for deleted services
+        # Prune orphans after persist even near the soft deadline — deleted services
+        # must not keep sharded cache forever on chronically slow fleets.
+        try:
             _cleanup_orphaned_ocsp(db, le_certs or {}, stats)
+        except Exception as e:
+            log_warning("⚠️ OCSP orphaned cleanup failed: %s", e)
 
         # Update last full refresh timestamp if we did a full run or found changes
         if db is not None and (not skip_unchanged_ttl_checks or any(r[1] is not None for r in all_ocsp_results)):
