@@ -866,6 +866,43 @@ local function cert_pubkey_kind(cert_pem)
 	return kind
 end
 
+-- Audit which leaf was stapled (or skipped) — kind + full SPKI + der_sha256.
+local function log_ocsp_stapled(server_name, kind, fp, resp)
+	local der = resp_binding(resp) or "-"
+	local fp_s = (type(fp) == "string" and #fp == 64) and fp or "-"
+	log(
+		ngx.INFO,
+		"OCSP_STAPLED kind="
+			.. tostring(kind or "unknown")
+			.. " fp="
+			.. fp_s
+			.. " der_sha256="
+			.. der
+			.. " server_name="
+			.. tostring(server_name or "nil")
+	)
+end
+
+local function log_ocsp_staple_skip(kind, fp, reason, server_name)
+	local fp_s = "-"
+	if type(fp) == "string" and #fp == 64 then
+		fp_s = fp
+	elseif type(fp) == "string" and #fp > 0 then
+		fp_s = fp
+	end
+	log(
+		ngx.NOTICE,
+		"OCSP_STAPLE_SKIP kind="
+			.. tostring(kind or "unknown")
+			.. " fp="
+			.. fp_s
+			.. " reason="
+			.. tostring(reason or "unknown")
+			.. " server_name="
+			.. tostring(server_name or "nil")
+	)
+end
+
 -- ngx.ocsp has one status slot. Prefer ECDSA when RSA+ECDSA leaves are both present.
 local function select_preferred_leaf(blocks)
 	-- Prefer ECDSA among *leaves* (key-matched PEMs from set_certs_from_pem).
@@ -888,11 +925,7 @@ local function select_preferred_leaf(blocks)
 		end
 	end
 	if ec_leaf and rsa_leaf then
-		log(
-			ngx.NOTICE,
-			"OCSP multi-certificate PEM: stapling ECDSA leaf only "
-				.. "(ngx.ocsp has one status slot; RSA leaf will not be stapled)"
-		)
+		log_ocsp_staple_skip("rsa", spki_fingerprint(rsa_leaf), "single_slot_ecdsa_prefer", nil)
 		return ec_leaf
 	end
 	return ec_leaf or rsa_leaf or other_leaf or blocks[1]
@@ -1112,6 +1145,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 					else
 						warm_cache(internalstore, fingerprint, cached, false, exp)
 					end
+					log_ocsp_stapled(server_name, nil, fingerprint, cached)
 					return true
 				end
 				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
@@ -1153,6 +1187,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 			end)
 			if ok_set and set_ok then
 				warm_cache(internalstore, fingerprint, resp, verified, meta_effective_expires_unix(meta))
+				log_ocsp_stapled(server_name, nil, fingerprint, resp)
 				return true
 			end
 			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
@@ -1169,7 +1204,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	return false
 end
 
-local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple)
+local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name)
 	if not fingerprint then
 		return nil
 	end
@@ -1203,6 +1238,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return ocsp.set_ocsp_status_resp(cached)
 			end)
 			if ok_set and set_ok then
+				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 				return true
 			end
 			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
@@ -1227,6 +1263,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					end
 				end
 				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires))
+				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 				return true
 			end
 			if result == false then
@@ -1263,6 +1300,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return false, "must_staple", ligand_detail
 			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
+			log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, resp)
 			return true
 		end
 		if result == false then
@@ -1356,7 +1394,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		end
 	end
 
-	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple)
+	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name)
 	if result == true then
 		return true
 	end
