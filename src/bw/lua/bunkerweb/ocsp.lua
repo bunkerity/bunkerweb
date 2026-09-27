@@ -127,6 +127,17 @@ local function verified_key(fingerprint)
 	return "TLS:SSL:ocsp_verified:" .. fingerprint
 end
 
+-- Bind verified flag to OCSP DER bytes (not SPKI alone). Same-key renewals keep the fingerprint.
+local function resp_binding(resp)
+	if type(resp) ~= "string" or #resp == 0 then
+		return nil
+	end
+	if ngx.md5 then
+		return ngx.md5(resp)
+	end
+	return nil
+end
+
 local function get_cached_resp(internalstore, fingerprint)
 	local ok, resp = pcall(function()
 		return internalstore:get(cache_key(fingerprint), true)
@@ -137,17 +148,24 @@ local function get_cached_resp(internalstore, fingerprint)
 	return nil
 end
 
-local function is_verified(internalstore, fingerprint)
-	local ok, verified = pcall(function()
+local function is_verified(internalstore, fingerprint, resp)
+	local binding = resp_binding(resp)
+	if not binding then
+		return false
+	end
+	local ok, stored = pcall(function()
 		return internalstore:get(verified_key(fingerprint), true)
 	end)
-	return ok and verified == true
+	return ok and stored == binding
 end
 
 local function warm_cache(internalstore, fingerprint, resp)
+	local binding = resp_binding(resp)
 	pcall(function()
 		internalstore:set(cache_key(fingerprint), resp, 300, true)
-		internalstore:set(verified_key(fingerprint), true, 300, true)
+		if binding then
+			internalstore:set(verified_key(fingerprint), binding, 300, true)
+		end
 	end)
 end
 
@@ -226,6 +244,7 @@ end
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
 -- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
+-- ocsp_verified stores ngx.md5(DER) so a same-key renewal cannot skip re-validation.
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
 function _M.staple(internalstore, server_name, cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" or not internalstore then
@@ -260,7 +279,7 @@ function _M.staple(internalstore, server_name, cert_pem)
 			local issuers = nil
 			local cached = get_cached_resp(internalstore, fingerprint)
 			if cached then
-				if is_verified(internalstore, fingerprint) then
+				if is_verified(internalstore, fingerprint, cached) then
 					local ok_set, set_ok, set_err = pcall(function()
 						return ocsp.set_ocsp_status_resp(cached)
 					end)
