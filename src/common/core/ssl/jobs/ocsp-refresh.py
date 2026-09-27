@@ -2962,11 +2962,40 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
             log_warning("⚠️ OCSP could not load custom certs for orphan check: %s", e)
             return  # Don't clean up if we can't verify what's valid
 
+        try:
+            selfsigned_certs = _load_selfsigned_certs_from_db(db)
+            for key, pem_data in selfsigned_certs.items():
+                valid_cert_names.add(key)
+                try:
+                    fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
+                    if fp:
+                        valid_fingerprints.add(fp)
+                except Exception:
+                    continue
+        except Exception as e:
+            log_warning("⚠️ OCSP could not load self-signed certs for orphan check: %s", e)
+            return  # Don't clean up if we can't verify what's valid
+
     if not valid_cert_names:
         log_debug("ℹ️ OCSP no valid certs found, skipping orphan cleanup to avoid accidental deletion")
         return
 
     orphaned_count: int = 0
+    removed_fingerprints: set = set()
+
+    def _drop_orphan_fingerprint(fingerprint: str) -> None:
+        nonlocal orphaned_count
+        if not fingerprint or fingerprint in valid_fingerprints or fingerprint in removed_fingerprints:
+            return
+        try:
+            # Response, legacy keys, issuer, metadata, and checksum. Leaving any of
+            # them lets restore_ocsp_from_database recreate the sharded directory.
+            _delete_fingerprint_db_rows(db, fingerprint)
+            removed_fingerprints.add(fingerprint)
+            log_info("🧹 OCSP removed orphaned fingerprint DB entries: fp=%s", fingerprint[:16] + "...")
+            orphaned_count += 1
+        except Exception as e:
+            log_debug("⚠️ OCSP failed to remove orphaned fingerprint DB entries fp=%s: %s", fingerprint, e)
 
     # Check database OCSP entries
     if db:
@@ -2974,34 +3003,30 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
             cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
             for entry in cache_files:
                 file_name = entry.get("file_name", "")
+
+                # Response rows are {hex1}/{hex2}/{fingerprint}/ocsp.der, or the legacy ocsp/<fingerprint> key.
+                # Issuer and metadata rows for that fingerprint must go with the response.
+                if valid_fingerprints:
+                    response_fp = _fingerprint_from_ocsp_der_name(file_name)
+                    issuer_fp = None if response_fp else _fingerprint_from_issuer_name(file_name)
+                    meta_fp = None if response_fp or issuer_fp else _fingerprint_from_meta_name(file_name)
+                    related_fp = response_fp or issuer_fp or meta_fp
+                    if related_fp:
+                        if related_fp not in valid_fingerprints:
+                            _drop_orphan_fingerprint(related_fp)
+                        continue
+
                 if not file_name.startswith("ocsp/"):
                     continue
                 cert_name_raw = file_name[len("ocsp/"):]
 
-                # Database layout:
-                # - marker entries: ocsp/<cert_name> (data = fingerprint)
-                # - response entries: ocsp/<fingerprint> (data = ocsp.der bytes)
-                # Only delete response entries if the fingerprint is not present anymore.
+                # Marker entries are ocsp/<cert_name> (data = fingerprint).
                 if cert_name_raw in valid_cert_names:
                     continue
 
-                resolved_fp = _normalize_fingerprint(cert_name_raw)
-                if resolved_fp and resolved_fp in valid_fingerprints:
-                    continue
-
-                if resolved_fp:
-                    # Orphaned OCSP response entry: remove DB record + checksum (disk cleanup is fingerprint-aware below).
-                    try:
-                        _delete_fingerprint_db_rows(db, resolved_fp)
-                        log_info("🧹 OCSP removed orphaned fingerprint DB entries: fp=%s", resolved_fp[:16] + "...")
-                        orphaned_count += 1
-                    except Exception as e:
-                        log_debug("⚠️ OCSP failed to remove orphaned fingerprint DB entries fp=%s: %s", resolved_fp, e)
-                else:
-                    # Orphaned marker entry (deleted service): reuse cleanup logic.
-                    log_info("🧹 OCSP removing orphaned marker entry for deleted service: %s", cert_name_raw)
-                    cleanup_ocsp_cache(db, cert_name_raw)
-                    orphaned_count += 1
+                log_info("🧹 OCSP removing orphaned marker entry for deleted service: %s", cert_name_raw)
+                cleanup_ocsp_cache(db, cert_name_raw)
+                orphaned_count += 1
         except Exception as e:
             log_warning("⚠️ OCSP could not check database for orphaned entries: %s", e)
 
