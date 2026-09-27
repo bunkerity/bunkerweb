@@ -2648,12 +2648,16 @@ def _is_ocsp_enabled_for_service(service_name: str) -> bool:
 
 
 def _is_ocsp_enabled_anywhere() -> bool:
-    """True when the global setting or any multisite service enables OCSP stapling."""
+    """True when at least one service would staple with the effective setting.
+
+    Multisite: evaluate each SERVER_NAME entry with ``_is_ocsp_enabled_for_service``
+    (site override wins). Global ``yes`` alone must not boot the job when every
+    site overrides to ``no``.
+    """
     if os.getenv("MULTISITE", "no").lower() == "yes":
-        suffix = "_SSL_USE_OCSP_STAPLING"
-        for key, value in os.environ.items():
-            if key.endswith(suffix) and str(value).lower() == "yes":
-                return True
+        servers = [s for s in os.getenv("SERVER_NAME", "").split() if s]
+        if servers:
+            return any(_is_ocsp_enabled_for_service(server) for server in servers)
     return os.getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import environ, getenv, sep
+from os import getenv, sep
 from os.path import join
 from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
@@ -33,13 +33,21 @@ OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_T
 status = 0
 
 
+def _ocsp_stapling_enabled_for(service_name: str) -> bool:
+    """True when this service's effective SSL_USE_OCSP_STAPLING is yes (site wins)."""
+    if getenv("MULTISITE", "no").lower() == "yes" and service_name:
+        site_value = getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
+        if site_value is not None:
+            return site_value.lower() == "yes"
+    return getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
+
+
 def _ocsp_stapling_enabled_anywhere() -> bool:
-    """True when global or any multisite service has SSL_USE_OCSP_STAPLING=yes."""
+    """True when at least one SERVER_NAME service would staple (site override wins)."""
     if getenv("MULTISITE", "no").lower() == "yes":
-        suffix = "_SSL_USE_OCSP_STAPLING"
-        for key, value in environ.items():
-            if key.endswith(suffix) and str(value).lower() == "yes":
-                return True
+        servers = [s for s in getenv("SERVER_NAME", "").split() if s]
+        if servers:
+            return any(_ocsp_stapling_enabled_for(server) for server in servers)
     return getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
 
 
