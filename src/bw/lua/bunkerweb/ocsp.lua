@@ -132,8 +132,14 @@ local function resp_binding(resp)
 	if type(resp) ~= "string" or #resp == 0 then
 		return nil
 	end
-	if ngx.md5 then
-		return ngx.md5(resp)
+	local ok, digest = pcall(function()
+		local digest_lib = require("resty.openssl.digest")
+		local ctx = digest_lib.new("sha256")
+		ctx:update(resp)
+		return to_hex(ctx:final())
+	end)
+	if ok and type(digest) == "string" and #digest == 64 then
+		return digest
 	end
 	return nil
 end
@@ -174,6 +180,48 @@ local function drop_cache(internalstore, fingerprint)
 		internalstore:delete(cache_key(fingerprint))
 		internalstore:delete(verified_key(fingerprint))
 	end)
+end
+
+-- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
+local function l1_matches_disk(fingerprint, resp)
+	local binding = resp_binding(resp)
+	if not binding then
+		return false
+	end
+
+	local disk_sha = nil
+	pcall(function()
+		local meta_path = "/var/cache/bunkerweb/ssl/"
+			.. fingerprint:sub(1, 1)
+			.. "/"
+			.. fingerprint:sub(2, 2)
+			.. "/"
+			.. fingerprint
+			.. "/ocsp.json"
+		local f = io.open(meta_path, "r")
+		if not f then
+			return
+		end
+		local raw = f:read("*a")
+		f:close()
+		if type(raw) ~= "string" then
+			return
+		end
+		local sha = raw:match('"der_sha256"%s*:%s*"([0-9a-fA-F]+)"')
+		if sha and #sha == 64 then
+			disk_sha = sha:lower()
+		end
+	end)
+
+	if disk_sha then
+		return disk_sha == binding
+	end
+
+	local data = read_file(ocsp_path(fingerprint))
+	if not data then
+		return false
+	end
+	return resp_binding(data) == binding
 end
 
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
@@ -244,7 +292,7 @@ end
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
 -- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
--- ocsp_verified stores ngx.md5(DER) so a same-key renewal cannot skip re-validation.
+-- ocsp_verified stores sha256(DER); L1 is dropped when on-disk der_sha256 (or file hash) diverges.
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
 function _M.staple(internalstore, server_name, cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" or not internalstore then
@@ -279,7 +327,9 @@ function _M.staple(internalstore, server_name, cert_pem)
 			local issuers = nil
 			local cached = get_cached_resp(internalstore, fingerprint)
 			if cached then
-				if is_verified(internalstore, fingerprint, cached) then
+				if not l1_matches_disk(fingerprint, cached) then
+					drop_cache(internalstore, fingerprint)
+				elseif is_verified(internalstore, fingerprint, cached) then
 					local ok_set, set_ok, set_err = pcall(function()
 						return ocsp.set_ocsp_status_resp(cached)
 					end)

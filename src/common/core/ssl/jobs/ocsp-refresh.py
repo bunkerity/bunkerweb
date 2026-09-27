@@ -1321,6 +1321,15 @@ def _write_ocsp_http_error_backoff(
             "expires": retry_after.isoformat(),
             "error_type": "http_backoff",
         }
+        # Preserve der_sha256 when the on-disk OCSP body was not replaced.
+        try:
+            if meta_path.is_file():
+                old = json.loads(meta_path.read_text(encoding="utf-8"))
+                old_sha = old.get("der_sha256") if isinstance(old, dict) else None
+                if isinstance(old_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", old_sha):
+                    meta["der_sha256"] = old_sha.lower()
+        except Exception:
+            pass
 
         meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
         meta_path.chmod(0o644)
@@ -3272,6 +3281,7 @@ def _persist_ocsp_results_to_db(
                     try:
                         meta = _extract_cert_metadata(pem_data, cert_name)
                         meta["fingerprint"] = cert_fp
+                        meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                         meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
@@ -3401,6 +3411,8 @@ def _persist_ocsp_results_to_disk(
                         meta = _extract_cert_metadata(pem_data, cert_name)
                         # Add fingerprint reference for debugging/verification
                         meta["fingerprint"] = cert_fp
+                        # der_sha256 lets NGINX L1 detect atomic ocsp.der replaces without re-reading DER
+                        meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                         meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
                         meta_path.write_text(json.dumps(meta, separators=(",", ":")), encoding="utf-8")
                         meta_path.chmod(0o644)
