@@ -454,7 +454,7 @@ local function tls_feature_is_must_staple(text)
 		return true
 	end
 	-- Feature id 5 as a whole decimal token (e.g. "5", "5, 17") — callers must pass
-	-- extension text or TLS Feature value line(s), never a full openssl dump.
+	-- extension text only (never a full openssl dump).
 	for token in text:gmatch("%d+") do
 		if token == "5" then
 			return true
@@ -463,92 +463,27 @@ local function tls_feature_is_must_staple(text)
 	return false
 end
 
--- Pull only the TLS Feature value from openssl x509 -text (not the whole dump).
-local function extract_tls_feature_values(openssl_text)
-	if type(openssl_text) ~= "string" then
-		return nil
-	end
-	local same = openssl_text:match("TLS Feature:%s*([^\r\n]+)")
-	if same and same:match("%S") then
-		return same
-	end
-	return openssl_text:match("TLS Feature:[ \t]*\r?\n([^\r\n]+)")
-end
-
-local function has_must_staple_openssl_fallback(cert_pem)
-	local must = false
-	pcall(function()
-		local worker_id = (ngx.worker and ngx.worker.id and ngx.worker.id()) or "0"
-		local conn = (ngx.var and ngx.var.connection) or "0"
-		local tmp_cert = "/tmp/ocsp_must_staple_stream_w" .. tostring(worker_id) .. "_c" .. tostring(conn) .. ".pem"
-		local f = io.open(tmp_cert, "w")
-		if not f then
-			return
-		end
-		local ok_write = f:write(cert_pem)
-		f:close()
-		if not ok_write then
-			pcall(function()
-				os.remove(tmp_cert)
-			end)
-			return
-		end
-		local handle = io.popen("openssl x509 -text -noout -in " .. tmp_cert .. " 2>/dev/null", "r")
-		if not handle then
-			pcall(function()
-				os.remove(tmp_cert)
-			end)
-			return
-		end
-		local result = handle:read("*a")
-		handle:close()
-		pcall(function()
-			os.remove(tmp_cert)
-		end)
-		local feature_vals = extract_tls_feature_values(result)
-		if feature_vals and tls_feature_is_must_staple(feature_vals) then
-			must = true
-		end
-	end)
-	return must
-end
-
--- Match HTTP: resty.openssl first, then openssl CLI so stream fail-closes on Must-Staple
--- even when resty is missing or cannot surface the TLS Feature extension.
+-- Handshake path: resty.openssl only — no /tmp + openssl CLI. Callers also consult
+-- ocsp.json (written by ocsp-refresh) when resty cannot see Must-Staple.
 local function has_must_staple(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return false
 	end
 	local must = false
-	local resty_ok = false
 	pcall(function()
 		local x509 = require("resty.openssl.x509")
 		local cert_obj = x509.new(cert_pem)
 		if not cert_obj then
 			return
 		end
-		resty_ok = true
 		local tls_feature_ext = cert_obj:get_extension("tlsfeature")
 		if not tls_feature_ext then
 			return
 		end
 		must = tls_feature_is_must_staple(tls_feature_ext:text() or "")
 	end)
-	if must then
-		return true
-	end
-	-- resty missing, parse failed, or extension not seen via resty → CLI fallback
-	if has_must_staple_openssl_fallback(cert_pem) then
-		if not resty_ok then
-			log(ngx.DEBUG, "OCSP-Must-Staple detected via openssl fallback (resty.openssl unavailable)")
-		else
-			log(ngx.DEBUG, "OCSP-Must-Staple detected via openssl fallback (resty missed TLS Feature)")
-		end
-		return true
-	end
-	return false
+	return must
 end
-
 local function read_ocsp_json(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
@@ -1092,6 +1027,10 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return false
 	end
 	local must_staple = has_must_staple(leaf_pem)
+	-- When resty cannot see TLS Feature, honor Must-Staple from job-written ocsp.json.
+	if not must_staple and fp_hint then
+		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
+	end
 
 	if not stapling_enabled(internalstore, server_name) then
 		if must_staple then
@@ -1118,6 +1057,12 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		fp_hint = nil
 	end
 	local fingerprint = leaf_fp or fp_hint
+	if not must_staple and fingerprint then
+		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
+		if must_staple then
+			log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
+		end
+	end
 
 	local result, reason = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple)
 	if result == true then
