@@ -187,11 +187,16 @@ local function is_verified(internalstore, fingerprint, resp)
 	return ok and stored == binding
 end
 
-local function warm_cache(internalstore, fingerprint, resp)
+local function warm_cache(internalstore, fingerprint, resp, mark_verified)
+	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
+	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
+	if mark_verified == nil then
+		mark_verified = true
+	end
 	local binding = resp_binding(resp)
 	pcall(function()
 		internalstore:set(cache_key(fingerprint), resp, 300, true)
-		if binding then
+		if mark_verified and binding then
 			internalstore:set(verified_key(fingerprint), binding, 300, true)
 		end
 	end)
@@ -379,6 +384,24 @@ local function ocsp_json_fingerprint_matches(meta, fingerprint)
 		return false
 	end
 	return meta.fingerprint:lower() == fingerprint
+end
+
+-- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
+-- Require meta.fingerprint match AND der_sha256 == sha256(body) so a swapped
+-- ocsp.der under matching SPKI meta cannot be stapled.
+local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
+	if not ocsp_json_fingerprint_matches(meta, fingerprint) then
+		return false
+	end
+	if type(meta.der_sha256) ~= "string" then
+		return false
+	end
+	local meta_sha = meta.der_sha256:lower()
+	if #meta_sha ~= 64 or not meta_sha:match("^[0-9a-f]+$") then
+		return false
+	end
+	local body_sha = resp_binding(resp)
+	return body_sha ~= nil and body_sha == meta_sha
 end
 
 local function normalize_fp_hint(cert_fp_hint)
@@ -617,7 +640,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem)
 end
 
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
--- Must-Staple comes from ocsp.json; response acceptance requires L1 verified binding or matching meta.
+-- Acceptance: prior crypto-verified L1 binding, or job meta that binds fingerprint + der_sha256
+-- to the exact DER bytes. Never promote fingerprint-only accepts to ocsp_verified.
 local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	local meta = read_ocsp_json(fingerprint)
 	local must_staple = ocsp_json_must_staple(meta)
@@ -646,35 +670,46 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached) then
 			drop_cache(internalstore, fingerprint)
-		elseif is_verified(internalstore, fingerprint, cached) or ocsp_json_fingerprint_matches(meta, fingerprint) then
-			local ok_set, set_ok, set_err = pcall(function()
-				return ocsp.set_ocsp_status_resp(cached)
-			end)
-			if ok_set and set_ok then
-				if not is_verified(internalstore, fingerprint, cached) then
-					warm_cache(internalstore, fingerprint, cached)
+		else
+			local verified = is_verified(internalstore, fingerprint, cached)
+			local authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
+			if verified or authorized then
+				local ok_set, set_ok, set_err = pcall(function()
+					return ocsp.set_ocsp_status_resp(cached)
+				end)
+				if ok_set and set_ok then
+					-- Only re-warm verified if crypto already proved this body.
+					if verified then
+						warm_cache(internalstore, fingerprint, cached, true)
+					else
+						warm_cache(internalstore, fingerprint, cached, false)
+					end
+					return true
 				end
-				return true
+				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
+				drop_cache(internalstore, fingerprint)
 			end
-			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
-			drop_cache(internalstore, fingerprint)
 		end
 	end
 
 	local resp = read_file(ocsp_path(fingerprint))
-	if resp and (is_verified(internalstore, fingerprint, resp) or ocsp_json_fingerprint_matches(meta, fingerprint)) then
-		local ok_set, set_ok, set_err = pcall(function()
-			return ocsp.set_ocsp_status_resp(resp)
-		end)
-		if ok_set and set_ok then
-			warm_cache(internalstore, fingerprint, resp)
-			return true
+	if resp then
+		local verified = is_verified(internalstore, fingerprint, resp)
+		local authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
+		if verified or authorized then
+			local ok_set, set_ok, set_err = pcall(function()
+				return ocsp.set_ocsp_status_resp(resp)
+			end)
+			if ok_set and set_ok then
+				warm_cache(internalstore, fingerprint, resp, verified)
+				return true
+			end
+			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
 		end
-		log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
-		if must_staple then
-			return false, "must_staple"
-		end
-		return false
 	end
 
 	if must_staple then
