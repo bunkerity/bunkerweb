@@ -127,7 +127,7 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
-OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
+OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
 
 
 def _ocsp_stapling_enabled_anywhere() -> bool:

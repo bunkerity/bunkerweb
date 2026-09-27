@@ -20,7 +20,7 @@ from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
-OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
+OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
 
 
 def _ocsp_stapling_enabled_for(service_name: str) -> bool:

@@ -124,6 +124,10 @@ def log_critical(msg: str, *args: Any, **kwargs: Any) -> None:
 
 status = 0
 
+# Soft job deadline. Callers (certbot-new/renew, custom-cert) wait OCSP_REFRESH_TIMEOUT=2100s;
+# keep this lower so the job can persist partial results before the parent kills the process.
+JOB_TIMEOUT_SECONDS = 2040  # 34 minutes
+
 # Use scheduler-managed cache directory (automatically synced from database on restart)
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
 MIN_TTL = 4500  # 75 minutes: minimum safety threshold. Smart refresh uses max(MIN_TTL, 20% of response lifetime)
@@ -3519,15 +3523,19 @@ def main() -> int:
     db: Optional[Any] = None
 
     # Job-level timeout: exit gracefully if exceeded (prevents deadlock on slow systems)
-    # Responses fetched so far are saved; next run continues where left off
-    JOB_TIMEOUT = 1500  # 25 minutes in seconds
+    # Responses fetched so far are saved; next run continues where left off.
+    # Must stay below caller OCSP_REFRESH_TIMEOUT (2100s) for a clean persist window.
+    JOB_TIMEOUT = JOB_TIMEOUT_SECONDS
     job_start_time = time.time()
     lock_fd_main = None
+    timed_out = False
 
     def check_job_timeout(phase: str = "") -> bool:
         """Check if job has exceeded timeout. Returns True if timeout exceeded."""
+        nonlocal timed_out
         elapsed = time.time() - job_start_time
         if elapsed > JOB_TIMEOUT:
+            timed_out = True
             log_warning(
                 "⏱️ OCSP job timeout after %.0fs (%.1f minutes) %s. "
                 "Saved responses fetched so far; next run will continue processing remaining certificates.",
@@ -3875,10 +3883,10 @@ def main() -> int:
             log_warning("⏱️ OCSP job timeout during processing. Saving partial results (%d cert(s)) to database and disk.", len(all_ocsp_results))
             _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
             _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
-            # Return early with partial results saved
+            # Return early with partial results saved — non-zero so callers do not treat this as success
             elapsed = time.time() - job_start_time
             log_warning("📊 OCSP partial job completed in %.3fs with %d results saved", elapsed, len(all_ocsp_results))
-            return status
+            return 1 if status == 0 else status
 
         # === Persist all OCSP responses to database and disk ===
         _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
@@ -3917,16 +3925,21 @@ def main() -> int:
         _log_ocsp_responder_dns_table()
 
         # Decide exit status based on results
+        if timed_out and status == 0:
+            status = 1
+            log_warning("⚠️ OCSP refresh job ended after soft timeout (partial run)")
         if stats["errors"] > 0:
             status = 2
 
-        if stats["errors"] == 0:
+        if stats["errors"] == 0 and not timed_out:
             log_info("✓ OCSP refresh job completed successfully")
             # Check if all certificates are up-to-date (no fetches needed)
             if stats["ocsp_fetched_responses"] == 0 and (stats["le_certs_processed"] + stats["custom_certs_processed"]) > 0:
                 log_info("✅ All OCSP responses are current and valid - no updates needed")
-        else:
+        elif stats["errors"] > 0:
             log_warning("⚠️ OCSP refresh job completed with %d error(s)", stats["errors"])
+        elif timed_out:
+            log_warning("⚠️ OCSP refresh job completed partially due to timeout")
 
         elapsed = time.time() - job_start_time
         log_info(

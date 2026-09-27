@@ -29,7 +29,7 @@ LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
-OCSP_REFRESH_TIMEOUT = 2100  # 2100 seconds (35 minutes) max to cover ocsp-refresh job worst-case duration
+OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
 status = 0
 
 
