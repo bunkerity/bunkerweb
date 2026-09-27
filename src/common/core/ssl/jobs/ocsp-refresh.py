@@ -170,10 +170,11 @@ def _log_ocsp_cache_mount_hints() -> None:
         remoteish = {"nfs", "nfs4", "cifs", "smb", "ceph", "fuse", "fuse.ceph", "glusterfs", "afs"}
         if best_fstype and (best_fstype in remoteish or best_fstype.startswith("fuse")):
             log_info(
-                "ℹ️ OCSP cache appears on %s (%s); advisory locks use local /run instead. "
-                "Ensure a single writer or DB-backed restore so nodes stay coherent.",
+                "ℹ️ OCSP cache appears on %s (%s); local /run flock is paired with "
+                "O_EXCL leases under %s/.ocsp-locks for multi-node writers.",
                 best_fstype,
                 best_mount or CONFIGS_SSL_BASE,
+                CONFIGS_SSL_BASE,
             )
     except Exception as e:
         log_debug("⚠️ OCSP could not inspect cache mount type: %s", e)
@@ -651,8 +652,10 @@ def _prepare_ocsp_lock_root() -> Optional[Path]:
     """
     Pick a non-world-writable local directory for advisory locks.
 
-    Locks must not live under CONFIGS_SSL_BASE: that path is often NFS/Ceph/overlay
-    where fcntl.flock is a no-op or not coherent across clients.
+    Local flock alone is not enough when several schedulers share CONFIGS_SSL_BASE:
+    /run is node-private. Cross-node exclusion uses O_EXCL leases on the cache volume
+    (see _acquire_shared_lease). Local flock still serializes writers on one host and
+    avoids depending on NFS flock semantics.
     """
     for candidate in _ocsp_lock_root_candidates():
         try:
@@ -680,26 +683,202 @@ def _fingerprint_lock_file(lock_root: Path, cert_fp: str) -> Path:
     return lock_root / "ocsp-locks" / cert_fp[0] / cert_fp[1] / f"ocsp-{cert_fp}.lock"
 
 
-def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[int]:
+def _shared_lease_path(cert_name: str) -> Path:
     """
-    Acquire a file-based lock for a specific certificate to prevent race conditions
-    when multiple scheduler instances fetch OCSP responses concurrently.
+    Per-cert lease on the shared OCSP cache volume (not flock).
 
-    Lock files are stored in a non-world-writable *local* runtime directory (preferred:
-    /run/bunkerweb, then /var/run/bunkerweb, then a safe fallback under /tmp). They are
-    intentionally not placed on the OCSP cache filesystem so NFS/overlay flock gaps
-    cannot reintroduce torn issuer/der/json publishes. Timestamp-based staleness
-    detection identifies crashed/abandoned locks.
-
-    Args:
-        cert_name: Certificate identifier
-        timeout: Maximum seconds to wait for lock acquisition (default 300 = 5 minutes)
-        stale_threshold: Lock file age (seconds) to consider it stale (default 600 = 10 minutes)
-
-    Returns:
-        File descriptor on success, None if lock unavailable or timed out
+    O_EXCL create is the cross-node mutex; /run flock only covers one host.
     """
-    # Per-certificate lock is keyed by the certificate public key fingerprint.
+    cert_fp = _normalize_fingerprint(cert_name)
+    base = CONFIGS_SSL_BASE / ".ocsp-locks"
+    if cert_fp and cert_name != "main":
+        return base / cert_fp[0] / cert_fp[1] / f"ocsp-{cert_fp}.lease"
+    return base / f"ocsp-{_sanitize_filename(cert_name)}.lease"
+
+
+def _new_lease_token() -> str:
+    import socket
+
+    return f"{socket.gethostname()}\n{os.getpid()}\n{time.time_ns()}\n"
+
+
+class OcspLock:
+    """Local flock fd plus optional shared-volume O_EXCL lease."""
+
+    __slots__ = ("local_fd", "lease_path", "lease_token", "cert_name")
+
+    def __init__(
+        self,
+        local_fd: int,
+        cert_name: str,
+        lease_path: Optional[Path] = None,
+        lease_token: Optional[str] = None,
+    ) -> None:
+        self.local_fd = local_fd
+        self.cert_name = cert_name
+        self.lease_path = lease_path
+        self.lease_token = lease_token
+
+
+def _prepare_shared_lease_parent(lease_path: Path) -> bool:
+    try:
+        lease_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if lease_path.parent.is_symlink() or (CONFIGS_SSL_BASE / ".ocsp-locks").is_symlink():
+            log_error("❌ OCSP shared lease directory is a symlink (refusing).")
+            return False
+        return True
+    except Exception as e:
+        log_debug("⚠️ OCSP could not prepare shared lease directory %s: %s", lease_path.parent, e)
+        return False
+
+
+def _lease_is_stale(lease_path: Path, stale_threshold: int) -> bool:
+    try:
+        age = time.time() - lease_path.stat().st_mtime
+        return age > stale_threshold
+    except FileNotFoundError:
+        return True
+    except Exception:
+        return False
+
+
+def _try_reclaim_stale_lease(lease_path: Path, stale_threshold: int) -> bool:
+    """Best-effort unlink of a stale shared lease so O_EXCL can succeed."""
+    if not _lease_is_stale(lease_path, stale_threshold):
+        return False
+    try:
+        lease_path.unlink()
+        log_warning(
+            "⚠️ OCSP reclaimed stale shared lease %s (age > %ds)",
+            lease_path.name,
+            stale_threshold,
+        )
+        return True
+    except FileNotFoundError:
+        return True
+    except Exception as e:
+        log_debug("⚠️ OCSP could not reclaim shared lease %s: %s", lease_path, e)
+        return False
+
+
+def _acquire_shared_lease(
+    cert_name: str,
+    timeout: int,
+    stale_threshold: int,
+) -> Optional[Tuple[Path, str]]:
+    """
+    Cross-node mutex via exclusive create on the shared cache volume.
+
+    Does not use fcntl.flock on the cache FS (unreliable on NFS). Returns
+    (lease_path, token) or None on timeout. If the cache tree is unavailable,
+    returns None so the caller can fail closed for publishes.
+    """
+    lease_path = _shared_lease_path(cert_name)
+    if not _prepare_shared_lease_parent(lease_path):
+        return None
+
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        token = _new_lease_token()
+        fd = None
+        try:
+            fd = os.open(str(lease_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            try:
+                os.write(fd, token.encode())
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+                fd = None
+            return lease_path, token
+        except FileExistsError:
+            if _try_reclaim_stale_lease(lease_path, stale_threshold):
+                continue
+            if cert_name == "main":
+                log_error(
+                    "❌ OCSP job is already running on another node (shared lease held at %s). "
+                    "Exiting to avoid concurrent cache publishes.",
+                    lease_path,
+                )
+                return None
+            elapsed = time.time() - start_time
+            remaining = timeout - elapsed
+            if remaining <= 0:
+                break
+            log_debug(
+                "⏳ OCSP waiting for shared lease on %s (%.0fs remaining)...",
+                cert_name,
+                remaining,
+            )
+            time.sleep(0.5)
+            continue
+        except Exception as e:
+            if fd is not None:
+                try:
+                    os.close(fd)
+                except Exception:
+                    pass
+            log_debug("⚠️ OCSP shared lease acquire failed for %s: %s", cert_name, e)
+            time.sleep(0.5)
+
+    log_warning(
+        "⚠️ OCSP could not acquire shared cache lease for %s after %ds at %s",
+        cert_name,
+        timeout,
+        lease_path,
+    )
+    return None
+
+
+def _release_shared_lease(lease_path: Optional[Path], lease_token: Optional[str]) -> None:
+    if lease_path is None or lease_token is None:
+        return
+    try:
+        if not lease_path.is_file() or lease_path.is_symlink():
+            return
+        # Only unlink if we still own the lease (another node may have reclaimed).
+        raw = lease_path.read_text(encoding="utf-8", errors="ignore")
+        if raw != lease_token:
+            log_debug("⚠️ OCSP shared lease %s no longer owned; skip unlink", lease_path)
+            return
+        lease_path.unlink()
+    except FileNotFoundError:
+        return
+    except Exception as e:
+        log_debug("⚠️ OCSP shared lease release failed for %s: %s", lease_path, e)
+
+
+def _refresh_shared_lease(lease_path: Optional[Path], lease_token: Optional[str]) -> Optional[str]:
+    """Rewrite lease content to refresh mtime; returns updated token or None."""
+    if lease_path is None or lease_token is None:
+        return lease_token
+    try:
+        if not lease_path.is_file():
+            return lease_token
+        raw = lease_path.read_text(encoding="utf-8", errors="ignore")
+        if raw != lease_token:
+            return lease_token
+        parts = lease_token.split("\n")
+        host = parts[0] if parts else ""
+        pid = parts[1] if len(parts) > 1 else str(os.getpid())
+        new_token = f"{host}\n{pid}\n{time.time_ns()}\n"
+        fd = os.open(str(lease_path), os.O_WRONLY | os.O_TRUNC, 0o600)
+        try:
+            os.write(fd, new_token.encode())
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        return new_token
+    except Exception as e:
+        log_debug("⚠️ OCSP shared lease refresh failed for %s: %s", lease_path, e)
+        return lease_token
+
+
+def _acquire_local_flock(
+    cert_name: str,
+    timeout: int,
+    stale_threshold: int,
+) -> Optional[int]:
+    """Node-local fcntl.flock under /run (or fallback). Returns fd or None."""
     cert_fp = _normalize_fingerprint(cert_name)
     lock_root = _prepare_ocsp_lock_root()
     if not lock_root:
@@ -735,82 +914,68 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
     start_time = time.time()
 
     while time.time() - start_time < timeout:
-        # Check if existing lock file is stale (crashed process)
         try:
             if lock_file.exists():
                 mtime = lock_file.stat().st_mtime
                 age = time.time() - mtime
                 if age > stale_threshold:
                     log_warning(
-                        "⚠️ OCSP detected stale lock for %s (age %.0fs > threshold %ds). "
+                        "⚠️ OCSP detected stale local lock for %s (age %.0fs > threshold %ds). "
                         "Previous process may have crashed. Proceeding without unlinking to avoid a race.",
                         cert_name, age, stale_threshold
                     )
-                    # Do not unlink: another process may have just acquired the lock
-                    # after updating mtime, and deleting here would be a race.
         except Exception as e:
             log_debug("⚠️ OCSP stale lock detection failed for %s: %s", lock_file, e)
 
         try:
             fd = os.open(str(lock_file), os.O_CREAT | os.O_WRONLY, 0o600)
-            # Try non-blocking lock acquisition (LOCK_NB)
             try:
                 fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                # Lock acquired successfully—write timestamp to detect stale locks
                 try:
                     os.write(fd, str(int(time.time())).encode())
                 except Exception as e:
                     log_debug("⚠️ OCSP could not write lock timestamp for %s: %s", cert_name, e)
                 return fd
             except BlockingIOError:
-                # Lock held by another process, close fd and exit or retry
                 os.close(fd)
 
                 if cert_name == "main":
-                    # For main lock, fail fast: another OCSP job is already running
                     log_error(
-                        "❌ OCSP job is already running (another instance holds the lock). "
+                        "❌ OCSP job is already running (another instance holds the local lock). "
                         "Exiting to avoid concurrent operations."
                     )
                     return None
 
-                # For cert-specific locks, retry with timeout
                 elapsed = time.time() - start_time
                 remaining_time = timeout - elapsed
                 if remaining_time > 0:
-                    log_debug("⏳ OCSP waiting for lock on %s (%.0fs remaining)...", cert_name, remaining_time)
+                    log_debug("⏳ OCSP waiting for local lock on %s (%.0fs remaining)...", cert_name, remaining_time)
                     time.sleep(0.5)
                     continue
                 else:
                     break
         except Exception as e:
-            log_debug("⚠️ OCSP lock acquisition attempt failed for %s: %s", cert_name, e)
+            log_debug("⚠️ OCSP local lock acquisition attempt failed for %s: %s", cert_name, e)
             time.sleep(0.5)
 
-    # Timeout reached: log clear message based on lock type
     if cert_name == "main":
         chosen_lock_dir = str(lock_dir) if lock_dir else "/tmp/bunkerweb"
         log_error(
-            "❌ OCSP job timed out waiting for the main lock (%ds timeout). "
-            "Another OCSP job is still running. This may indicate a hung or very slow job. "
+            "❌ OCSP job timed out waiting for the main local lock (%ds timeout). "
+            "Another OCSP job is still running. "
             "Check for stale lock files: rm -f %s/ocsp*.lock",
             timeout,
             chosen_lock_dir,
         )
     else:
         log_warning(
-            "⚠️ OCSP could not acquire lock for %s after %ds. "
-            "If concurrent OCSP fetches happen, cryptographic verification protects data integrity. "
-            "Consider increasing scheduler interval or timeout if jobs consistently exceed %ds.",
-            cert_name, timeout, timeout
+            "⚠️ OCSP could not acquire local lock for %s after %ds.",
+            cert_name, timeout
         )
     return None
 
 
-def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
-    """
-    Release and delete a certificate-specific lock file.
-    """
+def _release_local_flock(fd: Optional[int], cert_name: str = "undefined") -> None:
     if fd is None:
         return
 
@@ -824,7 +989,6 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
                 lock_file = candidate
                 break
         if lock_file is None:
-            # Prefer primary runtime path for unlink-after-create races
             root = _prepare_ocsp_lock_root()
             if root:
                 lock_file = _fingerprint_lock_file(root, cert_fp)
@@ -838,8 +1002,6 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
                 break
 
     try:
-        # Unlink while still holding the flock to avoid a release race where
-        # another process could acquire the same lock file name before we unlock.
         if lock_file is not None:
             try:
                 if lock_file.exists() and not lock_file.is_symlink():
@@ -850,31 +1012,67 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
     except Exception as e:
-        log_debug("⚠️ OCSP could not release lock for %s: %s", cert_name, e)
+        log_debug("⚠️ OCSP could not release local lock for %s: %s", cert_name, e)
 
-def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
-    """
-    Refresh the lock file timestamp to prove the process is still alive.
-    Call this periodically while holding a lock during long-running operations.
-    Prevents stale lock detection from triggering on jobs that legitimately take >30 seconds.
 
-    Args:
-        fd: File descriptor from _acquire_cert_lock
-        cert_name: Certificate identifier (for logging only)
+def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[OcspLock]:
     """
-    if fd is None:
+    Acquire exclusion for OCSP publish/fetch of one certificate (or the main job).
+
+    Two layers:
+      1) Local fcntl.flock under /run (reliable on one host; not visible cross-node)
+      2) O_EXCL lease under CONFIGS_SSL_BASE/.ocsp-locks (shared cache coherence bus)
+
+    Both must succeed. Local-only locking left multi-node writers free to tear
+    issuer.pem / ocsp.der / ocsp.json on a shared volume.
+    """
+    # Split budget so a stuck remote lease cannot burn the whole timeout after local success.
+    local_budget = max(1, timeout // 2)
+    shared_budget = max(1, timeout - local_budget)
+
+    local_fd = _acquire_local_flock(cert_name, timeout=local_budget, stale_threshold=stale_threshold)
+    if local_fd is None:
+        return None
+
+    lease = _acquire_shared_lease(cert_name, timeout=shared_budget, stale_threshold=stale_threshold)
+    if lease is None:
+        _release_local_flock(local_fd, cert_name)
+        return None
+
+    lease_path, lease_token = lease
+    return OcspLock(local_fd=local_fd, cert_name=cert_name, lease_path=lease_path, lease_token=lease_token)
+
+
+def _release_cert_lock(lock: Optional[OcspLock], cert_name: str = "undefined") -> None:
+    """Release shared lease then local flock."""
+    if lock is None:
+        return
+    name = cert_name if cert_name != "undefined" else lock.cert_name
+    _release_shared_lease(lock.lease_path, lock.lease_token)
+    _release_local_flock(lock.local_fd, name)
+
+
+def _refresh_cert_lock(lock: Optional[OcspLock], cert_name: str) -> None:
+    """
+    Refresh local lock + shared lease timestamps to prove the process is still alive.
+    """
+    if lock is None:
         return
 
+    fd = lock.local_fd
     try:
-        # Seek to start and truncate to update modification time and content
         os.lseek(fd, 0, os.SEEK_SET)
         os.ftruncate(fd, 0)
         timestamp = str(int(time.time())).encode()
         os.write(fd, timestamp)
-        os.fsync(fd)  # Ensure write is persisted
-        log_debug("🔒 OCSP refreshed lock timestamp for %s", cert_name)
+        os.fsync(fd)
+        log_debug("🔒 OCSP refreshed local lock timestamp for %s", cert_name)
     except Exception as e:
-        log_debug("⚠️ OCSP could not refresh lock timestamp for %s: %s", cert_name, e)
+        log_debug("⚠️ OCSP could not refresh local lock timestamp for %s: %s", cert_name, e)
+
+    new_token = _refresh_shared_lease(lock.lease_path, lock.lease_token)
+    if new_token is not None:
+        lock.lease_token = new_token
 
 
 def _try_unlink_stale_lock(lock_file: Path, stale_threshold: int, current_time: float) -> bool:
@@ -955,7 +1153,7 @@ def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
             except Exception as e:
                 log_debug("⚠️ OCSP fingerprint lock cleanup failed under %s: %s", locks_root, e)
 
-    # Migrate away: remove any legacy locks left on the cache filesystem.
+    # Migrate away: remove any legacy flock files left on the cache filesystem.
     if CONFIGS_SSL_BASE.is_dir():
         try:
             for lock_file in CONFIGS_SSL_BASE.glob("*/*/ocsp-*.lock"):
@@ -964,6 +1162,22 @@ def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
                     log_debug("🧹 OCSP removed legacy cache-fs lock %s", lock_file)
         except Exception as e:
             log_debug("⚠️ OCSP legacy cache lock cleanup failed: %s", e)
+
+        # Stale shared O_EXCL leases (multi-node mutex) under .ocsp-locks/
+        leases_root = CONFIGS_SSL_BASE / ".ocsp-locks"
+        if leases_root.is_dir() and not leases_root.is_symlink():
+            try:
+                for lease_file in leases_root.glob("**/ocsp-*.lease"):
+                    try:
+                        age = current_time - lease_file.stat().st_mtime
+                        if age > stale_threshold:
+                            lease_file.unlink()
+                            cleaned += 1
+                            log_debug("🧹 OCSP removed stale shared lease %s (age %.0fs)", lease_file.name, age)
+                    except Exception as e:
+                        log_debug("⚠️ OCSP shared lease cleanup failed for %s: %s", lease_file, e)
+            except Exception as e:
+                log_debug("⚠️ OCSP shared lease tree cleanup failed: %s", e)
 
     if cleaned > 0:
         log_info("🧹 OCSP cleaned up %d stale lock file(s) from previous runs", cleaned)
@@ -1508,7 +1722,7 @@ def _write_issuer_pem(
     if not normalized or not issuer_pem:
         return False
 
-    lock_fd: Optional[int] = None
+    lock_fd: Optional[OcspLock] = None
     if not already_locked:
         lock_fd = _acquire_cert_lock(normalized)
         if lock_fd is None:
@@ -2548,7 +2762,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
 def process_custom_certs(
     db: Optional[Any] = None,
     stats: Optional[dict] = None,
-    lock_fd: Optional[int] = None,
+    lock_fd: Optional[OcspLock] = None,
     refresh_fn: Optional[Callable[[str], None]] = None,
     timeout_fn: Optional[Callable[[str], bool]] = None,
     skip_unchanged_ttl_checks: bool = False,
@@ -2562,7 +2776,7 @@ def process_custom_certs(
     Args:
         db: Database connection
         stats: Statistics dictionary
-        lock_fd: Optional file descriptor for lock refresh (for long operations)
+        lock_fd: Optional OcspLock for lock refresh (for long operations)
         refresh_fn: Optional callable to refresh lock (prevents stale detection)
         timeout_fn: Optional callable to check job timeout
         force_fetch: If True, force refetch all OCSP responses from upstream PKI
