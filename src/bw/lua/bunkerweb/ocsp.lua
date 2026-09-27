@@ -39,24 +39,30 @@ local function resolve_multisite_service_id(vars, sni)
 	return nil
 end
 
--- A per-site value wins. The plugin default is "no".
-local function stapling_enabled(internalstore, server_name)
+-- Read a multisite setting: per-site (primary service id) wins over global.
+local function get_site_variable(internalstore, server_name, name)
 	local ok, vars = pcall(function()
 		return internalstore:get("variables", true)
 	end)
 	if not ok or type(vars) ~= "table" or type(vars["global"]) ~= "table" then
-		return false
+		return nil
 	end
-	local value = vars["global"]["SSL_USE_OCSP_STAPLING"]
+	local value = vars["global"][name]
 	if vars["global"]["MULTISITE"] == "yes" and server_name then
 		local service_id = resolve_multisite_service_id(vars, server_name)
 		if service_id and type(vars[service_id]) == "table" then
-			local site_value = vars[service_id]["SSL_USE_OCSP_STAPLING"]
+			local site_value = vars[service_id][name]
 			if site_value ~= nil then
 				value = site_value
 			end
 		end
 	end
+	return value
+end
+
+-- A per-site value wins. The plugin default is "no".
+local function stapling_enabled(internalstore, server_name)
+	local value = get_site_variable(internalstore, server_name, "SSL_USE_OCSP_STAPLING")
 	if type(value) == "boolean" then
 		return value
 	end
@@ -65,6 +71,35 @@ local function stapling_enabled(internalstore, server_name)
 	end
 	local str = tostring(value):lower()
 	return str == "1" or str == "true" or str == "on" or str == "yes"
+end
+
+-- Must-Staple fuse both HTTP and stream read. Default "normal" (fail-close).
+-- staple_only / open soft-continue instead of aborting the handshake.
+local function ocsp_staple_mode(internalstore, server_name)
+	local value = get_site_variable(internalstore, server_name, "OCSP_STAPLE_MODE")
+	if value == nil or value == "" then
+		return "normal"
+	end
+	local str = tostring(value):lower()
+	if str == "staple_only" or str == "open" or str == "normal" then
+		return str
+	end
+	return "normal"
+end
+
+-- Convert a Must-Staple miss into abort (normal) or soft continue (fuse).
+local function soften_must_staple(mode, ok, reason)
+	if reason ~= "must_staple" then
+		return ok, reason
+	end
+	if mode == "staple_only" or mode == "open" then
+		log(
+			ngx.ERR,
+			"OCSP-Must-Staple unmet - continuing (OCSP_STAPLE_MODE=" .. mode .. ")"
+		)
+		return false
+	end
+	return false, "must_staple"
 end
 
 local function pem_blocks(cert_pem)
@@ -1254,12 +1289,13 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return false
 	end
 
+	local mode = ocsp_staple_mode(internalstore, server_name)
 	local pem_ok = type(cert_pem) == "string" and cert_pem ~= ""
 	local fp_hint = normalize_fp_hint(cert_fp_hint)
 
 	if not pem_ok then
 		if fp_hint then
-			return staple_from_fingerprint(internalstore, server_name, fp_hint)
+			return soften_must_staple(mode, staple_from_fingerprint(internalstore, server_name, fp_hint))
 		end
 		return false
 	end
@@ -1277,10 +1313,16 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
 	end
 
+	-- open: disable Must-Staple enforcement entirely (still staple when possible).
+	if must_staple and mode == "open" then
+		log(ngx.NOTICE, "OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled for " .. (server_name or "unknown"))
+		must_staple = false
+	end
+
 	if not stapling_enabled(internalstore, server_name) then
 		if must_staple then
 			log(ngx.ERR, "OCSP-Must-Staple required but OCSP stapling is disabled")
-			return false, "must_staple"
+			return soften_must_staple(mode, false, "must_staple")
 		end
 		return false
 	end
@@ -1289,7 +1331,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
 		log(ngx.ERR, "OCSP ngx.ocsp is not available, skipping stapling")
 		if must_staple then
-			return false, "must_staple"
+			return soften_must_staple(mode, false, "must_staple")
 		end
 		return false
 	end
@@ -1306,6 +1348,10 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
 		if must_staple then
 			log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
+			if mode == "open" then
+				log(ngx.NOTICE, "OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled for " .. (server_name or "unknown"))
+				must_staple = false
+			end
 		end
 	end
 
@@ -1314,12 +1360,12 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return true
 	end
 	if result == false then
-		return false, reason
+		return soften_must_staple(mode, false, reason)
 	end
 
 	if must_staple then
 		log(ngx.ERR, "OCSP-Must-Staple required but OCSP response not found")
-		return false, "must_staple"
+		return soften_must_staple(mode, false, "must_staple")
 	end
 	return false
 end

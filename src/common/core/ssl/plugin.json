@@ -104,6 +104,16 @@
       "label": "Use OCSP stapling",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "OCSP_STAPLE_MODE": {
+      "context": "multisite",
+      "default": "normal",
+      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet (default). staple_only = keep trying to staple but do not abort. open = disable Must-Staple enforcement (panic / recovery). Does not replace SSL_USE_OCSP_STAPLING.",
+      "id": "ocsp-staple-mode",
+      "label": "OCSP staple mode",
+      "regex": "^(normal|staple_only|open)$",
+      "type": "select",
+      "select": ["normal", "staple_only", "open"]
     }
   },
   "jobs": [
