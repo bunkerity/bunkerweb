@@ -284,37 +284,36 @@ try:
                                 elif meta["last_modified"]:
                                     req_headers["If-Modified-Since"] = meta["last_modified"]
 
-                            if not handle_304:
-                                max_retries = 3
-                                retry_count = 0
-                                resp = None
-                                while retry_count < max_retries:
-                                    try:
-                                        resp = get(url, stream=True, timeout=10, headers=req_headers or None)
-                                        break
-                                    except ConnectionError as e:
-                                        retry_count += 1
-                                        if retry_count == max_retries:
-                                            raise e
-                                        LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                                        sleep(3)
+                            max_retries = 3
+                            retry_count = 0
+                            resp = None
+                            while retry_count < max_retries:
+                                try:
+                                    resp = get(url, stream=True, timeout=10, headers=req_headers or None)
+                                    break
+                                except ConnectionError as e:
+                                    retry_count += 1
+                                    if retry_count == max_retries:
+                                        raise e
+                                    LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
+                                    sleep(3)
 
-                                if resp is None:
-                                    failed = True
-                                elif resp.status_code == 304:
-                                    resp.close()
-                                    handle_304 = True
-                                elif resp.status_code != 200:
-                                    status = 2
-                                    LOGGER.error(f"Got status code {resp.status_code}, skipping...")
-                                    failed_urls.add(url)
-                                    if url_file not in urls:
-                                        aggregated_recap[kind]["failed_count"] += 1
-                                    failed = True
-                                else:
-                                    etag = resp.headers.get("ETag", "")
-                                    last_modified = resp.headers.get("Last-Modified", "")
-                                    iterable = resp.iter_lines()
+                            if resp is None:
+                                failed = True
+                            elif resp.status_code == 304:
+                                resp.close()
+                                handle_304 = True
+                            elif resp.status_code != 200:
+                                status = 2
+                                LOGGER.error(f"Got status code {resp.status_code}, skipping...")
+                                failed_urls.add(url)
+                                if url_file not in urls:
+                                    aggregated_recap[kind]["failed_count"] += 1
+                                failed = True
+                            else:
+                                etag = resp.headers.get("ETag", "")
+                                last_modified = resp.headers.get("Last-Modified", "")
+                                iterable = resp.iter_lines()
 
                         if not failed:
                             if handle_304:
