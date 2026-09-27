@@ -1527,6 +1527,22 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     return remaining, total_lifetime
 
 
+def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
+    """
+    Fields handshake Lua uses to refuse stapling past nextUpdate.
+
+    expires: legacy human/TTL string for cleanup
+    expires_unix: absolute UTC unix time (prefer for ssl_certificate checks)
+    """
+    if not ttl or ttl <= 0:
+        return {"expires": "unknown"}
+    now = datetime.now(timezone.utc)
+    return {
+        "expires": now.isoformat() + f" + {int(ttl)}s",
+        "expires_unix": int(now.timestamp()) + int(ttl),
+    }
+
+
 def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
     """Write bytes via tempfile + replace so readers never see a partial file."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1639,6 +1655,11 @@ def _write_ocsp_http_error_backoff(
                         and old.get("error_type") != "http_backoff"
                     ):
                         meta["expires"] = old_expires
+                    old_exp_unix = old.get("expires_unix")
+                    if isinstance(old_exp_unix, (int, float)) and int(old_exp_unix) > 0 and old.get("error_type") != "http_backoff":
+                        meta["expires_unix"] = int(old_exp_unix)
+                    elif isinstance(old_exp_unix, str) and old_exp_unix.isdigit() and old.get("error_type") != "http_backoff":
+                        meta["expires_unix"] = int(old_exp_unix)
         except Exception:
             pass
 
@@ -3645,7 +3666,7 @@ def _persist_ocsp_results_to_db(
                         meta = _extract_cert_metadata(pem_data, cert_name)
                         meta["fingerprint"] = cert_fp
                         meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                        meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
+                        meta.update(_ocsp_expiry_meta(ttl))
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
                             service_id=None,
@@ -3806,7 +3827,7 @@ def _persist_ocsp_results_to_disk(
                     meta = _extract_cert_metadata(cleaned_pem, cert_name)
                     meta["fingerprint"] = cert_fp
                     meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                    meta["expires"] = datetime.now(timezone.utc).isoformat() + f" + {ttl}s" if ttl else "unknown"
+                    meta.update(_ocsp_expiry_meta(ttl))
                     _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
                     published_any = True
                     log_debug(

@@ -171,27 +171,53 @@ local function resp_binding(resp)
 	return nil
 end
 
--- One shm value = epoch + optional verified binding + DER.
+-- One shm value = epoch + optional verified binding + expires_unix + DER.
 -- Evicting this key cannot orphan verified from DER (or gen from DER).
--- Layout: "bw1\0" .. epoch .. "\0" .. binding_or_empty .. "\0" .. der
-local L1_MAGIC = "bw1\0"
+-- Layout v2: "bw2\0" .. epoch .. "\0" .. binding .. "\0" .. expires_unix .. "\0" .. der
+-- Layout v1 (legacy): "bw1\0" .. epoch .. "\0" .. binding .. "\0" .. der
+local L1_MAGIC = "bw2\0"
+local L1_MAGIC_V1 = "bw1\0"
 
-local function pack_l1(epoch, verified_binding, der)
-	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. der
+local function pack_l1(epoch, verified_binding, der, expires_unix)
+	local exp = ""
+	if type(expires_unix) == "number" and expires_unix > 0 then
+		exp = tostring(math.floor(expires_unix))
+	elseif type(expires_unix) == "string" and expires_unix:match("^%d+$") then
+		exp = expires_unix
+	end
+	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. exp .. "\0" .. der
 end
 
 local function unpack_l1(blob)
-	if type(blob) ~= "string" or #blob < 4 or blob:sub(1, 4) ~= L1_MAGIC then
-		return nil, nil, nil
+	if type(blob) ~= "string" or #blob < 4 then
+		return nil, nil, nil, nil
 	end
-	local epoch, binding, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0(.*)$")
-	if type(der) ~= "string" or #der == 0 then
-		return nil, nil, nil
+	local magic = blob:sub(1, 4)
+	if magic == L1_MAGIC then
+		local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+		if type(der) ~= "string" or #der == 0 then
+			return nil, nil, nil, nil
+		end
+		if binding == "" then
+			binding = nil
+		end
+		local expires_unix = nil
+		if type(exp) == "string" and exp:match("^%d+$") then
+			expires_unix = tonumber(exp)
+		end
+		return epoch or "0", binding, der, expires_unix
 	end
-	if binding == "" then
-		binding = nil
+	if magic == L1_MAGIC_V1 then
+		local epoch, binding, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0(.*)$")
+		if type(der) ~= "string" or #der == 0 then
+			return nil, nil, nil, nil
+		end
+		if binding == "" then
+			binding = nil
+		end
+		return epoch or "0", binding, der, nil
 	end
-	return epoch or "0", binding, der
+	return nil, nil, nil, nil
 end
 
 -- Shared with the HTTP ssl_certificate path: job bumps this file so both
@@ -218,7 +244,7 @@ local function current_ocsp_epoch()
 	return epoch
 end
 
--- Returns der, verified_binding, epoch (or nil).
+-- Returns der, verified_binding, epoch, expires_unix (or nil).
 -- Legacy raw-DER (+ sibling verified/gen keys) is promoted to the composite once.
 local function get_l1(internalstore, fingerprint)
 	if not internalstore or not fingerprint then
@@ -231,9 +257,9 @@ local function get_l1(internalstore, fingerprint)
 		return nil
 	end
 
-	local epoch, verified, der = unpack_l1(blob)
+	local epoch, verified, der, expires_unix = unpack_l1(blob)
 	if der then
-		return der, verified, epoch
+		return der, verified, epoch, expires_unix
 	end
 
 	-- Legacy: bare DER body under the same key.
@@ -253,11 +279,11 @@ local function get_l1(internalstore, fingerprint)
 		end
 	end)
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der), 300, true)
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), 300, true)
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
 	end)
-	return der, binding, epoch
+	return der, binding, epoch, nil
 end
 
 local function entry_verified(stored_binding, resp)
@@ -265,7 +291,7 @@ local function entry_verified(stored_binding, resp)
 	return binding ~= nil and stored_binding == binding
 end
 
-local function warm_cache(internalstore, fingerprint, resp, mark_verified)
+local function warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix)
 	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
 	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
 	if mark_verified == nil then
@@ -280,7 +306,7 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified)
 	end
 	local epoch = current_ocsp_epoch()
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp), 300, true)
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), 300, true)
 		-- Drop pre-composite siblings so they cannot outlive / contradict this entry.
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
@@ -378,10 +404,19 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
 		log(ngx.DEBUG, "OCSP cert_pem_to_der failed: " .. tostring(err))
 		return false
 	end
-	local ok_call, validate_ok = pcall(function()
+	-- Newer OpenResty returns true, next_update; older returns true only.
+	-- Some builds already reject past nextUpdate inside the FFI call.
+	local ok_call, validate_ok, next_update = pcall(function()
 		return ocsp.validate_ocsp_response(ocsp_der, der_chain)
 	end)
-	return ok_call and validate_ok == true
+	if not ok_call or validate_ok ~= true then
+		return false
+	end
+	if type(next_update) == "number" and next_update > 0 and next_update <= ngx.time() then
+		log(ngx.DEBUG, "OCSP validate rejected: nextUpdate in the past")
+		return false
+	end
+	return true
 end
 
 local function issuer_candidates(blocks, leaf_pem, fingerprint)
@@ -493,6 +528,71 @@ local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 	end
 	local body_sha = resp_binding(resp)
 	return body_sha ~= nil and body_sha == meta_sha
+end
+
+-- Absolute unix nextUpdate from job meta (preferred) or legacy "iso + Ns" expires.
+local function meta_expires_unix(meta)
+	if type(meta) ~= "table" then
+		return nil
+	end
+	local u = meta.expires_unix
+	if type(u) == "number" and u > 0 then
+		return math.floor(u)
+	end
+	if type(u) == "string" then
+		local n = tonumber(u)
+		if n and n > 0 then
+			return math.floor(n)
+		end
+	end
+	local raw = meta.expires
+	if type(raw) ~= "string" then
+		return nil
+	end
+	local base_str, ttl_str = raw:match("^(.-) %+ (%d+)%s*s%s*$")
+	if not base_str or not ttl_str then
+		return nil
+	end
+	local y, mo, d, H, M, S = base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
+	if not y then
+		return nil
+	end
+	-- Treat components as UTC (job writes timezone.utc isoformat).
+	local ok_ts, ts = pcall(os.time, {
+		year = tonumber(y),
+		month = tonumber(mo),
+		day = tonumber(d),
+		hour = tonumber(H),
+		min = tonumber(M),
+		sec = tonumber(S),
+		isdst = false,
+	})
+	if not ok_ts or type(ts) ~= "number" then
+		return nil
+	end
+	local ok_off, offset = pcall(function()
+		return os.difftime(os.time(), os.time(os.date("!*t", os.time())))
+	end)
+	if ok_off and type(offset) == "number" then
+		ts = ts - offset
+	end
+	return ts + tonumber(ttl_str)
+end
+
+-- False when we know nextUpdate/expires is past. Unknown expiry → true (PEM validate may still enforce).
+local function resp_still_fresh(expires_unix, fingerprint, meta)
+	local exp = expires_unix
+	if not exp then
+		meta = meta or read_ocsp_json(fingerprint)
+		exp = meta_expires_unix(meta)
+	end
+	if not exp then
+		return true
+	end
+	if ngx.time() >= exp then
+		return false
+	end
+	return true
 end
 
 local function normalize_fp_hint(cert_fp_hint)
@@ -757,9 +857,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		return false
 	end
 
-	local cached, cached_verified, cached_epoch = get_l1(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
+			drop_cache(internalstore, fingerprint)
+		elseif not resp_still_fresh(cached_expires, fingerprint, meta) then
+			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
 			drop_cache(internalstore, fingerprint)
 		else
 			local verified = entry_verified(cached_verified, cached)
@@ -769,11 +872,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 					return ocsp.set_ocsp_status_resp(cached)
 				end)
 				if ok_set and set_ok then
+					local exp = cached_expires or meta_expires_unix(meta)
 					-- Only re-warm verified if crypto already proved this body.
 					if verified then
-						warm_cache(internalstore, fingerprint, cached, true)
+						warm_cache(internalstore, fingerprint, cached, true, exp)
 					else
-						warm_cache(internalstore, fingerprint, cached, false)
+						warm_cache(internalstore, fingerprint, cached, false, exp)
 					end
 					return true
 				end
@@ -785,6 +889,13 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
+		if not resp_still_fresh(nil, fingerprint, meta) then
+			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
+		end
 		-- Disk path: verified binding only exists in L1; after drop/miss, require meta authorize
 		-- or a leftover legacy sibling (get_l1 already promoted). Re-check composite if rewarmed.
 		local _, disk_verified = get_l1(internalstore, fingerprint)
@@ -795,7 +906,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
 			if ok_set and set_ok then
-				warm_cache(internalstore, fingerprint, resp, verified)
+				warm_cache(internalstore, fingerprint, resp, verified, meta_expires_unix(meta))
 				return true
 			end
 			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
@@ -818,9 +929,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		return nil
 	end
 	local issuers = nil
-	local cached, cached_verified, cached_epoch = get_l1(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
+			drop_cache(internalstore, fingerprint)
+		elseif not resp_still_fresh(cached_expires, fingerprint, nil) then
+			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
 			drop_cache(internalstore, fingerprint)
 		elseif entry_verified(cached_verified, cached) then
 			local ok_set, set_ok, set_err = pcall(function()
@@ -835,7 +949,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
 			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
 			if result == true then
-				warm_cache(internalstore, fingerprint, cached)
+				warm_cache(internalstore, fingerprint, cached, true, cached_expires or meta_expires_unix(read_ocsp_json(fingerprint)))
 				return true
 			end
 			if result == false then
@@ -850,10 +964,18 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
+		local meta = read_ocsp_json(fingerprint)
+		if not resp_still_fresh(nil, fingerprint, meta) then
+			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
+		end
 		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
 		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 		if result == true then
-			warm_cache(internalstore, fingerprint, resp)
+			warm_cache(internalstore, fingerprint, resp, true, meta_expires_unix(meta))
 			return true
 		end
 		if result == false then
