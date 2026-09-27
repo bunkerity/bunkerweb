@@ -455,9 +455,51 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	return resp_binding(data) == binding
 end
 
-local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
+local function issuer_candidates(blocks, leaf_pem, fingerprint)
+	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
+	-- re-encoding from the chain). Do not let validate succeed against a different CA.
+	local stored = nil
+	if fingerprint then
+		stored = read_file(issuer_path(fingerprint))
+	end
+	local want_spki = stored and spki_fingerprint(stored) or nil
+
+	local issuers = {}
+	local seen = {}
+	local function add(pem)
+		if type(pem) ~= "string" or pem == "" or seen[pem] then
+			return
+		end
+		if want_spki then
+			local got = spki_fingerprint(pem)
+			if not got or got ~= want_spki then
+				return
+			end
+		end
+		seen[pem] = true
+		issuers[#issuers + 1] = pem
+	end
+
+	add(stored)
+	for _, other in ipairs(blocks) do
+		if other ~= leaf_pem then
+			add(other)
+		end
+	end
+	return issuers
+end
+
+local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki)
 	if not issuer_pem or issuer_pem == "" or not ssl.cert_pem_to_der then
 		return false
+	end
+	-- Explicit pin: candidate issuer SPKI must match the shard's issuer.pem.
+	if type(shard_issuer_spki) == "string" and #shard_issuer_spki == 64 then
+		local got = spki_fingerprint(issuer_pem)
+		if not got or got ~= shard_issuer_spki then
+			log(ngx.ERR, "OCSP validate refuse: issuer SPKI does not match shard issuer")
+			return false
+		end
 	end
 	local der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
 	if not der_chain then
@@ -478,20 +520,6 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
 		return false
 	end
 	return true
-end
-
-local function issuer_candidates(blocks, leaf_pem, fingerprint)
-	local issuers = {}
-	for _, other in ipairs(blocks) do
-		if other ~= leaf_pem then
-			issuers[#issuers + 1] = other
-		end
-	end
-	local stored = read_file(issuer_path(fingerprint))
-	if stored then
-		issuers[#issuers + 1] = stored
-	end
-	return issuers
 end
 
 -- True when TLS Feature text asserts status_request (Must-Staple / feature id 5).
@@ -996,14 +1024,14 @@ local function normalize_fp_hint(cert_fp_hint)
 	return nil
 end
 
-local function try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
 		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
 		return false
 	end
 	for _, issuer_pem in ipairs(issuers) do
-		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem) then
+		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem, shard_issuer_spki) then
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
@@ -1416,6 +1444,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		return nil
 	end
 	local issuers = nil
+	local shard_issuer_pem = read_file(issuer_path(fingerprint))
+	local shard_issuer_spki = shard_issuer_pem and spki_fingerprint(shard_issuer_pem) or nil
 	local meta = must_staple and read_ocsp_json(fingerprint) or nil
 	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
@@ -1470,7 +1500,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return false
 			end
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
-			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
+			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki)
 			if result == true then
 				if must_staple then
 					meta = meta or read_ocsp_json(fingerprint)
@@ -1511,7 +1541,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki)
 		if result == true then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then

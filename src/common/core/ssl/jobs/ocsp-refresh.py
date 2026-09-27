@@ -655,6 +655,79 @@ def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
         return None
 
 
+def _spki_der_from_cert(cert: x509.Certificate) -> bytes:
+    """SubjectPublicKeyInfo DER for SPKI pin comparisons."""
+    return cert.public_key().public_bytes(
+        encoding=Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+
+
+def _ocsp_signer_ends_on_issuer_spki(ocsp_der: bytes, issuer: x509.Certificate) -> bool:
+    """
+    True when the OCSP BasicResponse signer is the shard issuer itself (same SPKI)
+    or a responder certificate directly issued by that issuer.
+
+    OpenSSL ``-CAfile issuer -partial_chain`` usually enforces this; this pin makes
+    the shard's issuer SPKI explicit so a mismatched restore cannot publish.
+    """
+    try:
+        resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
+        issuer_spki = _spki_der_from_cert(issuer)
+    except Exception:
+        return False
+
+    embedded: List[x509.Certificate] = []
+    try:
+        embedded = list(resp.certificates)
+    except Exception:
+        embedded = []
+
+    if not embedded:
+        # Issuer-signed response with no embedded certs; OpenSSL already used -CAfile.
+        return True
+
+    for cert in embedded:
+        try:
+            if _spki_der_from_cert(cert) == issuer_spki:
+                return True
+        except Exception:
+            continue
+
+    for cert in embedded:
+        try:
+            if hasattr(cert, "verify_directly_issued_by"):
+                cert.verify_directly_issued_by(issuer)
+                return True
+        except Exception:
+            continue
+
+    # Older cryptography: verify tbs signature with the issuer public key.
+    try:
+        from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
+    except Exception:
+        return False
+
+    for cert in embedded:
+        try:
+            if cert.issuer != issuer.subject:
+                continue
+            pub = issuer.public_key()
+            hash_alg = cert.signature_hash_algorithm
+            if hash_alg is None:
+                continue
+            if isinstance(pub, rsa.RSAPublicKey):
+                pub.verify(cert.signature, cert.tbs_certificate_bytes, padding.PKCS1v15(), hash_alg)
+                return True
+            if isinstance(pub, ec.EllipticCurvePublicKey):
+                pub.verify(cert.signature, cert.tbs_certificate_bytes, ec.ECDSA(hash_alg))
+                return True
+        except Exception:
+            continue
+
+    return False
+
+
 def _ocsp_lock_root_candidates() -> List[Path]:
     """Local runtime dirs for flock files (never the OCSP cache tree)."""
     return [
@@ -2323,6 +2396,13 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             if p.returncode != 0:
                 log_error("❌ OCSP response cryptographic signature verification failed for %s. Discarding forged/invalid response. OpenSSL Error: %s", cert_name, p.stderr.strip() or p.stdout.strip())
                 return None, 0, None
+
+        if not _ocsp_signer_ends_on_issuer_spki(ocsp_der, issuer):
+            log_error(
+                "❌ OCSP signer chain does not end on issuer SPKI for %s; refusing to publish.",
+                cert_name,
+            )
+            return None, 0, None
 
         # responseStatus=SUCCESSFUL ≠ CertStatus=good (RFC 6960). Only publish staples
         # that attest the leaf is good; revoked/unknown must not replace a usable cache.
