@@ -1306,16 +1306,69 @@ def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
         return 0
 
 
-def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", timeout: int = 10) -> Tuple[Optional[bytes], int]:
+def _write_issuer_pem(fingerprint: Optional[str], issuer_pem: bytes, db: Optional[Any] = None) -> None:
+    """Persist the issuer certificate used to verify an OCSP response.
+
+    The handshake re-checks ocsp.der with ngx.ocsp.validate_ocsp_response, which needs
+    the issuer. Leaf-only custom certificates do not include it, so it is stored beside
+    ocsp.der and mirrored in the job cache for restore.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not issuer_pem:
+        return
+
+    try:
+        ocsp_dir = _get_sharded_ocsp_path(normalized)
+        ocsp_dir.mkdir(parents=True, exist_ok=True)
+        tmp_path = ocsp_dir / ".issuer.pem.tmp"
+        issuer_path = ocsp_dir / "issuer.pem"
+        tmp_path.write_bytes(issuer_pem)
+        tmp_path.chmod(0o644)
+        tmp_path.replace(issuer_path)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not write issuer.pem for %s: %s", normalized[:16], e)
+        return
+
+    if db is None:
+        return
+    try:
+        db.upsert_job_cache(
+            service_id=None,
+            file_name=f"issuer/{normalized}",
+            data=issuer_pem,
+            job_name="ocsp-refresh",
+            checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
+        )
+    except Exception as e:
+        log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
+
+
+def _ensure_issuer_pem(pem_data: bytes, fingerprint: Optional[str], cert_name: str = "", db: Optional[Any] = None) -> None:
+    """Write issuer.pem when a cached OCSP response has none yet."""
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not pem_data:
+        return
+    issuer_path = _get_sharded_ocsp_path(normalized) / "issuer.pem"
+    if issuer_path.is_file() and issuer_path.stat().st_size > 0:
+        return
+    try:
+        _leaf, issuer = _parse_chain(pem_data, cert_name)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not resolve issuer certificate for %s: %s", cert_name, e)
+        return
+    _write_issuer_pem(normalized, issuer.public_bytes(Encoding.PEM), db)
+
+
+def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", timeout: int = 10) -> Tuple[Optional[bytes], int, Optional[bytes]]:
     """
     Fetch OCSP response using cryptography + urllib.
-    Returns (raw DER bytes or None, ttl_seconds).
+    Returns (raw DER bytes or None, ttl_seconds, issuer PEM or None).
     """
     try:
         leaf, issuer = _parse_chain(pem_data, cert_name)
     except Exception as e:
         log_error("❌ OCSP failed to parse chain for %s: %s", cert_name, e)
-        return None, 0
+        return None, 0, None
 
     # Used for writing backoff metadata on HTTP errors.
     cert_fp = _get_cert_pubkey_fingerprint(pem_data)
@@ -1341,13 +1394,13 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 scheme = parsed.scheme.lower() if parsed.scheme else ""
                 if scheme not in ("http", "https"):
                     log_error("❌ OCSP invalid responder scheme %s for %s: %s", scheme, cert_name, ocsp_url)
-                    return None, 0
+                    return None, 0, None
 
                 default_port = 443 if scheme == "https" else 80
                 ocsp_hostname, ips = _get_ocsp_responder_ips(ocsp_url, default_port=default_port)
                 if not ocsp_hostname or not ips:
                     log_error("❌ OCSP could not resolve safe IPs for responder %s (host=%s)", cert_name, ocsp_hostname)
-                    return None, 0
+                    return None, 0, None
 
                 # Fetch by connecting to each resolved IP, while keeping TLS SNI for `ocsp_hostname`.
                 ocsp_der = None
@@ -1419,7 +1472,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         else:
             # Loop finished without a break: all attempts failed
             log_error("❌ OCSP failed to fetch successful response for %s after trying both SHA256 and SHA1", cert_name)
-            return None, 0
+            return None, 0, None
 
         # === SECURE OCSP RESPONSE VERIFICATION ===
         # Use OpenSSL to cryptographically verify the OCSP response signature.
@@ -1464,7 +1517,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
 
             if not Path(OPENSSL_BIN).is_file():
                 log_error("❌ OCSP verification requires openssl at %s", OPENSSL_BIN)
-                return None, 0
+                return None, 0, None
 
             try:
                 # Add a timeout so a stuck openssl process cannot hang the whole job
@@ -1475,10 +1528,10 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                     cert_name,
                     e.timeout,
                 )
-                return None, 0
+                return None, 0, None
             if p.returncode != 0:
                 log_error("❌ OCSP response cryptographic signature verification failed for %s. Discarding forged/invalid response. OpenSSL Error: %s", cert_name, p.stderr.strip() or p.stdout.strip())
-                return None, 0
+                return None, 0, None
 
         # Extract TTL
         remaining, _ = _ocsp_response_lifetimes(ocsp_response)
@@ -1491,7 +1544,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         log_debug("⏸️ OCSP delaying 2 seconds after fetch for %s to prevent rate limiting", cert_name)
         time.sleep(2)
 
-        return ocsp_der, ttl
+        return ocsp_der, ttl, issuer.public_bytes(Encoding.PEM)
     except HTTPError as e:
         # HTTP error code — OCSP responder returned an error
         error_desc = f"HTTP {e.code}"
@@ -1518,14 +1571,14 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 reason=e.reason or "",
             )
 
-        return None, 0
+        return None, 0, None
     except URLError as e:
         # Network error — DNS, connection refused, timeout, SSL error, etc.
         log_error("❌ OCSP network error fetching response for %s from %s: %s", cert_name, ocsp_url, e)
-        return None, 0
+        return None, 0, None
     except Exception as e:
         log_error("❌ OCSP failed to fetch response for %s: %s", cert_name, e)
-        return None, 0
+        return None, 0, None
 
 
 def extract_san_dns(pem_data: bytes, cert_name: str = "") -> List[str]:
@@ -1966,6 +2019,20 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
+            if file_name.startswith("issuer/") and entry.get("data"):
+                issuer_fp = _normalize_fingerprint(file_name[len("issuer/"):])
+                if not issuer_fp:
+                    continue
+                try:
+                    issuer_path = _get_sharded_ocsp_path(issuer_fp) / "issuer.pem"
+                    issuer_path.parent.mkdir(parents=True, exist_ok=True)
+                    if not issuer_path.is_file() or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
+                        issuer_path.write_bytes(entry["data"])
+                        issuer_path.chmod(0o644)
+                        log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
+                except Exception as e:
+                    log_debug("⚠️ OCSP could not restore issuer certificate for %s: %s", file_name, e)
+                continue
             if not file_name.startswith("ocsp/") or not entry.get("data"):
                 continue
             cert_or_fp_raw = file_name[len("ocsp/"):]
@@ -2115,17 +2182,19 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     half_lifetime,
                 )
                 stats["ocsp_cached_responses"] = stats.get("ocsp_cached_responses", 0) + 1
+                _ensure_issuer_pem(pem_data, fingerprint, cert_name, db)
                 return (cert_name, None, cached_ttl, cert_checksum, pem_data, ocsp_url, False)
 
             if cached_ttl <= refresh_threshold:
                 log_info("🔄 OCSP response for %s is near expiration (TTL=%ds <= refresh_threshold=%ds [20%% of %ds]), attempting aggressive refresh", cert_name, cached_ttl, refresh_threshold, total_lifetime)
 
         ocsp_der: Optional[bytes] = None
+        issuer_pem: Optional[bytes] = None
         ttl: int = 0
 
         # Use a timeout of 10 seconds per attempt, retry once after 10 seconds
         for attempt in (1, 2):
-            ocsp_der, ttl = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
+            ocsp_der, ttl, issuer_pem = fetch_ocsp_response(pem_data, ocsp_url, cert_name=cert_name, timeout=10)
             if ocsp_der:
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
@@ -2165,9 +2234,13 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                         current_ttl,
                         current_refresh_threshold,
                     )
+                    _ensure_issuer_pem(pem_data, fingerprint, cert_name, db)
                 return (cert_name, None, current_ttl, cert_checksum, pem_data, ocsp_url, True)
 
             return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
+
+        if issuer_pem:
+            _write_issuer_pem(fingerprint, issuer_pem, db)
 
         # Calculate checksum for integrity verification (lowercase for consistency)
         ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
@@ -2440,6 +2513,10 @@ def cleanup_ocsp_cache(
                         file_name=f"cert_checksum/{resolved_fp}",
                         job_name="ocsp-refresh",
                     )
+                    db.delete_job_cache(
+                        file_name=f"issuer/{resolved_fp}",
+                        job_name="ocsp-refresh",
+                    )
                 log_debug("🧹 OCSP database records removed for %s (fingerprint resolved=%s)", cert_name, bool(resolved_fp))
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
@@ -2465,6 +2542,13 @@ def cleanup_ocsp_cache(
                     except Exception as e:
                         log_debug("⚠️ OCSP failed to unlink ocsp.json metadata %s: %s", meta_file, e)
 
+                issuer_file = Path(root) / "issuer.pem"
+                if issuer_file.is_file():
+                    try:
+                        issuer_file.unlink()
+                    except Exception as e:
+                        log_debug("⚠️ OCSP failed to unlink issuer.pem %s: %s", issuer_file, e)
+
                 # Remove empty directories (walk in reverse order ensures we clean up bottom-up)
                 try:
                     if root != str(CONFIGS_SSL_BASE):  # Don't remove the base directory
@@ -2478,7 +2562,7 @@ def cleanup_ocsp_cache(
                 job_cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh")
                 for cache_file in job_cache_files:
                     file_name = cache_file.get("file_name", "")
-                    if file_name.startswith("ocsp/") or file_name.startswith("cert_checksum/") or file_name == "last_full_refresh":
+                    if file_name.startswith("ocsp/") or file_name.startswith("issuer/") or file_name.startswith("cert_checksum/") or file_name == "last_full_refresh":
                         try:
                             db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
                             log_debug("🧹 OCSP removed database entry %s", file_name)
