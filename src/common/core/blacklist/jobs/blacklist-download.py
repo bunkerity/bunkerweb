@@ -53,6 +53,14 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
+def sanitize_validator(value: str) -> str:
+    """Keep a validator only when it is a single line."""
+    value = value.strip()
+    if "\n" in value or "\r" in value:
+        return ""
+    return value
+
+
 def parse_http_metadata(cached_data: bytes) -> dict:
     """Extract ETag and Last-Modified stored in cache file comment headers."""
     meta = {"etag": "", "last_modified": ""}
@@ -60,15 +68,17 @@ def parse_http_metadata(cached_data: bytes) -> dict:
         if not line.startswith(b"# "):
             break
         if line.startswith(b"# ETag: "):
-            meta["etag"] = line[8:].decode("utf-8", errors="replace").strip()
+            meta["etag"] = sanitize_validator(line[8:].decode("utf-8", errors="replace"))
         elif line.startswith(b"# Last-Modified: "):
-            meta["last_modified"] = line[17:].decode("utf-8", errors="replace").strip()
+            meta["last_modified"] = sanitize_validator(line[17:].decode("utf-8", errors="replace"))
     return meta
 
 
 def build_cache_header(url: str, etag: str = "", last_modified: str = "") -> bytes:
     """Build cache file header bytes with URL and optional HTTP metadata."""
     header = b"# Downloaded from " + url.encode("utf-8") + b"\n"
+    etag = sanitize_validator(etag)
+    last_modified = sanitize_validator(last_modified)
     if etag:
         header += b"# ETag: " + etag.encode("utf-8") + b"\n"
     if last_modified:
