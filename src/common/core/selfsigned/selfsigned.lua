@@ -122,11 +122,28 @@ function selfsigned:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Cache data
+	-- Keep the original PEM and a public-key fingerprint so OCSP stapling can find ocsp.der.
+	local cert_fingerprint = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local leaf_pem = data[1]:match("(%-%-%-%-%-BEGIN CERTIFICATE%-%-%-%-%-.-%-%-%-%-%-END CERTIFICATE%-%-%-%-%-)")
+		if leaf_pem then
+			local cert_obj = x509.new(leaf_pem)
+			if cert_obj then
+				local digest_bytes = cert_obj:pubkey_digest("sha256")
+				if digest_bytes then
+					cert_fingerprint = (digest_bytes:gsub(".", function(c)
+						return string.format("%02x", string.byte(c))
+					end)):lower()
+				end
+			end
+		end
+	end)
+	-- Cache data: {parsed_cert, parsed_key, cert_pem, key_pem, fingerprint}
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_selfsigned_" .. key
 		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key, data[1], data[2], cert_fingerprint }, nil, true)
 		if not ok then
 			return false, "error while setting data into internalstore : " .. err
 		end

@@ -5604,6 +5604,7 @@ Siga estos pasos para configurar y usar la función SSL:
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Cifrados SSL Personalizados:** Lista de conjuntos de cifrado separados por dos puntos para usar en las conexiones SSL/TLS (sobrescribe el nivel). |
 | `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **Curvas ECDH SSL:** Lista separada por `:` de curvas ECDH (grupos TLS) o `auto` para selección inteligente (PQC con OpenSSL 3.5+).                 |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **Tamaño de Caché de Sesión SSL:** Tamaño de la caché de sesión SSL (ej., `10m`, `512k`). Establecer a `off` o `none` para desactivar.              |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Usar grapado OCSP:** Con `yes`, se grapa una respuesta OCSP en caché durante el handshake TLS cuando el certificado anuncia un respondedor OCSP. Aplica a TLS HTTP y stream, incluidos Let's Encrypt, certificados personalizados y autofirmados. |
 
 !!! tip "Pruebas de SSL Labs"
     Después de configurar sus ajustes de SSL, utilice la [Prueba de Servidor de SSL Labs de Qualys](https://www.ssllabs.com/ssltest/) para verificar su configuración y buscar posibles problemas de seguridad. Una configuración de SSL adecuada de BunkerWeb debería obtener una calificación A+.

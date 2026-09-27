@@ -5595,6 +5595,7 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | 否   | **自定义 SSL 密码：** 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。                                 |
 | `SSL_ECDH_CURVE`              | `auto`            | multisite | 否   | **SSL ECDH 曲线：** 以 `:` 分隔的 ECDH 曲线（TLS 组）列表，或 `auto` 启用智能选择（OpenSSL 3.5+ 的 PQC 组）。 |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | 否   | **SSL 会话缓存大小：** SSL 会话缓存的大小（例如 `10m`、`512k`）。设置为 `off` 或 `none` 以禁用。              |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | 否   | **使用 OCSP 装订：** 设为 `yes` 时，在 TLS 握手期间为声明了 OCSP 响应器的证书装订缓存的 OCSP 响应。适用于 HTTP 与 stream TLS，包括 Let's Encrypt、自定义证书和自签名证书。 |
 
 !!! tip "SSL Labs 测试"
     配置 SSL 设置后，请使用 [Qualys SSL Labs 服务器测试](https://www.ssllabs.com/ssltest/) 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。

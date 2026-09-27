@@ -1999,6 +1999,39 @@ def _load_custom_certs_from_db(db: Any) -> Dict[str, bytes]:
     return result
 
 
+def _load_selfsigned_certs_from_db(db: Any) -> Dict[str, bytes]:
+    """Load self-signed certificate PEM data stored by the self-signed job."""
+    result: Dict[str, bytes] = {}
+    try:
+        cache_files = db.get_jobs_cache_files(job_name="self-signed", with_data=True)
+    except Exception as e:
+        log_error("❌ OCSP failed to query database for self-signed certificates: %s", e)
+        return result
+
+    if not cache_files:
+        log_debug("ℹ️ OCSP no self-signed cache entries found in database")
+        return result
+
+    for entry in cache_files:
+        try:
+            file_name = entry.get("file_name", "")
+            service_id = entry.get("service_id", "")
+            if file_name != "cert.pem" or not service_id:
+                continue
+            if not re.match(r"^[A-Za-z0-9_.*-]+$", service_id):
+                log_warning("⚠️ OCSP sanitization: skipping self-signed cert with invalid service_id: %s", service_id)
+                continue
+            data = entry.get("data")
+            if not data or b"-----BEGIN" not in data:
+                continue
+            result[f"selfsigned-{service_id}"] = data
+            log_debug("✓ OCSP loaded self-signed cert for %s from database", service_id)
+        except Exception as e:
+            log_warning("⚠️ OCSP failed to process self-signed cert entry %s: %s", entry.get("file_name", "?"), e)
+
+    return result
+
+
 def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
     """
     Restore cached OCSP responses from database to disk.
@@ -2134,7 +2167,8 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         ocsp_url = extract_ocsp_url(pem_data, cert_name)
         if not ocsp_url:
             log_debug("ℹ️ OCSP certificate %s has no responder, skipping fetch", cert_name)
-            stats["le_certs_no_ocsp"] = stats.get("le_certs_no_ocsp", 0) + 1
+            no_ocsp_key = "custom_certs_no_ocsp" if cert_name.startswith(("customcert-", "selfsigned-")) else "le_certs_no_ocsp"
+            stats[no_ocsp_key] = stats.get(no_ocsp_key, 0) + 1
             return (cert_name, None, 0, cert_checksum, pem_data, None, False)
 
         log_debug("🌐 OCSP responder for certificate %s: %s", cert_name, ocsp_url)
@@ -2386,11 +2420,46 @@ def process_custom_certs(
     return results
 
 
+def process_selfsigned_certs(
+    db: Optional[Any] = None,
+    stats: Optional[dict] = None,
+    refresh_fn: Optional[Callable[[str], None]] = None,
+    timeout_fn: Optional[Callable[[str], bool]] = None,
+    force_fetch: bool = False,
+) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
+    """Fetch OCSP responses for self-signed certificates that advertise a responder."""
+    if stats is None:
+        stats = {}
+    results: List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]] = []
+    if not db:
+        return results
+
+    try:
+        certs = _load_selfsigned_certs_from_db(db)
+        if not certs:
+            log_info("ℹ️ OCSP no self-signed certificates found in database")
+            return results
+        log_info("🔄 OCSP loaded %d self-signed certificate(s) from database", len(certs))
+        stats["custom_certs_processed"] = stats.get("custom_certs_processed", 0) + len(certs)
+        for cert_name, pem_data in sorted(certs.items()):
+            if callable(timeout_fn) and timeout_fn(f"self-signed cert {cert_name}"):
+                break
+            if callable(refresh_fn):
+                refresh_fn(cert_name)
+            results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch))
+    except Exception as e:
+        log_error("OCSP exception while processing self-signed certificates: %s", e)
+        stats["errors"] = stats.get("errors", 0) + 1
+
+    return results
+
+
 def _service_name_from_dir(dir_name: str) -> str:
-    """Strip -rsa or -ecdsa suffix and customcert- prefix from a name to get the service name."""
+    """Strip key-type suffixes and cert-source prefixes to get the service name."""
     name = dir_name
-    if name.startswith("customcert-"):
-        name = name[len("customcert-"):]
+    for prefix in ("customcert-", "selfsigned-"):
+        if name.startswith(prefix):
+            name = name[len(prefix):]
     for suffix in ("-rsa", "-ecdsa"):
         if name.endswith(suffix):
             return name[: -len(suffix)]
@@ -3569,6 +3638,19 @@ def main() -> int:
             for res in custom_results:
                 if res[1] is None and res[5] and res[6]: # ocsp_der is None AND ocsp_url is present AND was_attempted is True
                     stashed_failures.append((res[0], res[4])) # cert_name, pem_data
+
+        if not check_job_timeout("before self-signed cert processing"):
+            selfsigned_results = process_selfsigned_certs(
+                db,
+                stats,
+                refresh_fn=refresh_job_lock,
+                timeout_fn=check_job_timeout,
+                force_fetch=force_fetch,
+            )
+            all_ocsp_results.extend(selfsigned_results)
+            for res in selfsigned_results:
+                if res[1] is None and res[5] and res[6]:
+                    stashed_failures.append((res[0], res[4]))
 
         # === Final deferred retry for stashed failures ===
         if stashed_failures:

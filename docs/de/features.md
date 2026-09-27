@@ -5436,6 +5436,7 @@ So funktioniert's:
 | `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen.                                                            |
 | `SSL_ECDH_CURVE`              | `auto`            | Multisite | nein     | **SSL-ECDH-Kurven:** Durch `:` getrennte Liste von ECDH-Kurven (TLS-Gruppen) oder `auto` fuer intelligente Auswahl (PQC mit OpenSSL 3.5+). |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | Multisite | nein     | Größe des SSL-Sitzungscaches (z.B. `10m`, `512k`). Auf `off` oder `none` setzen zum Deaktivieren.                                          |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | Multisite | nein     | **OCSP-Stapling verwenden:** Bei `yes` wird während des TLS-Handshakes eine zwischengespeicherte OCSP-Antwort mitgesendet, wenn das Zertifikat einen OCSP-Responder ausweist. Gilt für HTTP- und Stream-TLS, einschließlich Let's Encrypt, eigener und selbstsignierter Zertifikate. |
 
 !!! tip "SSL Labs Test"
     Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.

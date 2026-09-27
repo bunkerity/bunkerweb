@@ -24,6 +24,7 @@ Comment ça marche :
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | non      | Suites personnalisées (liste séparée par `:`) qui remplacent le niveau.                        |
 | `SSL_ECDH_CURVE`              | `auto`            | multisite | non      | **Courbes ECDH SSL :** Liste séparée par `:` des courbes ECDH (groupes TLS) ou `auto` pour une sélection intelligente (PQC avec OpenSSL 3.5+). |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | non      | Taille du cache de session SSL (ex. `10m`, `512k`). Définir à `off` ou `none` pour désactiver. |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | non      | **Utiliser l'agrafage OCSP :** Lorsque la valeur est `yes`, une réponse OCSP en cache est agrafée pendant le handshake TLS pour les certificats qui annoncent un répondeur OCSP. S'applique au TLS HTTP et stream, y compris Let's Encrypt, certificats personnalisés et auto-signés. |
 
 !!! tip "Test SSL Labs"
     Testez votre configuration via [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Une configuration BunkerWeb bien réglée atteint généralement A+.
