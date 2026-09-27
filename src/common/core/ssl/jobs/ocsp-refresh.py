@@ -183,6 +183,10 @@ def _log_ocsp_cache_mount_hints() -> None:
 MIN_TTL = 4500  # 75 minutes: minimum safety threshold. Smart refresh uses max(MIN_TTL, 20% of response lifetime)
 OPENSSL_BIN = "/usr/bin/openssl"
 
+# Forensic provenance stamped into every GOOD ocsp.json for this process invocation.
+_JOB_RUN_ID: Optional[str] = None
+_OPENSSL_IDENTITY: Optional[Dict[str, Any]] = None
+
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
 # Positive TTL must stay short enough to follow CDN/anycast PoP moves within one job.
@@ -1610,6 +1614,87 @@ def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
     }
 
 
+def _new_job_run_id() -> str:
+    """Stable id for one ocsp-refresh invocation (pid + monotonic ns)."""
+    return f"{os.getpid()}.{time.time_ns()}"
+
+
+def _begin_job_run() -> str:
+    """Start a new job run id and refresh cached OpenSSL identity."""
+    global _JOB_RUN_ID, _OPENSSL_IDENTITY
+    _JOB_RUN_ID = _new_job_run_id()
+    _OPENSSL_IDENTITY = None
+    return _JOB_RUN_ID
+
+
+def _openssl_identity() -> Dict[str, Any]:
+    """
+    Identity of OPENSSL_BIN used to verify OCSP responses.
+    Cached for the current job run so every ocsp.json agrees.
+    """
+    global _OPENSSL_IDENTITY
+    if _OPENSSL_IDENTITY is not None:
+        return dict(_OPENSSL_IDENTITY)
+
+    ident: Dict[str, Any] = {"path": OPENSSL_BIN}
+    try:
+        bin_path = Path(OPENSSL_BIN)
+        if not bin_path.is_file():
+            ident["missing"] = True
+        else:
+            try:
+                ident["mtime_ns"] = bin_path.stat().st_mtime_ns
+            except Exception:
+                pass
+            try:
+                proc = subprocess.run(
+                    [OPENSSL_BIN, "version"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=5,
+                )
+                line = ((proc.stdout or "") + (proc.stderr or "")).strip().splitlines()
+                if line:
+                    ident["version"] = line[0][:256]
+            except Exception as e:
+                ident["version_error"] = str(e)[:128]
+    except Exception as e:
+        ident["error"] = str(e)[:128]
+
+    _OPENSSL_IDENTITY = ident
+    return dict(ident)
+
+
+def _provenance_meta() -> Dict[str, Any]:
+    """
+    Forensic fields for ocsp.json: which job run published, and which OpenSSL verified.
+    Handshake Lua does not require these; they exist for on-call correlation.
+    """
+    run_id = _JOB_RUN_ID or _new_job_run_id()
+    openssl = _openssl_identity()
+    out: Dict[str, Any] = {"job_run_id": run_id}
+    if openssl.get("version"):
+        out["openssl_version"] = str(openssl["version"])
+    if openssl.get("path"):
+        out["openssl_path"] = str(openssl["path"])
+    mtime_ns = openssl.get("mtime_ns")
+    if isinstance(mtime_ns, int) and mtime_ns > 0:
+        out["openssl_mtime_ns"] = mtime_ns
+    return out
+
+
+def _preserve_provenance(dst: Dict[str, Any], src: Optional[Dict[str, Any]]) -> None:
+    """Keep prior GOOD provenance when rewriting ocsp.json for backoff/markers."""
+    if not isinstance(src, dict):
+        return
+    for key in ("job_run_id", "openssl_version", "openssl_path", "openssl_mtime_ns"):
+        val = src.get(key)
+        if val is None or val == "":
+            continue
+        dst[key] = val
+
+
 def _meta_int_unix(meta: Dict[str, Any], key: str) -> Optional[int]:
     raw = meta.get(key)
     if isinstance(raw, (int, float)) and int(raw) > 0:
@@ -1903,6 +1988,8 @@ def _write_ocsp_http_error_backoff(
                             meta[age_key] = int(old_age)
                         elif isinstance(old_age, str) and old_age.isdigit() and old.get("error_type") != "http_backoff":
                             meta[age_key] = int(old_age)
+                    # Keep prior GOOD verifier identity; backoff is not a new openssl publish.
+                    _preserve_provenance(meta, old)
         except Exception:
             pass
 
@@ -4048,6 +4135,7 @@ def _persist_ocsp_results_to_db(
                         meta["fingerprint"] = cert_fp
                         meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                         meta.update(_ocsp_expiry_meta(ttl))
+                        meta.update(_provenance_meta())
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
                             service_id=None,
@@ -4287,6 +4375,7 @@ def _tombstone_ocsp_shard(
                     meta["must_staple"] = True
         except Exception:
             pass
+        meta.update(_provenance_meta())
         _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
         _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
         der_path = shard / "ocsp.der"
@@ -4383,6 +4472,7 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
         meta["fingerprint"] = normalized
         meta["ttl_halved_after_nongood"] = True
         meta["ttl_halved_from"] = remaining
+        meta.update(_provenance_meta())
         _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
         _bump_ocsp_cache_epoch()
         log_warning(
@@ -4534,6 +4624,7 @@ def _persist_ocsp_results_to_disk(
                 meta["fingerprint"] = cert_fp
                 meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                 meta.update(_ocsp_expiry_meta(ttl))
+                meta.update(_provenance_meta())
 
                 published_dir = _publish_ocsp_shard(
                     cert_fp,
@@ -4656,8 +4747,16 @@ def main() -> int:
             force_flags += " [CHANGED-ONLY]"
         if force_fetch:
             force_flags += " [FORCE-FETCH]"
-        log_info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)",
-                 JOB_TIMEOUT // 60, force_flags)
+        run_id = _begin_job_run()
+        openssl = _openssl_identity()
+        log_info(
+            "🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s) "
+            "job_run_id=%s openssl=%s",
+            JOB_TIMEOUT // 60,
+            force_flags,
+            run_id,
+            openssl.get("version") or openssl.get("path") or "unknown",
+        )
 
         # Clean up stale lock files from previous crashed runs (defensive measure)
         _cleanup_stale_locks()
