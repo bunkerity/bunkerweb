@@ -337,9 +337,7 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	end)
 end
 
--- Throttle L1 disk freshness checks (re-read ocsp.json at most this often per fp).
-local L1_DISK_CHECK_SECONDS = 5
-
+-- Legacy diskcheck key (pre-fix throttle). Still deleted on drop so old entries vanish.
 local function l1_disk_check_key(fingerprint)
 	return "TLS:SSL:ocsp_diskcheck:" .. fingerprint
 end
@@ -354,6 +352,8 @@ local function drop_cache(internalstore, fingerprint)
 end
 
 -- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
+-- Always re-read ocsp.json der_sha256 (or hash the file). A 5s "last OK" short-circuit
+-- stapled pre-replace DER after a job swap; epoch alone does not cover no-bump writes.
 local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
@@ -363,16 +363,6 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	-- Cross-zone coherence: job cannot delete the other lua_shared_dict; epoch is the bus.
 	if (stored_epoch or "") ~= current_ocsp_epoch() then
 		return false
-	end
-
-	-- Skip repeated disk I/O within the throttle window when last check said OK.
-	if internalstore then
-		local ok_cached, cached_binding = pcall(function()
-			return internalstore:get(l1_disk_check_key(fingerprint), true)
-		end)
-		if ok_cached and cached_binding == binding then
-			return true
-		end
 	end
 
 	local disk_sha = nil
@@ -399,24 +389,14 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 		end
 	end)
 
-	local matches
 	if disk_sha then
-		matches = disk_sha == binding
-	else
-		local data = read_file(ocsp_path(fingerprint))
-		if not data then
-			matches = false
-		else
-			matches = resp_binding(data) == binding
-		end
+		return disk_sha == binding
 	end
-
-	if matches and internalstore then
-		pcall(function()
-			internalstore:set(l1_disk_check_key(fingerprint), binding, L1_DISK_CHECK_SECONDS, true)
-		end)
+	local data = read_file(ocsp_path(fingerprint))
+	if not data then
+		return false
 	end
-	return matches
+	return resp_binding(data) == binding
 end
 
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
