@@ -627,6 +627,173 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	return false
 end
 
+-- Canonical uppercase hex serial without leading zeros (decimal BN → hex when needed).
+local function canonical_serial_hex(serial)
+	if serial == nil then
+		return nil
+	end
+	if type(serial) == "table" then
+		if serial.to_hex then
+			local ok_hex, hex = pcall(function()
+				return serial:to_hex()
+			end)
+			if ok_hex and type(hex) == "string" and #hex > 0 then
+				hex = hex:upper():gsub("^0+", "")
+				return hex == "" and "0" or hex
+			end
+		end
+		if serial.to_number then
+			local ok_n, n = pcall(function()
+				return serial:to_number()
+			end)
+			if ok_n and type(n) == "number" then
+				serial = n
+			end
+		end
+	end
+	if type(serial) == "number" then
+		-- Format as hex without 0x; strip leading zeros.
+		local hex = string.format("%X", serial)
+		hex = hex:gsub("^0+", "")
+		return hex == "" and "0" or hex
+	end
+	if type(serial) ~= "string" then
+		serial = tostring(serial)
+	end
+	if serial == "" then
+		return nil
+	end
+	serial = serial:upper():gsub("%s+", ""):gsub("^0X", "")
+	-- Decimal digit-only strings from some BN tostring paths.
+	if serial:match("^[0-9]+$") and not serial:match("^[0-9A-F]*[A-F]") then
+		-- Pure decimal: convert via resty BN when available.
+		local converted = nil
+		pcall(function()
+			local bn = require("resty.openssl.bn")
+			local obj = bn.from_dec(serial)
+			if obj and obj.to_hex then
+				converted = obj:to_hex()
+			end
+		end)
+		if type(converted) == "string" and #converted > 0 then
+			serial = converted:upper()
+		end
+	end
+	if not serial:match("^[0-9A-F]+$") then
+		return nil
+	end
+	serial = serial:gsub("^0+", "")
+	return serial == "" and "0" or serial
+end
+
+local function leaf_serial_hex(cert_pem)
+	if type(cert_pem) ~= "string" or cert_pem == "" then
+		return nil
+	end
+	local hex = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local cert = x509.new(cert_pem)
+		if not cert then
+			return
+		end
+		hex = canonical_serial_hex(cert:get_serial_number())
+	end)
+	return hex
+end
+
+local function ocsp_resp_serial_hex(ocsp_der)
+	if type(ocsp_der) ~= "string" or ocsp_der == "" then
+		return nil
+	end
+	local hex = nil
+	pcall(function()
+		local ocsp_lib = require("resty.openssl.ocsp")
+		local parsed = ocsp_lib.new(ocsp_der)
+		if not parsed then
+			return
+		end
+		hex = canonical_serial_hex(parsed:get_serial())
+	end)
+	return hex
+end
+
+local function pem_dn_str(cert_pem, which)
+	if type(cert_pem) ~= "string" or cert_pem == "" then
+		return nil
+	end
+	local out = nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local cert = x509.new(cert_pem)
+		if not cert then
+			return
+		end
+		local name = nil
+		if which == "issuer" then
+			name = cert:get_issuer_name()
+		else
+			name = cert:get_subject_name()
+		end
+		if name then
+			out = tostring(name)
+		end
+	end)
+	if type(out) == "string" and #out > 0 then
+		return out
+	end
+	return nil
+end
+
+-- CertID must name this handshake leaf: serial match + issuer DN binds to a candidate
+-- issuer PEM (subject == leaf.issuer). Fail closed when either side is unreadable.
+-- ngx.ocsp.validate_ocsp_response also binds CertID; this gate covers verified-L1
+-- paths that skip re-validate after a same-key renew left a stale body under the SPKI.
+local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
+	if type(leaf_pem) ~= "string" or leaf_pem == "" or type(ocsp_der) ~= "string" or ocsp_der == "" then
+		return false, "missing_leaf_or_resp"
+	end
+	local leaf_serial = leaf_serial_hex(leaf_pem)
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der)
+	if not leaf_serial or not resp_serial then
+		return false, "serial_unreadable"
+	end
+	if leaf_serial ~= resp_serial then
+		return false, "serial_mismatch"
+	end
+	local leaf_issuer = pem_dn_str(leaf_pem, "issuer")
+	if not leaf_issuer then
+		return false, "leaf_issuer_unreadable"
+	end
+	if type(issuer_pems) ~= "table" or #issuer_pems == 0 then
+		return false, "no_issuer_candidates"
+	end
+	for _, iss in ipairs(issuer_pems) do
+		local subj = pem_dn_str(iss, "subject")
+		if subj and subj == leaf_issuer then
+			return true, nil
+		end
+	end
+	return false, "issuer_mismatch"
+end
+
+-- Fingerprint-only path has no handshake leaf PEM: require response CertID serial
+-- to match the job-published ocsp.json serial (same body the ligand binds).
+local function certid_consistent_with_meta(meta, ocsp_der)
+	if type(meta) ~= "table" then
+		return false, "no_meta"
+	end
+	local meta_serial = canonical_serial_hex(meta.serial)
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der)
+	if not meta_serial or not resp_serial then
+		return false, "serial_unreadable"
+	end
+	if meta_serial ~= resp_serial then
+		return false, "serial_mismatch"
+	end
+	return true, nil
+end
+
 local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
 end
@@ -830,6 +997,11 @@ local function normalize_fp_hint(cert_fp_hint)
 end
 
 local function try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
+	if not ok_id then
+		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
+		return false
+	end
 	for _, issuer_pem in ipairs(issuers) do
 		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem) then
 			local ok_set, set_ok, set_err = pcall(function()
@@ -1152,6 +1324,15 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 					drop_cache(internalstore, fingerprint)
 					return false, "must_staple", ligand_detail
 				end
+				local ok_id, why = certid_consistent_with_meta(meta or read_ocsp_json(fingerprint), cached)
+				if not ok_id then
+					log(ngx.ERR, "OCSP CertID refuse fingerprint staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
+					drop_cache(internalstore, fingerprint)
+					if must_staple then
+						return false, "must_staple", "certid_mismatch"
+					end
+					return false
+				end
 				local ok_set, set_ok, set_err = pcall(function()
 					return ocsp.set_ocsp_status_resp(cached)
 				end)
@@ -1200,6 +1381,14 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 			if must_staple and not ligand_ok then
 				return false, "must_staple", ligand_detail
 			end
+			local ok_id, why = certid_consistent_with_meta(meta, resp)
+			if not ok_id then
+				log(ngx.ERR, "OCSP CertID refuse fingerprint staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
+				if must_staple then
+					return false, "must_staple", "certid_mismatch"
+				end
+				return false
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
@@ -1243,6 +1432,16 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 				return false
 			end
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
+			local ok_id, why = certid_matches_handshake_leaf(leaf_pem, cached, issuers)
+			if not ok_id then
+				log(ngx.ERR, "OCSP CertID refuse L1 staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return false, "must_staple", "certid_mismatch"
+				end
+				-- Fall through to disk / re-validate with the current leaf.
+			else
 			-- Must-Staple: bind shared ocsp.json ligand, not stream-private L1 alone.
 			if must_staple then
 				meta = meta or read_ocsp_json(fingerprint)
@@ -1261,6 +1460,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
 			drop_cache(internalstore, fingerprint)
+			end
 		else
 			if serial_blacklist_blocks(fingerprint, cached) then
 				drop_cache(internalstore, fingerprint)
