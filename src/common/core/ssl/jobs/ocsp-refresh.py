@@ -185,7 +185,8 @@ OPENSSL_BIN = "/usr/bin/openssl"
 
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
-DNS_CACHE_TTL = 300  # 5 minutes for successful resolutions
+# Positive TTL must stay short enough to follow CDN/anycast PoP moves within one job.
+DNS_CACHE_TTL = 60
 DNS_CACHE_NEGATIVE_TTL = 15  # brief; empty/failed lookups must not poison the whole job batch
 _OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
 # Cert-name markers for differential tracking. Must not share ocsp/<token> with legacy
@@ -258,7 +259,7 @@ def _get_ocsp_responder_ips(ocsp_url: str, default_port: int) -> Tuple[str, List
     if hostname in _OCSP_RESPONDER_DNS_CACHE:
         # Refresh LRU position
         ips, cached_at = _OCSP_RESPONDER_DNS_CACHE[hostname]
-        # Successful resolutions keep the long TTL; empty/failed lookups use a short
+        # Successful resolutions use DNS_CACHE_TTL; empty/failed lookups use a short
         # negative TTL so one transient getaddrinfo blip cannot fail every cert that
         # shares this OCSP hostname for the rest of the job.
         ttl = DNS_CACHE_TTL if ips else DNS_CACHE_NEGATIVE_TTL
@@ -278,6 +279,17 @@ def _get_ocsp_responder_ips(ocsp_url: str, default_port: int) -> Tuple[str, List
     while len(_OCSP_RESPONDER_DNS_CACHE) > _OCSP_RESPONDER_DNS_CACHE_MAX:
         _OCSP_RESPONDER_DNS_CACHE.popitem(last=False)
     return hostname, ips
+
+
+def _invalidate_ocsp_responder_dns(hostname: str) -> None:
+    """Drop a positive DNS cache entry so the next lookup re-resolves (CDN/anycast move)."""
+    if not hostname:
+        return
+    try:
+        del _OCSP_RESPONDER_DNS_CACHE[hostname]
+        log_debug("🔄 OCSP invalidated DNS cache for responder %s", hostname)
+    except KeyError:
+        pass
 
 
 def _post_ocsp_over_ip_with_sni(
@@ -1842,41 +1854,56 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                     return None, 0, None
 
                 # Fetch by connecting to each resolved IP, while keeping TLS SNI for `ocsp_hostname`.
+                # If every cached IP fails, invalidate DNS and re-resolve once (CDN/anycast cutover).
                 ocsp_der = None
-                for ip_str in ips:
-                    http_code: Optional[int] = None
-                    http_reason: str = ""
-                    try:
-                        ocsp_der, http_code, http_reason = _post_ocsp_over_ip_with_sni(
-                            ocsp_url=ocsp_url,
-                            ocsp_request_data=ocsp_request_data,
-                            ocsp_hostname=ocsp_hostname,
-                            ip_str=ip_str,
-                            timeout=timeout,
-                        )
-                    except Exception as e:
-                        log_warning(
-                            "⚠️ OCSP fetch failed for %s (%s) -> %s using %s: %s",
-                            cert_name,
-                            ocsp_hostname,
-                            ip_str,
-                            alg_name,
-                            e,
-                        )
-                        ocsp_der = None
+                for dns_attempt in range(2):
+                    for ip_str in ips:
+                        http_code: Optional[int] = None
+                        http_reason: str = ""
+                        try:
+                            ocsp_der, http_code, http_reason = _post_ocsp_over_ip_with_sni(
+                                ocsp_url=ocsp_url,
+                                ocsp_request_data=ocsp_request_data,
+                                ocsp_hostname=ocsp_hostname,
+                                ip_str=ip_str,
+                                timeout=timeout,
+                            )
+                        except Exception as e:
+                            log_warning(
+                                "⚠️ OCSP fetch failed for %s (%s) -> %s using %s: %s",
+                                cert_name,
+                                ocsp_hostname,
+                                ip_str,
+                                alg_name,
+                                e,
+                            )
+                            ocsp_der = None
+                        if ocsp_der:
+                            break
+
+                        # For HTTP 400/500, persist a short retry backoff.
+                        if http_code in (400, 500):
+                            _write_ocsp_http_error_backoff(
+                                cert_fp=cert_fp,
+                                ocsp_url=ocsp_url,
+                                http_code=http_code,
+                                reason=http_reason,
+                                serial=leaf.serial_number,
+                            )
+
                     if ocsp_der:
                         break
-
-                    # For HTTP 400/500, persist a short retry backoff.
-                    if http_code in (400, 500):
-                        _write_ocsp_http_error_backoff(
-                            cert_fp=cert_fp,
-                            ocsp_url=ocsp_url,
-                            http_code=http_code,
-                            reason=http_reason,
-                            serial=leaf.serial_number,
+                    if dns_attempt == 0:
+                        log_debug(
+                            "🔄 OCSP all cached IPs failed for %s; re-resolving %s",
+                            cert_name,
+                            ocsp_hostname,
                         )
-        
+                        _invalidate_ocsp_responder_dns(ocsp_hostname)
+                        ocsp_hostname, ips = _get_ocsp_responder_ips(ocsp_url, default_port=default_port)
+                        if not ips:
+                            break
+
                 if not ocsp_der:
                     log_warning("⚠️ OCSP empty response from %s for %s", ocsp_url, cert_name)
                     continue
