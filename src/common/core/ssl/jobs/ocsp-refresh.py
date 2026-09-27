@@ -1684,6 +1684,141 @@ def _atomic_write_text(path: Path, text: str, mode: int = 0o640) -> None:
     _atomic_write_bytes(path, text.encode("utf-8"), mode=mode)
 
 
+# Sidecars that must survive a shard directory swap (not rewritten by a GOOD publish).
+_OCSP_SHARD_SIDECARS = frozenset({"nongood.json", "serial-blacklist.json"})
+
+
+def _write_bytes_inplace(path: Path, data: bytes, mode: int = 0o640) -> None:
+    """Write bytes into a staging tree (no rename). Caller publishes the directory."""
+    with open(path, "wb") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    path.chmod(mode)
+
+
+def _fsync_directory(path: Path) -> None:
+    """Best-effort directory fsync so renames persist across power loss."""
+    try:
+        fd = os.open(str(path), os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    except Exception:
+        pass
+
+
+def _copy_ocsp_shard_sidecars(live_dir: Path, staging_dir: Path) -> None:
+    """Carry quarantine/blacklist markers into a new shard tree before rename."""
+    if not live_dir.is_dir():
+        return
+    for name in _OCSP_SHARD_SIDECARS:
+        src = live_dir / name
+        if not src.is_file():
+            continue
+        try:
+            shutil.copy2(src, staging_dir / name)
+        except Exception as e:
+            log_debug("⚠️ OCSP could not copy sidecar %s into staging: %s", name, e)
+
+
+def _publish_ocsp_shard(
+    fingerprint: str,
+    *,
+    issuer_pem: bytes,
+    ocsp_der: bytes,
+    meta: Dict[str, Any],
+    db: Optional[Any] = None,
+) -> Path:
+    """
+    Publish issuer.pem + ocsp.der + ocsp.json as one directory rename.
+
+    Stage under ``.{fp}.pub-*``, move the live shard aside to ``.{fp}.old-*``,
+    then rename the stage into place. Readers see either the previous complete
+    shard or the new complete shard — never a mix of old DER and new JSON (or a
+    missing issuer). Sidecars (nongood.json, serial-blacklist.json) are carried
+    into the new tree. On failure the previous live directory is restored.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        raise ValueError("empty fingerprint")
+    if not issuer_pem or not ocsp_der:
+        raise ValueError("issuer_pem and ocsp_der are required")
+
+    final_dir = _get_sharded_ocsp_path(normalized)
+    parent = final_dir.parent
+    parent.mkdir(parents=True, exist_ok=True)
+
+    token = f"{os.getpid()}.{time.time_ns()}"
+    staging = parent / f".{final_dir.name}.pub-{token}"
+    stale = parent / f".{final_dir.name}.old-{token}"
+
+    staging_created = False
+    live_moved_aside = False
+    published = False
+
+    try:
+        if staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
+        if stale.exists():
+            shutil.rmtree(stale, ignore_errors=True)
+
+        staging.mkdir(mode=0o750)
+        staging_created = True
+
+        _copy_ocsp_shard_sidecars(final_dir, staging)
+        _write_bytes_inplace(staging / "issuer.pem", issuer_pem)
+        _write_bytes_inplace(staging / "ocsp.der", ocsp_der)
+        meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
+        _write_bytes_inplace(staging / "ocsp.json", meta_bytes)
+        _fsync_directory(staging)
+
+        if final_dir.exists() or final_dir.is_symlink():
+            final_dir.rename(stale)
+            live_moved_aside = True
+        staging.rename(final_dir)
+        published = True
+        staging_created = False
+
+        if stale.exists():
+            shutil.rmtree(stale, ignore_errors=True)
+        _fsync_directory(parent)
+
+        # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
+        if db is not None:
+            try:
+                db.upsert_job_cache(
+                    service_id=None,
+                    file_name=_ocsp_cache_relpath(normalized, "issuer.pem"),
+                    data=issuer_pem,
+                    job_name="ocsp-refresh",
+                    checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
+                )
+                try:
+                    db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
+                except Exception:
+                    pass
+            except Exception as e:
+                log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
+
+        return final_dir
+    except Exception:
+        if not published:
+            if live_moved_aside and stale.exists() and not final_dir.exists():
+                try:
+                    stale.rename(final_dir)
+                except Exception as restore_err:
+                    log_error(
+                        "❌ OCSP failed to restore shard after publish error (fp=%s): %s",
+                        normalized[:16],
+                        restore_err,
+                    )
+            if staging_created and staging.exists():
+                shutil.rmtree(staging, ignore_errors=True)
+        raise
+
+
 def _normalize_ocsp_serial(serial: Any) -> Optional[str]:
     """Canonical lowercase hex serial (no 0x prefix) for backoff identity matching."""
     if serial is None:
@@ -4336,12 +4471,12 @@ def _persist_ocsp_results_to_disk(
     db: Optional[Any] = None,
 ) -> None:
     """
-    Write OCSP cache files as one locked snapshot per fingerprint:
-    issuer.pem → ocsp.der → ocsp.json (each via tempfile + replace).
+    Write OCSP cache as one locked directory rename per fingerprint:
+    stage issuer.pem + ocsp.der + ocsp.json, then swap the shard into place.
 
-    Holding the cert lock across all three avoids unlocked issuer swaps and
-    non-atomic metadata writes racing the DER publish. Existing files are kept
-    intact if any step fails. Called at normal completion and on timeout.
+    Holding the cert lock across the publish avoids concurrent writers racing
+    the rename. The previous shard stays intact if staging or rename fails.
+    Called at normal completion and on timeout.
     """
     if not all_ocsp_results:
         return
@@ -4369,7 +4504,7 @@ def _persist_ocsp_results_to_disk(
             # Lock is keyed by certificate public key fingerprint (not hostname/cert_name).
             lock_fd = _acquire_cert_lock(cert_fp)
             if lock_fd is None:
-                # Avoid writing ocsp.der / ocsp.json / issuer.pem without a lock.
+                # Avoid publishing the shard without a lock.
                 stats["errors"] = stats.get("errors", 0) + 1
                 log_warning(
                     "⏭️ OCSP skipping disk write for %s (fingerprint: %s) due to lock acquisition failure",
@@ -4379,36 +4514,12 @@ def _persist_ocsp_results_to_disk(
                 continue
             try:
                 publish_error_logged = False
-                # Create sharded directory using fingerprint (0-f distribution)
-                # Example: /var/cache/bunkerweb/ssl/0/089433bd22ca2b9536b597a9fc7ca86cdd1d1df0193caaa205043b40f1ea435b/ocsp.der
                 ocsp_cert_dir = _get_sharded_ocsp_path(cert_fp)
                 try:
-                    ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
-                except Exception as e:
-                    log_error("❌ OCSP error while creating sharded directory %s: %s", ocsp_cert_dir, e)
-                    stats["errors"] = stats.get("errors", 0) + 1
-                    publish_error_logged = True
-                    raise
-
-                ocsp_path = ocsp_cert_dir / "ocsp.der"
-                meta_path = ocsp_cert_dir / "ocsp.json"
-                previous_der: Optional[bytes] = None
-                try:
-                    if ocsp_path.is_file():
-                        previous_der = ocsp_path.read_bytes()
-                except Exception:
-                    previous_der = None
-
-                # 1) issuer.pem first — abort publish if it fails (validate needs issuer).
-                try:
                     _leaf, issuer = _parse_chain(cleaned_pem, cert_name)
-                    if not _write_issuer_pem(
-                        cert_fp,
-                        issuer.public_bytes(Encoding.PEM),
-                        db=db,
-                        already_locked=True,
-                    ):
-                        raise RuntimeError("issuer.pem publish failed")
+                    issuer_pem = issuer.public_bytes(Encoding.PEM)
+                    if not issuer_pem:
+                        raise RuntimeError("empty issuer PEM")
                 except Exception as issuer_err:
                     log_error(
                         "❌ OCSP refusing to publish ocsp.der for %s without issuer.pem: %s",
@@ -4419,47 +4530,41 @@ def _persist_ocsp_results_to_disk(
                     publish_error_logged = True
                     raise
 
-                # 2) ocsp.der (atomic)
-                _atomic_write_bytes(ocsp_path, ocsp_der)
+                meta = _extract_cert_metadata(cleaned_pem, cert_name)
+                meta["fingerprint"] = cert_fp
+                meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
+                meta.update(_ocsp_expiry_meta(ttl))
+
+                published_dir = _publish_ocsp_shard(
+                    cert_fp,
+                    issuer_pem=issuer_pem,
+                    ocsp_der=ocsp_der,
+                    meta=meta,
+                    db=db,
+                )
+                published_any = True
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
                     cert_name,
-                    ocsp_path,
+                    published_dir / "ocsp.der",
                     cert_fp[:16] + "...",
                 )
-
-                # 3) ocsp.json last (atomic) — commit marker with der_sha256 for L1 freshness
-                try:
-                    meta = _extract_cert_metadata(cleaned_pem, cert_name)
-                    meta["fingerprint"] = cert_fp
-                    meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                    meta.update(_ocsp_expiry_meta(ttl))
-                    _atomic_write_text(meta_path, json.dumps(meta, separators=(",", ":")))
-                    published_any = True
-                    log_debug(
-                        "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
-                        cert_name,
-                        cert_fp[:16] + "...",
-                        meta.get("serial") or "unknown",
-                        meta.get("must_staple"),
-                    )
-                except Exception as e:
-                    # Keep DER and meta consistent: restore prior DER or remove the new one.
-                    log_error("❌ OCSP metadata write failed for %s; rolling back ocsp.der: %s", cert_name, e)
-                    try:
-                        if previous_der is not None:
-                            _atomic_write_bytes(ocsp_path, previous_der)
-                        elif ocsp_path.is_file():
-                            ocsp_path.unlink()
-                    except Exception as rb_err:
-                        log_error("❌ OCSP could not roll back ocsp.der for %s: %s", cert_name, rb_err)
-                    stats["errors"] = stats.get("errors", 0) + 1
-                    publish_error_logged = True
-                    raise
+                log_debug(
+                    "✓ OCSP saved metadata for %s (fingerprint: %s, serial=%s, must_staple=%s)",
+                    cert_name,
+                    cert_fp[:16] + "...",
+                    meta.get("serial") or "unknown",
+                    meta.get("must_staple"),
+                )
             except Exception as e:
                 try:
+                    # Drop leftover staging only — never unlink .old-* here; that tree
+                    # may be the sole intact shard if restore-after-rename failed.
+                    parent = ocsp_cert_dir.parent
                     for tmp_file in ocsp_cert_dir.glob(".*.tmp"):
                         tmp_file.unlink()
+                    for orphan in parent.glob(f".{ocsp_cert_dir.name}.pub-*"):
+                        shutil.rmtree(orphan, ignore_errors=True)
                 except Exception:
                     pass
                 if not publish_error_logged:
