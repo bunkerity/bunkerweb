@@ -146,20 +146,16 @@ OCSP_MARKER_PREFIX = "ocsp-marker/"
 def _is_safe_ip_str(ip_str: str) -> bool:
     """
     Check whether an IP string is safe for outbound connections (SSRF defense).
-    Mirrors the allow/deny logic in `is_safe_url()` but for a raw IP.
+
+    Require a globally routable address (`ipaddress.is_global`). That rejects
+    RFC1918, loopback, link-local, multicast, reserved, *and* RFC6598 CGNAT
+    ``100.64.0.0/10`` (which Python's ``is_private`` does not cover). Matches
+    BunkerWeb's Lua ``ip_is_global`` notion of non-internal space.
     """
     import ipaddress
 
     try:
-        ip_obj = ipaddress.ip_address(ip_str)
-        return not (
-            ip_obj.is_unspecified
-            or ip_obj.is_private
-            or ip_obj.is_loopback
-            or ip_obj.is_link_local
-            or ip_obj.is_multicast
-            or ip_obj.is_reserved
-        )
+        return ipaddress.ip_address(ip_str).is_global
     except Exception:
         return False
 
@@ -961,16 +957,16 @@ def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
 
 def is_safe_url(url: str) -> bool:
     """
-    Validate that a URL is safe to fetch (HTTP/HTTPS only, no internal/private IPs).
+    Validate that a URL is safe to fetch (HTTP/HTTPS only, globally routable IPs).
     Prevents Server-Side Request Forgery (SSRF) when fetching OCSP responses or issuer certs
-    from URLs embedded in untrusted certificates.
+    from URLs embedded in untrusted certificates. Blocks RFC1918, loopback, link-local,
+    and RFC6598 CGNAT ``100.64.0.0/10`` via ``_is_safe_ip_str`` / ``ipaddress.is_global``.
 
     Security note: Even if DNS rebinding occurs, the OCSP response is cryptographically
     verified against the issuer's public key (see fetch_ocsp_response). An attacker cannot
     forge a valid OCSP response without the issuer's private key.
     """
     import socket
-    import ipaddress
 
     try:
         parsed = urlparse(url)
