@@ -119,6 +119,45 @@ local function issuer_path(fingerprint)
 	return "/var/cache/bunkerweb/ssl/" .. fingerprint:sub(1, 1) .. "/" .. fingerprint:sub(2, 2) .. "/" .. fingerprint .. "/issuer.pem"
 end
 
+local function cache_key(fingerprint)
+	return "TLS:SSL:ocsp:" .. fingerprint
+end
+
+local function verified_key(fingerprint)
+	return "TLS:SSL:ocsp_verified:" .. fingerprint
+end
+
+local function get_cached_resp(internalstore, fingerprint)
+	local ok, resp = pcall(function()
+		return internalstore:get(cache_key(fingerprint), true)
+	end)
+	if ok and type(resp) == "string" and #resp > 0 then
+		return resp
+	end
+	return nil
+end
+
+local function is_verified(internalstore, fingerprint)
+	local ok, verified = pcall(function()
+		return internalstore:get(verified_key(fingerprint), true)
+	end)
+	return ok and verified == true
+end
+
+local function warm_cache(internalstore, fingerprint, resp)
+	pcall(function()
+		internalstore:set(cache_key(fingerprint), resp, 300, true)
+		internalstore:set(verified_key(fingerprint), true, 300, true)
+	end)
+end
+
+local function drop_cache(internalstore, fingerprint)
+	pcall(function()
+		internalstore:delete(cache_key(fingerprint))
+		internalstore:delete(verified_key(fingerprint))
+	end)
+end
+
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
 	if not issuer_pem or issuer_pem == "" or not ssl.cert_pem_to_der then
 		return false
@@ -134,8 +173,39 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem)
 	return ok_call and validate_ok == true
 end
 
+local function issuer_candidates(blocks, leaf_pem, fingerprint)
+	local issuers = {}
+	for _, other in ipairs(blocks) do
+		if other ~= leaf_pem then
+			issuers[#issuers + 1] = other
+		end
+	end
+	local stored = read_file(issuer_path(fingerprint))
+	if stored then
+		issuers[#issuers + 1] = stored
+	end
+	return issuers
+end
+
+local function try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+	for _, issuer_pem in ipairs(issuers) do
+		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem) then
+			local ok_set, set_ok, set_err = pcall(function()
+				return ocsp.set_ocsp_status_resp(resp)
+			end)
+			if ok_set and set_ok then
+				return true
+			end
+			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
+			return false
+		end
+	end
+	return nil
+end
+
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
--- HTTP keeps its own callback; both read the same ocsp.der / issuer.pem cache.
+-- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
+-- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
 function _M.staple(internalstore, server_name, cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" or not internalstore then
 		return false
@@ -155,29 +225,42 @@ function _M.staple(internalstore, server_name, cert_pem)
 	for _, leaf_pem in ipairs(blocks) do
 		local fingerprint = spki_fingerprint(leaf_pem, internalstore)
 		if fingerprint then
-			local resp = read_file(ocsp_path(fingerprint))
-			if resp then
-				local issuers = {}
-				for _, other in ipairs(blocks) do
-					if other ~= leaf_pem then
-						issuers[#issuers + 1] = other
+			local issuers = nil
+			local cached = get_cached_resp(internalstore, fingerprint)
+			if cached then
+				if is_verified(internalstore, fingerprint) then
+					local ok_set, set_ok, set_err = pcall(function()
+						return ocsp.set_ocsp_status_resp(cached)
+					end)
+					if ok_set and set_ok then
+						return true
 					end
-				end
-				local stored = read_file(issuer_path(fingerprint))
-				if stored then
-					issuers[#issuers + 1] = stored
-				end
-				for _, issuer_pem in ipairs(issuers) do
-					if validate(ocsp, ssl, resp, leaf_pem, issuer_pem) then
-						local ok_set, set_ok, set_err = pcall(function()
-							return ocsp.set_ocsp_status_resp(resp)
-						end)
-						if ok_set and set_ok then
-							return true
-						end
-						log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
+					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
+					drop_cache(internalstore, fingerprint)
+				else
+					issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
+					local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
+					if result == true then
+						warm_cache(internalstore, fingerprint, cached)
+						return true
+					end
+					if result == false then
 						return false
 					end
+					drop_cache(internalstore, fingerprint)
+				end
+			end
+
+			local resp = read_file(ocsp_path(fingerprint))
+			if resp then
+				issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
+				local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+				if result == true then
+					warm_cache(internalstore, fingerprint, resp)
+					return true
+				end
+				if result == false then
+					return false
 				end
 			end
 		end
