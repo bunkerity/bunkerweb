@@ -261,6 +261,7 @@ try:
                         etag = ""
                         last_modified = ""
                         iterable = []
+                        resp = None
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
                         if url.startswith("file://"):
                             try:
@@ -286,7 +287,6 @@ try:
 
                             max_retries = 3
                             retry_count = 0
-                            resp = None
                             while retry_count < max_retries:
                                 try:
                                     resp = get(url, stream=True, timeout=10, headers=req_headers or None)
@@ -337,17 +337,21 @@ try:
 
                                 url_content = b""
                                 count_lines = 0
-                                for line in iterable:
-                                    line = line.strip()
-                                    if not line or line.startswith((b"#", b";")):
-                                        continue
-                                    elif kind != "USER_AGENT":
-                                        line = line.split(b" ")[0]
-                                    ok, data = check_line(kind, line)
-                                    if ok:
-                                        unique_entries.add(data)
-                                        url_content += data + b"\n"
-                                        count_lines += 1
+                                try:
+                                    for line in iterable:
+                                        line = line.strip()
+                                        if not line or line.startswith((b"#", b";")):
+                                            continue
+                                        elif kind != "USER_AGENT":
+                                            line = line.split(b" ")[0]
+                                        ok, data = check_line(kind, line)
+                                        if ok:
+                                            unique_entries.add(data)
+                                            url_content += data + b"\n"
+                                            count_lines += 1
+                                finally:
+                                    if resp is not None:
+                                        resp.close()
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["total_lines"] += count_lines
 
