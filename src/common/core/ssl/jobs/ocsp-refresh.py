@@ -1515,9 +1515,10 @@ _NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
 class _VerifiedNonGood(Exception):
     """OCSP response verified, but CertStatus is not GOOD. Not a transport failure."""
 
-    def __init__(self, status_name: str, serial: Optional[int]):
+    def __init__(self, status_name: str, serial: Optional[int], this_update_unix: Optional[int] = None):
         self.status_name = status_name
         self.serial = serial
+        self.this_update_unix = this_update_unix
         super().__init__(status_name)
 
 
@@ -1550,6 +1551,33 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     now = datetime.now(timezone.utc)
     remaining = max(0, int((next_update - now).total_seconds()))
     return remaining, total_lifetime
+
+
+def _ocsp_this_update_unix(ocsp_response: x509_ocsp.OCSPResponse) -> Optional[int]:
+    """thisUpdate as unix seconds, used to tell a newer GOOD from the banned body."""
+    this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
+    if this_update is None:
+        return None
+    if this_update.tzinfo is None:
+        this_update = this_update.replace(tzinfo=timezone.utc)
+    try:
+        return int(this_update.timestamp())
+    except Exception:
+        return None
+
+
+def _serial_forms(serial: Optional[int]) -> Tuple[Optional[str], Optional[str]]:
+    if serial is None:
+        return None, None
+    try:
+        number = int(serial)
+    except (TypeError, ValueError):
+        return None, None
+    if number < 0:
+        return None, None
+    decimal = str(number)
+    serial_hex = format(number, "X").lstrip("0") or "0"
+    return decimal, serial_hex
 
 
 def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
@@ -2038,7 +2066,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 cert_name,
                 leaf.serial_number,
             )
-            raise _VerifiedNonGood(status_name, leaf.serial_number)
+            raise _VerifiedNonGood(status_name, leaf.serial_number, _ocsp_this_update_unix(ocsp_response))
         try:
             resp_serial = ocsp_response.serial_number
         except (ValueError, AttributeError):
@@ -2630,6 +2658,9 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
 
             db_data = entry["data"]
             db_checksum = (entry.get("checksum") or hashlib.sha256(db_data).hexdigest()).lower()
+            if _serial_blacklist_blocks(fingerprint, db_data, fingerprint[:16]):
+                log_warning("🧹 OCSP skipping database sync of blacklisted serial for %s", fingerprint[:16])
+                continue
 
             try:
                 ocsp_cert_dir = _get_sharded_ocsp_path(fingerprint)
@@ -2805,6 +2836,9 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 verified_nongood = exc
                 break
             if ocsp_der:
+                if _serial_blacklist_blocks(fingerprint, ocsp_der, cert_name):
+                    stats["ocsp_serial_blacklist_blocked"] = stats.get("ocsp_serial_blacklist_blocked", 0) + 1
+                    return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
                 _clear_nongood_marker(fingerprint)
@@ -2820,6 +2854,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 verified_nongood.status_name,
                 cert_name,
                 db,
+                verified_nongood.this_update_unix,
             )
             if tombstoned:
                 stats["ocsp_tombstoned"] = stats.get("ocsp_tombstoned", 0) + 1
@@ -3658,6 +3693,10 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
             except Exception as e:
                 log_warning("⚠️ OCSP could not parse response from database for %s during verification: %s", cert_name_raw, e)
 
+            if data and _serial_blacklist_blocks(fingerprint, data, cert_name_raw):
+                log_warning("🧹 OCSP skipping restore of blacklisted serial for %s", cert_name_raw)
+                continue
+
             try:
                 if not ocsp_path.is_file():
                     # File missing: restore from database
@@ -3842,7 +3881,7 @@ def _nongood_marker_path(fingerprint: str) -> Optional[Path]:
 
 
 def _clear_nongood_marker(fingerprint: Optional[str]) -> None:
-    """A verified GOOD answer resets the non-GOOD streak for this SPKI."""
+    """A verified GOOD answer that is allowed to publish resets the non-GOOD streak."""
     if not fingerprint:
         return
     path = _nongood_marker_path(fingerprint)
@@ -3852,6 +3891,113 @@ def _clear_nongood_marker(fingerprint: Optional[str]) -> None:
         path.unlink()
     except Exception as e:
         log_debug("⚠️ OCSP could not clear non-GOOD marker for %s: %s", fingerprint[:16], e)
+
+
+def _serial_blacklist_path(fingerprint: str) -> Optional[Path]:
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return None
+    return _get_sharded_ocsp_path(normalized) / "serial-blacklist.json"
+
+
+def _read_serial_blacklist(fingerprint: str) -> Optional[Dict[str, Any]]:
+    path = _serial_blacklist_path(fingerprint)
+    if path is None or not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"unreadable": True}
+    if not isinstance(data, dict):
+        return {"unreadable": True}
+    return data
+
+
+def _write_serial_blacklist(
+    fingerprint: str,
+    serial: Optional[int],
+    status_name: str,
+    this_update_unix: Optional[int],
+) -> None:
+    path = _serial_blacklist_path(fingerprint)
+    decimal, serial_hex = _serial_forms(serial)
+    if path is None or not decimal:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_text(
+        path,
+        json.dumps(
+            {
+                "serial": decimal,
+                "serial_hex": serial_hex,
+                "status": status_name,
+                "this_update_unix": this_update_unix,
+            }
+        ),
+        mode=0o640,
+    )
+
+
+def _clear_serial_blacklist(fingerprint: str) -> None:
+    path = _serial_blacklist_path(fingerprint)
+    if path is None or not path.is_file():
+        return
+    try:
+        path.unlink()
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clear serial blacklist for %s: %s", fingerprint[:16], e)
+
+
+def _der_serial_and_this_update(ocsp_der: bytes) -> Tuple[Optional[str], Optional[int]]:
+    try:
+        parsed = x509_ocsp.load_der_ocsp_response(ocsp_der)
+        decimal, _serial_hex = _serial_forms(parsed.serial_number)
+        return decimal, _ocsp_this_update_unix(parsed)
+    except Exception:
+        return None, None
+
+
+def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_name: str) -> bool:
+    """
+    True when this body must not be published or restored.
+    The same serial stays banned until a verified GOOD with a later thisUpdate.
+    A different serial (reissue on the same key) is not banned.
+    """
+    if not fingerprint or not ocsp_der:
+        return False
+    ban = _read_serial_blacklist(fingerprint)
+    if not ban:
+        return False
+    if ban.get("unreadable"):
+        log_error("❌ OCSP serial blacklist for %s is unreadable; refusing to publish", cert_name)
+        return True
+    banned_serial = str(ban.get("serial")) if ban.get("serial") is not None else None
+    got_serial, this_unix = _der_serial_and_this_update(ocsp_der)
+    if not banned_serial or not got_serial:
+        log_error("❌ OCSP serial blacklist for %s has no comparable serial; refusing to publish", cert_name)
+        return True
+    if got_serial != banned_serial:
+        return False
+    try:
+        ban_unix = int(ban.get("this_update_unix"))
+    except (TypeError, ValueError):
+        ban_unix = None
+    if this_unix is not None and ban_unix is not None and this_unix > ban_unix:
+        _clear_serial_blacklist(fingerprint)
+        log_info(
+            "✓ OCSP serial blacklist cleared for %s serial=%s (newer GOOD thisUpdate)",
+            cert_name,
+            got_serial,
+        )
+        return False
+    log_error(
+        "❌ OCSP serial %s for %s stays blacklisted until a newer GOOD (thisUpdate=%s, ban=%s)",
+        got_serial,
+        cert_name,
+        this_unix,
+        ban_unix,
+    )
+    return True
 
 
 def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> None:
@@ -3869,7 +4015,14 @@ def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> None:
             pass
 
 
-def _tombstone_ocsp_shard(fingerprint: str, serial: Optional[int], status_name: str, cert_name: str, db: Optional[Any]) -> bool:
+def _tombstone_ocsp_shard(
+    fingerprint: str,
+    serial: Optional[int],
+    status_name: str,
+    cert_name: str,
+    db: Optional[Any],
+    this_update_unix: Optional[int] = None,
+) -> bool:
     """
     Remove the published staple for this SPKI. Keeps must_staple in ocsp.json
     (without der_sha256) so Must-Staple still fail-closes, and bumps the epoch
@@ -3900,6 +4053,7 @@ def _tombstone_ocsp_shard(fingerprint: str, serial: Optional[int], status_name: 
         except Exception:
             pass
         _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
         der_path = shard / "ocsp.der"
         try:
             if der_path.is_file():
@@ -3930,6 +4084,7 @@ def _note_verified_nongood(
     status_name: str,
     cert_name: str,
     db: Optional[Any],
+    this_update_unix: Optional[int] = None,
 ) -> bool:
     """
     Count one verified non-GOOD answer. Tombstone the shard at the threshold.
@@ -3981,7 +4136,7 @@ def _note_verified_nongood(
     )
     if consecutive < threshold:
         return False
-    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db)
+    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix)
 
 
 def _persist_ocsp_results_to_disk(
@@ -4014,6 +4169,9 @@ def _persist_ocsp_results_to_disk(
             if not cert_fp:
                 log_error("❌ OCSP cannot store response for %s: failed to compute fingerprint", cert_name)
                 stats["errors"] = stats.get("errors", 0) + 1
+                continue
+            if _serial_blacklist_blocks(cert_fp, ocsp_der, cert_name):
+                stats["ocsp_serial_blacklist_blocked"] = stats.get("ocsp_serial_blacklist_blocked", 0) + 1
                 continue
 
             # Acquire lock to prevent race conditions with concurrent OCSP fetches.

@@ -509,6 +509,67 @@ local function read_ocsp_json(fingerprint)
 	return nil
 end
 
+-- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
+-- A different serial (reissue on the same key) is allowed. Unreadable serial
+-- while the file exists fails closed.
+local function serial_blacklist_blocks(fingerprint, resp)
+	if not is_fp64(fingerprint) or type(resp) ~= "string" or resp == "" then
+		return false
+	end
+	local raw = read_file(
+		"/var/cache/bunkerweb/ssl/"
+			.. fingerprint:sub(1, 1)
+			.. "/"
+			.. fingerprint:sub(2, 2)
+			.. "/"
+			.. fingerprint
+			.. "/serial-blacklist.json"
+	)
+	if not raw or raw == "" then
+		return false
+	end
+	local banned_hex = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
+	if not banned_hex then
+		log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		return true
+	end
+	banned_hex = banned_hex:upper():gsub("^0+", "")
+	if banned_hex == "" then
+		banned_hex = "0"
+	end
+	local got_hex = nil
+	pcall(function()
+		local ocsp_lib = require("resty.openssl.ocsp")
+		local parsed = ocsp_lib.new(resp)
+		if not parsed then
+			return
+		end
+		local serial = parsed:get_serial()
+		if type(serial) == "table" and serial.to_hex then
+			got_hex = serial:to_hex()
+		elseif serial ~= nil then
+			got_hex = tostring(serial)
+		end
+	end)
+	if type(got_hex) ~= "string" then
+		log(ngx.ERR, "OCSP serial blacklist present but response serial unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		return true
+	end
+	got_hex = got_hex:upper():gsub("%s+", ""):gsub("^0X", ""):gsub("^0+", "")
+	if got_hex == "" then
+		got_hex = "0"
+	end
+	if not got_hex:match("^[0-9A-F]+$") then
+		log(ngx.ERR, "OCSP serial blacklist present but response serial unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		return true
+	end
+	if got_hex == banned_hex then
+		log(ngx.ERR, "OCSP serial blacklist refuse staple fp=" .. fingerprint:sub(1, 16) .. "... serial_hex=" .. banned_hex:sub(1, 16))
+		return true
+	end
+	return false
+end
+
 local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
 end
@@ -900,6 +961,13 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
 			drop_cache(internalstore, fingerprint)
 		else
+			if serial_blacklist_blocks(fingerprint, cached) then
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return false, "must_staple"
+				end
+				return false
+			end
 			local verified = entry_verified(cached_verified, cached)
 			-- Only consult meta when L1 is not already crypto-verified (avoids refuse noise).
 			local authorized = false
@@ -938,6 +1006,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		-- Disk path: verified binding only exists in L1; after drop/miss, require meta authorize
 		-- or a leftover legacy sibling (get_l1 already promoted). Re-check composite if rewarmed.
 		local _, disk_verified = get_l1(internalstore, fingerprint)
+		if serial_blacklist_blocks(fingerprint, resp) then
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
+		end
 		local verified = entry_verified(disk_verified, resp)
 		local authorized = false
 		if not verified then
@@ -979,6 +1053,13 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
 			drop_cache(internalstore, fingerprint)
 		elseif entry_verified(cached_verified, cached) then
+			if serial_blacklist_blocks(fingerprint, cached) then
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return false, "must_staple"
+				end
+				return false
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(cached)
 			end)
@@ -988,6 +1069,13 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
 			drop_cache(internalstore, fingerprint)
 		else
+			if serial_blacklist_blocks(fingerprint, cached) then
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return false, "must_staple"
+				end
+				return false
+			end
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
 			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
 			if result == true then
@@ -1015,6 +1103,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			return false
 		end
 		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
+		if serial_blacklist_blocks(fingerprint, resp) then
+			if must_staple then
+				return false, "must_staple"
+			end
+			return false
+		end
 		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 		if result == true then
 			warm_cache(internalstore, fingerprint, resp, true, meta_expires_unix(meta))
