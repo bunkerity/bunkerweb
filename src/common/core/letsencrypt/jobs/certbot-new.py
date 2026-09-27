@@ -130,6 +130,16 @@ CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
+def _ocsp_stapling_enabled_anywhere() -> bool:
+    """True when global or any multisite service has SSL_USE_OCSP_STAPLING=yes."""
+    if getenv("MULTISITE", "no").lower() == "yes":
+        suffix = "_SSL_USE_OCSP_STAPLING"
+        for key, value in environ.items():
+            if key.endswith(suffix) and str(value).lower() == "yes":
+                return True
+    return getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
+
+
 def normalize_server_names(server_names: str) -> Set[str]:
     """Return a normalized set of server names split on comma/space, lowercased and trimmed."""
     return {part.strip().lower() for part in server_names.replace(",", " ").split() if part.strip()}
@@ -1152,7 +1162,7 @@ try:
 
         # * Trigger OCSP stapling refresh for newly issued certificates (AFTER database save)
         # OCSP job will compare new certs with cached ones and process differential updates
-        if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+        if status == 1 and _ocsp_stapling_enabled_anywhere():
             LOGGER.info("🔄 OCSP triggering refresh for newly issued certificates")
             try:
                 import sys

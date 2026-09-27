@@ -2325,10 +2325,27 @@ def _service_name_from_dir(dir_name: str) -> str:
 
 
 def _is_ocsp_enabled_for_service(service_name: str) -> bool:
-    """Check if OCSP stapling is enabled for a specific service (multisite setting)."""
-    # Check service-specific setting first, fall back to global
-    value = os.getenv(f"{service_name}_SSL_USE_OCSP_STAPLING", os.getenv("SSL_USE_OCSP_STAPLING", "yes"))
-    return value.lower() == "yes"
+    """Check if OCSP stapling is enabled for a specific service (multisite setting).
+
+    The scheduler expands multisite settings to ``{service}_SSL_USE_OCSP_STAPLING``.
+    That value wins when set. Otherwise the global ``SSL_USE_OCSP_STAPLING`` is used.
+    The plugin default is ``no``.
+    """
+    if os.getenv("MULTISITE", "no").lower() == "yes" and service_name:
+        site_value = os.getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
+        if site_value is not None:
+            return site_value.lower() == "yes"
+    return os.getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
+
+
+def _is_ocsp_enabled_anywhere() -> bool:
+    """True when the global setting or any multisite service enables OCSP stapling."""
+    if os.getenv("MULTISITE", "no").lower() == "yes":
+        suffix = "_SSL_USE_OCSP_STAPLING"
+        for key, value in os.environ.items():
+            if key.endswith(suffix) and str(value).lower() == "yes":
+                return True
+    return os.getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
 
 
 def cleanup_ocsp_cache(
@@ -3279,10 +3296,10 @@ def main() -> int:
         except Exception as e:
             log_debug("⚠️ OCSP temporary file cleanup failed: %s", e)
 
-        # Check if OCSP stapling is globally disabled
-        ocsp_enabled = os.getenv("SSL_USE_OCSP_STAPLING", "yes").lower()
-        if ocsp_enabled != "yes":
-            log_info("🧹 OCSP stapling is globally disabled (SSL_USE_OCSP_STAPLING=%s), cleaning up all caches", ocsp_enabled)
+        # Skip the whole job only when no service wants stapling.
+        # A global "no" must not wipe caches for sites that override the setting to "yes".
+        if not _is_ocsp_enabled_anywhere():
+            log_info("🧹 OCSP stapling is disabled for every service, cleaning up all caches")
             cleanup_ocsp_cache(db, purge_db=True)
             return 0
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from subprocess import DEVNULL, PIPE, Popen, TimeoutExpired, run
 from sys import exit as sys_exit, path as sys_path
@@ -31,6 +31,16 @@ LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
 OCSP_REFRESH_TIMEOUT = 2100  # 2100 seconds (35 minutes) max to cover ocsp-refresh job worst-case duration
 status = 0
+
+
+def _ocsp_stapling_enabled_anywhere() -> bool:
+    """True when global or any multisite service has SSL_USE_OCSP_STAPLING=yes."""
+    if getenv("MULTISITE", "no").lower() == "yes":
+        suffix = "_SSL_USE_OCSP_STAPLING"
+        for key, value in environ.items():
+            if key.endswith(suffix) and str(value).lower() == "yes":
+                return True
+    return getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
 
 
 try:
@@ -119,7 +129,7 @@ try:
 
     # Trigger OCSP refresh after successful renewal (AFTER database save)
     # OCSP job will compare new certs with cached ones and process differential updates
-    if status == 1 and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+    if status == 1 and _ocsp_stapling_enabled_anywhere():
         LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
 
         try:

@@ -23,6 +23,15 @@ JOB = Job(LOGGER, __file__)
 OCSP_REFRESH_TIMEOUT = 2100  # 35 minutes max to cover ocsp-refresh job worst-case duration
 
 
+def _ocsp_stapling_enabled_for(service_name: str) -> bool:
+    """True when this service, or the global setting, has SSL_USE_OCSP_STAPLING=yes."""
+    if getenv("MULTISITE", "no").lower() == "yes" and service_name:
+        site_value = getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
+        if site_value is not None:
+            return site_value.lower() == "yes"
+    return getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
+
+
 def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["cert", "key"], server_name: str) -> Union[bytes, Path, None]:
     """Process SSL certificate or key data from file path or direct data (base64 or plain text)"""
     try:
@@ -224,7 +233,7 @@ try:
 
     # Trigger OCSP stapling refresh when certificates changed (AFTER caching)
     # OCSP job will compare new certs with cached ones and process differential updates
-    if changed_domains and getenv("SSL_USE_OCSP_STAPLING", "yes").lower() == "yes":
+    if changed_domains and any(_ocsp_stapling_enabled_for(server) for server in changed_domains):
         LOGGER.info(f"🔄 OCSP triggering refresh for {len(changed_domains)} changed custom cert(s): {', '.join(changed_domains)}")
         try:
             import sys
