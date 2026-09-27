@@ -306,6 +306,7 @@ try:
                             elif resp.status_code != 200:
                                 status = 2
                                 LOGGER.error(f"Got status code {resp.status_code}, skipping...")
+                                resp.close()
                                 failed_urls.add(url)
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
