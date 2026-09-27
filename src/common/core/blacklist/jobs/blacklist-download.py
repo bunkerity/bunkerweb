@@ -54,8 +54,8 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 
 def parse_http_metadata(cached_data: bytes) -> dict:
-    """Extract ETag, Last-Modified, and Content-Length stored in cache file comment headers."""
-    meta = {"etag": "", "last_modified": "", "content_length": ""}
+    """Extract ETag and Last-Modified stored in cache file comment headers."""
+    meta = {"etag": "", "last_modified": ""}
     for line in cached_data.split(b"\n"):
         if not line.startswith(b"# "):
             break
@@ -63,20 +63,16 @@ def parse_http_metadata(cached_data: bytes) -> dict:
             meta["etag"] = line[8:].decode("utf-8", errors="replace").strip()
         elif line.startswith(b"# Last-Modified: "):
             meta["last_modified"] = line[17:].decode("utf-8", errors="replace").strip()
-        elif line.startswith(b"# Content-Length: "):
-            meta["content_length"] = line[18:].decode("utf-8", errors="replace").strip()
     return meta
 
 
-def build_cache_header(url: str, etag: str = "", last_modified: str = "", content_length: str = "") -> bytes:
+def build_cache_header(url: str, etag: str = "", last_modified: str = "") -> bytes:
     """Build cache file header bytes with URL and optional HTTP metadata."""
     header = b"# Downloaded from " + url.encode("utf-8") + b"\n"
     if etag:
         header += b"# ETag: " + etag.encode("utf-8") + b"\n"
     if last_modified:
         header += b"# Last-Modified: " + last_modified.encode("utf-8") + b"\n"
-    if content_length:
-        header += b"# Content-Length: " + content_length.encode("utf-8") + b"\n"
     return header
 
 
@@ -264,7 +260,6 @@ try:
                         old_cached_data = cached_url.get("data", b"") if isinstance(cached_url, dict) else b""
                         etag = ""
                         last_modified = ""
-                        content_length = ""
                         iterable = []
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
                         if url.startswith("file://"):
@@ -288,8 +283,6 @@ try:
                                     req_headers["If-None-Match"] = meta["etag"]
                                 elif meta["last_modified"]:
                                     req_headers["If-Modified-Since"] = meta["last_modified"]
-                                # No ETag or Last-Modified available: Content-Length alone is not
-                                # a reliable cache validator, so always perform a full GET.
 
                             if not handle_304:
                                 max_retries = 3
@@ -321,7 +314,6 @@ try:
                                 else:
                                     etag = resp.headers.get("ETag", "")
                                     last_modified = resp.headers.get("Last-Modified", "")
-                                    content_length = resp.headers.get("Content-Length", "")
                                     iterable = resp.iter_lines()
 
                         if not failed:
@@ -359,7 +351,7 @@ try:
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["total_lines"] += count_lines
 
-                                cached, err = JOB.cache_file(url_file, build_cache_header(url, etag, last_modified, content_length) + url_content)
+                                cached, err = JOB.cache_file(url_file, build_cache_header(url, etag, last_modified) + url_content)
                                 if not cached:
                                     LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
