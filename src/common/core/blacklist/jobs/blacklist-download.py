@@ -281,7 +281,7 @@ try:
                                 meta = parse_http_metadata(old_cached_data)
                                 if meta["etag"]:
                                     req_headers["If-None-Match"] = meta["etag"]
-                                elif meta["last_modified"]:
+                                if meta["last_modified"]:
                                     req_headers["If-Modified-Since"] = meta["last_modified"]
 
                             max_retries = 3
