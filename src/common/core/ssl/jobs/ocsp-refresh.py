@@ -130,6 +130,55 @@ JOB_TIMEOUT_SECONDS = 2040  # 34 minutes
 
 # Use scheduler-managed cache directory (automatically synced from database on restart)
 CONFIGS_SSL_BASE = Path(os.sep, "var", "cache", "bunkerweb", "ssl")
+
+
+def _log_ocsp_cache_mount_hints() -> None:
+    """
+    Ops hint: handshake Lua reads the same path the job writes. Split mounts between
+    scheduler and BunkerWeb break stapling unless each node restores via DB generate_caches.
+    """
+    log_info(
+        "ℹ️ OCSP cache %s must be visible to BunkerWeb workers "
+        "(shared volume with the scheduler, or restored via DB generate_caches on each instance)",
+        CONFIGS_SSL_BASE,
+    )
+    try:
+        mounts_path = Path("/proc/self/mountinfo")
+        if not mounts_path.is_file():
+            return
+        cache_resolved = str(CONFIGS_SSL_BASE.resolve())
+        best_mount = ""
+        best_fstype = ""
+        for line in mounts_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            # mountinfo: ... mount_point fstype ...
+            parts = line.split()
+            if len(parts) < 9:
+                continue
+            # Find separator "-" then fstype is next field
+            try:
+                dash = parts.index("-")
+            except ValueError:
+                continue
+            if dash + 1 >= len(parts):
+                continue
+            mount_point = parts[4]
+            fstype = parts[dash + 1]
+            if cache_resolved == mount_point or cache_resolved.startswith(mount_point.rstrip("/") + "/"):
+                if len(mount_point) >= len(best_mount):
+                    best_mount = mount_point
+                    best_fstype = fstype
+        remoteish = {"nfs", "nfs4", "cifs", "smb", "ceph", "fuse", "fuse.ceph", "glusterfs", "afs"}
+        if best_fstype and (best_fstype in remoteish or best_fstype.startswith("fuse")):
+            log_info(
+                "ℹ️ OCSP cache appears on %s (%s); advisory locks use local /run instead. "
+                "Ensure a single writer or DB-backed restore so nodes stay coherent.",
+                best_fstype,
+                best_mount or CONFIGS_SSL_BASE,
+            )
+    except Exception as e:
+        log_debug("⚠️ OCSP could not inspect cache mount type: %s", e)
+
+
 MIN_TTL = 4500  # 75 minutes: minimum safety threshold. Smart refresh uses max(MIN_TTL, 20% of response lifetime)
 OPENSSL_BIN = "/usr/bin/openssl"
 
@@ -589,16 +638,58 @@ def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
         return None
 
 
+def _ocsp_lock_root_candidates() -> List[Path]:
+    """Local runtime dirs for flock files (never the OCSP cache tree)."""
+    return [
+        Path(os.sep, "run", "bunkerweb"),
+        Path(os.sep, "var", "run", "bunkerweb"),
+        Path(os.sep, "tmp", "bunkerweb"),
+    ]
+
+
+def _prepare_ocsp_lock_root() -> Optional[Path]:
+    """
+    Pick a non-world-writable local directory for advisory locks.
+
+    Locks must not live under CONFIGS_SSL_BASE: that path is often NFS/Ceph/overlay
+    where fcntl.flock is a no-op or not coherent across clients.
+    """
+    for candidate in _ocsp_lock_root_candidates():
+        try:
+            candidate.mkdir(parents=True, exist_ok=True, mode=0o700)
+        except Exception as e:
+            log_debug("⚠️ OCSP lock candidate mkdir failed for %s: %s", candidate, e)
+            continue
+        try:
+            if candidate.is_symlink():
+                log_error("❌ OCSP lock directory %s is a symlink (refusing).", candidate)
+                continue
+            st = candidate.stat()
+            if st.st_mode & 0o022:
+                log_error("❌ OCSP lock directory %s has unsafe permissions (mode=%o).", candidate, st.st_mode & 0o777)
+                continue
+            return candidate
+        except Exception as e:
+            log_debug("⚠️ OCSP lock candidate stat failed for %s: %s", candidate, e)
+            continue
+    return None
+
+
+def _fingerprint_lock_file(lock_root: Path, cert_fp: str) -> Path:
+    """Per-SPKI lock path under the local runtime root (sharded)."""
+    return lock_root / "ocsp-locks" / cert_fp[0] / cert_fp[1] / f"ocsp-{cert_fp}.lock"
+
+
 def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int = 600) -> Optional[int]:
     """
     Acquire a file-based lock for a specific certificate to prevent race conditions
     when multiple scheduler instances fetch OCSP responses concurrently.
 
-    Lock files are stored in a non-world-writable runtime directory (preferred: /run/bunkerweb,
-    then /var/run/bunkerweb, then a safe fallback under /tmp). Timestamp-based staleness detection
-    is used for identifying crashed/abandoned locks.
-    If a lock file hasn't been updated in stale_threshold seconds, it's considered stale
-    (indicating the previous process crashed or is hung).
+    Lock files are stored in a non-world-writable *local* runtime directory (preferred:
+    /run/bunkerweb, then /var/run/bunkerweb, then a safe fallback under /tmp). They are
+    intentionally not placed on the OCSP cache filesystem so NFS/overlay flock gaps
+    cannot reintroduce torn issuer/der/json publishes. Timestamp-based staleness
+    detection identifies crashed/abandoned locks.
 
     Args:
         cert_name: Certificate identifier
@@ -609,15 +700,17 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
         File descriptor on success, None if lock unavailable or timed out
     """
     # Per-certificate lock is keyed by the certificate public key fingerprint.
-    # This avoids host/cert-name collisions and matches the fingerprint-based OCSP cache layout.
     cert_fp = _normalize_fingerprint(cert_name)
+    lock_root = _prepare_ocsp_lock_root()
+    if not lock_root:
+        return None
+
     lock_dir: Optional[Path] = None
     lock_file: Optional[Path] = None
 
-    # Fingerprint-based lock dir: root-folder/ssl/x/x (2-level sharding).
     if cert_fp and cert_name != "main":
-        lock_dir = CONFIGS_SSL_BASE / cert_fp[0] / cert_fp[1]
-        lock_file = lock_dir / f"ocsp-{cert_fp}.lock"
+        lock_file = _fingerprint_lock_file(lock_root, cert_fp)
+        lock_dir = lock_file.parent
         try:
             lock_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
             if lock_dir.is_symlink():
@@ -634,46 +727,9 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
         except Exception as e:
             log_debug("⚠️ OCSP could not prepare fingerprint lock directory %s: %s", lock_dir, e)
             return None
-
-    # Fallback (e.g. cert_name == "main" or unexpected non-fingerprint input): runtime lock dir.
-    if lock_file is None or lock_dir is None:
-        # Lock directories must not be attacker-controlled.
-        # `/tmp` is world-writable, so we prefer runtime dirs first and only fall back
-        # to `/tmp` if it's not a symlink and has safe permissions.
-        lock_dir_candidates = [
-            Path(os.sep, "run", "bunkerweb"),
-            Path(os.sep, "var", "run", "bunkerweb"),
-            Path(os.sep, "tmp", "bunkerweb"),
-        ]
-
-        for candidate in lock_dir_candidates:
-            try:
-                candidate.mkdir(parents=True, exist_ok=True, mode=0o700)
-            except Exception as e:
-                log_debug("⚠️ OCSP lock candidate mkdir failed for %s: %s", candidate, e)
-                continue
-
-            try:
-                if candidate.is_symlink():
-                    log_error("❌ OCSP lock directory %s is a symlink (refusing).", candidate)
-                    continue
-
-                st = candidate.stat()
-                # Reject world/group-writable directories.
-                if st.st_mode & 0o022:
-                    log_error("❌ OCSP lock directory %s has unsafe permissions (mode=%o).", candidate, st.st_mode & 0o777)
-                    continue
-
-                lock_dir = candidate
-                break
-            except Exception as e:
-                log_debug("⚠️ OCSP lock candidate stat failed for %s: %s", candidate, e)
-                continue
-
-        if not lock_dir:
-            return None
-
+    else:
         sanitized_name = _sanitize_filename(cert_name)
+        lock_dir = lock_root
         lock_file = lock_dir / f"ocsp-{sanitized_name}.lock"
 
     start_time = time.time()
@@ -738,8 +794,8 @@ def _acquire_cert_lock(cert_name: str, timeout: int = 300, stale_threshold: int 
             "❌ OCSP job timed out waiting for the main lock (%ds timeout). "
             "Another OCSP job is still running. This may indicate a hung or very slow job. "
             "Check for stale lock files: rm -f %s/ocsp*.lock",
-            chosen_lock_dir,
             timeout,
+            chosen_lock_dir,
         )
     else:
         log_warning(
@@ -757,22 +813,30 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
     """
     if fd is None:
         return
-    
-    cert_fp = _normalize_fingerprint(cert_name)
-    lock_file_name: str
-    lock_file: Optional[Path] = None
-    lock_dir_candidates = [
-        Path(os.sep, "run", "bunkerweb"),
-        Path(os.sep, "var", "run", "bunkerweb"),
-        Path(os.sep, "tmp", "bunkerweb"),
-    ]
 
-    # Fingerprint-based lock location: root-folder/ssl/x/x
+    cert_fp = _normalize_fingerprint(cert_name)
+    lock_file: Optional[Path] = None
+
     if cert_fp and cert_name != "main":
-        lock_file = CONFIGS_SSL_BASE / cert_fp[0] / cert_fp[1] / f"ocsp-{cert_fp}.lock"
+        for root in _ocsp_lock_root_candidates():
+            candidate = _fingerprint_lock_file(root, cert_fp)
+            if candidate.exists():
+                lock_file = candidate
+                break
+        if lock_file is None:
+            # Prefer primary runtime path for unlink-after-create races
+            root = _prepare_ocsp_lock_root()
+            if root:
+                lock_file = _fingerprint_lock_file(root, cert_fp)
     else:
         sanitized_name = _sanitize_filename(cert_name)
         lock_file_name = f"ocsp-{sanitized_name}.lock"
+        for lock_dir in _ocsp_lock_root_candidates():
+            candidate = lock_dir / lock_file_name
+            if candidate.exists():
+                lock_file = candidate
+                break
+
     try:
         # Unlink while still holding the flock to avoid a release race where
         # another process could acquire the same lock file name before we unlock.
@@ -781,23 +845,12 @@ def _release_cert_lock(fd: Optional[int], cert_name: str = "undefined") -> None:
                 if lock_file.exists() and not lock_file.is_symlink():
                     lock_file.unlink()
             except Exception as e:
-                log_debug("⚠️ OCSP fingerprint lock file unlink failed for %s: %s", lock_file, e)
-        else:
-            for lock_dir in lock_dir_candidates:
-                lock_file = lock_dir / lock_file_name
-                try:
-                    if lock_file.exists() and not lock_file.is_symlink():
-                        lock_file.unlink()
-                        break
-                except Exception as e:
-                    log_debug("⚠️ OCSP lock file unlink failed for %s: %s", lock_file, e)
-                    continue
+                log_debug("⚠️ OCSP lock file unlink failed for %s: %s", lock_file, e)
 
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
     except Exception as e:
         log_debug("⚠️ OCSP could not release lock for %s: %s", cert_name, e)
-
 
 def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
     """
@@ -824,132 +877,93 @@ def _refresh_cert_lock(fd: Optional[int], cert_name: str) -> None:
         log_debug("⚠️ OCSP could not refresh lock timestamp for %s: %s", cert_name, e)
 
 
+def _try_unlink_stale_lock(lock_file: Path, stale_threshold: int, current_time: float) -> bool:
+    """Unlink one stale lock if we can acquire it. Returns True if removed."""
+    try:
+        mtime = lock_file.stat().st_mtime
+        age = current_time - mtime
+        # stale_threshold < 0 means "always try" (legacy cache-fs lock migration).
+        if stale_threshold >= 0 and age <= stale_threshold:
+            return False
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clean lock file %s: %s", lock_file.name, e)
+        return False
+
+    fd = None
+    try:
+        fd = os.open(str(lock_file), os.O_RDWR | os.O_CREAT, 0o600)
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            lock_file.unlink()
+        except Exception as e:
+            log_debug("⚠️ OCSP could not unlink stale lock file %s: %s", lock_file.name, e)
+        log_debug("🧹 OCSP removed stale lock file %s (age %.0fs)", lock_file.name, age)
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+        return True
+    except BlockingIOError:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except Exception as e:
+                log_debug("⚠️ OCSP could not close stale lock fd: %s", e)
+        return False
+    except Exception as e:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except Exception as close_e:
+                log_debug("⚠️ OCSP could not close stale lock fd after exception: %s", close_e)
+        log_debug("⚠️ OCSP failed to unlink stale lock file %s: %s", lock_file.name, e)
+        return False
+
+
 def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
     """
     Clean up stale lock files from previous crashed/aborted jobs at startup.
-    This is a defensive measure to prevent lock accumulation from crashed processes.
-
-    Args:
-        stale_threshold: Lock age (seconds) to consider stale (default 300 = 5 minutes)
+    Scans local runtime lock roots (including ocsp-locks/) and removes leftover
+    lock files that used to live on the OCSP cache filesystem.
     """
     current_time = time.time()
     cleaned = 0
 
-    lock_dir_candidates = [
-        Path(os.sep, "run", "bunkerweb"),
-        Path(os.sep, "var", "run", "bunkerweb"),
-        Path(os.sep, "tmp", "bunkerweb"),
-    ]
-
-    for lock_dir in lock_dir_candidates:
+    for lock_dir in _ocsp_lock_root_candidates():
         if not lock_dir.exists():
             continue
         try:
             if lock_dir.is_symlink():
                 continue
             st = lock_dir.stat()
-            # Reject world/group-writable directories.
             if st.st_mode & 0o022:
                 continue
         except Exception as e:
             log_debug("⚠️ OCSP lock directory stat failed for %s: %s", lock_dir, e)
             continue
 
+        # Main / named locks at runtime root
         for lock_file in lock_dir.glob("ocsp-*.lock"):
+            if _try_unlink_stale_lock(lock_file, stale_threshold, current_time):
+                cleaned += 1
+
+        # Fingerprint locks under runtime/ocsp-locks/h1/h2/
+        locks_root = lock_dir / "ocsp-locks"
+        if locks_root.is_dir() and not locks_root.is_symlink():
             try:
-                mtime = lock_file.stat().st_mtime
-                age = current_time - mtime
-                if age > stale_threshold:
-                    # Only unlink if we can also acquire the lock.
-                    # This avoids the stale-cleanup unlink race where another process
-                    # is legitimately holding the lock.
-                    fd = None
-                    try:
-                        fd = os.open(str(lock_file), os.O_RDWR | os.O_CREAT, 0o600)
-                        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                        # Unlink while the lock is still held to avoid a tiny race
-                        # between unlocking and deleting the file.
-                        try:
-                            lock_file.unlink()
-                        except Exception as e:
-                            log_debug("⚠️ OCSP could not unlink stale lock file %s: %s", lock_file.name, e)
-
+                for lock_file in locks_root.glob("*/*/ocsp-*.lock"):
+                    if _try_unlink_stale_lock(lock_file, stale_threshold, current_time):
                         cleaned += 1
-                        log_debug("🧹 OCSP removed stale lock file %s (age %.0fs)", lock_file.name, age)
-                        fcntl.flock(fd, fcntl.LOCK_UN)
-                        os.close(fd)
-                        fd = None
-                    except BlockingIOError:
-                        if fd is not None:
-                            try:
-                                os.close(fd)
-                            except Exception as e:
-                                log_debug("⚠️ OCSP could not close stale lock fd: %s", e)
-                        # Another process is holding the lock.
-                        continue
-                    except Exception as e:
-                        if fd is not None:
-                            try:
-                                os.close(fd)
-                            except Exception as close_e:
-                                log_debug("⚠️ OCSP could not close stale lock fd after exception: %s", close_e)
-                        log_debug("⚠️ OCSP failed to unlink stale lock file %s (age %.0fs): %s", lock_file.name, age, e)
-                        continue
             except Exception as e:
-                log_debug("⚠️ OCSP could not clean lock file %s: %s", lock_file.name, e)
+                log_debug("⚠️ OCSP fingerprint lock cleanup failed under %s: %s", locks_root, e)
 
-    # Fingerprint-based lock cleanup (root-folder/ssl/x/x)
+    # Migrate away: remove any legacy locks left on the cache filesystem.
     if CONFIGS_SSL_BASE.is_dir():
         try:
-            for lock_dir in CONFIGS_SSL_BASE.glob("*/*"):
-                try:
-                    if not lock_dir.is_dir() or lock_dir.is_symlink():
-                        continue
-                    st = lock_dir.stat()
-                    if st.st_mode & 0o022:
-                        continue
-                except Exception as e:
-                    log_debug("⚠️ OCSP lock directory stat failed for fingerprint shard %s: %s", lock_dir, e)
-                    continue
-
-                for lock_file in lock_dir.glob("ocsp-*.lock"):
-                    try:
-                        mtime = lock_file.stat().st_mtime
-                        age = current_time - mtime
-                        if age <= stale_threshold:
-                            continue
-
-                        fd = None
-                        try:
-                            fd = os.open(str(lock_file), os.O_RDWR | os.O_CREAT, 0o600)
-                            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                            try:
-                                lock_file.unlink()
-                            except Exception as e:
-                                log_debug("⚠️ OCSP could not unlink stale fingerprint lock file %s: %s", lock_file.name, e)
-
-                            cleaned += 1
-                            fcntl.flock(fd, fcntl.LOCK_UN)
-                            os.close(fd)
-                            fd = None
-                        except BlockingIOError:
-                            if fd is not None:
-                                try:
-                                    os.close(fd)
-                                except Exception as close_e:
-                                    log_debug("⚠️ OCSP could not close stale fingerprint lock fd: %s", close_e)
-                            continue
-                        except Exception as e:
-                            if fd is not None:
-                                try:
-                                    os.close(fd)
-                                except Exception as close_e:
-                                    log_debug("⚠️ OCSP could not close stale fingerprint lock fd after exception: %s", close_e)
-                            log_debug("⚠️ OCSP failed to cleanup stale fingerprint lock file %s: %s", lock_file.name, e)
-                    except Exception as e:
-                        log_debug("⚠️ OCSP could not stat stale fingerprint lock file %s: %s", lock_file, e)
+            for lock_file in CONFIGS_SSL_BASE.glob("*/*/ocsp-*.lock"):
+                if _try_unlink_stale_lock(lock_file, stale_threshold=-1, current_time=current_time):
+                    cleaned += 1
+                    log_debug("🧹 OCSP removed legacy cache-fs lock %s", lock_file)
         except Exception as e:
-            log_debug("⚠️ OCSP fingerprint lock cleanup failed: %s", e)
+            log_debug("⚠️ OCSP legacy cache lock cleanup failed: %s", e)
 
     if cleaned > 0:
         log_info("🧹 OCSP cleaned up %d stale lock file(s) from previous runs", cleaned)
@@ -3692,6 +3706,7 @@ def main() -> int:
                 test_file.touch()
                 test_file.unlink()
                 log_debug("✓ OCSP cache directory %s is readable and writable", CONFIGS_SSL_BASE)
+                _log_ocsp_cache_mount_hints()
             except PermissionError:
                 log_error("❌ OCSP cache directory %s is not writable (permission denied). Check directory ownership and permissions.", CONFIGS_SSL_BASE)
                 return 2

@@ -91,18 +91,9 @@ local function to_hex(bin)
 end
 
 -- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
-local function spki_fingerprint(cert_pem, internalstore)
-	local md5 = ngx.md5 and ngx.md5(cert_pem) or nil
-	local cache_key = md5 and ("TLS:SSL:ocsp_spki:" .. md5) or nil
-	if cache_key then
-		local ok, cached = pcall(function()
-			return internalstore:get(cache_key, true)
-		end)
-		if ok and is_fp64(cached) then
-			return cached:lower()
-		end
-	end
-
+-- Do not memoize by ngx.md5(cert_pem): PEM whitespace/rewrap changes the key while
+-- the SPKI is identical, which caused cache misses and path skew vs the job.
+local function spki_fingerprint(cert_pem, _internalstore)
 	local fingerprint = nil
 	local ok_fp, err = pcall(function()
 		local x509 = require("resty.openssl.x509")
@@ -123,11 +114,7 @@ local function spki_fingerprint(cert_pem, internalstore)
 	if not ok_fp then
 		log(ngx.DEBUG, "OCSP SPKI fingerprint failed: " .. tostring(err))
 	end
-
-	if cache_key and is_fp64(fingerprint) then
-		pcall(function()
-			internalstore:set(cache_key, fingerprint, 86400, true)
-		end)
+	if is_fp64(fingerprint) then
 		return fingerprint
 	end
 	return nil
