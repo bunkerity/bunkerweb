@@ -523,19 +523,46 @@ end
 -- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
 -- Require meta.fingerprint match AND der_sha256 == sha256(body) so a swapped
 -- ocsp.der under matching SPKI meta cannot be stapled.
+-- Logs accept/refuse with truncated expected vs observed digests for audit.
 local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
+	local fp_short = (type(fingerprint) == "string" and fingerprint:sub(1, 16)) or "?"
 	if not ocsp_json_fingerprint_matches(meta, fingerprint) then
+		log(
+			ngx.DEBUG,
+			"OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=fingerprint_mismatch_or_missing_meta"
+		)
 		return false
 	end
 	if type(meta.der_sha256) ~= "string" then
+		log(ngx.ERR, "OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=missing_der_sha256")
 		return false
 	end
 	local meta_sha = meta.der_sha256:lower()
 	if #meta_sha ~= 64 or not meta_sha:match("^[0-9a-f]+$") then
+		log(ngx.ERR, "OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=invalid_der_sha256")
 		return false
 	end
 	local body_sha = resp_binding(resp)
-	return body_sha ~= nil and body_sha == meta_sha
+	local meta_short = meta_sha:sub(1, 16)
+	local body_short = (type(body_sha) == "string" and body_sha:sub(1, 16)) or "nil"
+	if body_sha == nil or body_sha ~= meta_sha then
+		log(
+			ngx.ERR,
+			"OCSP meta der_sha256 refuse fp="
+				.. fp_short
+				.. "... expected="
+				.. meta_short
+				.. "... observed="
+				.. body_short
+				.. "..."
+		)
+		return false
+	end
+	log(
+		ngx.INFO,
+		"OCSP meta der_sha256 accept fp=" .. fp_short .. "... der_sha256=" .. meta_short .. "..."
+	)
+	return true
 end
 
 -- Absolute unix nextUpdate from job meta (preferred) or legacy "iso + Ns" expires.
@@ -874,7 +901,11 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 			drop_cache(internalstore, fingerprint)
 		else
 			local verified = entry_verified(cached_verified, cached)
-			local authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
+			-- Only consult meta when L1 is not already crypto-verified (avoids refuse noise).
+			local authorized = false
+			if not verified then
+				authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
+			end
 			if verified or authorized then
 				local ok_set, set_ok, set_err = pcall(function()
 					return ocsp.set_ocsp_status_resp(cached)
@@ -908,7 +939,10 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		-- or a leftover legacy sibling (get_l1 already promoted). Re-check composite if rewarmed.
 		local _, disk_verified = get_l1(internalstore, fingerprint)
 		local verified = entry_verified(disk_verified, resp)
-		local authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
+		local authorized = false
+		if not verified then
+			authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
+		end
 		if verified or authorized then
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
