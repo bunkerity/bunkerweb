@@ -3652,15 +3652,23 @@ def main() -> int:
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="OCSP refresh job for BunkerWeb")
     parser.add_argument("--force", action="store_true", help="Force full OCSP refresh and TTL checks managed by the job")
+    parser.add_argument(
+        "--changed-only",
+        action="store_true",
+        help="Only process new/changed certificates; skip unchanged TTL checks (for post-renew/issuance hooks)",
+    )
     parser.add_argument("--force-fetch", action="store_true", help="Force refetch all OCSP responses from upstream PKI, do not replace existing files on error")
     args, unknown = parser.parse_known_args()
     force_all = args.force
+    changed_only = args.changed_only
     force_fetch = args.force_fetch
 
     try:
         force_flags = ""
         if force_all:
             force_flags += " [FORCE]"
+        if changed_only:
+            force_flags += " [CHANGED-ONLY]"
         if force_fetch:
             force_flags += " [FORCE-FETCH]"
         log_info("🔄 OCSP refresh job started with differential update strategy (timeout in %d minutes%s)",
@@ -3771,8 +3779,13 @@ def main() -> int:
         last_refresh_key = "last_full_refresh"
         now_ts = int(time.time())
         skip_unchanged_ttl_checks = False
-        
-        if not force_all:
+
+        # Post-renew/issuance hooks use --changed-only so the soft deadline is spent on
+        # new/changed leaves, not a whole-fleet unchanged TTL walk.
+        if changed_only and not force_all:
+            skip_unchanged_ttl_checks = True
+            log_info("ℹ️ OCSP --changed-only: processing new/changed certificates only (skipping unchanged TTL checks)")
+        elif not force_all:
             last_refresh_entry = db.get_job_cache_file(file_name=last_refresh_key, job_name="ocsp-refresh", with_info=True)
             if last_refresh_entry and last_refresh_entry.get("data") and stats.get("expired_cleaned", 0) == 0:
                 try:

@@ -146,7 +146,7 @@ try:
             import sys
 
             ocsp_script = join(sep, "usr", "share", "bunkerweb", "core", "ssl", "jobs", "ocsp-refresh.py")
-            result = run([sys.executable, ocsp_script, "--force"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
+            result = run([sys.executable, ocsp_script, "--changed-only"], stdin=DEVNULL, capture_output=True, text=True, timeout=OCSP_REFRESH_TIMEOUT)
             if result.returncode == 0:
                 LOGGER.info("✓ OCSP refresh completed successfully after renewal")
             else:
