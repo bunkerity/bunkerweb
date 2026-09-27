@@ -581,49 +581,91 @@ local function ocsp_json_fingerprint_matches(meta, fingerprint)
 	return meta.fingerprint:lower() == fingerprint
 end
 
+-- Shared ligand: job-published ocsp.json der_sha256. HTTP (internalstore) and
+-- stream (internalstore_stream) cannot share L1 shm; this disk binding is the
+-- cross-zone stand-in for "the ligand HTTP would accept."
+-- Returns ok, reason, meta_sha, body_sha (sha values only on mismatch / accept).
+local function ocsp_json_ligand_matches(meta, fingerprint, resp)
+	if not ocsp_json_fingerprint_matches(meta, fingerprint) then
+		return false, "fingerprint_mismatch_or_missing_meta", nil, nil
+	end
+	if type(meta.der_sha256) ~= "string" then
+		return false, "missing_der_sha256", nil, nil
+	end
+	local meta_sha = meta.der_sha256:lower()
+	if #meta_sha ~= 64 or not meta_sha:match("^[0-9a-f]+$") then
+		return false, "invalid_der_sha256", nil, nil
+	end
+	local body_sha = resp_binding(resp)
+	if body_sha == nil or body_sha ~= meta_sha then
+		return false, "der_sha256_mismatch", meta_sha, body_sha
+	end
+	return true, nil, meta_sha, body_sha
+end
+
 -- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
 -- Require meta.fingerprint match AND der_sha256 == sha256(body) so a swapped
 -- ocsp.der under matching SPKI meta cannot be stapled.
 -- Logs accept/refuse with truncated expected vs observed digests for audit.
 local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 	local fp_short = (type(fingerprint) == "string" and fingerprint:sub(1, 16)) or "?"
-	if not ocsp_json_fingerprint_matches(meta, fingerprint) then
-		log(
-			ngx.DEBUG,
-			"OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=fingerprint_mismatch_or_missing_meta"
-		)
-		return false
-	end
-	if type(meta.der_sha256) ~= "string" then
-		log(ngx.ERR, "OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=missing_der_sha256")
-		return false
-	end
-	local meta_sha = meta.der_sha256:lower()
-	if #meta_sha ~= 64 or not meta_sha:match("^[0-9a-f]+$") then
-		log(ngx.ERR, "OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=invalid_der_sha256")
-		return false
-	end
-	local body_sha = resp_binding(resp)
-	local meta_short = meta_sha:sub(1, 16)
-	local body_short = (type(body_sha) == "string" and body_sha:sub(1, 16)) or "nil"
-	if body_sha == nil or body_sha ~= meta_sha then
-		log(
-			ngx.ERR,
-			"OCSP meta der_sha256 refuse fp="
-				.. fp_short
-				.. "... expected="
-				.. meta_short
-				.. "... observed="
-				.. body_short
-				.. "..."
-		)
+	local ok, reason, meta_sha, body_sha = ocsp_json_ligand_matches(meta, fingerprint, resp)
+	if not ok then
+		local level = ngx.ERR
+		if reason == "fingerprint_mismatch_or_missing_meta" then
+			level = ngx.DEBUG
+		end
+		if reason == "der_sha256_mismatch" then
+			local meta_short = (type(meta_sha) == "string" and meta_sha:sub(1, 16)) or "nil"
+			local body_short = (type(body_sha) == "string" and body_sha:sub(1, 16)) or "nil"
+			log(
+				level,
+				"OCSP meta der_sha256 refuse fp="
+					.. fp_short
+					.. "... expected="
+					.. meta_short
+					.. "... observed="
+					.. body_short
+					.. "..."
+			)
+		else
+			log(level, "OCSP meta der_sha256 refuse fp=" .. fp_short .. "... reason=" .. tostring(reason))
+		end
 		return false
 	end
 	log(
 		ngx.INFO,
-		"OCSP meta der_sha256 accept fp=" .. fp_short .. "... der_sha256=" .. meta_short .. "..."
+		"OCSP meta der_sha256 accept fp=" .. fp_short .. "... der_sha256=" .. meta_sha:sub(1, 16) .. "..."
 	)
 	return true
+end
+
+-- Must-Staple may not rely on stream-private crypto-verified L1 alone.
+-- Refuse unless the body binds the shared ocsp.json der_sha256 ligand.
+local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
+	local fp_short = (type(fingerprint) == "string" and fingerprint:sub(1, 16)) or "?"
+	local ok, reason, meta_sha, body_sha = ocsp_json_ligand_matches(meta, fingerprint, resp)
+	if ok then
+		return true
+	end
+	if reason == "der_sha256_mismatch" then
+		log(
+			ngx.ERR,
+			"OCSP-Must-Staple refuse shared ligand fp="
+				.. fp_short
+				.. "... expected="
+				.. ((type(meta_sha) == "string" and meta_sha:sub(1, 16)) or "nil")
+				.. "... observed="
+				.. ((type(body_sha) == "string" and body_sha:sub(1, 16)) or "nil")
+				.. "..."
+		)
+	else
+		log(
+			ngx.ERR,
+			"OCSP-Must-Staple refuse shared ligand fp=" .. fp_short .. "... reason=" .. tostring(reason)
+		)
+	end
+	return false
 end
 
 -- Absolute unix nextUpdate from job meta (preferred) or legacy "iso + Ns" expires.
@@ -1021,6 +1063,11 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 				authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
 			end
 			if verified or authorized then
+				-- Must-Staple: stream-private verified L1 is not enough; bind shared ligand.
+				if must_staple and not must_staple_binds_shared_ligand(meta, fingerprint, cached) then
+					drop_cache(internalstore, fingerprint)
+					return false, "must_staple"
+				end
 				local ok_set, set_ok, set_err = pcall(function()
 					return ocsp.set_ocsp_status_resp(cached)
 				end)
@@ -1064,6 +1111,9 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 			authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
 		end
 		if verified or authorized then
+			if must_staple and not must_staple_binds_shared_ligand(meta, fingerprint, resp) then
+				return false, "must_staple"
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
@@ -1091,11 +1141,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		return nil
 	end
 	local issuers = nil
+	local meta = must_staple and read_ocsp_json(fingerprint) or nil
 	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
-		elseif not resp_still_fresh(cached_expires, fingerprint, nil) then
+		elseif not resp_still_fresh(cached_expires, fingerprint, meta) then
 			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
 			drop_cache(internalstore, fingerprint)
 		elseif entry_verified(cached_verified, cached) then
@@ -1105,6 +1156,14 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					return false, "must_staple"
 				end
 				return false
+			end
+			-- Must-Staple: bind shared ocsp.json ligand, not stream-private L1 alone.
+			if must_staple then
+				meta = meta or read_ocsp_json(fingerprint)
+				if not must_staple_binds_shared_ligand(meta, fingerprint, cached) then
+					drop_cache(internalstore, fingerprint)
+					return false, "must_staple"
+				end
 			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(cached)
@@ -1125,7 +1184,14 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
 			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
 			if result == true then
-				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(read_ocsp_json(fingerprint), cached_expires))
+				if must_staple then
+					meta = meta or read_ocsp_json(fingerprint)
+					if not must_staple_binds_shared_ligand(meta, fingerprint, cached) then
+						drop_cache(internalstore, fingerprint)
+						return false, "must_staple"
+					end
+				end
+				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires))
 				return true
 			end
 			if result == false then
@@ -1140,7 +1206,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
-		local meta = read_ocsp_json(fingerprint)
+		meta = meta or read_ocsp_json(fingerprint)
 		if not resp_still_fresh(nil, fingerprint, meta) then
 			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
 			if must_staple then
@@ -1157,6 +1223,9 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		end
 		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 		if result == true then
+			if must_staple and not must_staple_binds_shared_ligand(meta, fingerprint, resp) then
+				return false, "must_staple"
+			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
 			return true
 		end
@@ -1175,6 +1244,8 @@ end
 -- (TLS:SSL:ocsp: composite of epoch|verified|expires|DER) so each subsystem warms its own L1.
 -- Shm TTL is min(300s, remaining until expires_unix) so DRAM cannot outlive nextUpdate.
 -- Verified binding is sha256(DER) packed with the body; L1 drops when epoch or der_sha256 diverges.
+-- Must-Staple also requires the shared ocsp.json der_sha256 ligand (cross-zone stand-in for
+-- HTTP's L1 entry); stream-private crypto-verified L1 alone is refused.
 -- Optional cert_fp_hint (plugin status[5]) enforces Must-Staple via ocsp.json when PEM is absent.
 -- Dual-cert PEMs staple the ECDSA leaf only (one ngx.ocsp status slot).
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
