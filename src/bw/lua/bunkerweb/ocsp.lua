@@ -187,6 +187,26 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint)
 	return issuers
 end
 
+local function has_must_staple(cert_pem)
+	local must = false
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local cert_obj = x509.new(cert_pem)
+		if not cert_obj then
+			return
+		end
+		local tls_feature_ext = cert_obj:get_extension("tlsfeature")
+		if not tls_feature_ext then
+			return
+		end
+		local tls_feature_text = tls_feature_ext:text() or ""
+		if tls_feature_text:find("OCSP status request", 1, true) or tls_feature_text:find("5", 1, true) then
+			must = true
+		end
+	end)
+	return must
+end
+
 local function try_staple(ocsp, ssl, resp, leaf_pem, issuers)
 	for _, issuer_pem in ipairs(issuers) do
 		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem) then
@@ -206,24 +226,36 @@ end
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
 -- (TLS:SSL:ocsp: / ocsp_verified:) so each subsystem warms its own L1 for 300s.
+-- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
 function _M.staple(internalstore, server_name, cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" or not internalstore then
 		return false
 	end
+
+	local blocks = pem_blocks(cert_pem)
+	local leaf_pem = blocks[1]
+	local must_staple = has_must_staple(leaf_pem)
+
 	if not stapling_enabled(internalstore, server_name) then
+		if must_staple then
+			log(ngx.ERR, "OCSP-Must-Staple required but OCSP stapling is disabled")
+			return false, "must_staple"
+		end
 		return false
 	end
 
 	local ok_ocsp, ocsp = pcall(require, "ngx.ocsp")
 	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
 		log(ngx.ERR, "OCSP ngx.ocsp is not available, skipping stapling")
+		if must_staple then
+			return false, "must_staple"
+		end
 		return false
 	end
 	local ssl = require "ngx.ssl"
-	local blocks = pem_blocks(cert_pem)
 
-	for _, leaf_pem in ipairs(blocks) do
-		local fingerprint = spki_fingerprint(leaf_pem, internalstore)
+	for _, block_pem in ipairs(blocks) do
+		local fingerprint = spki_fingerprint(block_pem, internalstore)
 		if fingerprint then
 			local issuers = nil
 			local cached = get_cached_resp(internalstore, fingerprint)
@@ -238,13 +270,16 @@ function _M.staple(internalstore, server_name, cert_pem)
 					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
 					drop_cache(internalstore, fingerprint)
 				else
-					issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
-					local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers)
+					issuers = issuer_candidates(blocks, block_pem, fingerprint)
+					local result = try_staple(ocsp, ssl, cached, block_pem, issuers)
 					if result == true then
 						warm_cache(internalstore, fingerprint, cached)
 						return true
 					end
 					if result == false then
+						if must_staple then
+							return false, "must_staple"
+						end
 						return false
 					end
 					drop_cache(internalstore, fingerprint)
@@ -253,17 +288,25 @@ function _M.staple(internalstore, server_name, cert_pem)
 
 			local resp = read_file(ocsp_path(fingerprint))
 			if resp then
-				issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
-				local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers)
+				issuers = issuers or issuer_candidates(blocks, block_pem, fingerprint)
+				local result = try_staple(ocsp, ssl, resp, block_pem, issuers)
 				if result == true then
 					warm_cache(internalstore, fingerprint, resp)
 					return true
 				end
 				if result == false then
+					if must_staple then
+						return false, "must_staple"
+					end
 					return false
 				end
 			end
 		end
+	end
+
+	if must_staple then
+		log(ngx.ERR, "OCSP-Must-Staple required but OCSP response not found")
+		return false, "must_staple"
 	end
 	return false
 end
