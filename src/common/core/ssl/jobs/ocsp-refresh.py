@@ -1360,17 +1360,25 @@ def _write_ocsp_http_error_backoff(
             "ocsp_url": ocsp_url,
             "http_error": {"code": http_code, "reason": reason or ""},
             "retry_after": retry_after.isoformat(),
-            # Keep "expires" for compatibility with the existing success metadata schema/logging.
-            "expires": retry_after.isoformat(),
             "error_type": "http_backoff",
         }
-        # Preserve der_sha256 when the on-disk OCSP body was not replaced.
+        # Preserve success-cache fields. Never put retry_after into "expires" — TTL cleanup
+        # treats expires as OCSP response lifetime and would delete a still-valid ocsp.der.
         try:
             if meta_path.is_file():
                 old = json.loads(meta_path.read_text(encoding="utf-8"))
-                old_sha = old.get("der_sha256") if isinstance(old, dict) else None
-                if isinstance(old_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", old_sha):
-                    meta["der_sha256"] = old_sha.lower()
+                if isinstance(old, dict):
+                    old_sha = old.get("der_sha256")
+                    if isinstance(old_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", old_sha):
+                        meta["der_sha256"] = old_sha.lower()
+                    old_expires = old.get("expires")
+                    if (
+                        isinstance(old_expires, str)
+                        and old_expires.strip()
+                        and old_expires.strip().lower() != "unknown"
+                        and old.get("error_type") != "http_backoff"
+                    ):
+                        meta["expires"] = old_expires
         except Exception:
             pass
 
@@ -2839,9 +2847,6 @@ def _cleanup_expired_ocsp_entries(
 
         Success metadata format:
           - "<iso8601 datetime> + <N>s"
-
-        Error/backoff metadata format:
-          - "<iso8601 datetime>"  (retry_after.isoformat())
         """
         if not expires_value or not isinstance(expires_value, str):
             return None
@@ -2853,7 +2858,7 @@ def _cleanup_expired_ocsp_entries(
             if " + " in raw:
                 base_str, tail_str = raw.rsplit(" + ", 1)
                 # Expected: "<N>s"
-                m = re.match(r"^(\\d+)\\s*s$", tail_str.strip())
+                m = re.match(r"^(\d+)\s*s$", tail_str.strip())
                 if not m:
                     return None
                 ttl_seconds = int(m.group(1))
@@ -2862,10 +2867,9 @@ def _cleanup_expired_ocsp_entries(
                     base_dt = base_dt.replace(tzinfo=timezone.utc)
                 return base_dt + timedelta(seconds=ttl_seconds)
 
-            dt = datetime.fromisoformat(raw)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt
+            # Bare ISO timestamps are not used for success TTL (backoff used to
+            # misuse expires=retry_after). Ignore them so cleanup falls back to ocsp.der.
+            return None
         except Exception:
             return None
 
@@ -2906,6 +2910,11 @@ def _cleanup_expired_ocsp_entries(
                     meta_file.parent.name
                 )
                 if not fingerprint:
+                    continue
+
+                # Backoff markers must not drive deletion; only success "expires" (or ocsp.der) may.
+                if meta.get("error_type") == "http_backoff" and " + " not in str(meta.get("expires") or ""):
+                    meta_unparseable_fingerprints.add(fingerprint)
                     continue
 
                 expires_dt = _parse_expires(meta.get("expires"))
