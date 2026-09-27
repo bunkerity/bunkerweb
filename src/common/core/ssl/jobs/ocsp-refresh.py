@@ -1341,19 +1341,35 @@ def _atomic_write_text(path: Path, text: str, mode: int = 0o640) -> None:
     _atomic_write_bytes(path, text.encode("utf-8"), mode=mode)
 
 
+def _normalize_ocsp_serial(serial: Any) -> Optional[str]:
+    """Canonical lowercase hex serial (no 0x prefix) for backoff identity matching."""
+    if serial is None:
+        return None
+    if isinstance(serial, int):
+        return format(serial, "x")
+    s = str(serial).strip().lower()
+    if s.startswith("0x"):
+        s = s[2:]
+    if not s or not re.fullmatch(r"[0-9a-f]+", s):
+        return None
+    # Drop leading zeros so decimal/hex formatting skew cannot split identity.
+    return s.lstrip("0") or "0"
+
+
 def _write_ocsp_http_error_backoff(
     cert_fp: Optional[str],
     ocsp_url: str,
     http_code: int,
     reason: str,
+    serial: Optional[Any] = None,
     backoff_seconds: int = HTTP_ERROR_BACKOFF_SECONDS,
 ) -> None:
     """
     Persist an HTTP error backoff marker into ocsp.json so we can avoid
     re-fetching for a short duration.
 
-    This is used by _process_cert() to skip OCSP refresh attempts shortly
-    after certain transient/non-transient HTTP failures (e.g. 400/500).
+    Identity is (SPKI fingerprint, leaf serial, ocsp_url): same-key renews and
+    unrelated responders must not inherit another CertID's freeze.
     """
     if not cert_fp:
         return
@@ -1370,6 +1386,7 @@ def _write_ocsp_http_error_backoff(
 
         now = datetime.now(timezone.utc)
         retry_after = now + timedelta(seconds=backoff_seconds)
+        serial_norm = _normalize_ocsp_serial(serial)
 
         meta = {
             "fingerprint": cert_fp,
@@ -1378,6 +1395,8 @@ def _write_ocsp_http_error_backoff(
             "retry_after": retry_after.isoformat(),
             "error_type": "http_backoff",
         }
+        if serial_norm:
+            meta["serial"] = serial_norm
         # Preserve success-cache fields. Never put retry_after into "expires" — TTL cleanup
         # treats expires as OCSP response lifetime and would delete a still-valid ocsp.der.
         try:
@@ -1405,10 +1424,16 @@ def _write_ocsp_http_error_backoff(
         _release_cert_lock(lock_fd, cert_fp)
 
 
-def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
+def _get_http_error_backoff_remaining(
+    cert_fp: Optional[str],
+    serial: Optional[Any] = None,
+    ocsp_url: Optional[str] = None,
+) -> int:
     """
     Return remaining seconds for an http_error backoff stored in ocsp.json.
-    Returns 0 if no backoff marker exists or if it is expired/invalid.
+    Returns 0 if no backoff marker exists, it is expired/invalid, or it was
+    written for a different leaf serial / OCSP URL (shared SPKI must not freeze
+    unrelated CertIDs).
     """
     if not cert_fp:
         return 0
@@ -1425,6 +1450,17 @@ def _get_http_error_backoff_remaining(cert_fp: Optional[str]) -> int:
 
         # Only trust backoff markers we wrote.
         if meta.get("error_type") != "http_backoff":
+            return 0
+
+        # Bind to CertID + responder. Legacy SPKI-only markers (no serial) are ignored
+        # so a prior shared-key freeze cannot keep blocking after this fix.
+        want_serial = _normalize_ocsp_serial(serial)
+        have_serial = _normalize_ocsp_serial(meta.get("serial"))
+        if not want_serial or not have_serial or want_serial != have_serial:
+            return 0
+
+        have_url = meta.get("ocsp_url")
+        if ocsp_url and isinstance(have_url, str) and have_url.strip() and have_url.strip() != ocsp_url.strip():
             return 0
 
         retry_after = meta.get("retry_after")
@@ -1591,6 +1627,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                             ocsp_url=ocsp_url,
                             http_code=http_code,
                             reason=http_reason,
+                            serial=leaf.serial_number,
                         )
         
                 if not ocsp_der:
@@ -1618,6 +1655,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                         ocsp_url=ocsp_url,
                         http_code=e.code,
                         reason=e.reason or "",
+                        serial=leaf.serial_number,
                     )
                 ocsp_der = None
                 continue
@@ -1717,14 +1755,20 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         log_error("❌ OCSP %s from responder for %s at %s", error_desc, cert_name, ocsp_url)
 
         # For HTTP 400/500, write a short backoff marker into ocsp.json so the job
-        # doesn't immediately retry the same failing responder for every certificate.
+        # doesn't immediately retry the same failing CertID/responder.
         if e.code in (400, 500):
             cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+            serial = None
+            try:
+                serial = x509.load_pem_x509_certificate(pem_data).serial_number
+            except Exception:
+                pass
             _write_ocsp_http_error_backoff(
                 cert_fp=cert_fp,
                 ocsp_url=ocsp_url,
                 http_code=e.code,
                 reason=e.reason or "",
+                serial=serial,
             )
 
         return None, 0, None
@@ -2371,10 +2415,17 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
             log_warning("⚠️ OCSP could not compute fingerprint for %s, treating as new fetch", cert_name)
 
         # === HTTP error backoff (400/500) ===
-        # If we previously got an HTTP 400/500 for this certificate's OCSP responder,
-        # avoid hammering the same endpoint until the backoff expires.
+        # Skip only when the same leaf serial + OCSP URL is still in backoff.
+        # SPKI-only keys would freeze every site/renew sharing that public key.
         if not force_fetch:
-            backoff_remaining = _get_http_error_backoff_remaining(cert_fp)
+            leaf_serial = None
+            try:
+                leaf_serial = x509.load_pem_x509_certificate(pem_data).serial_number
+            except Exception:
+                pass
+            backoff_remaining = _get_http_error_backoff_remaining(
+                cert_fp, serial=leaf_serial, ocsp_url=ocsp_url
+            )
             if backoff_remaining > 0:
                 stats["ocsp_http_error_backoff_skipped"] = stats.get("ocsp_http_error_backoff_skipped", 0) + 1
                 log_info(
