@@ -129,6 +129,10 @@ local STAPLE_DECISION = {
 	-- Colony min is leaf-only (a live peer lacks multi-staple); not a local libssl gap.
 	-- Transient: must not stick after the leaf-only worker leaves.
 	intermediate_must_staple_colony = true,
+	-- Fingerprint-only attach/probe with no PEM chain: intermediate Must-Staple unprovable.
+	fingerprint_chain_unavailable = true,
+	-- Multi-staple stack build / SSL_set0 failed after leaf set; intermediate MS refused.
+	multi_staple_attach_failed = true,
 	-- Soft ngx.ocsp.validate budget aborted during leaf issuer tries; multi-staple
 	-- stack was never attached (not ok_partial — that name is NULL-slot attach only).
 	validate_budget = true,
@@ -385,7 +389,8 @@ local DROP_ALLOW_ON_REFUSE = {
 	tombstoned = true,
 	serial_blacklisted = true,
 	cluster_floor = true,
-	shared_ligand = true,
+	-- Bare "shared_ligand" is the runbook ALIAS — KEEP (see below). Only concrete
+	-- binding failures DROP. ligand_missing stays KEEP (promote-tear ENOENT).
 	ligand_mismatch = true,
 	-- Raw ligand_verdict binding failures (HTTP/stream pass these without prefix).
 	der_sha256_mismatch = true,
@@ -393,7 +398,9 @@ local DROP_ALLOW_ON_REFUSE = {
 	invalid_der_sha256 = true,
 	fingerprint_mismatch_or_missing_meta = true,
 	canary_refused = true,
-	intermediate_must_staple_libssl = true,
+	-- intermediate_must_staple_libssl is KEEP (aligned with colony): a single
+	-- OpenSSL 3.5 worker must not compare-and-delete the fleet allow-pin during
+	-- mixed-version rollouts. Local handshake still refuses.
 }
 -- Keep allow pin (do not revoke) — sibling may still staple; local-only / temporary.
 -- Invariant: every cause should_skip_peer_bus returns true for must also be KEEP
@@ -402,6 +409,7 @@ local KEEP_ALLOW_ON_REFUSE = {
 	not_paged = true,
 	validate_budget = true,
 	intermediate_must_staple_colony = true,
+	intermediate_must_staple_libssl = true,
 	set_staple_failed = true,
 	set_staple_exception = true,
 	response_not_found = true,
@@ -412,7 +420,12 @@ local KEEP_ALLOW_ON_REFUSE = {
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
 	ligand_missing = true,
+	-- Runbook alias collapse of ligand_* — callers must pass raw ligand_verdict;
+	-- if they pass normalize_staple_decision output, KEEP (do not DROP on ENOENT).
+	shared_ligand = true,
 	peer_refuse_unavailable = true,
+	fingerprint_chain_unavailable = true,
+	multi_staple_attach_failed = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
@@ -531,7 +544,13 @@ local function entry_verified(stored_binding, resp)
 	return binding ~= nil and stored_binding == binding
 end
 
-local function warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix)
+-- Write DER into stream/HTTP L1 (bw2 composite).
+-- packed_epoch: when re-parking a body that already passed l1_matches_disk, pass
+-- the epoch from that get — never stamp "now's" epoch over an old body (that would
+-- make a stale DER look current until the next ligand check). Matches HTTP
+-- ocsp_l1_put(..., packed_epoch) in ssl-certificate-by-lua.conf.
+-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
+local function warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix, packed_epoch)
 	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
 	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
 	if mark_verified == nil then
@@ -549,7 +568,10 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	if mark_verified then
 		binding = resp_binding(resp)
 	end
-	local epoch = current_ocsp_epoch()
+	local epoch = packed_epoch
+	if type(epoch) ~= "string" or #epoch == 0 then
+		epoch = current_ocsp_epoch()
+	end
 	pcall(function()
 		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl)
 		-- Also clear the zone-scoped key so a prior put without the zone flag cannot linger.
@@ -661,26 +683,82 @@ local function tls_feature_is_must_staple(text)
 	return false
 end
 
--- Handshake path: resty.openssl only — no /tmp + openssl CLI. Callers also consult
--- ocsp.json (written by ocsp-refresh) when resty cannot see Must-Staple.
+-- Handshake path: resty.openssl only — no /tmp + openssl CLI.
+-- Returns true | false | nil (unknown). Unknown must stay fail-closed at call sites
+-- that decide whether Must-Staple enforcement applies (never invent false on throw).
+-- Callers also consult ocsp.json (written by ocsp-refresh) when resty cannot see
+-- Must-Staple — see resolve_leaf_must_staple.
 local function has_must_staple(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
-		return false
+		return nil
 	end
+	local known = false
 	local must = false
-	pcall(function()
+	local ok = pcall(function()
 		local x509 = require("resty.openssl.x509")
 		local cert_obj = x509.new(cert_pem)
 		if not cert_obj then
 			return
 		end
+		known = true
 		local tls_feature_ext = cert_obj:get_extension("tlsfeature")
 		if not tls_feature_ext then
 			return
 		end
 		must = tls_feature_is_must_staple(tls_feature_ext:text() or "")
 	end)
+	if not ok or not known then
+		return nil
+	end
 	return must
+end
+
+-- Tri-state leaf Must-Staple: TLS Feature, then ocsp.json, then unknown→nil.
+-- Fail-closed gate: resolve_leaf_must_staple(...) ~= false.
+local function resolve_leaf_must_staple(cert_pem, fingerprint)
+	local tls = has_must_staple(cert_pem)
+	if tls == true then
+		return true
+	end
+	local meta = nil
+	if type(fingerprint) == "string" and is_fp64(fingerprint) then
+		meta = read_ocsp_json(fingerprint)
+	elseif type(cert_pem) == "string" and cert_pem ~= "" then
+		local fp = spki_fingerprint(cert_pem)
+		if fp then
+			meta = read_ocsp_json(fp)
+		end
+	end
+	if ocsp_json_must_staple(meta) then
+		return true
+	end
+	if tls == false then
+		return false
+	end
+	if meta ~= nil then
+		-- Job wrote meta without must_staple=true → not Must-Staple.
+		return false
+	end
+	return nil
+end
+
+-- Boolean Must-Staple for a PEM block (leaf or intermediate).
+-- fail_closed_unknown=true → treat resty miss + no ocsp.json as Must-Staple
+-- (intermediate path / bag filtering). false → unknown returns false (rare).
+local function cert_must_staple_bool(pem, fail_closed_unknown)
+	local tls = has_must_staple(pem)
+	if tls == true then
+		return true
+	end
+	local fp = spki_fingerprint(pem)
+	local meta = fp and read_ocsp_json(fp) or nil
+	if ocsp_json_must_staple(meta) then
+		return true
+	end
+	if tls == false or meta ~= nil then
+		return false
+	end
+	return fail_closed_unknown == true
 end
 local function read_ocsp_json(fingerprint)
 	if not is_fp64(fingerprint) then
@@ -941,6 +1019,10 @@ local function ligand_or_meta(meta, fingerprint)
 end
 
 -- Peer-refuse / allow generation: (der_sha256, soft_recall_gen).
+-- When resp bytes are present, body SHA wins. Meta/ligand der_sha256 is only a
+-- fallback for meta-only DROP causes (tombstone / serial / canary) — never for
+-- probe paths that pass resp=nil after CertID/ligand refuses (that would
+-- compare-and-delete the GOOD generation using meta alone).
 local function generation_tuple(meta, resp)
 	local body = resp_binding(resp)
 	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
@@ -954,6 +1036,16 @@ local function generation_tuple(meta, resp)
 	end
 	return body, soft_recall_gen_of(meta)
 end
+
+-- DROP causes that may revoke using meta.der_sha256 when resp is nil (meta names
+-- the poisoned generation). Body-poison causes require resp bytes so a probe
+-- refuse cannot CAS-delete the live pin via meta alone.
+local META_ONLY_DROP_ALLOW = {
+	tombstoned = true,
+	serial_blacklisted = true,
+	cluster_floor = true,
+	canary_refused = true,
+}
 
 -- Handshake is read-only on the pin directory (except compare-and-delete revoke).
 -- Do NOT unlink legacy refuse or gen-less pins here: that was a DoS lever on the
@@ -1292,6 +1384,18 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		return false
 	end
 	meta = ligand_or_meta(meta, fingerprint)
+	-- Body-poison DROPs require the refused DER bytes. Probe paths pass resp=nil
+	-- and would otherwise revoke via meta.der_sha256 (wrong generation CAS).
+	if not META_ONLY_DROP_ALLOW[refuse_cause] and (type(resp) ~= "string" or #resp == 0) then
+		log(
+			ngx.DEBUG,
+			"OCSP allow-pin keep (no resp body for compare-and-delete) refuse_cause="
+				.. refuse_cause
+				.. " fp="
+				.. fp_short
+		)
+		return false
+	end
 	local sha, recall_gen = generation_tuple(meta, resp)
 	if not sha then
 		log(
@@ -1322,6 +1426,9 @@ local function should_skip_peer_bus(detail, meta, fingerprint)
 	return d == "not_paged"
 		or d == "validate_budget"
 		or d == "intermediate_must_staple_colony"
+		or d == "intermediate_must_staple_libssl"
+		or d == "fingerprint_chain_unavailable"
+		or d == "multi_staple_attach_failed"
 		or d == "peer_refuse_unavailable"
 		or (type(eff) == "table" and eff.paged ~= true)
 		or (
@@ -1787,9 +1894,9 @@ end
 
 -- Shared HTTP↔stream L1↔disk coherence. Fail-closed like ligand_verdict:
 -- corrupt meta / paged+ligand ENOENT / require-path gaps drop L1. Publish-gap keep
--- (meta+DER both gone, epoch still matches) only while ligand_effective_sha names
--- the cached binding — never bare true. HTTP conf must call this export rather than
--- inlining a second copy that can drift.
+-- (meta+DER both gone, epoch still matches) only while outside ligand is paged=true
+-- AND ligand_effective_sha names the cached binding — never bare true / ligand-only
+-- after a full shard retract. HTTP conf must call this export rather than inlining.
 local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
@@ -1859,7 +1966,14 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	if disk_sha then
 		return disk_sha == binding
 	end
+	-- Both shard files gone: do NOT keep L1 on ligand SHA alone (staggered job
+	-- delete can leave outside ligand naming the old body). Require ligand present
+	-- with paged=true (active canary generation mid-promote) plus SHA match.
 	if meta_missing and not read_file(ocsp_path(fingerprint)) then
+		local ligand = read_ocsp_ligand(fingerprint)
+		if type(ligand) ~= "table" or ligand.paged ~= true then
+			return false
+		end
 		local ligand_sha = _M.ligand_effective_sha(nil, fingerprint)
 		return type(ligand_sha) == "string" and #ligand_sha == 64 and ligand_sha == binding
 	end
@@ -2087,7 +2201,10 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		end
 		local detail = tostring(set_err or set_ok)
 		log(ngx.ERR, "OCSP failed to set stapling: " .. detail)
-		if detail == "intermediate_must_staple_libssl" or detail == "intermediate_must_staple_colony" then
+		if detail == "intermediate_must_staple_libssl"
+			or detail == "intermediate_must_staple_colony"
+			or detail == "multi_staple_attach_failed"
+		then
 			return false, detail
 		end
 		return false
@@ -2388,6 +2505,8 @@ local function load_paged_intermediate_staple(cert_pem, leaf_pem)
 end
 
 -- True when any non-root chain cert carries Must-Staple (PEM TLS Feature or ocsp.json).
+-- Unknown TLS Feature (resty throw) without ocsp.json fail-closes as true so leaf-only
+-- attach cannot silently skip intermediate Must-Staple.
 local function chain_has_intermediate_must_staple(chain_blocks)
 	if type(chain_blocks) ~= "table" or #chain_blocks < 2 then
 		return false
@@ -2407,11 +2526,17 @@ local function chain_has_intermediate_must_staple(chain_blocks)
 		if self_signed then
 			break
 		end
-		if has_must_staple(pem) then
+		local tls_ms = has_must_staple(pem)
+		if tls_ms == true then
 			return true
 		end
 		local fp = spki_fingerprint(pem)
-		if fp and ocsp_json_must_staple(read_ocsp_json(fp)) then
+		local meta = fp and read_ocsp_json(fp) or nil
+		if ocsp_json_must_staple(meta) then
+			return true
+		end
+		-- resty unknown and no job meta → fail closed (treat as intermediate Must-Staple).
+		if tls_ms == nil and meta == nil then
 			return true
 		end
 	end
@@ -2447,11 +2572,8 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 		if self_signed then
 			break
 		end
-		local inter_must = has_must_staple(pem)
+		local inter_must = cert_must_staple_bool(pem, true)
 		local der, fp = load_paged_intermediate_staple(pem, leaf_pem)
-		if not der and not inter_must and fp then
-			inter_must = ocsp_json_must_staple(read_ocsp_json(fp))
-		end
 		if not der then
 			if inter_must then
 				return nil, "must_staple", "response_not_found"
@@ -2491,6 +2613,11 @@ end
 -- order. Colony leaf-only (any live 3.5 peer) or missing local symbol: leaf-only.
 -- Intermediate Must-Staple then refuses — never log leaf success while a TLS 1.3
 -- client would still abort on the missing CertificateEntry status.
+--
+-- Multi-staple stack build / SSL_set0 / missing SSL pointer after the colony was
+-- ready: if the chain has intermediate Must-Staple, refuse (multi_staple_attach_failed
+-- or intermediate_must_staple_*), clearing the connection staple when possible.
+-- Leaf-only fallback is only legal when no intermediate carries Must-Staple.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local ready, st, why_not = openssl_multi_staple_ready()
 	if not ready then
@@ -2519,15 +2646,32 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end
 
+	-- After leaf staple is set, multi-staple failure must not return leaf_ok when
+	-- intermediate Must-Staple is present (header contract / TLS 1.3 clients).
+	local function refuse_or_leaf_only(why_detail)
+		clear_multi_staple_attach_note()
+		pcall(clear_connection_staple)
+		if chain_has_intermediate_must_staple(chain_blocks) then
+			log(
+				ngx.ERR,
+				"OCSP multi-staple failed with intermediate Must-Staple; refusing leaf-only detail="
+					.. tostring(why_detail or "multi_staple_attach_failed")
+			)
+			return nil, why_detail or "multi_staple_attach_failed"
+		end
+		log(ngx.ERR, "OCSP multi-staple failed; keeping leaf-only staple (no intermediate Must-Staple)")
+		return ocsp.set_ocsp_status_resp(leaf_resp)
+	end
+
 	local ssl_mod = require "ngx.ssl"
 	if not ssl_mod.get_req_ssl_pointer then
-		clear_multi_staple_attach_note()
-		return ocsp.set_ocsp_status_resp(leaf_resp)
+		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 	local ssl_ptr = ssl_mod.get_req_ssl_pointer()
 	if not ssl_ptr then
-		clear_multi_staple_attach_note()
-		return ocsp.set_ocsp_status_resp(leaf_resp)
+		-- Colony said multi-ready but this request has no SSL pointer — same gate
+		-- as the leaf-only path (do not bypass intermediate Must-Staple).
+		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 
 	-- Ensure status callback is registered (ngx.ocsp leaf path does this).
@@ -2549,8 +2693,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local ffi, C = st.ffi, st.C
 	local stack = C.OPENSSL_sk_new_null()
 	if stack == nil then
-		clear_multi_staple_attach_note()
-		return leaf_ok, leaf_warn
+		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 	local parsed = {}
 	local push_ok = true
@@ -2579,9 +2722,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	end
 	if not push_ok then
 		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
-		clear_multi_staple_attach_note()
-		log(ngx.ERR, "OCSP multi-staple stack build failed; keeping leaf-only staple")
-		return leaf_ok, leaf_warn
+		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 
 	local ctx = C.SSL_get_SSL_CTX(ssl_ptr)
@@ -2592,9 +2733,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local rc = C.SSL_set0_tlsext_status_ocsp_resp_ex(ssl_ptr, stack)
 	if rc == 0 then
 		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
-		clear_multi_staple_attach_note()
-		log(ngx.ERR, "OCSP SSL_set0_tlsext_status_ocsp_resp_ex failed; keeping leaf-only staple")
-		return leaf_ok, leaf_warn
+		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 	note_multi_staple_attach(#ders, null_slots)
 	log(
@@ -3129,13 +3268,7 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		local dropped_must = 0
 		for _, pem in ipairs(intermediate_pems) do
 			if type(pem) == "string" and pem ~= "" then
-				local must = has_must_staple(pem)
-				if not must then
-					local fp = spki_fingerprint(pem)
-					if fp then
-						must = ocsp_json_must_staple(read_ocsp_json(fp))
-					end
-				end
+				local must = cert_must_staple_bool(pem, true)
 				if must then
 					dropped_must = dropped_must + 1
 				else
@@ -3240,11 +3373,8 @@ issuer_path_intermediate_ready = function(chain_pem_or_blocks)
 		if self_signed then
 			break
 		end
-		local inter_must = has_must_staple(pem)
-		local der, fp = load_paged_intermediate_staple(pem, leaf_pem)
-		if not der and not inter_must and fp then
-			inter_must = ocsp_json_must_staple(read_ocsp_json(fp))
-		end
+		local inter_must = cert_must_staple_bool(pem, true)
+		local der = load_paged_intermediate_staple(pem, leaf_pem)
 		if not der and inter_must then
 			return false, "response_not_found"
 		end
@@ -3366,10 +3496,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		local chain_pem = issuer_linked_chain_pem(leaf.pem, intermediates)
 		local leaf_must = false
 		if probe_must then
-			leaf_must = has_must_staple(leaf.pem)
-			if not leaf_must and leaf.fp then
-				leaf_must = ocsp_json_must_staple(read_ocsp_json(leaf.fp))
-			end
+			leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) == true
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -3457,10 +3584,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			)
 			last_err, last_detail = "must_staple", path_detail or "unmet"
 		else
-			local leaf_must = has_must_staple(leaf.pem)
-			if not leaf_must and leaf.fp then
-				leaf_must = ocsp_json_must_staple(read_ocsp_json(leaf.fp))
-			end
+			local leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) == true
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -3557,10 +3681,12 @@ end
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
 -- Acceptance: prior crypto-verified L1 binding, or job meta that binds fingerprint + der_sha256
 -- to the exact DER bytes. Never promote fingerprint-only accepts to ocsp_verified.
-local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only, mode)
+local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only, mode, chain_blocks)
 	mode = mode or "normal"
 	local meta = read_ocsp_json(fingerprint)
 	local must_staple = ocsp_json_must_staple(meta)
+	-- Fingerprint-only: intermediate Must-Staple is unprovable without PEM chain.
+	-- Must-Staple leaves refuse with fingerprint_chain_unavailable (see attach_fp).
 	if meta_tombstoned(meta) then
 		drop_cache(internalstore, fingerprint)
 		if must_staple then
@@ -3616,6 +3742,22 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		return false
 	end
 
+	-- Attach helper: Must-Staple without chain → fingerprint_chain_unavailable.
+	local function attach_fp(resp)
+		if must_staple and (type(chain_blocks) ~= "table" or #chain_blocks < 1) then
+			return nil, "fingerprint_chain_unavailable"
+		end
+		return attach_ocsp_staple(ocsp, resp, chain_blocks)
+	end
+
+	-- Must-Staple without chain: refuse before L1/disk work (unprovable intermediate MS).
+	if must_staple and (type(chain_blocks) ~= "table" or #chain_blocks < 1) then
+		if probe_only then
+			return false, "must_staple", "fingerprint_chain_unavailable"
+		end
+		return must_staple_refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable", mode)
+	end
+
 	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
@@ -3663,21 +3805,31 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				end
 				local set_ok, set_err
 				local ok_set = pcall(function()
-					set_ok, set_err = attach_ocsp_staple(ocsp, cached, nil)
+					set_ok, set_err = attach_fp(cached)
 				end)
 				if ok_set and set_ok then
 					local exp = meta_effective_expires_unix(meta, cached_expires)
-					-- Only re-warm verified if crypto already proved this body.
+					-- Re-warm with the epoch l1_matches_disk already accepted.
 					if verified then
-						warm_cache(internalstore, fingerprint, cached, true, exp)
+						warm_cache(internalstore, fingerprint, cached, true, exp, cached_epoch)
 					else
-						warm_cache(internalstore, fingerprint, cached, false, exp)
+						warm_cache(internalstore, fingerprint, cached, false, exp, cached_epoch)
 					end
 					log_ocsp_stapled(server_name, nil, fingerprint, cached)
 					return true
 				end
 				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
 				drop_cache(internalstore, fingerprint)
+				local detail = tostring(set_err or set_ok)
+				if
+					must_staple
+					or detail == "fingerprint_chain_unavailable"
+					or detail == "multi_staple_attach_failed"
+					or detail == "intermediate_must_staple_libssl"
+					or detail == "intermediate_must_staple_colony"
+				then
+					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+				end
 			end
 			end
 		end
@@ -3725,7 +3877,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			end
 			local set_ok, set_err
 			local ok_set = pcall(function()
-				set_ok, set_err = attach_ocsp_staple(ocsp, resp, nil)
+				set_ok, set_err = attach_fp(resp)
 			end)
 			if ok_set and set_ok then
 				warm_cache(internalstore, fingerprint, resp, verified, meta_effective_expires_unix(meta))
@@ -3733,8 +3885,15 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				return true
 			end
 			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
-			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "set_staple_failed", mode)
+			local detail = tostring(set_err or set_ok)
+			if
+				must_staple
+				or detail == "fingerprint_chain_unavailable"
+				or detail == "multi_staple_attach_failed"
+				or detail == "intermediate_must_staple_libssl"
+				or detail == "intermediate_must_staple_colony"
+			then
+				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
 			end
 			return false
 		end
@@ -3847,10 +4006,17 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			if
 				attach_detail == "intermediate_must_staple_libssl"
 				or attach_detail == "intermediate_must_staple_colony"
+				or attach_detail == "multi_staple_attach_failed"
+				or attach_detail == "fingerprint_chain_unavailable"
 				or must_staple
 			then
 				local detail = attach_detail
-				if detail ~= "intermediate_must_staple_libssl" and detail ~= "intermediate_must_staple_colony" then
+				if
+					detail ~= "intermediate_must_staple_libssl"
+					and detail ~= "intermediate_must_staple_colony"
+					and detail ~= "multi_staple_attach_failed"
+					and detail ~= "fingerprint_chain_unavailable"
+				then
 					detail = "set_staple_failed"
 				end
 				return must_staple_refuse(fingerprint, meta, cached, detail, mode)
@@ -3882,7 +4048,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					end
 					return true
 				end
-				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires))
+				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires), cached_epoch)
 				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 				return true
 			end
@@ -3896,6 +4062,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				if
 					result_detail == "intermediate_must_staple_libssl"
 					or result_detail == "intermediate_must_staple_colony"
+					or result_detail == "multi_staple_attach_failed"
+					or result_detail == "fingerprint_chain_unavailable"
 					or result_detail == "response_not_found"
 					or must_staple
 				then
@@ -3905,6 +4073,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					if
 						detail ~= "intermediate_must_staple_libssl"
 						and detail ~= "intermediate_must_staple_colony"
+						and detail ~= "multi_staple_attach_failed"
+						and detail ~= "fingerprint_chain_unavailable"
 						and detail ~= "response_not_found"
 					then
 						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
@@ -3963,6 +4133,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			if
 				result_detail == "intermediate_must_staple_libssl"
 				or result_detail == "intermediate_must_staple_colony"
+				or result_detail == "multi_staple_attach_failed"
+				or result_detail == "fingerprint_chain_unavailable"
 				or result_detail == "response_not_found"
 				or must_staple
 			then
@@ -3970,6 +4142,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				if
 					detail ~= "intermediate_must_staple_libssl"
 					and detail ~= "intermediate_must_staple_colony"
+					and detail ~= "multi_staple_attach_failed"
+					and detail ~= "fingerprint_chain_unavailable"
 					and detail ~= "response_not_found"
 				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
@@ -4018,11 +4192,9 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	-- Drop off-path bag PEMs (sibling dual-cert leaf, cross-signs) before Must-Staple scan.
 	blocks = presentable_chain_blocks(blocks)
 	leaf_pem = blocks[1] or leaf_pem
-	local must_staple = has_must_staple(leaf_pem)
-	-- When resty cannot see TLS Feature, honor Must-Staple from job-written ocsp.json.
-	if not must_staple and fp_hint then
-		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
-	end
+	local must_tri = resolve_leaf_must_staple(leaf_pem, fp_hint)
+	-- Fail closed: unknown (nil) enforces Must-Staple; proven false does not.
+	local must_staple = must_tri ~= false
 
 	-- open: disable Must-Staple enforcement entirely (still staple when possible).
 	if must_staple and mode == "open" then
@@ -4059,14 +4231,13 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		-- No SPKI from PEM; fingerprint-only path (no sibling borrow possible without a second leaf).
 		fingerprint = fp_hint
 	end
-	if not must_staple and fingerprint then
-		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
-		if must_staple then
-			log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
-			if mode == "open" then
-				log(ngx.NOTICE, "OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled for " .. (server_name or "unknown"))
-				must_staple = false
-			end
+	if fingerprint then
+		must_tri = resolve_leaf_must_staple(leaf_pem, fingerprint)
+		must_staple = must_tri ~= false
+		if must_staple and mode == "open" then
+			must_staple = false
+		elseif must_tri == true then
+			log(ngx.INFO, "OCSP-Must-Staple for fp=" .. fingerprint:sub(1, 16) .. "...")
 		end
 	end
 
@@ -4130,14 +4301,13 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not path_ok then
 		return finish(false, "must_staple", path_detail or "unmet")
 	end
-	local must_staple = has_must_staple(leaf_pem)
-	if not must_staple and fp_hint then
-		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
-	end
-	if not must_staple then
+	local must_tri = resolve_leaf_must_staple(leaf_pem, fp_hint)
+	-- Fail closed: unknown enforces Must-Staple; proven false may load unstapled.
+	if must_tri == false then
 		-- Optional leaf stapling: path already scored; leaf may load without a live body.
 		return true
 	end
+	local must_staple = true
 	if not stapling_enabled(internalstore, server_name) then
 		return finish(false, "must_staple", "ssl_use_ocsp_stapling_no")
 	end
@@ -4154,10 +4324,7 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not fingerprint then
 		return finish(false, "must_staple", "fingerprint_unavailable")
 	end
-	if not must_staple then
-		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
-	end
-	if not must_staple then
+	if resolve_leaf_must_staple(leaf_pem, fingerprint) == false then
 		return true
 	end
 	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, true, server_name, true, mode)
@@ -4201,23 +4368,22 @@ function _M.clear_peer_refuse(fingerprint)
 end
 
 -- True when the leaf PEM or ocsp.json marks Must-Staple (TLS Feature status_request).
+-- Unknown (resty miss + no ocsp.json) returns true (fail closed), matching handshake.
 function _M.requires_must_staple(cert_pem, cert_fp_hint)
 	local fp_hint = normalize_fp_hint(cert_fp_hint)
+	local leaf_pem = nil
 	if type(cert_pem) == "string" and cert_pem ~= "" then
 		local blocks = pem_blocks(cert_pem)
-		local leaf_pem = blocks[1]
-		if leaf_pem and has_must_staple(leaf_pem) then
-			return true
-		end
-		local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem, nil) or nil
-		if leaf_fp and ocsp_json_must_staple(read_ocsp_json(leaf_fp)) then
-			return true
-		end
+		leaf_pem = blocks[1]
 	end
-	if fp_hint and ocsp_json_must_staple(read_ocsp_json(fp_hint)) then
-		return true
-	end
-	return false
+	local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem, nil) or nil
+	return resolve_leaf_must_staple(leaf_pem, leaf_fp or fp_hint) ~= false
+end
+
+-- Tri-state export for HTTP/conf callers that need unknown ≠ false vs true.
+-- Returns true | false | nil (see resolve_leaf_must_staple).
+function _M.resolve_leaf_must_staple(cert_pem, fingerprint)
+	return resolve_leaf_must_staple(cert_pem, fingerprint)
 end
 
 -- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", "ed", or nil.
@@ -4543,6 +4709,11 @@ function _M.start_l1_warmer(internalstore)
 end
 
 
+-- Public attach: presentable_chain_blocks first, then attach_ocsp_staple.
+-- Reviewers: multi-staple build/set0 failure refuses when intermediate Must-Staple
+-- is present (multi_staple_attach_failed); leaf-only fallback only otherwise.
+-- Pass fullchain PEM/blocks — nil chain cannot prove intermediate Must-Staple
+-- (fingerprint-only Must-Staple uses fingerprint_chain_unavailable upstream).
 function _M.attach_ocsp_staple(leaf_resp, chain_pem_or_blocks)
 	local ok_ocsp, ocsp = pcall(require, "ngx.ocsp")
 	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
