@@ -1854,6 +1854,21 @@ def _inter_body_shard_paged(fingerprint: Optional[str]) -> bool:
         return False
 
 
+def _inter_body_shard_keepable(cert_name: str, inter_pem: bytes, fingerprint: Optional[str]) -> bool:
+    """
+    True when the shared intermediate body is canary-paged and still above soft-refresh
+    thresholds — safe to donate without fetch/publish (no live-directory swap).
+    """
+    if not fingerprint or not _inter_body_shard_paged(fingerprint):
+        return False
+    cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name, inter_pem, fingerprint)
+    if cached_ttl is None:
+        return False
+    half_lifetime = (total_lifetime // 2) if (total_lifetime and total_lifetime > 0) else 0
+    refresh_threshold = max(MIN_TTL, int(total_lifetime * 0.20)) if total_lifetime and total_lifetime > 0 else MIN_TTL
+    return cached_ttl > refresh_threshold and cached_ttl > half_lifetime
+
+
 def _seal_inter_body_spki(fingerprint: Optional[str]) -> None:
     """Mark intermediate SPKI as donated for this job run (no further OCSP GETs)."""
     normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
@@ -1867,6 +1882,28 @@ def _inter_body_spki_sealed(fingerprint: Optional[str]) -> bool:
     if not normalized:
         return False
     return normalized in _SEALED_INTER_BODY_SPKI
+
+
+def _donate_inter_body_to_tenant(
+    *,
+    inter_fp: str,
+    control_fp: Optional[str],
+    iname: str,
+    stats: Optional[dict],
+    reason: str,
+) -> None:
+    """Reuse a shared intermediate body for this tenant; seal SPKI for the job run."""
+    _clear_tenant_control_negatives(control_fp)
+    _seal_inter_body_spki(inter_fp)
+    if stats is not None:
+        stats["ocsp_intermediate_plasmid_reuse"] = stats.get("ocsp_intermediate_plasmid_reuse", 0) + 1
+    log_debug(
+        "🧬 OCSP intermediate plasmid %s body_fp=%s... control_fp=%s... for %s",
+        reason,
+        inter_fp[:16],
+        (control_fp[:16] + "...") if control_fp else "nil",
+        iname,
+    )
 
 
 def _process_cert_chain(
@@ -1894,22 +1931,20 @@ def _process_cert_chain(
             inter_fp = _get_cert_pubkey_fingerprint(cleaned_inter)
             control_fp = _intermediate_control_fp(leaf_fp, inter_fp)
             # Plasmid reuse: one GOOD body per intermediate SPKI per job run.
-            # Later leaves clear only their tenant control key — never re-fetch.
+            # Never re-fetch/republish a live shared shard while handshakes read it —
+            # including the first leaf under force_fetch when the body is still keepable.
             sealed = bool(inter_fp) and _inter_body_spki_sealed(inter_fp)
             body_paged = bool(inter_fp) and _inter_body_shard_paged(inter_fp)
-            if sealed and body_paged:
-                _clear_tenant_control_negatives(control_fp)
-                if stats is not None:
-                    stats["ocsp_intermediate_plasmid_reuse"] = stats.get("ocsp_intermediate_plasmid_reuse", 0) + 1
-                log_debug(
-                    "🧬 OCSP intermediate plasmid reuse body_fp=%s... control_fp=%s... for %s",
-                    inter_fp[:16],
-                    (control_fp[:16] + "...") if control_fp else "nil",
-                    iname,
+            if inter_fp and body_paged and (sealed or _inter_body_shard_keepable(iname, cleaned_inter, inter_fp)):
+                _donate_inter_body_to_tenant(
+                    inter_fp=inter_fp,
+                    control_fp=control_fp,
+                    iname=iname,
+                    stats=stats,
+                    reason="reuse" if sealed else "keep",
                 )
                 continue
-            # Past the seal gate: body missing or never donated. Honor force_fetch
-            # so an evaporated shared DER can be re-donated in this run.
+            # Body missing, soft-recalled, or near expiry: refresh once, then seal.
             inter_force = bool(force_fetch)
             result = _process_cert(
                 iname,
