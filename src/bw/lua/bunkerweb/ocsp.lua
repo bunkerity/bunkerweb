@@ -340,6 +340,10 @@ end
 -- Death time = expires_unix/max_age minus skew: stop stapling before the CA's
 -- advertised nextUpdate so a lagging worker clock cannot serve a dead response.
 local OCSP_CLOCK_SKEW_SECONDS = 300
+-- Soft ngx.ocsp.validate budget on the TLS path (match HTTP ssl-certificate-by-lua).
+local OCSP_VALIDATE_BUDGET_NS = 700000000 -- 700ms when ngx.hrtime is available
+local OCSP_VALIDATE_BUDGET_S = 0.7
+local OCSP_VALIDATE_MAX_ISSUERS = 4
 -- Signed-window policy; must match ocsp-refresh.py.
 local OCSP_MAX_INTRINSIC_LIFETIME_SECONDS = 7 * 24 * 3600
 local OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600
@@ -1662,8 +1666,28 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
 		return set_resp()
 	end
-	for _, issuer_pem in ipairs(issuers) do
-		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem, shard_issuer_spki) then
+	if type(issuers) ~= "table" or #issuers == 0 then
+		return nil
+	end
+	local n = #issuers
+	if n > OCSP_VALIDATE_MAX_ISSUERS then
+		n = OCSP_VALIDATE_MAX_ISSUERS
+	end
+	local hrtime = ngx.hrtime
+	local t0 = hrtime and hrtime() or ngx.now()
+	for i = 1, n do
+		local over_budget
+		if hrtime then
+			over_budget = (hrtime() - t0) > OCSP_VALIDATE_BUDGET_NS
+		else
+			over_budget = (ngx.now() - t0) > OCSP_VALIDATE_BUDGET_S
+		end
+		if over_budget then
+			local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or "?"
+			log(ngx.ERR, "OCSP validate budget exceeded fp=" .. fp_short .. " after " .. tostring(i - 1) .. " issuer attempt(s)")
+			break
+		end
+		if validate(ocsp, ssl, resp, leaf_pem, issuers[i], shard_issuer_spki) then
 			return set_resp()
 		end
 	end
