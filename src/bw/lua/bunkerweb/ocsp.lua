@@ -2898,6 +2898,48 @@ function _M.issuer_path_intermediate_ready(chain_pem_or_blocks)
 	return issuer_path_intermediate_ready(chain_pem_or_blocks)
 end
 
+-- How many issuer-path intermediates would attach as NULL (ok_partial slots).
+-- Used to rank leaf-GOOD siblings: fewer nulls = more complete multi-staple.
+-- Leaf-only chains and leaf-only colony/libssl score 0 (vacuously complete for ranking).
+-- Does not demote — ok_partial remains legal when it is the only healthy option.
+local function issuer_path_null_slots(chain_pem_or_blocks)
+	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
+	if type(blocks) ~= "table" or #blocks < 2 then
+		return 0
+	end
+	local ready = openssl_multi_staple_ready()
+	if not ready then
+		return 0
+	end
+	local leaf_pem = blocks[1]
+	local nulls = 0
+	for i = 2, #blocks do
+		local pem = blocks[i]
+		local self_signed = false
+		pcall(function()
+			local x509 = require("resty.openssl.x509")
+			local c = x509.new(pem)
+			if c and c.get_subject_name and c.get_issuer_name then
+				local s = tostring(c:get_subject_name() or "")
+				local iss = tostring(c:get_issuer_name() or "")
+				self_signed = (s ~= "" and s == iss)
+			end
+		end)
+		if self_signed then
+			break
+		end
+		local der = load_paged_intermediate_staple(pem, leaf_pem)
+		if not der then
+			nulls = nulls + 1
+		end
+	end
+	return nulls
+end
+
+function _M.issuer_path_null_slots(chain_pem_or_blocks)
+	return issuer_path_null_slots(chain_pem_or_blocks)
+end
+
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
@@ -3030,32 +3072,101 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		return true, chain_pem, leaf.fp
 	end
 
-	-- Try ClientHello-compatible leaves in preference order. A poisoned Must-Staple
-	-- shard on the first match must not fail-close when a later match can staple.
+	-- Collect ClientHello-compatible leaves that pass Must-Staple / path health, then
+	-- prefer the sibling whose issuer path is most completely stapled (fewest NULL slots).
+	-- First match alone would stick on ok_partial while a fully stapled sibling exists.
 	local last_err, last_detail
 	local preferred = candidates[1]
+	local healthy = {}
 	for ci, leaf in ipairs(candidates) do
-		local ok_inst, a, b = install_one(leaf, true)
+		-- Probe only (no set_cert) via install_one's health gates, then discard.
+		-- Re-run install after selection so set_cert lands on the chosen leaf once.
+		local chain_pem = issuer_linked_chain_pem(leaf.pem, intermediates)
+		local path_ok, path_detail = true, nil
+		if mode ~= "open" then
+			path_ok, path_detail = issuer_path_intermediate_ready(chain_pem)
+		end
+		if not path_ok then
+			log(
+				ngx.ERR,
+				format_staple_decision(path_detail or "unmet", {
+					tag = "OCSP_MUST_STAPLE_REFUSE",
+					action = "skip_leaf",
+					mode = mode,
+					detail = "issuer_path_health",
+					fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+				})
+			)
+			last_err, last_detail = "must_staple", path_detail or "unmet"
+		else
+			local leaf_must = has_must_staple(leaf.pem)
+			if not leaf_must and leaf.fp then
+				leaf_must = ocsp_json_must_staple(read_ocsp_json(leaf.fp))
+			end
+			if leaf_must and mode == "open" then
+				leaf_must = false
+			end
+			local leaf_ok = true
+			local leaf_detail = nil
+			if leaf_must and internalstore and mode ~= "open" then
+				local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, chain_pem, leaf.fp, false)
+				if not probe_ok then
+					leaf_ok = false
+					leaf_detail = probe_detail or probe_reason or "probe_failed"
+					if leaf.fp and mode == "normal" then
+						record_peer_refuse(leaf.fp, read_ocsp_json(leaf.fp), nil, leaf_detail)
+					end
+					log(
+						ngx.ERR,
+						format_staple_decision(leaf_detail, {
+							tag = "OCSP_MUST_STAPLE_REFUSE",
+							action = "skip_leaf",
+							mode = mode,
+							fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+						})
+					)
+					last_err, last_detail = "must_staple", leaf_detail
+				end
+			end
+			if leaf_ok then
+				healthy[#healthy + 1] = {
+					leaf = leaf,
+					ci = ci,
+					nulls = issuer_path_null_slots(chain_pem),
+				}
+			end
+		end
+	end
+	if #healthy > 0 then
+		local best = healthy[1]
+		for i = 2, #healthy do
+			local h = healthy[i]
+			if h.nulls < best.nulls then
+				best = h
+			end
+		end
+		local ok_inst, a, b = install_one(best.leaf, false)
 		if ok_inst then
-			if ci > 1 then
+			if best.ci > 1 or (best.nulls < healthy[1].nulls) then
+				local detail = "staple_health_fallback"
+				if best.nulls < healthy[1].nulls then
+					detail = "path_completeness"
+				end
 				log(
 					ngx.NOTICE,
 					format_staple_decision("skip_slot", {
 						tag = "OCSP_STAPLE_HEALTH_FALLBACK",
-						detail = "staple_health_fallback",
-						fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+						detail = detail,
+						null_slots = best.nulls,
+						fp = tostring(best.leaf.fp and best.leaf.fp:sub(1, 16) or "nil") .. "...",
 						server_name = server_name or "nil",
 					})
 				)
 			end
-			log_skipped_sibling_leaves(leaves, leaf, server_name)
+			log_skipped_sibling_leaves(leaves, best.leaf, server_name)
 			return true, a, b
 		end
 		last_err, last_detail = a, b
-		if a ~= "must_staple" then
-			-- Parse / set_cert failure: do not keep trying siblings for that error class.
-			break
-		end
 	end
 	if last_err == "must_staple" and (mode == "staple_only" or mode == "open") then
 		-- Soft fuse: present the preferred site leaf unstapled (not a random sibling).
