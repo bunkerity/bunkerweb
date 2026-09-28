@@ -5038,10 +5038,24 @@ def _write_serial_blacklist(
     this_update_unix: Optional[int],
 ) -> None:
     path = _serial_blacklist_path(fingerprint)
-    decimal, serial_hex = _serial_forms(serial)
-    if path is None or not decimal:
+    if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
+    decimal, serial_hex = _serial_forms(serial)
+    # Nil serial still writes a fail-closed marker: Lua refuses when serial_hex is absent.
+    if not decimal:
+        _atomic_write_text(
+            path,
+            json.dumps(
+                {
+                    "status": status_name,
+                    "this_update_unix": this_update_unix,
+                    "serial_unknown": True,
+                }
+            ),
+            mode=0o640,
+        )
+        return
     _atomic_write_text(
         path,
         json.dumps(
@@ -5080,6 +5094,8 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     True when this body must not be published or restored.
     The same serial stays banned until a verified GOOD with a later thisUpdate.
     A different serial (reissue on the same key) is not banned.
+    serial_unknown (tombstone without a readable serial) clears on any verified GOOD
+    that has a serial — otherwise it would permanently block republish.
     """
     if not fingerprint or not ocsp_der:
         return False
@@ -5089,8 +5105,19 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     if ban.get("unreadable"):
         log_error("❌ OCSP serial blacklist for %s is unreadable; refusing to publish", cert_name)
         return True
-    banned_serial = str(ban.get("serial")) if ban.get("serial") is not None else None
     got_serial, this_unix = _der_serial_and_this_update(ocsp_der)
+    if ban.get("serial_unknown"):
+        if got_serial:
+            _clear_serial_blacklist(fingerprint)
+            log_info(
+                "✓ OCSP serial_unknown blacklist cleared for %s (verified GOOD serial=%s)",
+                cert_name,
+                got_serial,
+            )
+            return False
+        log_error("❌ OCSP serial_unknown blacklist for %s; refusing body without serial", cert_name)
+        return True
+    banned_serial = str(ban.get("serial")) if ban.get("serial") is not None else None
     if not banned_serial or not got_serial:
         log_error("❌ OCSP serial blacklist for %s has no comparable serial; refusing to publish", cert_name)
         return True
@@ -5142,9 +5169,15 @@ def _tombstone_ocsp_shard(
     this_update_unix: Optional[int] = None,
 ) -> bool:
     """
-    Remove the published staple for this SPKI. Keeps must_staple in ocsp.json
-    (without der_sha256) so Must-Staple still fail-closes, and bumps the epoch
-    so HTTP and stream L1 drop the previous GOOD body.
+    Remove the published staple for this SPKI.
+
+    Order matters for the mid-flight handshake window:
+    1. Write ocsp.json with tombstoned=true / paged=false (no der_sha256) so Lua
+       can refuse without waiting for .ocsp_epoch.
+    2. Bump .ocsp_epoch immediately so both L1 zones drop the last GOOD.
+    3. Then unlink ocsp.der, write serial blacklist, clear refuse, drop DB DER.
+
+    Keeps must_staple in ocsp.json so Must-Staple still fail-closes.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -5157,7 +5190,12 @@ def _tombstone_ocsp_shard(
         shard = _resolved_sharded_ocsp_path(normalized)
         shard.mkdir(parents=True, exist_ok=True)
         meta_path = shard / "ocsp.json"
-        meta: Dict[str, Any] = {"fingerprint": normalized, "tombstoned": True, "cert_status": status_name}
+        meta: Dict[str, Any] = {
+            "fingerprint": normalized,
+            "tombstoned": True,
+            "paged": False,
+            "cert_status": status_name,
+        }
         if serial is not None:
             meta["serial"] = str(serial)
         try:
@@ -5169,7 +5207,9 @@ def _tombstone_ocsp_shard(
             pass
         meta.update(_provenance_meta())
         meta["published_unix"] = int(datetime.now(timezone.utc).timestamp())
+        # Visible refuse signal first — Lua samples tombstoned before epoch/DER.
         _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        _bump_ocsp_cache_epoch()
         _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
         der_path = shard / "ocsp.der"
         try:
@@ -5180,7 +5220,6 @@ def _tombstone_ocsp_shard(
             return False
         _delete_ocsp_der_db_rows(db, normalized)
         _clear_ocsp_peer_refuse(normalized)
-        _bump_ocsp_cache_epoch()
         _advance_ocsp_cluster_floor(normalized, meta.get("published_unix"), meta.get("job_run_id"), db)
         log_error(
             "🧹 OCSP tombstoned shard for %s (fp=%s..., CertStatus=%s, serial=%s); previous GOOD staple removed",

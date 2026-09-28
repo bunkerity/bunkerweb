@@ -102,6 +102,7 @@ local STAPLE_DECISION = {
 	response_not_found = true,
 	response_stale = true,
 	serial_blacklisted = true,
+	tombstoned = true,
 	shared_ligand = true,
 	certid_mismatch = true,
 	set_staple_failed = true,
@@ -527,6 +528,7 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	end
 
 	local disk_sha = nil
+	local tombstoned = false
 	pcall(function()
 		local meta_path = "/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
@@ -544,11 +546,19 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 		if type(raw) ~= "string" then
 			return
 		end
+		-- Mid-tombstone: meta can say tombstoned before DER unlink / epoch bump.
+		if raw:find('"tombstoned"%s*:%s*true') then
+			tombstoned = true
+			return
+		end
 		local sha = raw:match('"der_sha256"%s*:%s*"([0-9a-fA-F]+)"')
 		if sha and #sha == 64 then
 			disk_sha = sha:lower()
 		end
 	end)
+	if tombstoned then
+		return false
+	end
 
 	if disk_sha then
 		return disk_sha == binding
@@ -769,6 +779,13 @@ local function shard_not_paged(meta)
 		return false
 	end
 	return meta.paged == false
+end
+
+-- Job tombstone writes "tombstoned": true before DER unlink / epoch bump.
+-- Handshake must sample this flag (not only .ocsp_epoch), or L1 can keep
+-- stapling the last GOOD while the multi-step write is mid-flight.
+local function meta_tombstoned(meta)
+	return type(meta) == "table" and meta.tombstoned == true
 end
 
 -- Cross-subsystem refuse bus (HTTP ↔ stream). Separate lua_shared_dict zones cannot
@@ -1897,6 +1914,13 @@ end
 local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only)
 	local meta = read_ocsp_json(fingerprint)
 	local must_staple = ocsp_json_must_staple(meta)
+	if meta_tombstoned(meta) then
+		drop_cache(internalstore, fingerprint)
+		if must_staple then
+			return must_staple_refuse(fingerprint, meta, nil, "tombstoned")
+		end
+		return false
+	end
 	do
 		local peer_dec = peer_refuse_blocks(fingerprint, meta, nil)
 		if peer_dec then
@@ -2074,6 +2098,13 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	local shard_issuer_pem = read_file(issuer_path(fingerprint))
 	local shard_issuer_spki = shard_issuer_pem and spki_fingerprint(shard_issuer_pem) or nil
 	local meta = read_ocsp_json(fingerprint)
+	if meta_tombstoned(meta) then
+		drop_cache(internalstore, fingerprint)
+		if must_staple then
+			return must_staple_refuse(fingerprint, meta, nil, "tombstoned")
+		end
+		return false
+	end
 	do
 		local peer_dec = peer_refuse_blocks(fingerprint, meta, nil)
 		if peer_dec then
@@ -2602,7 +2633,7 @@ local function warm_one_shard(internalstore, fingerprint)
 		return false
 	end
 	local meta = read_ocsp_json(fingerprint)
-	if not meta or shard_not_paged(meta) then
+	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
 		return false
 	end
 	if not resp_still_fresh(nil, fingerprint, meta) then
