@@ -363,8 +363,9 @@ local L1_MAX_TTL = 300
 -- Transient peer-refuse markers age out (align with L1). Sticky codes stay until canary page.
 local PEER_REFUSE_TTL_SECONDS = L1_MAX_TTL
 -- Identity / policy poison: keep shared until a new generation is paged.
--- not_paged is omitted: both subsystems already gate on ocsp.json paged; bus-poisoning
--- it sticks against the same der_sha256 after UNKNOWN soft-recall until a re-page lands.
+-- Soft-recall keeps der_sha256: peer_refuse_blocks ignores (and drops) markers
+-- while paged≠true / unpaged_after_nongood so sticky H cannot pin recovery forever.
+-- not_paged is omitted from sticky writes: both subsystems already gate on ocsp.json.
 local PEER_REFUSE_STICKY = {
 	certid_mismatch = true,
 	aia_uri_mismatch = true,
@@ -946,11 +947,31 @@ local function peer_refuse_marker_expired(marker)
 end
 
 -- If the sibling subsystem refused this generation, both refuse.
--- Returns staple_decision code, or nil when clear / expired.
+-- Returns staple_decision code, or nil when clear / expired / soft-recalled.
 -- quiet=true: skip ERR log (L1 warmer polls this every rescan).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	local gen = generation_id(meta, resp)
 	if not gen then
+		return nil
+	end
+	-- Soft-recall keeps the same der_sha256. A sticky bus entry for that hash must
+	-- not outlive the intentional unpage — recovery re-canaries the *same* body.
+	-- Disk paged=false already stops stapling; honor that gate alone until re-page.
+	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
+		local marker = read_peer_refuse(fingerprint)
+		if marker and marker.der_sha256 == gen then
+			pcall(os.remove, ocsp_refuse_path(fingerprint))
+			if not quiet then
+				log(
+					ngx.NOTICE,
+					"OCSP peer-refuse dropped for soft-recalled/unpaged generation fp="
+						.. fingerprint:sub(1, 16)
+						.. "... der="
+						.. gen:sub(1, 16)
+						.. "..."
+				)
+			end
+		end
 		return nil
 	end
 	local marker = read_peer_refuse(fingerprint)
@@ -993,6 +1014,18 @@ end
 local function record_peer_refuse(fingerprint, meta, resp, decision)
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
+	-- Never pin sticky poison to a soft-recalled / unpaged body: same der_sha256
+	-- would block the later re-canary of those exact bytes forever.
+	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
+		log(
+			ngx.DEBUG,
+			"OCSP peer-refuse skip write for unpaged/soft-recalled fp="
+				.. fp_short
+				.. " decision="
+				.. tostring(decision or "unmet")
+		)
+		return false
+	end
 	local gen = generation_id(meta, resp)
 	if not fingerprint or not is_fp64(fingerprint) then
 		log(
@@ -1057,13 +1090,15 @@ end
 -- normal (default): record so both subsystems refuse the same generation.
 -- Exceptions (skip bus — sibling already sees the same disk/meta gate, or stack mismatch):
 --   * set_staple_failed after a canary-paged body — CLI openssl vs ngx.ocsp attach
---   * not_paged — both sides read ocsp.json; sticky bus vs same der_sha256 blocks soft-recall recovery
+--   * not_paged / unpaged meta — sticky bus vs kept der_sha256 blocks soft-recall recovery
+--   * validate_budget — local timing; sibling must not inherit a handshake timeout
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
 		local d = detail or "unmet"
-		-- Timing / local soft-abort: sibling must not inherit a handshake timeout.
+		-- Timing / unpaged / soft-recall: never pin sticky poison to a kept der_sha256.
 		local skip_bus = d == "not_paged"
 			or d == "validate_budget"
+			or (type(meta) == "table" and meta.paged ~= true)
 			or (
 				(d == "set_staple_failed" or d == "set_staple_exception")
 				and type(meta) == "table"

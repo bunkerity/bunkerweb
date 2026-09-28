@@ -5883,11 +5883,13 @@ def _unpage_ocsp_shard_after_nongood(
         loaded["unpaged_after_nongood"] = True
         loaded["fingerprint"] = normalized
         loaded.update(_provenance_meta())
+        # Soft-recall keeps der_sha256. Clear sticky bus pins on that hash before and
+        # after advertising unpage — a leftover marker would block re-canary of the
+        # same body forever (generation identity does not change).
+        _clear_ocsp_peer_refuse(normalized)
         meta_text = json.dumps(loaded, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
-        # Epoch first (invalidate L1), then unlock peer-refuse — same order as canary page.
-        # Soft-recall keeps der_sha256; a prior sticky not_paged on that generation must not
-        # outlive the intentional unpage.
+        # Epoch first (invalidate L1), then unlock peer-refuse again (race with writers).
         _bump_ocsp_cache_epoch()
         _clear_ocsp_peer_refuse(normalized)
         if db is not None:
