@@ -97,6 +97,7 @@ local STAPLE_DECISION = {
 	not_paged = true,
 	aia_uri_mismatch = true,
 	aia_uri_unpinned = true,
+	aia_uri_missing_on_leaf = true,
 	ssl_use_ocsp_stapling_no = true,
 	ngx_ocsp_unavailable = true,
 	response_not_found = true,
@@ -357,6 +358,7 @@ local PEER_REFUSE_STICKY = {
 	certid_mismatch = true,
 	aia_uri_mismatch = true,
 	aia_uri_unpinned = true,
+	aia_uri_missing_on_leaf = true,
 	tombstoned = true,
 	serial_blacklisted = true,
 	cluster_floor = true,
@@ -1394,6 +1396,10 @@ local function aia_uri_pin_ok(leaf_pem, meta, must_staple)
 	end
 	log(ngx.ERR, "OCSP AIA URI pin mismatch pin=" .. pin .. " leaf_aia_count=" .. tostring(#leaf_uris))
 	return false, "aia_uri_mismatch"
+end
+
+function _M.aia_uri_pin_ok(leaf_pem, meta, must_staple)
+	return aia_uri_pin_ok(leaf_pem, meta, must_staple)
 end
 
 local function ocsp_json_must_staple(meta)
