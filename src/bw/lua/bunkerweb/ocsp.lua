@@ -156,6 +156,41 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	return true
 end
 
+-- Local DRAM flag: validate_budget aborted mid-issuer walk. KEEP fleet allow-pin
+-- but force one ngx.ocsp.validate pass so canary-skip cannot re-attach an unfinished body.
+local function ffi_needed_key(fingerprint)
+	return "TLS:SSL:ocsp_ffi_needed:" .. fingerprint
+end
+
+local function mark_ffi_needed(internalstore, fingerprint)
+	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
+		return
+	end
+	pcall(function()
+		internalstore:set(ffi_needed_key(fingerprint), "1", 300)
+	end)
+end
+
+local function clear_ffi_needed(internalstore, fingerprint)
+	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
+		return
+	end
+	pcall(function()
+		internalstore:delete(ffi_needed_key(fingerprint))
+	end)
+end
+
+local function is_ffi_needed(internalstore, fingerprint)
+	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
+		return false
+	end
+	local v
+	pcall(function()
+		v = internalstore:get(ffi_needed_key(fingerprint))
+	end)
+	return v == "1" or v == true
+end
+
 local function try_staple(
 	ocsp,
 	ssl,
@@ -166,7 +201,8 @@ local function try_staple(
 	probe_only,
 	meta,
 	fingerprint,
-	chain_blocks
+	chain_blocks,
+	force_ffi
 )
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
@@ -206,9 +242,13 @@ local function try_staple(
 	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand
 	-- match AND live allow-pin names this generation (soft-fuse / pin revoke
 	-- must not keep skip-validate alive on ligand bits alone).
-	if canary_paged_body_ok(meta, fingerprint, resp) then
+	-- force_ffi: prior validate_budget demoted L1 but KEEP pin — finish one FFI walk.
+	if canary_paged_body_ok(meta, fingerprint, resp) and not force_ffi then
 		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
 		return set_resp()
+	end
+	if force_ffi and canary_paged_body_ok(meta, fingerprint, resp) then
+		log(ngx.DEBUG, "OCSP force FFI after validate_budget; ignoring canary skip once")
 	end
 	if type(issuers) ~= "table" or #issuers == 0 then
 		return nil
@@ -470,6 +510,7 @@ end
 -- optional unresolved_must_staple). Callers may pass it to staple/probe/attach;
 -- table.concat is only for set_cert. Named fields survive — PEM round-trip does not.
 function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
+	maybe_rearm_l1_warmer()
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
 		return false, "cert_pem and key_pem strings are required"
 	end
@@ -583,6 +624,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		if not parsed_cert or not parsed_key then
 			return false, "failed to parse cert/key: " .. tostring(cert_err or key_err)
 		end
+		-- Drop any prior leaf/multi staple before swapping CertificateEntrys.
+		pcall(clear_connection_staple)
 		local ok_cert, err_cert = ssl.set_cert(parsed_cert)
 		if not ok_cert then
 			return false, "set_cert failed: " .. tostring(err_cert)
@@ -591,6 +634,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		if not ok_key then
 			return false, "set_priv_key failed: " .. tostring(err_key)
 		end
+		-- Seal so staple/probe skip presentable re-link (keeps unresolved_must_staple).
+		blocks.ocsp_path_sealed = true
 		-- Return blocks so staple/attach see the same CertificateEntrys + unresolved flag.
 		return true, blocks, leaf.fp
 	end
@@ -656,42 +701,43 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			end
 		end
 	end
+	local best = nil
 	if #healthy > 0 then
-		-- Prefer ClientHello order (ci) first; use NULL-slot ranking as tiebreaker.
-		-- First try the preferred candidate; only fall back to fewer-nulls sibling if it fails.
-		local best = healthy[1]
-		for i = 2, #healthy do
-			local h = healthy[i]
-			-- Tiebreaker: if same ci, prefer fewer nulls
-			if h.ci == best.ci and h.nulls < best.nulls then
-				best = h
-			elseif h.ci < best.ci then
-				-- Prefer earlier ClientHello preference, regardless of nulls
-				best = h
+		-- Prefer fewest NULL slots (path completeness); ClientHello order (ci) breaks ties.
+		table.sort(healthy, function(a, b)
+			if a.nulls ~= b.nulls then
+				return a.nulls < b.nulls
 			end
-		end
-		local ok_inst, a, b = install_one(best.leaf, false)
-		if ok_inst then
-			if best.ci > 1 then
-				log(
-					ngx.NOTICE,
-					format_staple_decision("skip_slot", {
-						tag = "OCSP_STAPLE_HEALTH_FALLBACK",
-						detail = "sigalgs_fallback",
-						null_slots = best.nulls,
-						fp = tostring(best.leaf.fp and best.leaf.fp:sub(1, 16) or "nil") .. "...",
-						server_name = server_name or "nil",
-					})
-				)
+			return a.ci < b.ci
+		end)
+		best = healthy[1]
+		-- Re-probe on install for normal/staple_only (TOCTOU); try next sibling before soft fuse.
+		for _, h in ipairs(healthy) do
+			local ok_inst, a, b = install_one(h.leaf, mode ~= "open")
+			if ok_inst then
+				best = h
+				if h ~= healthy[1] or h.ci > 1 then
+					log(
+						ngx.NOTICE,
+						format_staple_decision("skip_slot", {
+							tag = "OCSP_STAPLE_HEALTH_FALLBACK",
+							detail = "path_completeness",
+							null_slots = h.nulls,
+							fp = tostring(h.leaf.fp and h.leaf.fp:sub(1, 16) or "nil") .. "...",
+							server_name = server_name or "nil",
+						})
+					)
+				end
+				log_skipped_sibling_leaves(leaves, h.leaf, server_name)
+				return true, a, b
 			end
-			log_skipped_sibling_leaves(leaves, best.leaf, server_name)
-			return true, a, b
+			last_err, last_detail = a, b
 		end
-		last_err, last_detail = a, b
 	end
-	if last_err == "must_staple" and mode == "open" then
-		-- Soft fuse (open mode only): present preferred leaf unstapled when Must-Staple fails.
-		-- staple_only mode: reject; cannot install Must-Staple leaves without proven staple.
+	if last_err == "must_staple" and (mode == "open" or mode == "staple_only") then
+		-- Soft fuse: present ranked survivor (or ClientHello preferred) unstapled.
+		-- staple_only / open: install without abort; never revoke the allow-pin here.
+		local soft_leaf = (best and best.leaf) or preferred
 		log(
 			ngx.ERR,
 			format_staple_decision(last_detail or "probe_failed", {
@@ -700,14 +746,14 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 				mode = mode,
 			})
 		)
-		local ok_soft, soft_pem, soft_fp = install_one(preferred, false)
+		local ok_soft, soft_pem, soft_fp = install_one(soft_leaf, false)
 		if ok_soft then
-			log_skipped_sibling_leaves(leaves, preferred, server_name)
+			log_skipped_sibling_leaves(leaves, soft_leaf, server_name)
 			return true, soft_pem, soft_fp
 		end
 		return false, soft_pem or "must_staple", soft_fp or last_detail
-	elseif last_err == "must_staple" and mode == "staple_only" then
-		-- staple_only: no soft fuse for Must-Staple; require proven staple.
+	elseif last_err == "must_staple" then
+		-- normal: no soft fuse for Must-Staple; require proven staple.
 		return false, "must_staple", last_detail or "no_staple_candidates"
 	end
 	return false, last_err, last_detail
@@ -870,6 +916,13 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 						return false
 					end
 					if probe_only then
+						-- Same issuer-path gate as PEM probe when chain blocks are available.
+						if type(chain_blocks) == "table" and #chain_blocks > 0 then
+							local path_ok, path_detail = issuer_path_intermediate_ready(chain_blocks)
+							if not path_ok then
+								return false, "must_staple", path_detail or "unmet"
+							end
+						end
 						return true
 					end
 					local set_ok, set_err
@@ -953,6 +1006,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				return false
 			end
 			if probe_only then
+				if type(chain_blocks) == "table" and #chain_blocks > 0 then
+					local path_ok, path_detail = issuer_path_intermediate_ready(chain_blocks)
+					if not path_ok then
+						return false, "must_staple", path_detail or "unmet"
+					end
+				end
 				return true
 			end
 			local set_ok, set_err
@@ -1151,6 +1210,7 @@ local function staple_one_leaf(
 						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
 					end
 				end
+				local force_ffi = is_ffi_needed(internalstore, fingerprint)
 				local result, result_detail = try_staple(
 					ocsp,
 					ssl,
@@ -1161,7 +1221,8 @@ local function staple_one_leaf(
 					probe_only,
 					meta,
 					fingerprint,
-					blocks
+					blocks,
+					force_ffi
 				)
 				if result == true then
 					if probe_only then
@@ -1180,6 +1241,7 @@ local function staple_one_leaf(
 						cached_epoch,
 						soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 					)
+					clear_ffi_needed(internalstore, fingerprint)
 					log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 					return true
 				end
@@ -1187,7 +1249,7 @@ local function staple_one_leaf(
 					if result_detail == "validate_budget" then
 						-- Demote local bw3 verified→unverified so the next handshake
 						-- cannot skip FFI on a body this budget never finished proving.
-						-- KEEP fleet allow-pin (validate_budget is KEEP_ALLOW).
+						-- KEEP fleet allow-pin (validate_budget is KEEP_ALLOW); mark force_ffi.
 						warm_cache(
 							internalstore,
 							fingerprint,
@@ -1197,6 +1259,7 @@ local function staple_one_leaf(
 							cached_epoch,
 							soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 						)
+						mark_ffi_needed(internalstore, fingerprint)
 						if must_staple then
 							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
 						end
@@ -1272,8 +1335,20 @@ local function staple_one_leaf(
 				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
 			end
 		end
-		local result, result_detail =
-			try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
+		local force_ffi = is_ffi_needed(internalstore, fingerprint)
+		local result, result_detail = try_staple(
+			ocsp,
+			ssl,
+			resp,
+			leaf_pem,
+			issuers,
+			shard_issuer_spki,
+			probe_only,
+			meta,
+			fingerprint,
+			blocks,
+			force_ffi
+		)
 		if result == true then
 			if probe_only then
 				local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
@@ -1283,6 +1358,7 @@ local function staple_one_leaf(
 				return true
 			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
+			clear_ffi_needed(internalstore, fingerprint)
 			log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, resp)
 			return true
 		end
@@ -1290,6 +1366,7 @@ local function staple_one_leaf(
 			if result_detail == "validate_budget" then
 				-- Demote local L1 verified (KEEP pin) — same contract as L1 path.
 				warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
+				mark_ffi_needed(internalstore, fingerprint)
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, resp, "validate_budget", mode)
 				end
@@ -1359,7 +1436,8 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 
 	if not pem_ok then
 		if fp_hint then
-			return soften_must_staple(mode, staple_from_fingerprint(internalstore, server_name, fp_hint, false, mode))
+			local ok, reason, detail = staple_from_fingerprint(internalstore, server_name, fp_hint, false, mode)
+			return soften_must_staple(mode, ok, reason, detail)
 		end
 		return false
 	end
@@ -1371,7 +1449,10 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return false
 	end
 	-- Drop off-path bag PEMs (sibling dual-cert leaf, cross-signs) before Must-Staple scan.
-	blocks = presentable_chain_blocks(blocks)
+	-- Sealed blocks from set_certs already issuer-linked — skip re-presentable.
+	if not blocks.ocsp_path_sealed then
+		blocks = presentable_chain_blocks(blocks)
+	end
 	leaf_pem = blocks[1] or leaf_pem
 
 	-- Staple only this leaf's SPKI. Never use a dual-cert sibling hint (RSA hint on ECDSA leaf),
@@ -1483,7 +1564,10 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not leaf_pem then
 		return false
 	end
-	blocks = presentable_chain_blocks(blocks)
+	-- Sealed blocks from set_certs already issuer-linked — skip re-presentable.
+	if not blocks.ocsp_path_sealed then
+		blocks = presentable_chain_blocks(blocks)
+	end
 	leaf_pem = blocks[1] or leaf_pem
 	-- Issuer-path readiness binds dual-cert health even when the leaf itself is not Must-Staple.
 	local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
@@ -1580,6 +1664,7 @@ end
 -- Capture SNI + preferred leaf kind during ssl_client_hello (HTTP and stream).
 -- Stores on ngx.ctx for the later ssl_certificate leaf pick / staple.
 function _M.capture_client_hello()
+	maybe_rearm_l1_warmer()
 	local ctx = ngx.ctx
 	if not ctx then
 		return
