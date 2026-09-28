@@ -439,7 +439,8 @@ local function get_l1(internalstore, fingerprint)
 		return nil
 	end
 	local ok, blob = pcall(function()
-		return internalstore:get(cache_key(fingerprint), true)
+		-- Shared dict (not per-worker LRU): one warmer refill serves every worker.
+		return internalstore:get(cache_key(fingerprint))
 	end)
 	if not ok or type(blob) ~= "string" or #blob == 0 then
 		return nil
@@ -454,14 +455,14 @@ local function get_l1(internalstore, fingerprint)
 	der = blob
 	local binding = nil
 	pcall(function()
-		local stored = internalstore:get(verified_key(fingerprint), true)
+		local stored = internalstore:get(verified_key(fingerprint))
 		if type(stored) == "string" and stored == resp_binding(der) then
 			binding = stored
 		end
 	end)
 	epoch = "0"
 	pcall(function()
-		local stored_gen = internalstore:get(gen_key(fingerprint), true)
+		local stored_gen = internalstore:get(gen_key(fingerprint))
 		if type(stored_gen) == "string" and #stored_gen > 0 then
 			epoch = stored_gen
 		end
@@ -469,10 +470,14 @@ local function get_l1(internalstore, fingerprint)
 	pcall(function()
 		local ttl = l1_shm_ttl(nil)
 		if ttl then
-			internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), ttl, true)
+			internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), ttl)
 		end
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
+		-- Drop any pre-fix per-worker LRU copy so it cannot outlive shared L1.
+		internalstore:delete(cache_key(fingerprint), true)
+		internalstore:delete(verified_key(fingerprint), true)
+		internalstore:delete(gen_key(fingerprint), true)
 	end)
 	return der, binding, epoch, nil
 end
@@ -502,10 +507,13 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	end
 	local epoch = current_ocsp_epoch()
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl, true)
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl)
 		-- Drop pre-composite siblings so they cannot outlive / contradict this entry.
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
+		internalstore:delete(cache_key(fingerprint), true)
+		internalstore:delete(verified_key(fingerprint), true)
+		internalstore:delete(gen_key(fingerprint), true)
 	end)
 end
 
@@ -520,6 +528,10 @@ local function drop_cache(internalstore, fingerprint)
 		internalstore:delete(verified_key(fingerprint))
 		internalstore:delete(l1_disk_check_key(fingerprint))
 		internalstore:delete(gen_key(fingerprint))
+		internalstore:delete(cache_key(fingerprint), true)
+		internalstore:delete(verified_key(fingerprint), true)
+		internalstore:delete(l1_disk_check_key(fingerprint), true)
+		internalstore:delete(gen_key(fingerprint), true)
 	end)
 end
 
@@ -2637,12 +2649,59 @@ end
 -- Worker timers preload paged shards into the subsystem shared dict so the
 -- critical path stays on get_l1 whenever possible. HTTP and stream each warm
 -- their own zone (dicts are not shared across subsystems).
+--
+-- Every worker arms a timer; a short shared-dict lease ensures only one scans
+-- disk at a time. If the holder dies, the lease expires and another worker
+-- takes over before L1_MAX_TTL (300s) empties DRAM onto the TLS path.
 
 local L1_WARMER_INTERVAL = 5
 local L1_WARMER_RESCAN = 60
+-- Must be well under L1_MAX_TTL so failover re-warms before shm entries expire.
+local L1_WARMER_LEASE_TTL = math.max(L1_WARMER_INTERVAL * 3, 20)
+local L1_WARMER_LEASE_KEY = "TLS:SSL:ocsp_l1_warmer_lease"
 local l1_warmer_started = false
 local l1_warmer_last_epoch = nil
 local l1_warmer_last_full = 0
+
+local function warmer_lease_token()
+	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
+	local pid = (ngx.worker and ngx.worker.pid and ngx.worker.pid()) or 0
+	return tostring(wid) .. ":" .. tostring(pid)
+end
+
+-- True when this worker holds (or just claimed) the scan lease for this subsystem.
+local function claim_l1_warmer_lease(internalstore)
+	if not internalstore then
+		return false
+	end
+	local token = warmer_lease_token()
+	local cur = nil
+	pcall(function()
+		cur = internalstore:get(L1_WARMER_LEASE_KEY)
+	end)
+	if cur == token then
+		pcall(function()
+			internalstore:set(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL)
+		end)
+		return true
+	end
+	if cur ~= nil and cur ~= "" then
+		return false
+	end
+	-- Lease free: atomic add when the raw dict is available, else set+recheck.
+	local claimed = false
+	pcall(function()
+		local dict = internalstore.dict
+		if dict and dict.add then
+			claimed = dict:add(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL) and true or false
+			return
+		end
+		internalstore:set(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL)
+		local check = internalstore:get(L1_WARMER_LEASE_KEY)
+		claimed = check == token
+	end)
+	return claimed
+end
 
 local function list_ocsp_fingerprints()
 	local fps = {}
@@ -2738,17 +2797,14 @@ function _M.warm_l1_from_disk(internalstore)
 	return warmed
 end
 
--- Start a recurring timer (once per worker Lua VM) that re-warms when .ocsp_epoch bumps.
--- Prefer worker 0 so N workers are not all scanning disk every interval.
+-- Start a recurring timer (once per worker Lua VM). A shared-dict lease picks
+-- one scanner so N workers do not all walk disk; lease expiry lets another
+-- worker take over if the holder dies before L1_MAX_TTL.
 function _M.start_l1_warmer(internalstore)
 	if not internalstore then
 		return false
 	end
 	if l1_warmer_started then
-		return true
-	end
-	local wid = ngx.worker and ngx.worker.id and ngx.worker.id() or 0
-	if wid ~= 0 then
 		return true
 	end
 	if not ngx.timer or not ngx.timer.at then
@@ -2763,15 +2819,17 @@ function _M.start_l1_warmer(internalstore)
 		if ngx.ctx then
 			ngx.ctx.bw_ocsp_epoch = nil
 		end
-		local epoch = current_ocsp_epoch()
-		local now = ngx.time()
-		-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
-		-- does not push the next handshake onto a cold ocsp.der read.
-		local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
-		if need then
-			l1_warmer_last_epoch = epoch
-			l1_warmer_last_full = now
-			pcall(_M.warm_l1_from_disk, internalstore)
+		if claim_l1_warmer_lease(internalstore) then
+			local epoch = current_ocsp_epoch()
+			local now = ngx.time()
+			-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
+			-- does not push the next handshake onto a cold ocsp.der read.
+			local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
+			if need then
+				l1_warmer_last_epoch = epoch
+				l1_warmer_last_full = now
+				pcall(_M.warm_l1_from_disk, internalstore)
+			end
 		end
 		local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
 		if not ok then
@@ -2780,13 +2838,24 @@ function _M.start_l1_warmer(internalstore)
 		end
 	end
 
-	local ok, err = ngx.timer.at(0, tick)
+	-- Stagger first tick by worker id so startup claims are not a thundering herd.
+	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
+	local delay = (tonumber(wid) or 0) * 0.05
+	local ok, err = ngx.timer.at(delay, tick)
 	if not ok then
 		l1_warmer_started = false
 		log(ngx.ERR, "OCSP L1 warmer start failed: " .. tostring(err))
 		return false
 	end
-	log(ngx.INFO, "OCSP L1 warmer started subsystem=" .. tostring(ngx.config.subsystem))
+	log(
+		ngx.INFO,
+		"OCSP L1 warmer armed worker="
+			.. tostring(wid)
+			.. " lease_ttl="
+			.. tostring(L1_WARMER_LEASE_TTL)
+			.. "s subsystem="
+			.. tostring(ngx.config.subsystem)
+	)
 	return true
 end
 

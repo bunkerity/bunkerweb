@@ -13,7 +13,7 @@ function ssl:initialize(ctx)
 end
 
 function ssl:init_workers()
-	-- Preload OCSP L1 off the TLS handshake path (worker 0 timer; HTTP zone).
+	-- Preload OCSP L1 off the TLS handshake path (leased worker timer; HTTP zone).
 	local ocsp = require "bunkerweb.ocsp"
 	local ok, err = pcall(ocsp.start_l1_warmer, self.internalstore)
 	if not ok then
