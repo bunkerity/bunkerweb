@@ -2357,8 +2357,8 @@ def _publish_ocsp_shard(
             cert_name or normalized[:16],
         )
 
-        # New generation: clear cross-subsystem refuse bus for this SPKI.
-        _clear_ocsp_peer_refuse(normalized)
+        # Peer-refuse clear is deferred to the persist batch (bump epoch first, then
+        # unlock). Clearing here would open the bus while L1 still trusts the old epoch.
 
         # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
         if db is not None:
@@ -5195,6 +5195,8 @@ def _persist_ocsp_results_to_disk(
 
     Holding the cert lock across the publish avoids concurrent writers racing
     the rename. The previous shard stays intact if staging, canary, or rename fails.
+    After the batch: bump ``.ocsp_epoch`` once, then clear peer-refuse for each
+    published SPKI (L1 must invalidate before the refuse bus unlocks).
     Called at normal completion and on timeout.
     """
     if not all_ocsp_results:
@@ -5203,7 +5205,7 @@ def _persist_ocsp_results_to_disk(
     if stats is None:
         stats = {}
 
-    published_any = False
+    published_fps: List[str] = []
     for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
         if not ocsp_der:
             continue
@@ -5300,7 +5302,7 @@ def _persist_ocsp_results_to_disk(
                     cert_name=cert_name,
                     db=db,
                 )
-                published_any = True
+                published_fps.append(cert_fp)
                 _advance_ocsp_cluster_floor(cert_fp, meta.get("published_unix"), meta.get("job_run_id"), db)
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
@@ -5337,9 +5339,13 @@ def _persist_ocsp_results_to_disk(
             log_error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
             stats["errors"] = stats.get("errors", 0) + 1
 
-    # One bump per persist batch: HTTP and stream L1 zones both re-check after this.
-    if published_any:
+    # One bump per persist batch, then unlock peer-refuse. Order matters: clearing
+    # refuse before the epoch bump would let handshakes use still-valid L1 entries
+    # for a generation the bus no longer blocks.
+    if published_fps:
         _bump_ocsp_cache_epoch()
+        for fp in published_fps:
+            _clear_ocsp_peer_refuse(fp)
 
 
 def main() -> int:

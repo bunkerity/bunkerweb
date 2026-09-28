@@ -386,9 +386,9 @@ def publish_ocsp_restore_coherence(
 ) -> None:
     """
     After DB restore wrote one or more OCSP shard leaves for these fingerprints:
-    clear peer-refuse, reset nongood.json, reconcile serial-blacklist against the
-    restored body, and bump .ocsp_epoch once. Skipped/fenced fingerprints must not
-    be passed in (their sidecars stay untouched).
+    bump .ocsp_epoch first (invalidate L1), then clear peer-refuse, reset nongood.json,
+    and reconcile serial-blacklist against the restored body. Skipped/fenced
+    fingerprints must not be passed in (their sidecars stay untouched).
     """
     fps: Set[str] = set()
     for fingerprint in fingerprints:
@@ -396,14 +396,15 @@ def publish_ocsp_restore_coherence(
             fps.add(fingerprint.lower())
     if not fps:
         return
+    # Epoch before refuse unlock — same order as the ocsp-refresh persist batch.
+    bump_ocsp_cache_epoch(cache_root, logger)
     for fp in sorted(fps):
         clear_ocsp_peer_refuse(cache_root, fp, logger)
         clear_ocsp_nongood_marker(cache_root, fp, logger)
         reconcile_ocsp_serial_blacklist_after_restore(cache_root, fp, logger)
-    bump_ocsp_cache_epoch(cache_root, logger)
     if logger is not None:
         logger.info(
-            f"OCSP restore coherence: refuse/nongood/blacklist reconcile + epoch bump for {len(fps)} shard(s)"
+            f"OCSP restore coherence: epoch bump + refuse/nongood/blacklist reconcile for {len(fps)} shard(s)"
         )
 
 
