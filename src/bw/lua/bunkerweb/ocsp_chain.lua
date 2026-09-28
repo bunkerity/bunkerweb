@@ -13,7 +13,6 @@ local to_hex = common.to_hex
 
 local cert = require("bunkerweb.ocsp_cert").internal
 local cert_subject_issuer_dns = cert.cert_subject_issuer_dns
-local has_must_staple = cert.has_must_staple
 local is_self_signed = cert.is_self_signed
 local pem_blocks = cert.pem_blocks
 local spki_fingerprint = cert.spki_fingerprint
@@ -23,7 +22,6 @@ local cert_must_staple_bool = store.cert_must_staple_bool
 local cluster_floor_blocks = store.cluster_floor_blocks
 local meta_tombstoned = store.meta_tombstoned
 local ocsp_json_ligand_matches = store.ocsp_json_ligand_matches
-local ocsp_json_must_staple = store.ocsp_json_must_staple
 local read_ocsp_json = store.read_ocsp_json
 local resp_still_fresh = store.resp_still_fresh
 local serial_blacklist_blocks = store.serial_blacklist_blocks
@@ -67,6 +65,7 @@ local function ssl_ffi()
 		"void SSL_free(void *ssl);",
 		"void *OPENSSL_sk_new_null(void);",
 		"int OPENSSL_sk_push(void *st, const void *data);",
+		"int OPENSSL_sk_num(const void *st);",
 		"void OPENSSL_sk_pop_free(void *st, void (*func)(void *));",
 		"void *d2i_OCSP_RESPONSE(void **a, const unsigned char **pp, long length);",
 		"void OCSP_RESPONSE_free(void *r);",
@@ -301,9 +300,13 @@ local function openssl_multi_staple_ready()
 		return true, _multi_staple_state, nil
 	end
 	if _multi_staple_state ~= nil then
-		-- Refresh liveness so a departed leaf-only worker can expire from the colony min.
-		publish_multi_staple_attach(_multi_staple_state ~= false, false)
-		return finish_local(_multi_staple_state ~= false)
+		local local_ok = _multi_staple_state ~= false
+		-- Bypass the 15s rate-limit when our capability disagrees with the live MIN
+		-- (reload / peer flip window where attach and disk would otherwise diverge).
+		local colony = colony_multi_staple_min()
+		local force = (local_ok and colony == false) or ((not local_ok) and colony == true)
+		publish_multi_staple_attach(local_ok, force)
+		return finish_local(local_ok)
 	end
 	local st = ssl_ffi()
 	if not st or not probe_multi_staple_ctrl() then
@@ -316,14 +319,15 @@ local function openssl_multi_staple_ready()
 	return finish_local(true)
 end
 
--- Warmer tick: refresh this worker's colony vote, probing first if it never ran.
+-- Warmer tick: refresh this worker's colony vote.
+-- Latched false (OOM / scratch SSL_CTX failure) is cleared so a later warmer can
+-- re-probe — probe-once forever would page every Must-Staple handshake until recycle.
 -- Lives here because _multi_staple_state is this module's mutable state.
 local function refresh_multi_staple_vote()
-	if _multi_staple_state ~= nil then
-		publish_multi_staple_attach(_multi_staple_state ~= false, false)
-	else
-		openssl_multi_staple_ready()
+	if _multi_staple_state == false then
+		_multi_staple_state = nil
 	end
+	openssl_multi_staple_ready()
 end
 
 -- Per-tenant control key for intermediate OCSP negatives (must match Python
@@ -399,9 +403,9 @@ local function load_paged_intermediate_staple(cert_pem, leaf_pem)
 	return der, body_fp
 end
 
--- True when any non-root chain cert carries Must-Staple (PEM TLS Feature or ocsp.json).
--- Unknown TLS Feature (resty throw) without ocsp.json fail-closes as true so leaf-only
--- attach cannot silently skip intermediate Must-Staple.
+-- True when any non-root chain cert carries Must-Staple.
+-- Single fail-closed oracle: cert_must_staple_bool(pem, true) — same detector as
+-- collect_chain_staple_ders / issuer_path body checks (no parallel TLS/meta walk).
 local function chain_has_intermediate_must_staple(chain_blocks)
 	if type(chain_blocks) ~= "table" or #chain_blocks < 2 then
 		return false
@@ -411,17 +415,7 @@ local function chain_has_intermediate_must_staple(chain_blocks)
 		if is_self_signed(pem) then
 			break
 		end
-		local tls_ms = has_must_staple(pem)
-		if tls_ms == true then
-			return true
-		end
-		local fp = spki_fingerprint(pem)
-		local meta = fp and read_ocsp_json(fp) or nil
-		if ocsp_json_must_staple(meta) then
-			return true
-		end
-		-- resty unknown and no job meta → fail closed (treat as intermediate Must-Staple).
-		if tls_ms == nil and meta == nil then
+		if cert_must_staple_bool(pem, true) then
 			return true
 		end
 	end
@@ -448,7 +442,7 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 			break
 		end
 		local inter_must = cert_must_staple_bool(pem, true)
-		local der, fp = load_paged_intermediate_staple(pem, leaf_pem)
+		local der = load_paged_intermediate_staple(pem, leaf_pem)
 		if not der then
 			if inter_must then
 				return nil, "must_staple", "response_not_found"
@@ -607,6 +601,17 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 		end
 	end
 	if not push_ok then
+		C.OPENSSL_sk_pop_free(stack, free_resp)
+		return refuse_or_leaf_only("multi_staple_attach_failed")
+	end
+
+	-- Cardinality check: nil NULL-slot pushes must not desync staples onto the wrong
+	-- CertificateEntry. Refuse rather than silently mis-staple.
+	local sk_num = -1
+	pcall(function()
+		sk_num = tonumber(C.OPENSSL_sk_num(stack)) or -1
+	end)
+	if sk_num ~= #ders then
 		C.OPENSSL_sk_pop_free(stack, free_resp)
 		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
@@ -883,15 +888,58 @@ end
 -- Named fields (unresolved_must_staple) are NOT preserved in the PEM bytes —
 -- callers that need the refuse flag must use issuer_linked_chain_blocks /
 -- presentable_chain_blocks and pass the table into health/attach, not this PEM.
--- When unresolved>0, also stamps ngx.ctx so a same-request PEM→re-parse round-trip
--- into presentable_chain_blocks restores the count (poison for depleted-PEM attach).
-local function note_depleted_pem_unresolved(unresolved)
+-- When unresolved>0, stamps ngx.ctx keyed by leaf SPKI so a same-request
+-- PEM→re-parse restores the count for that leaf only (dual-cert sibling safe).
+local function note_depleted_pem_unresolved(unresolved, leaf_pem)
+	if not ngx.ctx then
+		return
+	end
+	local fp = type(leaf_pem) == "string" and spki_fingerprint(leaf_pem) or nil
+	if not is_fp64(fp) then
+		return
+	end
+	local by_fp = ngx.ctx.bw_ocsp_chain_unresolved_by_fp
+	if type(by_fp) ~= "table" then
+		by_fp = {}
+		ngx.ctx.bw_ocsp_chain_unresolved_by_fp = by_fp
+	end
 	local u = tonumber(unresolved) or 0
-	if u > 0 and ngx.ctx then
-		local prev = tonumber(ngx.ctx.bw_ocsp_chain_unresolved_must_staple) or 0
-		if u > prev then
-			ngx.ctx.bw_ocsp_chain_unresolved_must_staple = u
-		end
+	if u <= 0 then
+		by_fp[fp] = nil
+		return
+	end
+	local prev = tonumber(by_fp[fp]) or 0
+	if u > prev then
+		by_fp[fp] = u
+	end
+end
+
+local function ctx_unresolved_for_leaf(leaf_pem)
+	if not ngx.ctx then
+		return nil
+	end
+	local by_fp = ngx.ctx.bw_ocsp_chain_unresolved_by_fp
+	if type(by_fp) ~= "table" then
+		return nil
+	end
+	local fp = type(leaf_pem) == "string" and spki_fingerprint(leaf_pem) or nil
+	if not is_fp64(fp) then
+		return nil
+	end
+	return tonumber(by_fp[fp])
+end
+
+local function restore_ctx_unresolved(out, leaf_pem)
+	if type(out) ~= "table" then
+		return
+	end
+	local ctx_u = ctx_unresolved_for_leaf(leaf_pem)
+	if not ctx_u or ctx_u <= 0 then
+		return
+	end
+	local cur = tonumber(out.unresolved_must_staple) or 0
+	if ctx_u > cur then
+		out.unresolved_must_staple = ctx_u
 	end
 end
 
@@ -900,7 +948,7 @@ local function issuer_linked_chain_pem(leaf_pem, intermediate_pems)
 	if type(blocks) ~= "table" or #blocks == 0 then
 		return ""
 	end
-	note_depleted_pem_unresolved(blocks.unresolved_must_staple)
+	note_depleted_pem_unresolved(blocks.unresolved_must_staple, blocks[1] or leaf_pem)
 	return table.concat(blocks, "\n")
 end
 
@@ -912,7 +960,8 @@ end
 -- count is preserved across re-link: table.concat → re-parse would otherwise
 -- drop the named field and the omitted Must-Staple PEMs, making health/attach
 -- treat an abbreviated chain as "no intermediate Must-Staple".
--- Same-request depleted-PEM export also stamps ngx.ctx; string inputs restore it.
+-- Same-request depleted-PEM export stamps ngx.ctx by leaf SPKI; string inputs
+-- restore only when the re-parsed leaf fingerprint matches (no dual-cert poison).
 local function presentable_chain_blocks(cert_pem_or_blocks)
 	local prior_unresolved = nil
 	local blocks = cert_pem_or_blocks
@@ -924,12 +973,9 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 		blocks = pem_blocks(blocks)
 	end
 	if type(blocks) ~= "table" or #blocks <= 1 then
-		-- Short/empty after PEM parse: still restore ctx stamp (depleted leaf-only).
-		if from_pem_string and type(blocks) == "table" and ngx.ctx then
-			local ctx_u = tonumber(ngx.ctx.bw_ocsp_chain_unresolved_must_staple)
-			if ctx_u and ctx_u > 0 then
-				blocks.unresolved_must_staple = ctx_u
-			end
+		-- Short/empty after PEM parse: restore ctx stamp for this leaf only.
+		if from_pem_string and type(blocks) == "table" and blocks[1] then
+			restore_ctx_unresolved(blocks, blocks[1])
 		end
 		return blocks
 	end
@@ -945,26 +991,23 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 			out.unresolved_must_staple = prior_unresolved
 		end
 	end
-	-- Restore refuse flag after depleted PEM round-trip (set_cert export → staple).
-	if from_pem_string and ngx.ctx then
-		local ctx_u = tonumber(ngx.ctx.bw_ocsp_chain_unresolved_must_staple)
-		if ctx_u and ctx_u > 0 then
-			local cur = tonumber(out.unresolved_must_staple) or 0
-			if ctx_u > cur then
-				out.unresolved_must_staple = ctx_u
-			end
-		end
+	if from_pem_string then
+		restore_ctx_unresolved(out, leaf)
+	end
+	-- Clean linked path for this leaf: drop any leftover depleted-PEM stamp.
+	if (tonumber(out.unresolved_must_staple) or 0) <= 0 then
+		note_depleted_pem_unresolved(0, leaf)
 	end
 	return out
 end
 
 -- PEM for set_cert from issuer-linked blocks (array part only; named fields ignored).
--- Stamps ngx.ctx when unresolved_must_staple>0 so PEM→presentable round-trips refuse.
+-- Stamps ngx.ctx by leaf SPKI when unresolved_must_staple>0 (PEM→presentable refuse).
 local function chain_pem_from_blocks(blocks)
 	if type(blocks) ~= "table" or #blocks == 0 then
 		return ""
 	end
-	note_depleted_pem_unresolved(blocks.unresolved_must_staple)
+	note_depleted_pem_unresolved(blocks.unresolved_must_staple, blocks[1])
 	return table.concat(blocks, "\n")
 end
 
@@ -1022,12 +1065,19 @@ end
 -- How many issuer-path intermediates would attach as NULL (ok_partial slots).
 -- Used to rank leaf-GOOD siblings: fewer nulls = more complete multi-staple.
 -- Colony/libssl leaf-only with intermediate Must-Staple scores a large sentinel
--- (not vacuous 0) so a multi-capable sibling wins ranking. Without intermediate
--- Must-Staple, leaf-only still scores 0 (legal completeness).
+-- (not vacuous 0) so a multi-capable sibling wins ranking. unresolved_must_staple
+-- on a short/#blocks<2 depleted chain also scores the sentinel (not vacuous 0).
+-- Without intermediate Must-Staple, leaf-only still scores 0 (legal completeness).
 -- Does not demote — ok_partial remains legal when it is the only healthy option.
 local function issuer_path_null_slots(chain_pem_or_blocks)
 	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
-	if type(blocks) ~= "table" or #blocks < 2 then
+	if type(blocks) ~= "table" then
+		return 0
+	end
+	if (tonumber(blocks.unresolved_must_staple) or 0) > 0 then
+		return 64
+	end
+	if #blocks < 2 then
 		return 0
 	end
 	local ready = openssl_multi_staple_ready()
