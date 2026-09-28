@@ -1067,12 +1067,9 @@ local META_ONLY_DROP_ALLOW = {
 -- hot path and turned mixed-version rollouts into synchronized Must-Staple outages.
 -- Missing soft_recall_gen → treat as 0 (one-release upgrade grace); job restamp
 -- rewrites proper gen on the next run.
-local function read_allow_pin(fingerprint)
-	if not is_fp64(fingerprint) then
-		return nil
-	end
-	local raw = read_file(ocsp_allow_path(fingerprint))
-	if not raw or raw == "" then
+-- Decode allow-pin JSON bytes; nil unless der_sha256 is 64 lowercase-normalized hex.
+local function decode_allow_pin(raw)
+	if type(raw) ~= "string" or raw == "" then
 		return nil
 	end
 	local ok, obj = pcall(function()
@@ -2266,13 +2263,21 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		n = OCSP_VALIDATE_MAX_ISSUERS
 	end
 	local hrtime = ngx.hrtime
-	local t0 = hrtime and hrtime() or ngx.now()
+	-- ngx.now() is cached per event-loop tick and validate never yields, so the
+	-- seconds fallback must refresh it or elapsed stays 0 and the budget never fires.
+	local function budget_clock_s()
+		if ngx.update_time then
+			ngx.update_time()
+		end
+		return ngx.now()
+	end
+	local t0 = hrtime and hrtime() or budget_clock_s()
 	for i = 1, n do
 		local over_budget
 		if hrtime then
 			over_budget = (hrtime() - t0) > OCSP_VALIDATE_BUDGET_NS
 		else
-			over_budget = (ngx.now() - t0) > OCSP_VALIDATE_BUDGET_S
+			over_budget = (budget_clock_s() - t0) > OCSP_VALIDATE_BUDGET_S
 		end
 		if over_budget then
 			local fp_s = (type(fingerprint) == "string" and #fingerprint == 64) and fingerprint or nil
