@@ -8,17 +8,21 @@ local function log(level, msg)
 	ngx.log(level, msg)
 end
 
--- variables["global"] and variables["<server name>"], same layout as utils.get_variable.
--- Per-site keys are the primary service id (first SERVER_NAME token). SNI may be a
--- secondary name on that service — resolve before looking up site overrides.
-local function resolve_multisite_service_id(vars, sni)
+-- Resolve SNI to primary service id with explicit precision tiers (highest to lowest).
+-- Tier 1: exact match on primary service id (key in vars table)
+-- Tier 2: case-insensitive match on primary service id
+-- Tier 3: SERVER_NAME token search (exact match then case-insensitive)
+-- Returns: primary service id (key in vars) or nil. Ensures consistent resolution order.
+local function resolve_multisite_service_id_from_vars(vars, sni)
 	if not sni or type(vars) ~= "table" then
 		return nil
 	end
+	-- Tier 1: exact match on primary service id
 	if type(vars[sni]) == "table" then
 		return sni
 	end
 	local sni_lower = tostring(sni):lower()
+	-- Tier 2: case-insensitive match on primary service id
 	for primary, site_vars in pairs(vars) do
 		if primary ~= "global" and type(primary) == "string" and type(site_vars) == "table" then
 			if primary:lower() == sni_lower then
@@ -26,12 +30,27 @@ local function resolve_multisite_service_id(vars, sni)
 			end
 		end
 	end
+	-- Tier 3: SERVER_NAME token search (exact first, then case-insensitive)
+	-- Tier 3a: exact token match
 	for primary, site_vars in pairs(vars) do
 		if primary ~= "global" and type(site_vars) == "table" then
 			local names = site_vars["SERVER_NAME"]
 			if type(names) == "string" then
 				for name in names:gmatch("%S+") do
-					if name == sni or name:lower() == sni_lower then
+					if name == sni then
+						return primary
+					end
+				end
+			end
+		end
+	end
+	-- Tier 3b: case-insensitive token match
+	for primary, site_vars in pairs(vars) do
+		if primary ~= "global" and type(site_vars) == "table" then
+			local names = site_vars["SERVER_NAME"]
+			if type(names) == "string" then
+				for name in names:gmatch("%S+") do
+					if name:lower() == sni_lower then
 						return primary
 					end
 				end
@@ -41,7 +60,21 @@ local function resolve_multisite_service_id(vars, sni)
 	return nil
 end
 
+-- Apply per-site setting override: check site-specific value, fall back to global.
+-- Separate phase from SNI resolution for clarity and testability.
+local function apply_site_override(vars, service_id, name, global_value)
+	if not service_id or type(vars[service_id]) ~= "table" then
+		return global_value
+	end
+	local site_value = vars[service_id][name]
+	if site_value ~= nil then
+		return site_value
+	end
+	return global_value
+end
+
 -- Read a multisite setting: per-site (primary service id) wins over global.
+-- Per-request resolution ensures config changes (reload) invalidate cached service mappings.
 local function get_site_variable(internalstore, server_name, name)
 	local ok, vars = pcall(function()
 		return internalstore:get("variables", true)
@@ -51,13 +84,10 @@ local function get_site_variable(internalstore, server_name, name)
 	end
 	local value = vars["global"][name]
 	if vars["global"]["MULTISITE"] == "yes" and server_name then
-		local service_id = resolve_multisite_service_id(vars, server_name)
-		if service_id and type(vars[service_id]) == "table" then
-			local site_value = vars[service_id][name]
-			if site_value ~= nil then
-				value = site_value
-			end
-		end
+		-- Per-request SNI resolution: always resolve against current config, no caching
+		local service_id = resolve_multisite_service_id_from_vars(vars, server_name)
+		-- Separate phase: apply per-site override
+		value = apply_site_override(vars, service_id, name, value)
 	end
 	return value
 end
@@ -315,27 +345,41 @@ local function read_file(path)
 	return nil
 end
 
+-- Derive 16-way shard from fingerprint: uses first 2 hex chars (nibble, nibble).
+-- Deterministic and independent of SNI resolution.
+-- Returns: (shard_high, shard_low) for path construction.
+local function fingerprint_shard(fingerprint)
+	if not fingerprint or #fingerprint < 2 then
+		return "0", "0"
+	end
+	return fingerprint:sub(1, 1), fingerprint:sub(2, 2)
+end
+
+-- Build OCSP response path from fingerprint and shard.
 local function ocsp_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/"
-		.. fingerprint:sub(1, 1)
-		.. "/"
-		.. fingerprint:sub(2, 2)
-		.. "/"
-		.. fingerprint
-		.. "/ocsp.der"
+	if not fingerprint or fingerprint == "" then
+		return "/var/cache/bunkerweb/ssl/0/0/unknown/ocsp.der"
+	end
+	local h, l = fingerprint_shard(fingerprint)
+	return "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/ocsp.der"
 end
 
+-- Build issuer PEM path from fingerprint and shard.
 local function issuer_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/"
-		.. fingerprint:sub(1, 1)
-		.. "/"
-		.. fingerprint:sub(2, 2)
-		.. "/"
-		.. fingerprint
-		.. "/issuer.pem"
+	if not fingerprint or fingerprint == "" then
+		return "/var/cache/bunkerweb/ssl/0/0/unknown/issuer.pem"
+	end
+	local h, l = fingerprint_shard(fingerprint)
+	return "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/issuer.pem"
 end
 
+-- Cache key includes fingerprint to auto-invalidate on certificate rotation.
+-- Same fingerprint = same cert; new cert = new fingerprint = new cache entry.
+-- This prevents stale OCSP decisions from applying to rotated certificates.
 local function cache_key(fingerprint)
+	if not fingerprint or fingerprint == "" then
+		return "TLS:SSL:ocsp:unknown"
+	end
 	return "TLS:SSL:ocsp:" .. fingerprint
 end
 
@@ -429,8 +473,10 @@ _M.internal = {
 	OCSP_VALIDATE_BUDGET_NS = OCSP_VALIDATE_BUDGET_NS,
 	OCSP_VALIDATE_BUDGET_S = OCSP_VALIDATE_BUDGET_S,
 	OCSP_VALIDATE_MAX_ISSUERS = OCSP_VALIDATE_MAX_ISSUERS,
+	apply_site_override = apply_site_override,
 	cache_key = cache_key,
 	current_ocsp_epoch = current_ocsp_epoch,
+	fingerprint_shard = fingerprint_shard,
 	format_staple_decision = format_staple_decision,
 	is_fp64 = is_fp64,
 	issuer_path = issuer_path,
