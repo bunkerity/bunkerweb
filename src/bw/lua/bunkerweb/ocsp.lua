@@ -2586,8 +2586,10 @@ end
 
 -- Ordered Certificate message for one leaf: leaf + issuer-linked intermediates only.
 -- Drops off-path bag members (cross-signs, unused extras) so their Must-Staple cannot
--- fail-close a healthy leaf→issuer path. If the leaf's issuer cannot be resolved in
--- the bag, falls back to the legacy full bag so quirky PEMs still install.
+-- fail-close a healthy leaf→issuer path (including after ClientHello sibling fallback).
+-- If the leaf's issuer cannot be resolved in the bag, never restore the full bag —
+-- that reintroduces "steer onto sibling, die on extra Must-Staple PEM". Instead keep
+-- only non-Must-Staple intermediates as chain hints.
 local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	if type(leaf_pem) ~= "string" or leaf_pem == "" then
 		return {}
@@ -2639,11 +2641,39 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		current_issuer = pick.issuer or pick_iss
 	end
 	if linked == 0 then
-		-- Unresolved issuer DN: legacy bag concat (name encoding / unordered dumps).
+		-- Unresolved issuer DN: never full-bag concat. Must-Staple extras in the bag
+		-- would fail-close after dual-cert health steers onto this sibling.
+		local dropped_must = 0
 		for _, pem in ipairs(intermediate_pems) do
 			if type(pem) == "string" and pem ~= "" then
-				blocks[#blocks + 1] = pem
+				local must = has_must_staple(pem)
+				if not must then
+					local fp = spki_fingerprint(pem)
+					if fp then
+						must = ocsp_json_must_staple(read_ocsp_json(fp))
+					end
+				end
+				if must then
+					dropped_must = dropped_must + 1
+				else
+					-- Skip self-signed trust anchors (not CertificateEntry staple targets).
+					local subj, iss = cert_subject_issuer_dns(pem)
+					if subj and iss and subj == iss then
+						-- drop root
+					else
+						blocks[#blocks + 1] = pem
+					end
+				end
 			end
+		end
+		if dropped_must > 0 then
+			log(
+				ngx.DEBUG,
+				"OCSP unresolved issuer path: dropped "
+					.. tostring(dropped_must)
+					.. " Must-Staple bag PEM(s); presented_entries="
+					.. tostring(#blocks)
+			)
 		end
 		return blocks, false
 	end
