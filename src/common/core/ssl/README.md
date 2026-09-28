@@ -93,8 +93,9 @@ Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is *
     | `refuse_must_staple` | Logs runbook code; **`probe_only` never writes the allow-pin bus**; soft fuse never writes; normal may DROP_ALLOW. |
     | `ocsp_current_epoch` / `_M.current_ocsp_epoch` | One tokenizer for `.ocsp_epoch` (first-line `^%S+`) so HTTP and stream L1 cannot desync. |
     | `ocsp_l1_put(..., packed_epoch)` | Optional epoch from the L1 get that already matched disk; `probe_only` callers skip put. |
-    | `certs_cleared` / `leaf_installed` / `leaf_must_staple` | Outside the top-level pcall so a throw after `clear_certs` / half-install aborts instead of falling through to nginx's static cert. |
+    | `certs_cleared` / `leaf_installed` / `leaf_must_staple` | Outside the top-level pcall so a throw after `clear_certs` / half-install aborts instead of falling through to nginx's static cert. `cleared_no_leaf` aborts when Must-Staple is required **or unknown** (`~= false`). |
     | `wipe_ssl_ctx` | Clears a half-installed leaf (`set_priv_key` / OCSP throw) and re-marks `certs_cleared`. |
+    | PATH A open clear | Fingerprint path clears Must-Staple under `open` **before** peer refuse (aligned with PATH B). |
 
 !!! tip "Stream `bunkerweb.ocsp` helpers (reviewer map)"
     | Helper | Role |
@@ -107,7 +108,8 @@ Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is *
     | `colony_multi_staple_min` | Live MIN of worker votes. Handshake **does not** `os.remove` stale files (publish prunes). A live vote that is neither `0` nor `1` is leaf-only. In-progress `*.tmp.*` names are skipped (publish renames into place). |
     | `multi_staple_worker_id` | Vote filename is `sha256(HOSTNAME)[1..16]-pid-wid` (crc32 fallback). Full hostname is hashed so a 64-char prefix cannot merge two pods. |
     | `pick_issuer_candidate` | Same subject DN, several PEMs: unique SPKI, else the single candidate with a paged staple. Otherwise the walk stops (no `cands[1]`). |
-    | `certid_matches_handshake_leaf` | Serial plus issuer DN. Several DN matches must share one SPKI (`issuer_ambiguous` → certid mismatch). Not a full issuerKeyHash parse. |
+    | `issuer_linked_chain_blocks` / `presentable_chain_blocks` | Issuer-linked presentation. Omitting Must-Staple bag PEMs sets `unresolved_must_staple` on the **table**. `issuer_linked_chain_pem` (PEM concat) drops that flag — pass the blocks table into health/attach/staple/probe, or pass the full leaf+intermediates bag so presentable can recompute it. |
+    | `certid_matches_handshake_leaf` | Serial plus issuer DN. Several DN matches must share one SPKI (`issuer_ambiguous` → certid mismatch). Not a full issuerKeyHash parse. `try_staple` returns `certid_mismatch` (DROP_ALLOW), not KEEP `set_staple_failed`. |
     | `peer_refuse_blocks` | Unpaged / soft-recall revokes this generation and returns `not_paged` (callers that skip `shard_not_paged` still refuse). KEEP_ALLOW. |
     | `warm_l1_from_disk` | Warms paged shards; Must-Staple (`ocsp.json`) first. Lease claim requires `dict.add` (no set-then-recheck). |
     | `warm_cache(..., packed_epoch)` | Same packed-epoch rule as HTTP `ocsp_l1_put` — do not stamp "now" over a body that already matched disk. |

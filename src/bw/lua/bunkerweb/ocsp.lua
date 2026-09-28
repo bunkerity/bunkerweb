@@ -2313,7 +2313,8 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
 		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
-		return false
+		-- Must be certid_mismatch (DROP_ALLOW), not bare false → set_staple_failed/unmet KEEP.
+		return false, "certid_mismatch"
 	end
 	local function set_resp()
 		if probe_only then
@@ -2931,13 +2932,16 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	end
 
 	local ctx = C.SSL_get_SSL_CTX(ssl_ptr)
-	-- Install at most once per SSL_CTX. Nginx's status callback lives on the
-	-- shared server ctx; replacing it on every handshake races other connections
-	-- that share that ctx. OpenSSL still requires SOME callback that returns
-	-- SSL_TLSEXT_ERR_OK or it will not emit staples already stored on the SSL
-	-- object (SSL_set0 / set_ocsp_status_resp). Staple bytes stay on the SSL,
-	-- not the ctx. Config-time install is not available from this Lua phase,
-	-- so the once-per-ctx guard is the handshake-safe form of the required call.
+	-- Install at most once per SSL_CTX on this worker. Nginx's status callback
+	-- lives on the shared server ctx; replacing it on every handshake via this
+	-- FFI path races other connections that share that ctx.
+	-- OpenSSL still requires SOME callback that returns SSL_TLSEXT_ERR_OK or it
+	-- will not emit staples already stored on the SSL object. Staple bytes stay
+	-- on the SSL, not the ctx.
+	-- Note: ocsp.set_ocsp_status_resp (called just above) still reinstalls
+	-- lua-nginx's empty cb every handshake when the client sent status_request —
+	-- both callbacks return OK, so staples still emit. This once-per-ctx guard
+	-- only avoids stacking extra FFI installs of st.empty_cb on top of that.
 	if ctx ~= nil then
 		local ctx_key = tostring(ctx)
 		if not _status_cb_installed[ctx_key] then
@@ -3632,16 +3636,31 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 end
 
 -- Concatenate issuer_linked_chain_blocks into one PEM string for set_cert.
+-- Named fields (unresolved_must_staple) are NOT preserved — callers that need
+-- the refuse flag must use issuer_linked_chain_blocks / presentable_chain_blocks
+-- and pass the table into health/attach, not this PEM.
 local function issuer_linked_chain_pem(leaf_pem, intermediate_pems)
 	local blocks = issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
+	if type(blocks) ~= "table" or #blocks == 0 then
+		return ""
+	end
 	return table.concat(blocks, "\n")
 end
 
 -- Narrow a PEM bag or block list to the leaf's issuer-linked presentation
 -- (same rules as issuer_linked_chain_blocks; used by health + attach paths).
+--
+-- Accepts a PEM string or a blocks table. If the input table already carries
+-- unresolved_must_staple (from a prior issuer_linked_chain_blocks call), that
+-- count is preserved across re-link: table.concat → re-parse would otherwise
+-- drop the named field and the omitted Must-Staple PEMs, making health/attach
+-- treat an abbreviated chain as "no intermediate Must-Staple".
 local function presentable_chain_blocks(cert_pem_or_blocks)
+	local prior_unresolved = nil
 	local blocks = cert_pem_or_blocks
-	if type(blocks) == "string" then
+	if type(blocks) == "table" then
+		prior_unresolved = tonumber(blocks.unresolved_must_staple)
+	elseif type(blocks) == "string" then
 		blocks = pem_blocks(blocks)
 	end
 	if type(blocks) ~= "table" or #blocks <= 1 then
@@ -3652,7 +3671,22 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 	for i = 2, #blocks do
 		inters[#inters + 1] = blocks[i]
 	end
-	return issuer_linked_chain_blocks(leaf, inters)
+	local out = issuer_linked_chain_blocks(leaf, inters)
+	if prior_unresolved and prior_unresolved > 0 then
+		local cur = tonumber(out.unresolved_must_staple) or 0
+		if prior_unresolved > cur then
+			out.unresolved_must_staple = prior_unresolved
+		end
+	end
+	return out
+end
+
+-- PEM for set_cert from issuer-linked blocks (array part only; named fields ignored).
+local function chain_pem_from_blocks(blocks)
+	if type(blocks) ~= "table" or #blocks == 0 then
+		return ""
+	end
+	return table.concat(blocks, "\n")
 end
 
 function _M.issuer_linked_chain_pem(leaf_pem, intermediate_pems)
@@ -3761,8 +3795,10 @@ end
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
--- Returns: true, chain_pem, leaf_fp  OR  false, err_msg [, detail]
--- chain_pem is the issuer-linked presentation (leaf + path intermediates) for staple attach.
+-- Returns: true, chain_blocks_or_pem, leaf_fp  OR  false, err_msg [, detail]
+-- On success the second value is the issuer-linked blocks table (array of PEMs plus
+-- optional unresolved_must_staple). Callers may pass it to staple/probe/attach;
+-- table.concat is only for set_cert. Named fields survive — PEM round-trip does not.
 function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
 		return false, "cert_pem and key_pem strings are required"
@@ -3822,8 +3858,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	end
 
 	local function install_one(leaf, probe_must)
-		-- Present only the issuer-linked path for this leaf — not every bag PEM.
-		local chain_pem = issuer_linked_chain_pem(leaf.pem, intermediates)
+		-- Issuer-linked blocks keep unresolved_must_staple; PEM concat alone would drop it.
+		local blocks = issuer_linked_chain_blocks(leaf.pem, intermediates)
+		local chain_pem = chain_pem_from_blocks(blocks)
 		local leaf_must = false
 		if probe_must then
 			leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) == true
@@ -3835,7 +3872,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		-- Soft-fuse install (probe_must=false) skips demotion so the preferred leaf can load unstapled.
 		-- Skip-leaf demotion must NOT write the peer-refuse bus: a sibling may still install.
 		if probe_must and mode ~= "open" then
-			local path_ok, path_detail = issuer_path_intermediate_ready(chain_pem)
+			local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 			if not path_ok then
 				local detail = path_detail or "unmet"
 				log(
@@ -3852,7 +3889,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			end
 		end
 		if leaf_must and internalstore and mode ~= "open" then
-			local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, chain_pem, leaf.fp, false)
+			-- Pass blocks (not depleted PEM) so probe/presentable keep unresolved_must_staple.
+			local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, blocks, leaf.fp, false)
 			if not probe_ok then
 				local detail = probe_detail or probe_reason or "probe_failed"
 				if leaf.fp and mode == "normal" then
@@ -3883,8 +3921,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		if not ok_key then
 			return false, "set_priv_key failed: " .. tostring(err_key)
 		end
-		-- Return issuer-linked chain so staple/attach see the same CertificateEntrys.
-		return true, chain_pem, leaf.fp
+		-- Return blocks so staple/attach see the same CertificateEntrys + unresolved flag.
+		return true, blocks, leaf.fp
 	end
 
 	-- Collect ClientHello-compatible leaves that pass Must-Staple / path health, then
@@ -3896,10 +3934,10 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	for ci, leaf in ipairs(candidates) do
 		-- Probe only (no set_cert) via install_one's health gates, then discard.
 		-- Re-run install after selection so set_cert lands on the chosen leaf once.
-		local chain_pem = issuer_linked_chain_pem(leaf.pem, intermediates)
+		local blocks = issuer_linked_chain_blocks(leaf.pem, intermediates)
 		local path_ok, path_detail = true, nil
 		if mode ~= "open" then
-			path_ok, path_detail = issuer_path_intermediate_ready(chain_pem)
+			path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 		end
 		if not path_ok then
 			log(
@@ -3921,7 +3959,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			local leaf_ok = true
 			local leaf_detail = nil
 			if leaf_must and internalstore and mode ~= "open" then
-				local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, chain_pem, leaf.fp, false)
+				local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, blocks, leaf.fp, false)
 				if not probe_ok then
 					leaf_ok = false
 					leaf_detail = probe_detail or probe_reason or "probe_failed"
@@ -3944,7 +3982,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 				healthy[#healthy + 1] = {
 					leaf = leaf,
 					ci = ci,
-					nulls = issuer_path_null_slots(chain_pem),
+					nulls = issuer_path_null_slots(blocks),
 				}
 			end
 		end
@@ -4343,6 +4381,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				or attach_detail == "intermediate_must_staple_colony"
 				or attach_detail == "multi_staple_attach_failed"
 				or attach_detail == "fingerprint_chain_unavailable"
+				or attach_detail == "issuer_unresolved_must_staple"
 				or must_staple
 			then
 				local detail = attach_detail
@@ -4351,6 +4390,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					and detail ~= "intermediate_must_staple_colony"
 					and detail ~= "multi_staple_attach_failed"
 					and detail ~= "fingerprint_chain_unavailable"
+					and detail ~= "issuer_unresolved_must_staple"
 				then
 					detail = "set_staple_failed"
 				end
@@ -4399,17 +4439,21 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					or result_detail == "intermediate_must_staple_colony"
 					or result_detail == "multi_staple_attach_failed"
 					or result_detail == "fingerprint_chain_unavailable"
+					or result_detail == "issuer_unresolved_must_staple"
+					or result_detail == "certid_mismatch"
 					or result_detail == "response_not_found"
 					or must_staple
 				then
-					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
-					-- Path demotion from probe_only also lands here (intermediate Must-Staple).
+					-- Preserve DROP/KEEP codes from try_staple (certid_mismatch, path demotion).
+					-- Only bare false + canary ligand collapses to set_staple_failed / unmet.
 					local detail = result_detail
 					if
 						detail ~= "intermediate_must_staple_libssl"
 						and detail ~= "intermediate_must_staple_colony"
 						and detail ~= "multi_staple_attach_failed"
 						and detail ~= "fingerprint_chain_unavailable"
+						and detail ~= "issuer_unresolved_must_staple"
+						and detail ~= "certid_mismatch"
 						and detail ~= "response_not_found"
 					then
 						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
@@ -4470,6 +4514,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				or result_detail == "intermediate_must_staple_colony"
 				or result_detail == "multi_staple_attach_failed"
 				or result_detail == "fingerprint_chain_unavailable"
+				or result_detail == "issuer_unresolved_must_staple"
+				or result_detail == "certid_mismatch"
 				or result_detail == "response_not_found"
 				or must_staple
 			then
@@ -4479,6 +4525,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					and detail ~= "intermediate_must_staple_colony"
 					and detail ~= "multi_staple_attach_failed"
 					and detail ~= "fingerprint_chain_unavailable"
+					and detail ~= "issuer_unresolved_must_staple"
+					and detail ~= "certid_mismatch"
 					and detail ~= "response_not_found"
 				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
@@ -4507,8 +4555,15 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 
 	local mode = ocsp_staple_mode(internalstore, server_name)
-	local pem_ok = type(cert_pem) == "string" and cert_pem ~= ""
 	local fp_hint = normalize_fp_hint(cert_fp_hint)
+	-- Accept PEM string or issuer-linked blocks table (preserves unresolved_must_staple).
+	local blocks = nil
+	if type(cert_pem) == "table" and #cert_pem > 0 then
+		blocks = cert_pem
+	elseif type(cert_pem) == "string" and cert_pem ~= "" then
+		blocks = pem_blocks(cert_pem)
+	end
+	local pem_ok = type(blocks) == "table" and #blocks > 0
 
 	if not pem_ok then
 		if fp_hint then
@@ -4517,7 +4572,6 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return false
 	end
 
-	local blocks = pem_blocks(cert_pem)
 	-- Fullchain order: first block is the leaf. Do not scan intermediates for key type
 	-- (an ECDSA intermediate would steal the staple from an RSA leaf).
 	local leaf_pem = blocks[1]
@@ -4615,8 +4669,15 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 		end
 		return false, reason, detail
 	end
-	local pem_ok = type(cert_pem) == "string" and cert_pem ~= ""
 	local fp_hint = normalize_fp_hint(cert_fp_hint)
+	-- Accept PEM string or issuer-linked blocks table (preserves unresolved_must_staple).
+	local blocks = nil
+	if type(cert_pem) == "table" and #cert_pem > 0 then
+		blocks = cert_pem
+	elseif type(cert_pem) == "string" and cert_pem ~= "" then
+		blocks = pem_blocks(cert_pem)
+	end
+	local pem_ok = type(blocks) == "table" and #blocks > 0
 	if not pem_ok then
 		if fp_hint then
 			local ok, reason, detail = staple_from_fingerprint(internalstore, server_name, fp_hint, true, mode)
@@ -4624,7 +4685,6 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 		end
 		return true
 	end
-	local blocks = pem_blocks(cert_pem)
 	local leaf_pem = blocks[1]
 	if not leaf_pem then
 		return false
