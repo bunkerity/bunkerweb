@@ -20,7 +20,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import OrderedDict
 from sys import exit as sys_exit, path as sys_path
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -5552,9 +5552,21 @@ def _write_ocsp_ligand(fingerprint: str, meta: Optional[Dict[str, Any]]) -> bool
     """
     Publish outside-shard ligand ``ocsp-ligand/{fp}`` (atomic replace).
 
-    Cross-zone stand-in for der_sha256 + soft_recall_gen + paged — lives beside
-    the SPKI directory so in-place promote cannot tear the binding. Order after
-    canary page: live DER visible → ligand swap → (batch) .ocsp_epoch.
+    Cross-zone stand-in for ``der_sha256`` + ``soft_recall_gen`` + ``paged`` —
+    lives beside the SPKI directory so in-place promote of
+    ``issuer.pem`` / ``ocsp.der`` / ``ocsp.json`` cannot half-expose the binding
+    HTTP and stream both trust. Fat meta (AIA, CertID, tombstone details) stays
+    in-shard.
+
+    Call sites:
+      * canary page success (after live DER is visible)
+      * soft-recall (advertise ``paged=false`` + bumped gen)
+      * per-run restamp of live paged shards
+      * end-of-batch re-stamp for ``published_fps``
+
+    Publish order after canary: live DER visible → ligand swap → allow pin →
+    (batch) ``.ocsp_epoch``. Lua fails closed on ligand ENOENT while
+    ``paged=true``.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized or not isinstance(meta, dict):
@@ -5619,10 +5631,17 @@ def _clear_ocsp_ligand(fingerprint: str) -> None:
 
 def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> bool:
     """
-    Canary-only allow pin ``ocsp-allow/{fp}``. Missing pin → Must-Staple refuse.
+    Canary / restamp allow pin ``ocsp-allow/{fp}``. Missing pin → Must-Staple refuse.
 
-    Handshake never creates pins; it only deletes on DROP_ALLOW refuse_cause.
-    Generation identity: der_sha256 + soft_recall_gen (matches Lua).
+    Polarity is inverted from the old sticky ``ocsp-refuse/{fp}`` bus: absence
+    fails closed, so cold start and soft-recall are deliberate outages until
+    this write lands. Handshake never creates pins — it only compare-and-deletes
+    on DROP_ALLOW ``refuse_cause`` when the pin still holds the refused
+    ``(der_sha256, soft_recall_gen)``. Soft fuse and KEEP_ALLOW causes leave
+    the pin alone.
+
+    Also clears any legacy refuse marker for this fingerprint so the old
+    polarity cannot shadow the new one after cutover.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized or not isinstance(meta, dict):
@@ -5678,9 +5697,11 @@ def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
     """
     Drop allow-pin (+ legacy refuse marker) for this SPKI.
 
-    Call on soft-recall / tombstone / restore (paged=false). Successful canary
-    page uses ``_write_ocsp_allow_pin`` instead — clearing alone leaves Must-Staple
-    fail-closed until the pin is rewritten.
+    Call on soft-recall / tombstone / restore (``paged=false``). Successful
+    canary page uses ``_write_ocsp_allow_pin`` instead — clearing alone leaves
+    Must-Staple fail-closed until the pin is rewritten (by canary or restamp).
+
+    Name kept for call-site compatibility with the pre-invert refuse bus.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -5700,6 +5721,207 @@ def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
             log_debug("🧹 OCSP cleared legacy peer-refuse for fp=%s...", normalized[:16])
     except Exception as e:
         log_debug("⚠️ OCSP could not clear allow-pin for %s: %s", normalized[:16] if normalized else "?", e)
+
+
+def _restamp_local_predicates(fingerprint: str, meta: Dict[str, Any], der: bytes) -> Optional[str]:
+    """
+    Cheap non-network checks before rewriting ligand/allow for an already-paged shard.
+
+    Returns a refuse_cause string when the body must not be re-pinned, else None.
+
+    A hash-only restamp would resurrect pins the handshake revoked for real
+    reasons (serial ban, intrinsic timing, non-GOOD). This gate re-runs the
+    local half of the canary path without openssl CLI or an OCSP GET:
+      * paged=true, not tombstoned, not soft-recalled
+      * meta.der_sha256 == sha256(ocsp.der)
+      * expires_unix still above death clock (minus skew)
+      * serial-blacklist does not block this body
+      * CertStatus=GOOD + intrinsic thisUpdate/lifetime policy
+    """
+    if meta.get("paged") is not True:
+        return "not_paged"
+    if meta.get("tombstoned") is True:
+        return "tombstoned"
+    if meta.get("unpaged_after_nongood") is True:
+        return "not_paged"
+    sha = meta.get("der_sha256")
+    if not isinstance(sha, str) or len(sha) != 64:
+        return "missing_der_sha256"
+    if hashlib.sha256(der).hexdigest().lower() != sha.lower():
+        return "der_sha256_mismatch"
+    try:
+        exp = int(meta.get("expires_unix") or 0)
+    except (TypeError, ValueError):
+        exp = 0
+    if exp <= 0 or (exp - OCSP_CLOCK_SKEW_SECONDS) <= int(time.time()):
+        return "response_stale"
+    if _serial_blacklist_blocks(fingerprint, der, fingerprint[:16]):
+        return "serial_blacklisted"
+    try:
+        ocsp_response = x509_ocsp.load_der_ocsp_response(der)
+    except Exception:
+        return "canary_parse_failed"
+    if ocsp_response.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
+        return "canary_response_status"
+    try:
+        singles = list(ocsp_response.responses)
+    except Exception:
+        singles = []
+    if not singles:
+        return "canary_cert_status_not_good"
+    matched = None
+    meta_certid = meta.get("certid") if isinstance(meta.get("certid"), dict) else None
+    for single in singles:
+        try:
+            if single.certificate_status != x509_ocsp.OCSPCertStatus.GOOD:
+                continue
+        except (ValueError, AttributeError):
+            continue
+        if meta_certid:
+            try:
+                serial = str(single.serial_number)
+            except Exception:
+                serial = ""
+            want = str(meta_certid.get("serial") or "")
+            if want and serial and want != serial:
+                continue
+        matched = single
+        break
+    if matched is None:
+        return "canary_cert_status_not_good"
+    policy = _ocsp_single_intrinsic_policy_reason(matched, fingerprint[:16])
+    if policy:
+        return policy
+    return None
+
+
+def _pin_or_ligand_needs_restamp(fingerprint: str, meta: Dict[str, Any]) -> bool:
+    """
+    True when allow-pin or ligand is missing, gen-mismatched, or aging.
+
+    Avoids needless churn in the tree ``send_files`` pushes to instances: skip
+    the write when both files already match ``(der_sha256, soft_recall_gen,
+    expires_unix)`` and the pin's ``allowed_unix`` is younger than half L1 TTL.
+    """
+    sha = str(meta.get("der_sha256") or "").lower()
+    try:
+        gen = int(meta.get("soft_recall_gen") or 0)
+    except (TypeError, ValueError):
+        gen = 0
+    try:
+        exp = int(meta.get("expires_unix") or 0)
+    except (TypeError, ValueError):
+        exp = 0
+    ligand_path = CONFIGS_SSL_BASE / "ocsp-ligand" / fingerprint
+    allow_path = CONFIGS_SSL_BASE / "ocsp-allow" / fingerprint
+    for path, kind in ((ligand_path, "ligand"), (allow_path, "allow")):
+        if not path.is_file():
+            return True
+        try:
+            obj = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return True
+        if not isinstance(obj, dict):
+            return True
+        if str(obj.get("der_sha256") or "").lower() != sha:
+            return True
+        try:
+            got_gen = int(obj.get("soft_recall_gen") or 0)
+        except (TypeError, ValueError):
+            got_gen = 0
+        if got_gen != gen:
+            return True
+        if kind == "ligand" and obj.get("paged") is not True:
+            return True
+        if kind == "allow":
+            try:
+                allowed = int(obj.get("allowed_unix") or 0)
+            except (TypeError, ValueError):
+                allowed = 0
+            # Refresh pins older than half L1 TTL so a stalled job does not leave
+            # near-expiry pins; also rewrite when expires_unix drifted.
+            if allowed <= 0 or (int(time.time()) - allowed) > 150:
+                return True
+            try:
+                pin_exp = int(obj.get("expires_unix") or 0)
+            except (TypeError, ValueError):
+                pin_exp = 0
+            if exp > 0 and pin_exp != exp:
+                return True
+    return False
+
+
+def _restamp_paged_shards(*, skip: Optional[Set[str]] = None) -> int:
+    """
+    Rewrite ``ocsp-ligand/{fp}`` + ``ocsp-allow/{fp}`` for every live paged shard
+    that still passes local predicates — without a network fetch.
+
+    Closes the upgrade / post-DROP outage where allow-pin polarity fails closed
+    while the job's TTL skip ("cached response still valid") never republishes.
+    After upgrade, already-paged shards have no ligand/pin; without this pass
+    Must-Staple refuses until TTL drops below 20% of lifetime.
+
+    Restored shards stay ``paged=false`` (foreign canary is not local proof) and
+    are excluded until a real canary. ``skip`` avoids double-writing fingerprints
+    just paged in the same persist batch.
+    """
+    skip_set = {s.lower() for s in (skip or set()) if isinstance(s, str)}
+    restamped = 0
+    refused = 0
+    try:
+        root = CONFIGS_SSL_BASE
+        if not root.is_dir():
+            return 0
+        for h1 in root.iterdir():
+            if not h1.is_dir() or len(h1.name) != 1 or not h1.name.isalnum():
+                continue
+            for h2 in h1.iterdir():
+                if not h2.is_dir() or len(h2.name) != 1 or not h2.name.isalnum():
+                    continue
+                for shard in h2.iterdir():
+                    if not shard.is_dir():
+                        continue
+                    fp = shard.name.lower()
+                    if len(fp) != 64 or not fp.isalnum() or fp[0] != h1.name.lower() or fp[1] != h2.name.lower():
+                        continue
+                    if fp in skip_set:
+                        continue
+                    meta_path = shard / "ocsp.json"
+                    der_path = shard / "ocsp.der"
+                    if not meta_path.is_file() or not der_path.is_file():
+                        continue
+                    try:
+                        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                        der = der_path.read_bytes()
+                    except Exception:
+                        continue
+                    if not isinstance(meta, dict) or not der:
+                        continue
+                    reason = _restamp_local_predicates(fp, meta, der)
+                    if reason:
+                        refused += 1
+                        log_debug("⏭️ OCSP restamp skip fp=%s... reason=%s", fp[:16], reason)
+                        continue
+                    if not _pin_or_ligand_needs_restamp(fp, meta):
+                        # Still clear legacy refuse so polarity stays clean.
+                        legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / fp
+                        if legacy.is_file():
+                            try:
+                                legacy.unlink()
+                            except Exception:
+                                pass
+                        continue
+                    if _write_ocsp_ligand(fp, meta) and _write_ocsp_allow_pin(fp, meta):
+                        restamped += 1
+    except Exception as e:
+        log_debug("⚠️ OCSP restamp walk failed: %s", e)
+    if restamped or refused:
+        log_info(
+            "✓ OCSP restamp: wrote ligand+allow for %d paged shard(s) (skipped_predicates=%d)",
+            restamped,
+            refused,
+        )
+    return restamped
 
 
 def _ocsp_floor_relpath(fingerprint: str) -> Optional[str]:
@@ -6603,6 +6825,10 @@ def _persist_ocsp_results_to_disk(
                 _clear_ocsp_peer_refuse(fp)
         for cfp in published_controls:
             _clear_tenant_control_negatives(cfp)
+    # Upgrade / post-DROP repair: re-write ligand+allow for every other live paged
+    # shard that still passes local predicates (no network). Restored shards stay
+    # paged=false and are excluded. Always run so a no-publish job still backfills.
+    _restamp_paged_shards(skip=set(published_fps))
 
 
 def main() -> int:

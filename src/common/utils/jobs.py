@@ -401,8 +401,9 @@ def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) ->
     Create ``ocsp-allow/``, ``ocsp-ligand/``, and legacy ``ocsp-refuse/`` off the
     TLS hot path (jobs / restore / refresh).
 
-    Canary writes allow pins + ligands here. Handshake only deletes allow pins
-    (DROP_ALLOW refuse_cause); it never mkdir's.
+    Canary and restamp write allow pins + ligands here. Handshake only
+    compare-and-deletes allow pins on DROP_ALLOW ``refuse_cause``; it never
+    mkdir's. Name kept for call-site compatibility with the pre-invert refuse bus.
     """
     try:
         root = Path(cache_root)
@@ -419,9 +420,12 @@ def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[
     """
     Drop allow-pin (+ legacy refuse) for this SPKI.
 
-    Call on soft-recall / tombstone / GOOD restore (paged=false). A successful
+    Call on soft-recall / tombstone / GOOD restore (``paged=false``). A successful
     local canary must rewrite the allow pin — clearing alone fails Must-Staple
-    closed until re-page.
+    closed until re-page or the job's restamp of a still-paged shard.
+
+    Does not clear ``ocsp-ligand/{fp}``; restore coherence clears the ligand
+    separately so a foreign canary cannot skip validate after DB restore.
     """
     if not fingerprint or len(fingerprint) != 64:
         return False
@@ -470,10 +474,13 @@ def publish_ocsp_restore_coherence(
 ) -> None:
     """
     After DB restore wrote one or more OCSP shard leaves for these fingerprints:
-    bump .ocsp_epoch first (invalidate L1), then drop allow-pin / legacy refuse,
-    reset nongood.json, and reconcile serial-blacklist against the restored body.
-    Restored shards stay ``paged=false`` until local canary — must not write allow.
-    Skipped/fenced fingerprints must not be passed in (their sidecars stay untouched).
+    bump ``.ocsp_epoch`` first (invalidate L1), then drop allow-pin / legacy refuse,
+    drop outside-shard ligand, reset nongood.json, and reconcile serial-blacklist
+    against the restored body.
+
+    Restored shards stay ``paged=false`` until local canary — must not write allow
+    or ligand here (a peer's canary is not local proof). Skipped/fenced
+    fingerprints must not be passed in (their sidecars stay untouched).
     """
     fps: Set[str] = set()
     for fingerprint in fingerprints:
