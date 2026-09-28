@@ -115,11 +115,13 @@ local STAPLE_DECISION = {
 	thisUpdate_unreadable = true,
 	canary_refused = true,
 	peer_refuse = true,
+	await_sni = true,
 	unmet = true,
 }
 
 local STAPLE_DECISION_ALIAS = {
 	single_slot_ecdsa_prefer = "skip_slot",
+	single_slot_rsa_prefer = "skip_slot",
 	wrong_key_type_hint = "skip_slot",
 	variables_unavailable = "stapling_off",
 	ligand_missing = "shared_ligand",
@@ -1655,9 +1657,11 @@ local function log_ocsp_staple_skip(kind, fp, reason, server_name)
 	)
 end
 
--- ngx.ocsp has one status slot. Prefer ECDSA when RSA+ECDSA leaves are both present.
-local function select_preferred_leaf(blocks)
-	-- Prefer ECDSA among *leaves* (key-matched PEMs from set_certs_from_pem).
+-- ngx.ocsp has one status slot. When RSA+ECDSA leaves are both present, prefer
+-- prefer_kind ("ec" / "rsa") from ClientHello when known; otherwise ECDSA
+-- (typical OpenSSL dual-cert choice for modern clients).
+local function select_preferred_leaf(blocks, prefer_kind)
+	-- Prefer among *leaves* (key-matched PEMs from set_certs_from_pem).
 	-- Callers that pass a fullchain must use the first block only — see staple().
 	if not blocks or #blocks == 0 then
 		return nil
@@ -1677,6 +1681,10 @@ local function select_preferred_leaf(blocks)
 		end
 	end
 	if ec_leaf and rsa_leaf then
+		if prefer_kind == "rsa" then
+			log_ocsp_staple_skip("ec", spki_fingerprint(ec_leaf), "single_slot_rsa_prefer", nil)
+			return rsa_leaf
+		end
 		log_ocsp_staple_skip("rsa", spki_fingerprint(rsa_leaf), "single_slot_ecdsa_prefer", nil)
 		return ec_leaf
 	end
@@ -1745,9 +1753,10 @@ local function cert_spki_fingerprint(cert_pem)
 end
 
 -- Install all leaf/key pairs from PEM (dual-cert aware). Returns preferred leaf PEM + SPKI fp
--- for OCSP (ECDSA preferred when both RSA and ECDSA leaves are present).
+-- for OCSP. prefer_kind ("ec"/"rsa") selects the single ngx.ocsp slot when both are present;
+-- default is ECDSA (typical OpenSSL dual-cert choice).
 -- Returns: true, leaf_pem, leaf_fp  OR  false, err_msg
-function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name)
+function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
 		return false, "cert_pem and key_pem strings are required"
 	end
@@ -1866,7 +1875,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name)
 	for _, leaf in ipairs(installed) do
 		leaf_pems[#leaf_pems + 1] = leaf.pem
 	end
-	local preferred_pem = select_preferred_leaf(leaf_pems)
+	local preferred_pem = select_preferred_leaf(leaf_pems, prefer_kind)
 	local preferred_fp = nil
 	for _, leaf in ipairs(installed) do
 		if leaf.pem == preferred_pem then
@@ -2410,6 +2419,114 @@ function _M.clear_peer_refuse(fingerprint)
 	local path = ocsp_refuse_path(fingerprint)
 	local ok = os.remove(path)
 	return ok and true or false
+end
+
+-- True when the leaf PEM or ocsp.json marks Must-Staple (TLS Feature status_request).
+function _M.requires_must_staple(cert_pem, cert_fp_hint)
+	local fp_hint = normalize_fp_hint(cert_fp_hint)
+	if type(cert_pem) == "string" and cert_pem ~= "" then
+		local blocks = pem_blocks(cert_pem)
+		local leaf_pem = blocks[1]
+		if leaf_pem and has_must_staple(leaf_pem) then
+			return true
+		end
+		local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem, nil) or nil
+		if leaf_fp and ocsp_json_must_staple(read_ocsp_json(leaf_fp)) then
+			return true
+		end
+	end
+	if fp_hint and ocsp_json_must_staple(read_ocsp_json(fp_hint)) then
+		return true
+	end
+	return false
+end
+
+-- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", or nil.
+-- Used on stream so the single ngx.ocsp slot matches the leaf OpenSSL is likely to present.
+function _M.prefer_kind_from_sigalgs(ext)
+	if type(ext) ~= "string" or #ext < 2 then
+		return nil
+	end
+	local len = ext:byte(1) * 256 + ext:byte(2)
+	if len < 2 then
+		return nil
+	end
+	local has_ec, has_rsa = false, false
+	local i = 3
+	local end_i = 2 + len
+	if end_i > #ext then
+		end_i = #ext
+	end
+	while i + 1 <= end_i do
+		local scheme = ext:byte(i) * 256 + ext:byte(i + 1)
+		-- ecdsa_secp* / ed25519 / ed448
+		if scheme == 0x0403 or scheme == 0x0503 or scheme == 0x0603 or scheme == 0x0807 or scheme == 0x0808 then
+			has_ec = true
+		-- rsa_pkcs1_* / rsa_pss_*
+		elseif
+			scheme == 0x0401
+			or scheme == 0x0501
+			or scheme == 0x0601
+			or scheme == 0x0804
+			or scheme == 0x0805
+			or scheme == 0x0806
+			or scheme == 0x0809
+			or scheme == 0x080a
+			or scheme == 0x080b
+		then
+			has_rsa = true
+		end
+		i = i + 2
+	end
+	if has_ec then
+		return "ec"
+	end
+	if has_rsa then
+		return "rsa"
+	end
+	return nil
+end
+
+-- Capture SNI + preferred leaf kind during ssl_client_hello (stream). Stores on ngx.ctx.
+function _M.capture_stream_client_hello()
+	local ctx = ngx.ctx
+	if not ctx then
+		return
+	end
+	local ok_clt, ssl_clt = pcall(require, "ngx.ssl.clienthello")
+	if not ok_clt or not ssl_clt then
+		return
+	end
+	if ssl_clt.get_client_hello_server_name then
+		local host = ssl_clt.get_client_hello_server_name()
+		if type(host) == "string" and host ~= "" then
+			ctx.bw_ocsp_sni = host
+		end
+	end
+	if ssl_clt.get_client_hello_ext then
+		local ext = ssl_clt.get_client_hello_ext(13)
+		local kind = _M.prefer_kind_from_sigalgs(ext)
+		if kind then
+			ctx.bw_ocsp_prefer_kind = kind
+		end
+	end
+end
+
+-- Resolve the handshake SNI for stream stapling (ssl.server_name, else client-hello ctx).
+function _M.handshake_sni(fallback)
+	local ssl = require "ngx.ssl"
+	local sni = ssl.server_name and ssl.server_name() or nil
+	if type(sni) == "string" and sni ~= "" then
+		return sni
+	end
+	local ctx = ngx.ctx
+	if ctx and type(ctx.bw_ocsp_sni) == "string" and ctx.bw_ocsp_sni ~= "" then
+		return ctx.bw_ocsp_sni
+	end
+	if type(fallback) == "string" and fallback ~= "" then
+		return fallback
+	end
+	return nil
 end
 
 

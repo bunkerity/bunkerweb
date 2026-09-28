@@ -65,17 +65,21 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `thisUpdate_future` / `thisUpdate_stale` / `lifetime_too_long` / `thisUpdate_unreadable` | Intrinsic signed-window policy | CA window rejected; check `thisUpdate`/`nextUpdate`; do not force-page. |
 | `canary_refused` | Scheduler canary refused page | Live shard unchanged; see `detail=` (`canary_openssl_verify`, …) and fix before page. |
 | `peer_refuse` | Sibling subsystem (HTTP↔stream) refused this generation | Shared `ocsp-refuse/{fp}` bus. Inspect `refused_by` / prior `staple_decision`; fixed when a new generation is canary-paged. |
+| `await_sni` | Stream staple deferred: no SNI-bound leaf yet | Optional: skip staple (`skip_slot` / `detail=await_sni`). Must-Staple: abort until ClientHello SNI selects the site leaf. |
 | `unmet` | Must-Staple required and no more specific code | Catch-all—check `detail=` / prior lines; use `OCSP_STAPLE_MODE=staple_only`/`open` only as a temporary fuse. |
 
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
-    NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb **prefers the ECDSA leaf** for that single slot and does **not** borrow the RSA leaf's cached response (or the reverse).
+    NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
+
+    - **HTTP:** prefers the ECDSA leaf (typical OpenSSL dual-cert choice for modern clients).
+    - **Stream:** reads ClientHello `signature_algorithms` when available and staples the matching leaf (`ec` or `rsa`); otherwise prefers ECDSA. Stapling is deferred until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
 
     Consequences:
 
-    - Only the preferred (ECDSA) leaf is stapled. Clients that negotiate the RSA leaf receive **no** staple for that handshake.
-    - If the **RSA** certificate has the Must-Staple TLS feature, clients that select RSA will see Must-Staple as unmet. With `OCSP_STAPLE_MODE=normal`, that can abort the handshake for those clients even when the ECDSA staple is healthy.
-    - If only the **ECDSA** leaf is Must-Staple (recommended for dual-cert), modern clients that prefer ECDSA stay fail-closed correctly; RSA-only clients are outside that pin.
-    - Logs may show `staple_decision=skip_slot` (`detail=single_slot_ecdsa_prefer` or `wrong_key_type_hint`) when the sibling key type is deliberately not stapled.
+    - Only the preferred leaf is stapled. Clients that negotiate the other leaf receive **no** staple for that handshake.
+    - If the **non-preferred** certificate has the Must-Staple TLS feature, clients that select that leaf will see Must-Staple as unmet. With `OCSP_STAPLE_MODE=normal`, that can abort the handshake for those clients even when the preferred staple is healthy.
+    - If only the **ECDSA** leaf is Must-Staple (recommended for dual-cert), modern clients that prefer ECDSA stay fail-closed correctly; RSA-only clients are outside that pin unless stream ClientHello selected RSA.
+    - Logs may show `staple_decision=skip_slot` (`detail=single_slot_ecdsa_prefer`, `single_slot_rsa_prefer`, `wrong_key_type_hint`, or `await_sni`) when a sibling key type is deliberately not stapled or SNI is not yet bound.
 
     Practical guidance: for dual-cert sites that need Must-Staple, put Must-Staple on the ECDSA leaf (or use a single leaf). Do not expect both key types to be Must-Staple-satisfied on the same connection. Use `OCSP_STAPLE_MODE=staple_only` or `open` only as a temporary recovery fuse if a dual-cert Must-Staple mismatch is paging you.
 
