@@ -1764,7 +1764,7 @@ end
 -- Build Certificate-message-ordered OCSP DER list: leaf, then each intermediate
 -- (skip self-signed / no-AIA). Missing intermediate → nil slot (OpenSSL omits that
 -- CertificateEntry's status_request). Intermediate Must-Staple without a GOOD body
--- returns false, "must_staple", detail.
+-- returns false, "must_staple", detail. Call only when openssl_multi_staple_ready().
 local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 	if type(leaf_resp) ~= "string" or leaf_resp == "" then
 		return nil, "unmet"
@@ -1807,7 +1807,15 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 end
 
 -- Attach leaf OCSP; on OpenSSL 3.6+ also attach intermediate responses in chain order.
+-- Intermediate Must-Staple is only fail-closed when libssl can actually emit
+-- multi-staple (3.6+). On 3.5 the server can only send the leaf status, so
+-- collecting intermediates first would refuse handshakes for a staple we cannot set.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
+	local ready, st = openssl_multi_staple_ready()
+	if not ready then
+		return ocsp.set_ocsp_status_resp(leaf_resp)
+	end
+
 	local ders, why, detail = collect_chain_staple_ders(leaf_resp, chain_blocks)
 	if not ders then
 		if why == "must_staple" then
@@ -1816,8 +1824,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 		return nil, why or "unmet"
 	end
 
-	local ready, st = openssl_multi_staple_ready()
-	local want_multi = ready and #ders > 1
+	local want_multi = #ders > 1
 	if not want_multi then
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end

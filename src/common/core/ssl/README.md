@@ -91,8 +91,8 @@ When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha25
     When the linked OpenSSL is **3.6+**, BunkerWeb attaches a `status_request` on each non-root `CertificateEntry` via `SSL_set0_tlsext_status_ocsp_resp_ex`:
 
     - `ocsp-refresh` fetches and pages a shard for every intermediate in the fullchain that advertises an OCSP AIA URI (same `/var/cache/bunkerweb/ssl/{h1}/{h2}/{spki}/` layout as the leaf).
-    - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; an intermediate with Must-Staple and no usable staple fails closed.
-    - On OpenSSL **3.5** (current Alpine images), only the leaf staple is sent — intermediate shards are still refreshed so they are ready after a libssl upgrade.
+    - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; an intermediate with Must-Staple and no usable staple fails closed — **only when multi-staple is active** (OpenSSL ≥ 3.6).
+    - On OpenSSL **3.5** (current Alpine images), only the leaf staple is sent and intermediate Must-Staple is not enforced at handshake (libssl cannot put `status_request` on those CertificateEntries). Intermediate shards are still refreshed so they are ready after a libssl upgrade.
 
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
