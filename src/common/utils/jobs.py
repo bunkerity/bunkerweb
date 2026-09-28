@@ -42,6 +42,175 @@ EXPIRE_TIME = {
 # OCSP SPKI shard keys under /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp64}/…
 _OCSP_SHARD_FILE_RE = re_compile(r"^([0-9a-fA-F])/([0-9a-fA-F])/([0-9a-fA-F]{64})/(ocsp\.der|ocsp\.json|issuer\.pem)$")
 _OCSP_FLOOR_FILE_RE = re_compile(r"^ocsp-floor/([0-9a-fA-F]{64})$")
+# Disk-local OCSP files never upserted to bw_jobs_cache (sidecars + coherence bus).
+_OCSP_SHARD_SIDECAR_RE = re_compile(
+    r"^([0-9a-fA-F])/([0-9a-fA-F])/([0-9a-fA-F]{64})/(serial-blacklist\.json|nongood\.json)$"
+)
+
+
+def is_ocsp_disk_local_rel(rel: str) -> bool:
+    """
+    True for OCSP files that live only on disk (not DB cache rows).
+
+    Keep across restore sweeps: .ocsp_epoch, ocsp-refuse/*, shard sidecars
+    (serial-blacklist.json, nongood.json). Coherence clears/reconciles sidecars
+    when a GOOD trio is restored — the sweep must not delete them blindly.
+    """
+    if not rel:
+        return False
+    path = str(rel).replace("\\", "/")
+    if path == ".ocsp_epoch" or path.startswith("ocsp-refuse/"):
+        return True
+    match = _OCSP_SHARD_SIDECAR_RE.match(path)
+    if not match:
+        return False
+    hex1, hex2, fingerprint, _leaf = match.groups()
+    fp = fingerprint.lower()
+    return fp[0] == hex1.lower() and fp[1] == hex2.lower()
+
+
+def ocsp_shard_dir(cache_root: Path, fingerprint: str) -> Optional[Path]:
+    """Return {cache_root}/{h1}/{h2}/{fp64} for a valid SPKI fingerprint."""
+    if not isinstance(fingerprint, str) or len(fingerprint) != 64 or not fingerprint.isalnum():
+        return None
+    fp = fingerprint.lower()
+    return Path(cache_root) / fp[0] / fp[1] / fp
+
+
+def _ocsp_parse_serial_int(value: Any) -> Optional[int]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return int(text, 10)
+    except ValueError:
+        pass
+    try:
+        return int(text, 16)
+    except ValueError:
+        return None
+
+
+def _ocsp_restored_serial_and_this_update(shard: Path) -> Tuple[Optional[int], Optional[int]]:
+    """Best-effort identity from restored ocsp.der, else ocsp.json pins."""
+    der_path = shard / "ocsp.der"
+    if der_path.is_file():
+        try:
+            from cryptography.x509 import ocsp as x509_ocsp
+
+            parsed = x509_ocsp.load_der_ocsp_response(der_path.read_bytes())
+            serial = getattr(parsed, "serial_number", None)
+            this_unix = None
+            this_update = getattr(parsed, "this_update_utc", None) or getattr(parsed, "this_update", None)
+            if this_update is not None:
+                try:
+                    if getattr(this_update, "tzinfo", None) is None:
+                        from datetime import timezone as _tz
+
+                        this_update = this_update.replace(tzinfo=_tz.utc)
+                    this_unix = int(this_update.timestamp())
+                except Exception:
+                    this_unix = None
+            if isinstance(serial, int):
+                return serial, this_unix
+        except Exception:
+            pass
+    meta_path = shard / "ocsp.json"
+    if not meta_path.is_file():
+        return None, None
+    try:
+        meta = json_loads(meta_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None, None
+    if not isinstance(meta, dict):
+        return None, None
+    serial = _ocsp_parse_serial_int(meta.get("serial"))
+    this_unix = None
+    raw = meta.get("this_update_unix")
+    if isinstance(raw, (int, float)) and int(raw) > 0:
+        this_unix = int(raw)
+    elif isinstance(raw, str) and raw.isdigit():
+        this_unix = int(raw)
+    return serial, this_unix
+
+
+def clear_ocsp_nongood_marker(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
+    """Reset consecutive non-GOOD streak after a GOOD trio restore (same as live fetch)."""
+    shard = ocsp_shard_dir(cache_root, fingerprint)
+    if shard is None:
+        return False
+    path = shard / "nongood.json"
+    if not path.is_file():
+        return True
+    try:
+        path.unlink()
+        if logger is not None:
+            logger.debug(f"OCSP cleared nongood.json after restore fp={fingerprint.lower()[:16]}...")
+        return True
+    except Exception as e:
+        if logger is not None:
+            logger.debug(f"OCSP could not clear nongood.json for {fingerprint.lower()[:16]}...: {e}")
+        return False
+
+
+def reconcile_ocsp_serial_blacklist_after_restore(
+    cache_root: Path,
+    fingerprint: str,
+    logger: Optional[Logger] = None,
+) -> bool:
+    """
+    After a GOOD trio restore: drop serial-blacklist.json when the restored body
+    would clear the ban (newer thisUpdate, different serial, or serial_unknown + serial).
+    Keep the ban when it still applies so a restored revoked serial stays refuse-closed.
+    """
+    shard = ocsp_shard_dir(cache_root, fingerprint)
+    if shard is None:
+        return False
+    path = shard / "serial-blacklist.json"
+    if not path.is_file():
+        return True
+    try:
+        ban = json_loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        ban = None
+    if not isinstance(ban, dict):
+        # Unreadable ban: keep fail-closed (same as live job).
+        return False
+    got_serial, this_unix = _ocsp_restored_serial_and_this_update(shard)
+    clear = False
+    if ban.get("serial_unknown"):
+        clear = got_serial is not None
+    else:
+        banned = _ocsp_parse_serial_int(ban.get("serial"))
+        if banned is None or got_serial is None:
+            clear = False
+        elif got_serial != banned:
+            clear = True
+        else:
+            try:
+                ban_unix = int(ban.get("this_update_unix"))
+            except (TypeError, ValueError):
+                ban_unix = None
+            if this_unix is not None and ban_unix is not None and this_unix > ban_unix:
+                clear = True
+    if not clear:
+        if logger is not None:
+            logger.debug(
+                f"OCSP kept serial-blacklist after restore fp={fingerprint.lower()[:16]}... "
+                f"(ban still applies to restored body)"
+            )
+        return False
+    try:
+        path.unlink()
+        if logger is not None:
+            logger.debug(f"OCSP cleared serial-blacklist after restore fp={fingerprint.lower()[:16]}...")
+        return True
+    except Exception as e:
+        if logger is not None:
+            logger.debug(f"OCSP could not clear serial-blacklist for {fingerprint.lower()[:16]}...: {e}")
+        return False
 
 
 def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
@@ -216,9 +385,10 @@ def publish_ocsp_restore_coherence(
     logger: Optional[Logger] = None,
 ) -> None:
     """
-    After DB restore wrote one or more OCSP shard leaves for these fingerprints,
-    clear sticky peer-refuse markers and bump .ocsp_epoch once (same side effects
-    as ocsp-refresh publish). Skipped/fenced fingerprints must not be passed in.
+    After DB restore wrote one or more OCSP shard leaves for these fingerprints:
+    clear peer-refuse, reset nongood.json, reconcile serial-blacklist against the
+    restored body, and bump .ocsp_epoch once. Skipped/fenced fingerprints must not
+    be passed in (their sidecars stay untouched).
     """
     fps: Set[str] = set()
     for fingerprint in fingerprints:
@@ -228,9 +398,13 @@ def publish_ocsp_restore_coherence(
         return
     for fp in sorted(fps):
         clear_ocsp_peer_refuse(cache_root, fp, logger)
+        clear_ocsp_nongood_marker(cache_root, fp, logger)
+        reconcile_ocsp_serial_blacklist_after_restore(cache_root, fp, logger)
     bump_ocsp_cache_epoch(cache_root, logger)
     if logger is not None:
-        logger.info(f"OCSP restore coherence: cleared refuse + bumped epoch for {len(fps)} shard(s)")
+        logger.info(
+            f"OCSP restore coherence: refuse/nongood/blacklist reconcile + epoch bump for {len(fps)} shard(s)"
+        )
 
 
 def encode_ocsp_floor_payload(published_unix: int, job_run_id: Optional[str] = None) -> bytes:
@@ -658,7 +832,7 @@ class Job:
                     self.logger.debug(f"Checking if {file} should be removed")
                     if (file.is_symlink() or file.is_file()) and file not in plugin_cache_files:
                         rel = file.relative_to(self.job_path).as_posix()
-                        if self.job_path.name == "ssl" and (rel == ".ocsp_epoch" or rel.startswith("ocsp-refuse/")):
+                        if self.job_path.name == "ssl" and is_ocsp_disk_local_rel(rel):
                             continue
                         parsed = parse_ocsp_shard_cache_name(rel)
                         if parsed and parsed[0] in ocsp_skip:

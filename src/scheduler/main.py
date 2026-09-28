@@ -54,6 +54,7 @@ from jobs import (  # type: ignore
     load_disk_ocsp_floor,
     normalize_restored_ocsp_json_bytes,
     ocsp_restore_plan,
+    is_ocsp_disk_local_rel,
     parse_ocsp_floor_bytes,
     parse_ocsp_floor_cache_name,
     parse_ocsp_shard_cache_name,
@@ -766,8 +767,9 @@ def generate_caches() -> Set[str]:
             if resource_path not in plugin_cache_files and resource_path.is_file():
                 if plugin_path.name == "ssl":
                     rel = resource_path.relative_to(plugin_path).as_posix()
-                    # Local-only coherence files — never DB-backed; keep across restore sweeps.
-                    if rel == ".ocsp_epoch" or rel.startswith("ocsp-refuse/"):
+                    # Local-only coherence / quarantine files — never DB-backed.
+                    # Sidecars are reconciled on GOOD restore; do not sweep them off.
+                    if is_ocsp_disk_local_rel(rel):
                         continue
                     parsed = parse_ocsp_shard_cache_name(rel)
                     if parsed and parsed[0] in ocsp_skip:

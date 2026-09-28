@@ -55,7 +55,7 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `ngx_ocsp_unavailable` | `ngx.ocsp` / `set_ocsp_status_resp` missing | OpenResty build / load issue—fix ngx_http_lua / stream OCSP module. |
 | `response_not_found` | No usable L1/disk GOOD staple | Check job fetch, shard path under `/var/cache/bunkerweb/ssl/`, serial blacklist. |
 | `response_stale` | Past nextUpdate / max-age / skew death | Wait for refresh or force `ocsp-refresh`. |
-| `serial_blacklisted` | Serial tombstoned after non-GOOD | Investigate CA revocation/UNKNOWN; clear only after a verified GOOD republish. |
+| `serial_blacklisted` | Serial tombstoned after non-GOOD | Investigate CA revocation/UNKNOWN; clear only after a verified GOOD republish. DB restore keeps the ban when the restored body still matches; clears it when the restored GOOD supersedes (newer `thisUpdate`, different serial, or `serial_unknown` + serial). Restore sweeps preserve `serial-blacklist.json` / `nongood.json` (disk-local); coherence resets `nongood.json` on every GOOD trio restore. |
 | `tombstoned` | Shard marked `tombstoned` in `ocsp.json` (revoked/unknown streak) | Job removed the GOOD staple; wait for a newer verified GOOD page. Mid-write: meta is the refuse signal before `.ocsp_epoch` / DER unlink finish. |
 | `shared_ligand` | Must-Staple L1 not bound to `ocsp.json` `der_sha256` | Epoch drift or partial publish—bump/`ocsp-refresh` so disk meta matches body. |
 | `certid_mismatch` | DER CertID ≠ leaf/issuer or meta pin | Refuse multi-response / wrong leaf; re-fetch for this SPKI. |
