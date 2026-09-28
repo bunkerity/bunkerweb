@@ -179,6 +179,11 @@ local function format_staple_decision(code, fields)
 	return table.concat(parts, " ")
 end
 
+-- Single source of truth for closed staple_decision=CODE log lines (HTTP + stream).
+function _M.format_staple_decision(code, fields)
+	return format_staple_decision(code, fields)
+end
+
 -- Convert a Must-Staple miss into abort (normal) or soft continue (fuse).
 -- Always logs staple_decision=CODE (runbook) with tag=OCSP_MUST_STAPLE_REFUSE.
 local function soften_must_staple(mode, ok, reason, detail)

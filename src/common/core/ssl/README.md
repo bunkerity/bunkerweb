@@ -41,7 +41,7 @@ Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 se
 
 ### OCSP `staple_decision` runbook
 
-Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** the section key below—grep the log token, open this section, follow the steps. Unknown legacy strings normalize to `unmet` with `detail=` preserved.
+Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** the section key below—grep the log token, open this section, follow the steps. Unknown legacy strings normalize to `unmet` with `detail=` preserved. The closed set and aliases live in one place (`bunkerweb.ocsp`); HTTP and stream both format through it.
 
 | `staple_decision` | Meaning | What to do |
 | ----------------- | ------- | ---------- |
