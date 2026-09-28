@@ -122,6 +122,10 @@ def test_global_ban_delete_does_not_authorize_crowdsec_removal(api_db):
     assert calls == [("connection-id", "unban", {"scope": "Ip", "value": "192.0.2.1", "decision_type": "ban", "decision_id": 7})]
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("biscuit_auth") is None,
+    reason="biscuit-python is deliberately absent from tests/unit/requirements.txt (Rust toolchain); install the api_app lane deps: .venv-unit/bin/pip install --require-hashes -r tests/unit/api_app/requirements.txt",
+)
 def test_biscuit_crowdsec_subject_rule_extracts_authority_username():
     from biscuit_auth import AuthorizerBuilder, BiscuitBuilder, KeyPair, Policy, Rule
 
