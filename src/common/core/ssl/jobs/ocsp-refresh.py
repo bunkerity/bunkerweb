@@ -198,10 +198,13 @@ _OPENSSL_IDENTITY: Optional[Dict[str, Any]] = None
 
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
-# Positive TTL must stay short enough to follow CDN/anycast PoP moves within one job.
-DNS_CACHE_TTL = 60
-DNS_CACHE_NEGATIVE_TTL = 15  # brief; empty/failed lookups must not poison the whole job batch
-_OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
+# Empty/failed lookups only: one brief sticky miss must not fail every cert that
+# shares this OCSP hostname. Positive answers are never reused across certs —
+# CDN/anycast can move mid-job while later leaves would still dial the first IP.
+DNS_CACHE_NEGATIVE_TTL = 15
+_OCSP_RESPONDER_DNS_NEGATIVE: "OrderedDict[str, float]" = OrderedDict()
+# Last successful resolution per host (logging / diagnostics only — not used to dial).
+_OCSP_RESPONDER_DNS_LAST: "OrderedDict[str, List[str]]" = OrderedDict()
 # Cert-name markers for differential tracking (cert_name → fingerprint hex).
 OCSP_MARKER_PREFIX = "ocsp-marker/"
 
@@ -262,46 +265,59 @@ def _get_ocsp_responder_ips(ocsp_url: str, default_port: int) -> Tuple[str, List
     Return (hostname, ips) for a given OCSP responder URL.
     - hostname is the original DNS name (used for TLS SNI + cert validation).
     - ips are resolved and safe IPs used for connecting.
+
+    Positive resolutions always call getaddrinfo (no cross-cert IP stickiness).
+    Only empty/failed lookups are cached briefly (DNS_CACHE_NEGATIVE_TTL).
     """
     parsed = urlparse(ocsp_url)
     hostname = parsed.hostname or ""
     if not hostname:
         return "", []
 
-    if hostname in _OCSP_RESPONDER_DNS_CACHE:
-        # Refresh LRU position
-        ips, cached_at = _OCSP_RESPONDER_DNS_CACHE[hostname]
-        # Successful resolutions use DNS_CACHE_TTL; empty/failed lookups use a short
-        # negative TTL so one transient getaddrinfo blip cannot fail every cert that
-        # shares this OCSP hostname for the rest of the job.
-        ttl = DNS_CACHE_TTL if ips else DNS_CACHE_NEGATIVE_TTL
-        if time.time() - cached_at < ttl:
-            _OCSP_RESPONDER_DNS_CACHE.move_to_end(hostname)
-            return hostname, ips
-        # Expired — re-resolve
+    now = time.time()
+    if hostname in _OCSP_RESPONDER_DNS_NEGATIVE:
+        cached_at = _OCSP_RESPONDER_DNS_NEGATIVE[hostname]
+        if now - cached_at < DNS_CACHE_NEGATIVE_TTL:
+            _OCSP_RESPONDER_DNS_NEGATIVE.move_to_end(hostname)
+            return hostname, []
         try:
-            del _OCSP_RESPONDER_DNS_CACHE[hostname]
+            del _OCSP_RESPONDER_DNS_NEGATIVE[hostname]
         except KeyError:
             pass
 
     port = parsed.port or default_port
     ips = _resolve_hostname_to_ips(hostname, port)
-    _OCSP_RESPONDER_DNS_CACHE[hostname] = (ips, time.time())
-    # Bounded cache to avoid unbounded memory growth.
-    while len(_OCSP_RESPONDER_DNS_CACHE) > _OCSP_RESPONDER_DNS_CACHE_MAX:
-        _OCSP_RESPONDER_DNS_CACHE.popitem(last=False)
+    if not ips:
+        _OCSP_RESPONDER_DNS_NEGATIVE[hostname] = now
+        _OCSP_RESPONDER_DNS_NEGATIVE.move_to_end(hostname)
+        while len(_OCSP_RESPONDER_DNS_NEGATIVE) > _OCSP_RESPONDER_DNS_CACHE_MAX:
+            _OCSP_RESPONDER_DNS_NEGATIVE.popitem(last=False)
+        return hostname, []
+
+    try:
+        del _OCSP_RESPONDER_DNS_NEGATIVE[hostname]
+    except KeyError:
+        pass
+    _OCSP_RESPONDER_DNS_LAST[hostname] = list(ips)
+    _OCSP_RESPONDER_DNS_LAST.move_to_end(hostname)
+    while len(_OCSP_RESPONDER_DNS_LAST) > _OCSP_RESPONDER_DNS_CACHE_MAX:
+        _OCSP_RESPONDER_DNS_LAST.popitem(last=False)
     return hostname, ips
 
 
 def _invalidate_ocsp_responder_dns(hostname: str) -> None:
-    """Drop a positive DNS cache entry so the next lookup re-resolves (CDN/anycast move)."""
+    """Drop sticky DNS state so the next lookup re-resolves (CDN/anycast cutover)."""
     if not hostname:
         return
-    try:
-        del _OCSP_RESPONDER_DNS_CACHE[hostname]
+    cleared = False
+    for store in (_OCSP_RESPONDER_DNS_NEGATIVE, _OCSP_RESPONDER_DNS_LAST):
+        try:
+            del store[hostname]
+            cleared = True
+        except KeyError:
+            pass
+    if cleared:
         log_debug("🔄 OCSP invalidated DNS cache for responder %s", hostname)
-    except KeyError:
-        pass
 
 
 def _post_ocsp_over_ip_with_sni(
@@ -392,17 +408,24 @@ def _post_ocsp_over_ip_with_sni(
 
 def _log_ocsp_responder_dns_table() -> None:
     """
-    Log a consolidated uniq table (OCSP responder hostnames -> resolved IPs).
+    Log a consolidated uniq table (OCSP responder hostnames -> last resolved IPs).
     """
-    if not _OCSP_RESPONDER_DNS_CACHE:
+    if not _OCSP_RESPONDER_DNS_LAST and not _OCSP_RESPONDER_DNS_NEGATIVE:
         log_debug("ℹ️ OCSP responder DNS table: no DNS lookups performed")
         return
 
-    # Print as a Markdown-like table for easy copy/paste
+    # Print as a Markdown-like table for easy copy/paste (last successful resolve per host).
     rows = []
-    for hostname, (ips, _) in sorted(_OCSP_RESPONDER_DNS_CACHE.items()):
+    for hostname, ips in sorted(_OCSP_RESPONDER_DNS_LAST.items()):
         ip_list = ", ".join(ips) if ips else ""
         rows.append(f"| {hostname} | {ip_list} |")
+    for hostname in sorted(_OCSP_RESPONDER_DNS_NEGATIVE.keys()):
+        if hostname not in _OCSP_RESPONDER_DNS_LAST:
+            rows.append(f"| {hostname} | (negative cache) |")
+
+    if not rows:
+        log_debug("ℹ️ OCSP responder DNS table: no DNS lookups performed")
+        return
 
     log_info("📇 OCSP responder DNS table (uniq responders):\n| Responder Hostname | Resolved IPs |\n|---|---|\n%s", "\n".join(rows))
 
