@@ -1720,16 +1720,23 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     Extract (remaining_ttl_seconds, total_lifetime_seconds) from a parsed OCSP response.
     Returns (None, None) if the timing fields are unavailable or invalid.
     Does not enforce intrinsic policy — call _ocsp_intrinsic_policy_reason for that.
+    Multi-response bodies raise on top-level timing — use _ocsp_single_lifetimes instead.
     """
-    # Prefer *_utc properties (cryptography 42.0+) to avoid deprecation warnings
-    this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
+    try:
+        # Prefer *_utc properties (cryptography 42.0+) to avoid deprecation warnings
+        this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
+    except (ValueError, AttributeError):
+        return None, None
     if this_update is None:
         return None, None
 
     if this_update.tzinfo is None:
         this_update = this_update.replace(tzinfo=timezone.utc)
 
-    next_update = getattr(ocsp_response, "next_update_utc", None) or ocsp_response.next_update
+    try:
+        next_update = getattr(ocsp_response, "next_update_utc", None) or ocsp_response.next_update
+    except (ValueError, AttributeError):
+        return None, None
     if next_update is None:
         # No Next Update: treat lifetime as 24 hours from This Update (RFC standard fallback)
         log_debug("⚡ OCSP Next Update missing, using default lifetime of 24h from This Update")
@@ -1751,7 +1758,10 @@ def _ocsp_response_update_unix(
     ocsp_response: x509_ocsp.OCSPResponse,
 ) -> Tuple[Optional[int], Optional[int]]:
     """Return (this_update_unix, next_update_unix). nextUpdate falls back to thisUpdate+24h."""
-    this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
+    try:
+        this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
+    except (ValueError, AttributeError):
+        return None, None
     if this_update is None:
         return None, None
     if this_update.tzinfo is None:
@@ -1761,7 +1771,10 @@ def _ocsp_response_update_unix(
     except Exception:
         return None, None
 
-    next_update = getattr(ocsp_response, "next_update_utc", None) or ocsp_response.next_update
+    try:
+        next_update = getattr(ocsp_response, "next_update_utc", None) or ocsp_response.next_update
+    except (ValueError, AttributeError):
+        return this_unix, None
     if next_update is None:
         next_update = this_update + timedelta(hours=24)
     elif next_update.tzinfo is None:
@@ -1832,6 +1845,158 @@ def _ocsp_this_update_unix(ocsp_response: x509_ocsp.OCSPResponse) -> Optional[in
     return this_unix
 
 
+def _ocsp_single_update_unix(single: Any) -> Tuple[Optional[int], Optional[int]]:
+    """Return (this_update_unix, next_update_unix) from one OCSP SingleResponse."""
+    this_update = getattr(single, "this_update_utc", None) or getattr(single, "this_update", None)
+    if this_update is None:
+        return None, None
+    if getattr(this_update, "tzinfo", None) is None:
+        this_update = this_update.replace(tzinfo=timezone.utc)
+    try:
+        this_unix = int(this_update.timestamp())
+    except Exception:
+        return None, None
+    next_update = getattr(single, "next_update_utc", None) or getattr(single, "next_update", None)
+    if next_update is None:
+        next_update = this_update + timedelta(hours=24)
+    elif getattr(next_update, "tzinfo", None) is None:
+        next_update = next_update.replace(tzinfo=timezone.utc)
+    try:
+        next_unix = int(next_update.timestamp())
+    except Exception:
+        return this_unix, None
+    return this_unix, next_unix
+
+
+def _ocsp_single_lifetimes(single: Any) -> Tuple[Optional[int], Optional[int]]:
+    """Remaining TTL and total lifetime from one SingleResponse."""
+    this_unix, next_unix = _ocsp_single_update_unix(single)
+    if this_unix is None or next_unix is None:
+        return None, None
+    total_lifetime = next_unix - this_unix
+    if total_lifetime <= 0:
+        return None, None
+    now = int(datetime.now(timezone.utc).timestamp())
+    remaining = max(0, next_unix - now)
+    return remaining, total_lifetime
+
+
+def _ocsp_single_intrinsic_policy_reason(single: Any, cert_name: str = "") -> Optional[str]:
+    """Signed-window policy on one SingleResponse (same codes as response-level)."""
+    this_unix, next_unix = _ocsp_single_update_unix(single)
+    if this_unix is None or next_unix is None:
+        log_error("❌ OCSP thisUpdate/nextUpdate unreadable for %s; refusing", cert_name)
+        return "thisUpdate_unreadable"
+    now_unix = int(datetime.now(timezone.utc).timestamp())
+    if this_unix > now_unix + OCSP_CLOCK_SKEW_SECONDS:
+        log_error(
+            "❌ OCSP thisUpdate is in the future for %s (thisUpdate=%s now=%s skew=%ss); refusing",
+            cert_name,
+            this_unix,
+            now_unix,
+            OCSP_CLOCK_SKEW_SECONDS,
+        )
+        return "thisUpdate_future"
+    if this_unix < now_unix - OCSP_MAX_THIS_UPDATE_AGE_SECONDS:
+        log_error(
+            "❌ OCSP thisUpdate is too old for %s (thisUpdate=%s now=%s max_age=%ss); refusing",
+            cert_name,
+            this_unix,
+            now_unix,
+            OCSP_MAX_THIS_UPDATE_AGE_SECONDS,
+        )
+        return "thisUpdate_stale"
+    lifetime = next_unix - this_unix
+    if lifetime <= 0:
+        log_error("❌ OCSP intrinsic lifetime invalid for %s (nextUpdate <= thisUpdate)", cert_name)
+        return "lifetime_invalid"
+    if lifetime > OCSP_MAX_INTRINSIC_LIFETIME_SECONDS:
+        log_error(
+            "❌ OCSP intrinsic lifetime too long for %s (%ss > %ss cap); refusing",
+            cert_name,
+            lifetime,
+            OCSP_MAX_INTRINSIC_LIFETIME_SECONDS,
+        )
+        return "lifetime_too_long"
+    return None
+
+
+def _find_matching_ocsp_single(
+    ocsp_response: x509_ocsp.OCSPResponse,
+    leaf: x509.Certificate,
+    issuer: x509.Certificate,
+    cert_name: str,
+) -> Tuple[Optional[Any], Optional[Dict[str, str]]]:
+    """
+    Find exactly one SingleResponse whose CertID matches leaf+issuer.
+
+    Multi-response bodies are accepted when precisely one entry matches; zero or
+    ambiguous matches fail closed. Returns (single, certid_pin) or (None, None).
+    """
+    try:
+        singles = list(ocsp_response.responses)
+    except Exception as e:
+        log_error("❌ OCSP could not enumerate SingleResponse(s) for %s: %s", cert_name, e)
+        return None, None
+    if not singles:
+        log_error("❌ OCSP response for %s has 0 SingleResponse(s); refusing to publish", cert_name)
+        return None, None
+
+    matches: List[Tuple[Any, Dict[str, str]]] = []
+    for single in singles:
+        try:
+            hash_alg = single.hash_algorithm
+            serial = int(single.serial_number)
+            name_hash = bytes(single.issuer_name_hash)
+            key_hash = bytes(single.issuer_key_hash)
+        except Exception as e:
+            log_debug("⚡ OCSP skipping unreadable SingleResponse for %s: %s", cert_name, e)
+            continue
+        if serial != int(leaf.serial_number):
+            continue
+        try:
+            expected = x509_ocsp.OCSPRequestBuilder().add_certificate(leaf, issuer, hash_alg).build()
+            exp_name = bytes(expected.issuer_name_hash)
+            exp_key = bytes(expected.issuer_key_hash)
+            exp_serial = int(expected.serial_number)
+        except Exception as e:
+            log_debug("⚡ OCSP could not build expected CertID for %s: %s", cert_name, e)
+            continue
+        if exp_serial != serial or exp_name != name_hash or exp_key != key_hash:
+            continue
+        serial_hex = format(serial, "X").lstrip("0") or "0"
+        pin = {
+            "serial": serial_hex,
+            "issuer_name_hash": name_hash.hex().lower(),
+            "issuer_key_hash": key_hash.hex().lower(),
+            "hash_algorithm": getattr(hash_alg, "name", str(hash_alg)).lower(),
+        }
+        matches.append((single, pin))
+
+    if len(matches) == 0:
+        log_error(
+            "❌ OCSP response for %s has %d SingleResponse(s) but none match leaf+issuer CertID",
+            cert_name,
+            len(singles),
+        )
+        return None, None
+    if len(matches) > 1:
+        log_error(
+            "❌ OCSP response for %s has %d SingleResponse(s) matching leaf+issuer; refusing ambiguous pin",
+            cert_name,
+            len(matches),
+        )
+        return None, None
+    if len(singles) > 1:
+        log_info(
+            "ℹ️ OCSP response for %s has %d SingleResponse(s); pinned the one matching leaf serial=%s",
+            cert_name,
+            len(singles),
+            matches[0][1].get("serial"),
+        )
+    return matches[0]
+
+
 def _pin_single_certid(
     ocsp_response: x509_ocsp.OCSPResponse,
     leaf: x509.Certificate,
@@ -1839,62 +2004,14 @@ def _pin_single_certid(
     cert_name: str,
 ) -> Optional[Dict[str, str]]:
     """
-    Require exactly one SingleResponse whose CertID matches leaf+issuer.
+    Pin CertID for ocsp.json: exactly one SingleResponse matching leaf+issuer.
 
-    Returns a certid pin for ocsp.json, or None to fail closed (multi-response,
-    unreadable fields, or CertID mismatch). Libraries that expose "the" serial from
-    a multi-response blob must not be allowed to disagree with sha256(DER).
+    Multi-response bodies are OK when precisely one entry matches (common CA
+    batching). Zero or ambiguous matches fail closed so sha256(DER) cannot
+    disagree with a library's "the" serial from a multi-response blob.
     """
-    try:
-        singles = list(ocsp_response.responses)
-    except Exception as e:
-        log_error("❌ OCSP could not enumerate SingleResponse(s) for %s: %s", cert_name, e)
-        return None
-    if len(singles) != 1:
-        log_error(
-            "❌ OCSP response for %s has %d SingleResponse(s); refusing to publish (need exactly 1)",
-            cert_name,
-            len(singles),
-        )
-        return None
-    single = singles[0]
-    try:
-        hash_alg = single.hash_algorithm
-        serial = int(single.serial_number)
-        name_hash = bytes(single.issuer_name_hash)
-        key_hash = bytes(single.issuer_key_hash)
-    except Exception as e:
-        log_error("❌ OCSP SingleResponse CertID unreadable for %s: %s", cert_name, e)
-        return None
-    if serial != int(leaf.serial_number):
-        log_error(
-            "❌ OCSP CertID serial %s does not match leaf serial %s for %s",
-            serial,
-            leaf.serial_number,
-            cert_name,
-        )
-        return None
-    try:
-        expected = x509_ocsp.OCSPRequestBuilder().add_certificate(leaf, issuer, hash_alg).build()
-        exp_name = bytes(expected.issuer_name_hash)
-        exp_key = bytes(expected.issuer_key_hash)
-        exp_serial = int(expected.serial_number)
-    except Exception as e:
-        log_error("❌ OCSP could not build expected CertID for %s: %s", cert_name, e)
-        return None
-    if exp_serial != serial or exp_name != name_hash or exp_key != key_hash:
-        log_error(
-            "❌ OCSP CertID pin mismatch for %s (serial/name_hash/key_hash vs leaf+issuer)",
-            cert_name,
-        )
-        return None
-    serial_hex = format(serial, "X").lstrip("0") or "0"
-    return {
-        "serial": serial_hex,
-        "issuer_name_hash": name_hash.hex().lower(),
-        "issuer_key_hash": key_hash.hex().lower(),
-        "hash_algorithm": getattr(hash_alg, "name", str(hash_alg)).lower(),
-    }
+    _single, pin = _find_matching_ocsp_single(ocsp_response, leaf, issuer, cert_name)
+    return pin
 
 
 def _serial_forms(serial: Optional[int]) -> Tuple[Optional[str], Optional[str]]:
@@ -1929,16 +2046,34 @@ def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
     }
 
 
-def _ocsp_signed_timing_meta(ocsp_der: bytes) -> Dict[str, Any]:
+def _ocsp_signed_timing_meta(
+    ocsp_der: bytes,
+    leaf: Optional[x509.Certificate] = None,
+    issuer: Optional[x509.Certificate] = None,
+    cert_name: str = "",
+) -> Dict[str, Any]:
     """
     Absolute thisUpdate/nextUpdate from the DER for handshake intrinsic-policy checks.
     Empty dict when unreadable (caller should already have refused publish).
+
+    When leaf+issuer are provided, timing is taken from the matching SingleResponse
+    (multi-response bodies supported).
     """
     try:
         resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
-        this_unix, next_unix = _ocsp_response_update_unix(resp)
     except Exception:
         return {}
+    this_unix: Optional[int] = None
+    next_unix: Optional[int] = None
+    if leaf is not None and issuer is not None:
+        single, _pin = _find_matching_ocsp_single(resp, leaf, issuer, cert_name or "?")
+        if single is not None:
+            this_unix, next_unix = _ocsp_single_update_unix(single)
+    if this_unix is None:
+        try:
+            this_unix, next_unix = _ocsp_response_update_unix(resp)
+        except Exception:
+            return {}
     out: Dict[str, Any] = {}
     if this_unix is not None:
         out["this_update_unix"] = this_unix
@@ -2330,8 +2465,8 @@ def _canary_ocsp_handshake(
     if not _ocsp_signer_ends_on_issuer_spki(ocsp_der, issuer):
         return False, "canary_signer_spki"
 
-    certid_pin = _pin_single_certid(ocsp_response, leaf, issuer, label)
-    if not certid_pin:
+    matched_single, certid_pin = _find_matching_ocsp_single(ocsp_response, leaf, issuer, label)
+    if not certid_pin or matched_single is None:
         return False, "canary_certid"
     meta_certid = meta.get("certid")
     if not isinstance(meta_certid, dict):
@@ -2341,13 +2476,13 @@ def _canary_ocsp_handshake(
             return False, "canary_certid_mismatch"
 
     try:
-        cert_status = ocsp_response.certificate_status
+        cert_status = matched_single.certificate_status
     except (ValueError, AttributeError):
         return False, "canary_cert_status_unreadable"
     if cert_status != x509_ocsp.OCSPCertStatus.GOOD:
         return False, "canary_cert_status_not_good"
 
-    policy_reason = _ocsp_intrinsic_policy_reason(ocsp_response, label)
+    policy_reason = _ocsp_single_intrinsic_policy_reason(matched_single, label)
     if policy_reason:
         return False, f"canary_{policy_reason}"
 
@@ -2941,15 +3076,15 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             )
             return None, 0, None
 
-        # Exactly one SingleResponse whose CertID names this leaf+issuer (pin for ocsp.json).
-        certid_pin = _pin_single_certid(ocsp_response, leaf, issuer, cert_name)
-        if not certid_pin:
+        # Pin CertID: exactly one SingleResponse matching leaf+issuer (multi-response OK).
+        matched_single, certid_pin = _find_matching_ocsp_single(ocsp_response, leaf, issuer, cert_name)
+        if not certid_pin or matched_single is None:
             return None, 0, None
 
         # responseStatus=SUCCESSFUL ≠ CertStatus=good (RFC 6960). Only publish staples
         # that attest the leaf is good; revoked/unknown must not replace a usable cache.
         try:
-            cert_status = ocsp_response.certificate_status
+            cert_status = matched_single.certificate_status
         except (ValueError, AttributeError) as e:
             log_error(
                 "❌ OCSP response for %s has no usable CertStatus after SUCCESSFUL outer status: %s. Discarding.",
@@ -2959,16 +3094,17 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             return None, 0, None
         if cert_status != x509_ocsp.OCSPCertStatus.GOOD:
             status_name = getattr(cert_status, "name", None) or str(cert_status)
+            this_u, _ = _ocsp_single_update_unix(matched_single)
             log_error(
                 "❌ OCSP CertStatus=%s for %s (serial=%s); refusing to publish non-good staple.",
                 status_name,
                 cert_name,
                 leaf.serial_number,
             )
-            raise _VerifiedNonGood(status_name, leaf.serial_number, _ocsp_this_update_unix(ocsp_response))
+            raise _VerifiedNonGood(status_name, leaf.serial_number, this_u)
         try:
-            resp_serial = ocsp_response.serial_number
-        except (ValueError, AttributeError):
+            resp_serial = int(matched_single.serial_number)
+        except (ValueError, AttributeError, TypeError):
             resp_serial = None
         if resp_serial is not None and resp_serial != leaf.serial_number:
             log_error(
@@ -2981,12 +3117,12 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
 
         # Signed-window policy: refuse stretched / future / ancient thisUpdate.
         # Discard only — not a GOOD and not a CertStatus non-GOOD for tombstone counters.
-        policy_reason = _ocsp_intrinsic_policy_reason(ocsp_response, cert_name)
+        policy_reason = _ocsp_single_intrinsic_policy_reason(matched_single, cert_name)
         if policy_reason:
             return None, 0, None
 
         # Extract TTL (storage clamp; intrinsic policy already enforced above).
-        remaining, _ = _ocsp_response_lifetimes(ocsp_response)
+        remaining, _ = _ocsp_single_lifetimes(matched_single)
         if remaining is not None:
             ttl = min(remaining, OCSP_MAX_INTRINSIC_LIFETIME_SECONDS)
         else:
@@ -3097,14 +3233,28 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
                 try:
                     resp_serial = int(ocsp_response.serial_number)
                 except (ValueError, AttributeError, TypeError):
-                    log_info(
-                        "⚡ OCSP cached response for %s: fp=%s CertID serial unreadable/ambiguous; "
-                        "treating as miss so refresh can refetch",
-                        cert_name,
-                        (fingerprint[:16] + "...") if fingerprint else "unknown",
-                    )
-                    return None, None
-                if resp_serial != leaf_serial:
+                    # Multi-response body: accept when exactly one SingleResponse serial matches.
+                    resp_serial = None
+                    matched = 0
+                    try:
+                        for single in ocsp_response.responses:
+                            try:
+                                if int(single.serial_number) == leaf_serial:
+                                    matched += 1
+                                    resp_serial = leaf_serial
+                            except Exception:
+                                continue
+                    except Exception:
+                        matched = 0
+                    if matched != 1:
+                        log_info(
+                            "⚡ OCSP cached response for %s: fp=%s CertID serial unreadable/ambiguous; "
+                            "treating as miss so refresh can refetch",
+                            cert_name,
+                            (fingerprint[:16] + "...") if fingerprint else "unknown",
+                        )
+                        return None, None
+                if resp_serial is not None and resp_serial != leaf_serial:
                     log_info(
                         "⚡ OCSP cached response for %s: fp=%s CertID serial mismatch "
                         "(cached=%s leaf=%s); treating as miss so refresh can refetch",
@@ -3115,7 +3265,24 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
                     )
                     return None, None
 
-        remaining, total_lifetime = _ocsp_response_lifetimes(ocsp_response)
+        # Prefer matched-leaf timing when the body has multiple SingleResponses.
+        remaining, total_lifetime = None, None
+        try:
+            remaining, total_lifetime = _ocsp_response_lifetimes(ocsp_response)
+        except Exception:
+            remaining, total_lifetime = None, None
+        if (remaining is None or total_lifetime is None) and cert_pem is not None:
+            try:
+                leaf_for_ttl = x509.load_pem_x509_certificate(_clean_pem(cert_pem))
+                for single in ocsp_response.responses:
+                    try:
+                        if int(single.serial_number) == int(leaf_for_ttl.serial_number):
+                            remaining, total_lifetime = _ocsp_single_lifetimes(single)
+                            break
+                    except Exception:
+                        continue
+            except Exception:
+                pass
         if remaining is None or total_lifetime is None:
             log_debug("🔄 OCSP could not determine precise lifetime for %s from cached response", cert_name)
             return None, None
@@ -4712,18 +4879,23 @@ def _persist_ocsp_results_to_db(
 
             cache_key = _ocsp_cache_relpath(cert_fp, "ocsp.der")
             try:
-                # Pin CertID before mirroring DER — refuse multi-response / mismatch blobs.
+                # Pin CertID before mirroring DER — refuse unmatched / ambiguous blobs.
                 try:
                     leaf_obj, issuer_obj = _parse_chain(cleaned_pem, cert_name)
                     parsed_resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
-                    certid_pin = _pin_single_certid(parsed_resp, leaf_obj, issuer_obj, cert_name)
-                    policy_reason = _ocsp_intrinsic_policy_reason(parsed_resp, cert_name)
+                    matched_single, certid_pin = _find_matching_ocsp_single(
+                        parsed_resp, leaf_obj, issuer_obj, cert_name
+                    )
+                    if matched_single is not None:
+                        policy_reason = _ocsp_single_intrinsic_policy_reason(matched_single, cert_name)
+                    else:
+                        policy_reason = "thisUpdate_unreadable"
                 except Exception as pin_err:
                     log_error("❌ OCSP CertID/timing pin failed for DB store of %s: %s", cert_name, pin_err)
                     certid_pin = None
                     policy_reason = "thisUpdate_unreadable"
                 if not certid_pin:
-                    log_error("❌ OCSP refusing DB cache for %s without single CertID pin", cert_name)
+                    log_error("❌ OCSP refusing DB cache for %s without matching CertID pin", cert_name)
                     stats["errors"] = stats.get("errors", 0) + 1
                     continue
                 if policy_reason:
@@ -5055,8 +5227,16 @@ def _clear_serial_blacklist(fingerprint: str) -> None:
 def _der_serial_and_this_update(ocsp_der: bytes) -> Tuple[Optional[str], Optional[int]]:
     try:
         parsed = x509_ocsp.load_der_ocsp_response(ocsp_der)
-        decimal, _serial_hex = _serial_forms(parsed.serial_number)
-        return decimal, _ocsp_this_update_unix(parsed)
+        try:
+            decimal, _serial_hex = _serial_forms(parsed.serial_number)
+            return decimal, _ocsp_this_update_unix(parsed)
+        except (ValueError, AttributeError, TypeError):
+            singles = list(parsed.responses)
+            if len(singles) == 1:
+                decimal, _serial_hex = _serial_forms(singles[0].serial_number)
+                this_u, _ = _ocsp_single_update_unix(singles[0])
+                return decimal, this_u
+            return None, None
     except Exception:
         return None, None
 
@@ -5560,7 +5740,8 @@ def _persist_ocsp_results_to_disk(
                 meta = _extract_cert_metadata(cleaned_pem, cert_name)
                 meta["fingerprint"] = cert_fp
                 meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                # Re-pin CertID at publish: exactly one SingleResponse matching leaf+issuer.
+                # Re-pin CertID at publish: exactly one SingleResponse matching leaf+issuer
+                # (multi-response bodies OK when precisely one entry matches).
                 try:
                     parsed_resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
                     certid_pin = _pin_single_certid(parsed_resp, _leaf, issuer, cert_name)
@@ -5585,7 +5766,13 @@ def _persist_ocsp_results_to_disk(
                 # Re-check intrinsic policy at publish and stamp signed timing for Lua.
                 try:
                     parsed_for_timing = x509_ocsp.load_der_ocsp_response(ocsp_der)
-                    policy_reason = _ocsp_intrinsic_policy_reason(parsed_for_timing, cert_name)
+                    matched_for_timing, _ = _find_matching_ocsp_single(
+                        parsed_for_timing, _leaf, issuer, cert_name
+                    )
+                    if matched_for_timing is not None:
+                        policy_reason = _ocsp_single_intrinsic_policy_reason(matched_for_timing, cert_name)
+                    else:
+                        policy_reason = "thisUpdate_unreadable"
                 except Exception as timing_err:
                     log_error("❌ OCSP intrinsic policy check failed for %s: %s", cert_name, timing_err)
                     policy_reason = "thisUpdate_unreadable"
@@ -5593,7 +5780,7 @@ def _persist_ocsp_results_to_disk(
                     stats["errors"] = stats.get("errors", 0) + 1
                     publish_error_logged = True
                     raise RuntimeError(f"intrinsic timing refused: {policy_reason}")
-                meta.update(_ocsp_signed_timing_meta(ocsp_der))
+                meta.update(_ocsp_signed_timing_meta(ocsp_der, _leaf, issuer, cert_name))
                 meta.update(_ocsp_expiry_meta(ttl))
                 if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
                     meta["expires_unix"] = meta["next_update_unix"]

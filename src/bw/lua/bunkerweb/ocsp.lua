@@ -1274,7 +1274,8 @@ end
 
 -- Fingerprint-only path has no handshake leaf PEM: require response CertID serial
 -- to match the job-published pin (meta.certid.serial, else meta.serial).
--- When meta.certid is present, those bytes are the single SingleResponse the job accepted.
+-- When meta.certid is present, those bytes are the SingleResponse the job accepted
+-- (exactly one CertID match among possibly several in the DER).
 local function certid_consistent_with_meta(meta, ocsp_der)
 	if type(meta) ~= "table" then
 		return false, "no_meta"
