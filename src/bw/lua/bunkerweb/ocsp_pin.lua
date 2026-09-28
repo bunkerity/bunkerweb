@@ -6,6 +6,9 @@ local ngx = ngx
 
 local common = require("bunkerweb.ocsp_common").internal
 local OCSP_CLOCK_SKEW_SECONDS = common.OCSP_CLOCK_SKEW_SECONDS
+local DROP_ALLOW_ON_REFUSE = common.DROP_ALLOW_ON_REFUSE
+local KEEP_ALLOW_ON_REFUSE = common.KEEP_ALLOW_ON_REFUSE
+local META_ONLY_DROP_ALLOW = common.META_ONLY_DROP_ALLOW
 local format_staple_decision = common.format_staple_decision
 local is_fp64 = common.is_fp64
 local log = common.log
@@ -22,70 +25,9 @@ local soft_recall_gen_of = store.soft_recall_gen_of
 -- Transient allow-pin TTL when expires_unix is absent (align with L1).
 local ALLOW_PIN_TTL_SECONDS = L1_MAX_TTL
 
--- Handshake refuse causes that DROP the allow pin (sibling Must-Staple fails until re-canary).
--- Never-write / keep-pin causes leave the canary allow in place (timing/colony/soft-recall).
--- Keys are raw refuse_cause strings BEFORE runbook alias collapse.
---
--- DROP = semantic poison about this body vs leaf / colony / canary (sibling must
---   fail closed until a new generation is canary-paged).
--- KEEP = this worker's view of pin state or its own clock. Must not erase a pin
---   every zone shares (stale reader / skewed clock → fleet Must-Staple outage).
---   Local handshake still refuses; only the shared pin survives.
-local DROP_ALLOW_ON_REFUSE = {
-	certid_mismatch = true,
-	aia_uri_mismatch = true,
-	aia_uri_unpinned = true,
-	aia_uri_missing_on_leaf = true,
-	aia_uri_leaf_unavailable = true,
-	tombstoned = true,
-	serial_blacklisted = true,
-	cluster_floor = true,
-	-- Bare "shared_ligand" is the runbook ALIAS — KEEP (see below). Only concrete
-	-- binding failures DROP. ligand_missing stays KEEP (promote-tear ENOENT).
-	ligand_mismatch = true,
-	-- Raw ligand_verdict binding failures (HTTP/stream pass these without prefix).
-	der_sha256_mismatch = true,
-	missing_der_sha256 = true,
-	invalid_der_sha256 = true,
-	fingerprint_mismatch_or_missing_meta = true,
-	canary_refused = true,
-	-- intermediate_must_staple_libssl is KEEP (aligned with colony): a single
-	-- OpenSSL 3.5 worker must not compare-and-delete the fleet allow-pin during
-	-- mixed-version rollouts. Local handshake still refuses.
-}
--- Keep allow pin (do not revoke) — sibling may still staple; local-only / temporary.
--- Invariant: every cause should_skip_peer_bus returns true for must also be KEEP
--- (or the skip arm never reaches record_peer_refuse). skip ⊆ KEEP.
-local KEEP_ALLOW_ON_REFUSE = {
-	not_paged = true,
-	validate_budget = true,
-	intermediate_must_staple_colony = true,
-	intermediate_must_staple_libssl = true,
-	set_staple_failed = true,
-	set_staple_exception = true,
-	response_not_found = true,
-	response_stale = true,
-	await_sni = true,
-	probe_failed = true,
-	allow_pin_missing = true,
-	allow_pin_expired = true,
-	allow_pin_mismatch = true,
-	gen_type_drift = true,
-	ligand_missing = true,
-	-- Runbook alias collapse of ligand_* — callers must pass raw ligand_verdict;
-	-- if they pass normalize_staple_decision output, KEEP (do not DROP on ENOENT).
-	shared_ligand = true,
-	peer_refuse_unavailable = true,
-	fingerprint_chain_unavailable = true,
-	multi_staple_attach_failed = true,
-	-- Local chain-presentation defect. Do not DROP a pin the sibling may still staple.
-	issuer_unresolved_must_staple = true,
-	thisUpdate_future = true,
-	thisUpdate_stale = true,
-	lifetime_invalid = true,
-	lifetime_too_long = true,
-	thisUpdate_unreadable = true,
-}
+-- DROP/KEEP tables live in ocsp_common (STAPLE_POLICY). Prefix rules stay here:
+-- canary_* defaults DROP; shared_ligand_* DROP unless KEEP on the stripped suffix.
+-- Invariant: every cause should_skip_peer_bus returns true for must also be KEEP.
 
 local function ocsp_allow_path(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-allow/" .. fingerprint
@@ -95,16 +37,6 @@ end
 local function ocsp_refuse_path_legacy(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint
 end
-
--- DROP causes that may revoke using meta.der_sha256 when resp is nil (meta names
--- the poisoned generation). Body-poison causes require resp bytes so a probe
--- refuse cannot CAS-delete the live pin via meta alone.
-local META_ONLY_DROP_ALLOW = {
-	tombstoned = true,
-	serial_blacklisted = true,
-	cluster_floor = true,
-	canary_refused = true,
-}
 
 -- Handshake is read-only on the pin directory (except compare-and-delete revoke).
 -- Do NOT unlink legacy refuse or gen-less pins here: that was a DoS lever on the

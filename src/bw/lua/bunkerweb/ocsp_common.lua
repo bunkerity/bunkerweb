@@ -112,6 +112,9 @@ end
 -- staple_only / open soft-continue instead of aborting the handshake.
 -- Stapling off (SSL_USE_OCSP_STAPLING=no, the default) → effective "open": no
 -- staple can be served, so Must-Staple is not enforced (upstream served unstapled).
+-- This is intentional policy (not a silent bug): refuse codes still log
+-- ssl_use_ocsp_stapling_no when a Must-Staple leaf hits the stapling-off path.
+-- Unknown OCSP_STAPLE_MODE values coerce to "normal" (fail-close), never soft-open.
 local function ocsp_staple_mode(internalstore, server_name)
 	if not stapling_enabled(internalstore, server_name) then
 		return "open"
@@ -185,6 +188,67 @@ local STAPLE_DECISION = {
 	unmet = true,
 }
 
+-- Allow-pin DROP/KEEP policy (single source of truth for pin.lua + docs).
+-- Keys are raw refuse_cause strings BEFORE runbook alias collapse.
+-- DROP = semantic poison about this body vs leaf / colony / canary (sibling must
+--   fail closed until a new generation is canary-paged).
+-- KEEP = this worker's view of pin state or its own clock. Must not erase a pin
+--   every zone shares (stale reader / skewed clock → fleet Must-Staple outage).
+local DROP_ALLOW_ON_REFUSE = {
+	certid_mismatch = true,
+	aia_uri_mismatch = true,
+	aia_uri_unpinned = true,
+	aia_uri_missing_on_leaf = true,
+	aia_uri_leaf_unavailable = true,
+	tombstoned = true,
+	serial_blacklisted = true,
+	cluster_floor = true,
+	-- Bare "shared_ligand" is the runbook ALIAS — KEEP (see below). Only concrete
+	-- binding failures DROP. ligand_missing stays KEEP (promote-tear ENOENT).
+	ligand_mismatch = true,
+	der_sha256_mismatch = true,
+	missing_der_sha256 = true,
+	invalid_der_sha256 = true,
+	fingerprint_mismatch_or_missing_meta = true,
+	canary_refused = true,
+}
+
+local KEEP_ALLOW_ON_REFUSE = {
+	not_paged = true,
+	validate_budget = true,
+	intermediate_must_staple_colony = true,
+	intermediate_must_staple_libssl = true,
+	set_staple_failed = true,
+	set_staple_exception = true,
+	response_not_found = true,
+	response_stale = true,
+	await_sni = true,
+	probe_failed = true,
+	allow_pin_missing = true,
+	allow_pin_expired = true,
+	allow_pin_mismatch = true,
+	gen_type_drift = true,
+	ligand_missing = true,
+	shared_ligand = true,
+	peer_refuse_unavailable = true,
+	fingerprint_chain_unavailable = true,
+	multi_staple_attach_failed = true,
+	issuer_unresolved_must_staple = true,
+	thisUpdate_future = true,
+	thisUpdate_stale = true,
+	lifetime_invalid = true,
+	lifetime_too_long = true,
+	thisUpdate_unreadable = true,
+}
+
+-- DROP causes that may revoke using meta.der_sha256 when resp is nil.
+local META_ONLY_DROP_ALLOW = {
+	tombstoned = true,
+	serial_blacklisted = true,
+	cluster_floor = true,
+	canary_refused = true,
+}
+
 local STAPLE_DECISION_ALIAS = {
 	single_slot_ecdsa_prefer = "skip_slot",
 	single_slot_rsa_prefer = "skip_slot",
@@ -222,6 +286,7 @@ end
 -- Canonical field ordering prevents information leakage and improves auditability.
 -- All logs use fixed ordering regardless of how many fields are present.
 local function format_staple_decision(code, fields)
+	local raw = tostring(code or "unmet")
 	local decision, alias_detail = normalize_staple_decision(code)
 	local parts = { "staple_decision=" .. decision }
 	local f = {}
@@ -230,10 +295,32 @@ local function format_staple_decision(code, fields)
 			f[k] = v
 		end
 	end
+	-- Always stamp subsystem so HTTP/stream logs cannot look identical while diverging.
+	if (f.subsystem == nil or f.subsystem == "") and ngx.config and ngx.config.subsystem then
+		f.subsystem = ngx.config.subsystem
+	end
+	-- Forensic invariant: refuse_cause= holds the pre-alias raw whenever we collapsed
+	-- a code (ligand_* → shared_ligand, canary_* → canary_refused, …). Pin DROP/KEEP
+	-- must key that raw — never staple_decision= alone. If the caller already set
+	-- refuse_cause, keep it; otherwise use alias_detail or the raw closed code.
+	if f.refuse_cause == nil or f.refuse_cause == "" then
+		if alias_detail then
+			f.refuse_cause = alias_detail
+		elseif
+			decision ~= "ok"
+			and decision ~= "ok_partial"
+			and decision ~= "stapling_off"
+			and decision ~= "skip_slot"
+		then
+			f.refuse_cause = raw
+		end
+	end
 	if alias_detail then
 		if f.detail == nil or f.detail == "" then
 			f.detail = alias_detail
 		elseif tostring(f.detail) ~= alias_detail then
+			-- Caller preseeded detail= with a different string — do not hide the alias
+			-- raw (already in refuse_cause=); also surface it as alias=.
 			f.alias = alias_detail
 		end
 	end
@@ -280,7 +367,13 @@ function _M.format_staple_decision(code, fields)
 end
 
 -- Convert a Must-Staple miss into abort (normal) or soft continue (fuse).
--- Always logs staple_decision=CODE (runbook) with tag=OCSP_MUST_STAPLE_REFUSE.
+-- Always logs staple_decision=CODE (runbook) with tag=OCSP_MUST_STAPLE_REFUSE
+-- and refuse_cause= raw detail (pre-alias) so pin/bus forensics survive collapse.
+--
+-- Return contract (callers MUST branch on the second value, not bare falsiness):
+--   soft continue → false, nil, "continue"
+--   abort         → false, "must_staple", "abort"
+-- Stream ssl_certificate already checks soft_reason == "must_staple".
 local function soften_must_staple(mode, ok, reason, detail)
 	if reason ~= "must_staple" then
 		return ok, reason
@@ -289,18 +382,20 @@ local function soften_must_staple(mode, ok, reason, detail)
 	if mode == "staple_only" or mode == "open" then
 		action = "continue"
 	end
+	local raw_cause = tostring(detail or "unmet")
 	log(
 		ngx.ERR,
-		format_staple_decision(detail or "unmet", {
+		format_staple_decision(raw_cause, {
 			tag = "OCSP_MUST_STAPLE_REFUSE",
 			action = action,
 			mode = mode or "normal",
+			refuse_cause = raw_cause,
 		})
 	)
 	if action == "continue" then
-		return false
+		return false, nil, "continue"
 	end
-	return false, "must_staple"
+	return false, "must_staple", "abort"
 end
 
 -- Exported so stream ssl_certificate await_sni can apply the same fuse as staple().
@@ -341,57 +436,37 @@ local function to_hex(bin)
 end
 
 local function read_file(path)
+	if type(path) ~= "string" or path == "" then
+		return nil, "missing"
+	end
 	local f = io.open(path, "rb")
 	if not f then
-		return nil
+		return nil, "missing"
 	end
 	local data = f:read("*a")
 	f:close()
 	if data and #data > 0 then
 		return data
 	end
-	return nil
+	-- Empty file ≠ ENOENT: callers that only use the first return still see nil,
+	-- but second return lets refuse paths distinguish truncate races from absence.
+	return nil, "empty"
 end
 
--- Derive 16-way shard from fingerprint using bit-pair extraction.
--- Current: uses first 2 hex chars (fingerprint:sub(1,2)) → 16-way distribution.
--- Deterministic and independent of SNI resolution.
--- Returns: (shard_high, shard_low) for path construction (e.g., "a", "b" → /a/b/).
--- Note: This uses simple bit ops. For better distribution under adversarial patterns,
--- consider hash-based sharding via sha256(fingerprint) % 16.
+-- First two hex chars of the SPKI fingerprint → 16×16 directory layout.
 local function fingerprint_shard(fingerprint)
 	if not fingerprint or #fingerprint < 2 then
 		return "0", "0"
 	end
-	-- Current simple approach: first 2 hex digits
-	-- Pro: fast, deterministic, no crypto
-	-- Con: vulnerable to fingerprint patterns clustering into same shard
 	return fingerprint:sub(1, 1), fingerprint:sub(2, 2)
 end
 
--- Hash-based shard distribution: cryptographic uniform distribution across 16 shards.
--- Use this variant if fingerprints show non-uniform bit patterns.
--- Returns: single hex digit representing one of 16 shards (0-f).
-local function fingerprint_shard_hash_based(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return "0"
-	end
-	-- Hash fingerprint and take modulo 16 for uniform distribution
-	-- This requires resty.openssl or similar; for now, return comment-only stub
-	-- local hash = require("resty.openssl.digest").new("sha256")
-	-- hash:update(fingerprint)
-	-- local digest = hash:final()
-	-- local byte_val = string.byte(digest, 1)
-	-- return string.format("%x", byte_val % 16)
-	-- Fallback: use first hex digit
-	return fingerprint:sub(1, 1)
-end
-
--- Build OCSP response path from fingerprint and shard.
--- Supports collision chains: ocsp.der (primary), ocsp.der.1, ocsp.der.2 if collision detected.
+-- Build OCSP response path from fingerprint. Nil fingerprint / empty string → nil
+-- (never the shared 0/0/unknown sink — that was a last-writer-wins collision hole).
+-- Optional collision_index appends .N for rare SPKI-dir collisions.
 local function ocsp_path(fingerprint, collision_index)
-	if not fingerprint or fingerprint == "" then
-		return "/var/cache/bunkerweb/ssl/0/0/unknown/ocsp.der"
+	if type(fingerprint) ~= "string" or fingerprint == "" then
+		return nil
 	end
 	local h, l = fingerprint_shard(fingerprint)
 	local base = "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/ocsp.der"
@@ -401,10 +476,10 @@ local function ocsp_path(fingerprint, collision_index)
 	return base
 end
 
--- Build issuer PEM path from fingerprint and shard.
+-- Build issuer PEM path from fingerprint. Empty/nil → nil (no shared unknown sink).
 local function issuer_path(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return "/var/cache/bunkerweb/ssl/0/0/unknown/issuer.pem"
+	if type(fingerprint) ~= "string" or fingerprint == "" then
+		return nil
 	end
 	local h, l = fingerprint_shard(fingerprint)
 	return "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/issuer.pem"
@@ -435,23 +510,6 @@ local function resp_binding(resp)
 		return digest
 	end
 	return nil
-end
-
--- Verify cached content matches requested fingerprint via response binding.
--- Returns: verified fingerprint, or nil if binding unavailable or mismatched.
--- Prevents silent overwrites in sharded layout by catching collisions at lookup.
-local function verify_fingerprint_binding(resp, fingerprint)
-	if not resp or not fingerprint then
-		return nil
-	end
-	local binding = resp_binding(resp)
-	if not binding then
-		-- No binding available; cannot verify
-		return nil
-	end
-	-- In production, binding should be validated against stored metadata
-	-- For now, presence of binding indicates verified state
-	return fingerprint
 end
 
 -- Declared clock-skew budget. Must match ocsp-refresh.py OCSP_CLOCK_SKEW_SECONDS.
@@ -521,6 +579,9 @@ local function normalize_fp_hint(cert_fp_hint)
 end
 
 _M.internal = {
+	DROP_ALLOW_ON_REFUSE = DROP_ALLOW_ON_REFUSE,
+	KEEP_ALLOW_ON_REFUSE = KEEP_ALLOW_ON_REFUSE,
+	META_ONLY_DROP_ALLOW = META_ONLY_DROP_ALLOW,
 	OCSP_CLOCK_SKEW_SECONDS = OCSP_CLOCK_SKEW_SECONDS,
 	OCSP_MAX_INTRINSIC_LIFETIME_SECONDS = OCSP_MAX_INTRINSIC_LIFETIME_SECONDS,
 	OCSP_MAX_THIS_UPDATE_AGE_SECONDS = OCSP_MAX_THIS_UPDATE_AGE_SECONDS,
@@ -531,7 +592,6 @@ _M.internal = {
 	cache_key = cache_key,
 	current_ocsp_epoch = current_ocsp_epoch,
 	fingerprint_shard = fingerprint_shard,
-	fingerprint_shard_hash_based = fingerprint_shard_hash_based,
 	format_staple_decision = format_staple_decision,
 	is_fp64 = is_fp64,
 	issuer_path = issuer_path,
@@ -547,7 +607,6 @@ _M.internal = {
 	soften_must_staple = soften_must_staple,
 	stapling_enabled = stapling_enabled,
 	to_hex = to_hex,
-	verify_fingerprint_binding = verify_fingerprint_binding,
 }
 
 return _M
