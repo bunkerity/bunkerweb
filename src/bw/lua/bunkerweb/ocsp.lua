@@ -1482,6 +1482,76 @@ local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
 	return false, "shared_ligand_" .. tostring(reason or "mismatch")
 end
 
+-- Civil UTC date/time → unix seconds (Proleptic Gregorian). No local TZ / DST.
+-- Algorithm: Howard Hinnant days_from_civil (public domain).
+local function utc_civil_to_unix(year, month, day, hour, min, sec)
+	year = tonumber(year)
+	month = tonumber(month)
+	day = tonumber(day)
+	hour = tonumber(hour) or 0
+	min = tonumber(min) or 0
+	sec = tonumber(sec) or 0
+	if not year or not month or not day then
+		return nil
+	end
+	local y = year
+	local m = month
+	if m <= 2 then
+		y = y - 1
+		m = m + 12
+	end
+	local era = math.floor(y / 400)
+	if y < 0 and y % 400 ~= 0 then
+		era = era - 1
+	end
+	local yoe = y - era * 400
+	local doy = math.floor((153 * (m - 3) + 2) / 5) + day - 1
+	local doe = yoe * 365 + math.floor(yoe / 4) - math.floor(yoe / 100) + doy
+	local days = era * 146097 + doe - 719468
+	return days * 86400 + hour * 3600 + min * 60 + sec
+end
+
+-- Parse job "expires" legacy form: "<isoformat> + <N>s" → absolute unix death time.
+-- Prefer meta.expires_unix; this path is for old shards that only have the string.
+local function parse_legacy_expires_plus_ttl(raw)
+	if type(raw) ~= "string" then
+		return nil
+	end
+	local base_str, ttl_str = raw:match("^(.-) %+ (%d+)%s*s%s*$")
+	if not base_str or not ttl_str then
+		return nil
+	end
+	base_str = base_str:match("^%s*(.-)%s*$") or base_str
+	local y, mo, d, H, M, S, frac, zone =
+		base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)[Tt ](%d%d):(%d%d):(%d%d)(%.%d+)?(Z|[z]|[+-]%d%d:?%d%d)?$")
+	if not y then
+		-- Allow trailing junk after zone (some serializers); take leading ISO.
+		y, mo, d, H, M, S, frac, zone =
+			base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)[Tt ](%d%d):(%d%d):(%d%d)(%.%d+)?(Z|[z]|[+-]%d%d:?%d%d)?")
+	end
+	if not y then
+		return nil
+	end
+	local ts = utc_civil_to_unix(y, mo, d, H, M, S)
+	if type(ts) ~= "number" then
+		return nil
+	end
+	-- Apply explicit offset so +02:00 bases become UTC before adding TTL.
+	if type(zone) == "string" and zone ~= "" and zone:upper() ~= "Z" then
+		local sign, zh, zm = zone:match("^([+-])(%d%d):?(%d%d)$")
+		if sign and zh then
+			local off = tonumber(zh) * 3600 + (tonumber(zm) or 0) * 60
+			if sign == "+" then
+				ts = ts - off
+			else
+				ts = ts + off
+			end
+		end
+	end
+	-- frac ignored (sub-second); death time is second-resolution like expires_unix.
+	return ts + tonumber(ttl_str)
+end
+
 -- Absolute unix nextUpdate from job meta (preferred) or legacy "iso + Ns" expires.
 local function meta_expires_unix(meta)
 	if type(meta) ~= "table" then
@@ -1497,38 +1567,11 @@ local function meta_expires_unix(meta)
 			return math.floor(n)
 		end
 	end
-	local raw = meta.expires
-	if type(raw) ~= "string" then
-		return nil
-	end
-	local base_str, ttl_str = raw:match("^(.-) %+ (%d+)%s*s%s*$")
-	if not base_str or not ttl_str then
-		return nil
-	end
-	local y, mo, d, H, M, S = base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
-	if not y then
-		return nil
-	end
-	-- Treat components as UTC (job writes timezone.utc isoformat).
-	local ok_ts, ts = pcall(os.time, {
-		year = tonumber(y),
-		month = tonumber(mo),
-		day = tonumber(d),
-		hour = tonumber(H),
-		min = tonumber(M),
-		sec = tonumber(S),
-		isdst = false,
-	})
-	if not ok_ts or type(ts) ~= "number" then
-		return nil
-	end
-	local ok_off, offset = pcall(function()
-		return os.difftime(os.time(), os.time(os.date("!*t", os.time())))
-	end)
-	if ok_off and type(offset) == "number" then
-		ts = ts - offset
-	end
-	return ts + tonumber(ttl_str)
+	return parse_legacy_expires_plus_ttl(meta.expires)
+end
+
+function _M.meta_expires_unix(meta)
+	return meta_expires_unix(meta)
 end
 
 -- Wall-clock stop from published_unix + max age (independent of nextUpdate).
