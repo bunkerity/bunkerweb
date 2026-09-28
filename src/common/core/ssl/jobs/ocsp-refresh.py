@@ -3121,6 +3121,11 @@ def _publish_ocsp_shard(
 
         _fsync_directory(parent)
 
+        # Outside-shard ligand then allow-pin (canary-only write). Handshake fails
+        # closed until both exist; .ocsp_epoch bump stays deferred to the persist batch.
+        _write_ocsp_ligand(normalized, page_meta)
+        _write_ocsp_allow_pin(normalized, page_meta)
+
         # Keep caller meta in sync with what was paged (floor / DB use published_unix).
         if isinstance(meta, dict):
             meta.clear()
@@ -3133,8 +3138,8 @@ def _publish_ocsp_shard(
             cert_name or normalized[:16],
         )
 
-        # Peer-refuse clear is deferred to the persist batch (bump epoch first, then
-        # unlock). Clearing here would open the bus while L1 still trusts the old epoch.
+        # Allow-pin is already live; epoch bump stays deferred so L1 drops the prior
+        # generation before siblings trust the new pin under a fresh epoch.
 
         # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
         if db is not None:
@@ -5534,26 +5539,167 @@ def _bump_ocsp_cache_epoch() -> None:
     """
     try:
         CONFIGS_SSL_BASE.mkdir(parents=True, exist_ok=True)
+        (CONFIGS_SSL_BASE / "ocsp-allow").mkdir(parents=True, exist_ok=True)
+        (CONFIGS_SSL_BASE / "ocsp-ligand").mkdir(parents=True, exist_ok=True)
+        # Legacy refuse dir kept for dual-read cleanup during cutover.
         (CONFIGS_SSL_BASE / "ocsp-refuse").mkdir(parents=True, exist_ok=True)
         _atomic_write_text(CONFIGS_SSL_BASE / ".ocsp_epoch", str(time.time_ns()), mode=0o640)
     except Exception as e:
         log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
 
 
-def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
-    """Drop HTTP↔stream generation refuse marker for this SPKI (new page / tombstone)."""
+def _write_ocsp_ligand(fingerprint: str, meta: Optional[Dict[str, Any]]) -> bool:
+    """
+    Publish outside-shard ligand ``ocsp-ligand/{fp}`` (atomic replace).
+
+    Cross-zone stand-in for der_sha256 + soft_recall_gen + paged — lives beside
+    the SPKI directory so in-place promote cannot tear the binding. Order after
+    canary page: live DER visible → ligand swap → (batch) .ocsp_epoch.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not isinstance(meta, dict):
+        return False
+    sha = meta.get("der_sha256")
+    if not isinstance(sha, str):
+        return False
+    sha = sha.lower()
+    if len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
+        return False
+    try:
+        gen = int(meta.get("soft_recall_gen") or 0)
+    except (TypeError, ValueError):
+        gen = 0
+    if gen < 0:
+        gen = 0
+    payload: Dict[str, Any] = {
+        "fingerprint": normalized,
+        "der_sha256": sha,
+        "soft_recall_gen": gen,
+        "paged": meta.get("paged") is True,
+    }
+    if meta.get("tombstoned") is True:
+        payload["tombstoned"] = True
+    exp = meta.get("expires_unix")
+    try:
+        exp_i = int(exp) if exp is not None else 0
+    except (TypeError, ValueError):
+        exp_i = 0
+    if exp_i > 0:
+        payload["expires_unix"] = exp_i
+    try:
+        ligand_dir = CONFIGS_SSL_BASE / "ocsp-ligand"
+        ligand_dir.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(ligand_dir / normalized, json.dumps(payload, separators=(",", ":")), mode=0o640)
+        log_debug(
+            "✓ OCSP wrote ligand fp=%s... der=%s... soft_recall_gen=%s paged=%s",
+            normalized[:16],
+            sha[:16],
+            gen,
+            payload["paged"],
+        )
+        return True
+    except Exception as e:
+        log_debug("⚠️ OCSP could not write ligand for %s: %s", normalized[:16], e)
+        return False
+
+
+def _clear_ocsp_ligand(fingerprint: str) -> None:
+    """Remove outside-shard ligand (tombstone / control clear)."""
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
         return
     try:
+        path = CONFIGS_SSL_BASE / "ocsp-ligand" / normalized
+        if path.is_file():
+            path.unlink()
+            log_debug("🧹 OCSP cleared ligand for fp=%s...", normalized[:16])
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clear ligand for %s: %s", normalized[:16] if normalized else "?", e)
+
+
+def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> bool:
+    """
+    Canary-only allow pin ``ocsp-allow/{fp}``. Missing pin → Must-Staple refuse.
+
+    Handshake never creates pins; it only deletes on DROP_ALLOW refuse_cause.
+    Generation identity: der_sha256 + soft_recall_gen (matches Lua).
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not isinstance(meta, dict):
+        return False
+    if meta.get("paged") is not True or meta.get("tombstoned") is True:
+        return False
+    sha = meta.get("der_sha256")
+    if not isinstance(sha, str):
+        return False
+    sha = sha.lower()
+    if len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
+        return False
+    try:
+        gen = int(meta.get("soft_recall_gen") or 0)
+    except (TypeError, ValueError):
+        gen = 0
+    if gen < 0:
+        gen = 0
+    payload: Dict[str, Any] = {
+        "der_sha256": sha,
+        "soft_recall_gen": gen,
+        "allowed_unix": int(time.time()),
+        "allowed_by": "ocsp-refresh",
+    }
+    exp = meta.get("expires_unix")
+    try:
+        exp_i = int(exp) if exp is not None else 0
+    except (TypeError, ValueError):
+        exp_i = 0
+    if exp_i > 0:
+        payload["expires_unix"] = exp_i
+    try:
+        allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
+        allow_dir.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(allow_dir / normalized, json.dumps(payload, separators=(",", ":")), mode=0o640)
+        # Legacy refuse must not shadow allow polarity.
+        legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / normalized
+        if legacy.is_file():
+            legacy.unlink(missing_ok=True)
+        log_debug(
+            "✓ OCSP wrote allow-pin fp=%s... der=%s... soft_recall_gen=%s",
+            normalized[:16],
+            sha[:16],
+            gen,
+        )
+        return True
+    except Exception as e:
+        log_debug("⚠️ OCSP could not write allow-pin for %s: %s", normalized[:16], e)
+        return False
+
+
+def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
+    """
+    Drop allow-pin (+ legacy refuse marker) for this SPKI.
+
+    Call on soft-recall / tombstone / restore (paged=false). Successful canary
+    page uses ``_write_ocsp_allow_pin`` instead — clearing alone leaves Must-Staple
+    fail-closed until the pin is rewritten.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return
+    try:
+        allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
+        allow_dir.mkdir(parents=True, exist_ok=True)
+        allow_path = allow_dir / normalized
+        if allow_path.is_file():
+            allow_path.unlink()
+            log_debug("🧹 OCSP cleared allow-pin for fp=%s...", normalized[:16])
         refuse_dir = CONFIGS_SSL_BASE / "ocsp-refuse"
         refuse_dir.mkdir(parents=True, exist_ok=True)
         path = refuse_dir / normalized
         if path.is_file():
             path.unlink()
-            log_debug("🧹 OCSP cleared peer-refuse bus for fp=%s...", normalized[:16])
+            log_debug("🧹 OCSP cleared legacy peer-refuse for fp=%s...", normalized[:16])
     except Exception as e:
-        log_debug("⚠️ OCSP could not clear peer-refuse for %s: %s", normalized[:16] if normalized else "?", e)
+        log_debug("⚠️ OCSP could not clear allow-pin for %s: %s", normalized[:16] if normalized else "?", e)
 
 
 def _ocsp_floor_relpath(fingerprint: str) -> Optional[str]:
@@ -5923,6 +6069,8 @@ def _tombstone_ocsp_shard(
         meta["published_unix"] = int(datetime.now(timezone.utc).timestamp())
         # Visible refuse signal first — Lua samples tombstoned before epoch/DER.
         _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        _clear_ocsp_ligand(normalized)
+        _clear_ocsp_peer_refuse(normalized)
         _bump_ocsp_cache_epoch()
         _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
         der_path = shard / "ocsp.der"
@@ -6077,9 +6225,10 @@ def _unpage_ocsp_shard_after_nongood(
     Soft-recall a shard after repeated non-GOOD answers without tombstoning yet.
 
     Sets ``paged=false`` and ``unpaged_after_nongood``, bumps ``soft_recall_gen``
-    (peer-refuse generation identity) while keeping the DER on disk, clears the
-    refuse bus, upserts meta, and bumps ``.ocsp_epoch`` so L1 drops the body.
-    A later verified GOOD must canary-page again. Idempotent when already unpaged.
+    (allow-pin / ligand generation identity) while keeping the DER on disk, drops
+    the allow-pin, rewrites ``ocsp-ligand/{fp}``, upserts meta, and bumps
+    ``.ocsp_epoch`` so L1 drops the body. A later verified GOOD must canary-page
+    again. Idempotent when already unpaged.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -6117,12 +6266,14 @@ def _unpage_ocsp_shard_after_nongood(
         loaded["soft_recall_gen"] = prev_gen + 1
         loaded["fingerprint"] = normalized
         loaded.update(_provenance_meta())
-        # Clear sticky bus pins before and after advertising unpage — defense in
+        # Clear allow-pin before and after advertising unpage — defense in
         # depth alongside soft_recall_gen (marker clear can race with writers).
         _clear_ocsp_peer_refuse(normalized)
         meta_text = json.dumps(loaded, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
-        # Epoch first (invalidate L1), then unlock peer-refuse again (race with writers).
+        # Ligand outside shard: advertise unpage + new gen before epoch bump.
+        _write_ocsp_ligand(normalized, loaded)
+        # Epoch first (invalidate L1), then drop allow again (race with writers).
         _bump_ocsp_cache_epoch()
         _clear_ocsp_peer_refuse(normalized)
         if db is not None:
@@ -6433,14 +6584,23 @@ def _persist_ocsp_results_to_disk(
             log_error("❌ OCSP exception while writing response for %s to disk: %s", cert_name, e)
             stats["errors"] = stats.get("errors", 0) + 1
 
-    # One bump per persist batch, then unlock peer-refuse. Order matters: clearing
-    # refuse before the epoch bump would let handshakes use still-valid L1 entries
-    # for a generation the bus no longer blocks. Bump only after live trees are
-    # visible — never mid-page (exchange / in-place promote keep a live path).
+    # One bump per persist batch, then ensure allow pins. Order matters: bumping
+    # epoch before rewriting allow would briefly fail-close Must-Staple; pins are
+    # already written at canary page — re-stamp from live meta and drop legacy refuse.
+    # Bump only after live trees are visible — never mid-page.
     if published_fps:
         _bump_ocsp_cache_epoch()
         for fp in published_fps:
-            _clear_ocsp_peer_refuse(fp)
+            try:
+                meta_path = _get_sharded_ocsp_path(fp) / "ocsp.json"
+                live_meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.is_file() else None
+            except Exception:
+                live_meta = None
+            if isinstance(live_meta, dict) and live_meta.get("paged") is True:
+                _write_ocsp_ligand(fp, live_meta)
+                _write_ocsp_allow_pin(fp, live_meta)
+            else:
+                _clear_ocsp_peer_refuse(fp)
         for cfp in published_controls:
             _clear_tenant_control_negatives(cfp)
 
@@ -6457,11 +6617,13 @@ def main() -> int:
     lock_fd_main = None
     timed_out = False
 
-    # Provision peer-refuse bus off the TLS path (handshake writes must not mkdir).
+    # Provision allow/ligand/legacy-refuse dirs off the TLS path (handshake must not mkdir).
     try:
+        (CONFIGS_SSL_BASE / "ocsp-allow").mkdir(parents=True, exist_ok=True)
+        (CONFIGS_SSL_BASE / "ocsp-ligand").mkdir(parents=True, exist_ok=True)
         (CONFIGS_SSL_BASE / "ocsp-refuse").mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        log_debug("⚠️ OCSP could not provision ocsp-refuse/: %s", e)
+        log_debug("⚠️ OCSP could not provision ocsp-allow/ligand/refuse dirs: %s", e)
 
     def check_job_timeout(phase: str = "") -> bool:
         """Check if job has exceeded timeout. Returns True if timeout exceeded."""

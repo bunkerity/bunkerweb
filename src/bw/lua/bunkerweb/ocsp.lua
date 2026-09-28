@@ -121,6 +121,9 @@ local STAPLE_DECISION = {
 	canary_refused = true,
 	peer_refuse = true,
 	peer_refuse_bus = true,
+	allow_pin_missing = true,
+	allow_pin_expired = true,
+	allow_pin_mismatch = true,
 	await_sni = true,
 	intermediate_must_staple_libssl = true,
 	-- Colony min is leaf-only (a live peer lacks multi-staple); not a local libssl gap.
@@ -175,7 +178,7 @@ local function format_staple_decision(code, fields)
 			f.alias = alias_detail
 		end
 	end
-	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "der_sha256", "epoch", "worker", "server_name", "subsystem", "multi_entries", "stapled_entries", "null_slots" }
+	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "refuse_cause", "der_sha256", "epoch", "worker", "server_name", "subsystem", "multi_entries", "stapled_entries", "null_slots" }
 	local seen = { staple_decision = true }
 	for _, key in ipairs(order) do
 		local val = f[key]
@@ -354,15 +357,13 @@ local OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600
 local L1_MAGIC = "bw2\0"
 -- Cap DRAM residence; never longer than remaining OCSP life when known.
 local L1_MAX_TTL = 300
--- Transient peer-refuse markers age out (align with L1). Sticky codes stay until canary page.
-local PEER_REFUSE_TTL_SECONDS = L1_MAX_TTL
--- Identity / policy poison: keep shared until a new generation is paged.
--- Soft-recall keeps der_sha256: peer_refuse_blocks ignores (and drops) markers
--- while paged≠true / unpaged_after_nongood so sticky H cannot pin recovery forever.
--- soft_recall_gen bumps on each soft-recall so leftover pins for the same hash
--- cannot re-match after re-page of the kept body.
--- not_paged is omitted from sticky writes: both subsystems already gate on ocsp.json.
-local PEER_REFUSE_STICKY = {
+-- Transient allow-pin TTL when expires_unix is absent (align with L1).
+local ALLOW_PIN_TTL_SECONDS = L1_MAX_TTL
+
+-- Handshake refuse causes that DROP the allow pin (sibling Must-Staple fails until re-canary).
+-- Never-write / keep-pin causes leave the canary allow in place (timing/colony/soft-recall).
+-- Keys are raw refuse_cause strings BEFORE runbook alias collapse.
+local DROP_ALLOW_ON_REFUSE = {
 	certid_mismatch = true,
 	aia_uri_mismatch = true,
 	aia_uri_unpinned = true,
@@ -372,14 +373,30 @@ local PEER_REFUSE_STICKY = {
 	serial_blacklisted = true,
 	cluster_floor = true,
 	shared_ligand = true,
+	ligand_missing = true,
+	ligand_mismatch = true,
 	canary_refused = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
-	-- Platform cannot emit CertificateEntry staples (no SSL_set0_tlsext_status_ocsp_resp_ex).
 	intermediate_must_staple_libssl = true,
+	allow_pin_missing = true,
+	allow_pin_expired = true,
+	allow_pin_mismatch = true,
+}
+-- Keep allow pin (do not revoke) — sibling may still staple; local-only / temporary.
+local KEEP_ALLOW_ON_REFUSE = {
+	not_paged = true,
+	validate_budget = true,
+	intermediate_must_staple_colony = true,
+	set_staple_failed = true,
+	set_staple_exception = true,
+	response_not_found = true,
+	response_stale = true,
+	await_sni = true,
+	probe_failed = true,
 }
 
 local function l1_shm_ttl(expires_unix)
@@ -799,16 +816,29 @@ local function meta_tombstoned(meta)
 	return type(meta) == "table" and meta.tombstoned == true
 end
 
--- Cross-subsystem refuse bus (HTTP ↔ stream). Separate lua_shared_dict zones cannot
--- share L1; disk carries "if either would refuse this generation, both refuse."
--- Generation identity is der_sha256 of the body PLUS soft_recall_gen (bumped on
--- soft-recall). Soft-recall keeps the same DER bytes; without the counter a sticky
--- bus pin on that der_sha256 would re-block after re-page of the kept body.
-local function ocsp_refuse_path(fingerprint)
+-- =============================================================================
+-- Cross-zone ligand + allow-pin bus (HTTP ↔ stream; separate lua_shared_dict)
+-- =============================================================================
+-- Ligand lives OUTSIDE the SPKI shard (like ocsp-floor / ocsp-allow) so in-place
+-- promote tears cannot half-expose der_sha256. Allow-pin polarity: missing file
+-- refuses Must-Staple; only the job/canary writes the pin; handshake only deletes.
+-- Generation identity remains der_sha256 + soft_recall_gen (job-minted counter).
+-- =============================================================================
+
+local function ocsp_ligand_path(fingerprint)
+	return "/var/cache/bunkerweb/ssl/ocsp-ligand/" .. fingerprint
+end
+
+local function ocsp_allow_path(fingerprint)
+	return "/var/cache/bunkerweb/ssl/ocsp-allow/" .. fingerprint
+end
+
+-- Legacy refuse path — dual-read once; handshake never writes here after invert.
+local function ocsp_refuse_path_legacy(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint
 end
 
--- Integer soft_recall_gen from ocsp.json (0 if absent). Half of peer-refuse generation id.
+-- Integer soft_recall_gen from ligand or ocsp.json (0 if absent). Job-minted refuse epoch.
 local function soft_recall_gen_of(meta)
 	if type(meta) ~= "table" then
 		return 0
@@ -820,30 +850,12 @@ local function soft_recall_gen_of(meta)
 	return math.floor(g)
 end
 
--- Peer-refuse generation: (der_sha256, soft_recall_gen). Soft-recall keeps DER bytes
--- but bumps the counter so a leftover bus pin cannot re-match after re-page.
--- Returns nil,nil when neither resp nor meta yields a 64-hex der_sha256.
-local function generation_tuple(meta, resp)
-	local body = resp_binding(resp)
-	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
-		local sha = meta.der_sha256:lower()
-		if #sha == 64 and sha:match("^[0-9a-f]+$") then
-			body = sha
-		end
-	end
-	if not body then
-		return nil, nil
-	end
-	return body, soft_recall_gen_of(meta)
-end
-
--- Load ocsp-refuse/{fp} JSON. Requires der_sha256 + soft_recall_gen; drops markers
--- that predate the counter. Returns nil when absent / invalid.
-local function read_peer_refuse(fingerprint)
+-- Load ocsp-ligand/{fp}. Prefer this over in-shard ocsp.json for der_sha256 binding.
+local function read_ocsp_ligand(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
 	end
-	local raw = read_file(ocsp_refuse_path(fingerprint))
+	local raw = read_file(ocsp_ligand_path(fingerprint))
 	if not raw or raw == "" then
 		return nil
 	end
@@ -862,18 +874,102 @@ local function read_peer_refuse(fingerprint)
 		return nil
 	end
 	obj.der_sha256 = sha
-	-- Markers without soft_recall_gen are pre-counter leftovers; drop them.
+	obj.soft_recall_gen = soft_recall_gen_of(obj)
+	return obj
+end
+
+-- Effective generation meta: ligand overrides shard ocsp.json for sha/gen.
+-- Tombstone / soft-recall unpage on the shard win over a stale ligand paged bit.
+local function ligand_or_meta(meta, fingerprint)
+	local ligand = read_ocsp_ligand(fingerprint)
+	if not ligand then
+		return meta
+	end
+	local merged = {}
+	if type(meta) == "table" then
+		for k, v in pairs(meta) do
+			merged[k] = v
+		end
+	end
+	merged.der_sha256 = ligand.der_sha256
+	merged.soft_recall_gen = ligand.soft_recall_gen
+	if type(meta) == "table" and meta.tombstoned == true then
+		merged.tombstoned = true
+		merged.paged = false
+	elseif type(meta) == "table" and meta.paged ~= true then
+		-- Soft-recall / restore: shard unpage beats a leftover ligand paged=true.
+		merged.paged = false
+	elseif ligand.paged ~= nil then
+		merged.paged = ligand.paged
+	end
+	if ligand.expires_unix ~= nil and merged.expires_unix == nil then
+		merged.expires_unix = ligand.expires_unix
+	end
+	if type(ligand.fingerprint) == "string" then
+		merged.fingerprint = ligand.fingerprint
+	end
+	return merged
+end
+
+-- Peer-refuse / allow generation: (der_sha256, soft_recall_gen).
+local function generation_tuple(meta, resp)
+	local body = resp_binding(resp)
+	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
+		local sha = meta.der_sha256:lower()
+		if #sha == 64 and sha:match("^[0-9a-f]+$") then
+			body = sha
+		end
+	end
+	if not body then
+		return nil, nil
+	end
+	return body, soft_recall_gen_of(meta)
+end
+
+local function read_allow_pin(fingerprint)
+	if not is_fp64(fingerprint) then
+		return nil
+	end
+	local raw = read_file(ocsp_allow_path(fingerprint))
+	if not raw or raw == "" then
+		-- Legacy refuse markers are poison under allow-pin polarity — drop them.
+		pcall(os.remove, ocsp_refuse_path_legacy(fingerprint))
+		return nil
+	end
+	local ok, obj = pcall(function()
+		return require("cjson").decode(raw)
+	end)
+	if not ok or type(obj) ~= "table" then
+		return nil
+	end
+	local sha = obj.der_sha256
+	if type(sha) ~= "string" then
+		return nil
+	end
+	sha = sha:lower()
+	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
+		return nil
+	end
+	obj.der_sha256 = sha
 	if obj.soft_recall_gen == nil then
-		pcall(os.remove, ocsp_refuse_path(fingerprint))
+		pcall(os.remove, ocsp_allow_path(fingerprint))
 		return nil
 	end
 	obj.soft_recall_gen = soft_recall_gen_of(obj)
 	return obj
 end
 
--- Atomically write a peer-refuse pin for this SPKI generation (tmp + rename).
--- Does not mkdir on the TLS path — missing ocsp-refuse/ → bus_write_failed.
-local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by, soft_recall_gen)
+local function drop_allow_pin(fingerprint)
+	if not is_fp64(fingerprint) then
+		return false
+	end
+	pcall(os.remove, ocsp_allow_path(fingerprint))
+	pcall(os.remove, ocsp_refuse_path_legacy(fingerprint))
+	return true
+end
+
+-- Job/canary only — never call from handshake refuse paths.
+local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
 		return false, "invalid_inputs"
 	end
@@ -886,17 +982,18 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by, 
 		gen = 0
 	end
 	gen = math.floor(gen)
-	-- Handshake path: never mkdir/shell here. Dir is provisioned off-path
-	-- (L1 warmer init, ocsp-refresh, restore coherence). Missing dir → bus_write_failed.
-	local path = ocsp_refuse_path(fingerprint)
+	local path = ocsp_allow_path(fingerprint)
 	local tmp = path .. ".tmp." .. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
-	local payload = require("cjson").encode({
+	local payload_obj = {
 		der_sha256 = sha,
 		soft_recall_gen = gen,
-		staple_decision = tostring(decision or "unmet"),
-		refused_by = tostring(refused_by or (ngx.config and ngx.config.subsystem) or "unknown"),
-		refused_unix = ngx.time(),
-	})
+		allowed_unix = ngx.time(),
+		allowed_by = tostring((ngx.config and ngx.config.subsystem) or "job"),
+	}
+	if type(expires_unix) == "number" and expires_unix > 0 then
+		payload_obj.expires_unix = math.floor(expires_unix)
+	end
+	local payload = require("cjson").encode(payload_obj)
 	local f, open_err = io.open(tmp, "w")
 	if not f then
 		return false, "open_tmp:" .. tostring(open_err or "dir_missing")
@@ -913,69 +1010,88 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by, 
 		pcall(os.remove, tmp)
 		return false, "rename:" .. tostring(rename_err or "nil")
 	end
+	-- Legacy refuse must not shadow allow polarity.
+	pcall(os.remove, ocsp_refuse_path_legacy(fingerprint))
 	return true
 end
 
--- Provision ocsp-refuse/ off the TLS critical path (init_worker / warmer / jobs).
-local function ensure_ocsp_refuse_dir()
-	local dir = "/var/cache/bunkerweb/ssl/ocsp-refuse"
-	local ok = false
-	pcall(function()
-		local lfs = require("lfs")
-		lfs.mkdir("/var/cache/bunkerweb/ssl")
-		ok = lfs.mkdir(dir) or (lfs.attributes(dir, "mode") == "directory")
-	end)
-	if ok then
-		return true
+local function ensure_ocsp_bus_dirs()
+	local ok_all = true
+	for _, dir in ipairs({
+		"/var/cache/bunkerweb/ssl/ocsp-allow",
+		"/var/cache/bunkerweb/ssl/ocsp-ligand",
+		"/var/cache/bunkerweb/ssl/ocsp-refuse",
+	}) do
+		local ok = false
+		pcall(function()
+			local lfs = require("lfs")
+			lfs.mkdir("/var/cache/bunkerweb/ssl")
+			ok = lfs.mkdir(dir) or (lfs.attributes(dir, "mode") == "directory")
+		end)
+		if not ok then
+			pcall(function()
+				local lfs = require("lfs")
+				ok = lfs.attributes(dir, "mode") == "directory"
+			end)
+		end
+		if not ok then
+			ok_all = false
+		end
 	end
-	-- Attributes-only check when mkdir is unnecessary (already exists).
-	pcall(function()
-		local lfs = require("lfs")
-		ok = lfs.attributes(dir, "mode") == "directory"
-	end)
-	return ok
+	return ok_all
+end
+
+-- Back-compat export name used by warmer / jobs.
+local function ensure_ocsp_refuse_dir()
+	return ensure_ocsp_bus_dirs()
 end
 
 function _M.ensure_ocsp_refuse_dir()
 	return ensure_ocsp_refuse_dir()
 end
 
--- True when a transient peer-refuse marker should be dropped (TTL).
--- Sticky identity/policy codes (certid, AIA, tombstone, …) never expire here.
-local function peer_refuse_marker_expired(marker)
-	local decision = normalize_staple_decision(marker and marker.staple_decision or "peer_refuse")
-	if PEER_REFUSE_STICKY[decision] then
-		return false
-	end
-	local t = marker and marker.refused_unix
-	if type(t) ~= "number" then
-		-- Transient marker without timestamp: heal (soft-fuse poison).
-		return true
-	end
-	return (ngx.time() - t) > PEER_REFUSE_TTL_SECONDS
+function _M.ensure_ocsp_bus_dirs()
+	return ensure_ocsp_bus_dirs()
 end
 
--- HTTP↔stream refuse bus gate for this SPKI generation.
--- Returns the stored staple_decision when a matching pin blocks, else nil.
--- Generation match is der_sha256 + soft_recall_gen. While soft-recalled/unpaged,
--- drops leftover pins for the kept hash so re-canary can succeed.
--- quiet=true: skip ERR log (L1 warmer polls this every rescan).
+local function allow_pin_expired(pin)
+	if type(pin) ~= "table" then
+		return true
+	end
+	local exp = pin.expires_unix
+	if type(exp) == "number" and exp > 0 then
+		return ngx.time() >= exp
+	end
+	local t = pin.allowed_unix
+	if type(t) ~= "number" then
+		return true
+	end
+	return (ngx.time() - t) > ALLOW_PIN_TTL_SECONDS
+end
+
+-- Allow-pin gate (inverted refuse bus). Returns staple_decision when Must-Staple
+-- must refuse; nil when the pin matches this generation (or optional staple path
+-- with no pin — caller still enforces not_paged / ligand).
+-- quiet=true: skip ERR log (L1 warmer).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
+	meta = ligand_or_meta(meta, fingerprint)
 	local sha, recall_gen = generation_tuple(meta, resp)
 	if not sha then
+		-- Must-Staple without a generation cannot prove allow — fail closed.
+		if type(meta) == "table" and (meta.must_staple == true or meta.paged == true) then
+			return "allow_pin_missing"
+		end
 		return nil
 	end
-	-- Soft-recall keeps the same der_sha256. Drop any leftover bus pin for that
-	-- hash while unpaged so canary can run; soft_recall_gen bumps so a leftover
-	-- marker cannot re-pin the same bytes after re-page.
+	-- Soft-recall / unpaged: drop leftover allow for this hash so canary can rewrite.
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
-		local marker = read_peer_refuse(fingerprint)
-		if marker and marker.der_sha256 == sha then
-			pcall(os.remove, ocsp_refuse_path(fingerprint))
+		local pin = read_allow_pin(fingerprint)
+		if pin and pin.der_sha256 == sha then
+			drop_allow_pin(fingerprint)
 			if not quiet then
 				log(
 					ngx.NOTICE,
-					"OCSP peer-refuse dropped for soft-recalled/unpaged generation fp="
+					"OCSP allow-pin dropped for soft-recalled/unpaged generation fp="
 						.. fingerprint:sub(1, 16)
 						.. "... der="
 						.. sha:sub(1, 16)
@@ -986,143 +1102,110 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 		end
 		return nil
 	end
-	local marker = read_peer_refuse(fingerprint)
-	if not marker or marker.der_sha256 ~= sha then
-		return nil
+	local pin = read_allow_pin(fingerprint)
+	if not pin then
+		if not quiet then
+			log(
+				ngx.ERR,
+				"OCSP allow-pin missing fp="
+					.. fingerprint:sub(1, 16)
+					.. "... der="
+					.. sha:sub(1, 16)
+					.. "... soft_recall_gen="
+					.. tostring(recall_gen)
+			)
+		end
+		return "allow_pin_missing"
 	end
-	if (tonumber(marker.soft_recall_gen) or 0) ~= recall_gen then
-		-- Soft-recall bumped gen: leftover pin for older era must not re-block.
-		return nil
+	if pin.der_sha256 ~= sha or (tonumber(pin.soft_recall_gen) or 0) ~= recall_gen then
+		if not quiet then
+			log(
+				ngx.ERR,
+				"OCSP allow-pin mismatch fp="
+					.. fingerprint:sub(1, 16)
+					.. "... want_der="
+					.. sha:sub(1, 16)
+					.. "... soft_recall_gen="
+					.. tostring(recall_gen)
+			)
+		end
+		return "allow_pin_mismatch"
 	end
-	if peer_refuse_marker_expired(marker) then
-		-- Drop stale transient poison so the next handshake does not re-read it.
-		pcall(os.remove, ocsp_refuse_path(fingerprint))
-		return nil
+	if allow_pin_expired(pin) then
+		drop_allow_pin(fingerprint)
+		if not quiet then
+			log(ngx.ERR, "OCSP allow-pin expired fp=" .. fingerprint:sub(1, 16) .. "...")
+		end
+		return "allow_pin_expired"
 	end
-	local by = marker.refused_by
-	local self_sub = (ngx.config and ngx.config.subsystem) or ""
-	-- Own prior refuse still applies (L1 may have diverged); peer or self same generation.
-	if type(by) == "string" and by ~= "" and by == self_sub then
-		-- Same subsystem re-check: still honor (sticky until page / TTL for transient).
-	end
-	local decision = marker.staple_decision
-	if type(decision) ~= "string" or decision == "" then
-		decision = "peer_refuse"
-	end
-	if not quiet then
-		log(
-			ngx.ERR,
-			"OCSP generation peer-refuse bus hit fp="
-				.. fingerprint:sub(1, 16)
-				.. "... der="
-				.. sha:sub(1, 16)
-				.. "... soft_recall_gen="
-				.. tostring(recall_gen)
-				.. " decision="
-				.. tostring(decision)
-				.. " refused_by="
-				.. tostring(by)
-				.. " subsystem="
-				.. tostring(self_sub)
-		)
-	end
-	return decision
+	return nil
 end
 
--- After a handshake refuse, pin this generation on the shared bus so the sibling
--- subsystem also refuses. Skips colony leaf-only and unpaged/soft-recalled bodies.
+-- Handshake refuse: DROP allow pin for DROP_ALLOW causes; never write sticky poison.
+-- refuse_cause is the raw pre-alias detail (logged); runbook code stays separate.
 local function record_peer_refuse(fingerprint, meta, resp, decision)
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
-	-- Colony leaf-only is temporary (peer 3.5 still live). Do not bus-poison — when
-	-- that worker leaves, multi-staple must resume without waiting for a canary page.
-	if decision == "intermediate_must_staple_colony" then
-		return false
+	local refuse_cause = tostring(decision or "unmet")
+	-- Prefix variants (canary_*, shared_ligand_*) drop allow like their runbook buckets.
+	local drop = DROP_ALLOW_ON_REFUSE[refuse_cause]
+		or (refuse_cause:sub(1, 7) == "canary_")
+		or (refuse_cause:sub(1, 14) == "shared_ligand_")
+	if KEEP_ALLOW_ON_REFUSE[refuse_cause] then
+		drop = false
 	end
-	-- Never pin sticky poison to a soft-recalled / unpaged body: same der_sha256
-	-- would block the later re-canary of those exact bytes forever.
-	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
+	if refuse_cause == "intermediate_must_staple_colony" then
+		drop = false
+	end
+	if not drop then
 		log(
 			ngx.DEBUG,
-			"OCSP peer-refuse skip write for unpaged/soft-recalled fp="
+			"OCSP allow-pin keep on refuse_cause="
+				.. refuse_cause
+				.. " fp="
 				.. fp_short
-				.. " decision="
-				.. tostring(decision or "unmet")
+				.. " subsystem="
+				.. by
 		)
 		return false
 	end
-	local sha, recall_gen = generation_tuple(meta, resp)
+	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
+		-- Already unpaged — pin should be absent; ensure drop.
+		drop_allow_pin(fingerprint)
+		return true
+	end
 	if not fingerprint or not is_fp64(fingerprint) then
 		log(
 			ngx.ERR,
 			format_staple_decision("peer_refuse_bus", {
 				tag = "OCSP_PEER_REFUSE_BUS",
-				action = "bus_write_failed",
+				action = "allow_drop_failed",
 				detail = "missing_fingerprint",
+				refuse_cause = refuse_cause,
 				fp = fp_short,
 				subsystem = by,
 			})
 		)
 		return false
 	end
-	if not sha then
-		-- Without der_sha256 / body the sibling cannot match a generation — escalate loudly.
-		log(
-			ngx.ERR,
-			format_staple_decision("peer_refuse_bus", {
-				tag = "OCSP_PEER_REFUSE_BUS",
-				action = "bus_write_failed",
-				detail = "missing_generation",
-				fp = fp_short,
-				mode = tostring(decision or "unmet"),
-				subsystem = by,
-			})
-		)
-		return false
-	end
-	local ok, why = write_peer_refuse(fingerprint, sha, decision, by, recall_gen)
-	if ok then
-		log(
-			ngx.NOTICE,
-			"OCSP generation refuse recorded fp="
-				.. fingerprint:sub(1, 16)
-				.. "... der="
-				.. sha:sub(1, 16)
-				.. "... soft_recall_gen="
-				.. tostring(recall_gen)
-				.. " staple_decision="
-				.. tostring(decision)
-				.. " refused_by="
-				.. by
-		)
-		return true
-	end
+	drop_allow_pin(fingerprint)
 	log(
-		ngx.ERR,
-		format_staple_decision("peer_refuse_bus", {
-			tag = "OCSP_PEER_REFUSE_BUS",
-			action = "bus_write_failed",
-			detail = tostring(why or "write_failed"),
-			fp = fp_short,
-			der_sha256 = sha:sub(1, 16) .. "...",
-			mode = tostring(decision or "unmet"),
-			subsystem = by,
-		})
+		ngx.NOTICE,
+		"OCSP allow-pin revoked fp="
+			.. fingerprint:sub(1, 16)
+			.. "... refuse_cause="
+			.. refuse_cause
+			.. " refused_by="
+			.. by
 	)
-	return false
+	return true
 end
 
--- Soft fuse (staple_only/open): continue the handshake but do not poison the
--- HTTP↔stream bus — a transient miss must not brick the sibling subsystem.
--- normal (default): record so both subsystems refuse the same generation.
--- Exceptions (skip bus — sibling already sees the same disk/meta gate, or stack mismatch):
---   * set_staple_failed after a canary-paged body — CLI openssl vs ngx.ocsp attach
---   * not_paged / unpaged meta — sticky bus vs kept der_sha256 blocks soft-recall recovery
---   * validate_budget — local timing; sibling must not inherit a handshake timeout
+-- Soft fuse: continue without touching the allow pin.
+-- normal: revoke allow for DROP_ALLOW refuse_cause so sibling Must-Staple fails closed.
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
 		local d = detail or "unmet"
-		-- Timing / unpaged / soft-recall: never pin sticky poison to a kept der_sha256.
 		local skip_bus = d == "not_paged"
 			or d == "validate_budget"
 			or (type(meta) == "table" and meta.paged ~= true)
@@ -1136,6 +1219,11 @@ local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 		end
 	end
 	return false, "must_staple", detail or "unmet"
+end
+
+-- Keep old name for warmer compatibility.
+local function ocsp_refuse_path(fingerprint)
+	return ocsp_allow_path(fingerprint)
 end
 
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
@@ -1490,13 +1578,27 @@ local function ocsp_json_fingerprint_matches(meta, fingerprint)
 	return meta.fingerprint:lower() == fingerprint
 end
 
--- Shared ligand: job-published ocsp.json der_sha256. HTTP (internalstore) and
--- stream (internalstore_stream) cannot share L1 shm; this disk binding is the
--- cross-zone stand-in for "the ligand HTTP would accept."
--- Returns ok, reason, meta_sha, body_sha (sha values only on mismatch / accept).
+-- Shared ligand: prefer ocsp-ligand/{fp} (outside shard; atomic rename). Fall back
+-- to in-shard ocsp.json der_sha256 only while unpaged / pre-ligand-dir cutover.
+-- Paged shards fail closed on ligand ENOENT (promote tear / missing publish).
+-- Returns ok, reason, meta_sha, body_sha.
 local function ocsp_json_ligand_matches(meta, fingerprint, resp)
+	local shard_meta = meta
+	local ligand = read_ocsp_ligand(fingerprint)
+	meta = ligand_or_meta(meta, fingerprint)
+	-- Canary-paged generations require the outside-shard ligand. Soft cutover /
+	-- soft-recall (paged≠true) may still bind via in-shard der_sha256.
+	if not ligand then
+		local paged = type(shard_meta) == "table" and shard_meta.paged == true
+		if paged then
+			return false, "ligand_missing", nil, nil
+		end
+	end
 	if not ocsp_json_fingerprint_matches(meta, fingerprint) then
-		return false, "fingerprint_mismatch_or_missing_meta", nil, nil
+		-- Ligand may carry fingerprint when shard meta is briefly gone.
+		if not (ligand and type(ligand.fingerprint) == "string" and ligand.fingerprint:lower() == fingerprint) then
+			return false, "fingerprint_mismatch_or_missing_meta", nil, nil
+		end
 	end
 	if type(meta.der_sha256) ~= "string" then
 		return false, "missing_der_sha256", nil, nil
@@ -1513,14 +1615,19 @@ local function ocsp_json_ligand_matches(meta, fingerprint, resp)
 end
 
 -- Job canary already verified this exact body (openssl CLI + ligands) and stamped
--- paged=true. Handshake may skip ngx.ocsp.validate_ocsp_response for that body so
--- CLI vs OpenResty FFI disagreement cannot unpage a live shard; set_ocsp_status_resp
--- and CertID/leaf checks still run.
+-- paged=true (ligand + allow-pin). Handshake may skip ngx.ocsp.validate_ocsp_response
+-- for that body so CLI vs OpenResty FFI disagreement cannot unpage a live shard;
+-- set_ocsp_status_resp and CertID/leaf checks still run.
 local function canary_paged_body_ok(meta, fingerprint, resp)
+	meta = ligand_or_meta(meta, fingerprint)
 	if type(meta) ~= "table" or meta.paged ~= true or meta.tombstoned == true then
 		return false
 	end
 	if not fingerprint or not is_fp64(fingerprint) then
+		return false
+	end
+	-- Outside-shard ligand is mandatory for canary trust (ENOENT → no skip).
+	if not read_ocsp_ligand(fingerprint) then
 		return false
 	end
 	local ok = ocsp_json_ligand_matches(meta, fingerprint, resp)
@@ -3826,7 +3933,7 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 end
 
 
--- Cross-subsystem generation refuse bus (HTTP ↔ stream).
+-- Cross-subsystem allow-pin bus (HTTP ↔ stream). Missing pin refuses Must-Staple.
 -- meta must carry der_sha256 (+ soft_recall_gen); string-only generation ids are gone.
 function _M.peer_refuse_blocks(fingerprint, meta, resp)
 	return peer_refuse_blocks(fingerprint, meta, resp)
@@ -3836,13 +3943,17 @@ function _M.record_peer_refuse(fingerprint, meta, decision, resp)
 	return record_peer_refuse(fingerprint, meta, resp, decision)
 end
 
+function _M.drop_allow_pin(fingerprint)
+	return drop_allow_pin(fingerprint)
+end
+
+function _M.write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
+	return write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
+end
+
+-- Back-compat: clear = drop allow pin (+ legacy refuse).
 function _M.clear_peer_refuse(fingerprint)
-	if not is_fp64(fingerprint) then
-		return false
-	end
-	local path = ocsp_refuse_path(fingerprint)
-	local ok = os.remove(path)
-	return ok and true or false
+	return drop_allow_pin(fingerprint)
 end
 
 -- True when the leaf PEM or ocsp.json marks Must-Staple (TLS Feature status_request).
@@ -4056,15 +4167,16 @@ local function list_ocsp_fingerprints()
 	return fps
 end
 
--- Load one paged shard into L1 without crypto validate (meta ligand is enough
--- for the handshake authorize path). Runs off the TLS critical path only.
--- Do not re-warm generations the handshake would refuse (peer-refuse bus or
--- serial-blacklist): that churns shm and forces refuse/drop on every hit.
+-- Load one paged shard into L1 without crypto validate (outside ligand + allow-pin
+-- are enough for the handshake authorize path). Runs off the TLS critical path only.
+-- Do not re-warm generations the handshake would refuse (allow-pin missing/mismatch
+-- or serial-blacklist): that churns shm and forces refuse/drop on every hit.
 local function warm_one_shard(internalstore, fingerprint)
 	if not internalstore or not is_fp64(fingerprint) then
 		return false
 	end
 	local meta = read_ocsp_json(fingerprint)
+	meta = ligand_or_meta(meta, fingerprint)
 	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
 		drop_cache(internalstore, fingerprint)
 		return false
@@ -4128,9 +4240,9 @@ function _M.start_l1_warmer(internalstore)
 	if not ngx.timer or not ngx.timer.at then
 		return false
 	end
-	-- Off handshake: ensure peer-refuse bus directory exists before any refuse write.
-	if not ensure_ocsp_refuse_dir() then
-		log(ngx.ERR, "OCSP could not provision ocsp-refuse/ dir; peer-refuse bus writes may fail")
+	-- Off handshake: ensure allow/ligand/legacy-refuse dirs exist (job writes pins).
+	if not ensure_ocsp_bus_dirs() then
+		log(ngx.ERR, "OCSP could not provision ocsp-allow/ocsp-ligand dirs; allow-pin bus may fail")
 	end
 	-- Publish multi-staple attach capability for ocsp-refresh (intermediate fetch gate).
 	pcall(openssl_multi_staple_ready)

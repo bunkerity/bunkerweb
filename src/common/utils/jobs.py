@@ -55,14 +55,17 @@ def is_ocsp_disk_local_rel(rel: str) -> bool:
     """
     True for OCSP files that live only on disk (not DB cache rows).
 
-    Keep across restore sweeps: .ocsp_epoch, ocsp-refuse/*, shard sidecars
-    (serial-blacklist.json, nongood.json). Coherence clears/reconciles sidecars
-    when a GOOD trio is restored — the sweep must not delete them blindly.
+    Keep across restore sweeps: .ocsp_epoch, ocsp-allow/*, ocsp-ligand/*,
+    ocsp-refuse/* (legacy), shard sidecars (serial-blacklist.json, nongood.json).
+    Coherence clears/reconciles bus pins when a GOOD trio is restored — the sweep
+    must not delete them blindly.
     """
     if not rel:
         return False
     path = str(rel).replace("\\", "/")
-    if path == ".ocsp_epoch" or path.startswith("ocsp-refuse/"):
+    if path == ".ocsp_epoch":
+        return True
+    if path.startswith("ocsp-allow/") or path.startswith("ocsp-ligand/") or path.startswith("ocsp-refuse/"):
         return True
     match = _OCSP_SHARD_SIDECAR_RE.match(path)
     if not match:
@@ -395,27 +398,30 @@ def ocsp_meta_floor_rank(meta: Optional[Dict[str, Any]]) -> Tuple[str, int]:
 
 def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) -> bool:
     """
-    Create ``ocsp-refuse/`` off the TLS hot path (jobs / restore / refresh).
+    Create ``ocsp-allow/``, ``ocsp-ligand/``, and legacy ``ocsp-refuse/`` off the
+    TLS hot path (jobs / restore / refresh).
 
-    HTTP and stream workers write soft_recall_gen sticky refuses here so a peer
-    process can refuse the same body without re-validating.
+    Canary writes allow pins + ligands here. Handshake only deletes allow pins
+    (DROP_ALLOW refuse_cause); it never mkdir's.
     """
     try:
-        refuse_dir = Path(cache_root) / "ocsp-refuse"
-        refuse_dir.mkdir(parents=True, exist_ok=True)
+        root = Path(cache_root)
+        for name in ("ocsp-allow", "ocsp-ligand", "ocsp-refuse"):
+            (root / name).mkdir(parents=True, exist_ok=True)
         return True
     except Exception as e:
         if logger is not None:
-            logger.debug(f"OCSP could not provision ocsp-refuse/: {e}")
+            logger.debug(f"OCSP could not provision allow/ligand/refuse dirs: {e}")
         return False
 
 
 def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
     """
-    Drop HTTP↔stream generation refuse marker for this SPKI.
+    Drop allow-pin (+ legacy refuse) for this SPKI.
 
-    Call on new canary page / GOOD restore so soft_recall_gen sticky refuses do
-    not keep Must-Staple closed after a successful publish.
+    Call on soft-recall / tombstone / GOOD restore (paged=false). A successful
+    local canary must rewrite the allow pin — clearing alone fails Must-Staple
+    closed until re-page.
     """
     if not fingerprint or len(fingerprint) != 64:
         return False
@@ -423,15 +429,17 @@ def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[
     try:
         if not ensure_ocsp_refuse_dir(cache_root, logger):
             return False
-        path = Path(cache_root) / "ocsp-refuse" / fp
-        if path.is_file():
-            path.unlink()
-            if logger is not None:
-                logger.debug(f"OCSP cleared peer-refuse bus for fp={fp[:16]}...")
+        root = Path(cache_root)
+        for sub in ("ocsp-allow", "ocsp-refuse"):
+            path = root / sub / fp
+            if path.is_file():
+                path.unlink()
+                if logger is not None:
+                    logger.debug(f"OCSP cleared {sub} bus for fp={fp[:16]}...")
         return True
     except Exception as e:
         if logger is not None:
-            logger.debug(f"OCSP could not clear peer-refuse for {fp[:16]}...: {e}")
+            logger.debug(f"OCSP could not clear allow-pin for {fp[:16]}...: {e}")
         return False
 
 
@@ -462,9 +470,10 @@ def publish_ocsp_restore_coherence(
 ) -> None:
     """
     After DB restore wrote one or more OCSP shard leaves for these fingerprints:
-    bump .ocsp_epoch first (invalidate L1), then clear peer-refuse, reset nongood.json,
-    and reconcile serial-blacklist against the restored body. Skipped/fenced
-    fingerprints must not be passed in (their sidecars stay untouched).
+    bump .ocsp_epoch first (invalidate L1), then drop allow-pin / legacy refuse,
+    reset nongood.json, and reconcile serial-blacklist against the restored body.
+    Restored shards stay ``paged=false`` until local canary — must not write allow.
+    Skipped/fenced fingerprints must not be passed in (their sidecars stay untouched).
     """
     fps: Set[str] = set()
     for fingerprint in fingerprints:
@@ -472,15 +481,23 @@ def publish_ocsp_restore_coherence(
             fps.add(fingerprint.lower())
     if not fps:
         return
-    # Epoch before refuse unlock — same order as the ocsp-refresh persist batch.
+    # Epoch before allow unlock — same order as the ocsp-refresh persist batch.
     bump_ocsp_cache_epoch(cache_root, logger)
     for fp in sorted(fps):
         clear_ocsp_peer_refuse(cache_root, fp, logger)
+        # Foreign canary is not local proof — drop outside-shard ligand until re-page.
+        try:
+            ligand = Path(cache_root) / "ocsp-ligand" / fp
+            if ligand.is_file():
+                ligand.unlink()
+        except Exception as e:
+            if logger is not None:
+                logger.debug(f"OCSP could not clear ligand for {fp[:16]}...: {e}")
         clear_ocsp_nongood_marker(cache_root, fp, logger)
         reconcile_ocsp_serial_blacklist_after_restore(cache_root, fp, logger)
     if logger is not None:
         logger.info(
-            f"OCSP restore coherence: epoch bump + refuse/nongood/blacklist reconcile for {len(fps)} shard(s)"
+            f"OCSP restore coherence: epoch bump + allow/ligand/nongood/blacklist reconcile for {len(fps)} shard(s)"
         )
 
 
@@ -992,6 +1009,10 @@ class Job:
                         if self.job_path.name == "ssl" and (
                             file == self.job_path / "ocsp-floor"
                             or file.parent == self.job_path / "ocsp-floor"
+                            or file == self.job_path / "ocsp-allow"
+                            or file.parent == self.job_path / "ocsp-allow"
+                            or file == self.job_path / "ocsp-ligand"
+                            or file.parent == self.job_path / "ocsp-ligand"
                             or file == self.job_path / "ocsp-refuse"
                             or file.parent == self.job_path / "ocsp-refuse"
                         ):
