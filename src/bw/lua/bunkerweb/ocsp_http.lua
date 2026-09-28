@@ -235,6 +235,15 @@ function _M.ssl_certificate(state)
 						local ok_clear, clear_err = clear_certs()
 						if not ok_clear then
 							safe_log(ngx.ERR, "error while clearing certificates : " .. tostring(clear_err))
+						else
+							-- Stapling-off still clears the SSL ctx; update state so a
+							-- failed set_cert cannot fall through to nginx's static leaf.
+							-- leaf_must_staple stays nil until install succeeds so
+							-- cleared_no_leaf (~= false) aborts a wipe without a leaf.
+							state.certs_cleared = true
+							state.leaf_installed = false
+							state.leaf_complete = false
+							state.leaf_must_staple = nil
 						end
 						local ok_cert, cert_err = set_cert(ret.status[1])
 						if not ok_cert then
@@ -244,6 +253,9 @@ function _M.ssl_certificate(state)
 							if not ok_key then
 								safe_log(ngx.ERR, "error while setting private key : " .. tostring(key_err))
 							else
+								state.leaf_installed = true
+								state.leaf_complete = true
+								state.leaf_must_staple = false
 								safe_log(ngx.DEBUG, "certificate set by " .. plugin_id .. " (OCSP stapling off)")
 								return true
 							end
@@ -2318,14 +2330,19 @@ function _M.ssl_certificate(state)
 						.. "... server_name="
 						.. (server_name or "nil")
 				)
-				if staple_mode == "open" then
+			end
+			if staple_mode == "open" then
+				if has_must_staple then
 					safe_log(
 						NOTICE,
 						"OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled server_name="
 							.. (server_name or "nil")
 					)
-					has_must_staple = false
 				end
+				has_must_staple = false
+			else
+				-- Fail closed: unknown (no ocsp.json / resty) refuses like proven MS.
+				has_must_staple = leaf_fail_closed_must_staple(cert_pem, fp_hint)
 			end
 
 			do
@@ -2684,6 +2701,10 @@ function _M.ssl_certificate(state)
 				"OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled server_name=" .. (server_name or "nil")
 			)
 			has_must_staple = false
+		elseif staple_mode ~= "open" then
+			-- Fail closed: unknown MS (resty miss + no trustworthy ocsp.json) must
+			-- refuse shard miss like proven Must-Staple — do not treat unknown as false.
+			has_must_staple = leaf_fail_closed_must_staple(leaf_for_meta or cert_pem, leaf_fp_resolved or fp_hint)
 		end
 		-- Dual-cert health: score this leaf's issuer-linked intermediates (not leaf shard alone).
 		-- Early so non-Must-Staple `return true` paths cannot pick a poisoned path. Legal

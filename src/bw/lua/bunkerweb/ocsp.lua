@@ -59,6 +59,7 @@ local peer_refuse_blocks = pin.peer_refuse_blocks
 local chain = require("bunkerweb.ocsp_chain").internal
 local attach_ocsp_staple = chain.attach_ocsp_staple
 local chain_pem_from_blocks = chain.chain_pem_from_blocks
+local clear_connection_staple = chain.clear_connection_staple
 local issuer_linked_chain_blocks = chain.issuer_linked_chain_blocks
 local issuer_path_intermediate_ready = chain.issuer_path_intermediate_ready
 local issuer_path_null_slots = chain.issuer_path_null_slots
@@ -179,6 +180,8 @@ local function try_staple(
 			detail == "intermediate_must_staple_libssl"
 			or detail == "intermediate_must_staple_colony"
 			or detail == "multi_staple_attach_failed"
+			or detail == "issuer_unresolved_must_staple"
+			or detail == "fingerprint_chain_unavailable"
 		then
 			return false, detail
 		end
@@ -510,7 +513,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		local chain_pem = chain_pem_from_blocks(blocks)
 		local leaf_must = false
 		if probe_must then
-			leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) == true
+			-- Fail closed: unknown (nil) enforces Must-Staple like staple()/probe().
+			leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) ~= false
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -598,7 +602,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			)
 			last_err, last_detail = "must_staple", path_detail or "unmet"
 		else
-			local leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) == true
+			local leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) ~= false
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -810,10 +814,11 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				end
 				if verified or authorized then
 					-- Must-Staple: stream-private verified L1 is not enough; bind shared ligand.
+					-- Pass body bytes so DROP_ALLOW causes (concrete ligand / CertID) can CAS-delete.
 					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
 					if must_staple and not ligand_ok then
 						drop_cache(internalstore, fingerprint)
-						return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
+						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
 					end
 					local ok_id, why = certid_consistent_with_meta(meta or read_ocsp_json(fingerprint), cached)
 					if not ok_id then
@@ -827,7 +832,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 						)
 						drop_cache(internalstore, fingerprint)
 						if must_staple then
-							return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
+							return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
 						end
 						return false
 					end
@@ -896,7 +901,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		if verified or authorized then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
-				return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
+				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
 			end
 			local ok_id, why = certid_consistent_with_meta(meta, resp)
 			if not ok_id then
@@ -909,7 +914,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 						.. "..."
 				)
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
+					return must_staple_refuse(fingerprint, meta, resp, "certid_mismatch", mode)
 				end
 				return false
 			end
@@ -1034,7 +1039,7 @@ local function staple_one_leaf(
 					)
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
+						return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
 					end
 				-- Fall through to disk / re-validate with the current leaf.
 				else
@@ -1044,7 +1049,7 @@ local function staple_one_leaf(
 						local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
 						if not ligand_ok then
 							drop_cache(internalstore, fingerprint)
-							return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
+							return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
 						end
 					end
 					if probe_only then
@@ -1095,6 +1100,16 @@ local function staple_one_leaf(
 					return false
 				end
 				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+				-- Ligand before attach: try_staple attaches on success. Soft fuse must not
+				-- leave a mismatched DER on the SSL object. Pass body for DROP_ALLOW CAS.
+				if must_staple then
+					meta = meta or read_ocsp_json(fingerprint)
+					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
+					if not ligand_ok then
+						drop_cache(internalstore, fingerprint)
+						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
+					end
+				end
 				local result, result_detail = try_staple(
 					ocsp,
 					ssl,
@@ -1108,14 +1123,6 @@ local function staple_one_leaf(
 					blocks
 				)
 				if result == true then
-					if must_staple then
-						meta = meta or read_ocsp_json(fingerprint)
-						local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
-						if not ligand_ok then
-							drop_cache(internalstore, fingerprint)
-							return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
-						end
-					end
 					if probe_only then
 						local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 						if not path_ok then
@@ -1141,18 +1148,25 @@ local function staple_one_leaf(
 						end
 						return false
 					end
+					-- Optional stapling: CertID miss skips staple; do not abort as must_staple.
+					if result_detail == "certid_mismatch" then
+						drop_cache(internalstore, fingerprint)
+						if must_staple then
+							return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+						end
+						return false
+					end
 					if
 						result_detail == "intermediate_must_staple_libssl"
 						or result_detail == "intermediate_must_staple_colony"
 						or result_detail == "multi_staple_attach_failed"
 						or result_detail == "fingerprint_chain_unavailable"
 						or result_detail == "issuer_unresolved_must_staple"
-						or result_detail == "certid_mismatch"
 						or result_detail == "response_not_found"
 						or must_staple
 					then
-						-- Preserve DROP/KEEP codes from try_staple (certid_mismatch, path demotion).
-						-- Only bare false + canary ligand collapses to set_staple_failed / unmet.
+						-- Preserve DROP/KEEP codes from try_staple. Bare false + canary
+						-- ligand collapses to set_staple_failed / unmet.
 						local detail = result_detail
 						if
 							detail ~= "intermediate_must_staple_libssl"
@@ -1160,11 +1174,12 @@ local function staple_one_leaf(
 							and detail ~= "multi_staple_attach_failed"
 							and detail ~= "fingerprint_chain_unavailable"
 							and detail ~= "issuer_unresolved_must_staple"
-							and detail ~= "certid_mismatch"
 							and detail ~= "response_not_found"
 						then
 							detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
 						end
+						-- Attach already ran for some path demotions; clear leftover staple.
+						pcall(clear_connection_staple)
 						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
 					end
 					return false
@@ -1195,13 +1210,16 @@ local function staple_one_leaf(
 			end
 			return false
 		end
+		-- Ligand before attach (same contract as L1 unverified path).
+		if must_staple then
+			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
+			if not ligand_ok then
+				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
+			end
+		end
 		local result, result_detail =
 			try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
 		if result == true then
-			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
-			if must_staple and not ligand_ok then
-				return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
-			end
 			if probe_only then
 				local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 				if not path_ok then
@@ -1220,13 +1238,18 @@ local function staple_one_leaf(
 				end
 				return false
 			end
+			if result_detail == "certid_mismatch" then
+				if must_staple then
+					return must_staple_refuse(fingerprint, meta, resp, "certid_mismatch", mode)
+				end
+				return false
+			end
 			if
 				result_detail == "intermediate_must_staple_libssl"
 				or result_detail == "intermediate_must_staple_colony"
 				or result_detail == "multi_staple_attach_failed"
 				or result_detail == "fingerprint_chain_unavailable"
 				or result_detail == "issuer_unresolved_must_staple"
-				or result_detail == "certid_mismatch"
 				or result_detail == "response_not_found"
 				or must_staple
 			then
@@ -1237,11 +1260,11 @@ local function staple_one_leaf(
 					and detail ~= "multi_staple_attach_failed"
 					and detail ~= "fingerprint_chain_unavailable"
 					and detail ~= "issuer_unresolved_must_staple"
-					and detail ~= "certid_mismatch"
 					and detail ~= "response_not_found"
 				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
 				end
+				pcall(clear_connection_staple)
 				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
 			end
 			return false

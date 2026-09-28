@@ -1031,6 +1031,7 @@ end
 _M.internal = {
 	attach_ocsp_staple = attach_ocsp_staple,
 	chain_pem_from_blocks = chain_pem_from_blocks,
+	clear_connection_staple = clear_connection_staple,
 	issuer_linked_chain_blocks = issuer_linked_chain_blocks,
 	issuer_path_intermediate_ready = issuer_path_intermediate_ready,
 	issuer_path_null_slots = issuer_path_null_slots,
