@@ -719,6 +719,39 @@ local function has_must_staple(cert_pem)
 	return must
 end
 
+-- Job-written shard metadata ({fp[1]}/{fp[2]}/{fp}/ocsp.json), or nil when absent/invalid.
+-- Must stay above resolve_leaf_must_staple / cert_must_staple_bool: a local
+-- referenced before its definition compiles to a nil global in LuaJIT.
+local function read_ocsp_json(fingerprint)
+	if not is_fp64(fingerprint) then
+		return nil
+	end
+	local raw = read_file(
+		"/var/cache/bunkerweb/ssl/"
+			.. fingerprint:sub(1, 1)
+			.. "/"
+			.. fingerprint:sub(2, 2)
+			.. "/"
+			.. fingerprint
+			.. "/ocsp.json"
+	)
+	if not raw then
+		return nil
+	end
+	local ok, decoded = pcall(function()
+		return require("cjson").decode(raw)
+	end)
+	if ok and type(decoded) == "table" then
+		return decoded
+	end
+	return nil
+end
+
+-- True only when the job recorded must_staple=true in ocsp.json (resty-invisible TLS Feature).
+local function ocsp_json_must_staple(meta)
+	return meta ~= nil and meta.must_staple == true
+end
+
 -- Tri-state leaf Must-Staple: TLS Feature, then ocsp.json, then unknown→nil.
 -- Fail-closed gate: resolve_leaf_must_staple(...) ~= false.
 local function resolve_leaf_must_staple(cert_pem, fingerprint)
@@ -765,30 +798,6 @@ local function cert_must_staple_bool(pem, fail_closed_unknown)
 		return false
 	end
 	return fail_closed_unknown == true
-end
-local function read_ocsp_json(fingerprint)
-	if not is_fp64(fingerprint) then
-		return nil
-	end
-	local raw = read_file(
-		"/var/cache/bunkerweb/ssl/"
-			.. fingerprint:sub(1, 1)
-			.. "/"
-			.. fingerprint:sub(2, 2)
-			.. "/"
-			.. fingerprint
-			.. "/ocsp.json"
-	)
-	if not raw then
-		return nil
-	end
-	local ok, decoded = pcall(function()
-		return require("cjson").decode(raw)
-	end)
-	if ok and type(decoded) == "table" then
-		return decoded
-	end
-	return nil
 end
 
 -- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using CA-signed
@@ -1830,10 +1839,6 @@ function _M.aia_uri_pin_ok(leaf_pem, meta, must_staple)
 	return aia_uri_pin_ok(leaf_pem, meta, must_staple)
 end
 
-local function ocsp_json_must_staple(meta)
-	return meta ~= nil and meta.must_staple == true
-end
-
 -- Shared ligand verdict: one ligand read, hardened merge, body binding.
 -- Single source of truth for HTTP (ssl-certificate-by-lua.conf) and stream
 -- (this module). An inlined copy in the conf caused a zone-split after the
@@ -2210,8 +2215,11 @@ local function normalize_fp_hint(cert_fp_hint)
 	return nil
 end
 
+-- Forward declarations: assigned below with `name = function`, never `local function`
+-- (a second local would shadow these and leave earlier callers holding nil).
 local attach_ocsp_staple
 local issuer_path_intermediate_ready
+local clear_connection_staple
 
 local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, chain_blocks)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
@@ -2867,7 +2875,8 @@ end
 -- onto another leaf. The ex symbol is optional; older libssl ignores it.
 -- SSL_certs_clear does not clear either staple slot.
 local _ssl_ocsp_clear_cdef_done = false
-local function clear_connection_staple()
+-- Assigns the forward-declared local so attach_ocsp_staple's refuse_or_leaf_only sees it.
+clear_connection_staple = function()
 	local prev = ngx.ctx and ngx.ctx.bw_ocsp_stapled_fp or nil
 	if ngx.ctx then
 		ngx.ctx.bw_ocsp_stapled_fp = nil
