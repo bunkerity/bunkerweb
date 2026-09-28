@@ -2482,30 +2482,38 @@ def _write_ocsp_http_error_backoff(
                     old_sha = old.get("der_sha256")
                     if isinstance(old_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", old_sha):
                         meta["der_sha256"] = old_sha.lower()
+                    # Keep OCSP death clocks across repeated backoffs. Do not require
+                    # old.error_type != http_backoff — a second 5xx would otherwise
+                    # strip expires_unix and fail-closed freshness on the live DER.
                     old_exp_unix = old.get("expires_unix")
-                    if isinstance(old_exp_unix, (int, float)) and int(old_exp_unix) > 0 and old.get("error_type") != "http_backoff":
+                    if isinstance(old_exp_unix, (int, float)) and int(old_exp_unix) > 0:
                         meta["expires_unix"] = int(old_exp_unix)
-                    elif isinstance(old_exp_unix, str) and old_exp_unix.isdigit() and old.get("error_type") != "http_backoff":
+                    elif isinstance(old_exp_unix, str) and old_exp_unix.isdigit():
                         meta["expires_unix"] = int(old_exp_unix)
                     for age_key in ("published_unix", "max_age_unix"):
                         old_age = old.get(age_key)
-                        if isinstance(old_age, (int, float)) and int(old_age) > 0 and old.get("error_type") != "http_backoff":
+                        if isinstance(old_age, (int, float)) and int(old_age) > 0:
                             meta[age_key] = int(old_age)
-                        elif isinstance(old_age, str) and old_age.isdigit() and old.get("error_type") != "http_backoff":
+                        elif isinstance(old_age, str) and old_age.isdigit():
                             meta[age_key] = int(old_age)
                     # Keep prior GOOD verifier identity; backoff is not a new openssl publish.
                     _preserve_provenance(meta, old)
-                    # Keep canary / pin fields so a fetch blip does not demote a live GOOD shard.
+                    # Keep canary / pin fields so a fetch blip does not demote a live GOOD shard
+                    # (missing paged → not_paged; missing AIA/CertID pins fail Must-Staple).
                     for keep_key in (
                         "paged",
                         "paged_unix",
+                        "canary_reason",
                         "certid",
                         "aia_ocsp_uri",
+                        "aia_ocsp_uris",
                         "this_update_unix",
                         "next_update_unix",
                         "must_staple",
+                        "cert_status",
                         "fingerprint",
                         "serial",
+                        "unpaged_after_nongood",
                     ):
                         if keep_key not in meta and keep_key in old:
                             meta[keep_key] = old[keep_key]
