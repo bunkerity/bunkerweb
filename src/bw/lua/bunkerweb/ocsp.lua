@@ -114,6 +114,7 @@ local STAPLE_DECISION = {
 	probe_failed = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
+	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
 	canary_refused = true,
@@ -372,6 +373,7 @@ local PEER_REFUSE_STICKY = {
 	canary_refused = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
+	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
 }
@@ -1589,7 +1591,7 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	local ok_intrinsic, why = intrinsic_timing_ok(meta)
 	if not ok_intrinsic then
 		log(ngx.ERR, "OCSP intrinsic timing refuse reason=" .. tostring(why) .. " fp=" .. tostring(fingerprint and fingerprint:sub(1, 16) or "?"))
-		return false
+		return false, why or "unmet"
 	end
 	local meta_exp = meta_expires_unix(meta)
 	local max_age = meta_max_age_unix(meta)
@@ -1607,14 +1609,14 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 			"OCSP refuse staple: no expires_unix/max_age death clock fp="
 				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
 		)
-		return false
+		return false, "response_stale"
 	end
 	-- L1 may only tighten the meta death clock, never extend past stripped/legacy meta.
 	if type(expires_unix) == "number" and expires_unix > 0 and expires_unix < exp then
 		exp = math.floor(expires_unix)
 	end
 	if ngx.time() >= exp - OCSP_CLOCK_SKEW_SECONDS then
-		return false
+		return false, "response_stale"
 	end
 	return true
 end
@@ -2153,10 +2155,15 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
-		elseif not resp_still_fresh(cached_expires, fingerprint, meta) then
-			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
-			drop_cache(internalstore, fingerprint)
 		else
+			local fresh, fresh_why = resp_still_fresh(cached_expires, fingerprint, meta)
+			if not fresh then
+				log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+				end
+			else
 			if serial_blacklist_blocks(fingerprint, cached) then
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
@@ -2206,15 +2213,17 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
 				drop_cache(internalstore, fingerprint)
 			end
+			end
 		end
 	end
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
-		if not resp_still_fresh(nil, fingerprint, meta) then
+		local fresh, fresh_why = resp_still_fresh(nil, fingerprint, meta)
+		if not fresh then
 			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "response_stale", mode)
+				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 			end
 			return false
 		end
@@ -2315,10 +2324,15 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
-		elseif not resp_still_fresh(cached_expires, fingerprint, meta) then
-			log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
-			drop_cache(internalstore, fingerprint)
-		elseif entry_verified(cached_verified, cached) then
+		else
+			local fresh, fresh_why = resp_still_fresh(cached_expires, fingerprint, meta)
+			if not fresh then
+				log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
+				drop_cache(internalstore, fingerprint)
+				if must_staple then
+					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+				end
+			elseif entry_verified(cached_verified, cached) then
 			if serial_blacklist_blocks(fingerprint, cached) then
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
@@ -2394,15 +2408,17 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			drop_cache(internalstore, fingerprint)
 		end
+		end
 	end
 
 	local resp = read_file(ocsp_path(fingerprint))
 	if resp then
 		meta = meta or read_ocsp_json(fingerprint)
-		if not resp_still_fresh(nil, fingerprint, meta) then
+		local fresh, fresh_why = resp_still_fresh(nil, fingerprint, meta)
+		if not fresh then
 			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "response_stale", mode)
+				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 			end
 			return false
 		end
