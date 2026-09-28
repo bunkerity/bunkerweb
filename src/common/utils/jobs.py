@@ -244,6 +244,30 @@ def should_keep_disk_ocsp_floor(
     return disk_pub >= ocsp_floor_published_unix(incoming_floor)
 
 
+def should_skip_ocsp_floor_restore(
+    disk_floor: Optional[Dict[str, Any]],
+    incoming_floor: Optional[Dict[str, Any]],
+    floor_cap: Optional[int] = None,
+) -> Tuple[bool, str]:
+    """
+    Whether restore must not write this floor row.
+
+    Caps floor raises when the shard fence kept a still-GOOD trio: restoring a
+    higher colony floor would leave healthy-looking files while Must-Staple stays
+    closed (cluster_floor). Live peer advances outside restore are unchanged.
+    """
+    if should_keep_disk_ocsp_floor(disk_floor, incoming_floor):
+        return True, (
+            f"disk_floor_newer_or_equal disk_pub={ocsp_floor_published_unix(disk_floor)} "
+            f"incoming_pub={ocsp_floor_published_unix(incoming_floor)}"
+        )
+    if isinstance(floor_cap, int) and floor_cap > 0:
+        incoming_pub = ocsp_floor_published_unix(incoming_floor)
+        if incoming_pub > floor_cap:
+            return True, f"floor_capped_to_fenced_shard cap={floor_cap} incoming_pub={incoming_pub}"
+    return False, ""
+
+
 def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
     if not data:
         return None
@@ -311,29 +335,46 @@ def should_keep_disk_ocsp_shard(
 
 
 def ocsp_restore_skip_fingerprints(cache_files: list, cache_root: Path) -> Dict[str, str]:
-    """
-    Build fingerprint → reason for OCSP shards that must not be overwritten by this restore batch.
+    """Compatibility wrapper: fingerprint → fence reason only."""
+    skip, _caps = ocsp_restore_plan(cache_files, cache_root)
+    return skip
 
-    cache_files: rows with file_name + data (ocsp-refresh / ssl plugin job cache).
-    cache_root: typically /var/cache/bunkerweb/ssl
+
+def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, str], Dict[str, int]]:
+    """
+    Plan OCSP restore coherence for one cache batch.
+
+    Returns:
+      skip: fingerprint → reason for shards that must not be overwritten
+      floor_caps: fingerprint → max floor published_unix allowed when that shard
+        was fenced as a still-GOOD trio (prevents floor sitting ahead of kept files)
     """
     by_fp: Dict[str, Dict[str, Any]] = {}
+    incoming_floors: Dict[str, Optional[Dict[str, Any]]] = {}
     for entry in cache_files:
         if not isinstance(entry, dict):
             continue
-        parsed = parse_ocsp_shard_cache_name(entry.get("file_name") or "")
+        file_name = entry.get("file_name") or ""
+        floor_fp = parse_ocsp_floor_cache_name(file_name)
+        if floor_fp:
+            incoming_floors[floor_fp] = parse_ocsp_floor_bytes(entry.get("data"))
+            continue
+        parsed = parse_ocsp_shard_cache_name(file_name)
         if not parsed:
             continue
         fp, leaf = parsed
         bucket = by_fp.setdefault(fp, {})
         if leaf == "ocsp.json" and entry.get("data"):
             bucket["incoming_meta"] = parse_ocsp_meta_bytes(entry["data"])
-        elif leaf == "ocsp.der" and entry.get("data"):
+        elif leaf == "ocsp.der":
+            # Row presence is enough; generate_caches plans with with_data=False.
             bucket["has_der"] = True
 
     skip: Dict[str, str] = {}
+    floor_caps: Dict[str, int] = {}
+    root = Path(cache_root)
     for fp, bucket in by_fp.items():
-        shard_dir = cache_root / fp[0] / fp[1] / fp
+        shard_dir = root / fp[0] / fp[1] / fp
         disk_meta = load_disk_ocsp_meta(shard_dir)
         if not isinstance(disk_meta, dict):
             continue
@@ -341,13 +382,39 @@ def ocsp_restore_skip_fingerprints(cache_files: list, cache_root: Path) -> Dict[
         # DER-only restore without meta: keep disk when it already has usable meta.
         if incoming_meta is None and bucket.get("has_der"):
             skip[fp] = "disk_meta_present_incoming_meta_missing"
+            disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
+            if disk_pub > 0 and disk_meta.get("tombstoned") is not True:
+                floor_caps[fp] = disk_pub
             continue
-        if should_keep_disk_ocsp_shard(disk_meta, incoming_meta):
-            skip[fp] = (
-                f"disk_newer_or_equal expires_unix={_ocsp_meta_unix(disk_meta, 'expires_unix')} "
-                f"job_run_id={disk_meta.get('job_run_id')}"
-            )
-    return skip
+        if not should_keep_disk_ocsp_shard(disk_meta, incoming_meta):
+            continue
+
+        disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
+        # Effective floor after a naive max-only floor restore.
+        effective_floor = max(
+            ocsp_floor_published_unix(load_disk_ocsp_floor(root, fp)),
+            ocsp_floor_published_unix(incoming_floors.get(fp)),
+        )
+        # Prefer a DB generation that meets the floor over fencing a lagging GOOD
+        # that would leave Must-Staple closed on healthy-looking files.
+        if (
+            disk_meta.get("tombstoned") is not True
+            and disk_pub > 0
+            and effective_floor > disk_pub
+            and isinstance(incoming_meta, dict)
+            and incoming_meta.get("tombstoned") is not True
+            and _ocsp_meta_unix(incoming_meta, "published_unix") >= effective_floor
+            and bucket.get("has_der")
+        ):
+            continue
+
+        skip[fp] = (
+            f"disk_newer_or_equal expires_unix={_ocsp_meta_unix(disk_meta, 'expires_unix')} "
+            f"job_run_id={disk_meta.get('job_run_id')}"
+        )
+        if disk_meta.get("tombstoned") is not True and disk_pub > 0:
+            floor_caps[fp] = disk_pub
+    return skip, floor_caps
 
 
 class Job:
@@ -457,11 +524,13 @@ class Job:
                 return False
 
         # Never regress a newer on-disk OCSP shard with an older DB complete trio.
+        # Floor caps keep cluster floor from sitting ahead of a fenced still-GOOD trio.
         ocsp_skip: Dict[str, str] = {}
+        ocsp_floor_caps: Dict[str, int] = {}
         restored_ocsp_fps: Set[str] = set()
         if self.job_path.name == "ssl":
             try:
-                ocsp_skip = ocsp_restore_skip_fingerprints(list(job_cache_files or []), self.job_path)
+                ocsp_skip, ocsp_floor_caps = ocsp_restore_plan(list(job_cache_files or []), self.job_path)
             except Exception as e:
                 self.logger.debug(f"OCSP restore fence unavailable: {e}")
 
@@ -500,17 +569,16 @@ class Job:
                     )
                     ignored_dirs.add(cache_path.parent)
                     continue
-                # Cluster floor: max-only on published_unix — never lower from an older DB row.
+                # Cluster floor: max-only, but never raise above a fenced still-GOOD shard.
                 floor_fp = parse_ocsp_floor_cache_name(job_cache_file.get("file_name") or "")
                 if floor_fp:
                     incoming_floor = parse_ocsp_floor_bytes(job_cache_file.get("data"))
                     disk_floor = load_disk_ocsp_floor(self.job_path, floor_fp)
-                    if should_keep_disk_ocsp_floor(disk_floor, incoming_floor):
-                        self.logger.info(
-                            f"OCSP floor restore skip fp={floor_fp[:16]}... "
-                            f"disk_pub={ocsp_floor_published_unix(disk_floor)} "
-                            f"incoming_pub={ocsp_floor_published_unix(incoming_floor)}"
-                        )
+                    skip_floor, floor_reason = should_skip_ocsp_floor_restore(
+                        disk_floor, incoming_floor, ocsp_floor_caps.get(floor_fp)
+                    )
+                    if skip_floor:
+                        self.logger.info(f"OCSP floor restore skip fp={floor_fp[:16]}... reason={floor_reason}")
                         ignored_dirs.add(cache_path.parent)
                         continue
                 _write_atomic(checked_cache_path(self.job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"]), job_cache_file["data"])

@@ -48,7 +48,7 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `ok` | Staple set (or canary paged) | Healthy. |
 | `stapling_off` | Optional stapling disabled / unavailable | Expected when `SSL_USE_OCSP_STAPLING=no` or `ngx.ocsp` missing. Not a Must-Staple abort. |
 | `skip_slot` | Dual-cert sibling deliberately not stapled | One OCSP slot per handshake; ECDSA preferred. Put Must-Staple on ECDSA only. |
-| `cluster_floor` | Local `published_unix` behind colony floor | Wait for this node’s job/DB restore to catch the floor, or check shared cache mount. |
+| `cluster_floor` | Local `published_unix` behind colony floor | Wait for this node’s job to catch the floor. Restore will not raise the floor above a fenced still-GOOD trio (avoids healthy files + closed Must-Staple). |
 | `not_paged` | Shard on disk but canary never paged it | Inspect `ocsp-refresh` canary logs; previous live shard should still be in place. |
 | `aia_uri_mismatch` / `aia_uri_unpinned` | Staple not pinned to leaf AIA OCSP URI | Re-run refresh; check leaf AIA vs `ocsp.json` `aia_ocsp_uri`. |
 | `ssl_use_ocsp_stapling_no` | Must-Staple leaf but stapling setting off | Set `SSL_USE_OCSP_STAPLING=yes` or remove Must-Staple from the cert. |

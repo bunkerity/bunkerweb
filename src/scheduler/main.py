@@ -52,13 +52,12 @@ from jobs import (  # type: ignore
     Job,
     _write_atomic,
     load_disk_ocsp_floor,
-    ocsp_floor_published_unix,
-    ocsp_restore_skip_fingerprints,
+    ocsp_restore_plan,
     parse_ocsp_floor_bytes,
     parse_ocsp_floor_cache_name,
     parse_ocsp_shard_cache_name,
     publish_ocsp_restore_coherence,
-    should_keep_disk_ocsp_floor,
+    should_skip_ocsp_floor_restore,
 )
 from cache_restore import (  # type: ignore
     cache_tree,
@@ -584,14 +583,33 @@ def generate_caches() -> Set[str]:
     failed_plugins: Set[Path] = set()
 
     # Never let DB restore regress a newer on-disk OCSP SPKI shard.
+    # Floor caps keep cluster floor from sitting ahead of a fenced still-GOOD trio.
     ocsp_skip: Dict[str, str] = {}
+    ocsp_floor_caps: Dict[str, int] = {}
     restored_ocsp_fps: Set[str] = set()
     ssl_cache_root = Path(sep, "var", "cache", "bunkerweb", "ssl")
     try:
         ssl_rows = [row for row in (job_cache_files or []) if row.get("plugin_id") == "ssl"]
-        ocsp_skip = ocsp_restore_skip_fingerprints(ssl_rows, ssl_cache_root)
+        # Plan needs ocsp.json + floor bodies; DER rows only need file_name presence.
+        plan_rows: List[Dict[str, Any]] = []
+        for row in ssl_rows:
+            file_name = row.get("file_name") or ""
+            needs_body = bool(parse_ocsp_floor_cache_name(file_name))
+            parsed = parse_ocsp_shard_cache_name(file_name)
+            if parsed and parsed[1] == "ocsp.json":
+                needs_body = True
+            if needs_body:
+                body = SCHEDULER.db.get_job_cache_file(row["job_name"], file_name, service_id=row.get("service_id") or "")
+                enriched = dict(row)
+                enriched["data"] = body
+                plan_rows.append(enriched)
+            elif parsed and parsed[1] == "ocsp.der":
+                plan_rows.append(row)
+        ocsp_skip, ocsp_floor_caps = ocsp_restore_plan(plan_rows, ssl_cache_root)
         if ocsp_skip:
             LOGGER.info(f"OCSP restore fence: keeping {len(ocsp_skip)} newer on-disk shard(s)")
+        if ocsp_floor_caps:
+            LOGGER.info(f"OCSP floor caps: {len(ocsp_floor_caps)} fenced still-GOOD shard(s)")
     except Exception as e:
         LOGGER.debug(f"OCSP restore fence unavailable during generate_caches: {e}")
 
@@ -687,12 +705,11 @@ def generate_caches() -> Set[str]:
                 if floor_fp:
                     incoming_floor = parse_ocsp_floor_bytes(data if isinstance(data, (bytes, bytearray)) else None)
                     disk_floor = load_disk_ocsp_floor(job_path, floor_fp)
-                    if should_keep_disk_ocsp_floor(disk_floor, incoming_floor):
-                        LOGGER.info(
-                            f"OCSP floor generate_caches skip fp={floor_fp[:16]}... "
-                            f"disk_pub={ocsp_floor_published_unix(disk_floor)} "
-                            f"incoming_pub={ocsp_floor_published_unix(incoming_floor)}"
-                        )
+                    skip_floor, floor_reason = should_skip_ocsp_floor_restore(
+                        disk_floor, incoming_floor, ocsp_floor_caps.get(floor_fp)
+                    )
+                    if skip_floor:
+                        LOGGER.info(f"OCSP floor generate_caches skip fp={floor_fp[:16]}... reason={floor_reason}")
                         continue
             checked_path = checked_cache_path(job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"])
             _write_atomic(checked_path, data)
