@@ -140,8 +140,15 @@ local STAPLE_DECISION_ALIAS = {
 	single_slot_rsa_prefer = "skip_slot",
 	wrong_key_type_hint = "skip_slot",
 	variables_unavailable = "stapling_off",
+	-- Raw ligand_verdict reasons stay on refuse_cause=; runbook staple_decision=
+	-- collapses to shared_ligand so ops still land on one README section.
 	ligand_missing = "shared_ligand",
 	ligand_mismatch = "shared_ligand",
+	der_sha256_mismatch = "shared_ligand",
+	missing_der_sha256 = "shared_ligand",
+	invalid_der_sha256 = "shared_ligand",
+	fingerprint_mismatch_or_missing_meta = "shared_ligand",
+	peer_refuse_unavailable = "peer_refuse",
 }
 
 local function normalize_staple_decision(code)
@@ -380,10 +387,17 @@ local DROP_ALLOW_ON_REFUSE = {
 	cluster_floor = true,
 	shared_ligand = true,
 	ligand_mismatch = true,
+	-- Raw ligand_verdict binding failures (HTTP/stream pass these without prefix).
+	der_sha256_mismatch = true,
+	missing_der_sha256 = true,
+	invalid_der_sha256 = true,
+	fingerprint_mismatch_or_missing_meta = true,
 	canary_refused = true,
 	intermediate_must_staple_libssl = true,
 }
 -- Keep allow pin (do not revoke) — sibling may still staple; local-only / temporary.
+-- Invariant: every cause should_skip_peer_bus returns true for must also be KEEP
+-- (or the skip arm never reaches record_peer_refuse). skip ⊆ KEEP.
 local KEEP_ALLOW_ON_REFUSE = {
 	not_paged = true,
 	validate_budget = true,
@@ -398,6 +412,7 @@ local KEEP_ALLOW_ON_REFUSE = {
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
 	ligand_missing = true,
+	peer_refuse_unavailable = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
@@ -1281,15 +1296,19 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
 	local refuse_cause = tostring(decision or "unmet")
-	-- Prefix variants (canary_*, shared_ligand_*) drop allow like their runbook buckets.
-	local drop = DROP_ALLOW_ON_REFUSE[refuse_cause]
-		or (refuse_cause:sub(1, 7) == "canary_")
-		or (refuse_cause:sub(1, 14) == "shared_ligand_")
-	if KEEP_ALLOW_ON_REFUSE[refuse_cause] then
-		drop = false
+	-- Prefix variants (canary_*, legacy shared_ligand_*) drop like their buckets,
+	-- but KEEP exact-match on the full string OR the stripped suffix wins so a
+	-- leftover shared_ligand_ligand_missing cannot revoke (ligand_missing is KEEP).
+	local drop = DROP_ALLOW_ON_REFUSE[refuse_cause] or (refuse_cause:sub(1, 7) == "canary_")
+	local suffix = nil
+	if refuse_cause:sub(1, 14) == "shared_ligand_" then
+		drop = true
+		suffix = refuse_cause:sub(15)
 	end
-	if refuse_cause == "intermediate_must_staple_colony" then
+	if KEEP_ALLOW_ON_REFUSE[refuse_cause] or (suffix and KEEP_ALLOW_ON_REFUSE[suffix]) then
 		drop = false
+	elseif suffix and DROP_ALLOW_ON_REFUSE[suffix] then
+		drop = true
 	end
 	if not drop then
 		log(
@@ -1335,18 +1354,32 @@ end
 
 -- Soft fuse: continue without touching the allow pin.
 -- normal: revoke allow for DROP_ALLOW refuse_cause so sibling Must-Staple fails closed.
+--
+-- Transient causes must not enter the peer bus (HTTP↔stream). skip ⊆ KEEP_ALLOW:
+-- every arm here is also KEEP so a future list drift that forgets KEEP still cannot
+-- drop the shared pin via record_peer_refuse if skip somehow regresses.
+local function should_skip_peer_bus(detail, meta, fingerprint)
+	local d = tostring(detail or "unmet")
+	local eff = meta
+	if type(fingerprint) == "string" and is_fp64(fingerprint) then
+		eff = ligand_or_meta(meta, fingerprint)
+	end
+	return d == "not_paged"
+		or d == "validate_budget"
+		or d == "intermediate_must_staple_colony"
+		or d == "peer_refuse_unavailable"
+		or (type(eff) == "table" and eff.paged ~= true)
+		or (
+			(d == "set_staple_failed" or d == "set_staple_exception")
+			and type(eff) == "table"
+			and eff.paged == true
+		)
+end
+
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
 		local d = detail or "unmet"
-		local skip_bus = d == "not_paged"
-			or d == "validate_budget"
-			or (type(meta) == "table" and meta.paged ~= true)
-			or (
-				(d == "set_staple_failed" or d == "set_staple_exception")
-				and type(meta) == "table"
-				and meta.paged == true
-			)
-		if not skip_bus then
+		if not should_skip_peer_bus(d, meta, fingerprint) then
 			record_peer_refuse(fingerprint, meta, resp, d)
 		end
 	end
@@ -1835,13 +1868,15 @@ local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 end
 
 -- Must-Staple may not rely on stream-private crypto-verified L1 alone.
--- Returns true, or false, detail_code for OCSP_MUST_STAPLE_REFUSE (logged by soften).
+-- Returns true, or false, raw ligand_verdict reason for OCSP_MUST_STAPLE_REFUSE.
+-- Raw reason (not shared_ligand_*) so KEEP_ALLOW[ligand_missing] can hold the pin;
+-- format_staple_decision still aliases to staple_decision=shared_ligand.
 local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
 	local ok, reason = ocsp_json_ligand_matches(meta, fingerprint, resp)
 	if ok then
 		return true
 	end
-	return false, "shared_ligand_" .. tostring(reason or "mismatch")
+	return false, tostring(reason or "ligand_mismatch")
 end
 
 -- Absolute unix nextUpdate from job meta. Requires expires_unix (no ISO+Ns fallback).
@@ -4096,6 +4131,12 @@ end
 -- meta must carry der_sha256 (+ soft_recall_gen); string-only generation ids are gone.
 function _M.peer_refuse_blocks(fingerprint, meta, resp)
 	return peer_refuse_blocks(fingerprint, meta, resp)
+end
+
+-- Shared skip predicate for HTTP refuse_must_staple and stream must_staple_refuse.
+-- Transient / soft-recall causes must not enter the allow-pin bus. skip ⊆ KEEP.
+function _M.should_skip_peer_bus(detail, meta, fingerprint)
+	return should_skip_peer_bus(detail, meta, fingerprint)
 end
 
 function _M.record_peer_refuse(fingerprint, meta, decision, resp)
