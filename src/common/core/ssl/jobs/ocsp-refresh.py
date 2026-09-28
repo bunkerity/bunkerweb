@@ -1676,6 +1676,94 @@ def _parse_chain(pem_data: bytes, cert_name: str = "") -> Tuple[x509.Certificate
     raise RuntimeError(f"fullchain for {cert_name} does not contain issuer and AIA fetch failed")
 
 
+def _cert_has_ocsp_aia(cert: x509.Certificate) -> bool:
+    try:
+        aia = cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
+        aia_value = cast(AuthorityInformationAccess, aia.value)
+        for access_description in aia_value:
+            if access_description.access_method == AuthorityInformationAccessOID.OCSP:
+                if _normalize_ocsp_aia_uri(getattr(access_description.access_location, "value", None)):
+                    return True
+    except x509.ExtensionNotFound:
+        return False
+    except Exception:
+        return False
+    return False
+
+
+def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[str, bytes]]:
+    """
+    Non-root intermediates in the fullchain that advertise an OCSP AIA URI.
+    Each target is a mini-chain PEM (intermediate + its issuer) so _process_cert
+    can fetch/page a shard keyed by that intermediate's SPKI — for TLS 1.3
+    CertificateEntry multi-staple when OpenSSL >= 3.6.
+    """
+    out: List[Tuple[str, bytes]] = []
+    try:
+        certs = x509.load_pem_x509_certificates(_clean_pem(pem_data))
+    except Exception as e:
+        log_debug("⚠️ OCSP intermediate scan failed for %s: %s", cert_name, e)
+        return out
+    if len(certs) < 2:
+        return out
+    for i in range(1, len(certs)):
+        cert = certs[i]
+        # Trust anchors / self-signed: no OCSP staple for the root.
+        if cert.subject == cert.issuer:
+            continue
+        if not _cert_has_ocsp_aia(cert):
+            continue
+        issuer_pem = b""
+        if i + 1 < len(certs):
+            issuer_pem = certs[i + 1].public_bytes(Encoding.PEM)
+        else:
+            try:
+                fetched = _fetch_issuer_from_aia(cert, f"{cert_name}__ocsp_inter{i}")
+                if fetched is not None:
+                    issuer_pem = fetched.public_bytes(Encoding.PEM)
+            except Exception:
+                issuer_pem = b""
+        if not issuer_pem:
+            log_debug(
+                "ℹ️ OCSP skipping intermediate index %d for %s: no issuer PEM for OCSP request",
+                i,
+                cert_name,
+            )
+            continue
+        mini = cert.public_bytes(Encoding.PEM) + issuer_pem
+        # Marker regex allows [A-Za-z0-9_.*-]; keep the leaf name prefix for ops.
+        iname = f"{cert_name}__ocsp_inter{i}"
+        out.append((iname, mini))
+        log_debug(
+            "🔗 OCSP queued intermediate staple target %s (index=%d) for leaf %s",
+            iname,
+            i,
+            cert_name,
+        )
+    return out
+
+
+def _process_cert_chain(
+    cert_name: str,
+    pem_data: bytes,
+    db: Optional[Any] = None,
+    stats: Optional[dict] = None,
+    force_fetch: bool = False,
+) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
+    """Process leaf OCSP then any intermediate OCSP AIA targets in the same fullchain."""
+    results = [_process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch)]
+    for iname, ipem in _intermediate_ocsp_targets(cert_name, pem_data):
+        try:
+            results.append(_process_cert(iname, ipem, db, stats, force_fetch=force_fetch))
+            if stats is not None:
+                stats["ocsp_intermediate_processed"] = stats.get("ocsp_intermediate_processed", 0) + 1
+        except Exception as e:
+            log_warning("⚠️ OCSP intermediate fetch failed for %s: %s", iname, e)
+            if stats is not None:
+                stats["ocsp_intermediate_errors"] = stats.get("ocsp_intermediate_errors", 0) + 1
+    return results
+
+
 # Default OCSP TTL fallback (1 day) if Next Update is missing
 DEFAULT_OCSP_TTL = 86400
 
@@ -4147,7 +4235,7 @@ def process_custom_certs(
                 break
             if callable(refresh_fn):
                 refresh_fn(cert_name)
-            results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=True))
+            results.extend(_process_cert_chain(cert_name, cert_pem, db, stats, force_fetch=True))
 
         # 2. Process unchanged custom certificates (TTL check only or force-fetch if requested)
         if not skip_unchanged_ttl_checks:
@@ -4156,7 +4244,7 @@ def process_custom_certs(
                     break
                 if callable(refresh_fn):
                     refresh_fn(cert_name)
-                results.append(_process_cert(cert_name, cert_pem, db, stats, force_fetch=force_fetch))
+                results.extend(_process_cert_chain(cert_name, cert_pem, db, stats, force_fetch=force_fetch))
 
     except Exception as e:
         log_error("OCSP exception while processing custom certificates: %s", e)
@@ -4191,7 +4279,7 @@ def process_selfsigned_certs(
                 break
             if callable(refresh_fn):
                 refresh_fn(cert_name)
-            results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch))
+            results.extend(_process_cert_chain(cert_name, pem_data, db, stats, force_fetch=force_fetch))
     except Exception as e:
         log_error("OCSP exception while processing self-signed certificates: %s", e)
         stats["errors"] = stats.get("errors", 0) + 1
@@ -6132,8 +6220,9 @@ def main() -> int:
             for cert_name, pem_data in sorted(new_le_certs.items()):
                 if check_job_timeout(f"new LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
-                res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
-                all_ocsp_results.append(res)
+                chain_res = _process_cert_chain(cert_name, pem_data, db, stats, force_fetch=True)
+                all_ocsp_results.extend(chain_res)
+                res = chain_res[0] if chain_res else (cert_name, None, 0, "", pem_data, None, False)
                 if res[1] is None and res[5] and res[6]: # ocsp_der is None AND ocsp_url is present AND was_attempted is True
                     stashed_failures.append((cert_name, pem_data))
 
@@ -6168,8 +6257,9 @@ def main() -> int:
             for cert_name, pem_data in sorted(changed_le_certs.items()):
                 if check_job_timeout(f"changed LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
-                res = _process_cert(cert_name, pem_data, db, stats, force_fetch=True)
-                all_ocsp_results.append(res)
+                chain_res = _process_cert_chain(cert_name, pem_data, db, stats, force_fetch=True)
+                all_ocsp_results.extend(chain_res)
+                res = chain_res[0] if chain_res else (cert_name, None, 0, "", pem_data, None, False)
                 if res[1] is None and res[5] and res[6]:
                     stashed_failures.append((cert_name, pem_data))
 
@@ -6178,8 +6268,7 @@ def main() -> int:
                 for cert_name, pem_data in sorted(unchanged_le_certs.items()):
                     if check_job_timeout(f"unchanged LE cert {cert_name}"): break
                     refresh_job_lock(cert_name)
-                    res = _process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch)
-                    all_ocsp_results.append(res)
+                    all_ocsp_results.extend(_process_cert_chain(cert_name, pem_data, db, stats, force_fetch=force_fetch))
                     if res[1] is None and res[5] and res[6]:
                         stashed_failures.append((cert_name, pem_data))
 
@@ -6231,7 +6320,7 @@ def main() -> int:
                     log_info("🔄 OCSP retrying fetch for stashed failure: %s", cert_name)
                     refresh_job_lock(cert_name)
                     # Force fetch for the final retry attempt
-                    all_ocsp_results.append(_process_cert(cert_name, pem_data, db, stats, force_fetch=True))
+                    all_ocsp_results.extend(_process_cert_chain(cert_name, pem_data, db, stats, force_fetch=True))
 
         # === Check if timeout has been reached and save partial results ===
         if check_job_timeout("after processing phase"):

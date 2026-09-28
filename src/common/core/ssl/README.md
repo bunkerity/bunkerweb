@@ -74,19 +74,25 @@ Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is *
 
 When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha256` ligand), the handshake **trusts that canary** and skips `ngx.ocsp.validate_ocsp_response` (openssl CLI and OpenResty FFI can disagree). CertID / leaf binding and `set_ocsp_status_resp` still run. DB restore always stamps `paged=false` (a peer's canary is not local proof) and runs restore coherence (epoch bump + refuse clear) so this node must re-page before canary trust resumes. Shard publish prefers Linux `renameat2(RENAME_EXCHANGE)` so the live SPKI directory never disappears mid-swap; other platforms fall back to move-aside + rename (brief ENOENT possible). When validate does run, HTTP and stream share a soft ~700ms total budget and at most 4 issuer candidates.
 
-!!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
-    NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
+!!! warning "Dual-certificate (RSA + ECDSA): one leaf per handshake"
+    NGINX / OpenSSL present **one** end-entity certificate per handshake. BunkerWeb installs **only the leaf this ClientHello will use**, then staples that leaf’s OCSP response (RFC 9846 §4.5.1.1: `status_request` on the matching `CertificateEntry`).
 
-    - **HTTP and stream:** read ClientHello `signature_algorithms` in preference order and staple the leaf for the first recognized EC or RSA scheme (`ec` or `rsa`); if none parse, prefer ECDSA (typical OpenSSL dual-cert choice). Stream also defers stapling until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
+    Selection walks ClientHello `signature_algorithms` in preference order and picks the first scheme an available leaf can sign with (curve-aware: `ecdsa_secp256r1_sha256` does not select a P-384 leaf). If nothing matches, prefer ECDSA, else the only leaf.
 
     Consequences:
 
-    - Only the preferred leaf is stapled. Clients that negotiate the other leaf receive **no** staple for that handshake.
-    - If the **non-preferred** certificate has the Must-Staple TLS feature, clients that select that leaf will see Must-Staple as unmet. With `OCSP_STAPLE_MODE=normal`, that can abort the handshake for those clients even when the preferred staple is healthy.
-    - If only the **ECDSA** leaf is Must-Staple (recommended for dual-cert), modern clients that prefer ECDSA stay fail-closed correctly; RSA-only clients are outside that pin unless stream ClientHello selected RSA.
-    - Logs may show `staple_decision=skip_slot` (`detail=single_slot_ecdsa_prefer`, `single_slot_rsa_prefer`, `wrong_key_type_hint`, or `await_sni`) when a sibling key type is deliberately not stapled or SNI is not yet bound.
+    - The sibling key type is **not** offered on that connection (logged as `staple_decision=skip_slot`).
+    - Must-Staple is evaluated for the presented leaf (and for any intermediate that itself carries Must-Staple when multi-staple is active).
+    - Stream still defers stapling until SNI has bound the handshake leaf (`await_sni` / `skip_slot detail=await_sni`).
 
-    Practical guidance: for dual-cert sites that need Must-Staple, put Must-Staple on the ECDSA leaf (or use a single leaf). Do not expect both key types to be Must-Staple-satisfied on the same connection. Use `OCSP_STAPLE_MODE=staple_only` or `open` only as a temporary recovery fuse if a dual-cert Must-Staple mismatch is paging you — the fuse presents the site leaf unstapled (after `clear_certs`) rather than falling back to the static `ssl_certificate`.
+    Use `OCSP_STAPLE_MODE=staple_only` or `open` only as a temporary recovery fuse if a Must-Staple probe fails — the fuse presents the chosen site leaf unstapled (after `clear_certs`) rather than falling back to the static `ssl_certificate`.
+
+!!! tip "Intermediate OCSP (TLS 1.3 multi-staple)"
+    When the linked OpenSSL is **3.6+**, BunkerWeb attaches a `status_request` on each non-root `CertificateEntry` via `SSL_set0_tlsext_status_ocsp_resp_ex`:
+
+    - `ocsp-refresh` fetches and pages a shard for every intermediate in the fullchain that advertises an OCSP AIA URI (same `/var/cache/bunkerweb/ssl/{h1}/{h2}/{spki}/` layout as the leaf).
+    - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; an intermediate with Must-Staple and no usable staple fails closed.
+    - On OpenSSL **3.5** (current Alpine images), only the leaf staple is sent — intermediate shards are still refreshed so they are ready after a libssl upgrade.
 
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.
