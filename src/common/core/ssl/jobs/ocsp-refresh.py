@@ -2399,6 +2399,9 @@ def _publish_ocsp_shard(
             cert_name or normalized[:16],
         )
 
+        # New generation: clear cross-subsystem refuse bus for this SPKI.
+        _clear_ocsp_peer_refuse(normalized)
+
         # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
         if db is not None:
             try:
@@ -4862,6 +4865,22 @@ def _bump_ocsp_cache_epoch() -> None:
         log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
 
 
+def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
+    """Drop HTTP↔stream generation refuse marker for this SPKI (new page / tombstone)."""
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return
+    try:
+        refuse_dir = CONFIGS_SSL_BASE / "ocsp-refuse"
+        refuse_dir.mkdir(parents=True, exist_ok=True)
+        path = refuse_dir / normalized
+        if path.is_file():
+            path.unlink()
+            log_debug("🧹 OCSP cleared peer-refuse bus for fp=%s...", normalized[:16])
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clear peer-refuse for %s: %s", normalized[:16] if normalized else "?", e)
+
+
 def _ocsp_floor_relpath(fingerprint: str) -> Optional[str]:
     """Job-cache file_name for the per-SPKI cluster floor."""
     normalized = _normalize_fingerprint(fingerprint)
@@ -5160,6 +5179,7 @@ def _tombstone_ocsp_shard(
             log_error("❌ OCSP could not remove ocsp.der while tombstoning %s: %s", cert_name, e)
             return False
         _delete_ocsp_der_db_rows(db, normalized)
+        _clear_ocsp_peer_refuse(normalized)
         _bump_ocsp_cache_epoch()
         _advance_ocsp_cluster_floor(normalized, meta.get("published_unix"), meta.get("job_run_id"), db)
         log_error(
