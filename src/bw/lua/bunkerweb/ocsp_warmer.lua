@@ -40,6 +40,8 @@ local L1_WARMER_LEASE_TTL = math.max(L1_WARMER_INTERVAL * 3, 20)
 -- Renew mid-walk so a long MS-first scan cannot outlive the lease TTL.
 local L1_WARMER_LEASE_HEARTBEAT_EVERY = 32
 local L1_WARMER_LEASE_KEY = "TLS:SSL:ocsp_l1_warmer_lease"
+-- Mid-scan resume: "epoch|fp" so the next holder continues MS-first mid-list.
+local L1_WARMER_RESUME_KEY = "TLS:SSL:ocsp_l1_warmer_resume"
 local l1_warmer_started = false
 local l1_warmer_no_add_logged = false
 local l1_warmer_last_epoch = nil
@@ -53,6 +55,40 @@ local function warmer_lease_token()
 	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
 	local pid = (ngx.worker and ngx.worker.pid and ngx.worker.pid()) or 0
 	return tostring(wid) .. ":" .. tostring(pid)
+end
+
+local function read_warm_resume(internalstore)
+	local raw = nil
+	pcall(function()
+		raw = internalstore:get(L1_WARMER_RESUME_KEY)
+	end)
+	if type(raw) ~= "string" then
+		return nil, nil
+	end
+	local epoch_s, fp = raw:match("^(%d+)|([0-9a-f]+)$")
+	if not epoch_s or not is_fp64(fp) then
+		return nil, nil
+	end
+	return tonumber(epoch_s), fp
+end
+
+local function write_warm_resume(internalstore, epoch, fp)
+	if not internalstore or type(epoch) ~= "number" or not is_fp64(fp) then
+		return
+	end
+	pcall(function()
+		-- Outlive one lease TTL so the next holder can pick up after failover.
+		internalstore:set(L1_WARMER_RESUME_KEY, tostring(math.floor(epoch)) .. "|" .. fp, L1_WARMER_LEASE_TTL * 3)
+	end)
+end
+
+local function clear_warm_resume(internalstore)
+	if not internalstore then
+		return
+	end
+	pcall(function()
+		internalstore:delete(L1_WARMER_RESUME_KEY)
+	end)
 end
 
 -- Renew only while this worker still holds the token. set-after-get alone can
@@ -170,12 +206,15 @@ end
 -- are enough for the handshake authorize path). Runs off the TLS critical path only.
 -- Do not re-warm generations the handshake would refuse (allow-pin missing/mismatch
 -- or serial-blacklist): that churns shm and forces refuse/drop on every hit.
-local function warm_one_shard(internalstore, fingerprint)
+-- pre_meta: optional ligand-merged meta from the sort pass (avoids a second ocsp.json read).
+local function warm_one_shard(internalstore, fingerprint, pre_meta)
 	if not internalstore or not is_fp64(fingerprint) then
 		return false
 	end
-	local meta = read_ocsp_json(fingerprint)
-	meta = ligand_or_meta(meta, fingerprint)
+	local meta = pre_meta
+	if type(meta) ~= "table" then
+		meta = ligand_or_meta(read_ocsp_json(fingerprint), fingerprint)
+	end
 	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
 		drop_cache(internalstore, fingerprint)
 		return false
@@ -196,10 +235,24 @@ local function warm_one_shard(internalstore, fingerprint)
 	end
 	if peer_refuse_blocks(fingerprint, meta, resp, true) then
 		drop_cache(internalstore, fingerprint)
+		log(
+			ngx.NOTICE,
+			"OCSP L1 warmer skip allow-pin/refuse fp="
+				.. fingerprint:sub(1, 16)
+				.. "... subsystem="
+				.. tostring(ngx.config.subsystem)
+		)
 		return false
 	end
 	if serial_blacklist_blocks(fingerprint, resp) then
 		drop_cache(internalstore, fingerprint)
+		log(
+			ngx.NOTICE,
+			"OCSP L1 warmer skip serial-blacklist fp="
+				.. fingerprint:sub(1, 16)
+				.. "... subsystem="
+				.. tostring(ngx.config.subsystem)
+		)
 		return false
 	end
 	-- mark_verified=false: no leaf PEM here; handshake may still authorize via meta.
@@ -208,23 +261,29 @@ local function warm_one_shard(internalstore, fingerprint)
 end
 
 -- Scan the OCSP cache tree and warm every paged GOOD shard into this subsystem's L1.
--- list_ocsp_fingerprints is directory order. This warmer sorts Must-Staple
--- shards first (ligand-merged must_staple, still paged) so a lease that expires
--- mid-scan still covers fail-closed leaves before optional ones.
--- Returns warmed_count, complete (complete=false if lease lost mid-walk — caller
--- must not stamp last_epoch so the next tick retries).
-function _M.warm_l1_from_disk(internalstore)
+-- Must-Staple first (ligand-merged, still paged). Mid-scan lease loss writes a resume
+-- cursor so the next holder continues mid-list instead of re-warming the MS prefix.
+-- Returns warmed_count, complete (false → caller must not stamp last_epoch).
+function _M.warm_l1_from_disk(internalstore, epoch)
 	if not internalstore then
 		return 0, true
 	end
+	epoch = tonumber(epoch) or current_ocsp_epoch()
+	-- Heartbeat before enumeration: a hung lfs.dir must not outlive the lease
+	-- with no renew until shard index 32.
+	if not renew_l1_warmer_lease(internalstore) then
+		return 0, false
+	end
 	local fps = list_ocsp_fingerprints()
-	-- Read each shard's effective meta once for sort (ligand overlay). Reading
-	-- inside the comparator cost O(n log n) disk I/O and a file changing mid-sort
-	-- made the order inconsistent ("invalid order function").
+	if not renew_l1_warmer_lease(internalstore) then
+		return 0, false
+	end
+	-- Read each shard's effective meta once for sort + warm (ligand overlay).
 	local is_must = {}
+	local meta_by_fp = {}
 	for _, fp in ipairs(fps) do
 		local meta = ligand_or_meta(read_ocsp_json(fp), fp)
-		-- Prefer live fail-closed leaves: must_staple and still warmable (paged).
+		meta_by_fp[fp] = meta
 		is_must[fp] = type(meta) == "table"
 			and meta.must_staple == true
 			and not meta_tombstoned(meta)
@@ -236,31 +295,75 @@ function _M.warm_l1_from_disk(internalstore)
 		end
 		return a < b
 	end)
+
+	local start_i = 1
+	local resume_epoch, resume_fp = read_warm_resume(internalstore)
+	if resume_epoch == epoch and resume_fp then
+		for i, fp in ipairs(fps) do
+			if fp == resume_fp then
+				start_i = i
+				log(
+					ngx.NOTICE,
+					"OCSP L1 warmer resume at fp="
+						.. resume_fp:sub(1, 16)
+						.. "... index="
+						.. tostring(i)
+						.. " subsystem="
+						.. tostring(ngx.config.subsystem)
+				)
+				break
+			end
+		end
+	end
+
 	local warmed = 0
-	for i, fp in ipairs(fps) do
+	local ms_pcall_fail = false
+	for i = start_i, #fps do
+		local fp = fps[i]
 		-- Heartbeat before each chunk so a long walk cannot outlive LEASE_TTL.
-		if i > 1 and ((i - 1) % L1_WARMER_LEASE_HEARTBEAT_EVERY) == 0 then
+		if i > start_i and ((i - start_i) % L1_WARMER_LEASE_HEARTBEAT_EVERY) == 0 then
 			if not renew_l1_warmer_lease(internalstore) then
+				write_warm_resume(internalstore, epoch, fp)
 				log(
 					ngx.NOTICE,
 					"OCSP L1 warmer lost lease mid-scan after "
 						.. tostring(warmed)
-						.. " shard(s); will retry next tick subsystem="
+						.. " shard(s); resume fp="
+						.. fp:sub(1, 16)
+						.. "... subsystem="
 						.. tostring(ngx.config.subsystem)
 				)
 				return warmed, false
 			end
 		end
-		local ok, did = pcall(warm_one_shard, internalstore, fp)
-		if ok and did then
+		local ok, did = pcall(warm_one_shard, internalstore, fp, meta_by_fp[fp])
+		if not ok then
+			log(
+				ngx.ERR,
+				"OCSP L1 warmer shard error fp="
+					.. fp:sub(1, 16)
+					.. "... err="
+					.. tostring(did)
+					.. " subsystem="
+					.. tostring(ngx.config.subsystem)
+			)
+			if is_must[fp] then
+				ms_pcall_fail = true
+			end
+		elseif did then
 			warmed = warmed + 1
 		end
 	end
+	clear_warm_resume(internalstore)
 	if warmed > 0 then
 		log(
 			ngx.INFO,
 			"OCSP L1 warmer loaded " .. tostring(warmed) .. " shard(s) subsystem=" .. tostring(ngx.config.subsystem)
 		)
+	end
+	-- pcall throws on Must-Staple shards must not stamp a "complete" pass.
+	if ms_pcall_fail then
+		return warmed, false
 	end
 	return warmed, true
 end
@@ -276,6 +379,8 @@ function _M.start_l1_warmer(internalstore)
 		return true
 	end
 	if not ngx.timer or not ngx.timer.at then
+		-- No timer API: do not leave a store that handshake rearm will thrash.
+		l1_warmer_store = nil
 		return false
 	end
 	-- Off handshake: ensure allow/ligand/legacy-refuse dirs exist (job writes pins).
@@ -291,21 +396,25 @@ function _M.start_l1_warmer(internalstore)
 		if premature then
 			return
 		end
-		-- Refresh this worker's multi-staple colony vote (MIN across live workers).
+		-- Colony vote: every worker must refresh (MIN across live peers), not only
+		-- the lease holder — a leaf-only worker still needs to publish "0".
 		pcall(refresh_multi_staple_vote)
 		if claim_l1_warmer_lease(internalstore) then
+			-- Re-provision bus dirs on claim (vanished pin dirs after arm).
+			pcall(ensure_ocsp_bus_dirs)
 			local epoch = current_ocsp_epoch()
 			local now = ngx.time()
 			-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
 			-- does not push the next handshake onto a cold ocsp.der read.
 			local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
 			if need then
-				-- Stamp epoch/full only after a complete pass. Mid-scan lease loss
-				-- must not count as current (otherwise next ticks skip until RESCAN).
-				local ok_warm, _, complete = pcall(_M.warm_l1_from_disk, internalstore)
+				-- Stamp last_full from walk start so a long scan does not stretch
+				-- effective RESCAN by wall-clock duration. Epoch only after complete.
+				local walk_started = now
+				local ok_warm, _, complete = pcall(_M.warm_l1_from_disk, internalstore, epoch)
 				if ok_warm and complete == true then
 					l1_warmer_last_epoch = epoch
-					l1_warmer_last_full = now
+					l1_warmer_last_full = walk_started
 				end
 			end
 		end
