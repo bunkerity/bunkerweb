@@ -5006,10 +5006,11 @@ def _tombstone_ocsp_shard(
         _release_cert_lock(lock, normalized)
 
 
-def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
+def _halve_cached_staple_ttl(fingerprint: str, cert_name: str, db: Optional[Any] = None) -> Optional[int]:
     """
     First verified non-GOOD that does not yet tombstone: cut leftover GOOD TTL in half.
-    Keeps ocsp.der; rewrites expires / expires_unix and bumps the epoch so L1 reloads.
+    Keeps ocsp.der; rewrites expires / expires_unix, upserts that meta to the DB (so
+    restore cannot put the longer death clock back), and bumps the epoch so L1 reloads.
     Returns the new remaining seconds, or None when there was nothing to shorten.
     """
     normalized = _normalize_fingerprint(fingerprint)
@@ -5077,8 +5078,31 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str) -> Optional[int]:
         meta["ttl_halved_after_nongood"] = True
         meta["ttl_halved_from"] = remaining
         meta.update(_provenance_meta())
-        _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        meta_text = json.dumps(meta, separators=(",", ":"))
+        _atomic_write_text(meta_path, meta_text, mode=0o640)
         _bump_ocsp_cache_epoch()
+        if db is not None:
+            try:
+                meta_bytes = meta_text.encode("utf-8")
+                err = db.upsert_job_cache(
+                    service_id=None,
+                    file_name=_ocsp_cache_relpath(normalized, "ocsp.json"),
+                    data=meta_bytes,
+                    job_name="ocsp-refresh",
+                    checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
+                )
+                if err:
+                    log_warning(
+                        "⚠️ OCSP halved TTL on disk for %s but DB upsert failed: %s",
+                        cert_name,
+                        err,
+                    )
+            except Exception as e:
+                log_warning(
+                    "⚠️ OCSP halved TTL on disk for %s but could not upsert meta: %s",
+                    cert_name,
+                    e,
+                )
         log_warning(
             "⚠️ OCSP halved leftover staple TTL for %s after first non-GOOD (fp=%s... %ds → %ds)",
             cert_name,
@@ -5154,7 +5178,7 @@ def _note_verified_nongood(
     if consecutive < threshold:
         halved = None
         if consecutive == 1:
-            halved = _halve_cached_staple_ttl(normalized, cert_name)
+            halved = _halve_cached_staple_ttl(normalized, cert_name, db)
         return False, halved
     return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix), None
 

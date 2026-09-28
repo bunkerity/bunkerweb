@@ -505,8 +505,9 @@ def should_keep_disk_ocsp_shard(
     True when an on-disk OCSP shard must not be overwritten by a DB/restore payload.
 
     Order: tombstone vs GOOD by published_unix (wall clock; denial must not lose to an
-    older far-future GOOD), then expires_unix, published_unix, and job_run_id only as a
-    same-host forensic tie-break (pid.time_ns is not colony consensus). Equal → keep disk.
+    older far-future GOOD), then same-body TTL recall (shorter wins when either side
+    was halved after non-GOOD), then expires_unix, published_unix, and job_run_id only
+    as a same-host forensic tie-break (pid.time_ns is not colony consensus). Equal → keep disk.
     Missing disk meta → allow restore. Missing incoming meta while disk has meta → keep disk.
     """
     if not isinstance(disk_meta, dict):
@@ -533,6 +534,25 @@ def should_keep_disk_ocsp_shard(
 
     disk_exp = _ocsp_meta_unix(disk_meta, "expires_unix")
     inc_exp = _ocsp_meta_unix(incoming_meta, "expires_unix")
+
+    def _der_sha(meta: Dict[str, Any]) -> str:
+        sha = meta.get("der_sha256")
+        if isinstance(sha, str):
+            lowered = sha.lower()
+            if len(lowered) == 64 and all(c in "0123456789abcdef" for c in lowered):
+                return lowered
+        return ""
+
+    disk_sha = _der_sha(disk_meta)
+    inc_sha = _der_sha(incoming_meta)
+    same_body = bool(disk_sha and disk_sha == inc_sha)
+    disk_halved = disk_meta.get("ttl_halved_after_nongood") is True
+    inc_halved = incoming_meta.get("ttl_halved_after_nongood") is True
+    # Same DER with an intentional TTL recall: shorter death clock wins (do not let a
+    # longer stale DB expires undo a disk half, or a long local disk undo a DB half).
+    if same_body and (disk_halved or inc_halved) and disk_exp != inc_exp:
+        return disk_exp < inc_exp
+
     if disk_exp != inc_exp:
         return disk_exp > inc_exp
 
