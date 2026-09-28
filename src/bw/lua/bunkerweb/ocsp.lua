@@ -198,7 +198,24 @@ local function format_staple_decision(code, fields)
 			f.alias = alias_detail
 		end
 	end
-	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "refuse_cause", "der_sha256", "epoch", "worker", "server_name", "subsystem", "multi_entries", "stapled_entries", "null_slots" }
+	local order = {
+		"tag",
+		"action",
+		"mode",
+		"kind",
+		"fp",
+		"detail",
+		"alias",
+		"refuse_cause",
+		"der_sha256",
+		"epoch",
+		"worker",
+		"server_name",
+		"subsystem",
+		"multi_entries",
+		"stapled_entries",
+		"null_slots",
+	}
 	local seen = { staple_decision = true }
 	for _, key in ipairs(order) do
 		local val = f[key]
@@ -385,11 +402,23 @@ local function read_file(path)
 end
 
 local function ocsp_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/" .. fingerprint:sub(1, 1) .. "/" .. fingerprint:sub(2, 2) .. "/" .. fingerprint .. "/ocsp.der"
+	return "/var/cache/bunkerweb/ssl/"
+		.. fingerprint:sub(1, 1)
+		.. "/"
+		.. fingerprint:sub(2, 2)
+		.. "/"
+		.. fingerprint
+		.. "/ocsp.der"
 end
 
 local function issuer_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/" .. fingerprint:sub(1, 1) .. "/" .. fingerprint:sub(2, 2) .. "/" .. fingerprint .. "/issuer.pem"
+	return "/var/cache/bunkerweb/ssl/"
+		.. fingerprint:sub(1, 1)
+		.. "/"
+		.. fingerprint:sub(2, 2)
+		.. "/"
+		.. fingerprint
+		.. "/issuer.pem"
 end
 
 local function cache_key(fingerprint)
@@ -1372,7 +1401,9 @@ local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires
 	end
 	gen = math.floor(gen)
 	local path = ocsp_allow_path(fingerprint)
-	local tmp = path .. ".tmp." .. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
+	local tmp = path
+		.. ".tmp."
+		.. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
 	local payload_obj = {
 		der_sha256 = sha,
 		soft_recall_gen = gen,
@@ -1532,7 +1563,8 @@ end
 -- stays separate. Pin-state / clock causes are KEEP — this worker's view must
 -- not revoke a pin HTTP, stream, and every sibling rely on.
 local function record_peer_refuse(fingerprint, meta, resp, decision)
-	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
+	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...")
+		or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
 	local refuse_cause = tostring(decision or "unmet")
 	-- Prefix variants (canary_*, legacy shared_ligand_*) drop like their buckets,
@@ -1552,12 +1584,7 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 	if not drop then
 		log(
 			ngx.DEBUG,
-			"OCSP allow-pin keep on refuse_cause="
-				.. refuse_cause
-				.. " fp="
-				.. fp_short
-				.. " subsystem="
-				.. by
+			"OCSP allow-pin keep on refuse_cause=" .. refuse_cause .. " fp=" .. fp_short .. " subsystem=" .. by
 		)
 		return false
 	end
@@ -1624,11 +1651,7 @@ local function should_skip_peer_bus(detail, meta, fingerprint)
 		or d == "issuer_unresolved_must_staple"
 		or d == "peer_refuse_unavailable"
 		or (type(eff) == "table" and eff.paged ~= true)
-		or (
-			(d == "set_staple_failed" or d == "set_staple_exception")
-			and type(eff) == "table"
-			and eff.paged == true
-		)
+		or ((d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true)
 end
 
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
@@ -1822,11 +1845,22 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	end
 	local got_hex = ocsp_resp_serial_hex(resp, banned_hex)
 	if not got_hex then
-		log(ngx.ERR, "OCSP serial blacklist present but response serial unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		log(
+			ngx.ERR,
+			"OCSP serial blacklist present but response serial unreadable; refusing staple fp="
+				.. fingerprint:sub(1, 16)
+				.. "..."
+		)
 		return true
 	end
 	if got_hex == banned_hex then
-		log(ngx.ERR, "OCSP serial blacklist refuse staple fp=" .. fingerprint:sub(1, 16) .. "... serial_hex=" .. banned_hex:sub(1, 16))
+		log(
+			ngx.ERR,
+			"OCSP serial blacklist refuse staple fp="
+				.. fingerprint:sub(1, 16)
+				.. "... serial_hex="
+				.. banned_hex:sub(1, 16)
+		)
 		return true
 	end
 	return false
@@ -2325,10 +2359,7 @@ local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 		end
 		return false
 	end
-	log(
-		ngx.INFO,
-		"OCSP meta der_sha256 accept fp=" .. fp_short .. "... der_sha256=" .. meta_sha:sub(1, 16) .. "..."
-	)
+	log(ngx.INFO, "OCSP meta der_sha256 accept fp=" .. fp_short .. "... der_sha256=" .. meta_sha:sub(1, 16) .. "...")
 	return true
 end
 
@@ -2427,7 +2458,13 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	meta = meta or (fingerprint and read_ocsp_json(fingerprint)) or nil
 	local ok_intrinsic, why = intrinsic_timing_ok(meta)
 	if not ok_intrinsic then
-		log(ngx.ERR, "OCSP intrinsic timing refuse reason=" .. tostring(why) .. " fp=" .. tostring(fingerprint and fingerprint:sub(1, 16) or "?"))
+		log(
+			ngx.ERR,
+			"OCSP intrinsic timing refuse reason="
+				.. tostring(why)
+				.. " fp="
+				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
+		)
 		return false, why or "unmet"
 	end
 	local meta_exp = meta_expires_unix(meta)
@@ -2488,7 +2525,18 @@ local issuer_path_intermediate_ready
 local clear_connection_staple
 local maybe_rearm_l1_warmer
 
-local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, chain_blocks)
+local function try_staple(
+	ocsp,
+	ssl,
+	resp,
+	leaf_pem,
+	issuers,
+	shard_issuer_spki,
+	probe_only,
+	meta,
+	fingerprint,
+	chain_blocks
+)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
 		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
@@ -2513,7 +2561,8 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		end
 		local detail = tostring(set_err or set_ok)
 		log(ngx.ERR, "OCSP failed to set stapling: " .. detail)
-		if detail == "intermediate_must_staple_libssl"
+		if
+			detail == "intermediate_must_staple_libssl"
 			or detail == "intermediate_must_staple_colony"
 			or detail == "multi_staple_attach_failed"
 		then
@@ -3189,9 +3238,7 @@ clear_connection_staple = function()
 	if prev and ok_clear then
 		log(
 			ngx.DEBUG,
-			"OCSP dropped connection staple on SSL context swap prev_fp="
-				.. tostring(prev):sub(1, 16)
-				.. "..."
+			"OCSP dropped connection staple on SSL context swap prev_fp=" .. tostring(prev):sub(1, 16) .. "..."
 		)
 	end
 	return ok_clear
@@ -4109,7 +4156,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			local leaf_ok = true
 			local leaf_detail = nil
 			if leaf_must and internalstore and mode ~= "open" then
-				local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, blocks, leaf.fp, false)
+				local probe_ok, probe_reason, probe_detail =
+					_M.probe(internalstore, server_name, blocks, leaf.fp, false)
 				if not probe_ok then
 					leaf_ok = false
 					-- Skip-leaf demotion never writes the peer bus (see install_one).
@@ -4259,7 +4307,10 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		if must_staple then
 			return must_staple_refuse(fingerprint, meta, nil, "ngx_ocsp_unavailable", mode)
 		end
-		log(ngx.DEBUG, format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" }))
+		log(
+			ngx.DEBUG,
+			format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" })
+		)
 		return false
 	end
 
@@ -4286,72 +4337,82 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		else
 			local fresh, fresh_why = resp_still_fresh(cached_expires, fingerprint, meta)
 			if not fresh then
-				log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
+				log(
+					ngx.ERR,
+					"OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "..."
+				)
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 				end
 			else
-			if serial_blacklist_blocks(fingerprint, cached) then
-				drop_cache(internalstore, fingerprint)
-				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
-				end
-				return false
-			end
-			local verified = entry_verified(cached_verified, cached)
-			-- Only consult meta when L1 is not already crypto-verified (avoids refuse noise).
-			local authorized = false
-			if not verified then
-				authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
-			end
-			if verified or authorized then
-				-- Must-Staple: stream-private verified L1 is not enough; bind shared ligand.
-				local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
-				if must_staple and not ligand_ok then
-					drop_cache(internalstore, fingerprint)
-					return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
-				end
-				local ok_id, why = certid_consistent_with_meta(meta or read_ocsp_json(fingerprint), cached)
-				if not ok_id then
-					log(ngx.ERR, "OCSP CertID refuse fingerprint staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
+				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
+						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
 					end
 					return false
 				end
-				if probe_only then
-					return true
+				local verified = entry_verified(cached_verified, cached)
+				-- Only consult meta when L1 is not already crypto-verified (avoids refuse noise).
+				local authorized = false
+				if not verified then
+					authorized = ocsp_json_authorizes_resp(meta, fingerprint, cached)
 				end
-				local set_ok, set_err
-				local ok_set = pcall(function()
-					set_ok, set_err = attach_fp(cached)
-				end)
-				if ok_set and set_ok then
-					local exp = meta_effective_expires_unix(meta, cached_expires)
-					-- Re-warm with the epoch l1_matches_disk already accepted.
-					if verified then
-						warm_cache(internalstore, fingerprint, cached, true, exp, cached_epoch)
-					else
-						warm_cache(internalstore, fingerprint, cached, false, exp, cached_epoch)
+				if verified or authorized then
+					-- Must-Staple: stream-private verified L1 is not enough; bind shared ligand.
+					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
+					if must_staple and not ligand_ok then
+						drop_cache(internalstore, fingerprint)
+						return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
 					end
-					log_ocsp_stapled(server_name, nil, fingerprint, cached)
-					return true
+					local ok_id, why = certid_consistent_with_meta(meta or read_ocsp_json(fingerprint), cached)
+					if not ok_id then
+						log(
+							ngx.ERR,
+							"OCSP CertID refuse fingerprint staple reason="
+								.. tostring(why)
+								.. " fp="
+								.. fingerprint:sub(1, 16)
+								.. "..."
+						)
+						drop_cache(internalstore, fingerprint)
+						if must_staple then
+							return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
+						end
+						return false
+					end
+					if probe_only then
+						return true
+					end
+					local set_ok, set_err
+					local ok_set = pcall(function()
+						set_ok, set_err = attach_fp(cached)
+					end)
+					if ok_set and set_ok then
+						local exp = meta_effective_expires_unix(meta, cached_expires)
+						-- Re-warm with the epoch l1_matches_disk already accepted.
+						if verified then
+							warm_cache(internalstore, fingerprint, cached, true, exp, cached_epoch)
+						else
+							warm_cache(internalstore, fingerprint, cached, false, exp, cached_epoch)
+						end
+						log_ocsp_stapled(server_name, nil, fingerprint, cached)
+						return true
+					end
+					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
+					drop_cache(internalstore, fingerprint)
+					local detail = tostring(set_err or set_ok)
+					if
+						must_staple
+						or detail == "fingerprint_chain_unavailable"
+						or detail == "multi_staple_attach_failed"
+						or detail == "intermediate_must_staple_libssl"
+						or detail == "intermediate_must_staple_colony"
+					then
+						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+					end
 				end
-				log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
-				drop_cache(internalstore, fingerprint)
-				local detail = tostring(set_err or set_ok)
-				if
-					must_staple
-					or detail == "fingerprint_chain_unavailable"
-					or detail == "multi_staple_attach_failed"
-					or detail == "intermediate_must_staple_libssl"
-					or detail == "intermediate_must_staple_colony"
-				then
-					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
-				end
-			end
 			end
 		end
 	end
@@ -4360,7 +4421,10 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	if resp then
 		local fresh, fresh_why = resp_still_fresh(nil, fingerprint, meta)
 		if not fresh then
-			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			log(
+				ngx.ERR,
+				"OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "..."
+			)
 			if must_staple then
 				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 			end
@@ -4387,7 +4451,14 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			end
 			local ok_id, why = certid_consistent_with_meta(meta, resp)
 			if not ok_id then
-				log(ngx.ERR, "OCSP CertID refuse fingerprint staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
+				log(
+					ngx.ERR,
+					"OCSP CertID refuse fingerprint staple reason="
+						.. tostring(why)
+						.. " fp="
+						.. fingerprint:sub(1, 16)
+						.. "..."
+				)
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
 				end
@@ -4426,7 +4497,18 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	return false
 end
 
-local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, probe_only, mode)
+local function staple_one_leaf(
+	internalstore,
+	ocsp,
+	ssl,
+	blocks,
+	leaf_pem,
+	fingerprint,
+	must_staple,
+	server_name,
+	probe_only,
+	mode
+)
 	mode = mode or "normal"
 	if not fingerprint then
 		return nil
@@ -4474,144 +4556,172 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		else
 			local fresh, fresh_why = resp_still_fresh(cached_expires, fingerprint, meta)
 			if not fresh then
-				log(ngx.ERR, "OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "...")
+				log(
+					ngx.ERR,
+					"OCSP L1 response past nextUpdate/expires; discarding fp=" .. fingerprint:sub(1, 16) .. "..."
+				)
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 				end
 			elseif entry_verified(cached_verified, cached) then
-			if serial_blacklist_blocks(fingerprint, cached) then
-				drop_cache(internalstore, fingerprint)
-				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
-				end
-				return false
-			end
-			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
-			local ok_id, why = certid_matches_handshake_leaf(leaf_pem, cached, issuers)
-			if not ok_id then
-				log(ngx.ERR, "OCSP CertID refuse L1 staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
-				drop_cache(internalstore, fingerprint)
-				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
-				end
-				-- Fall through to disk / re-validate with the current leaf.
-			else
-			-- Must-Staple: bind shared ocsp.json ligand, not stream-private L1 alone.
-			if must_staple then
-				meta = meta or read_ocsp_json(fingerprint)
-				local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
-				if not ligand_ok then
+				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
-					return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
-				end
-			end
-			if probe_only then
-				local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
-				if not path_ok then
-					return false, "must_staple", path_detail or "unmet"
-				end
-				return true
-			end
-			local set_ok, set_err
-			local ok_set = pcall(function()
-				set_ok, set_err = attach_ocsp_staple(ocsp, cached, blocks)
-			end)
-			if ok_set and set_ok then
-				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
-				return true
-			end
-			local attach_detail = tostring(set_err or set_ok)
-			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
-			drop_cache(internalstore, fingerprint)
-			if
-				attach_detail == "intermediate_must_staple_libssl"
-				or attach_detail == "intermediate_must_staple_colony"
-				or attach_detail == "multi_staple_attach_failed"
-				or attach_detail == "fingerprint_chain_unavailable"
-				or attach_detail == "issuer_unresolved_must_staple"
-				or must_staple
-			then
-				local detail = attach_detail
-				if
-					detail ~= "intermediate_must_staple_libssl"
-					and detail ~= "intermediate_must_staple_colony"
-					and detail ~= "multi_staple_attach_failed"
-					and detail ~= "fingerprint_chain_unavailable"
-					and detail ~= "issuer_unresolved_must_staple"
-				then
-					detail = "set_staple_failed"
-				end
-				return must_staple_refuse(fingerprint, meta, cached, detail, mode)
-			end
-			end
-		else
-			if serial_blacklist_blocks(fingerprint, cached) then
-				drop_cache(internalstore, fingerprint)
-				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
-				end
-				return false
-			end
-			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
-			local result, result_detail = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
-			if result == true then
-				if must_staple then
-					meta = meta or read_ocsp_json(fingerprint)
-					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
-					if not ligand_ok then
-						drop_cache(internalstore, fingerprint)
-						return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
-					end
-				end
-				if probe_only then
-					local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
-					if not path_ok then
-						return false, "must_staple", path_detail or "unmet"
-					end
-					return true
-				end
-				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires), cached_epoch)
-				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
-				return true
-			end
-			if result == false then
-				if result_detail == "validate_budget" then
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
 					end
 					return false
 				end
-				if
-					result_detail == "intermediate_must_staple_libssl"
-					or result_detail == "intermediate_must_staple_colony"
-					or result_detail == "multi_staple_attach_failed"
-					or result_detail == "fingerprint_chain_unavailable"
-					or result_detail == "issuer_unresolved_must_staple"
-					or result_detail == "certid_mismatch"
-					or result_detail == "response_not_found"
-					or must_staple
-				then
-					-- Preserve DROP/KEEP codes from try_staple (certid_mismatch, path demotion).
-					-- Only bare false + canary ligand collapses to set_staple_failed / unmet.
-					local detail = result_detail
-					if
-						detail ~= "intermediate_must_staple_libssl"
-						and detail ~= "intermediate_must_staple_colony"
-						and detail ~= "multi_staple_attach_failed"
-						and detail ~= "fingerprint_chain_unavailable"
-						and detail ~= "issuer_unresolved_must_staple"
-						and detail ~= "certid_mismatch"
-						and detail ~= "response_not_found"
-					then
-						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
+				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+				local ok_id, why = certid_matches_handshake_leaf(leaf_pem, cached, issuers)
+				if not ok_id then
+					log(
+						ngx.ERR,
+						"OCSP CertID refuse L1 staple reason="
+							.. tostring(why)
+							.. " fp="
+							.. fingerprint:sub(1, 16)
+							.. "..."
+					)
+					drop_cache(internalstore, fingerprint)
+					if must_staple then
+						return must_staple_refuse(fingerprint, meta, nil, "certid_mismatch", mode)
 					end
-					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+				-- Fall through to disk / re-validate with the current leaf.
+				else
+					-- Must-Staple: bind shared ocsp.json ligand, not stream-private L1 alone.
+					if must_staple then
+						meta = meta or read_ocsp_json(fingerprint)
+						local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
+						if not ligand_ok then
+							drop_cache(internalstore, fingerprint)
+							return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
+						end
+					end
+					if probe_only then
+						local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+						if not path_ok then
+							return false, "must_staple", path_detail or "unmet"
+						end
+						return true
+					end
+					local set_ok, set_err
+					local ok_set = pcall(function()
+						set_ok, set_err = attach_ocsp_staple(ocsp, cached, blocks)
+					end)
+					if ok_set and set_ok then
+						log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
+						return true
+					end
+					local attach_detail = tostring(set_err or set_ok)
+					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
+					drop_cache(internalstore, fingerprint)
+					if
+						attach_detail == "intermediate_must_staple_libssl"
+						or attach_detail == "intermediate_must_staple_colony"
+						or attach_detail == "multi_staple_attach_failed"
+						or attach_detail == "fingerprint_chain_unavailable"
+						or attach_detail == "issuer_unresolved_must_staple"
+						or must_staple
+					then
+						local detail = attach_detail
+						if
+							detail ~= "intermediate_must_staple_libssl"
+							and detail ~= "intermediate_must_staple_colony"
+							and detail ~= "multi_staple_attach_failed"
+							and detail ~= "fingerprint_chain_unavailable"
+							and detail ~= "issuer_unresolved_must_staple"
+						then
+							detail = "set_staple_failed"
+						end
+						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+					end
 				end
-				return false
+			else
+				if serial_blacklist_blocks(fingerprint, cached) then
+					drop_cache(internalstore, fingerprint)
+					if must_staple then
+						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+					end
+					return false
+				end
+				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+				local result, result_detail = try_staple(
+					ocsp,
+					ssl,
+					cached,
+					leaf_pem,
+					issuers,
+					shard_issuer_spki,
+					probe_only,
+					meta,
+					fingerprint,
+					blocks
+				)
+				if result == true then
+					if must_staple then
+						meta = meta or read_ocsp_json(fingerprint)
+						local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
+						if not ligand_ok then
+							drop_cache(internalstore, fingerprint)
+							return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
+						end
+					end
+					if probe_only then
+						local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+						if not path_ok then
+							return false, "must_staple", path_detail or "unmet"
+						end
+						return true
+					end
+					warm_cache(
+						internalstore,
+						fingerprint,
+						cached,
+						true,
+						meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+						cached_epoch
+					)
+					log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
+					return true
+				end
+				if result == false then
+					if result_detail == "validate_budget" then
+						if must_staple then
+							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+						end
+						return false
+					end
+					if
+						result_detail == "intermediate_must_staple_libssl"
+						or result_detail == "intermediate_must_staple_colony"
+						or result_detail == "multi_staple_attach_failed"
+						or result_detail == "fingerprint_chain_unavailable"
+						or result_detail == "issuer_unresolved_must_staple"
+						or result_detail == "certid_mismatch"
+						or result_detail == "response_not_found"
+						or must_staple
+					then
+						-- Preserve DROP/KEEP codes from try_staple (certid_mismatch, path demotion).
+						-- Only bare false + canary ligand collapses to set_staple_failed / unmet.
+						local detail = result_detail
+						if
+							detail ~= "intermediate_must_staple_libssl"
+							and detail ~= "intermediate_must_staple_colony"
+							and detail ~= "multi_staple_attach_failed"
+							and detail ~= "fingerprint_chain_unavailable"
+							and detail ~= "issuer_unresolved_must_staple"
+							and detail ~= "certid_mismatch"
+							and detail ~= "response_not_found"
+						then
+							detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
+						end
+						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+					end
+					return false
+				end
+				drop_cache(internalstore, fingerprint)
 			end
-			drop_cache(internalstore, fingerprint)
-		end
 		end
 	end
 
@@ -4620,7 +4730,10 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		meta = meta or read_ocsp_json(fingerprint)
 		local fresh, fresh_why = resp_still_fresh(nil, fingerprint, meta)
 		if not fresh then
-			log(ngx.ERR, "OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			log(
+				ngx.ERR,
+				"OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "..."
+			)
 			if must_staple then
 				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 			end
@@ -4633,7 +4746,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		local result, result_detail = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
+		local result, result_detail =
+			try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
 		if result == true then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
@@ -4735,7 +4849,12 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	-- including for the Must-Staple decision below.
 	local leaf_fp = spki_fingerprint(leaf_pem)
 	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
-		log_ocsp_staple_skip(cert_pubkey_kind(leaf_pem) == "ec" and "rsa" or "ec", fp_hint, "wrong_key_type_hint", server_name)
+		log_ocsp_staple_skip(
+			cert_pubkey_kind(leaf_pem) == "ec" and "rsa" or "ec",
+			fp_hint,
+			"wrong_key_type_hint",
+			server_name
+		)
 		fp_hint = nil
 	end
 	-- No SPKI from PEM: fingerprint-only path (no sibling borrow possible without a second leaf).
@@ -4766,12 +4885,16 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		if must_staple then
 			return soften_must_staple(mode, false, "must_staple", "ngx_ocsp_unavailable")
 		end
-		log(ngx.DEBUG, format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" }))
+		log(
+			ngx.DEBUG,
+			format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" })
+		)
 		return false
 	end
 	local ssl = require "ngx.ssl"
 
-	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, false, mode)
+	local result, reason, detail =
+		staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, false, mode)
 	if result == true then
 		return true
 	end
@@ -4860,7 +4983,8 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not fingerprint then
 		return finish(false, "must_staple", "fingerprint_unavailable")
 	end
-	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, true, server_name, true, mode)
+	local result, reason, detail =
+		staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, true, server_name, true, mode)
 	if result == true then
 		return true
 	end
@@ -4869,7 +4993,6 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	end
 	return finish(false, "must_staple", "response_not_found")
 end
-
 
 -- Cross-subsystem allow-pin bus (HTTP ↔ stream). Missing pin refuses Must-Staple.
 -- meta must carry der_sha256 (+ soft_recall_gen); string-only generation ids are gone.
@@ -5194,7 +5317,10 @@ function _M.warm_l1_from_disk(internalstore)
 		end
 	end
 	if warmed > 0 then
-		log(ngx.INFO, "OCSP L1 warmer loaded " .. tostring(warmed) .. " shard(s) subsystem=" .. tostring(ngx.config.subsystem))
+		log(
+			ngx.INFO,
+			"OCSP L1 warmer loaded " .. tostring(warmed) .. " shard(s) subsystem=" .. tostring(ngx.config.subsystem)
+		)
 	end
 	return warmed
 end
@@ -5221,34 +5347,34 @@ function _M.start_l1_warmer(internalstore)
 	l1_warmer_started = true
 	l1_warmer_store = internalstore
 
-		local function tick(premature)
-			if premature then
-				return
-			end
-			-- Refresh this worker's multi-staple colony vote (MIN across live workers).
-			if _multi_staple_state ~= nil then
-				pcall(publish_multi_staple_attach, _multi_staple_state ~= false, false)
-			else
-				pcall(openssl_multi_staple_ready)
-			end
-			if claim_l1_warmer_lease(internalstore) then
-				local epoch = current_ocsp_epoch()
-				local now = ngx.time()
-				-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
-				-- does not push the next handshake onto a cold ocsp.der read.
-				local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
-				if need then
-					l1_warmer_last_epoch = epoch
-					l1_warmer_last_full = now
-					pcall(_M.warm_l1_from_disk, internalstore)
-				end
-			end
-			local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
-			if not ok then
-				l1_warmer_started = false
-				log(ngx.ERR, "OCSP L1 warmer reschedule failed: " .. tostring(err))
+	local function tick(premature)
+		if premature then
+			return
+		end
+		-- Refresh this worker's multi-staple colony vote (MIN across live workers).
+		if _multi_staple_state ~= nil then
+			pcall(publish_multi_staple_attach, _multi_staple_state ~= false, false)
+		else
+			pcall(openssl_multi_staple_ready)
+		end
+		if claim_l1_warmer_lease(internalstore) then
+			local epoch = current_ocsp_epoch()
+			local now = ngx.time()
+			-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
+			-- does not push the next handshake onto a cold ocsp.der read.
+			local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
+			if need then
+				l1_warmer_last_epoch = epoch
+				l1_warmer_last_full = now
+				pcall(_M.warm_l1_from_disk, internalstore)
 			end
 		end
+		local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
+		if not ok then
+			l1_warmer_started = false
+			log(ngx.ERR, "OCSP L1 warmer reschedule failed: " .. tostring(err))
+		end
+	end
 
 	-- Stagger first tick by worker id so startup claims are not a thundering herd.
 	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
