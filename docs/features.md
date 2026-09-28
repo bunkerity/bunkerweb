@@ -3399,6 +3399,9 @@ Follow these steps to configure and use the Let's Encrypt feature:
 7. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
 8. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
+!!! warning "OCSP stapling needs ZeroSSL (or another OCSP-capable CA)"
+    Let's Encrypt does **not** provide OCSP responders. If you enable `SSL_USE_OCSP_STAPLING`, use `LETS_ENCRYPT_SERVER=zerossl` (with ZeroSSL credentials) so issued leaves advertise an OCSP AIA URI. Otherwise stapling has nothing to fetch for Let's Encrypt certificates.
+
 !!! tip "Certificate Profiles"
     Let's Encrypt provides different certificate profiles for different use cases:
 
@@ -6289,6 +6292,9 @@ Follow these steps to configure and use the SSL feature:
 4. **Enable OCSP stapling:** Set `SSL_USE_OCSP_STAPLING` to `yes` to staple a cached OCSP response for certificates that advertise an OCSP responder.
 5. **Must-Staple fuse (optional):** Leave `OCSP_STAPLE_MODE` at `normal` unless you need an on-call escape hatch. Both HTTP and stream read the same value.
 
+!!! warning "Let's Encrypt has no OCSP responders"
+    Let's Encrypt certificates do **not** advertise usable OCSP responders, so OCSP stapling cannot work with `LETS_ENCRYPT_SERVER=letsencrypt`. For OCSP-capable ACME certificates, set `LETS_ENCRYPT_SERVER=zerossl` (and ZeroSSL credentials as needed). Custom certificates from a CA that publishes OCSP in AIA also work when stapling is enabled.
+
 ### Configuration Settings
 
 | Setting                       | Default           | Context   | Multiple | Description                                                                                                                        |
@@ -6300,7 +6306,7 @@ Follow these steps to configure and use the SSL feature:
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).                    |
 | `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **SSL ECDH Curves:** Colon-separated list of ECDH curves (TLS groups) or `auto` for smart selection (prefers PQC on OpenSSL 3.5+). |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable.                |
-| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Use OCSP stapling:** When set to `yes`, staple a cached OCSP response during the TLS handshake for certificates that advertise an OCSP responder. Applies to HTTP and stream TLS, including Let's Encrypt, custom, and self-signed certificates. |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Use OCSP stapling:** When set to `yes`, staple a cached OCSP response during the TLS handshake for certificates that advertise an OCSP responder. Applies to HTTP and stream TLS (custom certs, ZeroSSL ACME, etc.). Let's Encrypt leaves have no OCSP responders — use `LETS_ENCRYPT_SERVER=zerossl` for ACME + OCSP. |
 | `OCSP_STAPLE_MODE`            | `normal`          | multisite | no       | **OCSP staple mode:** Must-Staple fuse for HTTP and stream. `normal` refuses the handshake when Must-Staple is unmet; `staple_only` keeps stapling but does not abort; `open` disables Must-Staple enforcement (recovery). |
 
 Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 seconds (`OCSP_CLOCK_SKEW_SECONDS`). Death time is `nextUpdate` / `max_age_unix` **minus** that skew: staples stop being served before the CA's advertised expiry so a lagging worker clock cannot present a response the CA already considers dead.

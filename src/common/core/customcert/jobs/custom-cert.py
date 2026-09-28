@@ -1,4 +1,31 @@
 #!/usr/bin/env python3
+"""
+Custom SSL certificate job — validate, cache, and kick OCSP refresh on change.
+
+REVIEWER MAP
+============
+Caches operator-supplied cert/key pairs under
+``/var/cache/bunkerweb/customcert/{service}/cert.pem|key.pem`` for the
+``customcert`` Lua plugin (``ssl_certificate`` phase). When a pair changes
+**and** OCSP stapling is enabled for that service, this job runs
+``ocsp-refresh.py --changed-only`` so Must-Staple / staple shards track the
+new leaf without waiting for the next scheduled OCSP tick.
+
+Companions:
+  customcert.lua                 — serves cached PEM; status[5] = SPKI fp hint
+  ssl/jobs/ocsp-refresh.py       — fetch/canary/page OCSP for changed leaves
+  certificate_validation         — shared with UI (normalize_pem / validate pair)
+
+Exit status (scheduler convention):
+  0 — no change / nothing to do
+  1 — at least one cert/key was rewritten (reload signal)
+  2 — validation / cache error for one or more services
+
+OCSP post-change refresh is best-effort (timeout / failure → warning only);
+a failed kick does not flip status to 2 — the next scheduled ocsp-refresh
+still runs. Parent wait is OCSP_REFRESH_TIMEOUT (35m); the child soft-stops
+earlier at JOB_TIMEOUT_SECONDS≈2040s inside ocsp-refresh.
+"""
 
 from os import getenv, sep
 from os.path import join
@@ -19,11 +46,19 @@ from logger import getLogger  # type: ignore
 
 LOGGER = getLogger("CUSTOM-CERT")
 JOB = Job(LOGGER, __file__)
-OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
+# Parent wait for post-change OCSP kick. Child soft-stops at JOB_TIMEOUT_SECONDS≈2040s
+# inside ocsp-refresh; keep this slightly above that so the child can exit cleanly.
+OCSP_REFRESH_TIMEOUT = 2100  # 35m
 
 
 def _ocsp_stapling_enabled_for(service_name: str) -> bool:
-    """True when this service, or the global setting, has SSL_USE_OCSP_STAPLING=yes."""
+    """
+    True when this service (or global fallback) has ``SSL_USE_OCSP_STAPLING=yes``.
+
+    Multisite: ``{service}_SSL_USE_OCSP_STAPLING`` wins when set; otherwise the
+    global value. Used only to decide whether a cert change should kick
+    ``ocsp-refresh.py --changed-only`` — not whether custom SSL itself is on.
+    """
     if getenv("MULTISITE", "no").lower() == "yes" and service_name:
         site_value = getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
         if site_value is not None:
@@ -32,7 +67,13 @@ def _ocsp_stapling_enabled_for(service_name: str) -> bool:
 
 
 def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["cert", "key"], server_name: str) -> Union[bytes, Path, None]:
-    """Process SSL certificate or key data from file path or direct data (base64 or plain text)"""
+    """
+    Resolve a cert or key from a filesystem path or inline data (PEM / base64).
+
+    ``CUSTOM_SSL_CERT_PRIORITY=file`` prefers path over data. Inline values go
+    through ``normalize_pem`` (same rules as the UI) so a pair accepted in the
+    UI is accepted here. Returns a ``Path``, PEM ``bytes``, or ``None`` on error.
+    """
     try:
         if file_path:
             path_obj = Path(file_path)
@@ -57,6 +98,18 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
 
 
 def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
+    """
+    Validate the cert/key pair and cache under ``customcert/{service}/`` if changed.
+
+    Returns ``(need_reload, err)``:
+      * ``(True, "")``  — cert and/or key bytes differ from cache (or cache missing)
+      * ``(False, "")`` — unchanged on disk
+      * ``(False, msg|exc)`` — invalid pair / I/O; caller skips and may set status 2
+
+    Validates in-process (certificate + key match). Expiry is a warning only —
+    withdrawing a live cert would fall back to the default server cert, which
+    is worse than serving expired material until the operator replaces it.
+    """
     try:
         ret = False
         if not cert_file or not key_file:
@@ -145,7 +198,7 @@ try:
             cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", "") if multisite else getenv("CUSTOM_SSL_CERT_DATA", "")
             key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", "") if multisite else getenv("CUSTOM_SSL_KEY_DATA", "")
 
-            # Use file or data based on priority
+            # Use file or data based on priority (file wins when path set + priority=file).
             use_cert_file = cert_priority == "file" and cert_file_path
             use_key_file = cert_priority == "file" and key_file_path
 
@@ -182,12 +235,14 @@ try:
 
             LOGGER.info(f"No change in {first_server}'s certificate")
 
+    # Services that turned custom SSL off (or failed validation) must not keep stale PEM.
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
 
-    # Trigger OCSP stapling refresh when certificates changed (AFTER caching)
-    # OCSP job will compare new certs with cached ones and process differential updates
+    # After caching: same-key renew / new leaf must get a fresh OCSP page before
+    # handshake Must-Staple can succeed. --changed-only diffs against the job's
+    # known cert set (not a full fleet scan). Non-fatal on timeout/failure.
     if changed_domains and any(_ocsp_stapling_enabled_for(server) for server in changed_domains):
         LOGGER.info(f"🔄 OCSP triggering refresh for {len(changed_domains)} changed custom cert(s): {', '.join(changed_domains)}")
         try:

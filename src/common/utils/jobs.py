@@ -40,6 +40,9 @@ EXPIRE_TIME = {
 }
 
 # OCSP SPKI shard keys under /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp64}/…
+# Helpers below fence DB restore vs live disk, encode colony floors (this_update
+# only), strip restored paged=true (local canary only), and run post-restore
+# coherence (.ocsp_epoch bump → peer-refuse clear → nongood/blacklist reconcile).
 _OCSP_SHARD_FILE_RE = re_compile(r"^([0-9a-fA-F])/([0-9a-fA-F])/([0-9a-fA-F]{64})/(ocsp\.der|ocsp\.json|issuer\.pem)$")
 _OCSP_FLOOR_FILE_RE = re_compile(r"^ocsp-floor/([0-9a-fA-F]{64})$")
 # Disk-local OCSP files never upserted to bw_jobs_cache (sidecars + coherence bus).
@@ -70,7 +73,11 @@ def is_ocsp_disk_local_rel(rel: str) -> bool:
 
 
 def ocsp_shard_dir(cache_root: Path, fingerprint: str) -> Optional[Path]:
-    """Return {cache_root}/{h1}/{h2}/{fp64} for a valid SPKI fingerprint."""
+    """
+    Return ``{cache_root}/{h1}/{h2}/{fp64}`` for a valid 64-hex SPKI fingerprint.
+
+    Layout matches Lua handshake paths and ocsp-refresh.py publish dirs.
+    """
     if not isinstance(fingerprint, str) or len(fingerprint) != 64 or not fingerprint.isalnum():
         return None
     fp = fingerprint.lower()
@@ -78,6 +85,11 @@ def ocsp_shard_dir(cache_root: Path, fingerprint: str) -> Optional[Path]:
 
 
 def _ocsp_parse_serial_int(value: Any) -> Optional[int]:
+    """
+    Parse a certificate/OCSP serial from decimal or hex text; None if unreadable.
+
+    Used when reconciling serial-blacklist.json against a restored GOOD body.
+    """
     if value is None:
         return None
     text = str(value).strip()
@@ -94,7 +106,12 @@ def _ocsp_parse_serial_int(value: Any) -> Optional[int]:
 
 
 def _ocsp_restored_serial_and_this_update(shard: Path) -> Tuple[Optional[int], Optional[int]]:
-    """Best-effort identity from restored ocsp.der, else ocsp.json pins."""
+    """
+    Identity of a restored shard for serial-blacklist reconcile.
+
+    Prefer parsing ``ocsp.der`` (serial + thisUpdate); fall back to ocsp.json pins
+    when DER is missing or unreadable.
+    """
     der_path = shard / "ocsp.der"
     if der_path.is_file():
         try:
@@ -137,7 +154,12 @@ def _ocsp_restored_serial_and_this_update(shard: Path) -> Tuple[Optional[int], O
 
 
 def clear_ocsp_nongood_marker(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
-    """Reset consecutive non-GOOD streak after a GOOD trio restore (same as live fetch)."""
+    """
+    Reset consecutive non-GOOD streak after a GOOD trio restore.
+
+    Same as a live GOOD fetch: remove shard ``nongood.json`` so the next failure
+    starts the streak from zero (TTL halving / ban policy).
+    """
     shard = ocsp_shard_dir(cache_root, fingerprint)
     if shard is None:
         return False
@@ -194,7 +216,7 @@ def reconcile_ocsp_serial_blacklist_after_restore(
                 ban_unix = int(ban.get("this_update_unix"))
             except (TypeError, ValueError):
                 ban_unix = None
-            # Undated ban (null/omitted this_update_unix) is superseded by any dated GOOD.
+            # Ban without this_update_unix is invalid — any dated GOOD for that serial clears it.
             if this_unix is not None and (ban_unix is None or this_unix > ban_unix):
                 clear = True
     if not clear:
@@ -218,7 +240,9 @@ def reconcile_ocsp_serial_blacklist_after_restore(
 def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
     """
     If file_name is an OCSP shard cache key, return (fingerprint_lower, leaf_name).
-    leaf_name is one of ocsp.der, ocsp.json, issuer.pem.
+
+    leaf_name is one of ocsp.der, ocsp.json, issuer.pem. Used by restore_plan /
+    fence logic to group DB cache rows into SPKI shards.
     """
     if not file_name:
         return None
@@ -233,7 +257,12 @@ def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
 
 
 def parse_ocsp_floor_cache_name(file_name: str) -> Optional[str]:
-    """If file_name is ocsp-floor/{fp64}, return fingerprint_lower."""
+    """
+    If file_name is ocsp-floor/{fp64}, return fingerprint_lower.
+
+    Colony floor rows are separate from shard leaves; restore compares this_update
+    ranks and may fence raises when a still-GOOD local trio must stay ahead.
+    """
     if not file_name:
         return None
     match = _OCSP_FLOOR_FILE_RE.match(str(file_name).replace("\\", "/"))
@@ -258,10 +287,17 @@ def ocsp_job_run_id_rank(run_id: Any) -> int:
 
 
 def _ocsp_job_run_id_rank(run_id: Any) -> int:
+    """Alias of :func:`ocsp_job_run_id_rank` for internal callers (same semantics)."""
     return ocsp_job_run_id_rank(run_id)
 
 
 def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
+    """
+    Positive unix int from a meta field (int/float or digit string); else 0.
+
+    Floor / restore fences use 0 as "not comparable" — never invent a rank from
+    wall clock when the CA-signed field is missing.
+    """
     raw = meta.get(key)
     if isinstance(raw, (int, float)) and int(raw) > 0:
         return int(raw)
@@ -306,7 +342,11 @@ def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
 
 
 def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[Dict[str, Any]]:
-    """Read on-disk cluster floor payload for fingerprint, or None."""
+    """
+    Read on-disk cluster floor payload for fingerprint, or None.
+
+    Path: ``{cache_root}/ocsp-floor/{fp}``. Comparable rank is this_update_unix only.
+    """
     if not fingerprint or len(fingerprint) != 64:
         return None
     path = Path(cache_root) / "ocsp-floor" / fingerprint.lower()
@@ -333,18 +373,33 @@ def ocsp_floor_comparable(floor: Optional[Dict[str, Any]]) -> Tuple[str, int]:
 
 
 def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
-    """Colony-comparable floor rank (this_update_unix only)."""
+    """
+    Colony-comparable floor rank for logging / restore skip checks.
+
+    Despite the historical name, this returns ``this_update_unix`` only — never
+    wall-clock ``published_unix``.
+    """
     _kind, rank = ocsp_floor_comparable(floor)
     return rank
 
 
 def ocsp_meta_floor_rank(meta: Optional[Dict[str, Any]]) -> Tuple[str, int]:
-    """Same kind preference as floor files, for shard ocsp.json / fence caps."""
+    """
+    Colony-comparable rank from shard ocsp.json (same as floor files).
+
+    Used for restore fence caps: still-GOOD disk with a positive this_update
+    caps how high restore may raise ocsp-floor/{fp}.
+    """
     return ocsp_floor_comparable(meta)
 
 
 def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) -> bool:
-    """Create ocsp-refuse/ off the TLS path (jobs / restore / refresh)."""
+    """
+    Create ``ocsp-refuse/`` off the TLS hot path (jobs / restore / refresh).
+
+    HTTP and stream workers write soft_recall_gen sticky refuses here so a peer
+    process can refuse the same body without re-validating.
+    """
     try:
         refuse_dir = Path(cache_root) / "ocsp-refuse"
         refuse_dir.mkdir(parents=True, exist_ok=True)
@@ -356,7 +411,12 @@ def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) ->
 
 
 def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
-    """Drop HTTP↔stream generation refuse marker for this SPKI (new page / restore)."""
+    """
+    Drop HTTP↔stream generation refuse marker for this SPKI.
+
+    Call on new canary page / GOOD restore so soft_recall_gen sticky refuses do
+    not keep Must-Staple closed after a successful publish.
+    """
     if not fingerprint or len(fingerprint) != 64:
         return False
     fp = fingerprint.lower()
@@ -498,6 +558,12 @@ def should_skip_ocsp_floor_restore(
 
 
 def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
+    """
+    Decode ocsp.json bytes to a dict, or None if missing/invalid JSON.
+
+    Does not strip ``paged`` — callers that restore must use
+    :func:`normalize_restored_ocsp_json_bytes` before writing disk.
+    """
     if not data:
         return None
     try:
@@ -532,6 +598,11 @@ def normalize_restored_ocsp_json_bytes(data: Optional[bytes]) -> Optional[bytes]
 
 
 def load_disk_ocsp_meta(shard_dir: Path) -> Optional[Dict[str, Any]]:
+    """
+    Read and parse ``{shard_dir}/ocsp.json``, or None if absent/invalid.
+
+    Used by restore fence / floor-cap decisions against the live local trio.
+    """
     meta_path = shard_dir / "ocsp.json"
     if not meta_path.is_file():
         return None
@@ -608,19 +679,29 @@ def should_keep_disk_ocsp_shard(
 
 
 def ocsp_restore_skip_fingerprints(cache_files: list, cache_root: Path) -> Dict[str, str]:
-    """Compatibility wrapper: fingerprint → fence reason only."""
+    """
+    Fingerprints whose on-disk OCSP shard must not be overwritten by this restore.
+
+    Thin wrapper around :func:`ocsp_restore_plan` (returns only the skip map).
+    """
     skip, _caps = ocsp_restore_plan(cache_files, cache_root)
     return skip
 
 
 def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, str], Dict[str, int]]:
     """
-    Plan OCSP restore coherence for one cache batch.
+    Decide which OCSP shards/floors restore may overwrite vs fence.
 
-    Returns:
-      skip: fingerprint → reason for shards that must not be overwritten
-      floor_caps: fingerprint → max floor rank allowed when that shard
-        was fenced as a still-GOOD trio (prefer this_update_unix; else published_unix)
+    Walks the incoming ``bw_jobs_cache`` batch and compares each SPKI to disk:
+
+    * **skip** — fingerprint → reason: keep disk trio (newer/equal, DER-only
+      restore without meta, etc.). Coherence must not clear sidecars for these.
+    * **floor_caps** — fingerprint → max ``this_update_unix`` floor restore may
+      write when that shard was fenced as a still-GOOD trio (avoids healthy files
+      + closed Must-Staple via ``cluster_floor``).
+
+    Prefer accepting an incoming generation that already meets the colony floor
+    over fencing a lagging local GOOD that would leave Must-Staple closed.
     """
     by_fp: Dict[str, Dict[str, Any]] = {}
     incoming_floors: Dict[str, Optional[Dict[str, Any]]] = {}

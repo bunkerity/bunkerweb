@@ -35,7 +35,7 @@
     "LETS_ENCRYPT_SERVER": {
       "context": "multisite",
       "default": "letsencrypt",
-      "help": "Select the certificate authority server to use for certificate generation.",
+      "help": "Select the ACME CA: letsencrypt (default) or zerossl. Let's Encrypt does not provide OCSP responders — use zerossl when SSL_USE_OCSP_STAPLING is enabled.",
       "id": "lets-encrypt-server",
       "label": "Certificate Authority Server",
       "regex": "^(letsencrypt|zerossl)$",

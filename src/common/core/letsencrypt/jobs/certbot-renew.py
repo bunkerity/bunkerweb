@@ -1,4 +1,45 @@
 #!/usr/bin/env python3
+"""
+Let's Encrypt / ZeroSSL renew job — ``certbot renew`` then OCSP kick on success.
+
+REVIEWER MAP
+============
+Renews every lineage under ``LETSENCRYPT_DATA_PATH`` in one ``certbot renew``
+run (no per-service ``--account``). Persists the data tree to the job DB cache,
+then — when at least one lineage actually renewed **and** any service has OCSP
+stapling enabled — runs ``ocsp-refresh.py --changed-only`` so Must-Staple /
+staple shards track the new leaf without waiting for the next OCSP schedule.
+
+Companions:
+  certbot-new.py                 — issuance twin (same OCSP kick pattern)
+  customcert/jobs/custom-cert.py — custom SSL change → same OCSP kick
+  ssl/jobs/ocsp-refresh.py       — fetch/canary/page for changed leaves
+  letsencrypt_utils              — sanitize, stale-account purge, route53 AWS
+
+Flow:
+  1. Skip if AUTO_LETS_ENCRYPT off (any site in multisite).
+  2. ensure_accounts_for_orphans + sanitize_and_persist (quarantine bad renewals).
+  3. setup_route53_aws_config (renew has no per-service credentials flag).
+  4. ``certbot renew`` — stream logs; set ``renewed_any`` on success lines;
+     collect stale-account URIs/certs for mid-run purge + re-sanitize.
+  5. Persist DATA_PATH if restore_ok + consistent (reload-friendly status=1 if
+     certs renewed but consistency refuse would otherwise block reload).
+  6. If ``renewed_any`` and ``_ocsp_stapling_enabled_anywhere()`` → OCSP kick.
+
+``renewed_any`` is intentional: a no-op renew (certs not due) must not boot
+ocsp-refresh. Detection watches certbot lines containing ``(success)`` or
+``Congratulations``.
+
+Exit status:
+  0 — renew ran, nothing fatal (may still have renewed_any → OCSP)
+  1 — inconsistent cache refuse after successful renew (reload signal)
+  2 — renew timeout / non-zero certbot / restore_ok false
+
+OCSP kick is best-effort (timeout / failure → warning). Parent wait
+OCSP_REFRESH_TIMEOUT=35m; child soft-stops at JOB_TIMEOUT_SECONDS≈2040s.
+
+Multisite OCSP: site override wins; global yes + all sites no must not kick.
+"""
 
 from os import getenv, sep
 from os.path import join
@@ -50,12 +91,18 @@ LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 attach_job_log_file(LOGGER, "certbot-renew.log", LOGS_DIR)
 
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
-OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
+# Parent wait for post-renewal OCSP kick. Child soft-stops at JOB_TIMEOUT_SECONDS≈2040s
+# inside ocsp-refresh; keep this slightly above that so the child can exit cleanly.
+OCSP_REFRESH_TIMEOUT = 2100  # 35m
 status = 0
 
 
 def _ocsp_stapling_enabled_for(service_name: str) -> bool:
-    """True when this service's effective SSL_USE_OCSP_STAPLING is yes (site wins)."""
+    """
+    True when this service's effective ``SSL_USE_OCSP_STAPLING`` is yes.
+
+    Multisite: ``{service}_SSL_USE_OCSP_STAPLING`` wins when set; otherwise global.
+    """
     if getenv("MULTISITE", "no").lower() == "yes" and service_name:
         site_value = getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
         if site_value is not None:
@@ -64,7 +111,12 @@ def _ocsp_stapling_enabled_for(service_name: str) -> bool:
 
 
 def _ocsp_stapling_enabled_anywhere() -> bool:
-    """True when at least one SERVER_NAME service would staple (site override wins)."""
+    """
+    True when at least one ``SERVER_NAME`` service would staple.
+
+    Multisite must OR per-site effective values — global yes with every site
+    ``no`` must not boot the OCSP kick after a renew.
+    """
     if getenv("MULTISITE", "no").lower() == "yes":
         servers = [s for s in getenv("SERVER_NAME", "").split() if s]
         if servers:
@@ -156,9 +208,12 @@ try:
     # the rejection, and every renewal fails forever with no recovery path.
     stale_account_uris = set()
     stale_account_certs = set()
+    # True only when certbot reports an actual renewal — gates the OCSP kick
+    # so a quiet "nothing due" renew does not run ocsp-refresh --changed-only.
     renewed_any = False
 
     def watch_stale_account(line: str) -> None:
+        """Collect rejected ACME account URI / cert-name from certbot stderr/stdout."""
         if not is_stale_account_line(line):
             return
         uri = stale_account_uri(line)
@@ -172,6 +227,7 @@ try:
             LOGGER.error(f"The CA rejected the ACME account but named neither it nor a certificate, so it cannot be replaced automatically: {line}")
 
     def watch_renew_line(line: str) -> None:
+        """Stream callback: stale-account recovery + renewed_any success detection."""
         global renewed_any
         watch_stale_account(line)
         if "(success)" in line or "Congratulations" in line:
@@ -236,8 +292,11 @@ try:
             else:
                 LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 
-    # Trigger OCSP refresh after renewal when stapling is enabled.
-    # Runs after the cache attempt so a successful persist is visible to the OCSP job.
+    # After cache attempt: renewed leaf must get a canary-paged OCSP body before
+    # handshake Must-Staple can succeed. --changed-only diffs against the OCSP
+    # job's known cert set. Non-fatal on timeout/failure. Gate with anywhere()
+    # so global yes + all sites no does not kick; gate with renewed_any so a
+    # no-op renew does not kick either.
     if renewed_any and _ocsp_stapling_enabled_anywhere():
         LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
 

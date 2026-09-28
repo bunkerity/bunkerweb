@@ -1,3 +1,30 @@
+--[[
+  Self-signed SSL plugin — serve job-generated certs on ssl_certificate.
+
+  REVIEWER MAP
+  ============
+  Loads PEMs from /var/cache/bunkerweb/selfsigned/{service}/cert.pem|key.pem
+  into internalstore at init. Same status[1..5] contract as letsencrypt /
+  customcert so HTTP/stream OCSP can use the SPKI hint without re-parsing PEM.
+
+  Companions:
+    jobs/self-signed.py          — generate/cache PEMs under selfsigned/
+    ssl-certificate-by-lua.conf / ssl-certificate-stream-lua.conf — consume status
+    letsencrypt.lua / customcert.lua — same status layout
+
+  ssl_certificate return status (when data found):
+    [1] ngx.ssl parsed cert chain
+    [2] ngx.ssl parsed private key
+    [3] cert PEM string   (preferred install + OCSP leaf path)
+    [4] key PEM string
+    [5] leaf SPKI SHA256 hex (64 lowercase) — OCSP cache key hint; may be nil
+        if resty.openssl unavailable at init
+
+  Note: self-signed leaves rarely have a public OCSP AIA; stapling still goes
+  through the shared OCSP path when SSL_USE_OCSP_STAPLING=yes (miss → optional
+  skip / Must-Staple refuse). Fingerprint is kept for cache-key consistency.
+]]
+
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
@@ -21,6 +48,7 @@ function selfsigned:initialize(ctx)
 end
 
 function selfsigned:set()
+	-- Mark site as HTTPS-configured when self-signed generation is enabled.
 	local https_configured = self.variables["GENERATE_SELF_SIGNED_SSL"]
 	if https_configured == "yes" then
 		self.ctx.bw.https_configured = "yes"
@@ -29,6 +57,8 @@ function selfsigned:set()
 end
 
 function selfsigned:init()
+	-- Load cert/key for every GENERATE_SELF_SIGNED_SSL=yes service into
+	-- plugin_selfsigned_{name}. Multisite keys by primary SERVER_NAME.
 	local ret_ok, ret_err = true, "success"
 	if has_variable("GENERATE_SELF_SIGNED_SSL", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
@@ -91,6 +121,7 @@ function selfsigned:init()
 end
 
 function selfsigned:ssl_certificate()
+	-- Look up cached status tuple for this SNI (exact name — no wildcard map).
 	local server_name, err = ssl_server_name()
 	if not server_name then
 		if err then
@@ -112,17 +143,21 @@ function selfsigned:ssl_certificate()
 end
 
 function selfsigned:load_data(data, server_name)
-	-- Load certificate
+	-- Parse PEM pair and cache under each whitespace-separated name in server_name.
+	-- data[1]/data[2] = cert PEM / key PEM from disk.
+	--
+	-- status[5] = SHA256(SubjectPublicKeyInfo DER) of the leaf — same SPKI key
+	-- as letsencrypt/customcert for OCSP shard lookup. Precomputed at init.
 	local cert_chain, err = parse_pem_cert(data[1])
 	if not cert_chain then
 		return false, "error while parsing pem cert : " .. err
 	end
-	-- Load key
-	local priv_key, err = parse_pem_priv_key(data[2])
+	local priv_key
+	priv_key, err = parse_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Keep the original PEM and a public-key fingerprint so OCSP stapling can find ocsp.der.
+	-- Pre-compute leaf SPKI fingerprint for OCSP (status[5]).
 	local cert_fingerprint = nil
 	pcall(function()
 		local x509 = require("resty.openssl.x509")
@@ -141,7 +176,7 @@ function selfsigned:load_data(data, server_name)
 			end
 		end
 	end)
-	-- Cache data: {parsed_cert, parsed_key, cert_pem, key_pem, fingerprint}
+	-- Cache: {parsed_cert, parsed_key, cert_pem, key_pem, spki_fingerprint}
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_selfsigned_" .. key
 		local ok

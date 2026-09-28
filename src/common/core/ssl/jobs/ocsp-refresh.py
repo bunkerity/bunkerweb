@@ -1899,9 +1899,13 @@ def _libssl_has_multi_staple_ex() -> bool:
 
 def _colony_multi_staple_min() -> Optional[bool]:
     """
-    MIN across live per-worker markers in .multi_staple_attach.d/.
-    Returns False if any live vote is "0", True if all live votes are "1",
-    None if no live markers (fall back to aggregate file / dlsym).
+    Colony multi-staple capability = MIN across live worker votes.
+
+    Reads ``.multi_staple_attach.d/*`` (same markers Lua publishes). Any live
+    ``"0"`` (e.g. OpenSSL 3.5) forces the fleet leaf-only so intermediate AIA
+    prefetch is skipped. Returns False / True / None (no live markers — fall
+    back to aggregate file / dlsym). Stale votes expire after
+    ``_MULTI_STAPLE_WORKER_TTL``.
     """
     try:
         if not _MULTI_STAPLE_ATTACH_DIR.is_dir():
@@ -2047,7 +2051,12 @@ def _inter_body_shard_keepable(cert_name: str, inter_pem: bytes, fingerprint: Op
 
 
 def _seal_inter_body_spki(fingerprint: Optional[str]) -> None:
-    """Mark intermediate SPKI as donated for this job run (no further OCSP GETs)."""
+    """
+    Mark this intermediate SPKI as donated for the current job run.
+
+    Later leaves that share the issuer skip OCSP GET/publish (plasmid seal),
+    even under force_fetch. Cleared at the start of each job run.
+    """
     normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
     if not normalized:
         return
@@ -2055,6 +2064,7 @@ def _seal_inter_body_spki(fingerprint: Optional[str]) -> None:
 
 
 def _inter_body_spki_sealed(fingerprint: Optional[str]) -> bool:
+    """True when this intermediate SPKI was already sealed earlier in the job run."""
     normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
     if not normalized:
         return False
@@ -2069,7 +2079,12 @@ def _donate_inter_body_to_tenant(
     stats: Optional[dict],
     reason: str,
 ) -> None:
-    """Reuse a shared intermediate body for this tenant; seal SPKI for the job run."""
+    """
+    Reuse a shared intermediate GOOD body for this tenant without re-fetching.
+
+    Clears tenant control-key negatives, seals the body SPKI for the run, and
+    increments ``ocsp_intermediate_plasmid_reuse``. Does not touch the live shard.
+    """
     _clear_tenant_control_negatives(control_fp)
     _seal_inter_body_spki(inter_fp)
     if stats is not None:
@@ -2090,7 +2105,15 @@ def _process_cert_chain(
     stats: Optional[dict] = None,
     force_fetch: bool = False,
 ) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
-    """Process leaf OCSP then (when workers can multi-staple) intermediate AIA targets."""
+    """
+    Process leaf OCSP, then issuer-linked intermediate AIA targets when the colony
+    can multi-staple.
+
+    Intermediate GOOD bodies are keyed by intermediate SPKI (shared plasmid). The
+    first keepable or freshly GOOD donor seals that SPKI for the run so later
+    leaves — including under force_fetch — only clear their tenant control key.
+    Negatives stay on ``sha256(leaf_spki:inter_spki)``.
+    """
     results = [_process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch)]
     if not _worker_can_attach_multi_staple():
         if stats is not None and stats.get("ocsp_intermediate_skipped_libssl") is None:
@@ -6051,9 +6074,12 @@ def _unpage_ocsp_shard_after_nongood(
     db: Optional[Any] = None,
 ) -> bool:
     """
-    Soft recall: set paged=false so handshakes stop stapling the cached GOOD
-    without tombstoning (no serial ban / DER unlink yet). Idempotent when already
-    unpaged. Upserts meta and bumps epoch so L1 drops the body.
+    Soft-recall a shard after repeated non-GOOD answers without tombstoning yet.
+
+    Sets ``paged=false`` and ``unpaged_after_nongood``, bumps ``soft_recall_gen``
+    (peer-refuse generation identity) while keeping the DER on disk, clears the
+    refuse bus, upserts meta, and bumps ``.ocsp_epoch`` so L1 drops the body.
+    A later verified GOOD must canary-page again. Idempotent when already unpaged.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:

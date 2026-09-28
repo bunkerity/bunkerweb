@@ -23,6 +23,9 @@ Follow these steps to configure and use the SSL feature:
 4. **Enable OCSP stapling:** Set `SSL_USE_OCSP_STAPLING` to `yes` to staple a cached OCSP response for certificates that advertise an OCSP responder.
 5. **Must-Staple fuse (optional):** Leave `OCSP_STAPLE_MODE` at `normal` unless you need an on-call escape hatch. Both HTTP and stream read the same value.
 
+!!! warning "Let's Encrypt has no OCSP responders"
+    Let's Encrypt certificates do **not** advertise usable OCSP responders, so OCSP stapling cannot work with `LETS_ENCRYPT_SERVER=letsencrypt`. For OCSP-capable ACME certificates, set `LETS_ENCRYPT_SERVER=zerossl` (and ZeroSSL credentials as needed). Custom certificates from a CA that publishes OCSP in AIA also work when stapling is enabled.
+
 ### Configuration Settings
 
 | Setting                       | Default           | Context   | Multiple | Description                                                                                                         |
@@ -34,7 +37,7 @@ Follow these steps to configure and use the SSL feature:
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Custom SSL Ciphers:** Colon-separated list of cipher suites to use for SSL/TLS connections (overrides level).     |
 | `SSL_ECDH_CURVE`              | `auto`            | multisite | no       | **SSL ECDH Curves:** Colon-separated list of ECDH curves (TLS groups) or `auto` for smart selection (prefers PQC on OpenSSL 3.5+). |
 | `SSL_SESSION_CACHE_SIZE`      | `10m`             | multisite | no       | **SSL Session Cache Size:** Size of the SSL session cache (e.g., `10m`, `512k`). Set to `off` or `none` to disable. |
-| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Use OCSP stapling:** When set to `yes`, staple a cached OCSP response during the TLS handshake for certificates that advertise an OCSP responder. Applies to HTTP and stream TLS, including Let's Encrypt, custom, and self-signed certificates. |
+| `SSL_USE_OCSP_STAPLING`       | `no`              | multisite | no       | **Use OCSP stapling:** When set to `yes`, staple a cached OCSP response during the TLS handshake for certificates that advertise an OCSP responder. Applies to HTTP and stream TLS (custom certs, ZeroSSL ACME, etc.). Let's Encrypt leaves have no OCSP responders — use `LETS_ENCRYPT_SERVER=zerossl` for ACME + OCSP. |
 | `OCSP_STAPLE_MODE`            | `normal`          | multisite | no       | **OCSP staple mode:** Must-Staple fuse for HTTP and stream. `normal` refuses the handshake when Must-Staple is unmet and records the generation on the peer-refuse bus; `staple_only` still probes before `set_cert` (skips unprobed Must-Staple leaves when another leaf can install) but if nothing remains, installs the site leaf **unstapled** and does not abort or write the bus; `open` disables Must-Staple enforcement (recovery) and also installs unstapled without writing the bus. |
 
 Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 seconds (`OCSP_CLOCK_SKEW_SECONDS`). Death time is `nextUpdate` / `max_age_unix` **minus** that skew: staples stop being served before the CA's advertised expiry so a lagging worker clock cannot present a response the CA already considers dead.

@@ -25,6 +25,9 @@ Follow these steps to configure and use the Let's Encrypt feature:
 7. **Select certificate profile:** Choose your preferred certificate profile using the `LETS_ENCRYPT_PROFILE` setting (classic, tlsserver, or shortlived).
 8. **Let BunkerWeb handle the rest:** Once configured, certificates are automatically issued, installed, and renewed as needed.
 
+!!! warning "OCSP stapling needs ZeroSSL (or another OCSP-capable CA)"
+    Let's Encrypt does **not** provide OCSP responders. If you enable `SSL_USE_OCSP_STAPLING`, use `LETS_ENCRYPT_SERVER=zerossl` (with ZeroSSL credentials) so issued leaves advertise an OCSP AIA URI. Otherwise stapling has nothing to fetch for Let's Encrypt certificates.
+
 !!! tip "Certificate Profiles"
     Let's Encrypt provides different certificate profiles for different use cases:
 

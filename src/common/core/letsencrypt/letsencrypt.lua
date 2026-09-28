@@ -1,3 +1,34 @@
+--[[
+  Let's Encrypt plugin — ACME HTTP-01 / cert install for ssl_certificate phase.
+
+  REVIEWER MAP
+  ============
+  Loads live PEMs from certbot lineages into internalstore at init, serves them
+  on ssl_certificate, and exposes status[3]/[4]/[5] so HTTP/stream OCSP can
+  staple without re-parsing PEM on every handshake.
+
+  Companions:
+    jobs/certbot-new.py / certbot-renew.py — issue/renew + OCSP --changed-only kick
+    ssl-certificate-by-lua.conf / ssl-certificate-stream-lua.conf — consume status
+    bunkerweb.ocsp / ocsp-refresh.py — SPKI shard under /var/cache/bunkerweb/ssl/
+    customcert.lua — same status[1..5] / SPKI fingerprint contract
+
+  ssl_certificate return status (when data found):
+    [1] ngx.ssl parsed cert chain
+    [2] ngx.ssl parsed private key
+    [3] cert PEM string   (preferred install + OCSP leaf / dual-cert)
+    [4] key PEM string
+    [5] leaf SPKI SHA256 hex (64 lowercase) — OCSP cache key hint; may be nil
+        if resty.openssl unavailable at init (handshake may still compute)
+
+  Wildcard: init mirrors certbot-new grouping (plugin_letsencrypt_wildcard_*).
+  Hosts belonging to a non-LE service map to false so they never borrow another
+  service's cert. Single-label wildcard cover only (a.b.base ≠ *.base).
+
+  Passthrough ACME: LETS_ENCRYPT_PASSTHROUGH=yes whitelists a token-shaped
+  /.well-known/acme-challenge/* GET|HEAD for the backend solver (set phase).
+]]
+
 local acme = require "bunkerweb.acme"
 local cjson = require "cjson"
 local class = require "middleclass"
@@ -39,7 +70,8 @@ local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
 
--- Convert binary data to lowercase hex (replacement for ngx.encode_base16)
+-- Convert binary data to lowercase hex (replacement for ngx.encode_base16).
+-- Used for SPKI SHA256 → status[5] OCSP fingerprint.
 local function to_hex(bin)
 	if not bin then
 		return nil
@@ -285,6 +317,9 @@ function letsencrypt:set()
 end
 
 function letsencrypt:init()
+	-- Load live fullchain/privkey for every AUTO_LETS_ENCRYPT service into
+	-- internalstore (plugin_letsencrypt_{name}). Build wildcard_servers map
+	-- (host → cert-name | false) and wildcard_bases list for ssl_certificate.
 	local ret_ok, ret_err = true, "success"
 	local wildcard_servers = {}
 	local wildcard_bases_set = {}
@@ -532,6 +567,10 @@ function letsencrypt:init()
 end
 
 function letsencrypt:ssl_certificate()
+	-- Resolve SNI → cached {cert, key, pems, spki_fp} for the ssl_certificate
+	-- callback. Alias via wildcard_servers; never serve LE cert to a host marked
+	-- false (non-LE service). Unconfigured hosts may fall back to a single-label
+	-- wildcard base. Return data as status for set_cert + OCSP (see module map).
 	local server_name, err = ssl_server_name()
 	if not server_name then
 		if err then
@@ -589,18 +628,24 @@ function letsencrypt:ssl_certificate()
 end
 
 function letsencrypt:load_data(data, server_name)
-	-- Load certificate
+	-- Parse PEM pair and cache under each whitespace-separated name in server_name.
+	-- data[1]/data[2] = cert PEM / key PEM from disk (live/fullchain + privkey).
+	--
+	-- status[5] = SHA256(SubjectPublicKeyInfo DER) of the leaf — same SPKI key
+	-- ocsp-refresh uses for /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp}/. Precomputed
+	-- at init so handshake OCSP can use the fingerprint hint without resty.openssl
+	-- when PEM is unavailable (ngx.ssl cdata path). Dual-cert / ECDSA prefer still
+	-- recomputes from status[3] PEM when present (HTTP/stream).
 	local cert_chain, err = parse_pem_cert(data[1])
 	if not cert_chain then
 		return false, "error while parsing pem cert : " .. err
 	end
-	-- Load key
 	local priv_key
 	priv_key, err = parse_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Pre-compute leaf certificate fingerprint for OCSP lookup (avoids PEM parsing on every TLS handshake)
+	-- Pre-compute leaf SPKI fingerprint for OCSP (status[5]).
 	local cert_fingerprint = nil
 	pcall(function()
 		local x509 = require("resty.openssl.x509")
@@ -617,7 +662,7 @@ function letsencrypt:load_data(data, server_name)
 			end
 		end
 	end)
-	-- Cache data: {parsed_cert, parsed_key, cert_pem, key_pem, fingerprint}
+	-- Cache: {parsed_cert, parsed_key, cert_pem, key_pem, spki_fingerprint}
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. normalize_hostname(key)
 		local ok
@@ -630,6 +675,7 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
+	-- Local HTTP-01 challenge visit, or passthrough ACME whitelist — both OK.
 	if is_http_challenge(self.ctx) then
 		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", OK)
@@ -643,6 +689,8 @@ end
 
 -- luacheck: ignore 212
 function letsencrypt:api()
+	-- Scheduler/API writes challenge tokens under acme_folder (POST/DELETE).
+	-- Token path is base64url-only — reject traversal.
 	if
 		not match(self.ctx.bw.uri, "^/lets%-encrypt/challenge$")
 		or (self.ctx.bw.request_method ~= "POST" and self.ctx.bw.request_method ~= "DELETE")

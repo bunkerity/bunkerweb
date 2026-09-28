@@ -398,6 +398,8 @@ local function l1_shm_ttl(expires_unix)
 	return remaining
 end
 
+-- Pack one L1 shm entry: epoch | verified sha256 binding | expires_unix | DER.
+-- Single composite key so eviction cannot orphan verified from the body.
 local function pack_l1(epoch, verified_binding, der, expires_unix)
 	local exp = ""
 	if type(expires_unix) == "number" and expires_unix > 0 then
@@ -408,6 +410,7 @@ local function pack_l1(epoch, verified_binding, der, expires_unix)
 	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. exp .. "\0" .. der
 end
 
+-- Unpack a bw2 L1 blob. Returns epoch, binding, der, expires_unix (or all nil).
 local function unpack_l1(blob)
 	if type(blob) ~= "string" or #blob < 4 then
 		return nil, nil, nil, nil
@@ -435,6 +438,7 @@ end
 -- Always re-read: a mid-handshake bump must not be masked by an ngx.ctx pin.
 local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
 
+-- Read .ocsp_epoch (job coherence bus). HTTP and stream L1 must match this string.
 local function current_ocsp_epoch()
 	local epoch = "0"
 	pcall(function()
@@ -471,6 +475,7 @@ local function get_l1(internalstore, fingerprint)
 	return nil
 end
 
+-- True when L1's stored binding is still sha256(resp) — verified flag bound to these bytes.
 local function entry_verified(stored_binding, resp)
 	local binding = resp_binding(resp)
 	return binding ~= nil and stored_binding == binding
@@ -509,13 +514,10 @@ local function drop_cache(internalstore, fingerprint)
 	end)
 end
 
--- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
--- Always re-read ocsp.json der_sha256. A 5s "last OK" short-circuit
--- stapled pre-replace DER after a job swap; epoch alone does not cover no-bump writes.
--- Move-aside ENOENT gap (non-RENAME_EXCHANGE): live shard dir is briefly gone while
--- .ocsp_epoch still names the previous generation — keep L1 so Must-Staple does not
--- abort mid-swap. After the new tree is visible the persist batch bumps epoch and
--- this check drops the old body.
+-- True when this L1 body is still coherent with disk + .ocsp_epoch.
+-- Requires epoch match and ocsp.json der_sha256 == sha256(L1 DER). Meta without
+-- der_sha256 is invalid. If both meta and DER are missing while epoch still matches
+-- (brief publish gap), keep L1 so Must-Staple does not abort mid-swap.
 local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
@@ -732,8 +734,8 @@ local function meta_unix_field(meta, key)
 	return nil
 end
 
+-- Parse ocsp-floor/{fp} JSON to CA-signed this_update_unix (colony rank), or nil.
 local function parse_floor_rank(raw)
-	-- Returns this_update_unix rank, or nil when absent / not CA-time.
 	if type(raw) ~= "string" or raw == "" then
 		return nil
 	end
@@ -750,6 +752,8 @@ local function parse_floor_rank(raw)
 	return meta_unix_field(decoded, "this_update_unix")
 end
 
+-- True when colony floor this_update_unix is ahead of local ocsp.json — Must-Staple closed.
+-- Missing local this_update_unix is no opinion (never invent 0 vs a positive floor).
 local function cluster_floor_blocks(fingerprint, meta)
 	if not is_fp64(fingerprint) then
 		return false
@@ -804,6 +808,7 @@ local function ocsp_refuse_path(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint
 end
 
+-- Integer soft_recall_gen from ocsp.json (0 if absent). Half of peer-refuse generation id.
 local function soft_recall_gen_of(meta)
 	if type(meta) ~= "table" then
 		return 0
@@ -815,7 +820,9 @@ local function soft_recall_gen_of(meta)
 	return math.floor(g)
 end
 
--- Returns der_sha256 (64 hex) and soft_recall_gen (int >= 0), or nil.
+-- Peer-refuse generation: (der_sha256, soft_recall_gen). Soft-recall keeps DER bytes
+-- but bumps the counter so a leftover bus pin cannot re-match after re-page.
+-- Returns nil,nil when neither resp nor meta yields a 64-hex der_sha256.
 local function generation_tuple(meta, resp)
 	local body = resp_binding(resp)
 	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
@@ -830,6 +837,8 @@ local function generation_tuple(meta, resp)
 	return body, soft_recall_gen_of(meta)
 end
 
+-- Load ocsp-refuse/{fp} JSON. Requires der_sha256 + soft_recall_gen; drops markers
+-- that predate the counter. Returns nil when absent / invalid.
 local function read_peer_refuse(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
@@ -862,6 +871,8 @@ local function read_peer_refuse(fingerprint)
 	return obj
 end
 
+-- Atomically write a peer-refuse pin for this SPKI generation (tmp + rename).
+-- Does not mkdir on the TLS path — missing ocsp-refuse/ → bus_write_failed.
 local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by, soft_recall_gen)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
 		return false, "invalid_inputs"
@@ -929,7 +940,8 @@ function _M.ensure_ocsp_refuse_dir()
 	return ensure_ocsp_refuse_dir()
 end
 
--- Transient markers age out; sticky identity/policy codes stay until canary page.
+-- True when a transient peer-refuse marker should be dropped (TTL).
+-- Sticky identity/policy codes (certid, AIA, tombstone, …) never expire here.
 local function peer_refuse_marker_expired(marker)
 	local decision = normalize_staple_decision(marker and marker.staple_decision or "peer_refuse")
 	if PEER_REFUSE_STICKY[decision] then
@@ -943,8 +955,10 @@ local function peer_refuse_marker_expired(marker)
 	return (ngx.time() - t) > PEER_REFUSE_TTL_SECONDS
 end
 
--- If the sibling subsystem refused this generation, both refuse.
--- Returns staple_decision code, or nil when clear / expired / soft-recalled.
+-- HTTP↔stream refuse bus gate for this SPKI generation.
+-- Returns the stored staple_decision when a matching pin blocks, else nil.
+-- Generation match is der_sha256 + soft_recall_gen. While soft-recalled/unpaged,
+-- drops leftover pins for the kept hash so re-canary can succeed.
 -- quiet=true: skip ERR log (L1 warmer polls this every rescan).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	local sha, recall_gen = generation_tuple(meta, resp)
@@ -1015,6 +1029,8 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	return decision
 end
 
+-- After a handshake refuse, pin this generation on the shared bus so the sibling
+-- subsystem also refuses. Skips colony leaf-only and unpaged/soft-recalled bodies.
 local function record_peer_refuse(fingerprint, meta, resp, decision)
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
@@ -1812,8 +1828,9 @@ local function multi_staple_worker_id()
 	return _multi_staple_worker_id
 end
 
--- Scan live per-worker markers. Returns false if any live "0", true if all live are "1",
--- nil if no live markers (cold start / empty dir).
+-- Colony multi-staple capability = MIN across live worker votes under
+-- .multi_staple_attach.d/. Any live "0" (e.g. OpenSSL 3.5) forces fleet leaf-only.
+-- Returns false / true / nil (no live markers yet). Stale votes expire (~120s).
 local function colony_multi_staple_min()
 	local found_zero = false
 	local found_one = false
@@ -1858,6 +1875,8 @@ local function colony_multi_staple_min()
 	return nil
 end
 
+-- Publish this worker's multi-staple vote and refresh the aggregate colony marker.
+-- Aggregate is the live MIN (any "0" wins), not last-writer-wins.
 local function publish_multi_staple_attach(ready, force)
 	local now = ngx.now()
 	if not force and (now - _multi_staple_last_publish) < MULTI_STAPLE_PUBLISH_INTERVAL then
@@ -1899,6 +1918,9 @@ local function publish_multi_staple_attach(ready, force)
 	end)
 end
 
+-- True when this worker can multi-staple AND the colony MIN allows it.
+-- Probes SSL_set0_tlsext_status_ocsp_resp_ex, publishes the vote, then still
+-- fails closed with why_not="colony" while any live peer is leaf-only.
 local function openssl_multi_staple_ready()
 	-- Local symbol probe (publishes this worker's vote). Colony min may still force
 	-- leaf-only while any live peer cannot attach — even if this worker is 3.6+.
@@ -2806,12 +2828,14 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	return blocks, true
 end
 
+-- Concatenate issuer_linked_chain_blocks into one PEM string for set_cert.
 local function issuer_linked_chain_pem(leaf_pem, intermediate_pems)
 	local blocks = issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	return table.concat(blocks, "\n")
 end
 
--- Narrow a PEM bag or block list to the leaf's issuer-linked presentation.
+-- Narrow a PEM bag or block list to the leaf's issuer-linked presentation
+-- (same rules as issuer_linked_chain_blocks; used by health + attach paths).
 local function presentable_chain_blocks(cert_pem_or_blocks)
 	local blocks = cert_pem_or_blocks
 	if type(blocks) == "string" then

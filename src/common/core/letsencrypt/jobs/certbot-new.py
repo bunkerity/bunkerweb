@@ -1,4 +1,43 @@
 #!/usr/bin/env python3
+"""
+Let's Encrypt / ZeroSSL issuance job — request new certs and kick OCSP on success.
+
+REVIEWER MAP
+============
+Issues (or expands) ACME certificates via certbot / zerossl-bot into
+``LETSENCRYPT_DATA_PATH``, persists lineages into the job DB cache, then — when
+any issued service has OCSP stapling enabled — runs
+``ocsp-refresh.py --changed-only`` so Must-Staple / staple shards track the new
+leaf without waiting for the next scheduled OCSP tick.
+
+Companions:
+  letsencrypt.lua / customcert.lua   — serve leaf; status[5] SPKI hint for OCSP
+  ssl/jobs/ocsp-refresh.py           — fetch/canary/page for changed leaves
+  certbot-renew.py                   — renew path (same OCSP post-change kick)
+  customcert/jobs/custom-cert.py     — same OCSP kick pattern for custom SSL
+  letsencrypt_utils / certbot_concurrency — paths, accounts, merge locks
+
+Flow:
+  1. Build per-service configs (challenge, profile, ACME server, DNS provider).
+  2. Merge duplicate lineage names with identical fingerprints; reject conflicts.
+  3. Parallel ``generate_certificate`` → ``certbot_new`` → ``finalize_certbot_run``.
+  4. Cache DATA_PATH to DB (reload signal status=1 on success).
+  5. If ``issued_any`` and ``_ocsp_stapling_enabled_anywhere()`` → OCSP --changed-only.
+
+Exit status (scheduler convention):
+  0 — nothing issued / nothing to do
+  1 — at least one cert written (reload); also used after successful issue when
+      DB cache persist fails (reload still wanted — do not escalate to 2)
+  2 — hard config / issuance failure
+
+OCSP post-issuance refresh is best-effort (timeout / failure → warning only).
+Parent wait is OCSP_REFRESH_TIMEOUT (35m); child soft-stops earlier at
+JOB_TIMEOUT_SECONDS≈2040s inside ocsp-refresh.
+
+Multisite OCSP gate: site ``{service}_SSL_USE_OCSP_STAPLING`` wins when set;
+``_ocsp_stapling_enabled_anywhere`` must not treat global yes + all sites no
+as a kick (avoids empty --changed-only churn).
+"""
 
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -109,11 +148,18 @@ PROFILE_NAME_LIMITS = {"classic": 100, "tlsserver": 25, "shortlived": 25}
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
-OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
+# Parent wait for post-issuance OCSP kick. Child soft-stops at JOB_TIMEOUT_SECONDS≈2040s
+# inside ocsp-refresh; keep this slightly above that so the child can exit cleanly.
+OCSP_REFRESH_TIMEOUT = 2100  # 35m
 
 
 def _ocsp_stapling_enabled_for(service_name: str) -> bool:
-    """True when this service's effective SSL_USE_OCSP_STAPLING is yes (site wins)."""
+    """
+    True when this service's effective ``SSL_USE_OCSP_STAPLING`` is yes.
+
+    Multisite: ``{service}_SSL_USE_OCSP_STAPLING`` wins when set; otherwise global.
+    Used to decide whether issuance should kick ``ocsp-refresh.py --changed-only``.
+    """
     if getenv("MULTISITE", "no").lower() == "yes" and service_name:
         site_value = getenv(f"{service_name}_SSL_USE_OCSP_STAPLING")
         if site_value is not None:
@@ -122,7 +168,12 @@ def _ocsp_stapling_enabled_for(service_name: str) -> bool:
 
 
 def _ocsp_stapling_enabled_anywhere() -> bool:
-    """True when at least one SERVER_NAME service would staple (site override wins)."""
+    """
+    True when at least one ``SERVER_NAME`` service would staple.
+
+    Multisite must OR per-site effective values (site override wins) — a global
+    ``yes`` with every site set to ``no`` must not boot the OCSP kick.
+    """
     if getenv("MULTISITE", "no").lower() == "yes":
         servers = [s for s in getenv("SERVER_NAME", "").split() if s]
         if servers:
@@ -303,6 +354,13 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
 
 
 def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    """
+    Read env for one service → (server_name list, config dict).
+
+    Sets ``activated`` / ``misconfigured`` so the main loop can tell "LE off"
+    (green skip) from "LE on but cannot issue" (red status=2). Multisite keys
+    are ``{service}_*``; global mode reads unprefixed settings.
+    """
     def env(key: str, default: Optional[str] = None) -> str:
         if IS_MULTISITE:
             return getenv(f"{service}_{key}", default)
@@ -554,6 +612,13 @@ def extract_wildcard_groups(domains: List[str], service: str, rejected_services:
 
 
 def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, str]]]) -> Tuple:
+    """
+    Identity of a lineage config for merge / conflict detection.
+
+    Same fingerprint + same cert-name → merge SANs. Same name, different
+    fingerprint → keep first, warn. Includes ACME server, challenge, DNS
+    credential hash, ZeroSSL key hash, profile, email, staging, etc.
+    """
     provider_hash = ""
     if config.get("challenge") == "dns" and config.get("provider"):
         provider_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
@@ -574,6 +639,14 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
 
 
 def build_service_entries(service: str, rejected_services: Optional[Set[str]] = None) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    """
+    Expand one SERVER_NAME service into cert-name → config entries.
+
+    Wildcard mode yields one entry per base domain; otherwise one entry named
+    after the service. Misconfigured activated services are added to
+    ``rejected_services`` (kept separate from lineage names so a sibling can
+    still issue under the same cert-name).
+    """
     server_names, base_config = build_service_config(service)
     if not server_names:
         if base_config["misconfigured"] and rejected_services is not None:
@@ -689,6 +762,13 @@ def certbot_new(
     cmd_env: Dict[str, str],
     paths: CertbotPaths,
 ) -> int:
+    """
+    Run one ``certonly`` (or zerossl-bot) for ``service`` into ``paths``.
+
+    Scopes ``--account`` to the target ACME server URL so LE/ZeroSSL account ids
+    are never crossed. Returns certbot exit code (0 = success). Caller retries
+    via ``generate_certificate`` and merges via ``finalize_certbot_run``.
+    """
     certbot_entrypoint = resolve_certbot_entrypoint(
         str(config.get("acme_server") or "letsencrypt"),
         CERTBOT_BIN,
@@ -849,6 +929,13 @@ def certbot_new(
 
 
 def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+    """
+    Prepare certbot paths, run ``certbot_new`` with retries, finalize merge.
+
+    Returns True on success (fresh lineage on disk under DATA_PATH). Concurrent
+    mode uses per-service temp roots; ``MERGE_LOCK`` serializes finalize into
+    the shared data dir. Progress monitor ticks while any certbot is RUNNING.
+    """
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -1306,8 +1393,11 @@ try:
                 else:
                     LOGGER.info("Successfully saved data to db cache")
 
-        # Trigger OCSP stapling refresh for newly issued certificates (after the cache attempt).
-        # OCSP job compares new certs with cached ones and processes differential updates.
+        # After cache attempt: new leaf must get a canary-paged OCSP body before
+        # handshake Must-Staple can succeed. --changed-only diffs against the
+        # OCSP job's known cert set (not a full fleet scan). Non-fatal on
+        # timeout/failure — next scheduled ocsp-refresh still runs.
+        # Gate with anywhere() so global yes + all sites no does not kick.
         if issued_any and _ocsp_stapling_enabled_anywhere():
             LOGGER.info("🔄 OCSP triggering refresh for newly issued certificates")
             try:

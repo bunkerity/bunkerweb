@@ -1,4 +1,35 @@
 #!/usr/bin/env python3
+"""
+BunkerWeb scheduler — config generation, job orchestration, instance push.
+
+REVIEWER MAP (OCSP restore / coherence)
+=======================================
+``generate_caches()`` is the path that materializes ``bw_jobs_cache`` onto
+``/var/cache/bunkerweb/``. For the ``ssl`` plugin that includes OCSP shards
+and colony floors. Live nodes may already hold a newer GOOD trio than the DB
+row; restoring blindly would regress Must-Staple and leave healthy-looking
+files while the colony floor sits ahead (closed staples).
+
+OCSP restore rules (helpers in ``common/utils/jobs.py``):
+  1. ``ocsp_restore_plan`` → skip map + floor caps (this_update_unix only).
+  2. Skip writing skipped SPKI leaves; skip floors that would raise past a
+     fenced still-GOOD trio or that lose to a newer on-disk floor.
+  3. ``normalize_restored_ocsp_json_bytes`` stamps ``paged=false`` — a peer's
+     canary is not local openssl proof; handshake must re-page.
+  4. ``publish_ocsp_restore_coherence`` for fingerprints that *were* written:
+     bump ``.ocsp_epoch`` then clear peer-refuse / nongood / reconcile blacklist.
+     Skipped/fenced fps are not passed in (their sidecars stay untouched).
+  5. Sweep must not delete disk-local sidecars (``is_ocsp_disk_local_rel``:
+     ``.ocsp_epoch``, ``ocsp-refuse/*``, serial-blacklist / nongood) nor
+     fenced shard leaves / floors.
+
+Companions: ``ocsp-refresh.py`` (publish), ``ssl-certificate-*.conf`` /
+``bunkerweb.ocsp`` (handshake), ``jobs.py`` (fence / floor / coherence APIs).
+
+The rest of this module is the main loop: claim DB changes, render nginx
+configs, run once-jobs (with pre-push deferral), schedule periodic jobs,
+healthcheck instances, push configs/files.
+"""
 
 from argparse import ArgumentParser
 from contextlib import suppress
@@ -568,11 +599,18 @@ def validate_manual_plugin(plugin_data: Dict[str, Any], plugin_path: Path, *, lo
 
 
 def generate_caches() -> Set[str]:
-    """Restore all ``bw_jobs_cache`` rows to disk.
+    """
+    Restore all ``bw_jobs_cache`` rows to disk under ``/var/cache/bunkerweb/``.
 
     Returns a set of ``plugin_id/job_name`` identifiers for any cache files whose
     extraction or write failed. Callers can use this to avoid downstream actions
     (e.g. re-caching empty state) for affected plugins.
+
+    OCSP (plugin_id=ssl) — see module REVIEWER MAP:
+      * Plan fence before the write loop (``ocsp_restore_plan``).
+      * Skip skipped shards / capped floors; stamp restored ``ocsp.json`` unpaged.
+      * Coherence only for fingerprints actually written.
+      * Cleanup sweep preserves disk-local OCSP sidecars and fenced paths.
     """
     assert SCHEDULER is not None
 
@@ -697,6 +735,7 @@ def generate_caches() -> Set[str]:
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
             if job_cache_file.get("plugin_id") == "ssl":
+                # Fence: newer on-disk trio wins over DB row for this SPKI.
                 parsed = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
                 if parsed and parsed[0] in ocsp_skip:
                     LOGGER.info(
@@ -705,6 +744,8 @@ def generate_caches() -> Set[str]:
                     continue
                 floor_fp = parse_ocsp_floor_cache_name(job_cache_file.get("file_name") or "")
                 if floor_fp:
+                    # Floor raise capped when a still-GOOD local trio was fenced
+                    # (avoids healthy files + Must-Staple closed via cluster_floor).
                     incoming_floor = parse_ocsp_floor_bytes(data if isinstance(data, (bytes, bytearray)) else None)
                     disk_floor = load_disk_ocsp_floor(job_path, floor_fp)
                     skip_floor, floor_reason = should_skip_ocsp_floor_restore(
@@ -718,6 +759,7 @@ def generate_caches() -> Set[str]:
             if job_cache_file.get("plugin_id") == "ssl":
                 written_leaf = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
                 if written_leaf and written_leaf[1] == "ocsp.json":
+                    # Peer/DB paged=true is not local canary proof — force re-page.
                     write_data = normalize_restored_ocsp_json_bytes(
                         data if isinstance(data, (bytes, bytearray)) else None
                     )
@@ -771,6 +813,7 @@ def generate_caches() -> Set[str]:
                     # Sidecars are reconciled on GOOD restore; do not sweep them off.
                     if is_ocsp_disk_local_rel(rel):
                         continue
+                    # Keep fenced SPKI leaves and all floors (floor raise is gated above).
                     parsed = parse_ocsp_shard_cache_name(rel)
                     if parsed and parsed[0] in ocsp_skip:
                         continue
