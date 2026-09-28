@@ -1868,16 +1868,20 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
     return out
 
 
-# Worker-published gate: Lua probes SSL_set0_tlsext_status_ocsp_resp_ex and writes
-# /var/cache/bunkerweb/ssl/.multi_staple_attach ("1" / "0"). Do not fetch intermediate
-# OCSP until workers can attach CertificateEntry staples — prefetch has no wire effect
-# and burns AIA/canary budget on leaf-only libssl.
+# Colony multi-staple capability: workers publish per-id votes under
+# .multi_staple_attach.d/; aggregate .multi_staple_attach is the MIN across live
+# votes ("1" only when every live worker can attach). Do not fetch intermediate
+# OCSP until the colony can attach CertificateEntry staples — prefetch has no wire
+# effect on leaf-only libssl and burns AIA/canary budget. A single last-writer file
+# flaps during mixed 3.5/3.6 rollouts.
 _MULTI_STAPLE_ATTACH_PATH = Path(os.sep, "var", "cache", "bunkerweb", "ssl", ".multi_staple_attach")
+_MULTI_STAPLE_ATTACH_DIR = Path(os.sep, "var", "cache", "bunkerweb", "ssl", ".multi_staple_attach.d")
+_MULTI_STAPLE_WORKER_TTL = 120  # seconds; must match Lua MULTI_STAPLE_WORKER_TTL
 _MULTI_STAPLE_ATTACH_CACHE: Optional[bool] = None
 
 
 def _libssl_has_multi_staple_ex() -> bool:
-    """ctypes dlsym bootstrap when workers have not published .multi_staple_attach yet."""
+    """ctypes dlsym bootstrap when workers have not published colony markers yet."""
     # Prefer the process image / libssl already linked; fall back to common sonames.
     candidates = (None, "libssl.so.3", "libssl.so", "libssl.so.1.1")
     for name in candidates:
@@ -1893,18 +1897,70 @@ def _libssl_has_multi_staple_ex() -> bool:
     return False
 
 
+def _colony_multi_staple_min() -> Optional[bool]:
+    """
+    MIN across live per-worker markers in .multi_staple_attach.d/.
+    Returns False if any live vote is "0", True if all live votes are "1",
+    None if no live markers (fall back to aggregate file / dlsym).
+    """
+    try:
+        if not _MULTI_STAPLE_ATTACH_DIR.is_dir():
+            return None
+    except OSError:
+        return None
+    now = time.time()
+    found_zero = False
+    found_one = False
+    live = False
+    try:
+        for entry in _MULTI_STAPLE_ATTACH_DIR.iterdir():
+            if not entry.is_file() or ".tmp." in entry.name:
+                continue
+            try:
+                age = now - entry.stat().st_mtime
+            except OSError:
+                continue
+            if age > _MULTI_STAPLE_WORKER_TTL:
+                try:
+                    entry.unlink()
+                except OSError:
+                    pass
+                continue
+            try:
+                raw = entry.read_text(encoding="utf-8", errors="replace").strip()
+            except OSError:
+                continue
+            live = True
+            if raw.startswith("0"):
+                found_zero = True
+            elif raw.startswith("1"):
+                found_one = True
+    except OSError:
+        return None
+    if not live:
+        return None
+    if found_zero:
+        return False
+    if found_one:
+        return True
+    return None
+
+
 def _worker_can_attach_multi_staple() -> bool:
     """
-    True only when BunkerWeb workers can call SSL_set0_tlsext_status_ocsp_resp_ex.
-    Prefer the worker marker; if absent, probe local libssl (all-in-one cold start).
-    Marker "0" always wins (scheduler must not prefetch past a leaf-only worker).
+    True only when every live BunkerWeb worker can call SSL_set0_tlsext_status_ocsp_resp_ex.
+    Prefer the colony directory min; then the aggregate marker file; else probe local libssl
+    (all-in-one cold start). Any live "0" forces leaf-only until that worker expires.
     """
     global _MULTI_STAPLE_ATTACH_CACHE
     if _MULTI_STAPLE_ATTACH_CACHE is not None:
         return _MULTI_STAPLE_ATTACH_CACHE
     ready = False
     try:
-        if _MULTI_STAPLE_ATTACH_PATH.is_file():
+        colony = _colony_multi_staple_min()
+        if colony is not None:
+            ready = colony
+        elif _MULTI_STAPLE_ATTACH_PATH.is_file():
             raw = _MULTI_STAPLE_ATTACH_PATH.read_text(encoding="utf-8", errors="replace").strip()
             if raw.startswith("0"):
                 ready = False
@@ -2040,9 +2096,10 @@ def _process_cert_chain(
         if stats is not None and stats.get("ocsp_intermediate_skipped_libssl") is None:
             stats["ocsp_intermediate_skipped_libssl"] = 1
             log_info(
-                "ℹ️ OCSP skipping intermediate fetches: workers lack SSL_set0_tlsext_status_ocsp_resp_ex "
-                "(marker %s)",
+                "ℹ️ OCSP skipping intermediate fetches: colony lacks SSL_set0_tlsext_status_ocsp_resp_ex "
+                "(min across live workers; marker %s / %s)",
                 _MULTI_STAPLE_ATTACH_PATH.as_posix(),
+                _MULTI_STAPLE_ATTACH_DIR.as_posix(),
             )
         return results
     leaf_fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))

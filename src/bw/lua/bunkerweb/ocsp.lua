@@ -1766,21 +1766,123 @@ end
 
 -- TLS 1.3 multi-staple when libssl exports SSL_set0_tlsext_status_ocsp_resp_ex
 -- (upstream OpenSSL 3.6+; do not gate on version_num — distro backports / forks vary).
--- Probe result is published to .multi_staple_attach so ocsp-refresh only fetches
--- intermediate shards when workers can actually attach them.
+-- Colony capability is the MIN across live workers (not last-writer on one file):
+-- each worker writes .multi_staple_attach.d/<host-pid-wid>; aggregate .multi_staple_attach
+-- is "1" only when every live marker is "1". Any leaf-only worker forces fleet leaf-only
+-- until its marker expires. ocsp-refresh reads that min before intermediate AIA fetch.
 local MULTI_STAPLE_ATTACH_PATH = "/var/cache/bunkerweb/ssl/.multi_staple_attach"
+local MULTI_STAPLE_ATTACH_DIR = "/var/cache/bunkerweb/ssl/.multi_staple_attach.d"
+local MULTI_STAPLE_WORKER_TTL = 120 -- seconds; warmer / probe refresh keeps live workers fresh
+local MULTI_STAPLE_PUBLISH_INTERVAL = 15 -- rate-limit colony republish on hot paths
 local _multi_staple_state = nil -- nil=unprobed, false=unavailable, table=ready
+local _multi_staple_worker_id = nil
+local _multi_staple_last_publish = 0
 
-local function publish_multi_staple_attach(ready)
+local function multi_staple_worker_id()
+	if _multi_staple_worker_id then
+		return _multi_staple_worker_id
+	end
+	local host = os.getenv("HOSTNAME") or os.getenv("HOST") or "unknown"
+	host = tostring(host):gsub("[^%w._%-]", "_")
+	if #host > 64 then
+		host = host:sub(1, 64)
+	end
+	local pid = 0
+	local wid = 0
+	pcall(function()
+		if ngx.worker and ngx.worker.pid then
+			pid = tonumber(ngx.worker.pid()) or 0
+		end
+		if ngx.worker and ngx.worker.id then
+			wid = tonumber(ngx.worker.id()) or 0
+		end
+	end)
+	_multi_staple_worker_id = host .. "-" .. tostring(pid) .. "-" .. tostring(wid)
+	return _multi_staple_worker_id
+end
+
+-- Scan live per-worker markers. Returns false if any live "0", true if all live are "1",
+-- nil if no live markers (cold start / empty dir).
+local function colony_multi_staple_min()
+	local found_zero = false
+	local found_one = false
+	local live = false
+	pcall(function()
+		local lfs = require "lfs"
+		if lfs.attributes(MULTI_STAPLE_ATTACH_DIR, "mode") ~= "directory" then
+			return
+		end
+		local now = ngx.now()
+		for name in lfs.dir(MULTI_STAPLE_ATTACH_DIR) do
+			if name ~= "." and name ~= ".." and not name:find("%.tmp%.", 1, false) then
+				local path = MULTI_STAPLE_ATTACH_DIR .. "/" .. name
+				local mtime = lfs.attributes(path, "modification")
+				if type(mtime) == "number" and (now - mtime) > MULTI_STAPLE_WORKER_TTL then
+					os.remove(path)
+				else
+					local f = io.open(path, "r")
+					if f then
+						local raw = f:read("*l") or ""
+						f:close()
+						live = true
+						if raw:sub(1, 1) == "0" then
+							found_zero = true
+						elseif raw:sub(1, 1) == "1" then
+							found_one = true
+						end
+					end
+				end
+			end
+		end
+	end)
+	if not live then
+		return nil
+	end
+	if found_zero then
+		return false
+	end
+	if found_one then
+		return true
+	end
+	return nil
+end
+
+local function publish_multi_staple_attach(ready, force)
+	local now = ngx.now()
+	if not force and (now - _multi_staple_last_publish) < MULTI_STAPLE_PUBLISH_INTERVAL then
+		return
+	end
+	_multi_staple_last_publish = now
 	pcall(function()
 		local lfs = require "lfs"
 		lfs.mkdir("/var/cache/bunkerweb/ssl")
+		lfs.mkdir(MULTI_STAPLE_ATTACH_DIR)
+		local wid = multi_staple_worker_id()
+		local worker_path = MULTI_STAPLE_ATTACH_DIR .. "/" .. wid
+		local wtmp = worker_path .. ".tmp." .. tostring(ngx.worker.id() or 0)
+		local wf = io.open(wtmp, "w")
+		if not wf then
+			return
+		end
+		wf:write(ready and "1\n" or "0\n")
+		wf:close()
+		os.rename(wtmp, worker_path)
+
+		-- Colony min: any live "0" wins; else all-live-"1"; else this worker's vote.
+		local colony = colony_multi_staple_min()
+		local aggregate = ready
+		if colony == false then
+			aggregate = false
+		elseif colony == true then
+			aggregate = true
+		end
+
 		local tmp = MULTI_STAPLE_ATTACH_PATH .. ".tmp." .. tostring(ngx.worker.id() or 0)
 		local f = io.open(tmp, "w")
 		if not f then
 			return
 		end
-		f:write(ready and "1\n" or "0\n")
+		f:write(aggregate and "1\n" or "0\n")
 		f:close()
 		os.rename(tmp, MULTI_STAPLE_ATTACH_PATH)
 	end)
@@ -1788,12 +1890,14 @@ end
 
 local function openssl_multi_staple_ready()
 	if _multi_staple_state ~= nil then
+		-- Refresh liveness so a departed leaf-only worker can expire from the colony min.
+		publish_multi_staple_attach(_multi_staple_state ~= false, false)
 		return _multi_staple_state ~= false, _multi_staple_state
 	end
 	local ok_ffi, ffi = pcall(require, "ffi")
 	if not ok_ffi or not ffi then
 		_multi_staple_state = false
-		publish_multi_staple_attach(false)
+		publish_multi_staple_attach(false, true)
 		return false, nil
 	end
 	-- cdef may fail on re-entry (types already declared); symbol probe is the real gate.
@@ -1814,7 +1918,7 @@ local function openssl_multi_staple_ready()
 	end)
 	if not ok_sym or type(sym) ~= "cdata" then
 		_multi_staple_state = false
-		publish_multi_staple_attach(false)
+		publish_multi_staple_attach(false, true)
 		return false, nil
 	end
 	-- Keep empty status cb alive for the process (OpenSSL requires it to emit staples).
@@ -1822,7 +1926,7 @@ local function openssl_multi_staple_ready()
 		return 0 -- SSL_TLSEXT_ERR_OK
 	end)
 	_multi_staple_state = { ffi = ffi, C = ffi.C, empty_cb = cb }
-	publish_multi_staple_attach(true)
+	publish_multi_staple_attach(true, true)
 	return true, _multi_staple_state
 end
 
@@ -3879,28 +3983,34 @@ function _M.start_l1_warmer(internalstore)
 	pcall(openssl_multi_staple_ready)
 	l1_warmer_started = true
 
-	local function tick(premature)
-		if premature then
-			return
-		end
-		if claim_l1_warmer_lease(internalstore) then
-			local epoch = current_ocsp_epoch()
-			local now = ngx.time()
-			-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
-			-- does not push the next handshake onto a cold ocsp.der read.
-			local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
-			if need then
-				l1_warmer_last_epoch = epoch
-				l1_warmer_last_full = now
-				pcall(_M.warm_l1_from_disk, internalstore)
+		local function tick(premature)
+			if premature then
+				return
+			end
+			-- Refresh this worker's multi-staple colony vote (MIN across live workers).
+			if _multi_staple_state ~= nil then
+				pcall(publish_multi_staple_attach, _multi_staple_state ~= false, false)
+			else
+				pcall(openssl_multi_staple_ready)
+			end
+			if claim_l1_warmer_lease(internalstore) then
+				local epoch = current_ocsp_epoch()
+				local now = ngx.time()
+				-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
+				-- does not push the next handshake onto a cold ocsp.der read.
+				local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
+				if need then
+					l1_warmer_last_epoch = epoch
+					l1_warmer_last_full = now
+					pcall(_M.warm_l1_from_disk, internalstore)
+				end
+			end
+			local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
+			if not ok then
+				l1_warmer_started = false
+				log(ngx.ERR, "OCSP L1 warmer reschedule failed: " .. tostring(err))
 			end
 		end
-		local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
-		if not ok then
-			l1_warmer_started = false
-			log(ngx.ERR, "OCSP L1 warmer reschedule failed: " .. tostring(err))
-		end
-	end
 
 	-- Stagger first tick by worker id so startup claims are not a thundering herd.
 	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
