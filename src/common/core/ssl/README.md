@@ -91,9 +91,9 @@ When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha25
 !!! tip "Intermediate OCSP (TLS 1.3 multi-staple)"
     When linked libssl exports **`SSL_set0_tlsext_status_ocsp_resp_ex`** (upstream OpenSSL **3.6+**; detected by symbol probe, not `version_num`), BunkerWeb attaches a `status_request` on each non-root `CertificateEntry`:
 
-    - `ocsp-refresh` fetches and pages a shard for every intermediate in the fullchain that advertises an OCSP AIA URI (same `/var/cache/bunkerweb/ssl/{h1}/{h2}/{spki}/` layout as the leaf).
+    - Workers publish `/var/cache/bunkerweb/ssl/.multi_staple_attach` (`1` / `0`) from the same probe. `ocsp-refresh` fetches intermediate AIA shards **only when that capability is on** — leaf-only libssl does not burn OCSP GETs/canaries for bodies it cannot put on the wire.
     - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; an intermediate with Must-Staple and no usable staple fails closed.
-    - When the symbol is **missing** (e.g. current Alpine OpenSSL **3.5.x** images), only the leaf staple can be sent. Intermediate shards are still refreshed for a later libssl upgrade. If any intermediate itself carries Must-Staple, the handshake refuses with `staple_decision=intermediate_must_staple_libssl` (softened by `OCSP_STAPLE_MODE`) — the server never logs `OCSP_STAPLED` / `ok` for a leaf-only attach that TLS 1.3 clients enforcing intermediate Must-Staple would still reject.
+    - When the symbol is **missing** (e.g. current Alpine OpenSSL **3.5.x** images), only the leaf staple can be sent and intermediate refresh is skipped. If any intermediate itself carries Must-Staple, the handshake refuses with `staple_decision=intermediate_must_staple_libssl` (softened by `OCSP_STAPLE_MODE`) — the server never logs `OCSP_STAPLED` / `ok` for a leaf-only attach that TLS 1.3 clients enforcing intermediate Must-Staple would still reject.
 
 !!! tip "SSL Labs Testing"
     After configuring your SSL settings, use the [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/) to verify your configuration and check for potential security issues. A proper BunkerWeb SSL configuration should achieve an A+ rating.

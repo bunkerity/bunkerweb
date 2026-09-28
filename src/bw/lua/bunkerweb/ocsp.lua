@@ -1708,7 +1708,25 @@ end
 
 -- TLS 1.3 multi-staple when libssl exports SSL_set0_tlsext_status_ocsp_resp_ex
 -- (upstream OpenSSL 3.6+; do not gate on version_num — distro backports / forks vary).
+-- Probe result is published to .multi_staple_attach so ocsp-refresh only fetches
+-- intermediate shards when workers can actually attach them.
+local MULTI_STAPLE_ATTACH_PATH = "/var/cache/bunkerweb/ssl/.multi_staple_attach"
 local _multi_staple_state = nil -- nil=unprobed, false=unavailable, table=ready
+
+local function publish_multi_staple_attach(ready)
+	pcall(function()
+		local lfs = require "lfs"
+		lfs.mkdir("/var/cache/bunkerweb/ssl")
+		local tmp = MULTI_STAPLE_ATTACH_PATH .. ".tmp." .. tostring(ngx.worker.id() or 0)
+		local f = io.open(tmp, "w")
+		if not f then
+			return
+		end
+		f:write(ready and "1\n" or "0\n")
+		f:close()
+		os.rename(tmp, MULTI_STAPLE_ATTACH_PATH)
+	end)
+end
 
 local function openssl_multi_staple_ready()
 	if _multi_staple_state ~= nil then
@@ -1717,6 +1735,7 @@ local function openssl_multi_staple_ready()
 	local ok_ffi, ffi = pcall(require, "ffi")
 	if not ok_ffi or not ffi then
 		_multi_staple_state = false
+		publish_multi_staple_attach(false)
 		return false, nil
 	end
 	-- cdef may fail on re-entry (types already declared); symbol probe is the real gate.
@@ -1737,6 +1756,7 @@ local function openssl_multi_staple_ready()
 	end)
 	if not ok_sym or type(sym) ~= "cdata" then
 		_multi_staple_state = false
+		publish_multi_staple_attach(false)
 		return false, nil
 	end
 	-- Keep empty status cb alive for the process (OpenSSL requires it to emit staples).
@@ -1744,6 +1764,7 @@ local function openssl_multi_staple_ready()
 		return 0 -- SSL_TLSEXT_ERR_OK
 	end)
 	_multi_staple_state = { ffi = ffi, C = ffi.C, empty_cb = cb }
+	publish_multi_staple_attach(true)
 	return true, _multi_staple_state
 end
 
@@ -3371,6 +3392,8 @@ function _M.start_l1_warmer(internalstore)
 	if not ensure_ocsp_refuse_dir() then
 		log(ngx.ERR, "OCSP could not provision ocsp-refuse/ dir; peer-refuse bus writes may fail")
 	end
+	-- Publish multi-staple attach capability for ocsp-refresh (intermediate fetch gate).
+	pcall(openssl_multi_staple_ready)
 	l1_warmer_started = true
 
 	local function tick(premature)

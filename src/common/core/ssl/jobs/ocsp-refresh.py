@@ -1696,7 +1696,7 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
     Non-root intermediates in the fullchain that advertise an OCSP AIA URI.
     Each target is a mini-chain PEM (intermediate + its issuer) so _process_cert
     can fetch/page a shard keyed by that intermediate's SPKI — for TLS 1.3
-    CertificateEntry multi-staple when OpenSSL >= 3.6.
+    CertificateEntry multi-staple when workers export SSL_set0_tlsext_status_ocsp_resp_ex.
     """
     out: List[Tuple[str, bytes]] = []
     try:
@@ -1743,6 +1743,58 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
     return out
 
 
+# Worker-published gate: Lua probes SSL_set0_tlsext_status_ocsp_resp_ex and writes
+# /var/cache/bunkerweb/ssl/.multi_staple_attach ("1" / "0"). Do not fetch intermediate
+# OCSP until workers can attach CertificateEntry staples — prefetch has no wire effect
+# and burns AIA/canary budget on leaf-only libssl.
+_MULTI_STAPLE_ATTACH_PATH = Path(os.sep, "var", "cache", "bunkerweb", "ssl", ".multi_staple_attach")
+_MULTI_STAPLE_ATTACH_CACHE: Optional[bool] = None
+
+
+def _libssl_has_multi_staple_ex() -> bool:
+    """ctypes dlsym bootstrap when workers have not published .multi_staple_attach yet."""
+    # Prefer the process image / libssl already linked; fall back to common sonames.
+    candidates = (None, "libssl.so.3", "libssl.so", "libssl.so.1.1")
+    for name in candidates:
+        try:
+            lib = ctypes.CDLL(name) if name else ctypes.CDLL(None)
+        except OSError:
+            continue
+        try:
+            getattr(lib, "SSL_set0_tlsext_status_ocsp_resp_ex")
+            return True
+        except AttributeError:
+            continue
+    return False
+
+
+def _worker_can_attach_multi_staple() -> bool:
+    """
+    True only when BunkerWeb workers can call SSL_set0_tlsext_status_ocsp_resp_ex.
+    Prefer the worker marker; if absent, probe local libssl (all-in-one cold start).
+    Marker "0" always wins (scheduler must not prefetch past a leaf-only worker).
+    """
+    global _MULTI_STAPLE_ATTACH_CACHE
+    if _MULTI_STAPLE_ATTACH_CACHE is not None:
+        return _MULTI_STAPLE_ATTACH_CACHE
+    ready = False
+    try:
+        if _MULTI_STAPLE_ATTACH_PATH.is_file():
+            raw = _MULTI_STAPLE_ATTACH_PATH.read_text(encoding="utf-8", errors="replace").strip()
+            if raw.startswith("0"):
+                ready = False
+            elif raw.startswith("1"):
+                ready = True
+            else:
+                ready = _libssl_has_multi_staple_ex()
+        else:
+            ready = _libssl_has_multi_staple_ex()
+    except Exception:
+        ready = False
+    _MULTI_STAPLE_ATTACH_CACHE = ready
+    return ready
+
+
 def _process_cert_chain(
     cert_name: str,
     pem_data: bytes,
@@ -1750,8 +1802,17 @@ def _process_cert_chain(
     stats: Optional[dict] = None,
     force_fetch: bool = False,
 ) -> List[Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]]:
-    """Process leaf OCSP then any intermediate OCSP AIA targets in the same fullchain."""
+    """Process leaf OCSP then (when workers can multi-staple) intermediate AIA targets."""
     results = [_process_cert(cert_name, pem_data, db, stats, force_fetch=force_fetch)]
+    if not _worker_can_attach_multi_staple():
+        if stats is not None and stats.get("ocsp_intermediate_skipped_libssl") is None:
+            stats["ocsp_intermediate_skipped_libssl"] = 1
+            log_info(
+                "ℹ️ OCSP skipping intermediate fetches: workers lack SSL_set0_tlsext_status_ocsp_resp_ex "
+                "(marker %s)",
+                _MULTI_STAPLE_ATTACH_PATH.as_posix(),
+            )
+        return results
     for iname, ipem in _intermediate_ocsp_targets(cert_name, pem_data):
         try:
             results.append(_process_cert(iname, ipem, db, stats, force_fetch=force_fetch))
@@ -2179,9 +2240,10 @@ def _new_job_run_id() -> str:
 
 def _begin_job_run() -> str:
     """Start a new job run id and refresh cached OpenSSL identity."""
-    global _JOB_RUN_ID, _OPENSSL_IDENTITY
+    global _JOB_RUN_ID, _OPENSSL_IDENTITY, _MULTI_STAPLE_ATTACH_CACHE
     _JOB_RUN_ID = _new_job_run_id()
     _OPENSSL_IDENTITY = None
+    _MULTI_STAPLE_ATTACH_CACHE = None
     return _JOB_RUN_ID
 
 
