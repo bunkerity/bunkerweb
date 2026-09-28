@@ -131,6 +131,8 @@ local STAPLE_DECISION = {
 	allow_pin_missing = true,
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
+	-- soft_recall_gen present but non-integer (type drift). Local refuse; KEEP pin.
+	gen_type_drift = true,
 	await_sni = true,
 	intermediate_must_staple_libssl = true,
 	-- Colony min is leaf-only (a live peer lacks multi-staple); not a local libssl gap.

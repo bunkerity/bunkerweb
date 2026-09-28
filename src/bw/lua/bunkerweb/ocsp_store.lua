@@ -350,18 +350,35 @@ local function ocsp_ligand_path(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-ligand/" .. fingerprint
 end
 
--- Integer soft_recall_gen from ligand or ocsp.json (0 if absent).
+-- Integer soft_recall_gen from ligand / ocsp.json / allow-pin.
+-- Missing key → 0 (upgrade grace so pre-gen pins still match).
+-- Present but non-integer (table, bool, non-digit string, NaN, negative) → nil
+-- so generation_tuple / allow-pin match fail closed (KEEP pin; no CAS revoke).
 -- Job-minted counter: bumps on soft-recall so peer-refuse / allow identity
 -- (der_sha256, soft_recall_gen) cannot re-match a leftover pin after re-page.
 local function soft_recall_gen_of(meta)
 	if type(meta) ~= "table" then
 		return 0
 	end
-	local g = tonumber(meta.soft_recall_gen)
-	if not g or g < 0 then
+	local raw = meta.soft_recall_gen
+	if raw == nil then
 		return 0
 	end
-	return math.floor(g)
+	if type(raw) == "number" then
+		-- Reject NaN / inf / negative; floor truncates fractional JSON numbers.
+		if raw ~= raw or raw == math.huge or raw == -math.huge or raw < 0 then
+			return nil
+		end
+		return math.floor(raw)
+	end
+	if type(raw) == "string" then
+		-- Digit-only only (no tonumber("1e2") / "08" octal surprises).
+		if not raw:match("^%d+$") then
+			return nil
+		end
+		return tonumber(raw)
+	end
+	return nil
 end
 
 -- Load ocsp-ligand/{fp}. Prefer this over in-shard ocsp.json for der_sha256 binding.
@@ -460,6 +477,7 @@ end
 -- fallback for meta-only DROP causes (tombstone / serial / canary) — never for
 -- probe paths that pass resp=nil after CertID/ligand refuses (that would
 -- compare-and-delete the GOOD generation using meta alone).
+-- Type-drift soft_recall_gen → nil gen (callers refuse / skip CAS).
 local function generation_tuple(meta, resp)
 	local body = resp_binding(resp)
 	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
@@ -471,7 +489,11 @@ local function generation_tuple(meta, resp)
 	if not body then
 		return nil, nil
 	end
-	return body, soft_recall_gen_of(meta)
+	local gen = soft_recall_gen_of(meta)
+	if type(gen) ~= "number" then
+		return body, nil
+	end
+	return body, gen
 end
 
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
@@ -567,10 +589,10 @@ local function ocsp_json_ligand_matches(meta, fingerprint, resp)
 	return ok, reason, meta_sha, body_sha
 end
 
--- Job canary already verified this exact body (openssl CLI + ligands) and stamped
--- paged=true (ligand + allow-pin). Handshake may skip ngx.ocsp.validate_ocsp_response
--- for that body so CLI vs OpenResty FFI disagreement cannot unpage a live shard;
--- set_ocsp_status_resp and CertID/leaf checks still run.
+-- Ligand+paged only (CLI canary stamped this body). Handshake skip-validate must
+-- also require a live allow-pin generation match — see pin.canary_trust_ok /
+-- bunkerweb.ocsp.canary_paged_body_ok (pin wraps this). Store stays pin-free
+-- (require DAG: store cannot import pin).
 local function canary_paged_body_ok(meta, fingerprint, resp)
 	local ok, _, _, _, eff = ligand_verdict(meta, fingerprint, resp)
 	if not ok or type(eff) ~= "table" then
@@ -582,6 +604,8 @@ local function canary_paged_body_ok(meta, fingerprint, resp)
 	return true
 end
 
+-- Ligand-only predicate (warmer / internal). Public facade re-exports pin's
+-- canary_trust_ok as canary_paged_body_ok so skip-validate needs the allow-pin.
 function _M.canary_paged_body_ok(meta, fingerprint, resp)
 	return canary_paged_body_ok(meta, fingerprint, resp)
 end

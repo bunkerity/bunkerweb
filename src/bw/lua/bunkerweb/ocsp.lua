@@ -34,7 +34,6 @@ local pem_blocks = cert.pem_blocks
 local spki_fingerprint = cert.spki_fingerprint
 
 local store = require("bunkerweb.ocsp_store").internal
-local canary_paged_body_ok = store.canary_paged_body_ok
 local cluster_floor_blocks = store.cluster_floor_blocks
 local drop_cache = store.drop_cache
 local entry_verified = store.entry_verified
@@ -53,6 +52,8 @@ local shard_not_paged = store.shard_not_paged
 local warm_cache = store.warm_cache
 
 local pin = require("bunkerweb.ocsp_pin").internal
+-- Skip-validate needs live allow-pin (sha, gen), not ligand+paged alone.
+local canary_paged_body_ok = pin.canary_trust_ok
 local must_staple_refuse = pin.must_staple_refuse
 local peer_refuse_blocks = pin.peer_refuse_blocks
 
@@ -187,7 +188,9 @@ local function try_staple(
 		end
 		return false
 	end
-	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand match.
+	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand
+	-- match AND live allow-pin names this generation (soft-fuse / pin revoke
+	-- must not keep skip-validate alive on ligand bits alone).
 	if canary_paged_body_ok(meta, fingerprint, resp) then
 		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
 		return set_resp()
@@ -1143,6 +1146,17 @@ local function staple_one_leaf(
 				end
 				if result == false then
 					if result_detail == "validate_budget" then
+						-- Demote local bw2 verified→unverified so the next handshake
+						-- cannot skip FFI on a body this budget never finished proving.
+						-- KEEP fleet allow-pin (validate_budget is KEEP_ALLOW).
+						warm_cache(
+							internalstore,
+							fingerprint,
+							cached,
+							false,
+							meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+							cached_epoch
+						)
 						if must_staple then
 							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
 						end
@@ -1233,6 +1247,8 @@ local function staple_one_leaf(
 		end
 		if result == false then
 			if result_detail == "validate_budget" then
+				-- Demote local L1 verified (KEEP pin) — same contract as L1 path.
+				warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, resp, "validate_budget", mode)
 				end
@@ -1587,7 +1603,6 @@ local cert_api = require("bunkerweb.ocsp_cert")
 _M.aia_uri_pin_ok = cert_api.aia_uri_pin_ok
 _M.ocsp_resp_serial_hex = cert_api.ocsp_resp_serial_hex
 local store_api = require("bunkerweb.ocsp_store")
-_M.canary_paged_body_ok = store_api.canary_paged_body_ok
 _M.l1_body_matches_disk = store_api.l1_body_matches_disk
 _M.ligand_effective_sha = store_api.ligand_effective_sha
 _M.ligand_matches = store_api.ligand_matches
@@ -1595,6 +1610,8 @@ _M.ligand_verdict = store_api.ligand_verdict
 _M.meta_expires_unix = store_api.meta_expires_unix
 _M.resolve_leaf_must_staple = store_api.resolve_leaf_must_staple
 local pin_api = require("bunkerweb.ocsp_pin")
+-- Skip-validate = ligand+paged + live allow-pin (sha, gen). Store keeps ligand-only.
+_M.canary_paged_body_ok = pin_api.canary_paged_body_ok
 _M.clear_peer_refuse = pin_api.clear_peer_refuse
 _M.drop_allow_pin = pin_api.drop_allow_pin
 _M.ensure_ocsp_bus_dirs = pin_api.ensure_ocsp_bus_dirs

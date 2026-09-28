@@ -70,6 +70,7 @@ local KEEP_ALLOW_ON_REFUSE = {
 	allow_pin_missing = true,
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
+	gen_type_drift = true,
 	ligand_missing = true,
 	-- Runbook alias collapse of ligand_* — callers must pass raw ligand_verdict;
 	-- if they pass normalize_staple_decision output, KEEP (do not DROP on ENOENT).
@@ -142,8 +143,20 @@ local function read_allow_pin(fingerprint)
 end
 
 -- True when the pin names exactly this generation (der_sha256, soft_recall_gen).
+-- want_g must be a number; pin.soft_recall_gen must already be a number (decode
+-- ran soft_recall_gen_of — nil means type drift on the pin file, never match).
 local function allow_pin_matches(pin, want_sha, want_g)
-	return type(pin) == "table" and pin.der_sha256 == want_sha and (tonumber(pin.soft_recall_gen) or 0) == want_g
+	if type(want_g) ~= "number" or type(pin) ~= "table" then
+		return false
+	end
+	if pin.der_sha256 ~= want_sha then
+		return false
+	end
+	local pin_g = pin.soft_recall_gen
+	if type(pin_g) ~= "number" then
+		return false
+	end
+	return pin_g == want_g
 end
 
 -- Claim files match the job's stale-temp sweep (**/.ocsp_*.tmp, >5 min) so a
@@ -422,6 +435,16 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 		end
 		return nil
 	end
+	-- Type-drift soft_recall_gen: refuse locally, KEEP fleet pin (no CAS).
+	if type(recall_gen) ~= "number" then
+		if not quiet then
+			log(
+				ngx.ERR,
+				"OCSP soft_recall_gen type drift fp=" .. fingerprint:sub(1, 16) .. "... der=" .. sha:sub(1, 16) .. "..."
+			)
+		end
+		return "gen_type_drift"
+	end
 	-- Soft-recall / unpaged: revoke leftover allow for THIS (sha, gen) only so
 	-- a lagging worker cannot erase a re-canaried pin (same DER, newer gen).
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
@@ -444,7 +467,7 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 		end
 		return "allow_pin_missing"
 	end
-	if pin.der_sha256 ~= sha or (tonumber(pin.soft_recall_gen) or 0) ~= recall_gen then
+	if not allow_pin_matches(pin, sha, recall_gen) then
 		if not quiet then
 			log(
 				ngx.ERR,
@@ -574,6 +597,29 @@ local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	return false, "must_staple", detail or "unmet"
 end
 
+-- Skip ngx.ocsp.validate only when ligand+paged AND live allow-pin matches this
+-- generation. Ligand-alone would skip crypto after soft-fuse / pin revoke while
+-- CLI canary bits still say paged — that reopens Must-Staple without fleet proof.
+-- Store.canary_paged_body_ok stays ligand-only (require DAG); this is the public
+-- handshake predicate re-exported as bunkerweb.ocsp.canary_paged_body_ok.
+local function canary_trust_ok(meta, fingerprint, resp)
+	if not store.canary_paged_body_ok(meta, fingerprint, resp) then
+		return false
+	end
+	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
+	if not sha or type(gen) ~= "number" then
+		return false
+	end
+	local pin = read_allow_pin(fingerprint)
+	if not allow_pin_matches(pin, sha, gen) then
+		return false
+	end
+	if allow_pin_expired(pin) then
+		return false
+	end
+	return true
+end
+
 -- Keep old name for warmer compatibility.
 local function ocsp_refuse_path(fingerprint)
 	return ocsp_allow_path(fingerprint)
@@ -603,12 +649,18 @@ function _M.write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_un
 	return write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
 end
 
+-- Public skip-validate: ligand+paged + live allow-pin generation match.
+function _M.canary_paged_body_ok(meta, fingerprint, resp)
+	return canary_trust_ok(meta, fingerprint, resp)
+end
+
 -- Back-compat: clear = drop allow pin (+ legacy refuse).
 function _M.clear_peer_refuse(fingerprint)
 	return drop_allow_pin(fingerprint)
 end
 
 _M.internal = {
+	canary_trust_ok = canary_trust_ok,
 	ensure_ocsp_bus_dirs = ensure_ocsp_bus_dirs,
 	must_staple_refuse = must_staple_refuse,
 	peer_refuse_blocks = peer_refuse_blocks,

@@ -2994,8 +2994,8 @@ function _M.ssl_certificate(state)
 
 			-- Trust scheduler canary (openssl CLI + ligands, paged=true) for crypto verify
 			-- so CLI vs ngx.ocsp.validate_ocsp_response disagreement cannot unpage a live shard.
-			-- canary_paged_body_ok runs ligand_verdict (same fail-closed binding as L1 /
-			-- Must-Staple); never skip validate on a body L1 kept via in-shard fallback.
+			-- canary_paged_body_ok also requires a live allow-pin generation match (soft-fuse /
+			-- pin revoke must not keep skip-validate alive on ligand bits alone).
 			-- set_ocsp_status_resp / CertID gates still run on the attach path.
 			do
 				local meta = read_ocsp_json_for_fp(cert_fp)
@@ -3220,6 +3220,8 @@ function _M.ssl_certificate(state)
 			elseif budget_aborted then
 				-- Named decision: leaf issuer budget exhausted before attach / intermediates.
 				-- Not ok_partial (that is NULL-slot multi-staple after a successful attach).
+				-- Demote local L1 verified→unverified (KEEP fleet allow-pin) so the next
+				-- handshake cannot treat this body as crypto-proven.
 				safe_log(
 					ERR,
 					format_staple_decision("validate_budget", {
@@ -3229,6 +3231,13 @@ function _M.ssl_certificate(state)
 						detail = "leaf_issuers_only",
 					})
 				)
+				do
+					local _, _, packed_epoch, l1_exp = ocsp_l1_get(cert_fp)
+					local meta_budget = read_ocsp_json_for_fp(cert_fp)
+					local exp = l1_exp or ocsp_meta_expires_unix(meta_budget)
+					-- verified_binding nil = park DER for reuse without skip-crypto.
+					ocsp_l1_put(cert_fp, ocsp_der, nil, exp, packed_epoch)
+				end
 			end
 			return finish(false)
 		end
