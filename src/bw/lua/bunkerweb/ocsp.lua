@@ -869,12 +869,22 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 end
 
 -- Fingerprint-only path has no handshake leaf PEM: require response CertID serial
--- to match the job-published ocsp.json serial (same body the ligand binds).
+-- to match the job-published pin (meta.certid.serial, else meta.serial).
+-- When meta.certid is present, those bytes are the single SingleResponse the job accepted.
 local function certid_consistent_with_meta(meta, ocsp_der)
 	if type(meta) ~= "table" then
 		return false, "no_meta"
 	end
-	local meta_serial = canonical_serial_hex(meta.serial)
+	local pin = meta.certid
+	local meta_serial = nil
+	if type(pin) == "table" then
+		meta_serial = canonical_serial_hex(pin.serial)
+		if not meta_serial then
+			return false, "certid_serial_unreadable"
+		end
+	else
+		meta_serial = canonical_serial_hex(meta.serial)
+	end
 	local resp_serial = ocsp_resp_serial_hex(ocsp_der)
 	if not meta_serial or not resp_serial then
 		return false, "serial_unreadable"

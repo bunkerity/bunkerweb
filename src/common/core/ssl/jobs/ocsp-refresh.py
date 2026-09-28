@@ -408,6 +408,32 @@ def _log_ocsp_responder_dns_table() -> None:
     log_info("📇 OCSP responder DNS table (uniq responders):\n| Responder Hostname | Resolved IPs |\n|---|---|\n%s", "\n".join(rows))
 
 
+_CACHE_ROOT_RESOLVED: Optional[Path] = None
+
+
+def _cache_root_resolved() -> Path:
+    """Resolved absolute cache root (created if needed)."""
+    global _CACHE_ROOT_RESOLVED
+    if _CACHE_ROOT_RESOLVED is None:
+        CONFIGS_SSL_BASE.mkdir(parents=True, exist_ok=True)
+        _CACHE_ROOT_RESOLVED = CONFIGS_SSL_BASE.resolve()
+    return _CACHE_ROOT_RESOLVED
+
+
+def _assert_path_under_cache_root(path: Path) -> Path:
+    """
+    Resolve path and require it to stay under CONFIGS_SSL_BASE.
+    Blocks symlink/jail escapes that would write or read outside the OCSP tree.
+    """
+    root = _cache_root_resolved()
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"OCSP path escapes cache root ({root}): {resolved}") from exc
+    return resolved
+
+
 def _get_sharded_ocsp_path(fingerprint: str) -> Path:
 	"""
 	Get sharded directory path for OCSP response storage using two-level hex tree sharding.
@@ -431,6 +457,15 @@ def _get_sharded_ocsp_path(fingerprint: str) -> Path:
 	hex1 = normalized[0]
 	hex2 = normalized[1]
 	return CONFIGS_SSL_BASE / hex1 / hex2 / normalized
+
+
+def _resolved_sharded_ocsp_path(fingerprint: str) -> Path:
+    """Shard directory after parents exist; realpath must stay under the cache root."""
+    shard = _get_sharded_ocsp_path(fingerprint)
+    if shard.name == "unknown":
+        raise ValueError("empty fingerprint")
+    shard.parent.mkdir(parents=True, exist_ok=True)
+    return _assert_path_under_cache_root(shard)
 
 
 def _ocsp_cache_relpath(fingerprint: str, leaf: str) -> Optional[str]:
@@ -1662,6 +1697,71 @@ def _ocsp_this_update_unix(ocsp_response: x509_ocsp.OCSPResponse) -> Optional[in
         return None
 
 
+def _pin_single_certid(
+    ocsp_response: x509_ocsp.OCSPResponse,
+    leaf: x509.Certificate,
+    issuer: x509.Certificate,
+    cert_name: str,
+) -> Optional[Dict[str, str]]:
+    """
+    Require exactly one SingleResponse whose CertID matches leaf+issuer.
+
+    Returns a certid pin for ocsp.json, or None to fail closed (multi-response,
+    unreadable fields, or CertID mismatch). Libraries that expose "the" serial from
+    a multi-response blob must not be allowed to disagree with sha256(DER).
+    """
+    try:
+        singles = list(ocsp_response.responses)
+    except Exception as e:
+        log_error("❌ OCSP could not enumerate SingleResponse(s) for %s: %s", cert_name, e)
+        return None
+    if len(singles) != 1:
+        log_error(
+            "❌ OCSP response for %s has %d SingleResponse(s); refusing to publish (need exactly 1)",
+            cert_name,
+            len(singles),
+        )
+        return None
+    single = singles[0]
+    try:
+        hash_alg = single.hash_algorithm
+        serial = int(single.serial_number)
+        name_hash = bytes(single.issuer_name_hash)
+        key_hash = bytes(single.issuer_key_hash)
+    except Exception as e:
+        log_error("❌ OCSP SingleResponse CertID unreadable for %s: %s", cert_name, e)
+        return None
+    if serial != int(leaf.serial_number):
+        log_error(
+            "❌ OCSP CertID serial %s does not match leaf serial %s for %s",
+            serial,
+            leaf.serial_number,
+            cert_name,
+        )
+        return None
+    try:
+        expected = x509_ocsp.OCSPRequestBuilder().add_certificate(leaf, issuer, hash_alg).build()
+        exp_name = bytes(expected.issuer_name_hash)
+        exp_key = bytes(expected.issuer_key_hash)
+        exp_serial = int(expected.serial_number)
+    except Exception as e:
+        log_error("❌ OCSP could not build expected CertID for %s: %s", cert_name, e)
+        return None
+    if exp_serial != serial or exp_name != name_hash or exp_key != key_hash:
+        log_error(
+            "❌ OCSP CertID pin mismatch for %s (serial/name_hash/key_hash vs leaf+issuer)",
+            cert_name,
+        )
+        return None
+    serial_hex = format(serial, "X").lstrip("0") or "0"
+    return {
+        "serial": serial_hex,
+        "issuer_name_hash": name_hash.hex().lower(),
+        "issuer_key_hash": key_hash.hex().lower(),
+        "hash_algorithm": getattr(hash_alg, "name", str(hash_alg)).lower(),
+    }
+
+
 def _serial_forms(serial: Optional[int]) -> Tuple[Optional[str], Optional[str]]:
     if serial is None:
         return None, None
@@ -1913,7 +2013,7 @@ def _publish_ocsp_shard(
     if not issuer_pem or not ocsp_der:
         raise ValueError("issuer_pem and ocsp_der are required")
 
-    final_dir = _get_sharded_ocsp_path(normalized)
+    final_dir = _resolved_sharded_ocsp_path(normalized)
     parent = final_dir.parent
     parent.mkdir(parents=True, exist_ok=True)
 
@@ -2411,6 +2511,11 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 "❌ OCSP signer chain does not end on issuer SPKI for %s; refusing to publish.",
                 cert_name,
             )
+            return None, 0, None
+
+        # Exactly one SingleResponse whose CertID names this leaf+issuer (pin for ocsp.json).
+        certid_pin = _pin_single_certid(ocsp_response, leaf, issuer, cert_name)
+        if not certid_pin:
             return None, 0, None
 
         # responseStatus=SUCCESSFUL ≠ CertStatus=good (RFC 6960). Only publish staples
@@ -3034,8 +3139,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     )
                     continue
                 try:
-                    issuer_path = _get_sharded_ocsp_path(issuer_fp) / "issuer.pem"
-                    issuer_path.parent.mkdir(parents=True, exist_ok=True)
+                    issuer_path = _resolved_sharded_ocsp_path(issuer_fp) / "issuer.pem"
                     if not issuer_path.is_file() or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
                         issuer_path.write_bytes(entry["data"])
                         issuer_path.chmod(0o640)
@@ -3065,8 +3169,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     )
                     continue
                 try:
-                    meta_path = _get_sharded_ocsp_path(meta_fp) / "ocsp.json"
-                    meta_path.parent.mkdir(parents=True, exist_ok=True)
+                    meta_path = _resolved_sharded_ocsp_path(meta_fp) / "ocsp.json"
                     if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
                         meta_path.write_bytes(entry["data"])
                         meta_path.chmod(0o640)
@@ -3087,7 +3190,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 continue
 
             try:
-                ocsp_cert_dir = _get_sharded_ocsp_path(fingerprint)
+                ocsp_cert_dir = _resolved_sharded_ocsp_path(fingerprint)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
 
                 if ocsp_path.is_file():
@@ -4258,6 +4361,19 @@ def _persist_ocsp_results_to_db(
         if ocsp_der and ttl > 0:
             cache_key = _ocsp_cache_relpath(cert_fp, "ocsp.der")
             try:
+                # Pin CertID before mirroring DER — refuse multi-response / mismatch blobs.
+                try:
+                    leaf_obj, issuer_obj = _parse_chain(cleaned_pem, cert_name)
+                    parsed_resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
+                    certid_pin = _pin_single_certid(parsed_resp, leaf_obj, issuer_obj, cert_name)
+                except Exception as pin_err:
+                    log_error("❌ OCSP CertID pin failed for DB store of %s: %s", cert_name, pin_err)
+                    certid_pin = None
+                if not certid_pin:
+                    log_error("❌ OCSP refusing DB cache for %s without single CertID pin", cert_name)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    continue
+
                 ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
                 err = db.upsert_job_cache(
                     service_id=None,  # Global cache entry
@@ -4275,6 +4391,8 @@ def _persist_ocsp_results_to_db(
                         meta = _extract_cert_metadata(pem_data, cert_name)
                         meta["fingerprint"] = cert_fp
                         meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
+                        meta["certid"] = certid_pin
+                        meta["serial"] = certid_pin["serial"]
                         meta.update(_ocsp_expiry_meta(ttl))
                         meta.update(_provenance_meta())
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
@@ -4610,11 +4728,8 @@ def _tombstone_ocsp_shard(
         log_error("❌ OCSP could not lock shard to tombstone %s", cert_name)
         return False
     try:
-        shard = _get_sharded_ocsp_path(normalized)
+        shard = _resolved_sharded_ocsp_path(normalized)
         shard.mkdir(parents=True, exist_ok=True)
-        # Strip der_sha256 before unlinking ocsp.der. L1 treats a matching
-        # ocsp.json hash as proof the cached body is still current and will
-        # not open the file.
         meta_path = shard / "ocsp.json"
         meta: Dict[str, Any] = {"fingerprint": normalized, "tombstoned": True, "cert_status": status_name}
         if serial is not None:
@@ -4876,6 +4991,20 @@ def _persist_ocsp_results_to_disk(
                 meta = _extract_cert_metadata(cleaned_pem, cert_name)
                 meta["fingerprint"] = cert_fp
                 meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
+                # Re-pin CertID at publish: exactly one SingleResponse matching leaf+issuer.
+                try:
+                    parsed_resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
+                    certid_pin = _pin_single_certid(parsed_resp, _leaf, issuer, cert_name)
+                except Exception as pin_err:
+                    log_error("❌ OCSP CertID pin failed for %s: %s", cert_name, pin_err)
+                    certid_pin = None
+                if not certid_pin:
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    publish_error_logged = True
+                    raise RuntimeError("CertID pin refused (need exactly one matching SingleResponse)")
+                meta["certid"] = certid_pin
+                # Keep top-level serial aligned with the pinned CertID.
+                meta["serial"] = certid_pin["serial"]
                 meta.update(_ocsp_expiry_meta(ttl))
                 meta.update(_provenance_meta())
 
