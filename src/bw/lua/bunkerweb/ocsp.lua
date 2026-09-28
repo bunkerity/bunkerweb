@@ -75,7 +75,12 @@ end
 
 -- Must-Staple fuse both HTTP and stream read. Default "normal" (fail-close).
 -- staple_only / open soft-continue instead of aborting the handshake.
+-- Stapling off (SSL_USE_OCSP_STAPLING=no, the default) → effective "open": no
+-- staple can be served, so Must-Staple is not enforced (upstream served unstapled).
 local function ocsp_staple_mode(internalstore, server_name)
+	if not stapling_enabled(internalstore, server_name) then
+		return "open"
+	end
 	local value = get_site_variable(internalstore, server_name, "OCSP_STAPLE_MODE")
 	if value == nil or value == "" then
 		return "normal"
@@ -242,6 +247,11 @@ end
 -- Exported so stream ssl_certificate await_sni can apply the same fuse as staple().
 function _M.staple_mode(internalstore, server_name)
 	return ocsp_staple_mode(internalstore, server_name)
+end
+
+-- Exported for the HTTP stapling-off fast path (one parser for SSL_USE_OCSP_STAPLING).
+function _M.stapling_enabled(internalstore, server_name)
+	return stapling_enabled(internalstore, server_name)
 end
 
 function _M.soften_must_staple(mode, ok, reason, detail)
@@ -4005,6 +4015,11 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	mode = mode or "normal"
 	local meta = read_ocsp_json(fingerprint)
 	local must_staple = ocsp_json_must_staple(meta)
+	-- open (incl. stapling off): no enforcement, same as the PEM leaf path in _M.staple.
+	-- Gates below still skip a bad body; they just return false instead of refusing.
+	if must_staple and mode == "open" then
+		must_staple = false
+	end
 	-- Fingerprint-only: intermediate Must-Staple is unprovable without PEM chain.
 	-- Must-Staple leaves refuse with fingerprint_chain_unavailable (see attach_fp).
 	if meta_tombstoned(meta) then

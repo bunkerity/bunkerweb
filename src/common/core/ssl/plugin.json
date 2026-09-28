@@ -99,7 +99,7 @@
     "SSL_USE_OCSP_STAPLING": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable OCSP stapling for this site when certificates advertise an OCSP responder. Let's Encrypt does not provide OCSP responders — use LETS_ENCRYPT_SERVER=zerossl (or a custom CA cert with AIA OCSP) for stapling.",
+      "help": "Enable OCSP stapling for this site when certificates advertise an OCSP responder. Let's Encrypt does not provide OCSP responders — use LETS_ENCRYPT_SERVER=zerossl (or a custom CA cert with AIA OCSP) for stapling. When no, Must-Staple is not enforced: certificates are served unstapled and OCSP_STAPLE_MODE is ignored.",
       "id": "ssl-use-ocsp-stapling",
       "label": "Use OCSP stapling",
       "regex": "^(yes|no)$",
@@ -108,7 +108,7 @@
     "OCSP_STAPLE_MODE": {
       "context": "multisite",
       "default": "normal",
-      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet and write the HTTP↔stream refuse bus (default). staple_only = probe before set_cert and skip unprobed Must-Staple leaves when another leaf can install; if nothing remains, install the site leaf unstapled (do not abort, do not write the refuse bus). open = disable Must-Staple enforcement (panic / recovery), install unstapled, do not write the refuse bus. Does not replace SSL_USE_OCSP_STAPLING.",
+      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet and write the HTTP↔stream refuse bus (default). staple_only = probe before set_cert and skip unprobed Must-Staple leaves when another leaf can install; if nothing remains, install the site leaf unstapled (do not abort, do not write the refuse bus). open = disable Must-Staple enforcement (panic / recovery), install unstapled, do not write the refuse bus. Only applies when SSL_USE_OCSP_STAPLING=yes; with no, the effective mode is open.",
       "id": "ocsp-staple-mode",
       "label": "OCSP staple mode",
       "regex": "^(normal|staple_only|open)$",
