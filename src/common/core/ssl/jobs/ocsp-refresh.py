@@ -5380,7 +5380,11 @@ def _unpage_ocsp_shard_after_nongood(
         loaded.update(_provenance_meta())
         meta_text = json.dumps(loaded, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
+        # Epoch first (invalidate L1), then unlock peer-refuse — same order as canary page.
+        # Soft-recall keeps der_sha256; a prior sticky not_paged on that generation must not
+        # outlive the intentional unpage.
         _bump_ocsp_cache_epoch()
+        _clear_ocsp_peer_refuse(normalized)
         if db is not None:
             try:
                 meta_bytes = meta_text.encode("utf-8")

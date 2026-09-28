@@ -353,6 +353,8 @@ local L1_MAX_TTL = 300
 -- Transient peer-refuse markers age out (align with L1). Sticky codes stay until canary page.
 local PEER_REFUSE_TTL_SECONDS = L1_MAX_TTL
 -- Identity / policy poison: keep shared until a new generation is paged.
+-- not_paged is omitted: both subsystems already gate on ocsp.json paged; bus-poisoning
+-- it sticks against the same der_sha256 after UNKNOWN soft-recall until a re-page lands.
 local PEER_REFUSE_STICKY = {
 	certid_mismatch = true,
 	aia_uri_mismatch = true,
@@ -364,7 +366,6 @@ local PEER_REFUSE_STICKY = {
 	cluster_floor = true,
 	shared_ligand = true,
 	canary_refused = true,
-	not_paged = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_too_long = true,
@@ -1041,14 +1042,18 @@ end
 -- Soft fuse (staple_only/open): continue the handshake but do not poison the
 -- HTTP↔stream bus — a transient miss must not brick the sibling subsystem.
 -- normal (default): record so both subsystems refuse the same generation.
--- Exception: set_staple_failed after a canary-paged body — CLI openssl canary and
--- ngx.ocsp attach can disagree; do not bus-poison that generation for a stack mismatch.
+-- Exceptions (skip bus — sibling already sees the same disk/meta gate, or stack mismatch):
+--   * set_staple_failed after a canary-paged body — CLI openssl vs ngx.ocsp attach
+--   * not_paged — both sides read ocsp.json; sticky bus vs same der_sha256 blocks soft-recall recovery
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
 		local d = detail or "unmet"
-		local skip_bus = (d == "set_staple_failed" or d == "set_staple_exception")
-			and type(meta) == "table"
-			and meta.paged == true
+		local skip_bus = d == "not_paged"
+			or (
+				(d == "set_staple_failed" or d == "set_staple_exception")
+				and type(meta) == "table"
+				and meta.paged == true
+			)
 		if not skip_bus then
 			record_peer_refuse(fingerprint, meta, resp, d)
 		end
