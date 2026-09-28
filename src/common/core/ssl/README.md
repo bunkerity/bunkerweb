@@ -77,7 +77,7 @@ When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha25
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
     NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
 
-    - **HTTP and stream:** read ClientHello `signature_algorithms` when available and staple the matching leaf (`ec` or `rsa`); otherwise prefer ECDSA (typical OpenSSL dual-cert choice). Stream also defers stapling until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
+    - **HTTP and stream:** read ClientHello `signature_algorithms` in preference order and staple the leaf for the first recognized EC or RSA scheme (`ec` or `rsa`); if none parse, prefer ECDSA (typical OpenSSL dual-cert choice). Stream also defers stapling until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
 
     Consequences:
 

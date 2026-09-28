@@ -2638,7 +2638,8 @@ function _M.requires_must_staple(cert_pem, cert_fp_hint)
 end
 
 -- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", or nil.
--- Used on stream so the single ngx.ocsp slot matches the leaf OpenSSL is likely to present.
+-- Walk schemes in client preference order; first recognized EC or RSA scheme wins.
+-- (Listing both is normal — "any ECDSA present ⇒ ec" over-selected the EC staple slot.)
 function _M.prefer_kind_from_sigalgs(ext)
 	if type(ext) ~= "string" or #ext < 2 then
 		return nil
@@ -2647,7 +2648,6 @@ function _M.prefer_kind_from_sigalgs(ext)
 	if len < 2 then
 		return nil
 	end
-	local has_ec, has_rsa = false, false
 	local i = 3
 	local end_i = 2 + len
 	if end_i > #ext then
@@ -2657,9 +2657,10 @@ function _M.prefer_kind_from_sigalgs(ext)
 		local scheme = ext:byte(i) * 256 + ext:byte(i + 1)
 		-- ecdsa_secp* / ed25519 / ed448
 		if scheme == 0x0403 or scheme == 0x0503 or scheme == 0x0603 or scheme == 0x0807 or scheme == 0x0808 then
-			has_ec = true
+			return "ec"
+		end
 		-- rsa_pkcs1_* / rsa_pss_*
-		elseif
+		if
 			scheme == 0x0401
 			or scheme == 0x0501
 			or scheme == 0x0601
@@ -2670,15 +2671,9 @@ function _M.prefer_kind_from_sigalgs(ext)
 			or scheme == 0x080a
 			or scheme == 0x080b
 		then
-			has_rsa = true
+			return "rsa"
 		end
 		i = i + 2
-	end
-	if has_ec then
-		return "ec"
-	end
-	if has_rsa then
-		return "rsa"
 	end
 	return nil
 end
