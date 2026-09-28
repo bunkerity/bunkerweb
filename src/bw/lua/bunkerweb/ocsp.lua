@@ -2976,13 +2976,11 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		end
 		-- Bind staple health to this leaf's issuer-linked intermediates (not leaf shard alone).
 		-- Soft-fuse install (probe_must=false) skips demotion so the preferred leaf can load unstapled.
+		-- Skip-leaf demotion must NOT write the peer-refuse bus: a sibling may still install.
 		if probe_must and mode ~= "open" then
 			local path_ok, path_detail = issuer_path_intermediate_ready(chain_pem)
 			if not path_ok then
 				local detail = path_detail or "unmet"
-				if leaf.fp and mode == "normal" then
-					record_peer_refuse(leaf.fp, read_ocsp_json(leaf.fp), nil, detail)
-				end
 				log(
 					ngx.ERR,
 					format_staple_decision(detail, {
