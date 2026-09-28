@@ -37,6 +37,8 @@ local L1_WARMER_INTERVAL = 5
 local L1_WARMER_RESCAN = 60
 -- Must be well under L1_MAX_TTL so failover re-warms before shm entries expire.
 local L1_WARMER_LEASE_TTL = math.max(L1_WARMER_INTERVAL * 3, 20)
+-- Renew mid-walk so a long MS-first scan cannot outlive the lease TTL.
+local L1_WARMER_LEASE_HEARTBEAT_EVERY = 32
 local L1_WARMER_LEASE_KEY = "TLS:SSL:ocsp_l1_warmer_lease"
 local l1_warmer_started = false
 local l1_warmer_no_add_logged = false
@@ -53,6 +55,30 @@ local function warmer_lease_token()
 	return tostring(wid) .. ":" .. tostring(pid)
 end
 
+-- Renew only while this worker still holds the token. set-after-get alone can
+-- overwrite a peer that claimed after TTL expiry; verify post-set.
+local function renew_l1_warmer_lease(internalstore)
+	if not internalstore then
+		return false
+	end
+	local token = warmer_lease_token()
+	local cur = nil
+	pcall(function()
+		cur = internalstore:get(L1_WARMER_LEASE_KEY)
+	end)
+	if cur ~= token then
+		return false
+	end
+	pcall(function()
+		internalstore:set(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL)
+	end)
+	local again = nil
+	pcall(function()
+		again = internalstore:get(L1_WARMER_LEASE_KEY)
+	end)
+	return again == token
+end
+
 -- True when this worker holds (or just claimed) the scan lease for this subsystem.
 local function claim_l1_warmer_lease(internalstore)
 	if not internalstore then
@@ -64,10 +90,7 @@ local function claim_l1_warmer_lease(internalstore)
 		cur = internalstore:get(L1_WARMER_LEASE_KEY)
 	end)
 	if cur == token then
-		pcall(function()
-			internalstore:set(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL)
-		end)
-		return true
+		return renew_l1_warmer_lease(internalstore)
 	end
 	if cur ~= nil and cur ~= "" then
 		return false
@@ -91,8 +114,7 @@ local function claim_l1_warmer_lease(internalstore)
 	return claimed
 end
 
--- Directory order only (no Must-Staple priority). warm_l1_from_disk sorts
--- must_staple=true shards first so a short lease still warms fail-closed leaves.
+-- Nested hex dirs, or find fallback restricted to root/a/b/fp64.
 local function list_ocsp_fingerprints()
 	local fps = {}
 	local root = "/var/cache/bunkerweb/ssl"
@@ -124,14 +146,20 @@ local function list_ocsp_fingerprints()
 		end
 		return fps
 	end
-	local ok_p, pipe = pcall(io.popen, "find " .. root .. " -mindepth 3 -maxdepth 3 -type d 2>/dev/null")
+	-- Quote root for the shell; accept only root/<hex>/<hex>/<fp64> lines (no
+	-- trailing-hex suffix thrash from crafted directory names).
+	local ok_p, pipe = pcall(io.popen, "find '" .. root .. "' -mindepth 3 -maxdepth 3 -type d 2>/dev/null")
 	if not ok_p or not pipe then
 		return fps
 	end
+	local prefix = root .. "/"
 	for line in pipe:lines() do
-		local fp = line:match("([0-9a-f]+)$")
-		if is_fp64(fp) then
-			fps[#fps + 1] = fp
+		if type(line) == "string" and line:sub(1, #prefix) == prefix then
+			local rest = line:sub(#prefix + 1)
+			local a, b, fp = rest:match("^([0-9a-f])/([0-9a-f])/([0-9a-f]+)$")
+			if a and b and is_fp64(fp) then
+				fps[#fps + 1] = fp
+			end
 		end
 	end
 	pipe:close()
@@ -181,21 +209,26 @@ end
 
 -- Scan the OCSP cache tree and warm every paged GOOD shard into this subsystem's L1.
 -- list_ocsp_fingerprints is directory order. This warmer sorts Must-Staple
--- shards first (ocsp.json must_staple=true) so a lease that expires mid-scan
--- still covers fail-closed leaves before optional ones.
--- Returns warmed count.
+-- shards first (ligand-merged must_staple, still paged) so a lease that expires
+-- mid-scan still covers fail-closed leaves before optional ones.
+-- Returns warmed_count, complete (complete=false if lease lost mid-walk — caller
+-- must not stamp last_epoch so the next tick retries).
 function _M.warm_l1_from_disk(internalstore)
 	if not internalstore then
-		return 0
+		return 0, true
 	end
 	local fps = list_ocsp_fingerprints()
-	-- Read each ocsp.json once: reading inside the comparator cost O(n log n) disk
-	-- reads, and a file changing mid-sort made the order inconsistent, so table.sort
-	-- raised "invalid order function" and the whole pass was lost.
+	-- Read each shard's effective meta once for sort (ligand overlay). Reading
+	-- inside the comparator cost O(n log n) disk I/O and a file changing mid-sort
+	-- made the order inconsistent ("invalid order function").
 	local is_must = {}
 	for _, fp in ipairs(fps) do
-		local meta = read_ocsp_json(fp)
-		is_must[fp] = type(meta) == "table" and meta.must_staple == true
+		local meta = ligand_or_meta(read_ocsp_json(fp), fp)
+		-- Prefer live fail-closed leaves: must_staple and still warmable (paged).
+		is_must[fp] = type(meta) == "table"
+			and meta.must_staple == true
+			and not meta_tombstoned(meta)
+			and not shard_not_paged(meta)
 	end
 	table.sort(fps, function(a, b)
 		if is_must[a] ~= is_must[b] then
@@ -204,7 +237,20 @@ function _M.warm_l1_from_disk(internalstore)
 		return a < b
 	end)
 	local warmed = 0
-	for _, fp in ipairs(fps) do
+	for i, fp in ipairs(fps) do
+		-- Heartbeat before each chunk so a long walk cannot outlive LEASE_TTL.
+		if i > 1 and ((i - 1) % L1_WARMER_LEASE_HEARTBEAT_EVERY) == 0 then
+			if not renew_l1_warmer_lease(internalstore) then
+				log(
+					ngx.NOTICE,
+					"OCSP L1 warmer lost lease mid-scan after "
+						.. tostring(warmed)
+						.. " shard(s); will retry next tick subsystem="
+						.. tostring(ngx.config.subsystem)
+				)
+				return warmed, false
+			end
+		end
 		local ok, did = pcall(warm_one_shard, internalstore, fp)
 		if ok and did then
 			warmed = warmed + 1
@@ -216,7 +262,7 @@ function _M.warm_l1_from_disk(internalstore)
 			"OCSP L1 warmer loaded " .. tostring(warmed) .. " shard(s) subsystem=" .. tostring(ngx.config.subsystem)
 		)
 	end
-	return warmed
+	return warmed, true
 end
 
 -- Start a recurring timer (once per worker Lua VM). A shared-dict lease picks
@@ -238,7 +284,7 @@ function _M.start_l1_warmer(internalstore)
 	end
 	-- Publish multi-staple attach capability for ocsp-refresh (intermediate fetch gate).
 	pcall(openssl_multi_staple_ready)
-	l1_warmer_started = true
+	-- Remember store before arming so maybe_rearm can retry if timer.at fails.
 	l1_warmer_store = internalstore
 
 	local function tick(premature)
@@ -254,9 +300,13 @@ function _M.start_l1_warmer(internalstore)
 			-- does not push the next handshake onto a cold ocsp.der read.
 			local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
 			if need then
-				l1_warmer_last_epoch = epoch
-				l1_warmer_last_full = now
-				pcall(_M.warm_l1_from_disk, internalstore)
+				-- Stamp epoch/full only after a complete pass. Mid-scan lease loss
+				-- must not count as current (otherwise next ticks skip until RESCAN).
+				local ok_warm, _, complete = pcall(_M.warm_l1_from_disk, internalstore)
+				if ok_warm and complete == true then
+					l1_warmer_last_epoch = epoch
+					l1_warmer_last_full = now
+				end
 			end
 		end
 		local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
@@ -275,6 +325,9 @@ function _M.start_l1_warmer(internalstore)
 		log(ngx.ERR, "OCSP L1 warmer start failed: " .. tostring(err))
 		return false
 	end
+	-- Only after the first timer.at succeeds — otherwise maybe_rearm thinks we
+	-- are armed while no tick will ever claim the lease.
+	l1_warmer_started = true
 	log(
 		ngx.INFO,
 		"OCSP L1 warmer armed worker="
@@ -288,7 +341,7 @@ function _M.start_l1_warmer(internalstore)
 end
 
 -- A failed ngx.timer.at reschedule used to stop the warmer for the worker's lifetime.
--- Handshakes re-arm it (throttled) once it has been started at least once.
+-- Handshakes re-arm it (throttled) once a store was bound (even if start failed).
 maybe_rearm_l1_warmer = function()
 	if l1_warmer_started or not l1_warmer_store then
 		return
