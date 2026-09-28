@@ -6062,11 +6062,20 @@ def _unpage_ocsp_shard_after_nongood(
             return True
         loaded["paged"] = False
         loaded["unpaged_after_nongood"] = True
+        # Soft-recall keeps der_sha256. Bump soft_recall_gen so peer-refuse bus
+        # identity changes — a leftover sticky pin on that hash cannot re-block
+        # after re-page of the same body (generation is der_sha256 + this counter).
+        try:
+            prev_gen = int(loaded.get("soft_recall_gen") or 0)
+        except (TypeError, ValueError):
+            prev_gen = 0
+        if prev_gen < 0:
+            prev_gen = 0
+        loaded["soft_recall_gen"] = prev_gen + 1
         loaded["fingerprint"] = normalized
         loaded.update(_provenance_meta())
-        # Soft-recall keeps der_sha256. Clear sticky bus pins on that hash before and
-        # after advertising unpage — a leftover marker would block re-canary of the
-        # same body forever (generation identity does not change).
+        # Clear sticky bus pins before and after advertising unpage — defense in
+        # depth alongside soft_recall_gen (marker clear can race with writers).
         _clear_ocsp_peer_refuse(normalized)
         meta_text = json.dumps(loaded, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
@@ -6096,9 +6105,11 @@ def _unpage_ocsp_shard_after_nongood(
                     e,
                 )
         log_warning(
-            "⚠️ OCSP soft-recalled staple for %s after repeated non-GOOD (fp=%s... paged=false; DER kept until tombstone)",
+            "⚠️ OCSP soft-recalled staple for %s after repeated non-GOOD "
+            "(fp=%s... paged=false soft_recall_gen=%s; DER kept until tombstone)",
             cert_name,
             normalized[:16],
+            loaded.get("soft_recall_gen"),
         )
         return True
     except Exception as e:

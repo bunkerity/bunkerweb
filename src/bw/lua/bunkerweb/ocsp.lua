@@ -368,6 +368,8 @@ local PEER_REFUSE_TTL_SECONDS = L1_MAX_TTL
 -- Identity / policy poison: keep shared until a new generation is paged.
 -- Soft-recall keeps der_sha256: peer_refuse_blocks ignores (and drops) markers
 -- while paged≠true / unpaged_after_nongood so sticky H cannot pin recovery forever.
+-- soft_recall_gen bumps on each soft-recall so leftover pins for the same hash
+-- cannot re-match after re-page of the kept body.
 -- not_paged is omitted from sticky writes: both subsystems already gate on ocsp.json.
 local PEER_REFUSE_STICKY = {
 	certid_mismatch = true,
@@ -840,23 +842,43 @@ end
 
 -- Cross-subsystem refuse bus (HTTP ↔ stream). Separate lua_shared_dict zones cannot
 -- share L1; disk carries "if either would refuse this generation, both refuse."
--- Generation identity is der_sha256 of the body (or ocsp.json pin when body absent).
+-- Generation identity is der_sha256 of the body PLUS soft_recall_gen (bumped on
+-- soft-recall). Soft-recall keeps the same DER bytes; without the counter a sticky
+-- bus pin on that der_sha256 would re-block after re-page of the kept body.
 local function ocsp_refuse_path(fingerprint)
 	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint
 end
 
-local function generation_id(meta, resp)
-	local body = resp_binding(resp)
-	if body then
-		return body
+local function soft_recall_gen_of(meta)
+	if type(meta) ~= "table" then
+		return 0
 	end
-	if type(meta) == "table" and type(meta.der_sha256) == "string" then
+	local g = tonumber(meta.soft_recall_gen)
+	if not g or g < 0 then
+		return 0
+	end
+	return math.floor(g)
+end
+
+-- Returns der_sha256 (64 hex) and soft_recall_gen (int >= 0), or nil.
+local function generation_tuple(meta, resp)
+	local body = resp_binding(resp)
+	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
 		local sha = meta.der_sha256:lower()
 		if #sha == 64 and sha:match("^[0-9a-f]+$") then
-			return sha
+			body = sha
 		end
 	end
-	return nil
+	if not body then
+		return nil, nil
+	end
+	return body, soft_recall_gen_of(meta)
+end
+
+-- Legacy single-id helper (der_sha256 only) for logs / callers that need a string.
+local function generation_id(meta, resp)
+	local sha = generation_tuple(meta, resp)
+	return sha
 end
 
 local function read_peer_refuse(fingerprint)
@@ -882,10 +904,11 @@ local function read_peer_refuse(fingerprint)
 		return nil
 	end
 	obj.der_sha256 = sha
+	obj.soft_recall_gen = soft_recall_gen_of(obj)
 	return obj
 end
 
-local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
+local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by, soft_recall_gen)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
 		return false, "invalid_inputs"
 	end
@@ -893,12 +916,18 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
 		return false, "invalid_der_sha256"
 	end
+	local gen = tonumber(soft_recall_gen) or 0
+	if gen < 0 then
+		gen = 0
+	end
+	gen = math.floor(gen)
 	-- Handshake path: never mkdir/shell here. Dir is provisioned off-path
 	-- (L1 warmer init, ocsp-refresh, restore coherence). Missing dir → bus_write_failed.
 	local path = ocsp_refuse_path(fingerprint)
 	local tmp = path .. ".tmp." .. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
 	local payload = require("cjson").encode({
 		der_sha256 = sha,
+		soft_recall_gen = gen,
 		staple_decision = tostring(decision or "unmet"),
 		refused_by = tostring(refused_by or (ngx.config and ngx.config.subsystem) or "unknown"),
 		refused_unix = ngx.time(),
@@ -964,16 +993,16 @@ end
 -- Returns staple_decision code, or nil when clear / expired / soft-recalled.
 -- quiet=true: skip ERR log (L1 warmer polls this every rescan).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
-	local gen = generation_id(meta, resp)
-	if not gen then
+	local sha, recall_gen = generation_tuple(meta, resp)
+	if not sha then
 		return nil
 	end
-	-- Soft-recall keeps the same der_sha256. A sticky bus entry for that hash must
-	-- not outlive the intentional unpage — recovery re-canaries the *same* body.
-	-- Disk paged=false already stops stapling; honor that gate alone until re-page.
+	-- Soft-recall keeps the same der_sha256. Drop any leftover bus pin for that
+	-- hash while unpaged so canary can run; soft_recall_gen bumps so a leftover
+	-- marker cannot re-pin the same bytes after re-page.
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
 		local marker = read_peer_refuse(fingerprint)
-		if marker and marker.der_sha256 == gen then
+		if marker and marker.der_sha256 == sha then
 			pcall(os.remove, ocsp_refuse_path(fingerprint))
 			if not quiet then
 				log(
@@ -981,15 +1010,20 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 					"OCSP peer-refuse dropped for soft-recalled/unpaged generation fp="
 						.. fingerprint:sub(1, 16)
 						.. "... der="
-						.. gen:sub(1, 16)
-						.. "..."
+						.. sha:sub(1, 16)
+						.. "... soft_recall_gen="
+						.. tostring(recall_gen)
 				)
 			end
 		end
 		return nil
 	end
 	local marker = read_peer_refuse(fingerprint)
-	if not marker or marker.der_sha256 ~= gen then
+	if not marker or marker.der_sha256 ~= sha then
+		return nil
+	end
+	if (tonumber(marker.soft_recall_gen) or 0) ~= recall_gen then
+		-- Soft-recall bumped gen: leftover pin for older era must not re-block.
 		return nil
 	end
 	if peer_refuse_marker_expired(marker) then
@@ -1013,8 +1047,10 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 			"OCSP generation peer-refuse bus hit fp="
 				.. fingerprint:sub(1, 16)
 				.. "... der="
-				.. gen:sub(1, 16)
-				.. "... decision="
+				.. sha:sub(1, 16)
+				.. "... soft_recall_gen="
+				.. tostring(recall_gen)
+				.. " decision="
 				.. tostring(decision)
 				.. " refused_by="
 				.. tostring(by)
@@ -1045,7 +1081,7 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		)
 		return false
 	end
-	local gen = generation_id(meta, resp)
+	local sha, recall_gen = generation_tuple(meta, resp)
 	if not fingerprint or not is_fp64(fingerprint) then
 		log(
 			ngx.ERR,
@@ -1059,7 +1095,7 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		)
 		return false
 	end
-	if not gen then
+	if not sha then
 		-- Without der_sha256 / body the sibling cannot match a generation — escalate loudly.
 		log(
 			ngx.ERR,
@@ -1074,15 +1110,17 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		)
 		return false
 	end
-	local ok, why = write_peer_refuse(fingerprint, gen, decision, by)
+	local ok, why = write_peer_refuse(fingerprint, sha, decision, by, recall_gen)
 	if ok then
 		log(
 			ngx.NOTICE,
 			"OCSP generation refuse recorded fp="
 				.. fingerprint:sub(1, 16)
 				.. "... der="
-				.. gen:sub(1, 16)
-				.. "... staple_decision="
+				.. sha:sub(1, 16)
+				.. "... soft_recall_gen="
+				.. tostring(recall_gen)
+				.. " staple_decision="
 				.. tostring(decision)
 				.. " refused_by="
 				.. by
@@ -1096,7 +1134,7 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 			action = "bus_write_failed",
 			detail = tostring(why or "write_failed"),
 			fp = fp_short,
-			der_sha256 = gen:sub(1, 16) .. "...",
+			der_sha256 = sha:sub(1, 16) .. "...",
 			mode = tostring(decision or "unmet"),
 			subsystem = by,
 		})
