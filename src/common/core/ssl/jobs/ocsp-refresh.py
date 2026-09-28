@@ -1696,6 +1696,9 @@ OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600  # thisUpdate not older than th
 # Verified CertStatus != GOOD. REVOKED tombstones immediately; UNKNOWN waits
 # so a single "responder unsure" answer does not drop a usable staple.
 _NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
+# Soft recall: after this many same-status sightings, stop stapling (paged=false)
+# but keep the DER until the tombstone threshold. First UNKNOWN only halves TTL.
+_NON_GOOD_UNPAGE_AFTER = {"UNKNOWN": 2}
 
 
 class _VerifiedNonGood(Exception):
@@ -2350,6 +2353,7 @@ def _publish_ocsp_shard(
         page_meta["paged"] = True
         page_meta["paged_unix"] = int(datetime.now(timezone.utc).timestamp())
         page_meta["canary_reason"] = canary_reason
+        page_meta.pop("unpaged_after_nongood", None)
         _write_bytes_inplace(
             staging / "ocsp.json",
             json.dumps(page_meta, separators=(",", ":")).encode("utf-8"),
@@ -3647,7 +3651,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                     stats["ocsp_ttl_halved"] = stats.get("ocsp_ttl_halved", 0) + 1
                     log_warning(
                         "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; "
-                        "keeping existing cache with halved TTL=%ds",
+                        "keeping existing cache with halved TTL=%ds (staple still served until soft-recall / tombstone)",
                         verified_nongood.status_name,
                         cert_name,
                         keep_ttl,
@@ -3655,7 +3659,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 else:
                     log_warning(
                         "⚠️ OCSP CertStatus=%s for %s is below tombstone threshold; "
-                        "keeping existing cache until effective expiry",
+                        "existing cache retained (soft-recall may have set paged=false)",
                         verified_nongood.status_name,
                         cert_name,
                     )
@@ -5141,6 +5145,80 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str, db: Optional[Any]
         _release_cert_lock(lock, normalized)
 
 
+def _unpage_ocsp_shard_after_nongood(
+    fingerprint: str,
+    cert_name: str,
+    db: Optional[Any] = None,
+) -> bool:
+    """
+    Soft recall: set paged=false so handshakes stop stapling the cached GOOD
+    without tombstoning (no serial ban / DER unlink yet). Idempotent when already
+    unpaged. Upserts meta and bumps epoch so L1 drops the body.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    lock = _acquire_cert_lock(normalized)
+    if lock is None:
+        log_warning("⚠️ OCSP could not lock shard to unpage after non-GOOD for %s", cert_name)
+        return False
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        meta_path = shard / "ocsp.json"
+        if not meta_path.is_file():
+            return False
+        try:
+            loaded = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(loaded, dict):
+            return False
+        if loaded.get("tombstoned") is True:
+            return False
+        if loaded.get("paged") is not True and loaded.get("unpaged_after_nongood") is True:
+            return True
+        loaded["paged"] = False
+        loaded["unpaged_after_nongood"] = True
+        loaded["fingerprint"] = normalized
+        loaded.update(_provenance_meta())
+        meta_text = json.dumps(loaded, separators=(",", ":"))
+        _atomic_write_text(meta_path, meta_text, mode=0o640)
+        _bump_ocsp_cache_epoch()
+        if db is not None:
+            try:
+                meta_bytes = meta_text.encode("utf-8")
+                err = db.upsert_job_cache(
+                    service_id=None,
+                    file_name=_ocsp_cache_relpath(normalized, "ocsp.json"),
+                    data=meta_bytes,
+                    job_name="ocsp-refresh",
+                    checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
+                )
+                if err:
+                    log_warning(
+                        "⚠️ OCSP unpaged shard for %s but DB upsert failed: %s",
+                        cert_name,
+                        err,
+                    )
+            except Exception as e:
+                log_warning(
+                    "⚠️ OCSP unpaged shard for %s but could not upsert meta: %s",
+                    cert_name,
+                    e,
+                )
+        log_warning(
+            "⚠️ OCSP soft-recalled staple for %s after repeated non-GOOD (fp=%s... paged=false; DER kept until tombstone)",
+            cert_name,
+            normalized[:16],
+        )
+        return True
+    except Exception as e:
+        log_warning("⚠️ OCSP could not unpage shard after non-GOOD for %s: %s", cert_name, e)
+        return False
+    finally:
+        _release_cert_lock(lock, normalized)
+
+
 def _note_verified_nongood(
     fingerprint: Optional[str],
     serial: Optional[int],
@@ -5151,7 +5229,8 @@ def _note_verified_nongood(
 ) -> Tuple[bool, Optional[int]]:
     """
     Count one verified non-GOOD answer. Tombstone the shard at the threshold.
-    On the first sighting below that threshold, halve leftover GOOD TTL.
+    First sighting below threshold: halve leftover GOOD TTL (staple still served).
+    From _NON_GOOD_UNPAGE_AFTER (UNKNOWN: 2): soft-recall with paged=false.
     Returns (tombstoned, remaining_ttl_after_halve_or_None).
     """
     if not fingerprint:
@@ -5202,6 +5281,9 @@ def _note_verified_nongood(
         halved = None
         if consecutive == 1:
             halved = _halve_cached_staple_ttl(normalized, cert_name, db)
+        unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
+        if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
+            _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
         return False, halved
     return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix), None
 
