@@ -895,6 +895,99 @@ local function certid_consistent_with_meta(meta, ocsp_der)
 	return true, nil
 end
 
+-- Canonical AIA OCSP URI for comparison (scheme+host lowercased; path preserved).
+local function normalize_ocsp_aia_uri(url)
+	if type(url) ~= "string" then
+		return nil
+	end
+	url = url:match("^%s*(.-)%s*$") or ""
+	if url == "" then
+		return nil
+	end
+	local scheme, rest = url:match("^([Hh][Tt][Tt][Pp][Ss]?)://(.+)$")
+	if not scheme or not rest then
+		return nil
+	end
+	scheme = scheme:lower()
+	local hostport, pathquery = rest:match("^([^/?#]+)(.*)$")
+	if not hostport or hostport == "" then
+		return nil
+	end
+	return scheme .. "://" .. hostport:lower() .. (pathquery or "")
+end
+
+-- All OCSP URIs from leaf AIA (authorityInfoAccess), normalized.
+local function leaf_aia_ocsp_uris(cert_pem)
+	local out = {}
+	local seen = {}
+	if type(cert_pem) ~= "string" or cert_pem == "" then
+		return out
+	end
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local cert = x509.new(cert_pem)
+		if not cert then
+			return
+		end
+		local aia_ext = cert:get_extension("authorityInfoAccess")
+		if not aia_ext then
+			return
+		end
+		local aia_text = aia_ext:text() or ""
+		for uri in aia_text:gmatch("1%.3%.6%.1%.5%.5%.7%.48%.1%s*=%s*URI:([%w%p]+)") do
+			local n = normalize_ocsp_aia_uri(uri)
+			if n and not seen[n] then
+				seen[n] = true
+				out[#out + 1] = n
+			end
+		end
+		if #out == 0 then
+			for uri in aia_text:gmatch("OCSP%s*%-?%s*URI:([%w%p]+)") do
+				local n = normalize_ocsp_aia_uri(uri)
+				if n and not seen[n] then
+					seen[n] = true
+					out[#out + 1] = n
+				end
+			end
+		end
+	end)
+	return out
+end
+
+-- Published staple must name the leaf AIA OCSP URI the job fetched.
+-- Returns true, or false, detail for refuse_must_staple / skip.
+local function aia_uri_pin_ok(leaf_pem, meta, must_staple)
+	if type(meta) ~= "table" then
+		if must_staple then
+			return false, "aia_uri_unpinned"
+		end
+		return true, nil
+	end
+	local pin = normalize_ocsp_aia_uri(meta.aia_ocsp_uri or meta.ocsp_url)
+	if not pin then
+		if must_staple then
+			return false, "aia_uri_unpinned"
+		end
+		return true, nil
+	end
+	-- Fingerprint-only path: cannot re-check live AIA; pin + ligand still bind the body.
+	if type(leaf_pem) ~= "string" or leaf_pem == "" then
+		return true, nil
+	end
+	local leaf_uris = leaf_aia_ocsp_uris(leaf_pem)
+	if #leaf_uris == 0 then
+		log(ngx.ERR, "OCSP leaf has no AIA OCSP URI; refusing staple pinned to " .. pin)
+		return false, "aia_uri_missing_on_leaf"
+	end
+	for _, u in ipairs(leaf_uris) do
+		if u == pin then
+			return true, nil
+		end
+	end
+	log(ngx.ERR, "OCSP AIA URI pin mismatch pin=" .. pin .. " leaf_aia_count=" .. tostring(#leaf_uris))
+	return false, "aia_uri_mismatch"
+end
+
 local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
 end
@@ -1384,6 +1477,14 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		return false, "must_staple", "cluster_floor"
 	end
 
+	local aia_ok, aia_why = aia_uri_pin_ok(nil, meta, must_staple)
+	if not aia_ok then
+		if must_staple then
+			return false, "must_staple", aia_why or "aia_uri_mismatch"
+		end
+		return false
+	end
+
 	if not stapling_enabled(internalstore, server_name) then
 		if must_staple then
 			return false, "must_staple", "ssl_use_ocsp_stapling_no"
@@ -1523,9 +1624,16 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	local issuers = nil
 	local shard_issuer_pem = read_file(issuer_path(fingerprint))
 	local shard_issuer_spki = shard_issuer_pem and spki_fingerprint(shard_issuer_pem) or nil
-	local meta = must_staple and read_ocsp_json(fingerprint) or nil
+	local meta = read_ocsp_json(fingerprint)
 	if must_staple and cluster_floor_blocks(fingerprint, meta) then
 		return false, "must_staple", "cluster_floor"
+	end
+	local aia_ok, aia_why = aia_uri_pin_ok(leaf_pem, meta, must_staple)
+	if not aia_ok then
+		if must_staple then
+			return false, "must_staple", aia_why or "aia_uri_mismatch"
+		end
+		return false
 	end
 	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then

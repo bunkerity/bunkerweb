@@ -1360,34 +1360,105 @@ def is_safe_url(url: str) -> bool:
 
 def extract_ocsp_url(pem_data: bytes, cert_name: str = "") -> Optional[str]:
     """
-    Extract OCSP responder URL from PEM certificate data using the cryptography library.
+    Extract the first usable OCSP responder URL from the leaf AIA extension.
     Validates the URL scheme is http:// or https://.
-    Returns OCSP responder URL if present and valid, else None.
+    Returns a normalized URI if present and valid, else None.
+    """
+    uris = extract_ocsp_aia_uris(pem_data, cert_name)
+    return uris[0] if uris else None
+
+
+def _normalize_ocsp_aia_uri(url: Optional[str]) -> Optional[str]:
+    """
+    Canonical form for AIA OCSP URI comparison: strip, http(s) only,
+    lowercase scheme and host, preserve path/query/fragment.
+    """
+    if not isinstance(url, str):
+        return None
+    raw = url.strip()
+    if not raw:
+        return None
+    parsed = urlparse(raw)
+    scheme = (parsed.scheme or "").lower()
+    if scheme not in ("http", "https"):
+        return None
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return None
+    if ":" in host and not host.startswith("["):
+        netloc = f"[{host}]"
+    else:
+        netloc = host
+    if parsed.port is not None:
+        default = 80 if scheme == "http" else 443
+        if parsed.port != default:
+            netloc = f"{netloc}:{parsed.port}"
+    path = parsed.path or ""
+    query = f"?{parsed.query}" if parsed.query else ""
+    frag = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{scheme}://{netloc}{path}{query}{frag}"
+
+
+def extract_ocsp_aia_uris(pem_data: bytes, cert_name: str = "") -> List[str]:
+    """
+    All http(s) OCSP URIs from the leaf AIA extension, normalized and de-duplicated.
+    Order follows the certificate.
     """
     log_debug("🔒 OCSP checking support for certificate %s", cert_name)
+    out: List[str] = []
+    seen = set()
     try:
         cert = x509.load_pem_x509_certificate(pem_data)
-
         aia = cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
         aia_value = cast(AuthorityInformationAccess, aia.value)
         for access_description in aia_value:
-            if access_description.access_method == AuthorityInformationAccessOID.OCSP:
-                url = access_description.access_location.value
-                parsed = urlparse(url)
-                if parsed.scheme not in ("http", "https"):
-                    log_warning("⚠️ OCSP URL has invalid scheme for %s: %s", cert_name, url)
-                    return None
-                log_debug("🌐 OCSP found responder URL for %s: %s", cert_name, url)
-                return url
-
-        log_debug("🔒 OCSP no responder URL advertised in %s", cert_name)
-        return None
+            if access_description.access_method != AuthorityInformationAccessOID.OCSP:
+                continue
+            normalized = _normalize_ocsp_aia_uri(getattr(access_description.access_location, "value", None))
+            if not normalized:
+                log_warning(
+                    "⚠️ OCSP AIA URI has invalid scheme/host for %s: %s",
+                    cert_name,
+                    getattr(access_description.access_location, "value", None),
+                )
+                continue
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            out.append(normalized)
+            log_debug("🌐 OCSP found AIA responder URL for %s: %s", cert_name, normalized)
+        if not out:
+            log_debug("🔒 OCSP no responder URL advertised in %s", cert_name)
+        return out
     except x509.ExtensionNotFound:
         log_debug("🔒 OCSP no AIA extension found in %s", cert_name)
-        return None
+        return []
     except Exception as e:
         log_debug("🔒 OCSP failed to extract OCSP URL from %s: %s", cert_name, e)
+        return []
+
+
+def _pin_aia_ocsp_uri(pem_data: bytes, fetch_url: Optional[str], cert_name: str = "") -> Optional[str]:
+    """
+    Require fetch_url to be one of the leaf's AIA OCSP URIs. Returns the normalized pin, or None.
+    """
+    leaf_uris = extract_ocsp_aia_uris(pem_data, cert_name)
+    if not leaf_uris:
+        log_error("❌ OCSP refusing pin: leaf %s has no usable AIA OCSP URI", cert_name)
         return None
+    normalized_fetch = _normalize_ocsp_aia_uri(fetch_url)
+    if not normalized_fetch:
+        log_error("❌ OCSP refusing pin: fetch URL for %s is not a usable OCSP URI (%s)", cert_name, fetch_url)
+        return None
+    if normalized_fetch not in leaf_uris:
+        log_error(
+            "❌ OCSP refusing pin: fetch URL %s is not among leaf AIA OCSP URIs for %s (%s)",
+            normalized_fetch,
+            cert_name,
+            ", ".join(leaf_uris),
+        )
+        return None
+    return normalized_fetch
 
 
 def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optional[x509.Certificate]:
@@ -1562,14 +1633,10 @@ def _extract_cert_metadata(pem_data: bytes, cert_name: str = "") -> Dict[str, An
         log_debug("🔒 OCSP metadata: failed to extract serial for %s: %s", cert_name, e)
 
     try:
-        aia = cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
-        aia_value = cast(AuthorityInformationAccess, aia.value)
-        for access_description in aia_value:
-            if access_description.access_method == AuthorityInformationAccessOID.OCSP:
-                meta["ocsp_url"] = access_description.access_location.value
-                break
-    except x509.ExtensionNotFound:
-        log_debug("🔒 OCSP metadata: no AIA/OCSP URL for %s", cert_name)
+        aia_uris = extract_ocsp_aia_uris(pem_data, cert_name)
+        if aia_uris:
+            meta["ocsp_url"] = aia_uris[0]
+            meta["aia_ocsp_uris"] = aia_uris
     except Exception as e:
         log_debug("🔒 OCSP metadata: failed to extract OCSP URL for %s: %s", cert_name, e)
 
@@ -4374,6 +4441,12 @@ def _persist_ocsp_results_to_db(
                     stats["errors"] = stats.get("errors", 0) + 1
                     continue
 
+                aia_pin = _pin_aia_ocsp_uri(cleaned_pem, ocsp_url, cert_name)
+                if not aia_pin:
+                    log_error("❌ OCSP refusing DB cache for %s without AIA OCSP URI pin", cert_name)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    continue
+
                 ocsp_checksum = hashlib.sha256(ocsp_der).hexdigest().lower()
                 err = db.upsert_job_cache(
                     service_id=None,  # Global cache entry
@@ -4393,6 +4466,8 @@ def _persist_ocsp_results_to_db(
                         meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
                         meta["certid"] = certid_pin
                         meta["serial"] = certid_pin["serial"]
+                        meta["aia_ocsp_uri"] = aia_pin
+                        meta["ocsp_url"] = aia_pin
                         meta.update(_ocsp_expiry_meta(ttl))
                         meta.update(_provenance_meta())
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
@@ -5005,6 +5080,14 @@ def _persist_ocsp_results_to_disk(
                 meta["certid"] = certid_pin
                 # Keep top-level serial aligned with the pinned CertID.
                 meta["serial"] = certid_pin["serial"]
+                # Pin staple to the leaf AIA OCSP URI that produced this body.
+                aia_pin = _pin_aia_ocsp_uri(cleaned_pem, ocsp_url, cert_name)
+                if not aia_pin:
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    publish_error_logged = True
+                    raise RuntimeError("AIA OCSP URI pin refused")
+                meta["aia_ocsp_uri"] = aia_pin
+                meta["ocsp_url"] = aia_pin
                 meta.update(_ocsp_expiry_meta(ttl))
                 meta.update(_provenance_meta())
 
