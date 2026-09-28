@@ -1367,6 +1367,61 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 	return nil
 end
 
+-- OpenSSL clears a prior connection staple when resp is NULL (SSL_certs_clear does not).
+local _ssl_ocsp_clear_cdef_done = false
+local function clear_connection_staple()
+	local prev = ngx.ctx and ngx.ctx.bw_ocsp_stapled_fp or nil
+	if ngx.ctx then
+		ngx.ctx.bw_ocsp_stapled_fp = nil
+	end
+	local ok_clear = pcall(function()
+		local ssl_mod = require "ngx.ssl"
+		if not ssl_mod.get_req_ssl_pointer then
+			return
+		end
+		local ptr = ssl_mod.get_req_ssl_pointer()
+		if not ptr then
+			return
+		end
+		local ffi = require "ffi"
+		if not _ssl_ocsp_clear_cdef_done then
+			pcall(ffi.cdef, [[
+				int SSL_set_tlsext_status_ocsp_resp(void *ssl, void *resp, long len);
+				long SSL_ctrl(void *ssl, int cmd, long larg, void *parg);
+			]])
+			_ssl_ocsp_clear_cdef_done = true
+		end
+		-- Prefer the named API; fall back to SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP (71).
+		if ffi.C.SSL_set_tlsext_status_ocsp_resp then
+			ffi.C.SSL_set_tlsext_status_ocsp_resp(ptr, nil, 0)
+		else
+			ffi.C.SSL_ctrl(ptr, 71, 0, nil)
+		end
+	end)
+	if prev and ok_clear then
+		log(
+			ngx.DEBUG,
+			"OCSP dropped connection staple on SSL context swap prev_fp="
+				.. tostring(prev):sub(1, 16)
+				.. "..."
+		)
+	end
+	return ok_clear
+end
+
+local function note_connection_staple(fp)
+	if ngx.ctx and type(fp) == "string" and #fp == 64 then
+		ngx.ctx.bw_ocsp_stapled_fp = fp
+	end
+end
+
+-- Drop the connection staple (often set from L1) when clear_certs swaps the SSL context.
+-- HTTP/2 coalescing / plugin re-entry must not leave leaf A's staple on leaf B.
+-- Does not delete the process-wide L1 shared-dict entry (other connections still need it).
+function _M.on_ssl_context_swap(internalstore)
+	return clear_connection_staple()
+end
+
 -- Classify leaf PEM as "ec", "rsa", or nil (for dual-cert staple selection).
 local function cert_pubkey_kind(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
@@ -1406,6 +1461,7 @@ local function log_ocsp_stapled(server_name, kind, fp, resp)
 			worker = tostring(ngx.worker.id())
 		end
 	end)
+	note_connection_staple(fp_s ~= "-" and fp_s or nil)
 	log(
 		ngx.INFO,
 		format_staple_decision("ok", {
