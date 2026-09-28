@@ -370,8 +370,9 @@ local PEER_REFUSE_STICKY = {
 }
 
 local function l1_shm_ttl(expires_unix)
+	-- Never park an undated body in L1 (would outlive stripped/legacy meta).
 	if type(expires_unix) ~= "number" or expires_unix <= 0 then
-		return L1_MAX_TTL
+		return nil
 	end
 	-- Drop L1 at death time (expires_unix - skew), same as resp_still_fresh.
 	local remaining = expires_unix - OCSP_CLOCK_SKEW_SECONDS - ngx.time()
@@ -1487,7 +1488,8 @@ end
 
 -- False at death time (nextUpdate/max_age minus skew).
 -- Also enforces intrinsic signed-window policy when this_update_unix is present.
--- No death clock (missing expires_unix and max_age) → not fresh (fail-closed).
+-- Meta must carry a death clock (expires_unix and/or max_age/published). L1's
+-- cached expires may only shorten that clock — never keep a stripped-meta DER alive.
 local function meta_unix_field(meta, key)
 	if type(meta) ~= "table" then
 		return nil
@@ -1539,11 +1541,9 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 		log(ngx.ERR, "OCSP intrinsic timing refuse reason=" .. tostring(why) .. " fp=" .. tostring(fingerprint and fingerprint:sub(1, 16) or "?"))
 		return false
 	end
-	local exp = expires_unix
-	if not exp then
-		exp = meta_expires_unix(meta)
-	end
+	local meta_exp = meta_expires_unix(meta)
 	local max_age = meta_max_age_unix(meta)
+	local exp = meta_exp
 	if exp and max_age then
 		if max_age < exp then
 			exp = max_age
@@ -1558,6 +1558,10 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
 		)
 		return false
+	end
+	-- L1 may only tighten the meta death clock, never extend past stripped/legacy meta.
+	if type(expires_unix) == "number" and expires_unix > 0 and expires_unix < exp then
+		exp = math.floor(expires_unix)
 	end
 	if ngx.time() >= exp - OCSP_CLOCK_SKEW_SECONDS then
 		return false
