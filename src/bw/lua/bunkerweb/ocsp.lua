@@ -133,6 +133,10 @@ local STAPLE_DECISION = {
 	fingerprint_chain_unavailable = true,
 	-- Multi-staple stack build / SSL_set0 failed after leaf set; intermediate MS refused.
 	multi_staple_attach_failed = true,
+	-- Issuer DN in the bag did not resolve, and Must-Staple intermediates were
+	-- omitted from the presented chain. Refuse so leaf-only attach cannot
+	-- succeed while those intermediates were in the bag.
+	issuer_unresolved_must_staple = true,
 	-- Soft ngx.ocsp.validate budget aborted during leaf issuer tries; multi-staple
 	-- stack was never attached (not ok_partial — that name is NULL-slot attach only).
 	validate_budget = true,
@@ -426,6 +430,8 @@ local KEEP_ALLOW_ON_REFUSE = {
 	peer_refuse_unavailable = true,
 	fingerprint_chain_unavailable = true,
 	multi_staple_attach_failed = true,
+	-- Local chain-presentation defect. Do not DROP a pin the sibling may still staple.
+	issuer_unresolved_must_staple = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
@@ -1271,14 +1277,17 @@ local function allow_pin_expired(pin)
 	return (ngx.time() - t) > ALLOW_PIN_TTL_SECONDS
 end
 
--- Allow-pin gate (inverted refuse bus). Returns staple_decision when Must-Staple
--- must refuse; nil when the pin matches this generation (or optional staple path
--- with no pin — caller still enforces not_paged / ligand).
+-- Allow-pin gate (inverted refuse bus). Returns a staple_decision when the
+-- caller must not staple; nil when the pin matches this generation (or the
+-- optional staple path has no pin — caller still enforces ligand).
 -- quiet=true: skip ERR log (L1 warmer).
 --
 -- Soft-recall / unpaged: revoke leftover allow for THIS (sha, gen) only — a
 -- worker still holding soft-recalled meta must not erase a re-canaried pin
--- for the same DER at a newer soft_recall_gen.
+-- for the same DER at a newer soft_recall_gen — then return "not_paged".
+-- Callers that only test this return value (and do not also call
+-- shard_not_paged) still refuse. "not_paged" is KEEP_ALLOW, so a later
+-- record_peer_refuse does not DROP again.
 -- Expired pin: refuse locally (KEEP) but do not unlink (race with job restamp).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	meta = ligand_or_meta(meta, fingerprint)
@@ -1294,7 +1303,8 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	-- a lagging worker cannot erase a re-canaried pin (same DER, newer gen).
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
 		revoke_allow_pin(fingerprint, sha, recall_gen, "not_paged", quiet)
-		return nil
+		-- Non-nil so a caller that skips shard_not_paged cannot staple this generation.
+		return "not_paged"
 	end
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
@@ -1429,6 +1439,7 @@ local function should_skip_peer_bus(detail, meta, fingerprint)
 		or d == "intermediate_must_staple_libssl"
 		or d == "fingerprint_chain_unavailable"
 		or d == "multi_staple_attach_failed"
+		or d == "issuer_unresolved_must_staple"
 		or d == "peer_refuse_unavailable"
 		or (type(eff) == "table" and eff.paged ~= true)
 		or (
@@ -1634,6 +1645,11 @@ end
 
 -- CertID must name this handshake leaf: serial match + issuer DN binds to a candidate
 -- issuer PEM (subject == leaf.issuer). Fail closed when either side is unreadable.
+-- Several PEMs can share one subject DN (cross-signs). Accept that DN only when
+-- every match is the same SPKI; distinct keys return issuer_ambiguous (caller
+-- maps this to certid_mismatch). This is not a full OCSP CertID issuerNameHash /
+-- issuerKeyHash parse — resty.openssl.ocsp here exposes the serial, and the SPKI
+-- tie-break stops the wrong cross-sign from passing on DN text alone.
 -- ngx.ocsp.validate_ocsp_response also binds CertID; this gate covers verified-L1
 -- paths that skip re-validate after a same-key renew left a stale body under the SPKI.
 local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
@@ -1655,13 +1671,33 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 	if type(issuer_pems) ~= "table" or #issuer_pems == 0 then
 		return false, "no_issuer_candidates"
 	end
+	local matches = {}
 	for _, iss in ipairs(issuer_pems) do
-		local subj = pem_dn_str(iss, "subject")
-		if subj and subj == leaf_issuer then
-			return true, nil
+		if type(iss) == "string" and iss ~= "" then
+			local subj = pem_dn_str(iss, "subject")
+			if subj and subj == leaf_issuer then
+				matches[#matches + 1] = iss
+			end
 		end
 	end
-	return false, "issuer_mismatch"
+	if #matches == 0 then
+		return false, "issuer_mismatch"
+	end
+	-- One DN hit, or several PEMs that are the same key: DN match is enough.
+	-- Distinct SPKIs under one DN are different issuers; refuse rather than
+	-- accept the first PEM in bag order.
+	local seen_fp = nil
+	for _, iss in ipairs(matches) do
+		local fp = spki_fingerprint(iss)
+		if not fp then
+			return false, "issuer_spki_unreadable"
+		end
+		if seen_fp and seen_fp ~= fp then
+			return false, "issuer_ambiguous"
+		end
+		seen_fp = fp
+	end
+	return true, nil
 end
 
 -- Fingerprint-only path has no handshake leaf PEM: require response CertID serial
@@ -2266,15 +2302,34 @@ local MULTI_STAPLE_PUBLISH_INTERVAL = 15 -- rate-limit colony republish on hot p
 local _multi_staple_state = nil -- nil=unprobed, false=unavailable, table=ready
 local _multi_staple_worker_id = nil
 local _multi_staple_last_publish = 0
+-- tostring(SSL_CTX*) values that already received empty_cb on this worker.
+local _status_cb_installed = {}
 
+-- Colony vote filename. Hash the full hostname (do not truncate to 64 chars):
+-- two pods that share a long name prefix must not publish into the same file
+-- and overwrite each other's 0/1 vote. Tag is sha256(host)[1..16], else crc32.
 local function multi_staple_worker_id()
 	if _multi_staple_worker_id then
 		return _multi_staple_worker_id
 	end
-	local host = os.getenv("HOSTNAME") or os.getenv("HOST") or "unknown"
-	host = tostring(host):gsub("[^%w._%-]", "_")
-	if #host > 64 then
-		host = host:sub(1, 64)
+	local host = tostring(os.getenv("HOSTNAME") or os.getenv("HOST") or "unknown")
+	local host_tag = nil
+	pcall(function()
+		local digest_lib = require("resty.openssl.digest")
+		local digest_ctx = digest_lib.new("sha256")
+		digest_ctx:update(host)
+		host_tag = to_hex(digest_ctx:final())
+	end)
+	if type(host_tag) ~= "string" or #host_tag < 16 then
+		local crc = 0
+		pcall(function()
+			if ngx.crc32_long then
+				crc = ngx.crc32_long(host) or 0
+			end
+		end)
+		host_tag = string.format("%08x", crc)
+	else
+		host_tag = host_tag:sub(1, 16)
 	end
 	local pid = 0
 	local wid = 0
@@ -2286,13 +2341,42 @@ local function multi_staple_worker_id()
 			wid = tonumber(ngx.worker.id()) or 0
 		end
 	end)
-	_multi_staple_worker_id = host .. "-" .. tostring(pid) .. "-" .. tostring(wid)
+	_multi_staple_worker_id = host_tag .. "-" .. tostring(pid) .. "-" .. tostring(wid)
 	return _multi_staple_worker_id
+end
+
+-- Drop worker votes older than MULTI_STAPLE_WORKER_TTL. Publish-only: the
+-- handshake read path must not unlink files (a reader racing a writer, or a
+-- handshake that only wanted the min, must not delete a peer's vote).
+local function prune_stale_multi_staple_votes(now)
+	pcall(function()
+		local lfs = require "lfs"
+		if lfs.attributes(MULTI_STAPLE_ATTACH_DIR, "mode") ~= "directory" then
+			return
+		end
+		now = now or ngx.now()
+		for name in lfs.dir(MULTI_STAPLE_ATTACH_DIR) do
+			if name ~= "." and name ~= ".." and not name:find("%.tmp%.", 1, false) then
+				local path = MULTI_STAPLE_ATTACH_DIR .. "/" .. name
+				local mtime = lfs.attributes(path, "modification")
+				if type(mtime) == "number" and (now - mtime) > MULTI_STAPLE_WORKER_TTL then
+					os.remove(path)
+				end
+			end
+		end
+	end)
 end
 
 -- Colony multi-staple capability = MIN across live worker votes under
 -- .multi_staple_attach.d/. Any live "0" (e.g. OpenSSL 3.5) forces fleet leaf-only.
--- Returns false / true / nil (no live markers yet). Stale votes expire (~120s).
+-- Returns false / true / nil (no live markers yet).
+--
+-- Read path does not os.remove. Stale files are ignored here and unlinked only
+-- by publish_multi_staple_attach. In-progress "*.tmp.*" names are skipped:
+-- publish writes a temp then rename(2)s it, so readers never need a lock.
+-- A live file whose first byte is neither "0" nor "1" (torn or garbage) is
+-- leaf-only (false), not "no opinion" (nil). nil would let openssl_multi_staple_ready
+-- attach multi-staple while a peer's vote is unreadable.
 local function colony_multi_staple_min()
 	local found_zero = false
 	local found_one = false
@@ -2307,9 +2391,8 @@ local function colony_multi_staple_min()
 			if name ~= "." and name ~= ".." and not name:find("%.tmp%.", 1, false) then
 				local path = MULTI_STAPLE_ATTACH_DIR .. "/" .. name
 				local mtime = lfs.attributes(path, "modification")
-				if type(mtime) == "number" and (now - mtime) > MULTI_STAPLE_WORKER_TTL then
-					os.remove(path)
-				else
+				local stale = type(mtime) == "number" and (now - mtime) > MULTI_STAPLE_WORKER_TTL
+				if not stale then
 					local f = io.open(path, "r")
 					if f then
 						local raw = f:read("*l") or ""
@@ -2334,7 +2417,8 @@ local function colony_multi_staple_min()
 	if found_one then
 		return true
 	end
-	return nil
+	-- Live marker exists but is neither 0 nor 1.
+	return false
 end
 
 -- Publish this worker's multi-staple vote and refresh the aggregate colony marker.
@@ -2345,6 +2429,7 @@ local function publish_multi_staple_attach(ready, force)
 		return
 	end
 	_multi_staple_last_publish = now
+	prune_stale_multi_staple_votes(now)
 	pcall(function()
 		local lfs = require "lfs"
 		lfs.mkdir("/var/cache/bunkerweb/ssl")
@@ -2391,6 +2476,8 @@ local function openssl_multi_staple_ready()
 			return false, nil, "libssl"
 		end
 		local colony = colony_multi_staple_min()
+		-- false covers a live "0" and a live vote that is neither "0" nor "1".
+		-- nil (no live markers yet) does not block this worker.
 		if colony == false then
 			return false, nil, "colony"
 		end
@@ -2428,7 +2515,10 @@ local function openssl_multi_staple_ready()
 		publish_multi_staple_attach(false, true)
 		return false, nil, "libssl"
 	end
-	-- Keep empty status cb alive for the process (OpenSSL requires it to emit staples).
+	-- OpenSSL emits a staple already stored on the SSL object only when the
+	-- SSL_CTX status callback returns SSL_TLSEXT_ERR_OK (0). The callback
+	-- pointer must stay alive for the process (ffi.cast is not GC'd here).
+	-- Do not delete this callback: without it, SSL_set0 responses are not sent.
 	local cb = ffi.cast("int (*)(void *, void *)", function()
 		return 0 -- SSL_TLSEXT_ERR_OK
 	end)
@@ -2619,6 +2709,17 @@ end
 -- or intermediate_must_staple_*), clearing the connection staple when possible.
 -- Leaf-only fallback is only legal when no intermediate carries Must-Staple.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
+	-- issuer_linked_chain_blocks omitted Must-Staple bag PEMs it could not link.
+	-- The presented chain no longer shows them; refuse instead of leaf-only success.
+	if type(chain_blocks) == "table" and (tonumber(chain_blocks.unresolved_must_staple) or 0) > 0 then
+		clear_multi_staple_attach_note()
+		log(
+			ngx.ERR,
+			"OCSP attach refused: issuer path omitted Must-Staple intermediate(s) count="
+				.. tostring(chain_blocks.unresolved_must_staple)
+		)
+		return nil, "issuer_unresolved_must_staple"
+	end
 	local ready, st, why_not = openssl_multi_staple_ready()
 	if not ready then
 		clear_multi_staple_attach_note()
@@ -2726,8 +2827,19 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	end
 
 	local ctx = C.SSL_get_SSL_CTX(ssl_ptr)
+	-- Install at most once per SSL_CTX. Nginx's status callback lives on the
+	-- shared server ctx; replacing it on every handshake races other connections
+	-- that share that ctx. OpenSSL still requires SOME callback that returns
+	-- SSL_TLSEXT_ERR_OK or it will not emit staples already stored on the SSL
+	-- object (SSL_set0 / set_ocsp_status_resp). Staple bytes stay on the SSL,
+	-- not the ctx. Config-time install is not available from this Lua phase,
+	-- so the once-per-ctx guard is the handshake-safe form of the required call.
 	if ctx ~= nil then
-		C.SSL_CTX_set_tlsext_status_cb(ctx, st.empty_cb)
+		local ctx_key = tostring(ctx)
+		if not _status_cb_installed[ctx_key] then
+			C.SSL_CTX_set_tlsext_status_cb(ctx, st.empty_cb)
+			_status_cb_installed[ctx_key] = true
+		end
 	end
 	-- Ownership of stack + responses transfers to SSL on success.
 	local rc = C.SSL_set0_tlsext_status_ocsp_resp_ex(ssl_ptr, stack)
@@ -2748,7 +2860,12 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	return true
 end
 
--- OpenSSL clears a prior connection staple when resp is NULL (SSL_certs_clear does not).
+-- Drop staples stored on this connection's SSL object.
+-- Leaf: SSL_set_tlsext_status_ocsp_resp(NULL) (or SSL_ctrl 71).
+-- Multi (OpenSSL 3.6+): SSL_set0_tlsext_status_ocsp_resp_ex(ssl, NULL) so a
+-- previous CertificateEntry stack cannot survive clear_certs / context swap
+-- onto another leaf. The ex symbol is optional; older libssl ignores it.
+-- SSL_certs_clear does not clear either staple slot.
 local _ssl_ocsp_clear_cdef_done = false
 local function clear_connection_staple()
 	local prev = ngx.ctx and ngx.ctx.bw_ocsp_stapled_fp or nil
@@ -2772,15 +2889,23 @@ local function clear_connection_staple()
 			pcall(ffi.cdef, [[
 				int SSL_set_tlsext_status_ocsp_resp(void *ssl, void *resp, long len);
 				long SSL_ctrl(void *ssl, int cmd, long larg, void *parg);
+				long SSL_set0_tlsext_status_ocsp_resp_ex(void *ssl, void *resp);
 			]])
 			_ssl_ocsp_clear_cdef_done = true
 		end
 		-- Prefer the named API; fall back to SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP (71).
-		if ffi.C.SSL_set_tlsext_status_ocsp_resp then
-			ffi.C.SSL_set_tlsext_status_ocsp_resp(ptr, nil, 0)
-		else
-			ffi.C.SSL_ctrl(ptr, 71, 0, nil)
-		end
+		-- Separate pcalls: a missing symbol on one API must not skip the other.
+		pcall(function()
+			if ffi.C.SSL_set_tlsext_status_ocsp_resp then
+				ffi.C.SSL_set_tlsext_status_ocsp_resp(ptr, nil, 0)
+			else
+				ffi.C.SSL_ctrl(ptr, 71, 0, nil)
+			end
+		end)
+		-- OpenSSL 3.6+ multi-staple stack. Older libssl has no symbol; ignore.
+		pcall(function()
+			ffi.C.SSL_set0_tlsext_status_ocsp_resp_ex(ptr, nil)
+		end)
 	end)
 	if prev and ok_clear then
 		log(
@@ -3206,12 +3331,58 @@ local function cert_subject_issuer_dns(pem)
 	return subject, issuer
 end
 
+-- Several bag PEMs can share one subject DN (cross-signs). Do not take cands[1]
+-- (bag order). Prefer the unique SPKI; if keys differ, prefer the single
+-- candidate that already has a canary-paged staple we can attach. Still
+-- ambiguous → nil so the caller stops the walk instead of stapling the wrong path.
+local function pick_issuer_candidate(cands, leaf_pem)
+	if type(cands) ~= "table" or #cands == 0 then
+		return nil
+	end
+	if #cands == 1 then
+		return cands[1]
+	end
+	local seen_fp = nil
+	local unique = true
+	for _, cand in ipairs(cands) do
+		local fp = cand and spki_fingerprint(cand.pem) or nil
+		if not fp then
+			unique = false
+			break
+		end
+		if seen_fp and seen_fp ~= fp then
+			unique = false
+			break
+		end
+		seen_fp = fp
+	end
+	if unique and seen_fp then
+		return cands[1]
+	end
+	local staplable = {}
+	for _, cand in ipairs(cands) do
+		local der = load_paged_intermediate_staple(cand.pem, leaf_pem)
+		if der then
+			staplable[#staplable + 1] = cand
+		end
+	end
+	if #staplable == 1 then
+		return staplable[1]
+	end
+	return nil
+end
+
 -- Ordered Certificate message for one leaf: leaf + issuer-linked intermediates only.
 -- Drops off-path bag members (cross-signs, unused extras) so their Must-Staple cannot
 -- fail-close a healthy leaf→issuer path (including after ClientHello sibling fallback).
 -- If the leaf's issuer cannot be resolved in the bag, never restore the full bag —
 -- that reintroduces "steer onto sibling, die on extra Must-Staple PEM". Instead keep
 -- only non-Must-Staple intermediates as chain hints.
+--
+-- When that unresolved bag still held Must-Staple PEMs, those PEMs are omitted from
+-- the presented chain (the client does not receive them) AND blocks.unresolved_must_staple
+-- is set so issuer_path / attach refuse leaf-only. Presentation and the staple
+-- decision stay the same: we do not serve a chain that hid a Must-Staple issuer.
 local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	if type(leaf_pem) ~= "string" or leaf_pem == "" then
 		return {}
@@ -3237,6 +3408,7 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	local _, current_issuer = cert_subject_issuer_dns(leaf_pem)
 	local seen = {}
 	local linked = 0
+	local ambiguous = false
 	for _ = 1, 8 do
 		if not current_issuer or current_issuer == "" then
 			break
@@ -3245,7 +3417,19 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		if not cands or #cands == 0 then
 			break
 		end
-		local pick = cands[1]
+		local pick = pick_issuer_candidate(cands, leaf_pem)
+		if not pick then
+			-- Distinct SPKIs and no single paged staple to prefer. Stop; do not
+			-- guess cands[1]. Caller treats this like an unresolved issuer.
+			ambiguous = true
+			log(
+				ngx.ERR,
+				"OCSP issuer DN matched "
+					.. tostring(#cands)
+					.. " PEMs with different SPKIs; refusing to pick by bag order"
+			)
+			break
+		end
 		local pick_subj, pick_iss = cert_subject_issuer_dns(pick.pem)
 		-- Trust anchor: stop; do not present the root as a stapled CertificateEntry.
 		if pick_subj and pick_iss and pick_subj == pick_iss then
@@ -3262,33 +3446,58 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		linked = linked + 1
 		current_issuer = pick.issuer or pick_iss
 	end
-	if linked == 0 then
-		-- Unresolved issuer DN: never full-bag concat. Must-Staple extras in the bag
-		-- would fail-close after dual-cert health steers onto this sibling.
+	if linked == 0 or ambiguous then
+		-- Unresolved or ambiguous issuer DN: never full-bag concat. Must-Staple
+		-- extras in the bag would fail-close after dual-cert health steers onto
+		-- this sibling, so they are omitted from the Certificate message.
+		-- The client only sees `blocks`. If we omitted Must-Staple PEMs, set
+		-- unresolved_must_staple so attach / issuer_path refuse leaf-only
+		-- (issuer_unresolved_must_staple) instead of treating the short chain
+		-- as "no intermediate Must-Staple".
 		local dropped_must = 0
-		for _, pem in ipairs(intermediate_pems) do
-			if type(pem) == "string" and pem ~= "" then
-				local must = cert_must_staple_bool(pem, true)
-				if must then
-					dropped_must = dropped_must + 1
-				else
-					-- Skip self-signed trust anchors (not CertificateEntry staple targets).
-					local subj, iss = cert_subject_issuer_dns(pem)
-					if subj and iss and subj == iss then
-						-- drop root
+		if linked == 0 then
+			for _, pem in ipairs(intermediate_pems) do
+				if type(pem) == "string" and pem ~= "" then
+					local must = cert_must_staple_bool(pem, true)
+					if must then
+						dropped_must = dropped_must + 1
 					else
-						blocks[#blocks + 1] = pem
+						-- Skip self-signed trust anchors (not CertificateEntry staple targets).
+						local subj, iss = cert_subject_issuer_dns(pem)
+						if subj and iss and subj == iss then
+							-- drop root
+						else
+							blocks[#blocks + 1] = pem
+						end
+					end
+				end
+			end
+		else
+			-- Partial link then an ambiguous hop: count Must-Staple PEMs that
+			-- were not already placed on the chain.
+			local placed = {}
+			for i = 2, #blocks do
+				placed[blocks[i]] = true
+			end
+			for _, pem in ipairs(intermediate_pems) do
+				if type(pem) == "string" and pem ~= "" and not placed[pem] then
+					if cert_must_staple_bool(pem, true) then
+						dropped_must = dropped_must + 1
 					end
 				end
 			end
 		end
 		if dropped_must > 0 then
+			blocks.unresolved_must_staple = dropped_must
 			log(
-				ngx.DEBUG,
-				"OCSP unresolved issuer path: dropped "
+				ngx.ERR,
+				"OCSP unresolved issuer path: omitted "
 					.. tostring(dropped_must)
 					.. " Must-Staple bag PEM(s); presented_entries="
 					.. tostring(#blocks)
+					.. " ambiguous="
+					.. tostring(ambiguous)
+					.. " — attach refuses leaf-only (issuer_unresolved_must_staple)"
 			)
 		end
 		return blocks, false
@@ -3344,6 +3553,11 @@ end
 -- (libssl missing symbol, or colony leaf-only while a 3.5 peer is live.)
 issuer_path_intermediate_ready = function(chain_pem_or_blocks)
 	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
+	-- Check before the short-chain success return: omitted Must-Staple PEMs leave
+	-- a leaf-only list (#blocks < 2) that would otherwise look healthy.
+	if type(blocks) == "table" and (tonumber(blocks.unresolved_must_staple) or 0) > 0 then
+		return false, "issuer_unresolved_must_staple"
+	end
 	if type(blocks) ~= "table" or #blocks < 2 then
 		return true
 	end
@@ -4489,6 +4703,7 @@ local L1_WARMER_RESCAN = 60
 local L1_WARMER_LEASE_TTL = math.max(L1_WARMER_INTERVAL * 3, 20)
 local L1_WARMER_LEASE_KEY = "TLS:SSL:ocsp_l1_warmer_lease"
 local l1_warmer_started = false
+local l1_warmer_no_add_logged = false
 local l1_warmer_last_epoch = nil
 local l1_warmer_last_full = 0
 
@@ -4517,7 +4732,9 @@ local function claim_l1_warmer_lease(internalstore)
 	if cur ~= nil and cur ~= "" then
 		return false
 	end
-	-- Lease free: atomic add when the raw dict is available, else set+recheck.
+	-- Lease free: only shared-dict add is atomic. set-then-recheck lets two
+	-- workers both observe an empty key and both scan. If add is missing,
+	-- skip this tick (return false) instead of racing.
 	local claimed = false
 	pcall(function()
 		local dict = internalstore.dict
@@ -4525,13 +4742,17 @@ local function claim_l1_warmer_lease(internalstore)
 			claimed = dict:add(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL) and true or false
 			return
 		end
-		internalstore:set(L1_WARMER_LEASE_KEY, token, L1_WARMER_LEASE_TTL)
-		local check = internalstore:get(L1_WARMER_LEASE_KEY)
-		claimed = check == token
+		if not l1_warmer_no_add_logged then
+			l1_warmer_no_add_logged = true
+			log(ngx.ERR, "OCSP L1 warmer lease has no dict.add; skipping scan to avoid a set/recheck race")
+		end
+		claimed = false
 	end)
 	return claimed
 end
 
+-- Directory order only (no Must-Staple priority). warm_l1_from_disk sorts
+-- must_staple=true shards first so a short lease still warms fail-closed leaves.
 local function list_ocsp_fingerprints()
 	local fps = {}
 	local root = "/var/cache/bunkerweb/ssl"
@@ -4619,13 +4840,27 @@ local function warm_one_shard(internalstore, fingerprint)
 end
 
 -- Scan the OCSP cache tree and warm every paged GOOD shard into this subsystem's L1.
+-- list_ocsp_fingerprints is directory order. This warmer sorts Must-Staple
+-- shards first (ocsp.json must_staple=true) so a lease that expires mid-scan
+-- still covers fail-closed leaves before optional ones.
 -- Returns warmed count.
 function _M.warm_l1_from_disk(internalstore)
 	if not internalstore then
 		return 0
 	end
+	local fps = list_ocsp_fingerprints()
+	table.sort(fps, function(a, b)
+		local ma = read_ocsp_json(a)
+		local mb = read_ocsp_json(b)
+		local am = type(ma) == "table" and ma.must_staple == true
+		local bm = type(mb) == "table" and mb.must_staple == true
+		if am ~= bm then
+			return am
+		end
+		return tostring(a) < tostring(b)
+	end)
 	local warmed = 0
-	for _, fp in ipairs(list_ocsp_fingerprints()) do
+	for _, fp in ipairs(fps) do
 		local ok, did = pcall(warm_one_shard, internalstore, fp)
 		if ok and did then
 			warmed = warmed + 1
