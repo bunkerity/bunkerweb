@@ -67,21 +67,9 @@ local function get_staple_timeout()
 	return (timeout_sec or 5) * 1000
 end
 
-local function get_allow_pin_dir()
-	return "/data/bw/ocsp/allow-pin"
-end
-
-local function get_ligand_path()
-	return "/data/bw/ocsp/ligand"
-end
-
-local function get_epoch_path()
-	return "/data/bw/ocsp/epoch"
-end
-
-local function get_refused_path()
-	return "/data/bw/ocsp/refused"
-end
+-- Allow-pin / ligand / epoch paths live in bunkerweb.ocsp
+-- (/var/cache/bunkerweb/ssl/ocsp-allow|ocsp-ligand|...). Do not reintroduce
+-- a parallel /data/bw/ocsp tree here — handshake gates go through _cwd.
 
 -- =====================================================================
 -- HANDSHAKE FUNCTION: ssl_certificate(state)
@@ -101,6 +89,26 @@ function _M.ssl_certificate(state)
 	--
 	-- State is modified in-place with results and error details.
 	-- Uses module-level cached modules via local aliases for compatibility
+
+	-- Conf passes this table; write flags here so the outer abort / cleared_no_leaf
+	-- net (ssl-certificate-by-lua.conf) can see clear_certs / Must-Staple decisions.
+	-- Bare locals were extraction leftovers and became worker globals instead.
+	if type(state) ~= "table" then
+		state = {}
+	end
+	if state.abort_must_staple == nil then
+		state.abort_must_staple = false
+	end
+	if state.certs_cleared == nil then
+		state.certs_cleared = false
+	end
+	if state.leaf_installed == nil then
+		state.leaf_installed = false
+	end
+	if state.leaf_complete == nil then
+		state.leaf_complete = false
+	end
+	-- state.abort_must_staple_detail and state.leaf_must_staple stay nil until set.
 
 	-- Per-handshake logger instance
 	local logger = get_logger()
@@ -2072,7 +2080,7 @@ function _M.ssl_certificate(state)
 				if probe_only then
 					action = "abort"
 				end
-				abort_must_staple_detail = tostring(reason or "unmet")
+				state.abort_must_staple_detail = tostring(reason or "unmet")
 				-- Soft fuse continues this handshake; do not poison the HTTP↔stream bus.
 				-- probe_only demotions (skip_leaf) must never write the allow-pin bus —
 				-- an intermediate capability gap must not compare-and-delete the leaf pin.
@@ -3564,7 +3572,7 @@ function _M.ssl_certificate(state)
 		-- SECTION: plugin ssl_certificate loop — install leaf + staple
 		-- For each plugin in phase order: call ssl_certificate → pair certs/keys
 		-- → dual-cert probe (probe_only) + issuer-path health → set_cert once
-		-- → set_ocsp_from_cache (attach). Must-Staple abort sets abort_must_staple;
+		-- → set_ocsp_from_cache (attach). Must-Staple abort sets state.abort_must_staple;
 		-- ngx.exit runs AFTER the top-level pcall (below).
 		-- =====================================================================
 		-- Call ssl_certificate() methods
@@ -3602,15 +3610,15 @@ function _M.ssl_certificate(state)
 							-- does not clear SSL_set_tlsext_status_ocsp_resp.
 							--
 							-- Install-state flags live OUTSIDE the top-level pcall (see
-							-- certs_cleared / leaf_installed / leaf_must_staple above).
+							-- state.certs_cleared / state.leaf_installed / state.leaf_must_staple above).
 							-- After clear_certs, a Lua throw that used to `return true`
 							-- would hand nginx the static ssl_certificate — fatal for
 							-- Must-Staple. Outer handler aborts when cleared/half-installed.
 							pcall(clear_certs)
-							certs_cleared = true
-							leaf_installed = false
-							leaf_complete = false
-							leaf_must_staple = nil
+							state.certs_cleared = true
+							state.leaf_installed = false
+							state.leaf_complete = false
+							state.leaf_must_staple = nil
 							pcall(function()
 								local ocsp_mod = require "bunkerweb.ocsp"
 								if ocsp_mod and ocsp_mod.on_ssl_context_swap then
@@ -3620,7 +3628,7 @@ function _M.ssl_certificate(state)
 
 							-- wipe_ssl_ctx: remove a half-installed leaf (set_cert ok,
 							-- set_priv_key fail / OCSP throw) so we never leave a naked
-							-- Must-Staple cert on the connection. Sets certs_cleared again
+							-- Must-Staple cert on the connection. Sets state.certs_cleared again
 							-- so the outer abort path still fires if we return without abort.
 							local function wipe_ssl_ctx(why)
 								pcall(clear_certs)
@@ -3630,9 +3638,9 @@ function _M.ssl_certificate(state)
 										ocsp_mod.on_ssl_context_swap(internalstore)
 									end
 								end)
-								leaf_installed = false
-								leaf_complete = false
-								certs_cleared = true
+								state.leaf_installed = false
+								state.leaf_complete = false
+								state.certs_cleared = true
 								safe_log(
 									ERR,
 									"OCSP wipe_ssl_ctx why="
@@ -3916,8 +3924,8 @@ function _M.ssl_certificate(state)
 								for idx, pair in ipairs(install_pairs) do
 									-- Reset per-leaf abort detail so a sibling soft-fuse refuse
 									-- cannot leak into this leaf's post-install throw path
-									-- (abort_must_staple_detail is shared across the handshake).
-									abort_must_staple_detail = nil
+									-- (state.abort_must_staple_detail is shared across the handshake).
+									state.abort_must_staple_detail = nil
 									safe_log(DEBUG, "Setting certificate #" .. idx .. " (" .. pair.cert_id .. ") from " .. plugin_id .. (pair.matched and " [matched key]" or " [unmatched - no key found]"))
 
 									local ocsp_cert = pair.cert_pem_for_ocsp
@@ -3927,7 +3935,7 @@ function _M.ssl_certificate(state)
 									local ocsp_fp_hint = pair.cert_fp_for_ocsp
 									-- Tri-state for outer abort + scoped probe throw handling.
 									local ms_gate = leaf_fail_closed_must_staple(ocsp_cert, ocsp_fp_hint)
-									leaf_must_staple = leaf_requires_must_staple(ocsp_cert, ocsp_fp_hint)
+									state.leaf_must_staple = leaf_requires_must_staple(ocsp_cert, ocsp_fp_hint)
 
 									-- Dual-cert path already probe-gated above; single-leaf still probes here.
 									-- Policy probe does not require ngx.ocsp (attach stays ocsp-gated below).
@@ -3986,12 +3994,12 @@ function _M.ssl_certificate(state)
 											all_certs_set = false
 											if ms_gate then
 												wipe_ssl_ctx("set_cert_failed")
-												abort_must_staple = true
-												abort_must_staple_detail = "set_cert_failed"
+												state.abort_must_staple = true
+												state.abort_must_staple_detail = "set_cert_failed"
 												return false
 											end
 										else
-											leaf_installed = true
+											state.leaf_installed = true
 											local ok_key = true
 											local err_key = nil
 
@@ -4002,15 +4010,15 @@ function _M.ssl_certificate(state)
 													all_certs_set = false
 													wipe_ssl_ctx("set_priv_key_failed")
 													if ms_gate then
-														abort_must_staple = true
-														abort_must_staple_detail = "set_priv_key_failed"
+														state.abort_must_staple = true
+														state.abort_must_staple_detail = "set_priv_key_failed"
 														return false
 													end
 												end
 											else
 												safe_log(NOTICE, "Certificate #" .. idx .. " (" .. pair.cert_id .. ") has no matched private key - continuing without key (may fail during TLS handshake)")
 											end
-											leaf_complete = ok_key and pair.key ~= nil
+											state.leaf_complete = ok_key and pair.key ~= nil
 
 											if ok_key and ocsp then
 												insert(ocsp_candidates, {
@@ -4042,8 +4050,8 @@ function _M.ssl_certificate(state)
 										})
 									)
 									if action == "abort" then
-										abort_must_staple = true
-										abort_must_staple_detail = "probe_failed"
+										state.abort_must_staple = true
+										state.abort_must_staple_detail = "probe_failed"
 										return false
 									end
 									-- Soft fuse: install the preferred ClientHello leaf only.
@@ -4060,12 +4068,12 @@ function _M.ssl_certificate(state)
 											)
 											-- clear_certs already ran; do not fall through to static leaf.
 											wipe_ssl_ctx("soft_fuse_set_cert_failed")
-											abort_must_staple = true
-											abort_must_staple_detail = "soft_fuse_set_cert_failed"
+											state.abort_must_staple = true
+											state.abort_must_staple_detail = "soft_fuse_set_cert_failed"
 											return false
 										end
-										leaf_installed = true
-										leaf_must_staple = leaf_requires_must_staple(
+										state.leaf_installed = true
+										state.leaf_must_staple = leaf_requires_must_staple(
 											soft_pair.cert_pem_for_ocsp or (type(soft_pair.cert) == "string" and soft_pair.cert or nil),
 											soft_pair.cert_fp_for_ocsp
 										)
@@ -4080,15 +4088,15 @@ function _M.ssl_certificate(state)
 														.. (err_key or "unknown")
 												)
 												wipe_ssl_ctx("soft_fuse_set_priv_key_failed")
-												abort_must_staple = true
-												abort_must_staple_detail = "soft_fuse_set_priv_key_failed"
+												state.abort_must_staple = true
+												state.abort_must_staple_detail = "soft_fuse_set_priv_key_failed"
 												return false
 											end
 										end
-										leaf_complete = soft_pair.key ~= nil
+										state.leaf_complete = soft_pair.key ~= nil
 									else
-										abort_must_staple = true
-										abort_must_staple_detail = "soft_fuse_no_pair"
+										state.abort_must_staple = true
+										state.abort_must_staple_detail = "soft_fuse_no_pair"
 										return false
 									end
 									return true
@@ -4137,25 +4145,25 @@ function _M.ssl_certificate(state)
 										-- or fall through to nginx's static default after clear_certs.
 										wipe_ssl_ctx("ocsp_exception")
 										if leaf_fail_closed_must_staple(ocsp_choice.ocsp_cert, choice_fp) then
-											abort_must_staple = true
-											abort_must_staple_detail = "ocsp_exception"
+											state.abort_must_staple = true
+											state.abort_must_staple_detail = "ocsp_exception"
 											return false
 										end
-										-- Non-MS: wipe left certs_cleared; continue to next plugin.
+										-- Non-MS: wipe left state.certs_cleared; continue to next plugin.
 									elseif ocsp_cert_acceptable == false then
 										safe_log(
 											ERR,
-											format_staple_decision(abort_must_staple_detail or "unmet", {
+											format_staple_decision(state.abort_must_staple_detail or "unmet", {
 												tag = "OCSP_MUST_STAPLE_REFUSE",
 												action = "abort",
 												server_name = server_name or "nil",
 												cert = "#" .. ocsp_choice.idx .. " (" .. ocsp_choice.cert_id .. ")",
 											})
 										)
-										wipe_ssl_ctx(abort_must_staple_detail or "unmet")
-										abort_must_staple = true
-										if not abort_must_staple_detail then
-											abort_must_staple_detail = "unmet"
+										wipe_ssl_ctx(state.abort_must_staple_detail or "unmet")
+										state.abort_must_staple = true
+										if not state.abort_must_staple_detail then
+											state.abort_must_staple_detail = "unmet"
 										end
 										return false
 									else
