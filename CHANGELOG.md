@@ -4,6 +4,7 @@
 
 - [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
 - [BUGFIX] `ui`: for signed-in users, a single form field larger than 500 kB, such as an Easy Resolve request for a report with a large matched body, is accepted up to `MAX_CONTENT_LENGTH` instead of failing with 413. The login form keeps the 500 kB cap.
+- [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
 ## v1.6.16~rc2 - 2026/09/25
 
