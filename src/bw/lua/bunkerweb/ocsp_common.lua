@@ -167,6 +167,8 @@ local STAPLE_DECISION = {
 	allow_pin_missing = true,
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
+	-- μs claim/restore window (or reclaimable orphan claim) — not "never canaried".
+	allow_pin_claim_inflight = true,
 	-- soft_recall_gen present but non-integer (type drift). Local refuse; KEEP pin.
 	gen_type_drift = true,
 	await_sni = true,
@@ -227,6 +229,7 @@ local KEEP_ALLOW_ON_REFUSE = {
 	allow_pin_missing = true,
 	allow_pin_expired = true,
 	allow_pin_mismatch = true,
+	allow_pin_claim_inflight = true,
 	gen_type_drift = true,
 	ligand_missing = true,
 	shared_ligand = true,

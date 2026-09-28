@@ -5640,6 +5640,9 @@ def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> b
     ``(der_sha256, soft_recall_gen)``. Soft fuse and KEEP_ALLOW causes leave
     the pin alone.
 
+    Compare-and-stamp: refuse overwrite when on-disk ``soft_recall_gen`` is
+    strictly newer (lagging canary must not clobber N+1 with N).
+
     Also clears any legacy refuse marker for this fingerprint so the old
     polarity cannot shadow the new one after cutover.
     """
@@ -5676,7 +5679,24 @@ def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> b
     try:
         allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
         allow_dir.mkdir(parents=True, exist_ok=True)
-        _atomic_write_text(allow_dir / normalized, json.dumps(payload, separators=(",", ":")), mode=0o640)
+        path = allow_dir / normalized
+        # Best-effort CAS: skip clobber when a newer pin already landed.
+        if path.is_file():
+            try:
+                existing = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(existing, dict):
+                    got_gen = int(existing.get("soft_recall_gen") or 0)
+                    if got_gen > gen:
+                        log_debug(
+                            "OCSP allow-pin stale_gen skip fp=%s... on_disk=%s want=%s",
+                            normalized[:16],
+                            got_gen,
+                            gen,
+                        )
+                        return False
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                pass
+        _atomic_write_text(path, json.dumps(payload, separators=(",", ":")), mode=0o640)
         # Legacy refuse must not shadow allow polarity.
         legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / normalized
         if legacy.is_file():

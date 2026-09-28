@@ -122,6 +122,49 @@ local function restore_claimed_pin(claim, path)
 	return false
 end
 
+-- Scan ocsp-allow for .ocsp_revoke.{fp}.* claim litter (worker death mid-revoke).
+local function list_allow_pin_claims(fingerprint)
+	local claims = {}
+	if not is_fp64(fingerprint) then
+		return claims
+	end
+	local prefix = ".ocsp_revoke." .. fingerprint .. "."
+	local ok_lfs, lfs = pcall(require, "lfs")
+	if not ok_lfs or type(lfs) ~= "table" or not lfs.dir then
+		return claims
+	end
+	local dir = "/var/cache/bunkerweb/ssl/ocsp-allow"
+	pcall(function()
+		for name in lfs.dir(dir) do
+			if type(name) == "string" and name:sub(1, #prefix) == prefix and name:sub(-4) == ".tmp" then
+				claims[#claims + 1] = dir .. "/" .. name
+			end
+		end
+	end)
+	return claims
+end
+
+-- If a claim still holds want (sha, gen) and the live pin path is empty, restore it.
+local function try_reclaim_orphan_claim(fingerprint, want_sha, want_g)
+	local path = ocsp_allow_path(fingerprint)
+	if path_exists(path) then
+		return false
+	end
+	for _, claim in ipairs(list_allow_pin_claims(fingerprint)) do
+		local pin = decode_allow_pin(read_file(claim))
+		if allow_pin_matches(pin, want_sha, want_g) then
+			if restore_claimed_pin(claim, path) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function allow_pin_has_claim(fingerprint)
+	return #list_allow_pin_claims(fingerprint) > 0
+end
+
 -- Unconditional drop (job / admin / soft-recall cleanup that already knows the
 -- generation is gone). Handshake refuse paths must use revoke_allow_pin instead.
 -- Checks os.remove's nil,err return — pcall alone never sees EACCES.
@@ -152,8 +195,11 @@ end
 -- Readers may see the pin missing for the microseconds between claim and restore
 -- (a local allow_pin_missing refuse, KEEP) — never a persistent fleet-wide loss.
 -- Returns outcome: "allow_dropped" | "allow_kept_gen_moved" | "allow_absent"
---   | "allow_drop_eacces" | "allow_drop_failed"
-local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, quiet)
+--   | "allow_drop_eacces" | "allow_drop_failed" | "allow_kept_gen0_grace"
+-- handshake_drop=true: refuse to CAS soft_recall_gen=0 upgrade-grace pins
+-- (only job drop_allow_pin may clear those). Soft-recall not_paged cleanup
+-- passes handshake_drop=false so leftover gen-0 pins can still be revoked.
+local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, quiet, handshake_drop)
 	if not is_fp64(fingerprint) then
 		return "allow_drop_failed"
 	end
@@ -165,6 +211,24 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
 		return "allow_absent"
+	end
+	-- Upgrade-grace gen-0 pins: handshake DROP must not wipe the one-release pin
+	-- every sibling still relies on. Job drop_allow_pin remains unconditional.
+	if handshake_drop and want_g == 0 and type(pin.soft_recall_gen) == "number" and pin.soft_recall_gen == 0 then
+		if not quiet then
+			log(
+				ngx.NOTICE,
+				format_staple_decision("peer_refuse_bus", {
+					tag = "OCSP_PEER_REFUSE_BUS",
+					action = "allow_kept_gen0_grace",
+					refuse_cause = tostring(refuse_cause or ""),
+					fp = fingerprint:sub(1, 16) .. "...",
+					der_sha256 = want_sha:sub(1, 16) .. "...",
+					detail = "handshake_drop_blocked_on_gen0",
+				})
+			)
+		end
+		return "allow_kept_gen0_grace"
 	end
 	if not allow_pin_matches(pin, want_sha, want_g) then
 		if not quiet then
@@ -242,6 +306,8 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 end
 
 -- Job/canary only — never call from handshake refuse paths.
+-- Compare-and-stamp: refuse overwrite when on-disk soft_recall_gen is strictly
+-- newer (lagging canary must not clobber N+1 with N).
 local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
 		return false, "invalid_inputs"
@@ -256,6 +322,12 @@ local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires
 	end
 	gen = math.floor(gen)
 	local path = ocsp_allow_path(fingerprint)
+	-- Best-effort CAS: re-check immediately before rename (still TOCTOU vs another
+	-- writer, but closes the common lagging-canary clobber of a newer pin).
+	local existing = decode_allow_pin(read_file(path))
+	if existing and type(existing.soft_recall_gen) == "number" and existing.soft_recall_gen > gen then
+		return false, "stale_gen"
+	end
 	local tmp = path
 		.. ".tmp."
 		.. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
@@ -279,6 +351,12 @@ local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires
 	if not ok_w then
 		os.remove(tmp)
 		return false, "write_tmp:" .. tostring(write_err or "nil")
+	end
+	-- Re-check after write: a restamp may have landed while we wrote tmp.
+	existing = decode_allow_pin(read_file(path))
+	if existing and type(existing.soft_recall_gen) == "number" and existing.soft_recall_gen > gen then
+		os.remove(tmp)
+		return false, "stale_gen"
 	end
 	local ok_r, rename_err = os.rename(tmp, path)
 	if not ok_r then
@@ -379,13 +457,36 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	end
 	-- Soft-recall / unpaged: revoke leftover allow for THIS (sha, gen) only so
 	-- a lagging worker cannot erase a re-canaried pin (same DER, newer gen).
+	-- handshake_drop=false: soft-recall cleanup may clear leftover gen-0 pins.
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
-		revoke_allow_pin(fingerprint, sha, recall_gen, "not_paged", quiet)
+		revoke_allow_pin(fingerprint, sha, recall_gen, "not_paged", quiet, false)
 		-- Non-nil so a caller that skips shard_not_paged cannot staple this generation.
 		return "not_paged"
 	end
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
+		-- Worker death mid-revoke may leave a matching claim with an empty live path.
+		if try_reclaim_orphan_claim(fingerprint, sha, recall_gen) then
+			pin = read_allow_pin(fingerprint)
+		end
+	end
+	if not pin then
+		-- Claim still present but not ours (or empty): another revoke is in flight —
+		-- refuse locally without DROP (KEEP). Avoids racing the claim owner.
+		if allow_pin_has_claim(fingerprint) then
+			if not quiet then
+				log(
+					ngx.ERR,
+					"OCSP allow-pin claim inflight fp="
+						.. fingerprint:sub(1, 16)
+						.. "... der="
+						.. sha:sub(1, 16)
+						.. "... soft_recall_gen="
+						.. tostring(recall_gen)
+				)
+			end
+			return "allow_pin_claim_inflight"
+		end
 		if not quiet then
 			log(
 				ngx.ERR,
@@ -423,11 +524,40 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	return nil
 end
 
+-- Soft fuse: continue without touching the allow pin.
+-- normal: revoke allow for DROP_ALLOW refuse_cause so sibling Must-Staple fails closed.
+--
+-- Transient causes must not enter the peer bus (HTTP↔stream). skip ⊆ KEEP_ALLOW:
+-- every arm here is also KEEP so a future list drift that forgets KEEP still cannot
+-- drop the shared pin via record_peer_refuse if skip somehow regresses.
+local function should_skip_peer_bus(detail, meta, fingerprint)
+	local d = tostring(detail or "unmet")
+	local eff = meta
+	if type(fingerprint) == "string" and is_fp64(fingerprint) then
+		eff = ligand_or_meta(meta, fingerprint)
+	end
+	return d == "not_paged"
+		or d == "validate_budget"
+		or d == "intermediate_must_staple_colony"
+		or d == "intermediate_must_staple_libssl"
+		or d == "fingerprint_chain_unavailable"
+		or d == "multi_staple_attach_failed"
+		or d == "issuer_unresolved_must_staple"
+		or d == "peer_refuse_unavailable"
+		or (type(eff) == "table" and eff.paged ~= true)
+		or ((d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true)
+end
+
 -- Handshake refuse: DROP allow pin for DROP_ALLOW causes via compare-and-delete.
 -- refuse_cause is the raw pre-alias detail (logged); runbook staple_decision=
 -- stays separate. Pin-state / clock causes are KEEP — this worker's view must
 -- not revoke a pin HTTP, stream, and every sibling rely on.
+-- Hard-gates should_skip_peer_bus first so HTTP/stream callers that forget the
+-- outer skip check still cannot wipe the fleet pin on transient causes.
 local function record_peer_refuse(fingerprint, meta, resp, decision)
+	if should_skip_peer_bus(decision, meta, fingerprint) then
+		return false
+	end
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...")
 		or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
@@ -481,7 +611,7 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		return false
 	end
 	local sha, recall_gen = generation_tuple(meta, resp)
-	if not sha then
+	if not sha or type(recall_gen) ~= "number" then
 		log(
 			ngx.DEBUG,
 			"OCSP allow-pin keep (no generation for compare-and-delete) refuse_cause="
@@ -491,32 +621,9 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		)
 		return false
 	end
-	local outcome = revoke_allow_pin(fingerprint, sha, recall_gen, refuse_cause, false)
+	-- handshake_drop=true: never wipe soft_recall_gen=0 upgrade-grace pins.
+	local outcome = revoke_allow_pin(fingerprint, sha, recall_gen, refuse_cause, false, true)
 	return outcome == "allow_dropped"
-end
-
--- Soft fuse: continue without touching the allow pin.
--- normal: revoke allow for DROP_ALLOW refuse_cause so sibling Must-Staple fails closed.
---
--- Transient causes must not enter the peer bus (HTTP↔stream). skip ⊆ KEEP_ALLOW:
--- every arm here is also KEEP so a future list drift that forgets KEEP still cannot
--- drop the shared pin via record_peer_refuse if skip somehow regresses.
-local function should_skip_peer_bus(detail, meta, fingerprint)
-	local d = tostring(detail or "unmet")
-	local eff = meta
-	if type(fingerprint) == "string" and is_fp64(fingerprint) then
-		eff = ligand_or_meta(meta, fingerprint)
-	end
-	return d == "not_paged"
-		or d == "validate_budget"
-		or d == "intermediate_must_staple_colony"
-		or d == "intermediate_must_staple_libssl"
-		or d == "fingerprint_chain_unavailable"
-		or d == "multi_staple_attach_failed"
-		or d == "issuer_unresolved_must_staple"
-		or d == "peer_refuse_unavailable"
-		or (type(eff) == "table" and eff.paged ~= true)
-		or ((d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true)
 end
 
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
