@@ -2009,6 +2009,40 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		end
 	end
 
+	if #installed == 0 and must_staple_refused and (mode == "staple_only" or mode == "open") then
+		-- Soft fuse: clear_certs already wiped the connection. Installing nothing
+		-- would fall back to the static ssl_certificate. Present the site leaf
+		-- unstapled instead (Must-Staple unmet is accepted under the fuse).
+		log(
+			ngx.ERR,
+			format_staple_decision(refuse_detail or "probe_failed", {
+				tag = "OCSP_MUST_STAPLE_REFUSE",
+				action = "continue_install",
+				mode = mode,
+			})
+		)
+		for _, leaf in ipairs(leaves) do
+			local chain_pem = leaf.pem
+			for _, intermediate in ipairs(intermediates) do
+				chain_pem = chain_pem .. "\n" .. intermediate
+			end
+			local parsed_cert, cert_err = ssl.parse_pem_cert(chain_pem)
+			local parsed_key, key_err = ssl.parse_pem_priv_key(leaf.key)
+			if not parsed_cert or not parsed_key then
+				return false, "failed to parse cert/key: " .. tostring(cert_err or key_err)
+			end
+			local ok_cert, err_cert = ssl.set_cert(parsed_cert)
+			if not ok_cert then
+				return false, "set_cert failed: " .. tostring(err_cert)
+			end
+			local ok_key, err_key = ssl.set_priv_key(parsed_key)
+			if not ok_key then
+				return false, "set_priv_key failed: " .. tostring(err_key)
+			end
+			installed[#installed + 1] = leaf
+		end
+	end
+
 	if #installed == 0 then
 		if must_staple_refused then
 			return false, "must_staple", refuse_detail or "probe_failed"

@@ -108,7 +108,7 @@
     "OCSP_STAPLE_MODE": {
       "context": "multisite",
       "default": "normal",
-      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet and write the HTTP↔stream refuse bus (default). staple_only = probe before set_cert and skip unprobed Must-Staple leaves, but do not abort the handshake and do not write the refuse bus. open = disable Must-Staple enforcement (panic / recovery) without writing the refuse bus. Does not replace SSL_USE_OCSP_STAPLING.",
+      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet and write the HTTP↔stream refuse bus (default). staple_only = probe before set_cert and skip unprobed Must-Staple leaves when another leaf can install; if nothing remains, install the site leaf unstapled (do not abort, do not write the refuse bus). open = disable Must-Staple enforcement (panic / recovery), install unstapled, do not write the refuse bus. Does not replace SSL_USE_OCSP_STAPLING.",
       "id": "ocsp-staple-mode",
       "label": "OCSP staple mode",
       "regex": "^(normal|staple_only|open)$",
