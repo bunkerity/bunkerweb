@@ -26,6 +26,14 @@ end
 -- Keys this worker wrote to Redis on the previous sync, so the next one can tell which
 -- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
 local synced_redis_keys = {}
+-- What each table key last left in Redis: the LRU array synced, its length and its last item.
+-- log() appends item tables to that same array, so the last synced item is found back by
+-- reference and only what follows it is pushed, instead of rewriting the whole list every tick.
+local synced_tables = {}
+-- Last value each counter wrote to Redis, so an idle counter costs no SET every tick.
+local synced_counters = {}
+-- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
+local REDIS_BATCH = 500
 
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
@@ -404,6 +412,10 @@ end
 
 local function reap_evicted_redis_keys(self, wid, live_keys)
 	for key in pairs(synced_redis_keys) do
+		if not live_keys[key] then
+			synced_tables[key] = nil
+			synced_counters[key] = nil
+		end
 		-- Numeric totals remain authoritative in Redis after local LRU eviction.
 		-- Their existing TTL bounds dormant retention; TTL=0 intentionally retains them.
 		if not live_keys[key] and not key:find("_counter_", 1, true) then
@@ -414,6 +426,99 @@ local function reap_evicted_redis_keys(self, wid, live_keys)
 		end
 	end
 	synced_redis_keys = live_keys
+end
+
+-- Without a TTL there is no per-tick EXPIRE reply to reveal a lost key, so one EXISTS over every
+-- key this worker believes is in Redis does it instead. Any missing one (FLUSHDB, restart without
+-- persistence, maxmemory eviction) drops every synced state, and the sync below rewrites all
+-- tables and counters in full.
+local function check_synced_keys(self, wid)
+	local keys = {}
+	for key, state in pairs(synced_tables) do
+		-- An empty table was only DEL'd: it has no key to find.
+		if state.len > 0 then
+			keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
+		end
+	end
+	for key in pairs(synced_counters) do
+		keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
+	end
+	for i = 1, #keys, REDIS_BATCH do
+		local last = math.min(i + REDIS_BATCH - 1, #keys)
+		local found = self:redis_call("exists", unpack(keys, i, last))
+		-- An error proves nothing: keep the state until the next tick.
+		if type(found) ~= "number" then
+			return
+		end
+		if found < last - i + 1 then
+			synced_tables = {}
+			synced_counters = {}
+			return
+		end
+	end
+end
+
+-- Mirror a table metric into its Redis list. Unchanged since the last sync: no command at all.
+-- Appended to: one RPUSH of the new items, then an LTRIM for what log() dropped from the head.
+-- Anything else (new array, last synced item gone, unexpected list length): full rewrite.
+local function sync_table(self, key, redis_key, value)
+	local len = #value
+	local last = value[len]
+	local state = synced_tables[key]
+	local first = 1
+	if state and state.tbl == value and type(state.last) == "table" then
+		if len == state.len and last == state.last then
+			return true
+		end
+		for idx = len, 1, -1 do
+			if value[idx] == state.last then
+				first = idx + 1
+				break
+			end
+		end
+	end
+	-- Encoded up front: every call below yields, and log() shifts this array in place meanwhile.
+	local payload = {}
+	for i = first, len do
+		local item = value[i]
+		payload[#payload + 1] = type(item) == "table" and encode(item) or tostring(item)
+	end
+	-- Invalid until this sync completes, so a failure below forces a full rewrite next tick.
+	synced_tables[key] = nil
+	local redis_len = 0
+	if first > 1 then
+		redis_len = state.len
+	else
+		local ok, err = self:redis_call("del", redis_key)
+		if not ok then
+			return false, "can't clear metric table " .. key .. " in Redis: " .. (err or "unknown error")
+		end
+	end
+	for i = 1, #payload, REDIS_BATCH do
+		local pushed, err =
+			self:redis_call("rpush", redis_key, unpack(payload, i, math.min(i + REDIS_BATCH - 1, #payload)))
+		if not pushed then
+			return false, "can't push metric table " .. key .. " to Redis: " .. (err or "unknown error")
+		end
+		redis_len = redis_len + math.min(REDIS_BATCH, #payload - i + 1)
+		if pushed ~= redis_len then
+			-- The list is not what this sync expects (lost, replayed push or another writer).
+			-- Incremental: start over now. Full rewrite: a replayed batch sits mid-list where no
+			-- trim can reach it, so leave the key unsynced and let the next tick rewrite it.
+			if first > 1 then
+				return sync_table(self, key, redis_key, value)
+			end
+			return true
+		end
+	end
+	if redis_len > len then
+		local ok, err = self:redis_call("ltrim", redis_key, -len, -1)
+		if not ok then
+			return false, "can't trim metric table " .. key .. " in Redis: " .. (err or "unknown error")
+		end
+	end
+	synced_tables[key] = { tbl = value, len = len, last = last }
+	return true
 end
 
 -- Baseline and increments share the counter's existing LRU slot. A cache miss
@@ -513,12 +618,18 @@ local function refresh_request_ttls(self, ttl, wid)
 		return
 	end
 	local failed = false
-	local function touch(key)
+	local function touch(key, lru_key)
 		local ok, err
 		if persist then
 			ok, err = self.clusterstore:call("persist", key)
 		else
 			ok, err = self.clusterstore:call("expire", key, ttl)
+			-- 0 means the key is gone (eviction, FLUSHDB, restart without persistence): forget
+			-- what was synced so the next tick writes it again in full.
+			if ok == 0 and lru_key then
+				synced_tables[lru_key] = nil
+				synced_counters[lru_key] = nil
+			end
 		end
 		-- Silence here is a deferred loss: the key keeps the TTL it already carries, expires
 		-- a full period later and stays evictable under volatile-lru until it does.
@@ -539,7 +650,7 @@ local function refresh_request_ttls(self, ttl, wid)
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" then
-				touch("metrics:" .. key .. ":" .. wid)
+				touch("metrics:" .. key .. ":" .. wid, key)
 			end
 		end
 	end
@@ -806,6 +917,10 @@ function metrics:timer()
 				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
 			end
 			self_heal_request_facets(self)
+			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
+				check_synced_keys(self, wid)
+			end
 		end
 	end
 
@@ -896,43 +1011,28 @@ function metrics:timer()
 					local ok
 					if type(value) == "table" then
 						-- Use Redis list for table values
-						ok, err = self:redis_call("del", redis_key)
-						if ok then
-							for _, item in ipairs(value) do
-								local item_value = type(item) == "table" and encode(item) or tostring(item)
-								ok, err = self:redis_call("rpush", redis_key, item_value)
-								if not ok then
-									self:log_throttled(
-										ERR,
-										"sync_table_item",
-										"Can't push metric table item " .. key .. " to Redis: " .. err
-									)
-									break
-								end
-							end
-						else
-							self:log_throttled(
-								ERR,
-								"sync_table_clear",
-								"Can't clear metric table " .. key .. " in Redis: " .. err
-							)
+						ok, err = sync_table(self, key, redis_key, value)
+						if not ok then
+							self:log_throttled(ERR, "sync_table", err)
 						end
 					elseif type(value) == "number" then
 						-- Use Redis string for numeric counters
 						-- ponytail: increments survive yields only while the LRU record remains;
 						-- eviction during SET can drop newer deltas. Durable queues are separate work.
-						if not counter or counter.restored then
+						if (not counter or counter.restored) and synced_counters[key] ~= value then
 							-- Scoped here: the outer err still holds the previous key's failure,
 							-- which would be reported as this counter's own.
 							local set_ok, set_err = self:redis_call("set", redis_key, value)
-							if not set_ok then
+							if set_ok then
+								synced_counters[key] = value
+							else
 								self:log_throttled(
 									ERR,
 									"sync_counter",
 									"Can't sync metric counter " .. key .. " to Redis: " .. (set_err or "unknown error")
 								)
 							end
-						else
+						elseif counter and not counter.restored then
 							self:log_throttled(
 								WARN,
 								"counter_unrestored",
