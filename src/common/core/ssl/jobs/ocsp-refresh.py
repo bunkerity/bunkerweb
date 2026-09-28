@@ -2807,6 +2807,9 @@ def _page_shard_directory_into_place(staging: Path, final_dir: Path, stale: Path
         return False
 
     # Fallback: two renames — brief ENOENT window for concurrent handshakes.
+    # Do NOT bump .ocsp_epoch here: L1 must keep the previous generation across the
+    # gap (handshake treats missing meta+DER with matching epoch as still-valid L1).
+    # Epoch advances only after the new live tree is visible (persist batch).
     log_debug("⚡ OCSP page swap falling back to move-aside+rename (brief reader gap)")
     final_dir.rename(stale)
     try:
@@ -6378,7 +6381,8 @@ def _persist_ocsp_results_to_disk(
 
     # One bump per persist batch, then unlock peer-refuse. Order matters: clearing
     # refuse before the epoch bump would let handshakes use still-valid L1 entries
-    # for a generation the bus no longer blocks.
+    # for a generation the bus no longer blocks. Bump only after live trees are
+    # visible — never mid move-aside ENOENT gap (L1 keeps the previous epoch there).
     if published_fps:
         _bump_ocsp_cache_epoch()
         for fp in published_fps:

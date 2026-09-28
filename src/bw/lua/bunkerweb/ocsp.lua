@@ -534,6 +534,10 @@ end
 -- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
 -- Always re-read ocsp.json der_sha256 (or hash the file). A 5s "last OK" short-circuit
 -- stapled pre-replace DER after a job swap; epoch alone does not cover no-bump writes.
+-- Move-aside ENOENT gap (non-RENAME_EXCHANGE): live shard dir is briefly gone while
+-- .ocsp_epoch still names the previous generation — keep L1 so Must-Staple does not
+-- abort mid-swap. After the new tree is visible the persist batch bumps epoch and
+-- this check drops the old body.
 local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
@@ -547,6 +551,7 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 
 	local disk_sha = nil
 	local tombstoned = false
+	local meta_missing = false
 	pcall(function()
 		local meta_path = "/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
@@ -557,6 +562,7 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 			.. "/ocsp.json"
 		local f = io.open(meta_path, "r")
 		if not f then
+			meta_missing = true
 			return
 		end
 		local raw = f:read("*a")
@@ -583,6 +589,11 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	end
 	local data = read_file(ocsp_path(fingerprint))
 	if not data then
+		-- Previous epoch + missing shard tree: publish move-aside gap (or never published).
+		-- Trust L1 only when meta is also gone — a present meta without DER is not this gap.
+		if meta_missing then
+			return true
+		end
 		return false
 	end
 	return resp_binding(data) == binding
