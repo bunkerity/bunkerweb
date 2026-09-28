@@ -780,7 +780,8 @@ with app.app_context():
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
-                if endpoint == "static" and not app.debug:
+                # A directory base (img/flags) gets file names appended in JS, so it must stay query-free
+                if endpoint == "static" and not app.debug and "." in values.get("filename", "").rstrip("/").rsplit("/", 1)[-1]:
                     values.setdefault("v", BW_VERSION)
                 if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.16~rc3 - ????/??/??
+
+- [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
+
 ## v1.6.16~rc2 - 2026/09/25
 
 - [BUGFIX] `db`: on SQLite, settings written in the same save as a service rename or removal are no longer deleted by reused row ids, which could leave a renamed service without any settings and make the reload fall back to failover.
