@@ -148,6 +148,58 @@ function _M.ssl_certificate(state)
 	end
 
 	-- =====================================================================
+	-- SECTION: Per-handshake variable initialization
+	-- Initialize variables needed by business logic
+	-- =====================================================================
+
+	-- Optional modules and flags
+	local disable_resty_openssl = os.getenv("BW_DISABLE_RESTY_OPENSSL") == "yes"
+	local resty_x509 = nil
+	if not disable_resty_openssl then
+		resty_x509 = resty_openssl_x509
+	else
+		safe_log(ngx.DEBUG, "RESTY.OPENSSL DISABLED: resty.openssl.x509 is disabled")
+	end
+	local has_resty_ssl = (resty_x509 ~= nil) and not disable_resty_openssl
+
+	-- SSL methods
+	local clear_certs    = ssl and ssl.clear_certs
+	local set_cert       = ssl and ssl.set_cert
+	local set_priv_key   = ssl and ssl.set_priv_key
+	local require_plugin = helpers and helpers.require_plugin
+	local new_plugin     = helpers and helpers.new_plugin
+	local call_plugin    = helpers and helpers.call_plugin
+
+	-- Datastore and phase order initialization
+	local internalstore = cdatastore and cdatastore:new(ngx.shared.internalstore)
+	if not internalstore then
+		safe_log(ngx.ERR, "Failed to initialize internalstore")
+		return
+	end
+
+	-- Get plugins order
+	local order, order_err = internalstore:get("plugins_order", true)
+	if not order then
+		safe_log(ngx.ERR, "cannot get plugins order from internalstore : " .. (order_err or "unknown"))
+		return
+	end
+
+	-- Resolve per-site plugin order
+	local function get_phase_order(ord, phase, sni)
+		if ord.per_site and sni and ord.per_site[sni] and ord.per_site[sni][phase] then
+			return ord.per_site[sni][phase]
+		elseif ord.global and ord.global[phase] then
+			return ord.global[phase]
+		end
+		return ord[phase]
+	end
+
+	local server_name = ssl and ssl.server_name()
+	local phase_order = get_phase_order(order, "ssl_certificate", server_name)
+
+	safe_log(ngx.DEBUG, "ssl_certificate phase started for server_name=" .. (server_name or "nil"))
+
+	-- =====================================================================
 	-- SECTION: Business logic begins here (from original extracted body)
 	-- =====================================================================
 
