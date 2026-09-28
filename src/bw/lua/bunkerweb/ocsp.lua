@@ -123,6 +123,9 @@ local STAPLE_DECISION = {
 	peer_refuse_bus = true,
 	await_sni = true,
 	intermediate_must_staple_libssl = true,
+	-- Colony min is leaf-only (a live peer lacks multi-staple); not a local libssl gap.
+	-- Transient: must not stick after the leaf-only worker leaves.
+	intermediate_must_staple_colony = true,
 	-- Soft ngx.ocsp.validate budget aborted during leaf issuer tries; multi-staple
 	-- stack was never attached (not ok_partial — that name is NULL-slot attach only).
 	validate_budget = true,
@@ -1014,6 +1017,11 @@ end
 local function record_peer_refuse(fingerprint, meta, resp, decision)
 	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
 	local by = (ngx.config and ngx.config.subsystem) or "unknown"
+	-- Colony leaf-only is temporary (peer 3.5 still live). Do not bus-poison — when
+	-- that worker leaves, multi-staple must resume without waiting for a canary page.
+	if decision == "intermediate_must_staple_colony" then
+		return false
+	end
 	-- Never pin sticky poison to a soft-recalled / unpaged body: same der_sha256
 	-- would block the later re-canary of those exact bytes forever.
 	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
@@ -1715,7 +1723,7 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		end
 		local detail = tostring(set_err or set_ok)
 		log(ngx.ERR, "OCSP failed to set stapling: " .. detail)
-		if detail == "intermediate_must_staple_libssl" then
+		if detail == "intermediate_must_staple_libssl" or detail == "intermediate_must_staple_colony" then
 			return false, detail
 		end
 		return false
@@ -1889,16 +1897,28 @@ local function publish_multi_staple_attach(ready, force)
 end
 
 local function openssl_multi_staple_ready()
+	-- Local symbol probe (publishes this worker's vote). Colony min may still force
+	-- leaf-only while any live peer cannot attach — even if this worker is 3.6+.
+	local function finish_local(local_ok)
+		if not local_ok then
+			return false, nil, "libssl"
+		end
+		local colony = colony_multi_staple_min()
+		if colony == false then
+			return false, nil, "colony"
+		end
+		return true, _multi_staple_state, nil
+	end
 	if _multi_staple_state ~= nil then
 		-- Refresh liveness so a departed leaf-only worker can expire from the colony min.
 		publish_multi_staple_attach(_multi_staple_state ~= false, false)
-		return _multi_staple_state ~= false, _multi_staple_state
+		return finish_local(_multi_staple_state ~= false)
 	end
 	local ok_ffi, ffi = pcall(require, "ffi")
 	if not ok_ffi or not ffi then
 		_multi_staple_state = false
 		publish_multi_staple_attach(false, true)
-		return false, nil
+		return false, nil, "libssl"
 	end
 	-- cdef may fail on re-entry (types already declared); symbol probe is the real gate.
 	pcall(ffi.cdef, [[
@@ -1919,7 +1939,7 @@ local function openssl_multi_staple_ready()
 	if not ok_sym or type(sym) ~= "cdata" then
 		_multi_staple_state = false
 		publish_multi_staple_attach(false, true)
-		return false, nil
+		return false, nil, "libssl"
 	end
 	-- Keep empty status cb alive for the process (OpenSSL requires it to emit staples).
 	local cb = ffi.cast("int (*)(void *, void *)", function()
@@ -1927,7 +1947,7 @@ local function openssl_multi_staple_ready()
 	end)
 	_multi_staple_state = { ffi = ffi, C = ffi.C, empty_cb = cb }
 	publish_multi_staple_attach(true, true)
-	return true, _multi_staple_state
+	return finish_local(true)
 end
 
 -- Per-tenant control key for intermediate OCSP negatives (must match Python
@@ -2097,16 +2117,19 @@ local function clear_multi_staple_attach_note()
 	note_multi_staple_attach(0, 0)
 end
 
--- Attach leaf OCSP; when SSL_set0_tlsext_status_ocsp_resp_ex is present also attach
--- intermediate responses in chain order. Without that symbol: leaf-only. If an
--- intermediate requires Must-Staple, refuse with intermediate_must_staple_libssl
--- (capability gap) — never log leaf success while a TLS 1.3 client would still
--- abort on the missing CertificateEntry status.
+-- Attach leaf OCSP; when the colony can multi-staple (every live worker exports
+-- SSL_set0_tlsext_status_ocsp_resp_ex) also attach intermediate responses in chain
+-- order. Colony leaf-only (any live 3.5 peer) or missing local symbol: leaf-only.
+-- Intermediate Must-Staple then refuses — never log leaf success while a TLS 1.3
+-- client would still abort on the missing CertificateEntry status.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
-	local ready, st = openssl_multi_staple_ready()
+	local ready, st, why_not = openssl_multi_staple_ready()
 	if not ready then
 		clear_multi_staple_attach_note()
 		if chain_has_intermediate_must_staple(chain_blocks) then
+			if why_not == "colony" then
+				return nil, "intermediate_must_staple_colony"
+			end
 			return nil, "intermediate_must_staple_libssl"
 		end
 		return ocsp.set_ocsp_status_resp(leaf_resp)
@@ -2826,15 +2849,19 @@ end
 
 -- Dual-cert / probe health: can this leaf's issuer-linked intermediates be stapled?
 -- Does not require a leaf OCSP body. Legal NULL slots (no intermediate Must-Staple) pass.
--- Sticky defects demote the leaf: intermediate_must_staple_libssl, missing Must-Staple body.
+-- Sticky defects demote the leaf: intermediate Must-Staple capability gap / missing body.
+-- (libssl missing symbol, or colony leaf-only while a 3.5 peer is live.)
 issuer_path_intermediate_ready = function(chain_pem_or_blocks)
 	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
 	if type(blocks) ~= "table" or #blocks < 2 then
 		return true
 	end
-	local ready = openssl_multi_staple_ready()
+	local ready, _, why_not = openssl_multi_staple_ready()
 	if not ready then
 		if chain_has_intermediate_must_staple(blocks) then
+			if why_not == "colony" then
+				return false, "intermediate_must_staple_colony"
+			end
 			return false, "intermediate_must_staple_libssl"
 		end
 		return true
@@ -3350,9 +3377,13 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			local attach_detail = tostring(set_err or set_ok)
 			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
 			drop_cache(internalstore, fingerprint)
-			if attach_detail == "intermediate_must_staple_libssl" or must_staple then
+			if
+				attach_detail == "intermediate_must_staple_libssl"
+				or attach_detail == "intermediate_must_staple_colony"
+				or must_staple
+			then
 				local detail = attach_detail
-				if detail ~= "intermediate_must_staple_libssl" then
+				if detail ~= "intermediate_must_staple_libssl" and detail ~= "intermediate_must_staple_colony" then
 					detail = "set_staple_failed"
 				end
 				return must_staple_refuse(fingerprint, meta, cached, detail, mode)
@@ -3397,13 +3428,18 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 				if
 					result_detail == "intermediate_must_staple_libssl"
+					or result_detail == "intermediate_must_staple_colony"
 					or result_detail == "response_not_found"
 					or must_staple
 				then
 					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
 					-- Path demotion from probe_only also lands here (intermediate Must-Staple).
 					local detail = result_detail
-					if detail ~= "intermediate_must_staple_libssl" and detail ~= "response_not_found" then
+					if
+						detail ~= "intermediate_must_staple_libssl"
+						and detail ~= "intermediate_must_staple_colony"
+						and detail ~= "response_not_found"
+					then
 						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
 					end
 					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
@@ -3459,11 +3495,16 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			if
 				result_detail == "intermediate_must_staple_libssl"
+				or result_detail == "intermediate_must_staple_colony"
 				or result_detail == "response_not_found"
 				or must_staple
 			then
 				local detail = result_detail
-				if detail ~= "intermediate_must_staple_libssl" and detail ~= "response_not_found" then
+				if
+					detail ~= "intermediate_must_staple_libssl"
+					and detail ~= "intermediate_must_staple_colony"
+					and detail ~= "response_not_found"
+				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
 				end
 				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
