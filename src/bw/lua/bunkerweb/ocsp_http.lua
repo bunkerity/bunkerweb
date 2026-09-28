@@ -1,6 +1,93 @@
 local _M = {}
 _M.__index = _M
 
+-- =====================================================================
+-- MODULE-LEVEL: Load and cache all modules once at require time
+-- =====================================================================
+
+local _clogger
+local ok_logger, err_logger = pcall(function()
+	return require "bunkerweb.logger"
+end)
+
+if ok_logger then
+	_clogger = err_logger
+else
+	ngx.log(ngx.ERR, "SSL-CERTIFICATE critical error: failed to load bunkerweb.logger: " .. tostring(err_logger):sub(1, 1024))
+	_clogger = nil
+end
+
+-- Logger factory for per-handshake instances
+local function get_logger()
+	if not _clogger then return nil end
+	return _clogger:new("SSL-CERTIFICATE")
+end
+
+-- Safe require wrapper for modules
+local function safe_require(name)
+	local ok_mod, mod = pcall(require, name)
+	return ok_mod and mod or nil
+end
+
+-- Cache all critical and optional modules at load time
+local _class      = safe_require "middleclass" 
+local _helpers    = safe_require "bunkerweb.helpers"
+local _utils      = safe_require "bunkerweb.utils"
+local _cdatastore = safe_require "bunkerweb.datastore"
+local _cjson      = safe_require "cjson"
+local _ssl        = safe_require "ngx.ssl"
+local _ocsp       = safe_require "ngx.ocsp"
+local _resty_openssl_x509 = safe_require "resty.openssl.x509"
+local _cwd        = safe_require "bunkerweb.ocsp"
+
+-- =====================================================================
+-- MODULE-LEVEL: Pre-defined helper functions (used per-handshake)
+-- =====================================================================
+
+local function get_ocsp_enabled()
+	if not _helpers then return false end
+	return _helpers.getenv("SSL_USE_OCSP_STAPLING") == "yes"
+end
+
+local function is_ocsp_stapling_enabled()
+	return get_ocsp_enabled()
+end
+
+local function get_ocsp_staple_mode()
+	if not is_ocsp_stapling_enabled() then
+		return "open"
+	end
+	if not _helpers then return "normal" end
+	return _helpers.getenv("OCSP_STAPLE_MODE", "normal")
+end
+
+local function get_staple_timeout()
+	if not _helpers then return 5000 end
+	local timeout_sec = tonumber(_helpers.getenv("OCSP_STAPLE_TIMEOUT_SEC", "5"))
+	return (timeout_sec or 5) * 1000
+end
+
+local function get_allow_pin_dir()
+	return "/data/bw/ocsp/allow-pin"
+end
+
+local function get_ligand_path()
+	return "/data/bw/ocsp/ligand"
+end
+
+local function get_epoch_path()
+	return "/data/bw/ocsp/epoch"
+end
+
+local function get_refused_path()
+	return "/data/bw/ocsp/refused"
+end
+
+-- =====================================================================
+-- HANDSHAKE FUNCTION: ssl_certificate(state)
+-- Uses module-level cached modules and helpers
+-- =====================================================================
+
 function _M.ssl_certificate(state)
 	-- OCSP stapling logic for HTTP ssl_certificate phase.
 	--
@@ -13,81 +100,46 @@ function _M.ssl_certificate(state)
 	--   state.leaf_must_staple (bool|nil)
 	--
 	-- State is modified in-place with results and error details.
+	-- Uses module-level cached modules via local aliases for compatibility
 
-	-- =====================================================================
-	-- SECTION: module load + debug toggles
-	-- Critical: logger, helpers, datastore, ngx.ssl. Optional: ngx.ocsp,
-	-- resty.openssl (no /tmp openssl CLI on the handshake path).
-	-- =====================================================================
-	-- 1. Load logger first (critical for diagnostics)
-	local clogger
-	local ok_logger, err_logger = pcall(function()
-		return require "bunkerweb.logger"
-	end)
-
-	if not ok_logger then
-		local err_msg = tostring(err_logger):sub(1, 1024)
-		ngx.log(ngx.ERR, ("SSL-CERTIFICATE critical error: failed to load bunkerweb.logger: " .. err_msg):sub(1, 2048))
-		return
-	end
-	clogger = err_logger
-	local logger = clogger:new("SSL-CERTIFICATE")
-
+	-- Per-handshake logger instance
+	local logger = get_logger()
+	
 	local function safe_log(level, msg)
-		if msg then
+		if logger and msg then
 			logger:log(level, tostring(msg):sub(1, 2048))
 		end
 	end
 
+	-- Validate critical modules
+	if not _ssl then
+		safe_log(ngx.ERR, "Critical module ngx.ssl not available")
+		return
+	end
+	
+	if not _helpers then
+		safe_log(ngx.ERR, "Critical module bunkerweb.helpers not available")
+		return
+	end
+	
+	if not _cdatastore then
+		safe_log(ngx.ERR, "Critical module bunkerweb.datastore not available")
+		return
+	end
+
+	-- Create local aliases to module-level cached modules (for compatibility with business logic)
+	local class      = _class
+	local helpers    = _helpers
+	local utils      = _utils
+	local cdatastore = _cdatastore
+	local cjson      = _cjson
+	local ssl        = _ssl
+	local ocsp       = _ocsp
+	local resty_openssl_x509 = _resty_openssl_x509
+	local cwd        = _cwd
+
 	safe_log(ngx.DEBUG, "bunkerweb.logger loaded successfully")
-
-	-- 2. Load other core modules with logging
-	local function safe_require(name)
-		local ok_mod, mod = pcall(require, name)
-		if ok_mod then
-			safe_log(ngx.DEBUG, "Module " .. name .. " loaded successfully")
-			return mod
-		else
-			safe_log(ngx.ERR, "Failed to load core module " .. name .. ": " .. tostring(mod))
-			return nil
-		end
-	end
-
-	local class      = safe_require "middleclass"
-	local helpers    = safe_require "bunkerweb.helpers"
-	local utils      = safe_require "bunkerweb.utils"
-	local cdatastore = safe_require "bunkerweb.datastore"
-	local cjson      = safe_require "cjson"
-	local ssl        = safe_require "ngx.ssl"
-
-	-- Check critical modules (ssl, helpers, cdatastore are essential)
-	if not ssl then
-		safe_log(ngx.ERR, "Critical module ngx.ssl failed to load - cannot set custom certificates, nginx will use default certificate")
-		return  -- Let nginx use default certificate configured in http block
-	end
-
-	if not helpers then
-		safe_log(ngx.ERR, "Critical module bunkerweb.helpers failed to load - cannot get variables, nginx will use default certificate")
-		return
-	end
-
-	if not cdatastore then
-		safe_log(ngx.ERR, "Critical module bunkerweb.datastore failed to load - cannot read database, nginx will use default certificate")
-		return
-	end
-
-	safe_log(ngx.DEBUG, "All critical modules loaded")
-
-	-- 3. Optional modules: ngx.ocsp (for staple validation), resty.openssl (conditional use)
-	local ocsp         = safe_require "ngx.ocsp"
-	local resty_openssl_x509 = safe_require "resty.openssl.x509"
-	local cwd          = safe_require "bunkerweb.ocsp"
-
-	if not resty_openssl_x509 then
-		safe_log(ngx.WARN, "resty.openssl.x509 not available - OCSP staple validation will use fallback")
-	end
-
-	safe_log(ngx.DEBUG, "Optional modules loaded")
+	safe_log(ngx.DEBUG, "All critical modules available")
 
 	-- 4. Debug toggle (set DEBUG_SSL_CERTIFICATE=yes environment variable to enable)
 	local debug_ssl = os.getenv("DEBUG_SSL_CERTIFICATE") == "yes"
@@ -96,196 +148,9 @@ function _M.ssl_certificate(state)
 	end
 
 	-- =====================================================================
-		-- =====================================================================
-		-- SECTION: module load + debug toggles
-		-- Critical: logger, helpers, datastore, ngx.ssl. Optional: ngx.ocsp,
-		-- resty.openssl (no /tmp openssl CLI on the handshake path).
-		-- =====================================================================
-		-- 1. Load logger first (critical for diagnostics)
-		local clogger
-		local ok_logger, err_logger = pcall(function()
-			return require "bunkerweb.logger"
-		end)
-		
-		if not ok_logger then
-			local err_msg = tostring(err_logger):sub(1, 1024)
-			ngx.log(ngx.ERR, ("SSL-CERTIFICATE critical error: failed to load bunkerweb.logger: " .. err_msg):sub(1, 2048))
-			return
-		end
-		clogger = err_logger
-		local logger = clogger:new("SSL-CERTIFICATE")
+	-- SECTION: Business logic begins here (from original extracted body)
+	-- =====================================================================
 
-		local function safe_log(level, msg)
-			if msg then
-				logger:log(level, tostring(msg):sub(1, 2048))
-			end
-		end
-
-		safe_log(ngx.DEBUG, "bunkerweb.logger loaded successfully")
-
-		-- 2. Load other core modules with logging
-		local function safe_require(name)
-			local ok_mod, mod = pcall(require, name)
-			if ok_mod then
-				safe_log(ngx.DEBUG, "Module " .. name .. " loaded successfully")
-				return mod
-			else
-				safe_log(ngx.ERR, "Failed to load core module " .. name .. ": " .. tostring(mod))
-				return nil
-			end
-		end
-
-		local class      = safe_require "middleclass"
-		local helpers    = safe_require "bunkerweb.helpers"
-		local utils      = safe_require "bunkerweb.utils"
-		local cdatastore = safe_require "bunkerweb.datastore"
-		local cjson      = safe_require "cjson"
-		local ssl        = safe_require "ngx.ssl"
-
-		-- Check critical modules (ssl, helpers, cdatastore are essential)
-		if not ssl then
-			safe_log(ngx.ERR, "Critical module ngx.ssl failed to load - cannot set custom certificates, nginx will use default certificate")
-			return  -- Let nginx use default certificate configured in http block
-		end
-
-		if not helpers then
-			safe_log(ngx.ERR, "Critical module bunkerweb.helpers failed to load - plugins cannot be loaded, nginx will use default certificate")
-			return  -- Let nginx use default certificate
-		end
-
-		if not cdatastore then
-			safe_log(ngx.ERR, "Critical module bunkerweb.datastore failed to load - cannot access configuration, nginx will use default certificate")
-			return  -- Let nginx use default certificate
-		end
-
-		-- Log non-critical module failures but continue
-		if not class then
-			safe_log(ngx.ERR, "Non-critical module middleclass failed to load - some features may not work")
-		end
-		if not utils then
-			safe_log(ngx.ERR, "Non-critical module bunkerweb.utils failed to load - some features may not work")
-		end
-		if not cjson then
-			safe_log(ngx.ERR, "Non-critical module cjson failed to load - JSON operations may not work")
-		end
-
-		local ngx           = ngx
-		local ngx_req       = ngx.req
-		local is_internal   = ngx_req.is_internal
-		local ERR           = ngx.ERR
-		local INFO          = ngx.INFO
-		local NOTICE        = ngx.NOTICE
-		local DEBUG         = ngx.DEBUG
-
-		-- 3. Optional modules (require with pcall for safety)
-		local function optional_require(name, report_error)
-			local ok_mod, mod = pcall(require, name)
-			if ok_mod then
-				safe_log(DEBUG, "Optional module " .. name .. " loaded successfully")
-				return mod
-			else
-				local log_level = report_error and ERR or DEBUG
-				safe_log(log_level, "Optional module " .. name .. " not found or failed to load: " .. tostring(mod))
-				return nil
-			end
-		end
-
-		-- OCSP module.
-		-- Debug toggle: disable ngx.ocsp on purpose to simulate a failure.
-		-- Default: enabled (unless BW_DISABLE_NGX_OCSP is explicitly set).
-		local disable_ngx_ocsp = false
-		pcall(function()
-			local v = os.getenv("BW_DISABLE_NGX_OCSP")
-			if v then
-				v = tostring(v):lower()
-				if v == "1" or v == "yes" or v == "true" then
-					disable_ngx_ocsp = true
-				elseif v == "0" or v == "no" or v == "false" then
-					disable_ngx_ocsp = false
-				end
-			end
-		end)
-
-		local ocsp = nil
-		if not disable_ngx_ocsp then
-			ocsp = optional_require("ngx.ocsp", true)  -- Report failure (OCSP stapling feature)
-		else
-			safe_log(DEBUG, "OCSP DISABLED: ngx.ocsp disabled via BW_DISABLE_NGX_OCSP")
-		end
-		local cclusterstore = optional_require("bunkerweb.clusterstore", false)  -- Silent failure (cache optimization)
-
-		-- Try to load resty.openssl for native certificate parsing (report failure - performance optimization).
-		-- Debug toggles:
-		-- - disable resty.openssl via `BW_DISABLE_RESTY_OPENSSL=yes|1|true` (no /tmp openssl CLI fallback)
-		-- - enable resty.openssl via `BW_ENABLE_RESTY_OPENSSL=yes|1|true`
-		-- Default: enabled (resty.openssl will be loaded). When resty is unavailable, Must-Staple
-		-- still comes from ocsp.json written by ocsp-refresh; serial/fingerprint helpers return nil.
-		local disable_resty_openssl = false
-		pcall(function()
-			local v_disable = os.getenv("BW_DISABLE_RESTY_OPENSSL")
-			if v_disable then
-				v_disable = tostring(v_disable):lower()
-				if v_disable == "1" or v_disable == "yes" or v_disable == "true" then
-					disable_resty_openssl = true
-				end
-			end
-
-			local v_enable = os.getenv("BW_ENABLE_RESTY_OPENSSL")
-			if v_enable then
-				v_enable = tostring(v_enable):lower()
-				if v_enable == "1" or v_enable == "yes" or v_enable == "true" then
-					disable_resty_openssl = false
-				end
-			end
-		end)
-
-		local resty_x509 = nil
-		if not disable_resty_openssl then
-			resty_x509 = optional_require("resty.openssl.x509", true)
-		else
-			safe_log(DEBUG, "RESTY.OPENSSL DISABLED: resty.openssl.x509 is disabled; no openssl CLI fallback on handshake")
-		end
-		local has_resty_ssl = (resty_x509 ~= nil) and not disable_resty_openssl
-
-		local clear_certs    = ssl and ssl.clear_certs
-		local set_cert       = ssl and ssl.set_cert
-		local set_priv_key   = ssl and ssl.set_priv_key
-		local require_plugin = helpers and helpers.require_plugin
-		local new_plugin     = helpers and helpers.new_plugin
-		local call_plugin    = helpers and helpers.call_plugin
-
-		-- Start ssl_certificate phase.
-		-- internalstore / server_name must be declared before every helper below:
-		-- a local referenced above its declaration compiles to a nil global.
-		local internalstore = cdatastore and cdatastore:new(ngx.shared.internalstore)
-		if not internalstore then
-			safe_log(ngx.ERR, "Failed to initialize internalstore")
-			return
-		end
-
-		-- Get plugins order
-		local order, order_err = internalstore:get("plugins_order", true)
-		if not order then
-			safe_log(ngx.ERR, "cannot get plugins order from internalstore : " .. (order_err or "unknown"))
-			return
-		end
-
-		-- Resolve per-site plugin order
-		local function get_phase_order(ord, phase, sni)
-			if ord.per_site and sni and ord.per_site[sni] and ord.per_site[sni][phase] then
-				return ord.per_site[sni][phase]
-			elseif ord.global and ord.global[phase] then
-				return ord.global[phase]
-			end
-			return ord[phase]
-		end
-
-		local server_name = ssl and ssl.server_name()
-		local phase_order = get_phase_order(order, "ssl_certificate", server_name)
-
-		safe_log(ngx.DEBUG, "ssl_certificate phase started for server_name=" .. (server_name or "nil"))
-
-		-- =====================================================================
 		-- SECTION: stapling-off fast path (SSL_USE_OCSP_STAPLING=no, the default)
 		-- Upstream plugin loop: the first plugin returning parsed ngx.ssl objects
 		-- installs cert + key. Runs before the OCSP helpers below are built, so
