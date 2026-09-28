@@ -199,6 +199,10 @@ OPENSSL_BIN = "/usr/bin/openssl"
 # Forensic provenance stamped into every GOOD ocsp.json for this process invocation.
 _JOB_RUN_ID: Optional[str] = None
 _OPENSSL_IDENTITY: Optional[Dict[str, Any]] = None
+# Intermediate SPKI bodies already donated this job run (plasmid seal). Later leaves
+# that share the issuer reuse the shared shard; they do not re-hit the OCSP responder
+# even under force_fetch. Negatives stay on the per-tenant control key.
+_SEALED_INTER_BODY_SPKI: set = set()
 
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
@@ -1829,6 +1833,42 @@ def _clear_tenant_control_negatives(control_fp: Optional[str]) -> None:
         log_debug("⚠️ OCSP could not clear control meta for %s: %s", normalized[:16], e)
 
 
+def _inter_body_shard_paged(fingerprint: Optional[str]) -> bool:
+    """True when the shared intermediate SPKI shard has a canary-paged DER on disk."""
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return False
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        der = shard / "ocsp.der"
+        meta_path = shard / "ocsp.json"
+        if not der.is_file() or der.stat().st_size <= 0 or not meta_path.is_file():
+            return False
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict) or meta.get("paged") is not True:
+            return False
+        if meta.get("tombstoned") is True:
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def _seal_inter_body_spki(fingerprint: Optional[str]) -> None:
+    """Mark intermediate SPKI as donated for this job run (no further OCSP GETs)."""
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return
+    _SEALED_INTER_BODY_SPKI.add(normalized)
+
+
+def _inter_body_spki_sealed(fingerprint: Optional[str]) -> bool:
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return False
+    return normalized in _SEALED_INTER_BODY_SPKI
+
+
 def _process_cert_chain(
     cert_name: str,
     pem_data: bytes,
@@ -1850,20 +1890,47 @@ def _process_cert_chain(
     leaf_fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
     for iname, ipem in _intermediate_ocsp_targets(cert_name, pem_data):
         try:
-            inter_fp = _get_cert_pubkey_fingerprint(_clean_pem(ipem))
+            cleaned_inter = _clean_pem(ipem)
+            inter_fp = _get_cert_pubkey_fingerprint(cleaned_inter)
             control_fp = _intermediate_control_fp(leaf_fp, inter_fp)
-            results.append(
-                _process_cert(
+            # Plasmid reuse: one GOOD body per intermediate SPKI per job run.
+            # Later leaves clear only their tenant control key — never re-fetch.
+            sealed = bool(inter_fp) and _inter_body_spki_sealed(inter_fp)
+            body_paged = bool(inter_fp) and _inter_body_shard_paged(inter_fp)
+            if sealed and body_paged:
+                _clear_tenant_control_negatives(control_fp)
+                if stats is not None:
+                    stats["ocsp_intermediate_plasmid_reuse"] = stats.get("ocsp_intermediate_plasmid_reuse", 0) + 1
+                log_debug(
+                    "🧬 OCSP intermediate plasmid reuse body_fp=%s... control_fp=%s... for %s",
+                    inter_fp[:16],
+                    (control_fp[:16] + "...") if control_fp else "nil",
                     iname,
-                    ipem,
-                    db,
-                    stats,
-                    force_fetch=force_fetch,
-                    control_fp=control_fp,
                 )
+                continue
+            # Past the seal gate: body missing or never donated. Honor force_fetch
+            # so an evaporated shared DER can be re-donated in this run.
+            inter_force = bool(force_fetch)
+            result = _process_cert(
+                iname,
+                ipem,
+                db,
+                stats,
+                force_fetch=inter_force,
+                control_fp=control_fp,
             )
+            results.append(result)
             if stats is not None:
                 stats["ocsp_intermediate_processed"] = stats.get("ocsp_intermediate_processed", 0) + 1
+            ocsp_der = result[1]
+            cached_ttl = result[2]
+            was_attempted = result[6]
+            # Seal after a fresh GOOD fetch, or after accepting an already-paged cache.
+            if inter_fp and (
+                ocsp_der is not None
+                or (not was_attempted and isinstance(cached_ttl, int) and cached_ttl > 0 and _inter_body_shard_paged(inter_fp))
+            ):
+                _seal_inter_body_spki(inter_fp)
         except Exception as e:
             log_warning("⚠️ OCSP intermediate fetch failed for %s: %s", iname, e)
             if stats is not None:
@@ -2286,10 +2353,11 @@ def _new_job_run_id() -> str:
 
 def _begin_job_run() -> str:
     """Start a new job run id and refresh cached OpenSSL identity."""
-    global _JOB_RUN_ID, _OPENSSL_IDENTITY, _MULTI_STAPLE_ATTACH_CACHE
+    global _JOB_RUN_ID, _OPENSSL_IDENTITY, _MULTI_STAPLE_ATTACH_CACHE, _SEALED_INTER_BODY_SPKI
     _JOB_RUN_ID = _new_job_run_id()
     _OPENSSL_IDENTITY = None
     _MULTI_STAPLE_ATTACH_CACHE = None
+    _SEALED_INTER_BODY_SPKI = set()
     return _JOB_RUN_ID
 
 
