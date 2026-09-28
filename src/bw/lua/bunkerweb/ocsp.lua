@@ -594,43 +594,65 @@ local function read_ocsp_json(fingerprint)
 	return nil
 end
 
--- Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable.
-local function job_run_id_rank(run_id)
-	if type(run_id) ~= "string" or run_id == "" then
+-- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using wall-clock
+-- published_unix (not job_run_id — pid.time_ns is not colony-comparable).
+-- Must-Staple stays closed while local ocsp.json published_unix is below the floor.
+local function meta_published_unix(meta)
+	if type(meta) ~= "table" then
 		return 0
 	end
-	local ns = run_id:match("%.(%d+)$")
-	return tonumber(ns) or 0
+	local u = meta.published_unix
+	if type(u) == "number" and u > 0 then
+		return math.floor(u)
+	end
+	if type(u) == "string" then
+		local n = tonumber(u)
+		if n and n > 0 then
+			return math.floor(n)
+		end
+	end
+	return 0
 end
 
--- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone.
--- Must-Staple stays closed while local ocsp.json job_run_id ranks below the floor.
+local function parse_floor_published_unix(raw)
+	if type(raw) ~= "string" or raw == "" then
+		return 0
+	end
+	local trimmed = raw:match("^%s*(.-)%s*$") or raw
+	if trimmed:sub(1, 1) == "{" then
+		local ok, decoded = pcall(function()
+			return require("cjson").decode(trimmed)
+		end)
+		if ok and type(decoded) == "table" then
+			return meta_published_unix(decoded)
+		end
+		return 0
+	end
+	local token = trimmed:match("^(%d+)")
+	return tonumber(token) or 0
+end
+
 local function cluster_floor_blocks(fingerprint, meta)
 	if not is_fp64(fingerprint) then
 		return false
 	end
 	local raw = read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint)
-	if not raw or raw == "" then
+	local floor_pub = parse_floor_published_unix(raw)
+	if floor_pub <= 0 then
 		return false
 	end
-	local floor_id = raw:match("^%s*(%S+)")
-	local floor_rank = job_run_id_rank(floor_id)
-	if floor_rank <= 0 then
-		return false
-	end
-	local local_id = meta and meta.job_run_id or nil
-	local local_rank = job_run_id_rank(local_id)
-	if local_rank >= floor_rank then
+	local local_pub = meta_published_unix(meta)
+	if local_pub >= floor_pub then
 		return false
 	end
 	log(
 		ngx.ERR,
-		"OCSP cluster floor ahead of local job_run_id; Must-Staple closed fp="
+		"OCSP cluster floor ahead of local published_unix; Must-Staple closed fp="
 			.. fingerprint:sub(1, 16)
 			.. "... floor="
-			.. tostring(floor_id)
+			.. tostring(floor_pub)
 			.. " local="
-			.. tostring(local_id or "none")
+			.. tostring(local_pub)
 	)
 	return true
 end

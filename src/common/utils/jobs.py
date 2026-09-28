@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 from inspect import currentframe, getframeinfo
 from io import BytesIO
-from json import loads as json_loads
+from json import dumps as json_dumps, loads as json_loads
 from logging import Logger
 from os import getenv, replace
 from os.path import sep
@@ -61,7 +61,12 @@ def parse_ocsp_floor_cache_name(file_name: str) -> Optional[str]:
 
 
 def ocsp_job_run_id_rank(run_id: Any) -> int:
-    """Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable."""
+    """
+    Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable.
+
+    Local forensic / same-host tie-break only. Do not treat as colony consensus:
+    time_ns is per-process and not comparable across scheduler hosts.
+    """
     if not isinstance(run_id, str) or not run_id:
         return 0
     parts = run_id.rsplit(".", 1)
@@ -83,8 +88,13 @@ def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
     return 0
 
 
-def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[str]:
-    """Extract job_run_id from an ocsp-floor file body."""
+def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
+    """
+    Parse an ocsp-floor file body into {published_unix, job_run_id?}.
+
+    Preferred body is compact JSON. Also accepts a plain decimal published_unix.
+    Legacy plain job_run_id (pid.time_ns) is ignored for colony ordering (no published_unix).
+    """
     if not data:
         return None
     try:
@@ -93,12 +103,33 @@ def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[str]:
         return None
     if not text:
         return None
-    # First token only (ignore trailing noise).
-    return text.split()[0]
+    if text.startswith("{"):
+        try:
+            obj = json_loads(text)
+        except Exception:
+            return None
+        if not isinstance(obj, dict):
+            return None
+        published = _ocsp_meta_unix(obj, "published_unix")
+        out: Dict[str, Any] = {}
+        if published > 0:
+            out["published_unix"] = published
+        run_id = obj.get("job_run_id")
+        if isinstance(run_id, str) and run_id:
+            out["job_run_id"] = run_id
+        return out or None
+    token = text.split()[0]
+    if token.isdigit():
+        published = int(token)
+        if published > 0:
+            return {"published_unix": published}
+        return None
+    # Legacy job_run_id-only floor: not colony-comparable.
+    return None
 
 
-def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[str]:
-    """Read on-disk cluster floor job_run_id for fingerprint, or None."""
+def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[Dict[str, Any]]:
+    """Read on-disk cluster floor payload for fingerprint, or None."""
     if not fingerprint or len(fingerprint) != 64:
         return None
     path = Path(cache_root) / "ocsp-floor" / fingerprint.lower()
@@ -110,16 +141,34 @@ def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[str]:
         return None
 
 
-def should_keep_disk_ocsp_floor(disk_run_id: Optional[str], incoming_run_id: Optional[str]) -> bool:
+def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
+    if not isinstance(floor, dict):
+        return 0
+    return _ocsp_meta_unix(floor, "published_unix")
+
+
+def encode_ocsp_floor_payload(published_unix: int, job_run_id: Optional[str] = None) -> bytes:
+    """Serialize colony floor: wall-clock published_unix is the comparable field."""
+    payload: Dict[str, Any] = {"published_unix": int(published_unix)}
+    if isinstance(job_run_id, str) and job_run_id:
+        payload["job_run_id"] = job_run_id
+    return (json_dumps(payload, separators=(",", ":")) + "\n").encode("utf-8")
+
+
+def should_keep_disk_ocsp_floor(
+    disk_floor: Optional[Dict[str, Any]],
+    incoming_floor: Optional[Dict[str, Any]],
+) -> bool:
     """
     True when the on-disk cluster floor must not be overwritten by restore.
 
-    Floor is max-only: equal or higher disk rank wins. Missing disk → allow restore.
+    Floor is max-only on published_unix (wall clock, colony-comparable).
+    Equal → keep disk. Missing disk published_unix → allow restore.
     """
-    disk_rank = _ocsp_job_run_id_rank(disk_run_id)
-    if disk_rank <= 0:
+    disk_pub = ocsp_floor_published_unix(disk_floor)
+    if disk_pub <= 0:
         return False
-    return disk_rank >= _ocsp_job_run_id_rank(incoming_run_id)
+    return disk_pub >= ocsp_floor_published_unix(incoming_floor)
 
 
 def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
@@ -149,8 +198,9 @@ def should_keep_disk_ocsp_shard(
     """
     True when an on-disk OCSP shard must not be overwritten by a DB/restore payload.
 
-    Order: tombstone vs GOOD (denial must not lose to an older far-future GOOD),
-    then expires_unix, published_unix, job_run_id. Equal → keep disk.
+    Order: tombstone vs GOOD by published_unix (wall clock; denial must not lose to an
+    older far-future GOOD), then expires_unix, published_unix, and job_run_id only as a
+    same-host forensic tie-break (pid.time_ns is not colony consensus). Equal → keep disk.
     Missing disk meta → allow restore. Missing incoming meta while disk has meta → keep disk.
     """
     if not isinstance(disk_meta, dict):
@@ -160,26 +210,31 @@ def should_keep_disk_ocsp_shard(
 
     disk_tomb = disk_meta.get("tombstoned") is True
     inc_tomb = incoming_meta.get("tombstoned") is True
-    disk_run = _ocsp_job_run_id_rank(disk_meta.get("job_run_id"))
-    inc_run = _ocsp_job_run_id_rank(incoming_meta.get("job_run_id"))
+    disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
+    inc_pub = _ocsp_meta_unix(incoming_meta, "published_unix")
 
-    # A live tombstone outranks an older GOOD even when that GOOD still has a far expires_unix.
+    # Tombstone vs GOOD: wall-clock publish time, never cross-host job_run_id ranks.
     if disk_tomb and not inc_tomb:
-        return inc_run <= disk_run
+        if disk_pub > 0 or inc_pub > 0:
+            return inc_pub <= disk_pub
+        # No comparable wall times: keep the tombstone (fail closed).
+        return True
     if inc_tomb and not disk_tomb:
-        return inc_run < disk_run
+        if disk_pub > 0 or inc_pub > 0:
+            return inc_pub < disk_pub
+        # Prefer the incoming tombstone when wall times are absent.
+        return False
 
     disk_exp = _ocsp_meta_unix(disk_meta, "expires_unix")
     inc_exp = _ocsp_meta_unix(incoming_meta, "expires_unix")
     if disk_exp != inc_exp:
         return disk_exp > inc_exp
 
-    disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
-    inc_pub = _ocsp_meta_unix(incoming_meta, "published_unix")
     if disk_pub != inc_pub:
         return disk_pub > inc_pub
 
-    return disk_run >= inc_run
+    # Last resort only: local forensic id, not a cluster vote.
+    return _ocsp_job_run_id_rank(disk_meta.get("job_run_id")) >= _ocsp_job_run_id_rank(incoming_meta.get("job_run_id"))
 
 
 def ocsp_restore_skip_fingerprints(cache_files: list, cache_root: Path) -> Dict[str, str]:
@@ -357,15 +412,16 @@ class Job:
                     )
                     ignored_dirs.add(cache_path.parent.as_posix())
                     continue
-                # Cluster floor: max-only — never lower a peer-advanced floor from an older DB row.
+                # Cluster floor: max-only on published_unix — never lower from an older DB row.
                 floor_fp = parse_ocsp_floor_cache_name(job_cache_file.get("file_name") or "")
                 if floor_fp:
-                    incoming_run = parse_ocsp_floor_bytes(job_cache_file.get("data"))
-                    disk_run = load_disk_ocsp_floor(self.job_path, floor_fp)
-                    if should_keep_disk_ocsp_floor(disk_run, incoming_run):
+                    incoming_floor = parse_ocsp_floor_bytes(job_cache_file.get("data"))
+                    disk_floor = load_disk_ocsp_floor(self.job_path, floor_fp)
+                    if should_keep_disk_ocsp_floor(disk_floor, incoming_floor):
                         self.logger.info(
                             f"OCSP floor restore skip fp={floor_fp[:16]}... "
-                            f"disk={disk_run} incoming={incoming_run}"
+                            f"disk_pub={ocsp_floor_published_unix(disk_floor)} "
+                            f"incoming_pub={ocsp_floor_published_unix(incoming_floor)}"
                         )
                         ignored_dirs.add(cache_path.parent.as_posix())
                         continue
