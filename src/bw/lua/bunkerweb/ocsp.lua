@@ -866,7 +866,8 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
 		return false, "invalid_der_sha256"
 	end
-	local dir = "/var/cache/bunkerweb/ssl/ocsp-refuse"
+	-- Handshake path: never mkdir/shell here. Dir is provisioned off-path
+	-- (L1 warmer init, ocsp-refresh, restore coherence). Missing dir → bus_write_failed.
 	local path = ocsp_refuse_path(fingerprint)
 	local tmp = path .. ".tmp." .. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
 	local payload = require("cjson").encode({
@@ -875,42 +876,47 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 		refused_by = tostring(refused_by or (ngx.config and ngx.config.subsystem) or "unknown"),
 		refused_unix = ngx.time(),
 	})
-	local function try_write()
-		local f, open_err = io.open(tmp, "w")
-		if not f then
-			return false, "open_tmp:" .. tostring(open_err or "nil")
-		end
-		local ok_w, write_err = f:write(payload)
-		f:flush()
-		f:close()
-		if not ok_w then
-			pcall(os.remove, tmp)
-			return false, "write_tmp:" .. tostring(write_err or "nil")
-		end
-		local ok_r, rename_err = os.rename(tmp, path)
-		if not ok_r then
-			pcall(os.remove, tmp)
-			return false, "rename:" .. tostring(rename_err or "nil")
-		end
-		return true
+	local f, open_err = io.open(tmp, "w")
+	if not f then
+		return false, "open_tmp:" .. tostring(open_err or "dir_missing")
 	end
-	local ok, why = try_write()
-	if ok then
-		return true
+	local ok_w, write_err = f:write(payload)
+	f:flush()
+	f:close()
+	if not ok_w then
+		pcall(os.remove, tmp)
+		return false, "write_tmp:" .. tostring(write_err or "nil")
 	end
-	pcall(function()
-		os.execute("mkdir -p " .. dir)
-	end)
+	local ok_r, rename_err = os.rename(tmp, path)
+	if not ok_r then
+		pcall(os.remove, tmp)
+		return false, "rename:" .. tostring(rename_err or "nil")
+	end
+	return true
+end
+
+-- Provision ocsp-refuse/ off the TLS critical path (init_worker / warmer / jobs).
+local function ensure_ocsp_refuse_dir()
+	local dir = "/var/cache/bunkerweb/ssl/ocsp-refuse"
+	local ok = false
 	pcall(function()
 		local lfs = require("lfs")
 		lfs.mkdir("/var/cache/bunkerweb/ssl")
-		lfs.mkdir(dir)
+		ok = lfs.mkdir(dir) or (lfs.attributes(dir, "mode") == "directory")
 	end)
-	ok, why = try_write()
 	if ok then
 		return true
 	end
-	return false, why or "write_failed"
+	-- Attributes-only check when mkdir is unnecessary (already exists).
+	pcall(function()
+		local lfs = require("lfs")
+		ok = lfs.attributes(dir, "mode") == "directory"
+	end)
+	return ok
+end
+
+function _M.ensure_ocsp_refuse_dir()
+	return ensure_ocsp_refuse_dir()
 end
 
 -- If the sibling subsystem refused this generation, both refuse.
@@ -2809,6 +2815,10 @@ function _M.start_l1_warmer(internalstore)
 	end
 	if not ngx.timer or not ngx.timer.at then
 		return false
+	end
+	-- Off handshake: ensure peer-refuse bus directory exists before any refuse write.
+	if not ensure_ocsp_refuse_dir() then
+		log(ngx.ERR, "OCSP could not provision ocsp-refuse/ dir; peer-refuse bus writes may fail")
 	end
 	l1_warmer_started = true
 

@@ -158,15 +158,27 @@ def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
     return _ocsp_meta_unix(floor, "published_unix")
 
 
+def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) -> bool:
+    """Create ocsp-refuse/ off the TLS path (jobs / restore / refresh)."""
+    try:
+        refuse_dir = Path(cache_root) / "ocsp-refuse"
+        refuse_dir.mkdir(parents=True, exist_ok=True)
+        return True
+    except Exception as e:
+        if logger is not None:
+            logger.debug(f"OCSP could not provision ocsp-refuse/: {e}")
+        return False
+
+
 def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
     """Drop HTTP↔stream generation refuse marker for this SPKI (new page / restore)."""
     if not fingerprint or len(fingerprint) != 64:
         return False
     fp = fingerprint.lower()
     try:
-        refuse_dir = Path(cache_root) / "ocsp-refuse"
-        refuse_dir.mkdir(parents=True, exist_ok=True)
-        path = refuse_dir / fp
+        if not ensure_ocsp_refuse_dir(cache_root, logger):
+            return False
+        path = Path(cache_root) / "ocsp-refuse" / fp
         if path.is_file():
             path.unlink()
             if logger is not None:
@@ -187,6 +199,7 @@ def bump_ocsp_cache_epoch(cache_root: Path, logger: Optional[Logger] = None) -> 
     try:
         root = Path(cache_root)
         root.mkdir(parents=True, exist_ok=True)
+        ensure_ocsp_refuse_dir(root, logger)
         _write_atomic(root / ".ocsp_epoch", f"{time_ns()}\n".encode("ascii"))
         if logger is not None:
             logger.debug("OCSP bumped .ocsp_epoch after restore/publish coherence")

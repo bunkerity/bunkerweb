@@ -4848,6 +4848,7 @@ def _bump_ocsp_cache_epoch() -> None:
     """
     try:
         CONFIGS_SSL_BASE.mkdir(parents=True, exist_ok=True)
+        (CONFIGS_SSL_BASE / "ocsp-refuse").mkdir(parents=True, exist_ok=True)
         _atomic_write_text(CONFIGS_SSL_BASE / ".ocsp_epoch", str(time.time_ns()), mode=0o640)
     except Exception as e:
         log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
@@ -5547,6 +5548,12 @@ def main() -> int:
     job_start_time = time.time()
     lock_fd_main = None
     timed_out = False
+
+    # Provision peer-refuse bus off the TLS path (handshake writes must not mkdir).
+    try:
+        (CONFIGS_SSL_BASE / "ocsp-refuse").mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not provision ocsp-refuse/: %s", e)
 
     def check_job_timeout(phase: str = "") -> bool:
         """Check if job has exceeded timeout. Returns True if timeout exceeded."""
