@@ -272,11 +272,11 @@ def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
 
 def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
     """
-    Parse an ocsp-floor file body into {this_update_unix?, published_unix?, job_run_id?}.
+    Parse an ocsp-floor file body into {this_update_unix, published_unix?, job_run_id?}.
 
-    Preferred body is compact JSON with CA-signed ``this_update_unix`` as the colony
-    rank. Legacy bodies may have only ``published_unix`` (wall clock) or a plain
-    decimal published_unix. Plain job_run_id (pid.time_ns) is ignored for ordering.
+    Colony rank is CA-signed ``this_update_unix`` only. ``published_unix`` may appear
+    forensically but is ignored for ordering. Plain decimal / published-only bodies
+    are not comparable.
     """
     if not data:
         return None
@@ -284,34 +284,25 @@ def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
         text = data.decode("utf-8").strip()
     except Exception:
         return None
-    if not text:
+    if not text or not text.startswith("{"):
         return None
-    if text.startswith("{"):
-        try:
-            obj = json_loads(text)
-        except Exception:
-            return None
-        if not isinstance(obj, dict):
-            return None
-        out: Dict[str, Any] = {}
-        this_u = _ocsp_meta_unix(obj, "this_update_unix")
-        if this_u > 0:
-            out["this_update_unix"] = this_u
-        published = _ocsp_meta_unix(obj, "published_unix")
-        if published > 0:
-            out["published_unix"] = published
-        run_id = obj.get("job_run_id")
-        if isinstance(run_id, str) and run_id:
-            out["job_run_id"] = run_id
-        return out or None
-    token = text.split()[0]
-    if token.isdigit():
-        published = int(token)
-        if published > 0:
-            return {"published_unix": published}
+    try:
+        obj = json_loads(text)
+    except Exception:
         return None
-    # Legacy job_run_id-only floor: not colony-comparable.
-    return None
+    if not isinstance(obj, dict):
+        return None
+    this_u = _ocsp_meta_unix(obj, "this_update_unix")
+    if this_u <= 0:
+        return None
+    out: Dict[str, Any] = {"this_update_unix": this_u}
+    published = _ocsp_meta_unix(obj, "published_unix")
+    if published > 0:
+        out["published_unix"] = published
+    run_id = obj.get("job_run_id")
+    if isinstance(run_id, str) and run_id:
+        out["job_run_id"] = run_id
+    return out
 
 
 def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[Dict[str, Any]]:
@@ -329,24 +320,20 @@ def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[Dict[st
 
 def ocsp_floor_comparable(floor: Optional[Dict[str, Any]]) -> Tuple[str, int]:
     """
-    Colony floor rank without mixing clocks.
+    Colony floor rank: CA-signed ``this_update_unix`` only.
 
-    Returns (kind, unix) where kind is ``this_update`` (preferred, CA-signed) or
-    ``published`` (legacy wall-clock). Empty kind means not comparable.
+    Returns ("this_update", unix) or ("", 0) when not comparable.
     """
     if not isinstance(floor, dict):
         return "", 0
     this_u = _ocsp_meta_unix(floor, "this_update_unix")
     if this_u > 0:
         return "this_update", this_u
-    published = _ocsp_meta_unix(floor, "published_unix")
-    if published > 0:
-        return "published", published
     return "", 0
 
 
 def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
-    """Colony-comparable floor rank (prefer this_update_unix; legacy published_unix)."""
+    """Colony-comparable floor rank (this_update_unix only)."""
     _kind, rank = ocsp_floor_comparable(floor)
     return rank
 
@@ -446,25 +433,22 @@ def encode_ocsp_floor_payload(
     """
     Serialize colony floor.
 
-    Prefer CA-signed ``this_update_unix`` as the comparable field. ``published_unix``
-    may be stored forensically or alone for legacy restore rows — never invent
-    this_update from wall clock.
+    Requires CA-signed ``this_update_unix``. ``published_unix`` is forensic only —
+    never invent this_update from wall clock, and never rank on it alone.
     """
-    payload: Dict[str, Any] = {}
     try:
         this_u = int(this_update_unix) if this_update_unix is not None else 0
     except (TypeError, ValueError):
         this_u = 0
-    if this_u > 0:
-        payload["this_update_unix"] = this_u
+    if this_u <= 0:
+        raise ValueError("ocsp floor requires this_update_unix")
+    payload: Dict[str, Any] = {"this_update_unix": this_u}
     try:
         pub = int(published_unix) if published_unix is not None else 0
     except (TypeError, ValueError):
         pub = 0
     if pub > 0:
         payload["published_unix"] = pub
-    if not payload:
-        raise ValueError("ocsp floor requires this_update_unix or published_unix")
     if isinstance(job_run_id, str) and job_run_id:
         payload["job_run_id"] = job_run_id
     return (json_dumps(payload, separators=(",", ":")) + "\n").encode("utf-8")
@@ -477,20 +461,15 @@ def should_keep_disk_ocsp_floor(
     """
     True when the on-disk cluster floor must not be overwritten by restore.
 
-    Max-only within the same clock kind. A this_update floor is never overwritten
-    by a legacy published-only row; a this_update incoming upgrades legacy disk.
-    Equal rank → keep disk. Missing disk rank → allow restore.
+    Max-only on CA-signed this_update_unix. Equal rank → keep disk.
+    Missing disk rank → allow restore. Non-comparable incoming → keep disk.
     """
-    disk_kind, disk_rank = ocsp_floor_comparable(disk_floor)
+    _disk_kind, disk_rank = ocsp_floor_comparable(disk_floor)
     if disk_rank <= 0:
         return False
-    inc_kind, inc_rank = ocsp_floor_comparable(incoming_floor)
+    _inc_kind, inc_rank = ocsp_floor_comparable(incoming_floor)
     if inc_rank <= 0:
         return True
-    if disk_kind == "this_update" and inc_kind == "published":
-        return True
-    if disk_kind == "published" and inc_kind == "this_update":
-        return False
     return disk_rank >= inc_rank
 
 

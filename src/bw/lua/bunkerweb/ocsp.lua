@@ -319,15 +319,6 @@ local function cache_key(fingerprint)
 	return "TLS:SSL:ocsp:" .. fingerprint
 end
 
--- Legacy sibling keys (pre-composite L1). Still deleted on write/drop for upgrades.
-local function verified_key(fingerprint)
-	return "TLS:SSL:ocsp_verified:" .. fingerprint
-end
-
-local function gen_key(fingerprint)
-	return "TLS:SSL:ocsp_gen:" .. fingerprint
-end
-
 -- Bind verified flag to OCSP DER bytes (not SPKI alone). Same-key renewals keep the fingerprint.
 local function resp_binding(resp)
 	if type(resp) ~= "string" or #resp == 0 then
@@ -392,7 +383,7 @@ local PEER_REFUSE_STICKY = {
 }
 
 local function l1_shm_ttl(expires_unix)
-	-- Never park an undated body in L1 (would outlive stripped/legacy meta).
+	-- Never park an undated body in L1 (would outlive stripped meta).
 	if type(expires_unix) ~= "number" or expires_unix <= 0 then
 		return nil
 	end
@@ -506,35 +497,20 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	local epoch = current_ocsp_epoch()
 	pcall(function()
 		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl)
-		-- Drop pre-composite siblings so they cannot outlive / contradict this entry.
-		internalstore:delete(verified_key(fingerprint))
-		internalstore:delete(gen_key(fingerprint))
+		-- Also clear the zone-scoped key so a prior put without the zone flag cannot linger.
 		internalstore:delete(cache_key(fingerprint), true)
-		internalstore:delete(verified_key(fingerprint), true)
-		internalstore:delete(gen_key(fingerprint), true)
 	end)
-end
-
--- Legacy diskcheck key (pre-fix throttle). Still deleted on drop so old entries vanish.
-local function l1_disk_check_key(fingerprint)
-	return "TLS:SSL:ocsp_diskcheck:" .. fingerprint
 end
 
 local function drop_cache(internalstore, fingerprint)
 	pcall(function()
 		internalstore:delete(cache_key(fingerprint))
-		internalstore:delete(verified_key(fingerprint))
-		internalstore:delete(l1_disk_check_key(fingerprint))
-		internalstore:delete(gen_key(fingerprint))
 		internalstore:delete(cache_key(fingerprint), true)
-		internalstore:delete(verified_key(fingerprint), true)
-		internalstore:delete(l1_disk_check_key(fingerprint), true)
-		internalstore:delete(gen_key(fingerprint), true)
 	end)
 end
 
 -- True when L1 DER still matches on-disk ocsp.der (job may have replaced the file).
--- Always re-read ocsp.json der_sha256 (or hash the file). A 5s "last OK" short-circuit
+-- Always re-read ocsp.json der_sha256. A 5s "last OK" short-circuit
 -- stapled pre-replace DER after a job swap; epoch alone does not cover no-bump writes.
 -- Move-aside ENOENT gap (non-RENAME_EXCHANGE): live shard dir is briefly gone while
 -- .ocsp_epoch still names the previous generation — keep L1 so Must-Staple does not
@@ -589,16 +565,12 @@ local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
 	if disk_sha then
 		return disk_sha == binding
 	end
-	local data = read_file(ocsp_path(fingerprint))
-	if not data then
-		-- Previous epoch + missing shard tree: publish move-aside gap (or never published).
-		-- Trust L1 only when meta is also gone — a present meta without DER is not this gap.
-		if meta_missing then
-			return true
-		end
-		return false
+	-- Meta without der_sha256 is invalid (job always writes it). Move-aside ENOENT:
+	-- both meta and DER gone while epoch still names the previous generation → keep L1.
+	if meta_missing and not read_file(ocsp_path(fingerprint)) then
+		return true
 	end
-	return resp_binding(data) == binding
+	return false
 end
 
 local function issuer_candidates(blocks, leaf_pem, fingerprint)
@@ -741,9 +713,8 @@ local function read_ocsp_json(fingerprint)
 end
 
 -- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using CA-signed
--- this_update_unix (not wall-clock published_unix — clocks drift across nodes).
--- Legacy floors with only published_unix still compare published↔ published.
--- Missing local timing is no opinion (do not treat as 0 vs a positive floor).
+-- this_update_unix only (not wall-clock published_unix — clocks drift across nodes).
+-- Missing local this_update_unix is no opinion (do not treat as 0 vs a positive floor).
 local function meta_unix_field(meta, key)
 	if type(meta) ~= "table" or type(key) ~= "string" then
 		return nil
@@ -762,46 +733,32 @@ local function meta_unix_field(meta, key)
 end
 
 local function parse_floor_rank(raw)
-	-- Returns kind ("this_update"|"published"), rank, or nil,nil when absent.
+	-- Returns this_update_unix rank, or nil when absent / not CA-time.
 	if type(raw) ~= "string" or raw == "" then
-		return nil, nil
+		return nil
 	end
 	local trimmed = raw:match("^%s*(.-)%s*$") or raw
-	if trimmed:sub(1, 1) == "{" then
-		local ok, decoded = pcall(function()
-			return require("cjson").decode(trimmed)
-		end)
-		if ok and type(decoded) == "table" then
-			local this_u = meta_unix_field(decoded, "this_update_unix")
-			if this_u then
-				return "this_update", this_u
-			end
-			local pub = meta_unix_field(decoded, "published_unix")
-			if pub then
-				return "published", pub
-			end
-		end
-		return nil, nil
+	if trimmed:sub(1, 1) ~= "{" then
+		return nil
 	end
-	local token = trimmed:match("^(%d+)")
-	local n = tonumber(token)
-	if n and n > 0 then
-		return "published", n
+	local ok, decoded = pcall(function()
+		return require("cjson").decode(trimmed)
+	end)
+	if not ok or type(decoded) ~= "table" then
+		return nil
 	end
-	return nil, nil
+	return meta_unix_field(decoded, "this_update_unix")
 end
 
 local function cluster_floor_blocks(fingerprint, meta)
 	if not is_fp64(fingerprint) then
 		return false
 	end
-	local raw = read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint)
-	local kind, floor_rank = parse_floor_rank(raw)
-	if not kind or not floor_rank or floor_rank <= 0 then
+	local floor_rank = parse_floor_rank(read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint))
+	if not floor_rank or floor_rank <= 0 then
 		return false
 	end
-	local local_key = (kind == "this_update") and "this_update_unix" or "published_unix"
-	local local_rank = meta_unix_field(meta, local_key)
+	local local_rank = meta_unix_field(meta, "this_update_unix")
 	-- Missing local timing: no opinion — never invent 0 vs a positive floor.
 	if not local_rank then
 		return false
@@ -811,9 +768,7 @@ local function cluster_floor_blocks(fingerprint, meta)
 	end
 	log(
 		ngx.ERR,
-		"OCSP cluster floor ahead of local "
-			.. local_key
-			.. "; Must-Staple closed fp="
+		"OCSP cluster floor ahead of local this_update_unix; Must-Staple closed fp="
 			.. fingerprint:sub(1, 16)
 			.. "... floor="
 			.. tostring(floor_rank)
@@ -875,12 +830,6 @@ local function generation_tuple(meta, resp)
 	return body, soft_recall_gen_of(meta)
 end
 
--- Legacy single-id helper (der_sha256 only) for logs / callers that need a string.
-local function generation_id(meta, resp)
-	local sha = generation_tuple(meta, resp)
-	return sha
-end
-
 local function read_peer_refuse(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
@@ -904,6 +853,11 @@ local function read_peer_refuse(fingerprint)
 		return nil
 	end
 	obj.der_sha256 = sha
+	-- Markers without soft_recall_gen are pre-counter leftovers; drop them.
+	if obj.soft_recall_gen == nil then
+		pcall(os.remove, ocsp_refuse_path(fingerprint))
+		return nil
+	end
 	obj.soft_recall_gen = soft_recall_gen_of(obj)
 	return obj
 end
@@ -983,7 +937,7 @@ local function peer_refuse_marker_expired(marker)
 	end
 	local t = marker and marker.refused_unix
 	if type(t) ~= "number" then
-		-- Legacy transient marker without timestamp: heal (soft-fuse poison).
+		-- Transient marker without timestamp: heal (soft-fuse poison).
 		return true
 	end
 	return (ngx.time() - t) > PEER_REFUSE_TTL_SECONDS
@@ -1712,7 +1666,7 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 		)
 		return false, "response_stale"
 	end
-	-- L1 may only tighten the meta death clock, never extend past stripped/legacy meta.
+	-- L1 may only tighten the meta death clock, never extend past stripped meta.
 	if type(expires_unix) == "number" and expires_unix > 0 and expires_unix < exp then
 		exp = math.floor(expires_unix)
 	end
@@ -2046,7 +2000,6 @@ local function load_paged_intermediate_staple(cert_pem, leaf_pem)
 		end
 	end
 	local meta = read_ocsp_json(body_fp)
-	-- Legacy shared tombstones still block (pre-isolation); new code never writes them.
 	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
 		return nil, body_fp
 	end
@@ -2622,7 +2575,7 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	return ordered
 end
 
--- First of ordered_leaves_for_handshake (legacy single-pick API).
+-- First of ordered_leaves_for_handshake (single-pick helper).
 local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	local ordered = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	return ordered[1]
@@ -2670,19 +2623,6 @@ local function log_skipped_sibling_leaves(leaves, chosen, server_name)
 			log_ocsp_staple_skip(kind, leaf_fp_of(leaf) or spki_fingerprint(pem), reason, server_name)
 		end
 	end
-end
-
--- Back-compat: PEM-block list + prefer_kind → one PEM string.
-local function select_preferred_leaf(blocks, prefer_kind)
-	if not blocks or #blocks == 0 then
-		return nil
-	end
-	local leaves = {}
-	for _, block in ipairs(blocks) do
-		leaves[#leaves + 1] = block
-	end
-	local sigalgs_ext = ngx.ctx and ngx.ctx.bw_ocsp_sigalgs_ext or nil
-	return select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 end
 
 local function parse_pem_keys(pem_data)
@@ -3863,19 +3803,12 @@ end
 
 
 -- Cross-subsystem generation refuse bus (HTTP ↔ stream).
-function _M.peer_refuse_blocks(fingerprint, der_sha256_or_meta, resp)
-	local meta = der_sha256_or_meta
-	if type(der_sha256_or_meta) == "string" then
-		meta = { der_sha256 = der_sha256_or_meta }
-	end
+-- meta must carry der_sha256 (+ soft_recall_gen); string-only generation ids are gone.
+function _M.peer_refuse_blocks(fingerprint, meta, resp)
 	return peer_refuse_blocks(fingerprint, meta, resp)
 end
 
-function _M.record_peer_refuse(fingerprint, der_sha256_or_meta, decision, resp)
-	local meta = der_sha256_or_meta
-	if type(der_sha256_or_meta) == "string" then
-		meta = { der_sha256 = der_sha256_or_meta }
-	end
+function _M.record_peer_refuse(fingerprint, meta, decision, resp)
 	return record_peer_refuse(fingerprint, meta, resp, decision)
 end
 
@@ -3977,9 +3910,6 @@ function _M.capture_client_hello()
 		end
 	end
 end
-
--- Back-compat alias used by stream conf before HTTP shared the same capture.
-_M.capture_stream_client_hello = _M.capture_client_hello
 
 -- Resolve the handshake SNI for stream stapling (ssl.server_name, else client-hello ctx).
 function _M.handshake_sni(fallback)

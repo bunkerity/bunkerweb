@@ -3061,6 +3061,11 @@ def _publish_ocsp_shard(
         page_meta["paged_unix"] = int(datetime.now(timezone.utc).timestamp())
         page_meta["canary_reason"] = canary_reason
         page_meta.pop("unpaged_after_nongood", None)
+        # Generation counter for peer-refuse bus (bumped on soft-recall; 0 on first page).
+        try:
+            page_meta["soft_recall_gen"] = int(page_meta.get("soft_recall_gen") or 0)
+        except (TypeError, ValueError):
+            page_meta["soft_recall_gen"] = 0
         _write_bytes_inplace(
             staging / "ocsp.json",
             json.dumps(page_meta, separators=(",", ":")).encode("utf-8"),
@@ -3257,8 +3262,8 @@ def _get_http_error_backoff_remaining(
         if meta.get("error_type") != "http_backoff":
             return 0
 
-        # Bind to CertID + responder. Legacy SPKI-only markers (no serial) are ignored
-        # so a prior shared-key freeze cannot keep blocking after this fix.
+        # Bind to CertID + responder. Markers without serial are ignored
+        # so a shared-key freeze cannot keep blocking unrelated CertIDs.
         want_serial = _normalize_ocsp_serial(serial)
         have_serial = _normalize_ocsp_serial(meta.get("serial"))
         if not want_serial or not have_serial or want_serial != have_serial:
@@ -5482,7 +5487,7 @@ def _bump_ocsp_cache_epoch() -> None:
     """
     Bump a shared on-disk generation counter so HTTP and stream L1 caches
     (separate lua_shared_dict zones) both drop stale OCSP entries after publish.
-    Workers compare TLS:SSL:ocsp_gen:{fp} to this file; they cannot cross-delete
+    Workers compare packed L1 epoch to this file; they cannot cross-delete
     each other's shared dicts, so disk is the coherence bus.
     """
     try:
@@ -5587,21 +5592,13 @@ def _advance_ocsp_cluster_floor(
             try:
                 mirror_this = int(mirror["this_update_unix"]) if mirror.get("this_update_unix") else 0
                 mirror_pub = int(mirror["published_unix"]) if mirror.get("published_unix") else 0
-                # Prefer writing CA-time floor; legacy disk may only have published_unix.
-                if mirror_this > 0:
-                    payload = encode_ocsp_floor_payload(
-                        mirror_this,
-                        mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
-                        published_unix=mirror_pub if mirror_pub > 0 else None,
-                    )
-                elif mirror_pub > 0:
-                    payload = encode_ocsp_floor_payload(
-                        None,
-                        mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
-                        published_unix=mirror_pub,
-                    )
-                else:
+                if mirror_this <= 0:
                     return True
+                payload = encode_ocsp_floor_payload(
+                    mirror_this,
+                    mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
+                    published_unix=mirror_pub if mirror_pub > 0 else None,
+                )
                 db.upsert_job_cache(
                     service_id=None,
                     file_name=rel,
@@ -5636,10 +5633,12 @@ def _restore_ocsp_cluster_floor_entry(file_name: str, data: bytes) -> bool:
     run_id = incoming.get("job_run_id") if isinstance(incoming.get("job_run_id"), str) else None
     this_u = int(incoming["this_update_unix"]) if incoming.get("this_update_unix") else 0
     pub_u = int(incoming["published_unix"]) if incoming.get("published_unix") else 0
+    if this_u <= 0:
+        return False
     _atomic_write_bytes(
         floor_dir / floor_fp,
         encode_ocsp_floor_payload(
-            this_u if this_u > 0 else None,
+            this_u,
             run_id,
             published_unix=pub_u if pub_u > 0 else None,
         ),
@@ -5750,8 +5749,7 @@ def _der_serial_and_this_update(ocsp_der: bytes) -> Tuple[Optional[str], Optiona
 def _serial_ban_superseded_by_good(ban_unix: Optional[int], this_unix: Optional[int]) -> bool:
     """
     Same-serial GOOD clears the ban when its thisUpdate is strictly newer.
-    A ban with no this_update_unix (legacy null / omitted) is superseded by any
-    dated GOOD — otherwise that ban can never clear.
+    Bans without this_update_unix are invalid and treated as superseded.
     """
     if this_unix is None:
         return False
@@ -5764,7 +5762,7 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     """
     True when this body must not be published or restored.
     The same serial stays banned until a verified GOOD with a later thisUpdate.
-    A ban missing this_update_unix clears on any dated GOOD for that serial.
+    A ban missing this_update_unix is invalid and clears on any dated GOOD for that serial.
     A different serial (reissue on the same key) is not banned.
     serial_unknown (tombstone without a readable serial) clears on any verified GOOD
     that has a serial — otherwise it would permanently block republish.
