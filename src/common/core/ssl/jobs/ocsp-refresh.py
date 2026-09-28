@@ -4839,32 +4839,19 @@ def _write_serial_blacklist(
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     decimal, serial_hex = _serial_forms(serial)
+    # Omit this_update_unix when unknown — a JSON null can never satisfy
+    # "newer GOOD thisUpdate" and permanently sticks the ban for this serial.
+    stamp: Dict[str, Any] = {"status": status_name}
+    if isinstance(this_update_unix, (int, float)) and int(this_update_unix) > 0:
+        stamp["this_update_unix"] = int(this_update_unix)
     # Nil serial still writes a fail-closed marker: Lua refuses when serial_hex is absent.
     if not decimal:
-        _atomic_write_text(
-            path,
-            json.dumps(
-                {
-                    "status": status_name,
-                    "this_update_unix": this_update_unix,
-                    "serial_unknown": True,
-                }
-            ),
-            mode=0o640,
-        )
+        stamp["serial_unknown"] = True
+        _atomic_write_text(path, json.dumps(stamp), mode=0o640)
         return
-    _atomic_write_text(
-        path,
-        json.dumps(
-            {
-                "serial": decimal,
-                "serial_hex": serial_hex,
-                "status": status_name,
-                "this_update_unix": this_update_unix,
-            }
-        ),
-        mode=0o640,
-    )
+    stamp["serial"] = decimal
+    stamp["serial_hex"] = serial_hex
+    _atomic_write_text(path, json.dumps(stamp), mode=0o640)
 
 
 def _clear_serial_blacklist(fingerprint: str) -> None:
@@ -4886,10 +4873,24 @@ def _der_serial_and_this_update(ocsp_der: bytes) -> Tuple[Optional[str], Optiona
         return None, None
 
 
+def _serial_ban_superseded_by_good(ban_unix: Optional[int], this_unix: Optional[int]) -> bool:
+    """
+    Same-serial GOOD clears the ban when its thisUpdate is strictly newer.
+    A ban with no this_update_unix (legacy null / omitted) is superseded by any
+    dated GOOD — otherwise that ban can never clear.
+    """
+    if this_unix is None:
+        return False
+    if ban_unix is None:
+        return True
+    return this_unix > ban_unix
+
+
 def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_name: str) -> bool:
     """
     True when this body must not be published or restored.
     The same serial stays banned until a verified GOOD with a later thisUpdate.
+    A ban missing this_update_unix clears on any dated GOOD for that serial.
     A different serial (reissue on the same key) is not banned.
     serial_unknown (tombstone without a readable serial) clears on any verified GOOD
     that has a serial — otherwise it would permanently block republish.
@@ -4924,12 +4925,14 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
         ban_unix = int(ban.get("this_update_unix"))
     except (TypeError, ValueError):
         ban_unix = None
-    if this_unix is not None and ban_unix is not None and this_unix > ban_unix:
+    if _serial_ban_superseded_by_good(ban_unix, this_unix):
         _clear_serial_blacklist(fingerprint)
         log_info(
-            "✓ OCSP serial blacklist cleared for %s serial=%s (newer GOOD thisUpdate)",
+            "✓ OCSP serial blacklist cleared for %s serial=%s (newer GOOD thisUpdate=%s, ban=%s)",
             cert_name,
             got_serial,
+            this_unix,
+            ban_unix,
         )
         return False
     log_error(

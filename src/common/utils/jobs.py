@@ -162,8 +162,9 @@ def reconcile_ocsp_serial_blacklist_after_restore(
 ) -> bool:
     """
     After a GOOD trio restore: drop serial-blacklist.json when the restored body
-    would clear the ban (newer thisUpdate, different serial, or serial_unknown + serial).
-    Keep the ban when it still applies so a restored revoked serial stays refuse-closed.
+    would clear the ban (newer thisUpdate, undated ban + dated GOOD, different
+    serial, or serial_unknown + serial). Keep the ban when it still applies so a
+    restored revoked serial stays refuse-closed.
     """
     shard = ocsp_shard_dir(cache_root, fingerprint)
     if shard is None:
@@ -193,7 +194,8 @@ def reconcile_ocsp_serial_blacklist_after_restore(
                 ban_unix = int(ban.get("this_update_unix"))
             except (TypeError, ValueError):
                 ban_unix = None
-            if this_unix is not None and ban_unix is not None and this_unix > ban_unix:
+            # Undated ban (null/omitted this_update_unix) is superseded by any dated GOOD.
+            if this_unix is not None and (ban_unix is None or this_unix > ban_unix):
                 clear = True
     if not clear:
         if logger is not None:
