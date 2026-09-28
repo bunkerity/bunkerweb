@@ -1018,9 +1018,17 @@ end
 -- Soft fuse (staple_only/open): continue the handshake but do not poison the
 -- HTTP↔stream bus — a transient miss must not brick the sibling subsystem.
 -- normal (default): record so both subsystems refuse the same generation.
+-- Exception: set_staple_failed after a canary-paged body — CLI openssl canary and
+-- ngx.ocsp attach can disagree; do not bus-poison that generation for a stack mismatch.
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
-		record_peer_refuse(fingerprint, meta, resp, detail or "unmet")
+		local d = detail or "unmet"
+		local skip_bus = (d == "set_staple_failed" or d == "set_staple_exception")
+			and type(meta) == "table"
+			and meta.paged == true
+		if not skip_bus then
+			record_peer_refuse(fingerprint, meta, resp, d)
+		end
 	end
 	return false, "must_staple", detail or "unmet"
 end
@@ -1398,6 +1406,25 @@ local function ocsp_json_ligand_matches(meta, fingerprint, resp)
 	return true, nil, meta_sha, body_sha
 end
 
+-- Job canary already verified this exact body (openssl CLI + ligands) and stamped
+-- paged=true. Handshake may skip ngx.ocsp.validate_ocsp_response for that body so
+-- CLI vs OpenResty FFI disagreement cannot unpage a live shard; set_ocsp_status_resp
+-- and CertID/leaf checks still run.
+local function canary_paged_body_ok(meta, fingerprint, resp)
+	if type(meta) ~= "table" or meta.paged ~= true or meta.tombstoned == true then
+		return false
+	end
+	if not fingerprint or not is_fp64(fingerprint) then
+		return false
+	end
+	local ok = ocsp_json_ligand_matches(meta, fingerprint, resp)
+	return ok and true or false
+end
+
+function _M.canary_paged_body_ok(meta, fingerprint, resp)
+	return canary_paged_body_ok(meta, fingerprint, resp)
+end
+
 -- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
 -- Require meta.fingerprint match AND der_sha256 == sha256(body) so a swapped
 -- ocsp.der under matching SPKI meta cannot be stapled.
@@ -1599,25 +1626,33 @@ local function normalize_fp_hint(cert_fp_hint)
 	return nil
 end
 
-local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only)
+local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
 		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
 		return false
 	end
+	local function set_resp()
+		if probe_only then
+			return true
+		end
+		local ok_set, set_ok, set_err = pcall(function()
+			return ocsp.set_ocsp_status_resp(resp)
+		end)
+		if ok_set and set_ok then
+			return true
+		end
+		log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
+		return false
+	end
+	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand match.
+	if canary_paged_body_ok(meta, fingerprint, resp) then
+		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
+		return set_resp()
+	end
 	for _, issuer_pem in ipairs(issuers) do
 		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem, shard_issuer_spki) then
-			if probe_only then
-				return true
-			end
-			local ok_set, set_ok, set_err = pcall(function()
-				return ocsp.set_ocsp_status_resp(resp)
-			end)
-			if ok_set and set_ok then
-				return true
-			end
-			log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
-			return false
+			return set_resp()
 		end
 	end
 	return nil
@@ -2296,7 +2331,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return false
 			end
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
-			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only)
+			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint)
 			if result == true then
 				if must_staple then
 					meta = meta or read_ocsp_json(fingerprint)
@@ -2315,7 +2350,9 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			if result == false then
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, "unmet", mode)
+					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
+					local detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
+					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
 				end
 				return false
 			end
@@ -2340,7 +2377,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only)
+		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint)
 		if result == true then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
@@ -2355,7 +2392,8 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 		end
 		if result == false then
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "unmet", mode)
+				local detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
+				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
 			end
 			return false
 		end
