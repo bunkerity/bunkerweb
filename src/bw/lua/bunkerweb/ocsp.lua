@@ -477,6 +477,12 @@ end
 local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
 
 -- Read .ocsp_epoch (job coherence bus). HTTP and stream L1 must match this string.
+-- First non-space token on the first line — never require the whole file to be a
+-- single token (extra lines / comments must not desync HTTP vs stream readers).
+--
+-- Why one parser: a prior HTTP-only reader used ^%s*(%S+)%s*$ over the whole file
+-- and rejected multi-line epochs that stream accepted → HTTP L1 miss / stream hit
+-- on the same body. Both call sites must use this function (or the export below).
 local function current_ocsp_epoch()
 	local epoch = "0"
 	pcall(function()
@@ -491,6 +497,12 @@ local function current_ocsp_epoch()
 		end
 	end)
 	return epoch
+end
+
+-- Public: HTTP ssl-certificate-by-lua.conf delegates here so the handshake never
+-- reimplements epoch tokenization. Returns "0" when the file is missing/unreadable.
+function _M.current_ocsp_epoch()
+	return current_ocsp_epoch()
 end
 
 -- Returns der, verified_binding, epoch, expires_unix (or nil). bw2 composite only.
