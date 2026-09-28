@@ -377,7 +377,7 @@ local PEER_REFUSE_STICKY = {
 	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
-	-- Platform cannot emit CertificateEntry staples (OpenSSL < 3.6).
+	-- Platform cannot emit CertificateEntry staples (no SSL_set0_tlsext_status_ocsp_resp_ex).
 	intermediate_must_staple_libssl = true,
 }
 
@@ -1706,21 +1706,21 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 	return nil
 end
 
--- OpenSSL 3.6+ TLS 1.3 multi-staple: status_request on each CertificateEntry.
-local OPENSSL_VERSION_306 = 0x30600000
+-- TLS 1.3 multi-staple when libssl exports SSL_set0_tlsext_status_ocsp_resp_ex
+-- (upstream OpenSSL 3.6+; do not gate on version_num — distro backports / forks vary).
 local _multi_staple_state = nil -- nil=unprobed, false=unavailable, table=ready
 
 local function openssl_multi_staple_ready()
 	if _multi_staple_state ~= nil then
 		return _multi_staple_state ~= false, _multi_staple_state
 	end
-	local ok_ver, ver = pcall(require, "resty.openssl.version")
-	if not ok_ver or not ver or type(ver.version_num) ~= "number" or ver.version_num < OPENSSL_VERSION_306 then
+	local ok_ffi, ffi = pcall(require, "ffi")
+	if not ok_ffi or not ffi then
 		_multi_staple_state = false
 		return false, nil
 	end
-	local ffi = require "ffi"
-	local ok_cdef = pcall(ffi.cdef, [[
+	-- cdef may fail on re-entry (types already declared); symbol probe is the real gate.
+	pcall(ffi.cdef, [[
 		typedef struct ocsp_response_st OCSP_RESPONSE;
 		typedef struct stack_st OPENSSL_STACK;
 		OPENSSL_STACK *OPENSSL_sk_new_null(void);
@@ -1732,7 +1732,10 @@ local function openssl_multi_staple_ready()
 		void *SSL_get_SSL_CTX(const void *ssl);
 		long SSL_CTX_set_tlsext_status_cb(void *ctx, int (*cb)(void *ssl, void *arg));
 	]])
-	if not ok_cdef then
+	local ok_sym, sym = pcall(function()
+		return ffi.C.SSL_set0_tlsext_status_ocsp_resp_ex
+	end)
+	if not ok_sym or type(sym) ~= "cdata" then
 		_multi_staple_state = false
 		return false, nil
 	end
@@ -1844,10 +1847,11 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 	return ders
 end
 
--- Attach leaf OCSP; on OpenSSL 3.6+ also attach intermediate responses in chain order.
--- On OpenSSL < 3.6: leaf-only. If an intermediate requires Must-Staple, refuse with
--- intermediate_must_staple_libssl (capability gap) — never log leaf success while a
--- TLS 1.3 client would still abort on the missing CertificateEntry status.
+-- Attach leaf OCSP; when SSL_set0_tlsext_status_ocsp_resp_ex is present also attach
+-- intermediate responses in chain order. Without that symbol: leaf-only. If an
+-- intermediate requires Must-Staple, refuse with intermediate_must_staple_libssl
+-- (capability gap) — never log leaf success while a TLS 1.3 client would still
+-- abort on the missing CertificateEntry status.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local ready, st = openssl_multi_staple_ready()
 	if not ready then
