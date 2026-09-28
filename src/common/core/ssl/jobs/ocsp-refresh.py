@@ -1705,6 +1705,11 @@ PREVIOUS_GOOD_MAX_AGE_SECONDS = 24 * 3600
 # considers dead. Stored meta keeps the true absolute time; serve until absolute - skew.
 OCSP_CLOCK_SKEW_SECONDS = 300
 
+# Signed-window policy (intrinsic to the OCSP response — not retention / skew death).
+# Must match handshake Lua. A CA-stretched GOOD cannot outlive these ceilings.
+OCSP_MAX_INTRINSIC_LIFETIME_SECONDS = 7 * 24 * 3600  # nextUpdate − thisUpdate
+OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600  # thisUpdate not older than this vs now
+
 # Verified CertStatus != GOOD. REVOKED tombstones immediately; UNKNOWN waits
 # so a single "responder unsure" answer does not drop a usable staple.
 _NON_GOOD_TOMBSTONE_AFTER = {"REVOKED": 1, "UNKNOWN": 3}
@@ -1724,6 +1729,7 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     """
     Extract (remaining_ttl_seconds, total_lifetime_seconds) from a parsed OCSP response.
     Returns (None, None) if the timing fields are unavailable or invalid.
+    Does not enforce intrinsic policy — call _ocsp_intrinsic_policy_reason for that.
     """
     # Prefer *_utc properties (cryptography 42.0+) to avoid deprecation warnings
     this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
@@ -1751,17 +1757,89 @@ def _ocsp_response_lifetimes(ocsp_response: x509_ocsp.OCSPResponse) -> Tuple[Opt
     return remaining, total_lifetime
 
 
-def _ocsp_this_update_unix(ocsp_response: x509_ocsp.OCSPResponse) -> Optional[int]:
-    """thisUpdate as unix seconds, used to tell a newer GOOD from the banned body."""
+def _ocsp_response_update_unix(
+    ocsp_response: x509_ocsp.OCSPResponse,
+) -> Tuple[Optional[int], Optional[int]]:
+    """Return (this_update_unix, next_update_unix). nextUpdate falls back to thisUpdate+24h."""
     this_update = getattr(ocsp_response, "this_update_utc", None) or ocsp_response.this_update
     if this_update is None:
-        return None
+        return None, None
     if this_update.tzinfo is None:
         this_update = this_update.replace(tzinfo=timezone.utc)
     try:
-        return int(this_update.timestamp())
+        this_unix = int(this_update.timestamp())
     except Exception:
-        return None
+        return None, None
+
+    next_update = getattr(ocsp_response, "next_update_utc", None) or ocsp_response.next_update
+    if next_update is None:
+        next_update = this_update + timedelta(hours=24)
+    elif next_update.tzinfo is None:
+        next_update = next_update.replace(tzinfo=timezone.utc)
+    try:
+        next_unix = int(next_update.timestamp())
+    except Exception:
+        return this_unix, None
+    return this_unix, next_unix
+
+
+def _ocsp_intrinsic_policy_reason(
+    ocsp_response: x509_ocsp.OCSPResponse,
+    cert_name: str = "",
+) -> Optional[str]:
+    """
+    Enforce signed-window policy on a verified OCSP response.
+
+    Returns a reason code on refusal, or None when acceptable:
+      thisUpdate_future, thisUpdate_stale, lifetime_invalid, lifetime_too_long, thisUpdate_unreadable
+
+    This is not skew death time, wall-clock max-age since publish, or the storage TTL clamp.
+    Refusals must not be treated as GOOD (do not clear nongood / tombstone counters).
+    """
+    this_unix, next_unix = _ocsp_response_update_unix(ocsp_response)
+    if this_unix is None or next_unix is None:
+        log_error("❌ OCSP thisUpdate/nextUpdate unreadable for %s; refusing", cert_name)
+        return "thisUpdate_unreadable"
+
+    now_unix = int(datetime.now(timezone.utc).timestamp())
+    if this_unix > now_unix + OCSP_CLOCK_SKEW_SECONDS:
+        log_error(
+            "❌ OCSP thisUpdate is in the future for %s (thisUpdate=%s now=%s skew=%ss); refusing",
+            cert_name,
+            this_unix,
+            now_unix,
+            OCSP_CLOCK_SKEW_SECONDS,
+        )
+        return "thisUpdate_future"
+    if this_unix < now_unix - OCSP_MAX_THIS_UPDATE_AGE_SECONDS:
+        log_error(
+            "❌ OCSP thisUpdate is too old for %s (thisUpdate=%s now=%s max_age=%ss); refusing",
+            cert_name,
+            this_unix,
+            now_unix,
+            OCSP_MAX_THIS_UPDATE_AGE_SECONDS,
+        )
+        return "thisUpdate_stale"
+
+    lifetime = next_unix - this_unix
+    if lifetime <= 0:
+        log_error("❌ OCSP intrinsic lifetime invalid for %s (nextUpdate <= thisUpdate)", cert_name)
+        return "lifetime_invalid"
+    if lifetime > OCSP_MAX_INTRINSIC_LIFETIME_SECONDS:
+        log_error(
+            "❌ OCSP intrinsic lifetime too long for %s (%ss > %ss cap); refusing",
+            cert_name,
+            lifetime,
+            OCSP_MAX_INTRINSIC_LIFETIME_SECONDS,
+        )
+        return "lifetime_too_long"
+    return None
+
+
+def _ocsp_this_update_unix(ocsp_response: x509_ocsp.OCSPResponse) -> Optional[int]:
+    """thisUpdate as unix seconds, used to tell a newer GOOD from the banned body."""
+    this_unix, _ = _ocsp_response_update_unix(ocsp_response)
+    return this_unix
 
 
 def _pin_single_certid(
@@ -1861,6 +1939,26 @@ def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
         "published_unix": published,
         "max_age_unix": published + PREVIOUS_GOOD_MAX_AGE_SECONDS,
     }
+
+
+def _ocsp_signed_timing_meta(ocsp_der: bytes) -> Dict[str, Any]:
+    """
+    Absolute thisUpdate/nextUpdate from the DER for handshake intrinsic-policy checks.
+    Empty dict when unreadable (caller should already have refused publish).
+    """
+    try:
+        resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
+        this_unix, next_unix = _ocsp_response_update_unix(resp)
+    except Exception:
+        return {}
+    out: Dict[str, Any] = {}
+    if this_unix is not None:
+        out["this_update_unix"] = this_unix
+    if next_unix is not None:
+        out["next_update_unix"] = next_unix
+        if this_unix is not None and next_unix > this_unix:
+            out["intrinsic_lifetime_seconds"] = next_unix - this_unix
+    return out
 
 
 def _new_job_run_id() -> str:
@@ -2618,10 +2716,16 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             )
             return None, 0, None
 
-        # Extract TTL
+        # Signed-window policy: refuse stretched / future / ancient thisUpdate.
+        # Discard only — not a GOOD and not a CertStatus non-GOOD for tombstone counters.
+        policy_reason = _ocsp_intrinsic_policy_reason(ocsp_response, cert_name)
+        if policy_reason:
+            return None, 0, None
+
+        # Extract TTL (storage clamp; intrinsic policy already enforced above).
         remaining, _ = _ocsp_response_lifetimes(ocsp_response)
         if remaining is not None:
-            ttl = min(remaining, 7 * 24 * 3600)  # Cap to 7 days
+            ttl = min(remaining, OCSP_MAX_INTRINSIC_LIFETIME_SECONDS)
         else:
             ttl = 86400  # RFC standard fallback
 
@@ -4433,11 +4537,21 @@ def _persist_ocsp_results_to_db(
                     leaf_obj, issuer_obj = _parse_chain(cleaned_pem, cert_name)
                     parsed_resp = x509_ocsp.load_der_ocsp_response(ocsp_der)
                     certid_pin = _pin_single_certid(parsed_resp, leaf_obj, issuer_obj, cert_name)
+                    policy_reason = _ocsp_intrinsic_policy_reason(parsed_resp, cert_name)
                 except Exception as pin_err:
-                    log_error("❌ OCSP CertID pin failed for DB store of %s: %s", cert_name, pin_err)
+                    log_error("❌ OCSP CertID/timing pin failed for DB store of %s: %s", cert_name, pin_err)
                     certid_pin = None
+                    policy_reason = "thisUpdate_unreadable"
                 if not certid_pin:
                     log_error("❌ OCSP refusing DB cache for %s without single CertID pin", cert_name)
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    continue
+                if policy_reason:
+                    log_error(
+                        "❌ OCSP refusing DB cache for %s (intrinsic timing: %s)",
+                        cert_name,
+                        policy_reason,
+                    )
                     stats["errors"] = stats.get("errors", 0) + 1
                     continue
 
@@ -4468,7 +4582,10 @@ def _persist_ocsp_results_to_db(
                         meta["serial"] = certid_pin["serial"]
                         meta["aia_ocsp_uri"] = aia_pin
                         meta["ocsp_url"] = aia_pin
+                        meta.update(_ocsp_signed_timing_meta(ocsp_der))
                         meta.update(_ocsp_expiry_meta(ttl))
+                        if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
+                            meta["expires_unix"] = meta["next_update_unix"]
                         meta.update(_provenance_meta())
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
@@ -5088,7 +5205,21 @@ def _persist_ocsp_results_to_disk(
                     raise RuntimeError("AIA OCSP URI pin refused")
                 meta["aia_ocsp_uri"] = aia_pin
                 meta["ocsp_url"] = aia_pin
+                # Re-check intrinsic policy at publish and stamp signed timing for Lua.
+                try:
+                    parsed_for_timing = x509_ocsp.load_der_ocsp_response(ocsp_der)
+                    policy_reason = _ocsp_intrinsic_policy_reason(parsed_for_timing, cert_name)
+                except Exception as timing_err:
+                    log_error("❌ OCSP intrinsic policy check failed for %s: %s", cert_name, timing_err)
+                    policy_reason = "thisUpdate_unreadable"
+                if policy_reason:
+                    stats["errors"] = stats.get("errors", 0) + 1
+                    publish_error_logged = True
+                    raise RuntimeError(f"intrinsic timing refused: {policy_reason}")
+                meta.update(_ocsp_signed_timing_meta(ocsp_der))
                 meta.update(_ocsp_expiry_meta(ttl))
+                if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
+                    meta["expires_unix"] = meta["next_update_unix"]
                 meta.update(_provenance_meta())
 
                 published_dir = _publish_ocsp_shard(

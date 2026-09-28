@@ -225,6 +225,9 @@ end
 -- Death time = expires_unix/max_age minus skew: stop stapling before the CA's
 -- advertised nextUpdate so a lagging worker clock cannot serve a dead response.
 local OCSP_CLOCK_SKEW_SECONDS = 300
+-- Signed-window policy; must match ocsp-refresh.py.
+local OCSP_MAX_INTRINSIC_LIFETIME_SECONDS = 7 * 24 * 3600
+local OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600
 
 -- One shm value = epoch + optional verified binding + expires_unix + DER.
 -- Evicting this key cannot orphan verified from DER (or gen from DER).
@@ -1144,8 +1147,58 @@ local function meta_max_age_unix(meta)
 end
 
 -- False at death time (nextUpdate/max_age minus skew). Unknown → true.
+-- Also enforces intrinsic signed-window policy when this_update_unix is present.
+local function meta_unix_field(meta, key)
+	if type(meta) ~= "table" then
+		return nil
+	end
+	local u = meta[key]
+	if type(u) == "number" and u > 0 then
+		return math.floor(u)
+	end
+	if type(u) == "string" then
+		local n = tonumber(u)
+		if n and n > 0 then
+			return math.floor(n)
+		end
+	end
+	return nil
+end
+
+local function intrinsic_timing_ok(meta)
+	local this_u = meta_unix_field(meta, "this_update_unix")
+	if not this_u then
+		-- Legacy meta without signed timing: retention/skew checks only.
+		return true, nil
+	end
+	local now = ngx.time()
+	if this_u > now + OCSP_CLOCK_SKEW_SECONDS then
+		return false, "thisUpdate_future"
+	end
+	if this_u < now - OCSP_MAX_THIS_UPDATE_AGE_SECONDS then
+		return false, "thisUpdate_stale"
+	end
+	local next_u = meta_unix_field(meta, "next_update_unix") or meta_expires_unix(meta)
+	if not next_u then
+		return false, "thisUpdate_unreadable"
+	end
+	local lifetime = next_u - this_u
+	if lifetime <= 0 then
+		return false, "lifetime_invalid"
+	end
+	if lifetime > OCSP_MAX_INTRINSIC_LIFETIME_SECONDS then
+		return false, "lifetime_too_long"
+	end
+	return true, nil
+end
+
 local function resp_still_fresh(expires_unix, fingerprint, meta)
 	meta = meta or (fingerprint and read_ocsp_json(fingerprint)) or nil
+	local ok_intrinsic, why = intrinsic_timing_ok(meta)
+	if not ok_intrinsic then
+		log(ngx.ERR, "OCSP intrinsic timing refuse reason=" .. tostring(why) .. " fp=" .. tostring(fingerprint and fingerprint:sub(1, 16) or "?"))
+		return false
+	end
 	local exp = expires_unix
 	if not exp then
 		exp = meta_expires_unix(meta)
