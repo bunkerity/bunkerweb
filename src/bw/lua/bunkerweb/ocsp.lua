@@ -91,6 +91,7 @@ end
 -- Unknown detail strings normalize to unmet (raw kept as detail=).
 local STAPLE_DECISION = {
 	ok = true,
+	ok_partial = true,
 	stapling_off = true,
 	skip_slot = true,
 	cluster_floor = true,
@@ -168,7 +169,7 @@ local function format_staple_decision(code, fields)
 			f.alias = alias_detail
 		end
 	end
-	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "der_sha256", "epoch", "worker", "server_name", "subsystem" }
+	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "der_sha256", "epoch", "worker", "server_name", "subsystem", "multi_entries", "stapled_entries", "null_slots" }
 	local seen = { staple_decision = true }
 	for _, key in ipairs(order) do
 		local val = f[key]
@@ -1868,6 +1869,28 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 	return ders
 end
 
+-- Remember multi-staple stack shape for OCSP_STAPLED audit (NULL = legal omission).
+local function note_multi_staple_attach(entries, null_slots)
+	if not ngx.ctx then
+		return
+	end
+	local n = tonumber(entries) or 0
+	local nulls = tonumber(null_slots) or 0
+	if n < 1 then
+		ngx.ctx.bw_ocsp_multi_entries = nil
+		ngx.ctx.bw_ocsp_multi_stapled = nil
+		ngx.ctx.bw_ocsp_multi_null_slots = nil
+		return
+	end
+	ngx.ctx.bw_ocsp_multi_entries = n
+	ngx.ctx.bw_ocsp_multi_null_slots = nulls
+	ngx.ctx.bw_ocsp_multi_stapled = n - nulls
+end
+
+local function clear_multi_staple_attach_note()
+	note_multi_staple_attach(0, 0)
+end
+
 -- Attach leaf OCSP; when SSL_set0_tlsext_status_ocsp_resp_ex is present also attach
 -- intermediate responses in chain order. Without that symbol: leaf-only. If an
 -- intermediate requires Must-Staple, refuse with intermediate_must_staple_libssl
@@ -1876,6 +1899,7 @@ end
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local ready, st = openssl_multi_staple_ready()
 	if not ready then
+		clear_multi_staple_attach_note()
 		if chain_has_intermediate_must_staple(chain_blocks) then
 			return nil, "intermediate_must_staple_libssl"
 		end
@@ -1884,6 +1908,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 
 	local ders, why, detail = collect_chain_staple_ders(leaf_resp, chain_blocks)
 	if not ders then
+		clear_multi_staple_attach_note()
 		if why == "must_staple" then
 			return nil, detail or "unmet"
 		end
@@ -1892,15 +1917,18 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 
 	local want_multi = #ders > 1
 	if not want_multi then
+		clear_multi_staple_attach_note()
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end
 
 	local ssl_mod = require "ngx.ssl"
 	if not ssl_mod.get_req_ssl_pointer then
+		clear_multi_staple_attach_note()
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end
 	local ssl_ptr = ssl_mod.get_req_ssl_pointer()
 	if not ssl_ptr then
+		clear_multi_staple_attach_note()
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end
 
@@ -1909,12 +1937,21 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end)
 	if not ok_leaf or not leaf_ok then
+		clear_multi_staple_attach_note()
 		return nil, tostring(leaf_warn or leaf_ok or "set_staple_failed")
+	end
+
+	local null_slots = 0
+	for _, der in ipairs(ders) do
+		if der == false or der == nil then
+			null_slots = null_slots + 1
+		end
 	end
 
 	local ffi, C = st.ffi, st.C
 	local stack = C.OPENSSL_sk_new_null()
 	if stack == nil then
+		clear_multi_staple_attach_note()
 		return leaf_ok, leaf_warn
 	end
 	local parsed = {}
@@ -1944,6 +1981,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	end
 	if not push_ok then
 		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
+		clear_multi_staple_attach_note()
 		log(ngx.ERR, "OCSP multi-staple stack build failed; keeping leaf-only staple")
 		return leaf_ok, leaf_warn
 	end
@@ -1956,10 +1994,20 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local rc = C.SSL_set0_tlsext_status_ocsp_resp_ex(ssl_ptr, stack)
 	if rc == 0 then
 		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
+		clear_multi_staple_attach_note()
 		log(ngx.ERR, "OCSP SSL_set0_tlsext_status_ocsp_resp_ex failed; keeping leaf-only staple")
 		return leaf_ok, leaf_warn
 	end
-	log(ngx.DEBUG, "OCSP multi-staple attached entries=" .. tostring(#ders))
+	note_multi_staple_attach(#ders, null_slots)
+	log(
+		ngx.DEBUG,
+		"OCSP multi-staple attached entries="
+			.. tostring(#ders)
+			.. " stapled="
+			.. tostring(#ders - null_slots)
+			.. " null_slots="
+			.. tostring(null_slots)
+	)
 	return true
 end
 
@@ -1969,6 +2017,9 @@ local function clear_connection_staple()
 	local prev = ngx.ctx and ngx.ctx.bw_ocsp_stapled_fp or nil
 	if ngx.ctx then
 		ngx.ctx.bw_ocsp_stapled_fp = nil
+		ngx.ctx.bw_ocsp_multi_entries = nil
+		ngx.ctx.bw_ocsp_multi_stapled = nil
+		ngx.ctx.bw_ocsp_multi_null_slots = nil
 	end
 	local ok_clear = pcall(function()
 		local ssl_mod = require "ngx.ssl"
@@ -2156,6 +2207,7 @@ local function leaf_matches_scheme(profile, scheme)
 end
 
 -- Audit which leaf was stapled — kind + SPKI + der_sha256 + epoch this node served.
+-- Multi-staple NULL slots are legal omissions: log staple_decision=ok_partial (not hollow ok).
 local function log_ocsp_stapled(server_name, kind, fp, resp)
 	local der = resp_binding(resp) or "-"
 	local fp_s = (type(fp) == "string" and #fp == 64) and fp or "-"
@@ -2167,18 +2219,29 @@ local function log_ocsp_stapled(server_name, kind, fp, resp)
 		end
 	end)
 	note_connection_staple(fp_s ~= "-" and fp_s or nil)
-	log(
-		ngx.INFO,
-		format_staple_decision("ok", {
-			tag = "OCSP_STAPLED",
-			kind = kind or "unknown",
-			fp = fp_s,
-			der_sha256 = der,
-			epoch = epoch,
-			worker = worker,
-			server_name = server_name or "nil",
-		})
-	)
+	local fields = {
+		tag = "OCSP_STAPLED",
+		kind = kind or "unknown",
+		fp = fp_s,
+		der_sha256 = der,
+		epoch = epoch,
+		worker = worker,
+		server_name = server_name or "nil",
+	}
+	local decision = "ok"
+	local null_slots = ngx.ctx and tonumber(ngx.ctx.bw_ocsp_multi_null_slots) or nil
+	local multi_entries = ngx.ctx and tonumber(ngx.ctx.bw_ocsp_multi_entries) or nil
+	local stapled_entries = ngx.ctx and tonumber(ngx.ctx.bw_ocsp_multi_stapled) or nil
+	if multi_entries and multi_entries > 0 then
+		fields.multi_entries = multi_entries
+		fields.stapled_entries = stapled_entries or multi_entries
+		fields.null_slots = null_slots or 0
+		if (null_slots or 0) > 0 then
+			decision = "ok_partial"
+			fields.detail = "null_slot_omission"
+		end
+	end
+	log(ngx.INFO, format_staple_decision(decision, fields))
 end
 
 local function log_ocsp_staple_skip(kind, fp, reason, server_name)

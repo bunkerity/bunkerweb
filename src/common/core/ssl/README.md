@@ -45,7 +45,8 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 
 | `staple_decision` | Meaning | What to do |
 | ----------------- | ------- | ---------- |
-| `ok` | Staple set (or canary paged) | Healthy. |
+| `ok` | Staple set (or canary paged) | Healthy. Full multi-staple (every non-NULL stack entry has a body) also logs `ok` with `multi_entries` / `stapled_entries`. |
+| `ok_partial` | Multi-staple attached with one or more NULL stack slots | Legal omission: that `CertificateEntry` has no `status_request`. Not a Must-Staple abort. Check `null_slots=` / `detail=null_slot_omission`; refresh the intermediate SPKI shard if you expected status on that cert. |
 | `stapling_off` | Optional stapling disabled / unavailable | Expected when `SSL_USE_OCSP_STAPLING=no` or `ngx.ocsp` missing. Not a Must-Staple abort. |
 | `skip_slot` | Dual-cert sibling deliberately not stapled | One OCSP slot per handshake; ECDSA preferred. Put Must-Staple on ECDSA only. |
 | `cluster_floor` | Local CA `this_update_unix` behind colony floor (legacy floors: `published_unix`) | Wait for this node’s job to catch the floor. Floor is max-only on signed thisUpdate (not wall clock). Missing local timing is no opinion. Restore will not raise the floor above a fenced still-GOOD trio (avoids healthy files + closed Must-Staple). |
@@ -92,7 +93,7 @@ When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha25
     When linked libssl exports **`SSL_set0_tlsext_status_ocsp_resp_ex`** (upstream OpenSSL **3.6+**; detected by symbol probe, not `version_num`), BunkerWeb attaches a `status_request` on each non-root `CertificateEntry`:
 
     - Workers publish `/var/cache/bunkerweb/ssl/.multi_staple_attach` (`1` / `0`) from the same probe. `ocsp-refresh` fetches intermediate AIA shards **only when that capability is on** — leaf-only libssl does not burn OCSP GETs/canaries for bodies it cannot put on the wire.
-    - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; an intermediate with Must-Staple and no usable staple fails closed.
+    - At handshake, the staple stack is leaf DER then each intermediate (NULL slot if that intermediate has no GOOD paged body). Missing intermediate status is legal; the audit line is `staple_decision=ok_partial` with `null_slots=` (not a hollow `ok`). An intermediate with Must-Staple and no usable staple fails closed.
     - When the symbol is **missing** (e.g. current Alpine OpenSSL **3.5.x** images), only the leaf staple can be sent and intermediate refresh is skipped. If any intermediate itself carries Must-Staple, the handshake refuses with `staple_decision=intermediate_must_staple_libssl` (softened by `OCSP_STAPLE_MODE`) — the server never logs `OCSP_STAPLED` / `ok` for a leaf-only attach that TLS 1.3 clients enforcing intermediate Must-Staple would still reject.
 
 !!! tip "SSL Labs Testing"
