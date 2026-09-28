@@ -3,6 +3,7 @@
 ## v1.6.16~rc3 - ????/??/??
 
 - [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
+- [BUGFIX] `ui`: for signed-in users, a single form field larger than 500 kB, such as an Easy Resolve request for a report with a large matched body, is accepted up to `MAX_CONTENT_LENGTH` instead of failing with 413. The login form keeps the 500 kB cap.
 
 ## v1.6.16~rc2 - 2026/09/25
 

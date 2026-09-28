@@ -775,6 +775,15 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    def lift_form_field_limit():
+        # Flask caps a single non-file form field at 500 kB, below MAX_CONTENT_LENGTH (Easy Resolve posts more).
+        # Only signed-in users get the larger cap, so the login form keeps the default.
+        if request.method == "POST" and current_user.is_authenticated:
+            request.max_form_memory_size = app.config["MAX_CONTENT_LENGTH"]
+
+    # Must run before CSRFProtect's hook, which parses the form
+    app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
+
     app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
