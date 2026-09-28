@@ -63,6 +63,9 @@
     | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。           |
 
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
     默认的 `BLACKLIST_IP_URLS` 设置包含一个提供**已知 Tor 出口节点列表**的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。
 
 === "反向 DNS"

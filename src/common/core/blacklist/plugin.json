@@ -187,7 +187,7 @@
     "BLACKLIST_IP_URLS": {
       "context": "multisite",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "help": "List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme. Accepts plain-text, CSV and JSON lists; add #key or #key=value to keep only part of a JSON list.",
       "id": "blacklist-ip-urls",
       "label": "Blacklist IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
@@ -232,7 +232,7 @@
     "BLACKLIST_IGNORE_IP_URLS": {
       "context": "multisite",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme. Accepts plain-text, CSV and JSON lists; add #key or #key=value to keep only part of a JSON list.",
       "id": "blacklist-ignore-ip-urls",
       "label": "Blacklist ignore IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",

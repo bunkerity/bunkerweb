@@ -6,6 +6,7 @@ from hashlib import new as new_hash
 from ipaddress import ip_address
 from inspect import signature
 from io import BytesIO
+from json import loads as json_loads
 import os
 from os import (
     O_CREAT,
@@ -32,8 +33,8 @@ from tarfile import open as tar_open
 from stat import S_ISDIR, S_ISREG
 from threading import Lock
 from time import monotonic, sleep
-from typing import Dict, List, Optional, Tuple, Union, Any
-from urllib.parse import urlsplit
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from urllib.parse import unquote, urlsplit
 from math import ceil, isfinite
 import logging
 
@@ -926,3 +927,132 @@ def get_redis_client(
             if entry is None or entry[0] != cache_key or entry[1] is None:
                 _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
         return None
+
+
+LIST_JSON_MIME_SUFFIXES = ("json", "jsonl", "jsonlines")
+
+
+def split_list_url(url: str) -> Tuple[str, str]:
+    """Split a list URL into the URL to download and its JSON filter (the fragment, never sent to the server)."""
+    download_url, _, url_filter = url.partition("#")
+    return download_url, url_filter
+
+
+def _json_strings(node: Any) -> Iterator[str]:
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for value in node.values():
+            yield from _json_strings(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _json_strings(value)
+
+
+def _json_matches(value: Any, wanted: str) -> bool:
+    if isinstance(value, list):
+        return any(_json_matches(item, wanted) for item in value)
+    return isinstance(value, (str, int)) and not isinstance(value, bool) and str(value) == wanted
+
+
+def _json_select(node: Any, conditions: List[Tuple[str, str]], keys: Set[str]) -> Iterator[str]:
+    if isinstance(node, list):
+        for item in node:
+            yield from _json_select(item, conditions, keys)
+        return
+    if not isinstance(node, dict):
+        return
+    matched = all(key in node and _json_matches(node[key], wanted) for key, wanted in conditions)
+    if matched and not keys:
+        yield from _json_strings(node)
+        return
+    for key, value in node.items():
+        if matched and key in keys:
+            yield from _json_strings(value)
+        else:
+            yield from _json_select(value, conditions, keys)
+
+
+def _json_filtered_strings(documents: List[Any], url_filter: str) -> Iterator[str]:
+    conditions: List[Tuple[str, str]] = []
+    keys: Set[str] = set()
+    for term in filter(None, url_filter.split("&")):
+        key, sep, wanted = term.partition("=")
+        if sep:
+            conditions.append((unquote(key), unquote(wanted)))
+        else:
+            keys.add(unquote(key))
+    if conditions or keys:
+        return _json_select(documents, conditions, keys)
+    return _json_strings(documents)
+
+
+def iter_list_entries(
+    data: bytes,
+    *,
+    content_type: str = "",
+    url_filter: str = "",
+    ip_list: bool = False,
+    whole_line: bool = False,
+    logger: Optional[logging.Logger] = None,
+) -> Iterator[bytes]:
+    """Yield the distinct candidate entries of a downloaded list, comments and blank lines dropped.
+
+    Each line yields its first whitespace-separated token, or the whole line when whole_line is set (user agents).
+    With ip_list, commas also separate tokens and JSON is understood: a JSON document or JSON lines are walked for
+    every string value, or only the part url_filter selects (key=value keeps matching objects, a bare key keeps
+    the values under that key, & combines terms). Validation stays with the caller.
+    """
+    data = data.removeprefix(b"\xef\xbb\xbf")
+    mime = content_type.partition(";")[0].strip().lower()
+    documents: List[Any] = []
+    lines = data.splitlines()
+
+    if ip_list and (mime.endswith(LIST_JSON_MIME_SUFFIXES) or data.lstrip()[:1] in (b"{", b"[")):
+        with suppress(ValueError):
+            documents.append(json_loads(data))
+            lines = []
+    elif mime.endswith(LIST_JSON_MIME_SUFFIXES) and logger:
+        logger.warning(f"Got a {mime} list, JSON is only parsed for IP lists: reading it line by line")
+
+    def token(entry: bytes) -> bytes:
+        if whole_line:
+            return entry
+        tokens = (entry.replace(b",", b" ") if ip_list else entry).split()
+        return tokens[0] if tokens else b""
+
+    line_entries: List[bytes] = []
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith((b"#", b";")):
+            continue
+        if ip_list and line[:1] in (b"{", b"["):
+            with suppress(ValueError):
+                documents.append(json_loads(line))
+            continue
+        line_entries.append(token(line))
+
+    if url_filter:
+        # A filter narrows a trust list: it only ever selects from JSON, and fails closed on anything else
+        if not documents:
+            if logger:
+                logger.warning(f"Filter #{url_filter} needs a JSON list, ignoring the {len(line_entries)} text entries")
+            return
+        line_entries = []
+
+    seen: Set[bytes] = set()
+    for entry in line_entries:
+        if entry and entry not in seen:
+            seen.add(entry)
+            yield entry
+
+    matched = False
+    for value in _json_filtered_strings(documents, url_filter):
+        matched = True
+        entry = token(value.strip().encode("utf-8"))
+        if entry and entry not in seen:
+            seen.add(entry)
+            yield entry
+
+    if url_filter and not matched and logger:
+        logger.warning(f"Filter #{url_filter} matched nothing in the JSON list")

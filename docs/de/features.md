@@ -1090,6 +1090,9 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt. |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | Multisite | Nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.                        |
 
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
+
     Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
 
 === "Reverse DNS"
@@ -2640,6 +2643,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | ------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_IP`      |          | multisite | nein     | **IP-Greylist:** Liste von IP-Adressen oder Netzwerken (in CIDR-Notation), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.      |
     | `GREYLIST_IP_URLS` |          | multisite | nein     | **IP-Greylist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
+
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
 
 === "Reverse DNS"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
@@ -4882,6 +4888,9 @@ So funktioniert's:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | nein     | URLs, die IPs/Netzwerke von vertrauenswürdigen Proxys bereitstellen (unterstützt `file://`). |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | nein     | Aktiviert die PROXY-Protokoll-Unterstützung für die direkte Proxy→BunkerWeb-Kommunikation.   |
 
+!!! info "Listenformate"
+    URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
+
 !!! tip "Cloud-Anbieter"
     Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
 
@@ -4959,6 +4968,18 @@ So funktioniert's:
     REAL_IP_FROM: "" # Wir vertrauen nur Cloudflare-IPs
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Cloudflare-IPs automatisch herunterladen
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare-Header für Client-IP
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Hinter AWS CloudFront"
+
+    Konfiguration für eine Website hinter AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -6364,6 +6385,9 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | `WHITELIST_IGNORE_IP`      |          | multisite | nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Whitelist-Prüfungen umgehen sollen.                                                   |
     | `WHITELIST_IP_URLS`        |          | multisite | nein     | **IP-Whitelist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
     | `WHITELIST_IGNORE_IP_URLS` |          | multisite | nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die ignoriert werden sollen.                                        |
+
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
 
 === "Reverse DNS"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Whitelist. Dies ist nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken den Zugriff nach ihrer Domain zu ermöglichen.
