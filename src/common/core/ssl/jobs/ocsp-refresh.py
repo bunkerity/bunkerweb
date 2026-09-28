@@ -2782,14 +2782,44 @@ def _renameat2_exchange(path_a: Path, path_b: Path) -> bool:
     return False
 
 
+def _promote_staged_files_into_live(staging: Path, final_dir: Path) -> None:
+    """
+    Replace live shard *files* from staging without renaming the live directory away.
+
+    Used when renameat2(RENAME_EXCHANGE) is unavailable. Each ``os.replace`` is
+    atomic for that name; ``ocsp.json`` is promoted last so cold readers either
+    see the previous consistent trio or ligand-mismatch (never a missing SPKI
+    directory). Warm L1 keeps matching the previous ``der_sha256`` until meta
+    flips. Do not call this an atomic directory publish — it is not.
+    """
+    if not staging.is_dir():
+        raise FileNotFoundError(f"staging missing: {staging}")
+    final_dir.mkdir(parents=True, exist_ok=True)
+
+    entries = sorted(p for p in staging.iterdir() if p.is_file() or p.is_symlink())
+    commit = None
+    for src in entries:
+        if src.name == "ocsp.json":
+            commit = src
+            continue
+        os.replace(src, final_dir / src.name)
+    if commit is not None:
+        os.replace(commit, final_dir / commit.name)
+    # Drop any leftover staging dirs/files (non-regular names should not remain).
+    shutil.rmtree(staging, ignore_errors=True)
+
+
 def _page_shard_directory_into_place(staging: Path, final_dir: Path, stale: Path) -> bool:
     """
     Replace the live shard directory with the staged tree.
 
-    Prefer renameat2(RENAME_EXCHANGE) so Must-Staple readers never see ENOENT
-    between move-aside and stage-in. Returns True when the previous live tree
-    was moved aside via the non-atomic fallback (caller may need to restore it
-    on later failure); False when exchange succeeded or there was no prior live.
+    Prefer renameat2(RENAME_EXCHANGE) so the live SPKI path never disappears.
+    When exchange is unavailable, promote files into the existing live directory
+    (``ocsp.json`` last) — no move-aside ENOENT window. ``stale`` is unused on
+    the promote path (kept for call-site compatibility).
+
+    Returns True only if a legacy move-aside occurred (never with current
+    fallbacks); False when exchange, first publish, or in-place promote ran.
     """
     live_present = final_dir.exists() or final_dir.is_symlink()
     if not live_present:
@@ -2806,30 +2836,17 @@ def _page_shard_directory_into_place(staging: Path, final_dir: Path, stale: Path
         log_debug("✓ OCSP paged shard via renameat2(RENAME_EXCHANGE) (no reader gap)")
         return False
 
-    # Fallback: two renames — brief ENOENT window for concurrent handshakes.
-    # Do NOT bump .ocsp_epoch here: L1 must keep the previous generation across the
-    # gap (handshake treats missing meta+DER with matching epoch as still-valid L1).
-    # Epoch advances only after the new live tree is visible (persist batch).
-    log_debug("⚡ OCSP page swap falling back to move-aside+rename (brief reader gap)")
-    final_dir.rename(stale)
+    # No directory swap: keep live dir present. Not atomic as a whole tree —
+    # meta commits last; ligand refuses a torn trio until promote finishes.
+    log_debug("⚡ OCSP page falling back to in-place file promote (live dir kept; not atomic)")
     try:
-        staging.rename(final_dir)
+        _promote_staged_files_into_live(staging, final_dir)
     except Exception:
-        if stale.exists() and not final_dir.exists() and not final_dir.is_symlink():
-            try:
-                stale.rename(final_dir)
-            except Exception as restore_err:
-                log_error(
-                    "❌ OCSP failed to restore shard after page-rename error: %s",
-                    restore_err,
-                )
-        raise
-    if stale.exists() or stale.is_symlink():
-        if stale.is_symlink() or stale.is_file():
-            stale.unlink(missing_ok=True)
-        else:
+        # Staging may be partially drained; best-effort leave leftovers for next run.
+        if stale.exists() or stale.is_symlink():
             shutil.rmtree(stale, ignore_errors=True)
-    return True
+        raise
+    return False
 
 
 def _copy_ocsp_shard_sidecars(live_dir: Path, staging_dir: Path) -> None:
@@ -2996,9 +3013,11 @@ def _publish_ocsp_shard(
     any) is still in place. On canary failure the stage is discarded and live
     is untouched. On success, stamp ``paged`` / ``paged_unix``, then swap the
     stage into the live path via renameat2(RENAME_EXCHANGE) when available so
-    readers never see ENOENT; otherwise fall back to move-aside + rename.
-    Sidecars are carried into the new tree. On rename failure the previous live
-    directory is restored when the non-atomic fallback had moved it aside.
+    the SPKI directory never disappears; otherwise promote files into the live
+    directory (``ocsp.json`` last) — not an atomic tree publish, but no ENOENT
+    gap. Sidecars are carried into the staged tree before canary.
+    On rename failure the previous live directory is restored when a move-aside
+    had occurred (exchange / in-place paths do not move live aside).
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -3072,7 +3091,7 @@ def _publish_ocsp_shard(
         )
         _fsync_directory(staging)
 
-        # Page: swap staged (canary-ok) tree into the live path (prefer atomic exchange).
+        # Page: exchange staged tree into live when possible; else in-place promote.
         live_moved_aside = _page_shard_directory_into_place(staging, final_dir, stale)
         published = True
         staging_created = False
@@ -6391,7 +6410,7 @@ def _persist_ocsp_results_to_disk(
     # One bump per persist batch, then unlock peer-refuse. Order matters: clearing
     # refuse before the epoch bump would let handshakes use still-valid L1 entries
     # for a generation the bus no longer blocks. Bump only after live trees are
-    # visible — never mid move-aside ENOENT gap (L1 keeps the previous epoch there).
+    # visible — never mid-page (exchange / in-place promote keep a live path).
     if published_fps:
         _bump_ocsp_cache_epoch()
         for fp in published_fps:
