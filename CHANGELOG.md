@@ -15,7 +15,7 @@
 - [BUGFIX] `ui`: no startup crash while the database is still migrating (`no such column: bw_global_values.is_draft`).
 - [BUGFIX] A service without its own `SERVER_NAME` is named by its id instead of inheriting the global value, empty on Linux, which rendered `server_name ;`, failed every reload and got the service deleted or renamed by the next Web UI save. An empty `SERVER_NAME` is now refused for a service, still allowed globally.
 - [BUGFIX] `letsencrypt`: a passed-through ACME challenge keeps the client `Host` instead of a fixed `REVERSE_PROXY_CUSTOM_HOST`. (Fixes #3957)
-- [BUGFIX] `whitelist`, `greylist`, `antibot`, `blacklist`: rDNS rules now confirm IPv6 clients instead of treating them as spoofing their reverse DNS.
+- [BUGFIX] `whitelist`, `greylist`, `antibot`, `blacklist`: rDNS rules now confirm IPv6 clients instead of treating them as spoofing their reverse DNS. (Fixes #3966)
 - [BUGFIX] `ui`: deleting a custom config with a digit-only name no longer deletes other configs of that service and type on MariaDB.
 - [BUGFIX] `ui`: row actions on the jobs, plugins, templates, services and bans pages keep digit-only ids as text.
 - [BUGFIX] `autoconf`: with `KUBERNETES_SKIP_FOREIGN_CLASSES=yes`, the Kubernetes controller ignores Ingresses and Gateways whose class belongs to another controller.
