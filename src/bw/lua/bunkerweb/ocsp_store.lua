@@ -21,12 +21,21 @@ local has_must_staple = cert.has_must_staple
 local ocsp_resp_serial_hex = cert.ocsp_resp_serial_hex
 local spki_fingerprint = cert.spki_fingerprint
 
--- One shm value = epoch + optional verified binding + expires_unix + DER.
+-- One shm value = epoch + optional verified binding + soft_recall_gen + expires + DER.
 -- Evicting this key cannot orphan verified from DER (or gen from DER).
--- Layout v2: "bw2\0" .. epoch .. "\0" .. binding .. "\0" .. expires_unix .. "\0" .. der
-local L1_MAGIC = "bw2\0"
+-- Layout v3: "bw3\0" .. epoch .. "\0" .. binding .. "\0" .. gen .. "\0" .. expires .. "\0" .. der
+-- Layout v2 (legacy): "bw2\0" .. epoch .. "\0" .. binding .. "\0" .. expires .. "\0" .. der
+--   bw2 has no gen → entry_verified always false (soft-recall cannot leave sticky verified).
+local L1_MAGIC = "bw3\0"
+local L1_MAGIC_V2 = "bw2\0"
 -- Cap DRAM residence; never longer than remaining OCSP life when known.
 local L1_MAX_TTL = 300
+
+-- Forward decls: warm_cache tightens expires / gen against live ligand (defined below).
+local ligand_or_meta
+local soft_recall_gen_of
+local meta_effective_expires_unix
+
 local function l1_shm_ttl(expires_unix)
 	-- Never park an undated body in L1 (would outlive stripped meta).
 	if type(expires_unix) ~= "number" or expires_unix <= 0 then
@@ -43,28 +52,32 @@ local function l1_shm_ttl(expires_unix)
 	return remaining
 end
 
--- Pack one L1 shm entry: epoch | verified sha256 binding | expires_unix | DER.
--- Single composite key so eviction cannot orphan verified from the body.
-local function pack_l1(epoch, verified_binding, der, expires_unix)
+-- Pack one L1 shm entry: epoch | verified sha256 binding | soft_recall_gen | expires | DER.
+local function pack_l1(epoch, verified_binding, der, expires_unix, soft_recall_gen)
 	local exp = ""
 	if type(expires_unix) == "number" and expires_unix > 0 then
 		exp = tostring(math.floor(expires_unix))
 	elseif type(expires_unix) == "string" and expires_unix:match("^%d+$") then
 		exp = expires_unix
 	end
-	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. exp .. "\0" .. der
+	local gen = ""
+	if type(soft_recall_gen) == "number" and soft_recall_gen >= 0 then
+		gen = tostring(math.floor(soft_recall_gen))
+	end
+	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. gen .. "\0" .. exp .. "\0" .. der
 end
 
--- Unpack a bw2 L1 blob. Returns epoch, binding, der, expires_unix (or all nil).
+-- Unpack bw3 (preferred) or legacy bw2. Returns epoch, binding, der, expires_unix, gen.
+-- bw2 → gen=nil so verified trust fails closed until re-warm under bw3.
 local function unpack_l1(blob)
 	if type(blob) ~= "string" or #blob < 4 then
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, nil
 	end
 	local magic = blob:sub(1, 4)
 	if magic == L1_MAGIC then
-		local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+		local epoch, binding, gen_s, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
 		if type(der) ~= "string" or #der == 0 then
-			return nil, nil, nil, nil
+			return nil, nil, nil, nil, nil
 		end
 		if binding == "" then
 			binding = nil
@@ -73,12 +86,31 @@ local function unpack_l1(blob)
 		if type(exp) == "string" and exp:match("^%d+$") then
 			expires_unix = tonumber(exp)
 		end
-		return epoch or "0", binding, der, expires_unix
+		local gen = nil
+		if type(gen_s) == "string" and gen_s:match("^%d+$") then
+			gen = tonumber(gen_s)
+		end
+		return epoch or "0", binding, der, expires_unix, gen
 	end
-	return nil, nil, nil, nil
+	if magic == L1_MAGIC_V2 then
+		local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+		if type(der) ~= "string" or #der == 0 then
+			return nil, nil, nil, nil, nil
+		end
+		if binding == "" then
+			binding = nil
+		end
+		local expires_unix = nil
+		if type(exp) == "string" and exp:match("^%d+$") then
+			expires_unix = tonumber(exp)
+		end
+		-- No gen in v2 — caller must not trust verified across soft-recall.
+		return epoch or "0", binding, der, expires_unix, nil
+	end
+	return nil, nil, nil, nil, nil
 end
 
--- Returns der, verified_binding, epoch, expires_unix (or nil). bw2 composite only.
+-- Returns der, verified_binding, epoch, expires_unix, soft_recall_gen (or nil).
 local function get_l1(internalstore, fingerprint)
 	if not internalstore or not fingerprint then
 		return nil
@@ -91,26 +123,34 @@ local function get_l1(internalstore, fingerprint)
 		return nil
 	end
 
-	local epoch, verified, der, expires_unix = unpack_l1(blob)
+	local epoch, verified, der, expires_unix, gen = unpack_l1(blob)
 	if der then
-		return der, verified, epoch, expires_unix
+		return der, verified, epoch, expires_unix, gen
 	end
 	return nil
 end
 
--- True when L1's stored binding is still sha256(resp) — verified flag bound to these bytes.
-local function entry_verified(stored_binding, resp)
+-- True when L1's stored binding is still sha256(resp) AND soft_recall_gen matches.
+-- Missing/mismatched gen (bw2 legacy or soft-recall bump) → not crypto-trusted.
+local function entry_verified(stored_binding, resp, stored_gen, live_gen)
 	local binding = resp_binding(resp)
-	return binding ~= nil and stored_binding == binding
+	if binding == nil or stored_binding ~= binding then
+		return false
+	end
+	if type(stored_gen) ~= "number" or type(live_gen) ~= "number" then
+		return false
+	end
+	return stored_gen == live_gen
 end
 
--- Write DER into stream/HTTP L1 (bw2 composite).
+-- Write DER into stream/HTTP L1 (bw3 composite).
 -- packed_epoch: when re-parking a body that already passed l1_matches_disk, pass
 -- the epoch from that get — never stamp "now's" epoch over an old body (that would
 -- make a stale DER look current until the next ligand check). Matches HTTP
 -- ocsp_l1_put(..., packed_epoch) in ssl-certificate-by-lua.conf.
 -- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
-local function warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix, packed_epoch)
+-- soft_recall_gen: generation identity parked with the body (required for verified trust).
+local function warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix, packed_epoch, soft_recall_gen)
 	-- mark_verified=false: cache DER for reuse but do not skip crypto on later hits.
 	-- Only PEM + validate_ocsp_response (or a prior verified binding) may set verified.
 	if mark_verified == nil then
@@ -118,6 +158,21 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	end
 	if type(resp) ~= "string" or #resp == 0 then
 		return
+	end
+	-- Live merged death clock wins: never mark verified under a looser expires than
+	-- ligand/shard min (L1 TTL and resp_still_fresh would disagree across workers).
+	local live_meta = nil
+	if fingerprint then
+		live_meta = ligand_or_meta(nil, fingerprint)
+		local tight = meta_effective_expires_unix(live_meta, nil)
+		if type(tight) == "number" and tight > 0 then
+			if type(expires_unix) ~= "number" or expires_unix <= 0 or expires_unix > tight then
+				if mark_verified then
+					mark_verified = false
+				end
+				expires_unix = tight
+			end
+		end
 	end
 	local ttl = l1_shm_ttl(expires_unix)
 	if not ttl then
@@ -128,12 +183,20 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	if mark_verified then
 		binding = resp_binding(resp)
 	end
+	local gen = soft_recall_gen
+	if type(gen) ~= "number" then
+		gen = soft_recall_gen_of(live_meta)
+	end
+	-- Verified without a concrete gen cannot survive soft-recall — demote.
+	if mark_verified and type(gen) ~= "number" then
+		binding = nil
+	end
 	local epoch = packed_epoch
 	if type(epoch) ~= "string" or #epoch == 0 then
 		epoch = current_ocsp_epoch()
 	end
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix), ttl)
+		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix, gen), ttl)
 		-- Also clear the zone-scoped key so a prior put without the zone flag cannot linger.
 		internalstore:delete(cache_key(fingerprint), true)
 	end)
@@ -356,7 +419,7 @@ end
 -- so generation_tuple / allow-pin match fail closed (KEEP pin; no CAS revoke).
 -- Job-minted counter: bumps on soft-recall so peer-refuse / allow identity
 -- (der_sha256, soft_recall_gen) cannot re-match a leftover pin after re-page.
-local function soft_recall_gen_of(meta)
+soft_recall_gen_of = function(meta)
 	if type(meta) ~= "table" then
 		return 0
 	end
@@ -468,7 +531,7 @@ local function merge_ligand(shard_meta, ligand, fingerprint)
 end
 
 -- Effective generation meta: read ligand once then merge.
-local function ligand_or_meta(meta, fingerprint)
+ligand_or_meta = function(meta, fingerprint)
 	return merge_ligand(meta, read_ocsp_ligand(fingerprint), fingerprint)
 end
 
@@ -477,7 +540,9 @@ end
 -- fallback for meta-only DROP causes (tombstone / serial / canary) — never for
 -- probe paths that pass resp=nil after CertID/ligand refuses (that would
 -- compare-and-delete the GOOD generation using meta alone).
--- Type-drift soft_recall_gen → nil gen (callers refuse / skip CAS).
+-- Type-drift soft_recall_gen → (body, nil): incomplete identity — callers must
+-- not CAS/rematch on body alone (pin returns gen_type_drift KEEP). Missing body
+-- still returns nil,nil.
 local function generation_tuple(meta, resp)
 	local body = resp_binding(resp)
 	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
@@ -497,8 +562,8 @@ local function generation_tuple(meta, resp)
 end
 
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
--- A different serial (reissue on the same key) is allowed. Unreadable serial
--- while the file exists fails closed.
+-- A different serial (reissue on the same key) is allowed. Unreadable /
+-- ambiguous JSON while the file exists fails closed.
 local function serial_blacklist_blocks(fingerprint, resp)
 	if not is_fp64(fingerprint) or type(resp) ~= "string" or resp == "" then
 		return false
@@ -515,12 +580,25 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	if not raw or raw == "" then
 		return false
 	end
-	local banned_hex = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
-	if not banned_hex then
+	local ok_decode, obj = pcall(require("cjson").decode, raw)
+	if not ok_decode or type(obj) ~= "table" then
 		log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
 		return true
 	end
-	banned_hex = banned_hex:upper():gsub("^0+", "")
+	local banned = obj.serial_hex
+	if type(banned) ~= "string" or banned == "" or not banned:match("^[0-9A-Fa-f]+$") then
+		log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		return true
+	end
+	-- Reject duplicate / conflicting serial_hex keys disguised via JSON oddities:
+	-- cjson gives one value; also refuse if a second distinct match exists in raw.
+	local first = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
+	local rest = first and raw:match('"serial_hex"%s*:%s*"[0-9A-Fa-f]+".-("serial_hex"%s*:%s*"[0-9A-Fa-f]+")')
+	if rest then
+		log(ngx.ERR, "OCSP serial blacklist ambiguous; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+		return true
+	end
+	local banned_hex = banned:upper():gsub("^0+", "")
 	if banned_hex == "" then
 		banned_hex = "0"
 	end
@@ -725,6 +803,15 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 		if type(ligand) ~= "table" or ligand.paged ~= true then
 			return false
 		end
+		-- Publish-gap keep requires an explicit soft_recall_gen on the ligand
+		-- (missing key ≠ upgrade-grace 0 — that rematches leftover identity mid-promote).
+		if ligand.soft_recall_gen == nil then
+			return false
+		end
+		local gap_gen = soft_recall_gen_of(ligand)
+		if type(gap_gen) ~= "number" then
+			return false
+		end
 		local ligand_sha = _M.ligand_effective_sha(nil, fingerprint)
 		return type(ligand_sha) == "string" and #ligand_sha == 64 and ligand_sha == binding
 	end
@@ -905,7 +992,7 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	return true
 end
 
-local function meta_effective_expires_unix(meta, expires_unix)
+meta_effective_expires_unix = function(meta, expires_unix)
 	local exp = expires_unix or meta_expires_unix(meta)
 	local max_age = meta_max_age_unix(meta)
 	if exp and max_age then

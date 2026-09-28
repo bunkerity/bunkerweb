@@ -39,6 +39,7 @@ local drop_cache = store.drop_cache
 local entry_verified = store.entry_verified
 local get_l1 = store.get_l1
 local l1_matches_disk = store.l1_matches_disk
+local ligand_or_meta = store.ligand_or_meta
 local meta_effective_expires_unix = store.meta_effective_expires_unix
 local meta_tombstoned = store.meta_tombstoned
 local must_staple_binds_shared_ligand = store.must_staple_binds_shared_ligand
@@ -49,6 +50,7 @@ local resolve_leaf_must_staple = store.resolve_leaf_must_staple
 local resp_still_fresh = store.resp_still_fresh
 local serial_blacklist_blocks = store.serial_blacklist_blocks
 local shard_not_paged = store.shard_not_paged
+local soft_recall_gen_of = store.soft_recall_gen_of
 local warm_cache = store.warm_cache
 
 local pin = require("bunkerweb.ocsp_pin").internal
@@ -813,7 +815,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		return must_staple_refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable", mode)
 	end
 
-	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch, cached_expires, cached_gen = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
@@ -836,7 +838,8 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 					end
 					return false
 				end
-				local verified = entry_verified(cached_verified, cached)
+				local live_gen = soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+				local verified = entry_verified(cached_verified, cached, cached_gen, live_gen)
 				-- Only consult meta when L1 is not already crypto-verified (avoids refuse noise).
 				local authorized = false
 				if not verified then
@@ -877,9 +880,9 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 						local exp = meta_effective_expires_unix(meta, cached_expires)
 						-- Re-warm with the epoch l1_matches_disk already accepted.
 						if verified then
-							warm_cache(internalstore, fingerprint, cached, true, exp, cached_epoch)
+							warm_cache(internalstore, fingerprint, cached, true, exp, cached_epoch, live_gen)
 						else
-							warm_cache(internalstore, fingerprint, cached, false, exp, cached_epoch)
+							warm_cache(internalstore, fingerprint, cached, false, exp, cached_epoch, live_gen)
 						end
 						log_ocsp_stapled(server_name, nil, fingerprint, cached)
 						return true
@@ -916,14 +919,15 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		end
 		-- Disk path: verified binding only exists in L1; after drop/miss, require meta authorize
 		-- or a concurrent warmer rewrite. Re-check composite if rewarmed.
-		local _, disk_verified = get_l1(internalstore, fingerprint)
+		local _, disk_verified, _, _, disk_gen = get_l1(internalstore, fingerprint)
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then
 				return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
 			end
 			return false
 		end
-		local verified = entry_verified(disk_verified, resp)
+		local live_gen = soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+		local verified = entry_verified(disk_verified, resp, disk_gen, live_gen)
 		local authorized = false
 		if not verified then
 			authorized = ocsp_json_authorizes_resp(meta, fingerprint, resp)
@@ -956,7 +960,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				set_ok, set_err = attach_fp(resp)
 			end)
 			if ok_set and set_ok then
-				warm_cache(internalstore, fingerprint, resp, verified, meta_effective_expires_unix(meta))
+				warm_cache(internalstore, fingerprint, resp, verified, meta_effective_expires_unix(meta), nil, live_gen)
 				log_ocsp_stapled(server_name, nil, fingerprint, resp)
 				return true
 			end
@@ -1033,7 +1037,7 @@ local function staple_one_leaf(
 		end
 		return false
 	end
-	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
+	local cached, cached_verified, cached_epoch, cached_expires, cached_gen = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
 			drop_cache(internalstore, fingerprint)
@@ -1048,7 +1052,14 @@ local function staple_one_leaf(
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
 				end
-			elseif entry_verified(cached_verified, cached) then
+			elseif
+				entry_verified(
+					cached_verified,
+					cached,
+					cached_gen,
+					soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+				)
+			then
 				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
@@ -1166,14 +1177,15 @@ local function staple_one_leaf(
 						cached,
 						true,
 						meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
-						cached_epoch
+						cached_epoch,
+						soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 					)
 					log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 					return true
 				end
 				if result == false then
 					if result_detail == "validate_budget" then
-						-- Demote local bw2 verified→unverified so the next handshake
+						-- Demote local bw3 verified→unverified so the next handshake
 						-- cannot skip FFI on a body this budget never finished proving.
 						-- KEEP fleet allow-pin (validate_budget is KEEP_ALLOW).
 						warm_cache(
@@ -1182,7 +1194,8 @@ local function staple_one_leaf(
 							cached,
 							false,
 							meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
-							cached_epoch
+							cached_epoch,
+							soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 						)
 						if must_staple then
 							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)

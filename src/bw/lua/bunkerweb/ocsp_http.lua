@@ -327,18 +327,54 @@ function _M.ssl_certificate(state)
 		return nil
 	end
 
-	-- True when stored L1 binding still equals sha256(resp).
-	local function ocsp_verified_for_resp(stored, resp)
+	-- True when stored L1 binding still equals sha256(resp) AND soft_recall_gen matches.
+	-- Missing gen (legacy bw2) or gen mismatch after soft-recall → not crypto-trusted.
+	local function ocsp_verified_for_resp(stored, resp, stored_gen, live_gen)
 		local binding = ocsp_resp_binding(resp)
-		return binding ~= nil and stored == binding
+		if binding == nil or stored ~= binding then
+			return false
+		end
+		if type(stored_gen) ~= "number" or type(live_gen) ~= "number" then
+			return false
+		end
+		return stored_gen == live_gen
 	end
 
-	-- Composite L1: epoch + verified binding + expires_unix + DER (atomic under eviction).
-	-- Layout matches stream ocsp.lua bw2 only.
+	-- Live soft_recall_gen from outside ligand (upgrade-grace 0 when key absent).
+	local function ocsp_live_soft_recall_gen(cert_fp)
+		if type(cert_fp) ~= "string" or #cert_fp ~= 64 then
+			return nil
+		end
+		local gen = nil
+		pcall(function()
+			local f = io.open("/var/cache/bunkerweb/ssl/ocsp-ligand/" .. cert_fp, "r")
+			if not f then
+				gen = 0
+				return
+			end
+			local raw = f:read("*a")
+			f:close()
+			local ok, obj = pcall(require("cjson").decode, raw)
+			if not ok or type(obj) ~= "table" then
+				return
+			end
+			local raw_g = obj.soft_recall_gen
+			if raw_g == nil then
+				gen = 0
+			elseif type(raw_g) == "number" and raw_g == raw_g and raw_g >= 0 and raw_g ~= math.huge then
+				gen = math.floor(raw_g)
+			elseif type(raw_g) == "string" and raw_g:match("^%d+$") then
+				gen = tonumber(raw_g)
+			end
+		end)
+		return gen
+	end
+
+	-- Composite L1: epoch + verified binding + soft_recall_gen + expires + DER.
+	-- Layout matches store bw3 (legacy bw2 still unpacks with gen=nil).
 	-- Epoch file is the coherence bus with stream (separate lua_shared_dict; no cross-delete).
 	-- Always re-read: a mid-handshake bump must not be masked by an ngx.ctx pin.
 	local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
-	local OCSP_L1_MAGIC = "bw2\0"
 	local function ocsp_l1_cache_key(fingerprint)
 		return "TLS:SSL:ocsp:" .. tostring(fingerprint)
 	end
@@ -364,15 +400,31 @@ function _M.ssl_certificate(state)
 		end)
 		return epoch
 	end
-	-- Pack bw2 L1: epoch | verified binding | expires_unix | DER (matches ocsp.lua).
-	local function ocsp_l1_pack(epoch, verified_binding, der, expires_unix)
+	-- Pack bw3 L1: epoch | verified binding | soft_recall_gen | expires | DER (matches store).
+	-- Legacy bw2 still unpacks (gen=nil → verified trust fails closed).
+	local OCSP_L1_MAGIC = "bw3\0"
+	local OCSP_L1_MAGIC_V2 = "bw2\0"
+	local function ocsp_l1_pack(epoch, verified_binding, der, expires_unix, soft_recall_gen)
 		local exp = ""
 		if type(expires_unix) == "number" and expires_unix > 0 then
 			exp = tostring(math.floor(expires_unix))
 		elseif type(expires_unix) == "string" and expires_unix:match("^%d+$") then
 			exp = expires_unix
 		end
-		return OCSP_L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. exp .. "\0" .. der
+		local gen = ""
+		if type(soft_recall_gen) == "number" and soft_recall_gen >= 0 then
+			gen = tostring(math.floor(soft_recall_gen))
+		end
+		return OCSP_L1_MAGIC
+			.. (epoch or "0")
+			.. "\0"
+			.. (verified_binding or "")
+			.. "\0"
+			.. gen
+			.. "\0"
+			.. exp
+			.. "\0"
+			.. der
 	end
 	-- Declared clock-skew budget. Must match ocsp-refresh.py / ocsp.lua.
 	-- Death time = expires_unix/max_age minus skew.
@@ -397,16 +449,16 @@ function _M.ssl_certificate(state)
 		end
 		return remaining
 	end
-	-- Unpack bw2 L1 blob → epoch, binding, der, expires_unix (matches ocsp.lua).
+	-- Unpack bw3 (preferred) or legacy bw2 → epoch, binding, der, expires, gen.
 	local function ocsp_l1_unpack(blob)
 		if type(blob) ~= "string" or #blob < 4 then
-			return nil, nil, nil, nil
+			return nil, nil, nil, nil, nil
 		end
 		local magic = blob:sub(1, 4)
 		if magic == OCSP_L1_MAGIC then
-			local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+			local epoch, binding, gen_s, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
 			if type(der) ~= "string" or #der == 0 then
-				return nil, nil, nil, nil
+				return nil, nil, nil, nil, nil
 			end
 			if binding == "" then
 				binding = nil
@@ -415,11 +467,29 @@ function _M.ssl_certificate(state)
 			if type(exp) == "string" and exp:match("^%d+$") then
 				expires_unix = tonumber(exp)
 			end
-			return epoch or "0", binding, der, expires_unix
+			local gen = nil
+			if type(gen_s) == "string" and gen_s:match("^%d+$") then
+				gen = tonumber(gen_s)
+			end
+			return epoch or "0", binding, der, expires_unix, gen
 		end
-		return nil, nil, nil, nil
+		if magic == OCSP_L1_MAGIC_V2 then
+			local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+			if type(der) ~= "string" or #der == 0 then
+				return nil, nil, nil, nil, nil
+			end
+			if binding == "" then
+				binding = nil
+			end
+			local expires_unix = nil
+			if type(exp) == "string" and exp:match("^%d+$") then
+				expires_unix = tonumber(exp)
+			end
+			return epoch or "0", binding, der, expires_unix, nil
+		end
+		return nil, nil, nil, nil, nil
 	end
-	-- Returns der, verified_binding, epoch, expires_unix from HTTP L1 (bw2 only).
+	-- Returns der, verified_binding, epoch, expires_unix, soft_recall_gen from HTTP L1.
 	local function ocsp_l1_get(fingerprint)
 		if not internalstore or not fingerprint then
 			return nil
@@ -430,19 +500,20 @@ function _M.ssl_certificate(state)
 		if not ok or type(blob) ~= "string" or #blob == 0 then
 			return nil
 		end
-		local epoch, verified, der, expires_unix = ocsp_l1_unpack(blob)
+		local epoch, verified, der, expires_unix, gen = ocsp_l1_unpack(blob)
 		if der then
-			return der, verified, epoch, expires_unix
+			return der, verified, epoch, expires_unix, gen
 		end
 		return nil
 	end
-	-- Write DER into HTTP L1 (bw2 composite).
+	-- Write DER into HTTP L1 (bw3 composite).
 	-- packed_epoch: when re-parking a body that already passed l1_matches_disk,
 	-- pass the epoch from that get — never stamp "now's" epoch over an old body
 	-- (that would make a stale DER look current until the next ligand check).
 	-- Callers in probe_only should skip this entirely (losing leaves must not warm L1).
 	-- verified_binding nil = cache for reuse but do not skip crypto on later hits.
-	local function ocsp_l1_put(fingerprint, der, verified_binding, expires_unix, packed_epoch)
+	-- soft_recall_gen parks generation identity (required for verified trust).
+	local function ocsp_l1_put(fingerprint, der, verified_binding, expires_unix, packed_epoch, soft_recall_gen)
 		if not internalstore or not fingerprint or type(der) ~= "string" or #der == 0 then
 			return false
 		end
@@ -455,11 +526,15 @@ function _M.ssl_certificate(state)
 		if type(epoch) ~= "string" or #epoch == 0 then
 			epoch = ocsp_current_epoch()
 		end
+		-- Verified without a concrete gen cannot survive soft-recall — demote.
+		if verified_binding and type(soft_recall_gen) ~= "number" then
+			verified_binding = nil
+		end
 		local ok = false
 		pcall(function()
 			ok = internalstore:set(
 				ocsp_l1_cache_key(fingerprint),
-				ocsp_l1_pack(epoch, verified_binding, der, expires_unix),
+				ocsp_l1_pack(epoch, verified_binding, der, expires_unix, soft_recall_gen),
 				ttl
 			)
 			internalstore:delete(ocsp_l1_cache_key(fingerprint), true)
@@ -2418,7 +2493,7 @@ function _M.ssl_certificate(state)
 			local resp = nil
 			local fresh_refuse_why = nil
 
-			local cache_result, ocsp_verified, cache_epoch, cache_expires = ocsp_l1_get(fp_hint)
+			local cache_result, ocsp_verified, cache_epoch, cache_expires, cache_gen = ocsp_l1_get(fp_hint)
 			if type(cache_result) == "string" and #cache_result > 0 then
 				if not ocsp_l1_matches_disk(fp_hint, ocsp_dir, ocsp_path, cache_result, cache_epoch) then
 					ocsp_l1_drop(fp_hint, ocsp_path)
@@ -2435,7 +2510,8 @@ function _M.ssl_certificate(state)
 						ocsp_l1_drop(fp_hint, ocsp_path)
 						fresh_refuse_why = fresh_why or "response_stale"
 					else
-						local verified = ocsp_verified_for_resp(ocsp_verified, cache_result)
+						local live_gen = ocsp_live_soft_recall_gen(fp_hint)
+						local verified = ocsp_verified_for_resp(ocsp_verified, cache_result, cache_gen, live_gen)
 						local authorized = false
 						if not verified then
 							authorized = ocsp_json_authorizes_resp(fp_hint, cache_result)
@@ -2448,7 +2524,7 @@ function _M.ssl_certificate(state)
 							if not verified and not probe_only then
 								local exp = cache_expires
 									or ocsp_meta_effective_expires_unix(read_ocsp_json_for_fp(fp_hint))
-								ocsp_l1_put(fp_hint, cache_result, nil, exp, cache_epoch)
+								ocsp_l1_put(fp_hint, cache_result, nil, exp, cache_epoch, live_gen)
 							end
 						end
 					end
@@ -2478,10 +2554,11 @@ function _M.ssl_certificate(state)
 						fresh_refuse_why = fresh_why or "response_stale"
 						return
 					end
-					local _, disk_verified = ocsp_l1_get(fp_hint)
+					local _, disk_verified, _, _, disk_gen = ocsp_l1_get(fp_hint)
 					-- No leaf PEM: prior crypto-verified binding, or job meta that
 					-- binds fingerprint + der_sha256 to these exact DER bytes.
-					local verified = ocsp_verified_for_resp(disk_verified, data)
+					local live_gen = ocsp_live_soft_recall_gen(fp_hint)
+					local verified = ocsp_verified_for_resp(disk_verified, data, disk_gen, live_gen)
 					local authorized = false
 					if not verified then
 						authorized = ocsp_json_authorizes_resp(fp_hint, data)
@@ -2490,7 +2567,7 @@ function _M.ssl_certificate(state)
 						resp = data
 						if not probe_only then
 							local exp = ocsp_meta_effective_expires_unix(read_ocsp_json_for_fp(fp_hint))
-							ocsp_l1_put(fp_hint, data, verified and ocsp_resp_binding(data) or nil, exp)
+							ocsp_l1_put(fp_hint, data, verified and ocsp_resp_binding(data) or nil, exp, nil, live_gen)
 						end
 					end
 				end)
@@ -3232,11 +3309,18 @@ function _M.ssl_certificate(state)
 					})
 				)
 				do
-					local _, _, packed_epoch, l1_exp = ocsp_l1_get(cert_fp)
+					local _, _, packed_epoch, l1_exp, packed_gen = ocsp_l1_get(cert_fp)
 					local meta_budget = read_ocsp_json_for_fp(cert_fp)
 					local exp = l1_exp or ocsp_meta_expires_unix(meta_budget)
 					-- verified_binding nil = park DER for reuse without skip-crypto.
-					ocsp_l1_put(cert_fp, ocsp_der, nil, exp, packed_epoch)
+					ocsp_l1_put(
+						cert_fp,
+						ocsp_der,
+						nil,
+						exp,
+						packed_epoch,
+						packed_gen or ocsp_live_soft_recall_gen(cert_fp)
+					)
 				end
 			end
 			return finish(false)
@@ -3385,7 +3469,7 @@ function _M.ssl_certificate(state)
 				-- 1) L1 first (composite epoch|verified_binding|expires|DER).
 				-- Drop when .ocsp_epoch advanced or disk der_sha256 no longer matches
 				-- (publish / soft-recall / tombstone). Keep across brief ENOENT gap.
-				local cache_result, ocsp_verified, cache_epoch, cache_expires = ocsp_l1_get(cert_fp)
+				local cache_result, ocsp_verified, cache_epoch, cache_expires, cache_gen = ocsp_l1_get(cert_fp)
 				if type(cache_result) == "string" and #cache_result > 0 then
 					-- Drop L1 when the job atomically replaced ocsp.der (or removed it),
 					-- or when the shared publish epoch advanced (HTTP ↔ stream coherence).
@@ -3411,7 +3495,8 @@ function _M.ssl_certificate(state)
 							ocsp_l1_drop(cert_fp, ocsp_path)
 							fresh_refuse_why = fresh_why or "response_stale"
 						else
-							local ocsp_ok = ocsp_verified_for_resp(ocsp_verified, cache_result)
+							local live_gen = ocsp_live_soft_recall_gen(cert_fp)
+							local ocsp_ok = ocsp_verified_for_resp(ocsp_verified, cache_result, cache_gen, live_gen)
 							local ocsp_validated_now = ocsp_ok
 							if not ocsp_ok then
 								local fp_ok = verify_ocsp_fingerprint_match(cert_fp, ocsp_dir)
@@ -3426,7 +3511,7 @@ function _M.ssl_certificate(state)
 										if binding and not probe_only then
 											local exp = cache_expires
 												or ocsp_meta_effective_expires_unix(read_ocsp_json_for_fp(cert_fp))
-											ocsp_l1_put(cert_fp, cache_result, binding, exp, cache_epoch)
+											ocsp_l1_put(cert_fp, cache_result, binding, exp, cache_epoch, live_gen)
 										end
 									else
 										ocsp_ok = false
@@ -3518,8 +3603,9 @@ function _M.ssl_certificate(state)
 								fresh_refuse_why = fresh_why or "response_stale"
 								return
 							end
-							local _, disk_verified = ocsp_l1_get(cert_fp)
-							local ocsp_ok = ocsp_verified_for_resp(disk_verified, data)
+							local _, disk_verified, _, _, disk_gen = ocsp_l1_get(cert_fp)
+							local live_gen = ocsp_live_soft_recall_gen(cert_fp)
+							local ocsp_ok = ocsp_verified_for_resp(disk_verified, data, disk_gen, live_gen)
 							local verified_binding = nil
 							if not ocsp_ok then
 								local fp_ok = verify_ocsp_fingerprint_match(cert_fp, ocsp_dir)
@@ -3581,7 +3667,16 @@ function _M.ssl_certificate(state)
 								-- Cache in shared memory (TTL 300s) as one composite entry
 								if not probe_only then
 									local exp = ocsp_meta_effective_expires_unix(read_ocsp_json_for_fp(cert_fp))
-									if not ocsp_l1_put(cert_fp, resp, verified_binding, exp) then
+									if
+										not ocsp_l1_put(
+											cert_fp,
+											resp,
+											verified_binding,
+											exp,
+											nil,
+											ocsp_live_soft_recall_gen(cert_fp)
+										)
+									then
 										safe_log(
 											DEBUG,
 											"OCSP failed to cache response in shared memory server_name="
