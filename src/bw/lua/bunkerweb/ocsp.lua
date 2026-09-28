@@ -87,8 +87,94 @@ local function ocsp_staple_mode(internalstore, server_name)
 	return "normal"
 end
 
+-- Closed staple_decision codes. Each code is the runbook section key (ssl README).
+-- Unknown/legacy detail strings normalize to unmet (raw kept as detail=).
+local STAPLE_DECISION = {
+	ok = true,
+	stapling_off = true,
+	skip_slot = true,
+	cluster_floor = true,
+	not_paged = true,
+	aia_uri_mismatch = true,
+	aia_uri_unpinned = true,
+	ssl_use_ocsp_stapling_no = true,
+	ngx_ocsp_unavailable = true,
+	response_not_found = true,
+	response_stale = true,
+	serial_blacklisted = true,
+	shared_ligand = true,
+	certid_mismatch = true,
+	set_staple_failed = true,
+	set_staple_exception = true,
+	fingerprint_unavailable = true,
+	wrong_key_type_staple = true,
+	probe_failed = true,
+	thisUpdate_future = true,
+	thisUpdate_stale = true,
+	lifetime_too_long = true,
+	thisUpdate_unreadable = true,
+	canary_refused = true,
+	unmet = true,
+}
+
+local STAPLE_DECISION_ALIAS = {
+	single_slot_ecdsa_prefer = "skip_slot",
+	wrong_key_type_hint = "skip_slot",
+	variables_unavailable = "stapling_off",
+	ligand_missing = "shared_ligand",
+	ligand_mismatch = "shared_ligand",
+}
+
+local function normalize_staple_decision(code)
+	local raw = tostring(code or "unmet")
+	if STAPLE_DECISION_ALIAS[raw] then
+		return STAPLE_DECISION_ALIAS[raw], raw
+	end
+	if raw:sub(1, 7) == "canary_" then
+		return "canary_refused", raw
+	end
+	if STAPLE_DECISION[raw] then
+		return raw, nil
+	end
+	return "unmet", raw
+end
+
+-- Emit staple_decision=CODE as the primary machine field (runbook section).
+local function format_staple_decision(code, fields)
+	local decision, alias_detail = normalize_staple_decision(code)
+	local parts = { "staple_decision=" .. decision }
+	local f = {}
+	if type(fields) == "table" then
+		for k, v in pairs(fields) do
+			f[k] = v
+		end
+	end
+	if alias_detail then
+		if f.detail == nil or f.detail == "" then
+			f.detail = alias_detail
+		elseif tostring(f.detail) ~= alias_detail then
+			f.alias = alias_detail
+		end
+	end
+	local order = { "tag", "action", "mode", "kind", "fp", "detail", "alias", "der_sha256", "epoch", "worker", "server_name", "subsystem" }
+	local seen = { staple_decision = true }
+	for _, key in ipairs(order) do
+		local val = f[key]
+		if val ~= nil and val ~= "" then
+			parts[#parts + 1] = key .. "=" .. tostring(val)
+			seen[key] = true
+		end
+	end
+	for key, val in pairs(f) do
+		if not seen[key] and val ~= nil and val ~= "" then
+			parts[#parts + 1] = key .. "=" .. tostring(val)
+		end
+	end
+	return table.concat(parts, " ")
+end
+
 -- Convert a Must-Staple miss into abort (normal) or soft continue (fuse).
--- Always logs OCSP_MUST_STAPLE_REFUSE (never the optional OCSP_STAPLING_OFF wording).
+-- Always logs staple_decision=CODE (runbook) with tag=OCSP_MUST_STAPLE_REFUSE.
 local function soften_must_staple(mode, ok, reason, detail)
 	if reason ~= "must_staple" then
 		return ok, reason
@@ -99,12 +185,11 @@ local function soften_must_staple(mode, ok, reason, detail)
 	end
 	log(
 		ngx.ERR,
-		"OCSP_MUST_STAPLE_REFUSE reason="
-			.. tostring(detail or "unmet")
-			.. " action="
-			.. action
-			.. " mode="
-			.. tostring(mode or "normal")
+		format_staple_decision(detail or "unmet", {
+			tag = "OCSP_MUST_STAPLE_REFUSE",
+			action = action,
+			mode = mode or "normal",
+		})
 	)
 	if action == "continue" then
 		return false
@@ -112,9 +197,15 @@ local function soften_must_staple(mode, ok, reason, detail)
 	return false, "must_staple"
 end
 
--- Optional stapling skipped (no Must-Staple). Distinct from OCSP_MUST_STAPLE_REFUSE.
+-- Optional stapling skipped (no Must-Staple). Distinct from Must-Staple refuse.
 local function log_stapling_off(reason)
-	log(ngx.DEBUG, "OCSP_STAPLING_OFF reason=" .. tostring(reason or "ssl_use_ocsp_stapling_no"))
+	log(
+		ngx.DEBUG,
+		format_staple_decision("stapling_off", {
+			tag = "OCSP_STAPLING_OFF",
+			detail = tostring(reason or "ssl_use_ocsp_stapling_no"),
+		})
+	)
 end
 
 local function pem_blocks(cert_pem)
@@ -1317,18 +1408,15 @@ local function log_ocsp_stapled(server_name, kind, fp, resp)
 	end)
 	log(
 		ngx.INFO,
-		"OCSP_STAPLED kind="
-			.. tostring(kind or "unknown")
-			.. " fp="
-			.. fp_s
-			.. " der_sha256="
-			.. der
-			.. " epoch="
-			.. tostring(epoch)
-			.. " worker="
-			.. worker
-			.. " server_name="
-			.. tostring(server_name or "nil")
+		format_staple_decision("ok", {
+			tag = "OCSP_STAPLED",
+			kind = kind or "unknown",
+			fp = fp_s,
+			der_sha256 = der,
+			epoch = epoch,
+			worker = worker,
+			server_name = server_name or "nil",
+		})
 	)
 end
 
@@ -1341,14 +1429,12 @@ local function log_ocsp_staple_skip(kind, fp, reason, server_name)
 	end
 	log(
 		ngx.NOTICE,
-		"OCSP_STAPLE_SKIP kind="
-			.. tostring(kind or "unknown")
-			.. " fp="
-			.. fp_s
-			.. " reason="
-			.. tostring(reason or "unknown")
-			.. " server_name="
-			.. tostring(server_name or "nil")
+		format_staple_decision(reason or "skip_slot", {
+			tag = "OCSP_STAPLE_SKIP",
+			kind = kind or "unknown",
+			fp = fp_s,
+			server_name = server_name or "nil",
+		})
 	)
 end
 
@@ -1521,11 +1607,12 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name)
 				refuse_detail = probe_detail or probe_reason or "probe_failed"
 				log(
 					ngx.ERR,
-					"OCSP_MUST_STAPLE_REFUSE reason="
-						.. tostring(refuse_detail)
-						.. " action=skip_leaf mode=normal fp="
-						.. tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil")
-						.. "..."
+					format_staple_decision(refuse_detail or "probe_failed", {
+						tag = "OCSP_MUST_STAPLE_REFUSE",
+						action = "skip_leaf",
+						mode = "normal",
+						fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+					})
 				)
 				skip_leaf = true
 			end
@@ -1611,7 +1698,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		if must_staple then
 			return false, "must_staple", "ngx_ocsp_unavailable"
 		end
-		log(ngx.DEBUG, "OCSP_STAPLING_OFF reason=ngx_ocsp_unavailable")
+		log(ngx.DEBUG, format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" }))
 		return false
 	end
 
@@ -1941,7 +2028,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		if must_staple then
 			return soften_must_staple(mode, false, "must_staple", "ngx_ocsp_unavailable")
 		end
-		log(ngx.DEBUG, "OCSP_STAPLING_OFF reason=ngx_ocsp_unavailable")
+		log(ngx.DEBUG, format_staple_decision("stapling_off", { tag = "OCSP_STAPLING_OFF", detail = "ngx_ocsp_unavailable" }))
 		return false
 	end
 	local ssl = require "ngx.ssl"

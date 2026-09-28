@@ -39,6 +39,33 @@ Follow these steps to configure and use the SSL feature:
 
 Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 seconds (`OCSP_CLOCK_SKEW_SECONDS`). Death time is `nextUpdate` / `max_age_unix` **minus** that skew: staples stop being served before the CA's advertised expiry so a lagging worker clock cannot present a response the CA already considers dead.
 
+### OCSP `staple_decision` runbook
+
+Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** the section key below—grep the log token, open this section, follow the steps. Unknown legacy strings normalize to `unmet` with `detail=` preserved.
+
+| `staple_decision` | Meaning | What to do |
+| ----------------- | ------- | ---------- |
+| `ok` | Staple set (or canary paged) | Healthy. |
+| `stapling_off` | Optional stapling disabled / unavailable | Expected when `SSL_USE_OCSP_STAPLING=no` or `ngx.ocsp` missing. Not a Must-Staple abort. |
+| `skip_slot` | Dual-cert sibling deliberately not stapled | One OCSP slot per handshake; ECDSA preferred. Put Must-Staple on ECDSA only. |
+| `cluster_floor` | Local `published_unix` behind colony floor | Wait for this node’s job/DB restore to catch the floor, or check shared cache mount. |
+| `not_paged` | Shard on disk but canary never paged it | Inspect `ocsp-refresh` canary logs; previous live shard should still be in place. |
+| `aia_uri_mismatch` / `aia_uri_unpinned` | Staple not pinned to leaf AIA OCSP URI | Re-run refresh; check leaf AIA vs `ocsp.json` `aia_ocsp_uri`. |
+| `ssl_use_ocsp_stapling_no` | Must-Staple leaf but stapling setting off | Set `SSL_USE_OCSP_STAPLING=yes` or remove Must-Staple from the cert. |
+| `ngx_ocsp_unavailable` | `ngx.ocsp` / `set_ocsp_status_resp` missing | OpenResty build / load issue—fix ngx_http_lua / stream OCSP module. |
+| `response_not_found` | No usable L1/disk GOOD staple | Check job fetch, shard path under `/var/cache/bunkerweb/ssl/`, serial blacklist. |
+| `response_stale` | Past nextUpdate / max-age / skew death | Wait for refresh or force `ocsp-refresh`. |
+| `serial_blacklisted` | Serial tombstoned after non-GOOD | Investigate CA revocation/UNKNOWN; clear only after a verified GOOD republish. |
+| `shared_ligand` | Must-Staple L1 not bound to `ocsp.json` `der_sha256` | Epoch drift or partial publish—bump/`ocsp-refresh` so disk meta matches body. |
+| `certid_mismatch` | DER CertID ≠ leaf/issuer or meta pin | Refuse multi-response / wrong leaf; re-fetch for this SPKI. |
+| `set_staple_failed` / `set_staple_exception` | `set_ocsp_status_resp` failed | OpenResty/OpenSSL staple API error; check worker error log around the call. |
+| `fingerprint_unavailable` | No SPKI / hint for the leaf | Ensure plugin returns PEM (`status[3]`) or fingerprint (`status[5]`). |
+| `wrong_key_type_staple` | Staple body is wrong key type for chosen leaf | Dual-cert pin; do not borrow RSA↔ECDSA shards. |
+| `probe_failed` | Must-Staple probe before `set_cert` failed | Same as unmet for that leaf—fix shard/canary before loading the cert. |
+| `thisUpdate_future` / `thisUpdate_stale` / `lifetime_too_long` / `thisUpdate_unreadable` | Intrinsic signed-window policy | CA window rejected; check `thisUpdate`/`nextUpdate`; do not force-page. |
+| `canary_refused` | Scheduler canary refused page | Live shard unchanged; see `detail=` (`canary_openssl_verify`, …) and fix before page. |
+| `unmet` | Must-Staple required and no more specific code | Catch-all—check `detail=` / prior lines; use `OCSP_STAPLE_MODE=staple_only`/`open` only as a temporary fuse. |
+
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
     NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb **prefers the ECDSA leaf** for that single slot and does **not** borrow the RSA leaf's cached response (or the reverse).
 
@@ -47,7 +74,7 @@ Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 se
     - Only the preferred (ECDSA) leaf is stapled. Clients that negotiate the RSA leaf receive **no** staple for that handshake.
     - If the **RSA** certificate has the Must-Staple TLS feature, clients that select RSA will see Must-Staple as unmet. With `OCSP_STAPLE_MODE=normal`, that can abort the handshake for those clients even when the ECDSA staple is healthy.
     - If only the **ECDSA** leaf is Must-Staple (recommended for dual-cert), modern clients that prefer ECDSA stay fail-closed correctly; RSA-only clients are outside that pin.
-    - Logs may show `OCSP_STAPLE_SKIP … reason=single_slot_ecdsa_prefer` or `wrong_key_type_hint` when the sibling key type is deliberately not stapled.
+    - Logs may show `staple_decision=skip_slot` (`detail=single_slot_ecdsa_prefer` or `wrong_key_type_hint`) when the sibling key type is deliberately not stapled.
 
     Practical guidance: for dual-cert sites that need Must-Staple, put Must-Staple on the ECDSA leaf (or use a single leaf). Do not expect both key types to be Must-Staple-satisfied on the same connection. Use `OCSP_STAPLE_MODE=staple_only` or `open` only as a temporary recovery fuse if a dual-cert Must-Staple mismatch is paging you.
 

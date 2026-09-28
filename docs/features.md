@@ -5668,7 +5668,7 @@ Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 se
     - Only the preferred (ECDSA) leaf is stapled. Clients that negotiate the RSA leaf receive **no** staple for that handshake.
     - If the **RSA** certificate has the Must-Staple TLS feature, clients that select RSA will see Must-Staple as unmet. With `OCSP_STAPLE_MODE=normal`, that can abort the handshake for those clients even when the ECDSA staple is healthy.
     - If only the **ECDSA** leaf is Must-Staple (recommended for dual-cert), modern clients that prefer ECDSA stay fail-closed correctly; RSA-only clients are outside that pin.
-    - Logs may show `OCSP_STAPLE_SKIP … reason=single_slot_ecdsa_prefer` or `wrong_key_type_hint` when the sibling key type is deliberately not stapled.
+    - Logs may show `staple_decision=skip_slot` (`detail=single_slot_ecdsa_prefer` or `wrong_key_type_hint`) when the sibling key type is deliberately not stapled.
 
     Practical guidance: for dual-cert sites that need Must-Staple, put Must-Staple on the ECDSA leaf (or use a single leaf). Do not expect both key types to be Must-Staple-satisfied on the same connection. Use `OCSP_STAPLE_MODE=staple_only` or `open` only as a temporary recovery fuse if a dual-cert Must-Staple mismatch is paging you.
 

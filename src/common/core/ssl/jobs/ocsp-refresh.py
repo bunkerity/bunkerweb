@@ -2359,10 +2359,10 @@ def _publish_ocsp_shard(
         )
         if not canary_ok:
             log_error(
-                "❌ OCSP canary refused page for %s (fp=%s...): %s — live shard unchanged",
-                cert_name or normalized[:16],
-                normalized[:16],
+                "❌ staple_decision=canary_refused tag=OCSP_CANARY detail=%s fp=%s... cert=%s — live shard unchanged",
                 canary_reason,
+                normalized[:16],
+                cert_name or normalized[:16],
             )
             raise RuntimeError(f"canary refused page: {canary_reason}")
 
@@ -2393,10 +2393,10 @@ def _publish_ocsp_shard(
             meta.update(page_meta)
 
         log_info(
-            "✓ OCSP canary paged shard for %s (fp=%s..., paged_unix=%s)",
-            cert_name or normalized[:16],
+            "✓ staple_decision=ok tag=OCSP_CANARY_PAGED fp=%s... paged_unix=%s cert=%s",
             normalized[:16],
             page_meta.get("paged_unix"),
+            cert_name or normalized[:16],
         )
 
         # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
