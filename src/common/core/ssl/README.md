@@ -66,7 +66,7 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `thisUpdate_future` / `thisUpdate_stale` / `lifetime_too_long` / `thisUpdate_unreadable` | Intrinsic signed-window policy | CA window rejected; check `thisUpdate`/`nextUpdate`; do not force-page. |
 | `canary_refused` | Scheduler canary refused page | Live shard unchanged; see `detail=` (`canary_openssl_verify`, …) and fix before page. |
 | `peer_refuse` | Sibling subsystem (HTTP↔stream) refused this generation | Shared `ocsp-refuse/{fp}` bus. Inspect `refused_by` / prior `staple_decision`; fixed when a new generation is canary-paged. |
-| `await_sni` | Stream staple deferred: no SNI-bound leaf yet | Optional: skip staple (`skip_slot` / `detail=await_sni`). Must-Staple: abort until ClientHello SNI selects the site leaf. |
+| `await_sni` | Stream staple deferred: no SNI-bound leaf yet | Optional: skip staple (`skip_slot` / `detail=await_sni`). Must-Staple: `OCSP_STAPLE_MODE=normal` aborts; `staple_only`/`open` soft-continue unstapled (global mode when SNI is empty). |
 | `unmet` | Must-Staple required and no more specific code | Catch-all—check `detail=` / prior lines; use `OCSP_STAPLE_MODE=staple_only`/`open` only as a temporary fuse. |
 
 Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is **preloaded off the TLS critical path**: worker 0 runs an OCSP L1 warmer timer that scans paged shards after start and whenever `.ocsp_epoch` bumps. A cold miss can still read `ocsp.der` during `ssl_certificate`, but steady-state and post-publish handshakes should hit DRAM first.

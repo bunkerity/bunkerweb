@@ -209,6 +209,15 @@ local function soften_must_staple(mode, ok, reason, detail)
 	return false, "must_staple"
 end
 
+-- Exported so stream ssl_certificate await_sni can apply the same fuse as staple().
+function _M.staple_mode(internalstore, server_name)
+	return ocsp_staple_mode(internalstore, server_name)
+end
+
+function _M.soften_must_staple(mode, ok, reason, detail)
+	return soften_must_staple(mode, ok, reason, detail)
+end
+
 -- Optional stapling skipped (no Must-Staple). Distinct from Must-Staple refuse.
 local function log_stapling_off(reason)
 	log(
