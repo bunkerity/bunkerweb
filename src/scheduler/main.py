@@ -35,7 +35,7 @@ from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, c
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from jobs import Job, _write_atomic  # type: ignore
+from jobs import Job, _write_atomic, ocsp_restore_skip_fingerprints, parse_ocsp_shard_cache_name  # type: ignore
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller  # type: ignore
@@ -393,6 +393,16 @@ def generate_caches():
     file_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
     dir_perms = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP  # 0o750
 
+    # Never let DB restore regress a newer on-disk OCSP SPKI shard.
+    ocsp_skip: Dict[str, str] = {}
+    try:
+        ssl_rows = [row for row in (job_cache_files or []) if row.get("plugin_id") == "ssl"]
+        ocsp_skip = ocsp_restore_skip_fingerprints(ssl_rows, Path(sep, "var", "cache", "bunkerweb", "ssl"))
+        if ocsp_skip:
+            LOGGER.info(f"OCSP restore fence: keeping {len(ocsp_skip)} newer on-disk shard(s)")
+    except Exception as e:
+        LOGGER.debug(f"OCSP restore fence unavailable during generate_caches: {e}")
+
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
         plugin_paths.add(job_path)
@@ -418,6 +428,13 @@ def generate_caches():
                         LOGGER.error(f"Error extracting tar file: {e}")
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
+            if job_cache_file.get("plugin_id") == "ssl":
+                parsed = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
+                if parsed and parsed[0] in ocsp_skip:
+                    LOGGER.info(
+                        f"OCSP generate_caches skip fp={parsed[0][:16]}... leaf={parsed[1]} reason={ocsp_skip[parsed[0]]}"
+                    )
+                    continue
             _write_atomic(cache_path, job_cache_file["data"])
             if cache_path.stat().st_mode & 0o777 != file_perms:
                 cache_path.chmod(file_perms)

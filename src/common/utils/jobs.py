@@ -4,10 +4,12 @@
 from datetime import datetime, timedelta
 from inspect import currentframe, getframeinfo
 from io import BytesIO
+from json import loads as json_loads
 from logging import Logger
 from os import getenv, replace
 from os.path import sep
 from pathlib import Path
+from re import compile as re_compile
 from shutil import rmtree
 from tarfile import TarFile, open as tar_open
 from threading import Lock
@@ -25,6 +27,145 @@ EXPIRE_TIME = {
     "week": timedelta(weeks=1).total_seconds(),
     "month": timedelta(days=30).total_seconds(),
 }
+
+# OCSP SPKI shard keys under /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp64}/…
+_OCSP_SHARD_FILE_RE = re_compile(r"^([0-9a-fA-F])/([0-9a-fA-F])/([0-9a-fA-F]{64})/(ocsp\.der|ocsp\.json|issuer\.pem)$")
+
+
+def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
+    """
+    If file_name is an OCSP shard cache key, return (fingerprint_lower, leaf_name).
+    leaf_name is one of ocsp.der, ocsp.json, issuer.pem.
+    """
+    if not file_name:
+        return None
+    match = _OCSP_SHARD_FILE_RE.match(str(file_name).replace("\\", "/"))
+    if not match:
+        return None
+    hex1, hex2, fingerprint, leaf = match.groups()
+    fp = fingerprint.lower()
+    if fp[0] != hex1.lower() or fp[1] != hex2.lower():
+        return None
+    return fp, leaf
+
+
+def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
+    raw = meta.get(key)
+    if isinstance(raw, (int, float)) and int(raw) > 0:
+        return int(raw)
+    if isinstance(raw, str) and raw.isdigit():
+        return int(raw)
+    return 0
+
+
+def _ocsp_job_run_id_rank(run_id: Any) -> int:
+    """Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable."""
+    if not isinstance(run_id, str) or not run_id:
+        return 0
+    parts = run_id.rsplit(".", 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return int(parts[1])
+    return 0
+
+
+def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
+    if not data:
+        return None
+    try:
+        meta = json_loads(data.decode("utf-8"))
+    except Exception:
+        return None
+    return meta if isinstance(meta, dict) else None
+
+
+def load_disk_ocsp_meta(shard_dir: Path) -> Optional[Dict[str, Any]]:
+    meta_path = shard_dir / "ocsp.json"
+    if not meta_path.is_file():
+        return None
+    try:
+        return parse_ocsp_meta_bytes(meta_path.read_bytes())
+    except Exception:
+        return None
+
+
+def should_keep_disk_ocsp_shard(
+    disk_meta: Optional[Dict[str, Any]],
+    incoming_meta: Optional[Dict[str, Any]],
+) -> bool:
+    """
+    True when an on-disk OCSP shard must not be overwritten by a DB/restore payload.
+
+    Order: tombstone vs GOOD (denial must not lose to an older far-future GOOD),
+    then expires_unix, published_unix, job_run_id. Equal → keep disk.
+    Missing disk meta → allow restore. Missing incoming meta while disk has meta → keep disk.
+    """
+    if not isinstance(disk_meta, dict):
+        return False
+    if not isinstance(incoming_meta, dict):
+        return True
+
+    disk_tomb = disk_meta.get("tombstoned") is True
+    inc_tomb = incoming_meta.get("tombstoned") is True
+    disk_run = _ocsp_job_run_id_rank(disk_meta.get("job_run_id"))
+    inc_run = _ocsp_job_run_id_rank(incoming_meta.get("job_run_id"))
+
+    # A live tombstone outranks an older GOOD even when that GOOD still has a far expires_unix.
+    if disk_tomb and not inc_tomb:
+        return inc_run <= disk_run
+    if inc_tomb and not disk_tomb:
+        return inc_run < disk_run
+
+    disk_exp = _ocsp_meta_unix(disk_meta, "expires_unix")
+    inc_exp = _ocsp_meta_unix(incoming_meta, "expires_unix")
+    if disk_exp != inc_exp:
+        return disk_exp > inc_exp
+
+    disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
+    inc_pub = _ocsp_meta_unix(incoming_meta, "published_unix")
+    if disk_pub != inc_pub:
+        return disk_pub > inc_pub
+
+    return disk_run >= inc_run
+
+
+def ocsp_restore_skip_fingerprints(cache_files: list, cache_root: Path) -> Dict[str, str]:
+    """
+    Build fingerprint → reason for OCSP shards that must not be overwritten by this restore batch.
+
+    cache_files: rows with file_name + data (ocsp-refresh / ssl plugin job cache).
+    cache_root: typically /var/cache/bunkerweb/ssl
+    """
+    by_fp: Dict[str, Dict[str, Any]] = {}
+    for entry in cache_files:
+        if not isinstance(entry, dict):
+            continue
+        parsed = parse_ocsp_shard_cache_name(entry.get("file_name") or "")
+        if not parsed:
+            continue
+        fp, leaf = parsed
+        bucket = by_fp.setdefault(fp, {})
+        if leaf == "ocsp.json" and entry.get("data"):
+            bucket["incoming_meta"] = parse_ocsp_meta_bytes(entry["data"])
+        elif leaf == "ocsp.der" and entry.get("data"):
+            bucket["has_der"] = True
+
+    skip: Dict[str, str] = {}
+    for fp, bucket in by_fp.items():
+        shard_dir = cache_root / fp[0] / fp[1] / fp
+        disk_meta = load_disk_ocsp_meta(shard_dir)
+        if not isinstance(disk_meta, dict):
+            continue
+        incoming_meta = bucket.get("incoming_meta")
+        # DER-only restore without meta: keep disk when it already has usable meta.
+        if incoming_meta is None and bucket.get("has_der"):
+            skip[fp] = "disk_meta_present_incoming_meta_missing"
+            continue
+        if should_keep_disk_ocsp_shard(disk_meta, incoming_meta):
+            skip[fp] = (
+                f"disk_newer_or_equal expires_unix={_ocsp_meta_unix(disk_meta, 'expires_unix')} "
+                f"job_run_id={disk_meta.get('job_run_id')}"
+            )
+    return skip
 
 
 def _write_atomic(target: Path, data: bytes) -> None:
@@ -117,6 +258,14 @@ class Job:
         plugin_cache_files = set()
         ignored_dirs = set()
 
+        # Never regress a newer on-disk OCSP shard with an older DB complete trio.
+        ocsp_skip: Dict[str, str] = {}
+        if self.job_path.name == "ssl":
+            try:
+                ocsp_skip = ocsp_restore_skip_fingerprints(list(job_cache_files or []), self.job_path)
+            except Exception as e:
+                self.logger.debug(f"OCSP restore fence unavailable: {e}")
+
         for job_cache_file in job_cache_files:
             cache_path = self.job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
             plugin_cache_files.add(cache_path)
@@ -147,6 +296,13 @@ class Job:
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
+                parsed = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
+                if parsed and parsed[0] in ocsp_skip:
+                    self.logger.info(
+                        f"OCSP restore skip fp={parsed[0][:16]}... leaf={parsed[1]} reason={ocsp_skip[parsed[0]]}"
+                    )
+                    ignored_dirs.add(cache_path.parent.as_posix())
+                    continue
                 _write_atomic(cache_path, job_cache_file["data"])
                 ignored_dirs.add(cache_path.parent.as_posix())
                 self.logger.debug(
@@ -169,6 +325,10 @@ class Job:
 
                     self.logger.debug(f"Checking if {file} should be removed")
                     if file not in plugin_cache_files and file.is_file():
+                        # Never unlink a newer OCSP shard the fence just preserved.
+                        parsed = parse_ocsp_shard_cache_name(file.relative_to(self.job_path).as_posix())
+                        if parsed and parsed[0] in ocsp_skip:
+                            continue
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
                         if file.parent.is_dir():

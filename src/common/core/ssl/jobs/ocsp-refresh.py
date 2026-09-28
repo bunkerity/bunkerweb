@@ -42,7 +42,7 @@ for deps_path in [
 
 # Gracefully handle import failures
 try:
-    from jobs import Job  # type: ignore
+    from jobs import Job, ocsp_restore_skip_fingerprints  # type: ignore
 except ImportError as e:
     print(f"FATAL: Could not import Job: {e}", file=_sys.stderr)
     _sys.exit(1)
@@ -2979,6 +2979,9 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
     Restore cached OCSP responses from database to disk.
     Called at startup to ensure disk cache is populated from database.
     This handles ephemeral storage (tmpfs, etc.) by restoring files on each run.
+
+    Never overwrites a newer on-disk SPKI shard with an older complete DB trio
+    (checksum mismatch alone is not a freshness signal).
     """
     if not db:
         log_debug("ℹ️ OCSP database not available, skipping cache restoration")
@@ -2989,15 +2992,30 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         restored_count = 0
         replaced_count = 0
         ok_count = 0
+        skipped_newer = 0
 
         # Get all OCSP cache entries from database for this job
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+        try:
+            ocsp_skip = ocsp_restore_skip_fingerprints(list(cache_files or []), CONFIGS_SSL_BASE)
+        except Exception as e:
+            log_debug("⚠️ OCSP restore fence unavailable: %s", e)
+            ocsp_skip = {}
+
         for entry in cache_files:
             file_name = entry.get("file_name", "")
             if not entry.get("data"):
                 continue
             issuer_fp = _fingerprint_from_issuer_name(file_name)
             if issuer_fp:
+                if issuer_fp in ocsp_skip:
+                    skipped_newer += 1
+                    log_info(
+                        "⏭️ OCSP restore skip issuer.pem fp=%s... reason=%s",
+                        issuer_fp[:16],
+                        ocsp_skip[issuer_fp],
+                    )
+                    continue
                 try:
                     issuer_path = _get_sharded_ocsp_path(issuer_fp) / "issuer.pem"
                     issuer_path.parent.mkdir(parents=True, exist_ok=True)
@@ -3021,6 +3039,14 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 continue
             meta_fp = _fingerprint_from_meta_name(file_name)
             if meta_fp:
+                if meta_fp in ocsp_skip:
+                    skipped_newer += 1
+                    log_info(
+                        "⏭️ OCSP restore skip ocsp.json fp=%s... reason=%s",
+                        meta_fp[:16],
+                        ocsp_skip[meta_fp],
+                    )
+                    continue
                 try:
                     meta_path = _get_sharded_ocsp_path(meta_fp) / "ocsp.json"
                     meta_path.parent.mkdir(parents=True, exist_ok=True)
@@ -3053,9 +3079,21 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     if disk_checksum == db_checksum:
                         ok_count += 1
                         log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", fingerprint, db_checksum[:8])
+                    elif fingerprint in ocsp_skip:
+                        skipped_newer += 1
+                        log_info(
+                            "⏭️ OCSP restore skip ocsp.der fp=%s... (disk newer than DB) reason=%s",
+                            fingerprint[:16],
+                            ocsp_skip[fingerprint],
+                        )
                     else:
-                        # Checksum mismatch — replace with database version
-                        log_info("🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing", fingerprint, disk_checksum[:8], db_checksum[:8])
+                        # Checksum mismatch and restore fence allows DB → replace.
+                        log_info(
+                            "🔄 OCSP disk file for %s has wrong checksum (disk=%s, db=%s), replacing",
+                            fingerprint,
+                            disk_checksum[:8],
+                            db_checksum[:8],
+                        )
                         ocsp_path.write_bytes(db_data)
                         ocsp_path.chmod(0o640)
                         replaced_count += 1
@@ -3080,8 +3118,14 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
             except Exception as e:
                 log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
 
-        if restored_count > 0 or replaced_count > 0:
-            log_info("✓ OCSP sync complete: restored=%d, replaced=%d, unchanged=%d", restored_count, replaced_count, ok_count)
+        if restored_count > 0 or replaced_count > 0 or skipped_newer > 0:
+            log_info(
+                "✓ OCSP sync complete: restored=%d, replaced=%d, unchanged=%d, skipped_newer=%d",
+                restored_count,
+                replaced_count,
+                ok_count,
+                skipped_newer,
+            )
         else:
             log_debug("ℹ️ OCSP sync complete: all %d disk files match database (restored=0, replaced=0)", ok_count)
     except Exception as e:
