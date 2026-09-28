@@ -1488,8 +1488,9 @@ local function meta_max_age_unix(meta)
 	return nil
 end
 
--- False at death time (nextUpdate/max_age minus skew). Unknown → true.
+-- False at death time (nextUpdate/max_age minus skew).
 -- Also enforces intrinsic signed-window policy when this_update_unix is present.
+-- No death clock (missing expires_unix and max_age) → not fresh (fail-closed).
 local function meta_unix_field(meta, key)
 	if type(meta) ~= "table" then
 		return nil
@@ -1510,7 +1511,7 @@ end
 local function intrinsic_timing_ok(meta)
 	local this_u = meta_unix_field(meta, "this_update_unix")
 	if not this_u then
-		-- Legacy meta without signed timing: retention/skew checks only.
+		-- No signed thisUpdate pin: retention/skew checks only (expires_unix / max_age).
 		return true, nil
 	end
 	local now = ngx.time()
@@ -1554,7 +1555,12 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 		exp = max_age
 	end
 	if not exp then
-		return true
+		log(
+			ngx.ERR,
+			"OCSP refuse staple: no expires_unix/max_age death clock fp="
+				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
+		)
+		return false
 	end
 	if ngx.time() >= exp - OCSP_CLOCK_SKEW_SECONDS then
 		return false
