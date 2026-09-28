@@ -2961,6 +2961,11 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
       - total lifetime in seconds (Next Update - This Update)
     Both values are None if they cannot be determined.
 
+    When ``cert_pem`` is provided, the cached response's CertID serial must match the
+    current leaf. Shards are SPKI-keyed, so a same-key renew (or two names sharing a
+    key) can leave a still-fresh DER for a different serial — callers that skip fetch
+    on TTL must treat that as a miss.
+
     Args:
         cert_name: Certificate identifier (for logging only)
         cert_pem: Optional certificate PEM data to compute fingerprint if not provided
@@ -2988,6 +2993,40 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
     try:
         ocsp_data = ocsp_path.read_bytes()
         ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_data)
+
+        # SPKI shard ≠ CertID: same-key renew / shared-key sites must not TTL-skip.
+        if cert_pem is not None:
+            leaf_serial = None
+            try:
+                leaf = x509.load_pem_x509_certificate(_clean_pem(cert_pem))
+                leaf_serial = int(leaf.serial_number)
+            except Exception:
+                try:
+                    leaf = x509.load_der_x509_certificate(cert_pem)
+                    leaf_serial = int(leaf.serial_number)
+                except Exception:
+                    leaf_serial = None
+            if leaf_serial is not None:
+                try:
+                    resp_serial = int(ocsp_response.serial_number)
+                except (ValueError, AttributeError, TypeError):
+                    log_info(
+                        "⚡ OCSP cached response for %s: fp=%s CertID serial unreadable/ambiguous; "
+                        "treating as miss so refresh can refetch",
+                        cert_name,
+                        (fingerprint[:16] + "...") if fingerprint else "unknown",
+                    )
+                    return None, None
+                if resp_serial != leaf_serial:
+                    log_info(
+                        "⚡ OCSP cached response for %s: fp=%s CertID serial mismatch "
+                        "(cached=%s leaf=%s); treating as miss so refresh can refetch",
+                        cert_name,
+                        (fingerprint[:16] + "...") if fingerprint else "unknown",
+                        resp_serial,
+                        leaf_serial,
+                    )
+                    return None, None
 
         remaining, total_lifetime = _ocsp_response_lifetimes(ocsp_response)
         if remaining is None or total_lifetime is None:
