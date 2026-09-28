@@ -75,13 +75,26 @@ local maybe_rearm_l1_warmer = warmer.maybe_rearm_l1_warmer
 local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
 	-- re-encoding from the chain). Do not let validate succeed against a different CA.
+	-- false = issuer.pem confirmed absent; nil = not checked; string = PEM content
 	local stored = nil
+	local issuer_absent = false
 	if stored_pem ~= nil then
-		stored = stored_pem or nil
+		if stored_pem == false then
+			issuer_absent = true
+		else
+			stored = stored_pem
+		end
 	elseif fingerprint then
 		stored = read_file(issuer_path(fingerprint))
+		if not stored then
+			issuer_absent = true
+		end
 	end
 	local want_spki = stored and spki_fingerprint(stored) or nil
+	if issuer_absent and not want_spki then
+		local fp_str = fingerprint and fingerprint:sub(1, 16) or "nil"
+		log(ngx.DEBUG, "OCSP issuer.pem absent for fp " .. fp_str .. "; accepting chain issuers without SPKI pin")
+	end
 
 	local issuers = {}
 	local seen = {}
@@ -354,19 +367,21 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 				end
 				i = i + 2
 			end
-			-- TLS 1.2 ECDSA schemes name only the hash, not the curve, so an EC leaf on
-			-- another curve is still usable there. Rank it after every exact match so a
-			-- TLS 1.3 client (curve-bound schemes) still gets an exact leaf first.
+			-- TLS 1.2 ECDSA schemes name only the hash, not the curve; technically usable across curves.
+			-- But only as fallback after exact matches, not as primary strategy to avoid curve mismatches.
+			if matched then
+				return ordered
+			end
+			-- Fallback for TLS 1.2: accept any EC curve if no exact matches found.
 			if offered_ecdsa then
 				for li = 1, #leaves do
 					if profiles[li].kind == "ec" and not seen[li] then
-						matched = true
 						add(li)
 					end
 				end
-			end
-			if matched then
-				return ordered
+				if #ordered > 0 then
+					return ordered
+				end
 			end
 		end
 	end
@@ -640,25 +655,27 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		end
 	end
 	if #healthy > 0 then
+		-- Prefer ClientHello order (ci) first; use NULL-slot ranking as tiebreaker.
+		-- First try the preferred candidate; only fall back to fewer-nulls sibling if it fails.
 		local best = healthy[1]
 		for i = 2, #healthy do
 			local h = healthy[i]
-			if h.nulls < best.nulls then
+			-- Tiebreaker: if same ci, prefer fewer nulls
+			if h.ci == best.ci and h.nulls < best.nulls then
+				best = h
+			elseif h.ci < best.ci then
+				-- Prefer earlier ClientHello preference, regardless of nulls
 				best = h
 			end
 		end
 		local ok_inst, a, b = install_one(best.leaf, false)
 		if ok_inst then
-			if best.ci > 1 or (best.nulls < healthy[1].nulls) then
-				local detail = "staple_health_fallback"
-				if best.nulls < healthy[1].nulls then
-					detail = "path_completeness"
-				end
+			if best.ci > 1 then
 				log(
 					ngx.NOTICE,
 					format_staple_decision("skip_slot", {
 						tag = "OCSP_STAPLE_HEALTH_FALLBACK",
-						detail = detail,
+						detail = "sigalgs_fallback",
 						null_slots = best.nulls,
 						fp = tostring(best.leaf.fp and best.leaf.fp:sub(1, 16) or "nil") .. "...",
 						server_name = server_name or "nil",
@@ -670,8 +687,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		end
 		last_err, last_detail = a, b
 	end
-	if last_err == "must_staple" and (mode == "staple_only" or mode == "open") then
-		-- Soft fuse: present the preferred site leaf unstapled (not a random sibling).
+	if last_err == "must_staple" and mode == "open" then
+		-- Soft fuse (open mode only): present preferred leaf unstapled when Must-Staple fails.
+		-- staple_only mode: reject; cannot install Must-Staple leaves without proven staple.
 		log(
 			ngx.ERR,
 			format_staple_decision(last_detail or "probe_failed", {
@@ -686,6 +704,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			return true, soft_pem, soft_fp
 		end
 		return false, soft_pem or "must_staple", soft_fp or last_detail
+	elseif last_err == "must_staple" and mode == "staple_only" then
+		-- staple_only: no soft fuse for Must-Staple; require proven staple.
+		return false, "must_staple", last_detail or "no_staple_candidates"
 	end
 	return false, last_err, last_detail
 end
@@ -712,6 +733,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	end
 	-- Fingerprint-only: intermediate Must-Staple is unprovable without PEM chain.
 	-- Must-Staple leaves refuse with fingerprint_chain_unavailable (see attach_fp).
+	if must_staple and (type(chain_blocks) ~= "table" or #chain_blocks < 1) then
+		if not probe_only then
+			return must_staple_refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable", mode)
+		end
+		return false, "must_staple", "fingerprint_chain_unavailable"
+	end
 	if meta_tombstoned(meta) then
 		drop_cache(internalstore, fingerprint)
 		if must_staple then
@@ -1162,13 +1189,14 @@ local function staple_one_leaf(
 						end
 						return false
 					end
-					-- Optional stapling: CertID miss skips staple; do not abort as must_staple.
+					-- Optional stapling: CertID miss on unverified L1 falls through to disk.
+					-- Must-Staple fails immediately; optional stapling re-validates on disk.
 					if result_detail == "certid_mismatch" then
-						drop_cache(internalstore, fingerprint)
 						if must_staple then
+							drop_cache(internalstore, fingerprint)
 							return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
 						end
-						return false
+						-- Fall through to disk path for optional stapling re-validation
 					end
 					if
 						result_detail == "intermediate_must_staple_libssl"
