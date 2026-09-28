@@ -6308,8 +6308,7 @@ Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 se
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
     NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
 
-    - **HTTP:** prefers the ECDSA leaf (typical OpenSSL dual-cert choice for modern clients).
-    - **Stream:** reads ClientHello `signature_algorithms` when available and staples the matching leaf (`ec` or `rsa`); otherwise prefers ECDSA. Stapling is deferred until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
+    - **HTTP and stream:** read ClientHello `signature_algorithms` when available and staple the matching leaf (`ec` or `rsa`); otherwise prefer ECDSA (typical OpenSSL dual-cert choice). Stream also defers stapling until SNI has bound the handshake leaf (`staple_decision=await_sni` / `skip_slot detail=await_sni`).
 
     Consequences:
 

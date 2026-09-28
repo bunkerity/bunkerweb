@@ -2487,8 +2487,9 @@ function _M.prefer_kind_from_sigalgs(ext)
 	return nil
 end
 
--- Capture SNI + preferred leaf kind during ssl_client_hello (stream). Stores on ngx.ctx.
-function _M.capture_stream_client_hello()
+-- Capture SNI + preferred leaf kind during ssl_client_hello (HTTP and stream).
+-- Stores on ngx.ctx for the later ssl_certificate staple slot pick.
+function _M.capture_client_hello()
 	local ctx = ngx.ctx
 	if not ctx then
 		return
@@ -2511,6 +2512,9 @@ function _M.capture_stream_client_hello()
 		end
 	end
 end
+
+-- Back-compat alias used by stream conf before HTTP shared the same capture.
+_M.capture_stream_client_hello = _M.capture_client_hello
 
 -- Resolve the handshake SNI for stream stapling (ssl.server_name, else client-hello ctx).
 function _M.handshake_sni(fallback)
