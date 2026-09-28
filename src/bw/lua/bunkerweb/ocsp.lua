@@ -88,7 +88,7 @@ local function ocsp_staple_mode(internalstore, server_name)
 end
 
 -- Closed staple_decision codes. Each code is the runbook section key (ssl README).
--- Unknown/legacy detail strings normalize to unmet (raw kept as detail=).
+-- Unknown detail strings normalize to unmet (raw kept as detail=).
 local STAPLE_DECISION = {
 	ok = true,
 	stapling_off = true,
@@ -346,9 +346,7 @@ local OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600
 -- One shm value = epoch + optional verified binding + expires_unix + DER.
 -- Evicting this key cannot orphan verified from DER (or gen from DER).
 -- Layout v2: "bw2\0" .. epoch .. "\0" .. binding .. "\0" .. expires_unix .. "\0" .. der
--- Layout v1 (legacy): "bw1\0" .. epoch .. "\0" .. binding .. "\0" .. der
 local L1_MAGIC = "bw2\0"
-local L1_MAGIC_V1 = "bw1\0"
 -- Cap DRAM residence; never longer than remaining OCSP life when known.
 local L1_MAX_TTL = 300
 -- Transient peer-refuse markers age out (align with L1). Sticky codes stay until canary page.
@@ -415,16 +413,6 @@ local function unpack_l1(blob)
 		end
 		return epoch or "0", binding, der, expires_unix
 	end
-	if magic == L1_MAGIC_V1 then
-		local epoch, binding, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0(.*)$")
-		if type(der) ~= "string" or #der == 0 then
-			return nil, nil, nil, nil
-		end
-		if binding == "" then
-			binding = nil
-		end
-		return epoch or "0", binding, der, nil
-	end
 	return nil, nil, nil, nil
 end
 
@@ -452,8 +440,7 @@ local function current_ocsp_epoch()
 	return epoch
 end
 
--- Returns der, verified_binding, epoch, expires_unix (or nil).
--- Legacy raw-DER (+ sibling verified/gen keys) is promoted to the composite once.
+-- Returns der, verified_binding, epoch, expires_unix (or nil). bw2 composite only.
 local function get_l1(internalstore, fingerprint)
 	if not internalstore or not fingerprint then
 		return nil
@@ -470,36 +457,7 @@ local function get_l1(internalstore, fingerprint)
 	if der then
 		return der, verified, epoch, expires_unix
 	end
-
-	-- Legacy: bare DER body under the same key.
-	der = blob
-	local binding = nil
-	pcall(function()
-		local stored = internalstore:get(verified_key(fingerprint))
-		if type(stored) == "string" and stored == resp_binding(der) then
-			binding = stored
-		end
-	end)
-	epoch = "0"
-	pcall(function()
-		local stored_gen = internalstore:get(gen_key(fingerprint))
-		if type(stored_gen) == "string" and #stored_gen > 0 then
-			epoch = stored_gen
-		end
-	end)
-	pcall(function()
-		local ttl = l1_shm_ttl(nil)
-		if ttl then
-			internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, der, nil), ttl)
-		end
-		internalstore:delete(verified_key(fingerprint))
-		internalstore:delete(gen_key(fingerprint))
-		-- Drop any pre-fix per-worker LRU copy so it cannot outlive shared L1.
-		internalstore:delete(cache_key(fingerprint), true)
-		internalstore:delete(verified_key(fingerprint), true)
-		internalstore:delete(gen_key(fingerprint), true)
-	end)
-	return der, binding, epoch, nil
+	return nil
 end
 
 local function entry_verified(stored_binding, resp)
@@ -815,8 +773,8 @@ local function cluster_floor_blocks(fingerprint, meta)
 end
 
 -- Live shard must be scheduler-paged (canary handshake) before stapling.
--- Require explicit paged=true. Missing/legacy field is not canary proof
--- (restore/pre-canary meta used to skip this gate and staple never-canary'd DER).
+-- Require explicit paged=true. Missing field is not canary proof
+-- (restore stamps paged=false until canary succeeds).
 local function shard_not_paged(meta)
 	if type(meta) ~= "table" then
 		return true
@@ -1482,77 +1440,7 @@ local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
 	return false, "shared_ligand_" .. tostring(reason or "mismatch")
 end
 
--- Civil UTC date/time → unix seconds (Proleptic Gregorian). No local TZ / DST.
--- Algorithm: Howard Hinnant days_from_civil (public domain).
-local function utc_civil_to_unix(year, month, day, hour, min, sec)
-	year = tonumber(year)
-	month = tonumber(month)
-	day = tonumber(day)
-	hour = tonumber(hour) or 0
-	min = tonumber(min) or 0
-	sec = tonumber(sec) or 0
-	if not year or not month or not day then
-		return nil
-	end
-	local y = year
-	local m = month
-	if m <= 2 then
-		y = y - 1
-		m = m + 12
-	end
-	local era = math.floor(y / 400)
-	if y < 0 and y % 400 ~= 0 then
-		era = era - 1
-	end
-	local yoe = y - era * 400
-	local doy = math.floor((153 * (m - 3) + 2) / 5) + day - 1
-	local doe = yoe * 365 + math.floor(yoe / 4) - math.floor(yoe / 100) + doy
-	local days = era * 146097 + doe - 719468
-	return days * 86400 + hour * 3600 + min * 60 + sec
-end
-
--- Parse job "expires" legacy form: "<isoformat> + <N>s" → absolute unix death time.
--- Prefer meta.expires_unix; this path is for old shards that only have the string.
-local function parse_legacy_expires_plus_ttl(raw)
-	if type(raw) ~= "string" then
-		return nil
-	end
-	local base_str, ttl_str = raw:match("^(.-) %+ (%d+)%s*s%s*$")
-	if not base_str or not ttl_str then
-		return nil
-	end
-	base_str = base_str:match("^%s*(.-)%s*$") or base_str
-	local y, mo, d, H, M, S, frac, zone =
-		base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)[Tt ](%d%d):(%d%d):(%d%d)(%.%d+)?(Z|[z]|[+-]%d%d:?%d%d)?$")
-	if not y then
-		-- Allow trailing junk after zone (some serializers); take leading ISO.
-		y, mo, d, H, M, S, frac, zone =
-			base_str:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)[Tt ](%d%d):(%d%d):(%d%d)(%.%d+)?(Z|[z]|[+-]%d%d:?%d%d)?")
-	end
-	if not y then
-		return nil
-	end
-	local ts = utc_civil_to_unix(y, mo, d, H, M, S)
-	if type(ts) ~= "number" then
-		return nil
-	end
-	-- Apply explicit offset so +02:00 bases become UTC before adding TTL.
-	if type(zone) == "string" and zone ~= "" and zone:upper() ~= "Z" then
-		local sign, zh, zm = zone:match("^([+-])(%d%d):?(%d%d)$")
-		if sign and zh then
-			local off = tonumber(zh) * 3600 + (tonumber(zm) or 0) * 60
-			if sign == "+" then
-				ts = ts - off
-			else
-				ts = ts + off
-			end
-		end
-	end
-	-- frac ignored (sub-second); death time is second-resolution like expires_unix.
-	return ts + tonumber(ttl_str)
-end
-
--- Absolute unix nextUpdate from job meta (preferred) or legacy "iso + Ns" expires.
+-- Absolute unix nextUpdate from job meta. Requires expires_unix (no ISO+Ns fallback).
 local function meta_expires_unix(meta)
 	if type(meta) ~= "table" then
 		return nil
@@ -1567,7 +1455,7 @@ local function meta_expires_unix(meta)
 			return math.floor(n)
 		end
 	end
-	return parse_legacy_expires_plus_ttl(meta.expires)
+	return nil
 end
 
 function _M.meta_expires_unix(meta)
@@ -2246,7 +2134,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			return false
 		end
 		-- Disk path: verified binding only exists in L1; after drop/miss, require meta authorize
-		-- or a leftover legacy sibling (get_l1 already promoted). Re-check composite if rewarmed.
+		-- or a concurrent warmer rewrite. Re-check composite if rewarmed.
 		local _, disk_verified = get_l1(internalstore, fingerprint)
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then

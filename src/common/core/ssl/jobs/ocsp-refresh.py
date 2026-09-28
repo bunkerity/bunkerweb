@@ -27,7 +27,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import ocsp as x509_ocsp
-from cryptography.x509 import AuthorityInformationAccess, SubjectAlternativeName, TLSFeature, TLSFeatureType
+from cryptography.x509 import AuthorityInformationAccess, TLSFeature, TLSFeatureType
 from cryptography.x509.oid import ExtensionOID, AuthorityInformationAccessOID
 
 # Add BunkerWeb Python deps (Job, logger, Database) to path
@@ -202,8 +202,7 @@ _OCSP_RESPONDER_DNS_CACHE_MAX = 256
 DNS_CACHE_TTL = 60
 DNS_CACHE_NEGATIVE_TTL = 15  # brief; empty/failed lookups must not poison the whole job batch
 _OCSP_RESPONDER_DNS_CACHE: "OrderedDict[str, Tuple[List[str], float]]" = OrderedDict()
-# Cert-name markers for differential tracking. Must not share ocsp/<token> with legacy
-# fingerprint DER rows (a 64-hex hostname would collide).
+# Cert-name markers for differential tracking (cert_name → fingerprint hex).
 OCSP_MARKER_PREFIX = "ocsp-marker/"
 
 
@@ -481,9 +480,7 @@ def _ocsp_cache_relpath(fingerprint: str, leaf: str) -> Optional[str]:
 
 
 def _fingerprint_from_ocsp_der_name(file_name: str) -> Optional[str]:
-	"""Fingerprint for a response row: sharded ocsp.der, or the legacy ocsp/<fingerprint> key."""
-	if file_name.startswith("ocsp/"):
-		return _normalize_fingerprint(file_name[len("ocsp/") :])
+	"""Fingerprint for a sharded ocsp.der row ({h1}/{h2}/{fp}/ocsp.der)."""
 	parts = file_name.split("/")
 	if len(parts) == 4 and parts[3] == "ocsp.der":
 		return _normalize_fingerprint(parts[2])
@@ -491,9 +488,7 @@ def _fingerprint_from_ocsp_der_name(file_name: str) -> Optional[str]:
 
 
 def _fingerprint_from_issuer_name(file_name: str) -> Optional[str]:
-	"""Fingerprint for an issuer row: sharded issuer.pem, or the legacy issuer/<fingerprint> key."""
-	if file_name.startswith("issuer/"):
-		return _normalize_fingerprint(file_name[len("issuer/") :])
+	"""Fingerprint for a sharded issuer.pem row ({h1}/{h2}/{fp}/issuer.pem)."""
 	parts = file_name.split("/")
 	if len(parts) == 4 and parts[3] == "issuer.pem":
 		return _normalize_fingerprint(parts[2])
@@ -509,14 +504,10 @@ def _fingerprint_from_meta_name(file_name: str) -> Optional[str]:
 
 
 def _delete_fingerprint_db_rows(db: Any, fingerprint: str) -> None:
-	"""Drop response, issuer, metadata, and checksum rows for one certificate."""
+	"""Drop sharded response/issuer/metadata and checksum rows for one certificate."""
 	if db is None or not fingerprint:
 		return
-	names = [
-		f"ocsp/{fingerprint}",
-		f"issuer/{fingerprint}",
-		f"cert_checksum/{fingerprint}",
-	]
+	names = [f"cert_checksum/{fingerprint}"]
 	for leaf in ("ocsp.der", "issuer.pem", "ocsp.json"):
 		rel = _ocsp_cache_relpath(fingerprint, leaf)
 		if rel:
@@ -583,38 +574,25 @@ def _ocsp_marker_relpath(cert_name: str) -> Optional[str]:
     return f"{OCSP_MARKER_PREFIX}{_sanitize_filename(cert_name)}"
 
 
-def _legacy_ocsp_marker_relpath(cert_name: str) -> Optional[str]:
-    """Pre-fix marker key ocsp/<name> (collides with legacy DER when name is 64 hex)."""
-    if not cert_name or not re.match(r"^[A-Za-z0-9_.*-]+$", cert_name):
-        return None
-    return f"ocsp/{_sanitize_filename(cert_name)}"
-
-
 def _read_cert_name_marker(db: Any, cert_name: str) -> Optional[str]:
-    """Return fingerprint hex from ocsp-marker/ or legacy ocsp/<name> marker rows."""
+    """Return fingerprint hex from ocsp-marker/<cert_name>."""
     if db is None:
         return None
-    for key in (_ocsp_marker_relpath(cert_name), _legacy_ocsp_marker_relpath(cert_name)):
-        if not key:
-            continue
-        # Never treat ocsp/<64-hex> as a marker — that key may hold DER bytes.
-        if key.startswith("ocsp/") and _normalize_fingerprint(key[len("ocsp/") :]):
-            continue
-        try:
-            marker_data = db.get_job_cache_file(file_name=key, job_name="ocsp-refresh")
-            if not marker_data:
-                continue
-            decoded = marker_data.decode("utf-8", errors="ignore").strip()
-            fp = _normalize_fingerprint(decoded)
-            if fp:
-                return fp
-        except Exception:
-            continue
-    return None
+    key = _ocsp_marker_relpath(cert_name)
+    if not key:
+        return None
+    try:
+        marker_data = db.get_job_cache_file(file_name=key, job_name="ocsp-refresh")
+        if not marker_data:
+            return None
+        decoded = marker_data.decode("utf-8", errors="ignore").strip()
+        return _normalize_fingerprint(decoded)
+    except Exception:
+        return None
 
 
 def _upsert_cert_name_marker(db: Any, cert_name: str, fingerprint: str) -> None:
-    """Store cert_name → fingerprint under ocsp-marker/; drop safe legacy marker keys."""
+    """Store cert_name → fingerprint under ocsp-marker/."""
     if db is None or not fingerprint:
         return
     marker_key = _ocsp_marker_relpath(cert_name)
@@ -627,28 +605,19 @@ def _upsert_cert_name_marker(db: Any, cert_name: str, fingerprint: str) -> None:
         job_name="ocsp-refresh",
         checksum=hashlib.sha256(fingerprint.encode("utf-8")).hexdigest().lower(),
     )
-    legacy = _legacy_ocsp_marker_relpath(cert_name)
-    # Only delete legacy marker when it cannot be a fingerprint DER row.
-    if legacy and not _normalize_fingerprint(_sanitize_filename(cert_name)):
-        try:
-            db.delete_job_cache(file_name=legacy, job_name="ocsp-refresh")
-        except Exception:
-            pass
 
 
 def _delete_cert_name_marker(db: Any, cert_name: str) -> None:
-    """Remove new and legacy cert-name marker rows."""
+    """Remove ocsp-marker/<cert_name>."""
     if db is None:
         return
-    for key in (_ocsp_marker_relpath(cert_name), _legacy_ocsp_marker_relpath(cert_name)):
-        if not key:
-            continue
-        if key.startswith("ocsp/") and _normalize_fingerprint(key[len("ocsp/") :]):
-            continue
-        try:
-            db.delete_job_cache(file_name=key, job_name="ocsp-refresh")
-        except Exception:
-            pass
+    key = _ocsp_marker_relpath(cert_name)
+    if not key:
+        return
+    try:
+        db.delete_job_cache(file_name=key, job_name="ocsp-refresh")
+    except Exception:
+        pass
 
 
 def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
@@ -1213,7 +1182,7 @@ def _try_unlink_stale_lock(lock_file: Path, stale_threshold: int, current_time: 
     try:
         mtime = lock_file.stat().st_mtime
         age = current_time - mtime
-        # stale_threshold < 0 means "always try" (legacy cache-fs lock migration).
+        # stale_threshold < 0 means "always try".
         if stale_threshold >= 0 and age <= stale_threshold:
             return False
     except Exception as e:
@@ -1286,17 +1255,8 @@ def _cleanup_stale_locks(stale_threshold: int = 300) -> None:
             except Exception as e:
                 log_debug("⚠️ OCSP fingerprint lock cleanup failed under %s: %s", locks_root, e)
 
-    # Migrate away: remove any legacy flock files left on the cache filesystem.
+    # Stale shared O_EXCL leases (multi-node mutex) under .ocsp-locks/
     if CONFIGS_SSL_BASE.is_dir():
-        try:
-            for lock_file in CONFIGS_SSL_BASE.glob("*/*/ocsp-*.lock"):
-                if _try_unlink_stale_lock(lock_file, stale_threshold=-1, current_time=current_time):
-                    cleaned += 1
-                    log_debug("🧹 OCSP removed legacy cache-fs lock %s", lock_file)
-        except Exception as e:
-            log_debug("⚠️ OCSP legacy cache lock cleanup failed: %s", e)
-
-        # Stale shared O_EXCL leases (multi-node mutex) under .ocsp-locks/
         leases_root = CONFIGS_SSL_BASE / ".ocsp-locks"
         if leases_root.is_dir() and not leases_root.is_symlink():
             try:
@@ -1925,16 +1885,14 @@ def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
     """
     Fields handshake Lua uses to refuse stapling past nextUpdate.
 
-    expires: legacy human/TTL string for cleanup
-    expires_unix: absolute UTC unix time from nextUpdate (prefer for ssl_certificate checks)
+    expires_unix: absolute UTC unix death time (required by handshake / cleanup)
     published_unix / max_age_unix: wall-clock stop independent of nextUpdate
     """
     if not ttl or ttl <= 0:
-        return {"expires": "unknown"}
+        return {}
     now = datetime.now(timezone.utc)
     published = int(now.timestamp())
     return {
-        "expires": now.isoformat() + f" + {int(ttl)}s",
         "expires_unix": published + int(ttl),
         "published_unix": published,
         "max_age_unix": published + PREVIOUS_GOOD_MAX_AGE_SECONDS,
@@ -2412,10 +2370,6 @@ def _publish_ocsp_shard(
                     job_name="ocsp-refresh",
                     checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
                 )
-                try:
-                    db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
-                except Exception:
-                    pass
             except Exception as e:
                 log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
 
@@ -2492,8 +2446,8 @@ def _write_ocsp_http_error_backoff(
         }
         if serial_norm:
             meta["serial"] = serial_norm
-        # Preserve success-cache fields. Never put retry_after into "expires" — TTL cleanup
-        # treats expires as OCSP response lifetime and would delete a still-valid ocsp.der.
+        # Preserve success-cache fields. Never put retry_after into expires_unix —
+        # TTL cleanup treats that as OCSP response lifetime and would delete a still-valid ocsp.der.
         try:
             if meta_path.is_file():
                 old = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -2501,14 +2455,6 @@ def _write_ocsp_http_error_backoff(
                     old_sha = old.get("der_sha256")
                     if isinstance(old_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", old_sha):
                         meta["der_sha256"] = old_sha.lower()
-                    old_expires = old.get("expires")
-                    if (
-                        isinstance(old_expires, str)
-                        and old_expires.strip()
-                        and old_expires.strip().lower() != "unknown"
-                        and old.get("error_type") != "http_backoff"
-                    ):
-                        meta["expires"] = old_expires
                     old_exp_unix = old.get("expires_unix")
                     if isinstance(old_exp_unix, (int, float)) and int(old_exp_unix) > 0 and old.get("error_type") != "http_backoff":
                         meta["expires_unix"] = int(old_exp_unix)
@@ -2522,6 +2468,20 @@ def _write_ocsp_http_error_backoff(
                             meta[age_key] = int(old_age)
                     # Keep prior GOOD verifier identity; backoff is not a new openssl publish.
                     _preserve_provenance(meta, old)
+                    # Keep canary / pin fields so a fetch blip does not demote a live GOOD shard.
+                    for keep_key in (
+                        "paged",
+                        "paged_unix",
+                        "certid",
+                        "aia_ocsp_uri",
+                        "this_update_unix",
+                        "next_update_unix",
+                        "must_staple",
+                        "fingerprint",
+                        "serial",
+                    ):
+                        if keep_key not in meta and keep_key in old:
+                            meta[keep_key] = old[keep_key]
         except Exception:
             pass
 
@@ -2631,10 +2591,6 @@ def _write_issuer_pem(
                 job_name="ocsp-refresh",
                 checksum=hashlib.sha256(issuer_pem).hexdigest().lower(),
             )
-            try:
-                db.delete_job_cache(file_name=f"issuer/{normalized}", job_name="ocsp-refresh")
-            except Exception:
-                pass
         except Exception as e:
             log_debug("⚠️ OCSP could not store issuer certificate for %s: %s", normalized[:16], e)
             # Disk issuer is present; DB mirror failure must not block handshake publish.
@@ -2963,24 +2919,6 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         return None, 0, None
 
 
-def extract_san_dns(pem_data: bytes, cert_name: str = "") -> List[str]:
-    """
-    Extract DNS names from certificate SAN extension.
-    Best-effort; returns empty list on failure.
-    """
-    try:
-        cert = x509.load_pem_x509_certificate(pem_data)
-        san = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-        san_value = cast(SubjectAlternativeName, san.value)
-        names = san_value.get_values_for_type(x509.DNSName)
-        return sorted(set(names))
-    except x509.ExtensionNotFound:
-        return []
-    except Exception as e:
-        log_debug("OCSP failed to extract SAN from %s: %s", cert_name, e)
-        return []
-
-
 def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, fingerprint: Optional[str] = None) -> Tuple[Optional[int], Optional[int]]:
     """
     Check if cached OCSP DER file exists (using fingerprint-based sharded path) and return:
@@ -3064,58 +3002,6 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
         return None, None
 
 
-def _create_san_symlinks(pem_data: bytes, ocsp_path: Path, cert_name: str) -> None:
-    """
-    Create symlinks for each SAN in the certificate so that OCSP responses
-    can be found by any SNI name, not just the cert directory name.
-    E.g., if cert is for example.com + www.example.com and stored under example.com/ocsp.der,
-    creates www.example.com/ocsp.der -> example.com/ocsp.der
-    """
-    sans = extract_san_dns(pem_data, cert_name)
-    # Strip -rsa/-ecdsa suffix from cert_name for comparison
-    base_name = _service_name_from_dir(cert_name)
-
-    for san in sans:
-        # Prevent Path Traversal by validating SAN format
-        # Allow alphanumeric, hyphens, dots, and wildcards (e.g., *.example.com)
-        if not re.match(r"^[A-Za-z0-9_.*-]+$", san):
-            log_warning("⚠️ OCSP sanitization: skipping invalid/unsafe SAN %s", san)
-            continue
-
-        if san == base_name or san == cert_name:
-            continue
-
-        sanitized_san = _sanitize_filename(san)
-        san_dir = CONFIGS_SSL_BASE / sanitized_san
-        san_ocsp = san_dir / "ocsp.der"
-
-        # Skip if target already exists (real file or valid symlink)
-        if san_ocsp.exists() or san_ocsp.is_symlink():
-            # Log details about what's already there for troubleshooting
-            if san_ocsp.is_symlink():
-                try:
-                    target = san_ocsp.readlink()
-                    expected_target = Path("..") / _sanitize_filename(cert_name) / "ocsp.der"
-                    if target == expected_target:
-                        log_debug("🔗 OCSP SAN symlink for %s already correct (%s -> %s)", san, san_ocsp, target)
-                    else:
-                        log_debug("ℹ️ OCSP SAN symlink for %s points to different target (got %s, expected %s) — likely overlapping certs, skipping", san, target, expected_target)
-                except Exception:
-                    log_debug("⚠️ OCSP SAN symlink for %s is broken or unreadable", san)
-            elif san_ocsp.is_file():
-                log_debug("ℹ️ OCSP SAN path %s is a regular file (not a symlink) — likely another real cert, skipping symlink", san_ocsp)
-            continue
-
-        try:
-            san_dir.mkdir(parents=True, exist_ok=True)
-            # Use relative symlink: ../cert_name/ocsp.der
-            rel_target = Path("..") / _sanitize_filename(cert_name) / "ocsp.der"
-            san_ocsp.symlink_to(rel_target)
-            log_debug("🔗 OCSP created SAN symlink %s -> %s", san_ocsp, rel_target)
-        except Exception as e:
-            log_debug("⚠️ OCSP could not create SAN symlink for %s: %s", san, e)
-
-
 def _get_cached_ocsp_certs(db: Any) -> set:
     """
     Get the set of certificate names that have cached OCSP responses in the database.
@@ -3132,15 +3018,9 @@ def _get_cached_ocsp_certs(db: Any) -> set:
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=False)
         for entry in cache_files:
             file_name = entry.get("file_name", "")
-            cert_name_raw = None
-            if file_name.startswith(OCSP_MARKER_PREFIX):
-                cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
-            elif file_name.startswith("ocsp/"):
-                # Legacy marker ocsp/<name> — skip fingerprint-shaped keys (those are DER rows).
-                candidate = file_name[len("ocsp/") :]
-                if _normalize_fingerprint(candidate):
-                    continue
-                cert_name_raw = candidate
+            if not file_name.startswith(OCSP_MARKER_PREFIX):
+                continue
+            cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
             if cert_name_raw and re.match(r"^[A-Za-z0-9_.*-]+$", cert_name_raw):
                 cached_certs.add(cert_name_raw)
     except Exception as e:
@@ -3500,17 +3380,6 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                         issuer_path.write_bytes(entry["data"])
                         issuer_path.chmod(0o640)
                         log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
-                    if file_name.startswith("issuer/"):
-                        new_name = _ocsp_cache_relpath(issuer_fp, "issuer.pem")
-                        if new_name:
-                            db.upsert_job_cache(
-                                service_id=None,
-                                file_name=new_name,
-                                data=entry["data"],
-                                job_name="ocsp-refresh",
-                                checksum=hashlib.sha256(entry["data"]).hexdigest().lower(),
-                            )
-                            db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore issuer certificate for %s: %s", file_name, e)
                 continue
@@ -3533,8 +3402,8 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
                 continue
-            # Marker entries live under ocsp-marker/<cert_name> (not ocsp/<name>).
-            # Response entries are {hex1}/{hex2}/{fingerprint}/ocsp.der, or the legacy ocsp/{fingerprint} key.
+            # Marker entries live under ocsp-marker/<cert_name>.
+            # Response entries are {hex1}/{hex2}/{fingerprint}/ocsp.der.
             fingerprint = _fingerprint_from_ocsp_der_name(file_name)
             if not fingerprint:
                 continue
@@ -3580,17 +3449,6 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     ocsp_path.chmod(0o640)
                     restored_count += 1
                     log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
-                if file_name.startswith("ocsp/"):
-                    new_name = _ocsp_cache_relpath(fingerprint, "ocsp.der")
-                    if new_name:
-                        db.upsert_job_cache(
-                            service_id=None,
-                            file_name=new_name,
-                            data=db_data,
-                            job_name="ocsp-refresh",
-                            checksum=db_checksum,
-                        )
-                        db.delete_job_cache(file_name=file_name, job_name="ocsp-refresh")
             except Exception as e:
                 log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
 
@@ -4054,7 +3912,6 @@ def cleanup_ocsp_cache(
             return
 
         # Clean up a single certificate's OCSP cache
-        sanitized_name = _sanitize_filename(cert_name)
         resolved_fp = _normalize_fingerprint(fingerprint)
 
         # If fingerprint wasn't provided, try to resolve it from the marker stored in DB.
@@ -4065,42 +3922,14 @@ def cleanup_ocsp_cache(
                 log_debug("⚠️ OCSP could not resolve fingerprint marker for %s: %s", cert_name, e)
                 resolved_fp = None
 
-        # Disk cleanup: prefer fingerprint-based sharded storage.
+        # Disk cleanup: fingerprint-sharded storage only.
         if resolved_fp:
             ocsp_fp_dir = _get_sharded_ocsp_path(resolved_fp)
             if ocsp_fp_dir.is_dir():
                 shutil.rmtree(ocsp_fp_dir, ignore_errors=True)
                 log_info("🧹 OCSP removed sharded cache for %s (fingerprint=%s)", cert_name, resolved_fp[:16] + "...")
         else:
-            ocsp_dir = CONFIGS_SSL_BASE / sanitized_name
-            if ocsp_dir.is_dir():
-                shutil.rmtree(ocsp_dir, ignore_errors=True)
-                log_info("🧹 OCSP removed cache directory for %s", cert_name)
-
-        # Best-effort legacy flat cache cleanup (kept for backward compatibility).
-        legacy_ocsp_dir = CONFIGS_SSL_BASE / sanitized_name
-        if legacy_ocsp_dir.is_dir():
-            shutil.rmtree(legacy_ocsp_dir, ignore_errors=True)
-
-        # Also remove any SAN symlinks that point to this cert's OCSP cache
-        if CONFIGS_SSL_BASE.is_dir():
-            target_rel = Path("..") / sanitized_name / "ocsp.der"
-            for entry in CONFIGS_SSL_BASE.iterdir():
-                if not entry.is_dir():
-                    continue
-                san_ocsp = entry / "ocsp.der"
-                if san_ocsp.is_symlink():
-                    try:
-                        if san_ocsp.readlink() == target_rel:
-                            san_ocsp.unlink()
-                            log_debug("🧹 OCSP removed SAN symlink %s", san_ocsp)
-                            # Remove empty directory
-                            try:
-                                entry.rmdir()
-                            except OSError:
-                                pass
-                    except Exception as e:
-                        log_debug("⚠️ OCSP failed to remove SAN symlink %s: %s", san_ocsp, e)
+            log_debug("🧹 OCSP no fingerprint for %s; skipping disk shard cleanup", cert_name)
 
         if db and purge_db:
             try:
@@ -4113,7 +3942,7 @@ def cleanup_ocsp_cache(
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
     else:
-        # Clean up ALL OCSP caches (handles both old flat and new tree structures)
+        # Clean up ALL OCSP caches (sharded tree under CONFIGS_SSL_BASE)
         if CONFIGS_SSL_BASE.is_dir():
             # Recursively find and remove all ocsp.der files
             for root, dirs, files in os.walk(CONFIGS_SSL_BASE, topdown=False):
@@ -4150,7 +3979,8 @@ def cleanup_ocsp_cache(
 
         if db and purge_db:
             try:
-                # Remove all OCSP-related cache entries from database
+                # Remove all OCSP-related cache entries from database.
+                # Also wipe leftover pre-shard keys (ocsp/<fp>, issuer/<fp>) if any remain.
                 job_cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh")
                 for cache_file in job_cache_files:
                     file_name = cache_file.get("file_name", "")
@@ -4159,6 +3989,7 @@ def cleanup_ocsp_cache(
                         or file_name.startswith(OCSP_MARKER_PREFIX)
                         or file_name.startswith("issuer/")
                         or file_name.startswith("cert_checksum/")
+                        or file_name.startswith("ocsp-floor/")
                         or file_name == "last_full_refresh"
                         or _fingerprint_from_ocsp_der_name(file_name)
                         or _fingerprint_from_issuer_name(file_name)
@@ -4187,8 +4018,8 @@ def _cleanup_expired_ocsp_entries(
     This job maintains a fingerprint-sharded cache:
       - /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der
       - /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.json
-    and mirrors OCSP response bytes in database cache entries:
-      - file_name="ocsp/<fingerprint>"
+    and mirrors OCSP response bytes in database cache entries under the same
+    relative sharded paths (plus ocsp-marker/ and cert_checksum/).
     """
     if stats is None:
         stats = {}
@@ -4198,7 +4029,7 @@ def _cleanup_expired_ocsp_entries(
     # Fingerprints whose ocsp.{json,der} are believed expired.
     expired_fingerprints: set = set()
 
-    # Fingerprints whose ocsp.json exists but "expires" couldn't be parsed,
+    # Fingerprints whose ocsp.json exists but expires_unix couldn't be read,
     # so we might need to fall back to parsing ocsp.der.
     meta_unparseable_fingerprints: set = set()
 
@@ -4208,37 +4039,15 @@ def _cleanup_expired_ocsp_entries(
     max_disk_der_checks = 2000
     max_db_checks = 500
 
-    def _parse_expires(expires_value: Any) -> Optional[datetime]:
-        """
-        Parse the `expires` value written by this job into a timezone-aware datetime.
-
-        Success metadata format:
-          - "<iso8601 datetime> + <N>s"
-        """
-        if not expires_value or not isinstance(expires_value, str):
-            return None
-        raw = expires_value.strip()
-        if not raw or raw.lower() == "unknown":
-            return None
-
-        try:
-            if " + " in raw:
-                base_str, tail_str = raw.rsplit(" + ", 1)
-                # Expected: "<N>s"
-                m = re.match(r"^(\d+)\s*s$", tail_str.strip())
-                if not m:
-                    return None
-                ttl_seconds = int(m.group(1))
-                base_dt = datetime.fromisoformat(base_str.strip())
-                if base_dt.tzinfo is None:
-                    base_dt = base_dt.replace(tzinfo=timezone.utc)
-                return base_dt + timedelta(seconds=ttl_seconds)
-
-            # Bare ISO timestamps are not used for success TTL (backoff used to
-            # misuse expires=retry_after). Ignore them so cleanup falls back to ocsp.der.
-            return None
-        except Exception:
-            return None
+    def _meta_expires_unix(meta: Dict[str, Any]) -> Optional[int]:
+        """Absolute UTC death time from ocsp.json (expires_unix or next_update_unix)."""
+        for key in ("expires_unix", "next_update_unix"):
+            raw = meta.get(key)
+            if isinstance(raw, (int, float)) and int(raw) > 0:
+                return int(raw)
+            if isinstance(raw, str) and raw.isdigit():
+                return int(raw)
+        return None
 
     def _delete_fingerprint_cache(fingerprint: str) -> None:
         nonlocal expired_cleaned_count
@@ -4259,13 +4068,14 @@ def _cleanup_expired_ocsp_entries(
         expired_fingerprints.add(fingerprint)
         expired_cleaned_count += 1
 
-    # 1. Disk cleanup using ocsp.json "expires".
+    # 1. Disk cleanup using ocsp.json expires_unix.
     if CONFIGS_SSL_BASE.is_dir():
         try:
             meta_files = list(CONFIGS_SSL_BASE.rglob("ocsp.json"))
         except Exception:
             meta_files = []
 
+        now_unix = int(now.timestamp())
         for meta_file in meta_files[:max_disk_meta_checks]:
             try:
                 raw = meta_file.read_text(encoding="utf-8")
@@ -4279,17 +4089,18 @@ def _cleanup_expired_ocsp_entries(
                 if not fingerprint:
                     continue
 
-                # Backoff markers must not drive deletion; only success "expires" (or ocsp.der) may.
-                if meta.get("error_type") == "http_backoff" and " + " not in str(meta.get("expires") or ""):
+                # Backoff markers must not drive deletion; only success expires_unix (or ocsp.der) may.
+                if meta.get("error_type") == "http_backoff":
+                    if _meta_expires_unix(meta) is None:
+                        meta_unparseable_fingerprints.add(fingerprint)
+                    continue
+
+                expires_unix = _meta_expires_unix(meta)
+                if expires_unix is None:
                     meta_unparseable_fingerprints.add(fingerprint)
                     continue
 
-                expires_dt = _parse_expires(meta.get("expires"))
-                if expires_dt is None:
-                    meta_unparseable_fingerprints.add(fingerprint)
-                    continue
-
-                if expires_dt > now:
+                if expires_unix > now_unix:
                     continue
 
                 _delete_fingerprint_cache(fingerprint)
@@ -4431,7 +4242,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
         if not fingerprint or fingerprint in valid_fingerprints or fingerprint in removed_fingerprints:
             return
         try:
-            # Response, legacy keys, issuer, metadata, and checksum. Leaving any of
+            # Response, issuer, metadata, and checksum. Leaving any of
             # them lets restore_ocsp_from_database recreate the sharded directory.
             _delete_fingerprint_db_rows(db, fingerprint)
             removed_fingerprints.add(fingerprint)
@@ -4447,8 +4258,7 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
             for entry in cache_files:
                 file_name = entry.get("file_name", "")
 
-                # Response rows are {hex1}/{hex2}/{fingerprint}/ocsp.der, or the legacy ocsp/<fingerprint> key.
-                # Issuer and metadata rows for that fingerprint must go with the response.
+                # Response/issuer/metadata rows are {hex1}/{hex2}/{fingerprint}/…
                 if valid_fingerprints:
                     response_fp = _fingerprint_from_ocsp_der_name(file_name)
                     issuer_fp = None if response_fp else _fingerprint_from_issuer_name(file_name)
@@ -4459,17 +4269,9 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                             _drop_orphan_fingerprint(related_fp)
                         continue
 
-                cert_name_raw = None
-                if file_name.startswith(OCSP_MARKER_PREFIX):
-                    cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
-                elif file_name.startswith("ocsp/"):
-                    candidate = file_name[len("ocsp/") :]
-                    # Fingerprint-shaped ocsp/ keys are response rows (handled above).
-                    if _normalize_fingerprint(candidate):
-                        continue
-                    cert_name_raw = candidate
-                else:
+                if not file_name.startswith(OCSP_MARKER_PREFIX):
                     continue
+                cert_name_raw = file_name[len(OCSP_MARKER_PREFIX) :]
 
                 # Marker entries map cert_name → fingerprint.
                 if cert_name_raw in valid_cert_names:
@@ -4480,23 +4282,6 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
                 orphaned_count += 1
         except Exception as e:
             log_warning("⚠️ OCSP could not check database for orphaned entries: %s", e)
-
-    # Check disk directories for orphaned OCSP files
-    if CONFIGS_SSL_BASE.is_dir():
-        for entry in sorted(CONFIGS_SSL_BASE.iterdir()):
-            if not entry.is_dir():
-                continue
-            ocsp_file = entry / "ocsp.der"
-            if not ocsp_file.is_file() and not ocsp_file.is_symlink():
-                continue
-            cert_name_raw = entry.name
-            if cert_name_raw not in valid_cert_names:
-                # Check if it's a SAN symlink (those are managed by _create_san_symlinks)
-                if ocsp_file.is_symlink():
-                    continue
-                log_info("🧹 OCSP removing orphaned disk cache for deleted service: %s", cert_name_raw)
-                cleanup_ocsp_cache(db, cert_name_raw)
-                orphaned_count = orphaned_count + 1
 
     # Check sharded fingerprint cache directories for orphaned OCSP files.
     # Sharded layout is: /var/cache/bunkerweb/ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der
@@ -4786,10 +4571,6 @@ def _persist_ocsp_results_to_db(
                 )
                 if not err:
                     try:
-                        db.delete_job_cache(file_name=f"ocsp/{cert_fp}", job_name="ocsp-refresh")
-                    except Exception:
-                        pass
-                    try:
                         # Prefer the paged on-disk meta (includes paged_unix / canary_reason).
                         # Disk is already verified paged=true above; never invent paged without canary.
                         meta = dict(disk_meta_obj)
@@ -4811,7 +4592,7 @@ def _persist_ocsp_results_to_db(
                     log_info("✓ OCSP stored response for %s in database (fingerprint: %s, TTL=%ds)", cert_name, cert_fp[:16] + "...", ttl)
 
                     # Also store a marker entry with cert_name for differential tracking
-                    # (ocsp-marker/<name>, not ocsp/<name> — that prefix is legacy DER).
+                    # (ocsp-marker/<name>).
                     try:
                         _upsert_cert_name_marker(db, cert_name, cert_fp)
                         log_debug("✓ OCSP stored cert_name marker for %s (fingerprint: %s)", cert_name, cert_fp[:16] + "...")
@@ -5138,7 +4919,7 @@ def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> None:
     """Drop stored DER so end-of-job restore cannot put a tombstoned staple back."""
     if db is None or not fingerprint:
         return
-    names = [f"ocsp/{fingerprint}"]
+    names = []
     rel = _ocsp_cache_relpath(fingerprint, "ocsp.der")
     if rel:
         names.append(rel)
@@ -5710,9 +5491,7 @@ def main() -> int:
         # Wait for scheduler's directory purge to finish after service restart,
         # then restore cached OCSP responses from database to disk.
         # This handles ephemeral storage and post-restart cache directory cleanup.
-        # Note: OCSP files may live under legacy flat dirs (ssl/<name>/ocsp.der) or
-        # tree-sharded dirs (ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der). Only checking
-        # direct children of ssl/ misses the sharded layout and falsely logs "no cached files".
+        # OCSP files live under tree-sharded dirs (ssl/<hex1>/<hex2>/<fingerprint>/ocsp.der).
         ocsp_files_exist = (
             any(CONFIGS_SSL_BASE.rglob("ocsp.der")) if CONFIGS_SSL_BASE.is_dir() else False
         )

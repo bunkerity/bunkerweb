@@ -41,7 +41,7 @@ Handshake and the OCSP refresh job share a fixed **clock-skew budget** of 300 se
 
 ### OCSP `staple_decision` runbook
 
-Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** the section key below—grep the log token, open this section, follow the steps. Unknown legacy strings normalize to `unmet` with `detail=` preserved. The closed set and aliases live in one place (`bunkerweb.ocsp`); HTTP and stream both format through it.
+Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** the section key below—grep the log token, open this section, follow the steps. Unknown detail strings normalize to `unmet` with `detail=` preserved. The closed set and aliases live in one place (`bunkerweb.ocsp`); HTTP and stream both format through it.
 
 | `staple_decision` | Meaning | What to do |
 | ----------------- | ------- | ---------- |
@@ -49,12 +49,12 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `stapling_off` | Optional stapling disabled / unavailable | Expected when `SSL_USE_OCSP_STAPLING=no` or `ngx.ocsp` missing. Not a Must-Staple abort. |
 | `skip_slot` | Dual-cert sibling deliberately not stapled | One OCSP slot per handshake; ECDSA preferred. Put Must-Staple on ECDSA only. |
 | `cluster_floor` | Local `published_unix` behind colony floor | Wait for this node’s job to catch the floor. Restore will not raise the floor above a fenced still-GOOD trio (avoids healthy files + closed Must-Staple). |
-| `not_paged` | Shard on disk but canary never stamped `paged=true` | Missing/legacy `paged` is also not_paged. Inspect `ocsp-refresh` canary logs; previous live shard with `paged=true` should still be in place. |
+| `not_paged` | Shard on disk but canary never stamped `paged=true` | Missing `paged` is also not_paged. Inspect `ocsp-refresh` canary logs; previous live shard with `paged=true` should still be in place. |
 | `aia_uri_mismatch` / `aia_uri_unpinned` / `aia_uri_missing_on_leaf` | Staple not pinned to leaf AIA OCSP URI | HTTP and stream share `bunkerweb.ocsp.aia_uri_pin_ok` (all leaf AIA OCSP URIs, punctuation-safe). Re-run refresh; check leaf AIA vs `ocsp.json` `aia_ocsp_uri`. |
 | `ssl_use_ocsp_stapling_no` | Must-Staple leaf but stapling setting off | Set `SSL_USE_OCSP_STAPLING=yes` or remove Must-Staple from the cert. |
 | `ngx_ocsp_unavailable` | `ngx.ocsp` / `set_ocsp_status_resp` missing | OpenResty build / load issue—fix ngx_http_lua / stream OCSP module. |
 | `response_not_found` | No usable L1/disk GOOD staple | Check job fetch, shard path under `/var/cache/bunkerweb/ssl/`, serial blacklist. |
-| `response_stale` | Past nextUpdate / max-age / skew death | Wait for refresh or force `ocsp-refresh`. Prefer `expires_unix` in `ocsp.json`; legacy `expires` (`ISO + Ns`) is parsed as real UTC (no host TZ/DST guess) via `bunkerweb.ocsp.meta_expires_unix`. |
+| `response_stale` | Past nextUpdate / max-age / skew death | Wait for refresh or force `ocsp-refresh`. Handshake and cleanup require `expires_unix` (or `next_update_unix`) in `ocsp.json` — no ISO+Ns string fallback. |
 | `serial_blacklisted` | Serial tombstoned after non-GOOD | Investigate CA revocation/UNKNOWN; clear only after a verified GOOD republish. DB restore keeps the ban when the restored body still matches; clears it when the restored GOOD supersedes (newer `thisUpdate`, different serial, or `serial_unknown` + serial). Restore sweeps preserve `serial-blacklist.json` / `nongood.json` (disk-local); coherence resets `nongood.json` on every GOOD trio restore. |
 | `tombstoned` | Shard marked `tombstoned` in `ocsp.json` (revoked/unknown streak) | Job removed the GOOD staple; wait for a newer verified GOOD page. Mid-write: meta is the refuse signal before `.ocsp_epoch` / DER unlink finish. |
 | `shared_ligand` | Must-Staple L1 not bound to `ocsp.json` `der_sha256` | Epoch drift or partial publish—bump/`ocsp-refresh` so disk meta matches body. |
