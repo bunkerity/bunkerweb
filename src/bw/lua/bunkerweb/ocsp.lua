@@ -292,10 +292,55 @@ local function to_hex(bin)
 	return table.concat(hex)
 end
 
+-- Per-worker memo of pure PEM-derived facts (SPKI, DNs, Must-Staple bit, serial, key
+-- kind). One handshake used to re-parse the same PEM ~20 times. Keyed by the exact
+-- PEM bytes, so a rewrapped PEM is only a miss, never a wrong answer. Wiped when full.
+-- Main-chunk locals are capped at 200 by LuaJIT, so memo state lives in this block
+-- and the uncached computations in one table.
+local pem_memo_fetch
+local uncached = {}
+do
+	local PEM_MEMO_MAX = 512
+	local MEMO_NIL = {}
+	local pem_memo = {}
+	local pem_memo_count = 0
+
+	pem_memo_fetch = function(kind, pem, compute)
+		if type(pem) ~= "string" or pem == "" then
+			return compute(pem)
+		end
+		local entry = pem_memo[pem]
+		if entry then
+			local v = entry[kind]
+			if v == MEMO_NIL then
+				return nil
+			end
+			if v ~= nil then
+				return v
+			end
+		else
+			if pem_memo_count >= PEM_MEMO_MAX then
+				pem_memo = {}
+				pem_memo_count = 0
+			end
+			entry = {}
+			pem_memo[pem] = entry
+			pem_memo_count = pem_memo_count + 1
+		end
+		local v = compute(pem)
+		if v == nil then
+			entry[kind] = MEMO_NIL
+		else
+			entry[kind] = v
+		end
+		return v
+	end
+end
+
 -- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
--- Do not memoize by ngx.md5(cert_pem): PEM whitespace/rewrap changes the key while
--- the SPKI is identical, which caused cache misses and path skew vs the job.
-local function spki_fingerprint(cert_pem, _internalstore)
+-- Never key anything by ngx.md5(cert_pem) as a stand-in for the SPKI: PEM rewrap
+-- changes that hash while the SPKI is identical (path skew vs the job).
+function uncached.spki_fingerprint(cert_pem)
 	local fingerprint = nil
 	local ok_fp, err = pcall(function()
 		local x509 = require("resty.openssl.x509")
@@ -320,6 +365,10 @@ local function spki_fingerprint(cert_pem, _internalstore)
 		return fingerprint
 	end
 	return nil
+end
+
+local function spki_fingerprint(cert_pem)
+	return pem_memo_fetch("spki", cert_pem, uncached.spki_fingerprint)
 end
 
 local function read_file(path)
@@ -606,11 +655,15 @@ end
 -- Implemented after ligand_effective_sha (shared with HTTP); see l1_body_matches_disk.
 local l1_matches_disk
 
-local function issuer_candidates(blocks, leaf_pem, fingerprint)
+-- stored_pem: the shard issuer.pem the caller already read (false = known absent),
+-- or nil to read it here.
+local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
 	-- re-encoding from the chain). Do not let validate succeed against a different CA.
 	local stored = nil
-	if fingerprint then
+	if stored_pem ~= nil then
+		stored = stored_pem or nil
+	elseif fingerprint then
 		stored = read_file(issuer_path(fingerprint))
 	end
 	local want_spki = stored and spki_fingerprint(stored) or nil
@@ -704,7 +757,7 @@ end
 -- that decide whether Must-Staple enforcement applies (never invent false on throw).
 -- Callers also consult ocsp.json (written by ocsp-refresh) when resty cannot see
 -- Must-Staple — see resolve_leaf_must_staple.
-local function has_must_staple(cert_pem)
+function uncached.has_must_staple(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
@@ -727,6 +780,38 @@ local function has_must_staple(cert_pem)
 		return nil
 	end
 	return must
+end
+
+local function has_must_staple(cert_pem)
+	return pem_memo_fetch("must", cert_pem, uncached.has_must_staple)
+end
+
+-- { subject_dn, issuer_dn } strings (either may be nil on parse failure).
+function uncached.pem_names(pem)
+	local names = {}
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local c = x509.new(pem)
+		if c and c.get_subject_name and c.get_issuer_name then
+			names[1] = tostring(c:get_subject_name() or "")
+			names[2] = tostring(c:get_issuer_name() or "")
+		end
+	end)
+	return names
+end
+
+local function pem_names(pem)
+	local names = pem_memo_fetch("names", pem, uncached.pem_names)
+	if type(names) ~= "table" then
+		return nil, nil
+	end
+	return names[1], names[2]
+end
+
+-- Trust anchor (subject == issuer): never a stapled CertificateEntry.
+local function is_self_signed(pem)
+	local s, iss = pem_names(pem)
+	return s ~= nil and s ~= "" and s == iss
 end
 
 -- Job-written shard metadata ({fp[1]}/{fp[2]}/{fp}/ocsp.json), or nil when absent/invalid.
@@ -1561,6 +1646,152 @@ local function ocsp_refuse_path(fingerprint)
 	return ocsp_allow_path(fingerprint)
 end
 
+-- Minimal DER walk for OCSP CertID serials. lua-resty-openssl has no OCSP module, so
+-- the former require("resty.openssl.ocsp") always failed and every CertID check
+-- refused. Returns tag, content_start, content_end, next_pos (or nil if malformed).
+local function der_read(der, pos, limit)
+	if not pos or pos + 1 > limit then
+		return nil
+	end
+	local tag = der:byte(pos)
+	local len = der:byte(pos + 1)
+	local cs = pos + 2
+	if len >= 0x80 then
+		local n = len - 0x80
+		if n < 1 or n > 4 or cs + n - 1 > limit then
+			return nil
+		end
+		len = 0
+		for i = 0, n - 1 do
+			len = len * 256 + der:byte(cs + i)
+		end
+		cs = cs + n
+	end
+	local ce = cs + len - 1
+	if ce > limit then
+		return nil
+	end
+	return tag, cs, ce, ce + 1
+end
+
+-- id-pkix-ocsp-basic (1.3.6.1.5.5.7.48.1.1) OID content bytes.
+local OID_OCSP_BASIC = "\43\6\1\5\5\7\48\1\1"
+
+-- Canonical uppercase hex serial of every SingleResponse CertID (RFC 6960 4.2.1),
+-- in response order. nil when the DER is not a successful basic OCSP response.
+local function ocsp_der_serials(der)
+	if type(der) ~= "string" or #der < 2 then
+		return nil
+	end
+	local n = #der
+	local t, s, e, nx = der_read(der, 1, n)
+	if t ~= 0x30 then
+		return nil
+	end
+	local top_end = e
+	-- responseStatus ENUMERATED must be successful (0).
+	t, s, e, nx = der_read(der, s, top_end)
+	if t ~= 0x0A or e ~= s or der:byte(s) ~= 0 then
+		return nil
+	end
+	-- responseBytes [0] EXPLICIT ResponseBytes
+	t, s, e = der_read(der, nx, top_end)
+	if t ~= 0xA0 then
+		return nil
+	end
+	t, s, e = der_read(der, s, e)
+	if t ~= 0x30 then
+		return nil
+	end
+	local rb_end = e
+	t, s, e, nx = der_read(der, s, rb_end)
+	if t ~= 0x06 or der:sub(s, e) ~= OID_OCSP_BASIC then
+		return nil
+	end
+	-- response OCTET STRING → BasicOCSPResponse → tbsResponseData
+	t, s, e = der_read(der, nx, rb_end)
+	if t ~= 0x04 then
+		return nil
+	end
+	t, s, e = der_read(der, s, e)
+	if t ~= 0x30 then
+		return nil
+	end
+	t, s, e = der_read(der, s, e)
+	if t ~= 0x30 then
+		return nil
+	end
+	local rd_end = e
+	-- [0] version (optional), responderID [1]|[2], producedAt, responses
+	t, s, e, nx = der_read(der, s, rd_end)
+	if t == 0xA0 then
+		t, s, e, nx = der_read(der, nx, rd_end)
+	end
+	if t ~= 0xA1 and t ~= 0xA2 then
+		return nil
+	end
+	t, s, e, nx = der_read(der, nx, rd_end)
+	if t ~= 0x18 then
+		return nil
+	end
+	t, s, e = der_read(der, nx, rd_end)
+	if t ~= 0x30 then
+		return nil
+	end
+	local serials = {}
+	local pos, list_end = s, e
+	while pos <= list_end do
+		local st, ss, se, snx = der_read(der, pos, list_end)
+		if st ~= 0x30 then
+			return nil
+		end
+		-- CertID: hashAlgorithm, issuerNameHash, issuerKeyHash, serialNumber
+		local ct, cs, ce = der_read(der, ss, se)
+		if ct ~= 0x30 then
+			return nil
+		end
+		local at, _, _, anx = der_read(der, cs, ce)
+		local nt, _, _, nnx = der_read(der, anx, ce)
+		local kt, _, _, knx = der_read(der, nnx, ce)
+		local it, is, ie = der_read(der, knx, ce)
+		if at ~= 0x30 or nt ~= 0x04 or kt ~= 0x04 or it ~= 0x02 or ie < is then
+			return nil
+		end
+		-- RFC 5280 serials are positive; a negative INTEGER is not a leaf we issued.
+		if der:byte(is) >= 0x80 then
+			return nil
+		end
+		local hex = to_hex(der:sub(is, ie)):upper():gsub("^0+", "")
+		serials[#serials + 1] = hex == "" and "0" or hex
+		pos = snx
+	end
+	if #serials == 0 then
+		return nil
+	end
+	return serials
+end
+
+-- Serial of the SingleResponse naming want_hex when present, else the first one.
+-- Callers compare the result with want_hex, so this is a "response covers it" test.
+local function ocsp_resp_serial_hex(ocsp_der, want_hex)
+	local serials = ocsp_der_serials(ocsp_der)
+	if not serials then
+		return nil
+	end
+	if want_hex then
+		for _, serial in ipairs(serials) do
+			if serial == want_hex then
+				return serial
+			end
+		end
+	end
+	return serials[1]
+end
+
+function _M.ocsp_resp_serial_hex(ocsp_der, want_hex)
+	return ocsp_resp_serial_hex(ocsp_der, want_hex)
+end
+
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
 -- A different serial (reissue on the same key) is allowed. Unreadable serial
 -- while the file exists fails closed.
@@ -1589,29 +1820,8 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	if banned_hex == "" then
 		banned_hex = "0"
 	end
-	local got_hex = nil
-	pcall(function()
-		local ocsp_lib = require("resty.openssl.ocsp")
-		local parsed = ocsp_lib.new(resp)
-		if not parsed then
-			return
-		end
-		local serial = parsed:get_serial()
-		if type(serial) == "table" and serial.to_hex then
-			got_hex = serial:to_hex()
-		elseif serial ~= nil then
-			got_hex = tostring(serial)
-		end
-	end)
-	if type(got_hex) ~= "string" then
-		log(ngx.ERR, "OCSP serial blacklist present but response serial unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
-		return true
-	end
-	got_hex = got_hex:upper():gsub("%s+", ""):gsub("^0X", ""):gsub("^0+", "")
-	if got_hex == "" then
-		got_hex = "0"
-	end
-	if not got_hex:match("^[0-9A-F]+$") then
+	local got_hex = ocsp_resp_serial_hex(resp, banned_hex)
+	if not got_hex then
 		log(ngx.ERR, "OCSP serial blacklist present but response serial unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
 		return true
 	end
@@ -1622,7 +1832,9 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	return false
 end
 
--- Canonical uppercase hex serial without leading zeros (decimal BN → hex when needed).
+-- Canonical uppercase hex serial without leading zeros. Strings are always hex:
+-- ocsp-refresh.py writes format(serial, "X"), and an all-digit hex serial such as
+-- "1000" (0x1000) must not be reinterpreted as decimal.
 local function canonical_serial_hex(serial)
 	if serial == nil then
 		return nil
@@ -1647,41 +1859,26 @@ local function canonical_serial_hex(serial)
 		end
 	end
 	if type(serial) == "number" then
-		-- Format as hex without 0x; strip leading zeros.
+		-- Doubles are exact only below 2^53; larger serials must arrive as hex strings.
+		if serial < 0 or serial >= 2 ^ 53 or serial % 1 ~= 0 then
+			return nil
+		end
 		local hex = string.format("%X", serial)
 		hex = hex:gsub("^0+", "")
 		return hex == "" and "0" or hex
 	end
 	if type(serial) ~= "string" then
-		serial = tostring(serial)
-	end
-	if serial == "" then
 		return nil
 	end
-	serial = serial:upper():gsub("%s+", ""):gsub("^0X", "")
-	-- Decimal digit-only strings from some BN tostring paths.
-	if serial:match("^[0-9]+$") and not serial:match("^[0-9A-F]*[A-F]") then
-		-- Pure decimal: convert via resty BN when available.
-		local converted = nil
-		pcall(function()
-			local bn = require("resty.openssl.bn")
-			local obj = bn.from_dec(serial)
-			if obj and obj.to_hex then
-				converted = obj:to_hex()
-			end
-		end)
-		if type(converted) == "string" and #converted > 0 then
-			serial = converted:upper()
-		end
-	end
-	if not serial:match("^[0-9A-F]+$") then
+	serial = serial:upper():gsub("[%s:]+", ""):gsub("^0X", "")
+	if serial == "" or not serial:match("^[0-9A-F]+$") then
 		return nil
 	end
 	serial = serial:gsub("^0+", "")
 	return serial == "" and "0" or serial
 end
 
-local function leaf_serial_hex(cert_pem)
+function uncached.leaf_serial_hex(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
@@ -1697,43 +1894,19 @@ local function leaf_serial_hex(cert_pem)
 	return hex
 end
 
-local function ocsp_resp_serial_hex(ocsp_der)
-	if type(ocsp_der) ~= "string" or ocsp_der == "" then
-		return nil
-	end
-	local hex = nil
-	pcall(function()
-		local ocsp_lib = require("resty.openssl.ocsp")
-		local parsed = ocsp_lib.new(ocsp_der)
-		if not parsed then
-			return
-		end
-		hex = canonical_serial_hex(parsed:get_serial())
-	end)
-	return hex
+local function leaf_serial_hex(cert_pem)
+	return pem_memo_fetch("serial", cert_pem, uncached.leaf_serial_hex)
 end
 
 local function pem_dn_str(cert_pem, which)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
-	local out = nil
-	pcall(function()
-		local x509 = require("resty.openssl.x509")
-		local cert = x509.new(cert_pem)
-		if not cert then
-			return
-		end
-		local name = nil
-		if which == "issuer" then
-			name = cert:get_issuer_name()
-		else
-			name = cert:get_subject_name()
-		end
-		if name then
-			out = tostring(name)
-		end
-	end)
+	local subject, issuer = pem_names(cert_pem)
+	local out = subject
+	if which == "issuer" then
+		out = issuer
+	end
 	if type(out) == "string" and #out > 0 then
 		return out
 	end
@@ -1745,7 +1918,7 @@ end
 -- Several PEMs can share one subject DN (cross-signs). Accept that DN only when
 -- every match is the same SPKI; distinct keys return issuer_ambiguous (caller
 -- maps this to certid_mismatch). This is not a full OCSP CertID issuerNameHash /
--- issuerKeyHash parse — resty.openssl.ocsp here exposes the serial, and the SPKI
+-- issuerKeyHash check — ocsp_der_serials reads the serial only, and the SPKI
 -- tie-break stops the wrong cross-sign from passing on DN text alone.
 -- ngx.ocsp.validate_ocsp_response also binds CertID; this gate covers verified-L1
 -- paths that skip re-validate after a same-key renew left a stale body under the SPKI.
@@ -1754,7 +1927,7 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 		return false, "missing_leaf_or_resp"
 	end
 	local leaf_serial = leaf_serial_hex(leaf_pem)
-	local resp_serial = ocsp_resp_serial_hex(ocsp_der)
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der, leaf_serial)
 	if not leaf_serial or not resp_serial then
 		return false, "serial_unreadable"
 	end
@@ -1815,7 +1988,7 @@ local function certid_consistent_with_meta(meta, ocsp_der)
 	else
 		meta_serial = canonical_serial_hex(meta.serial)
 	end
-	local resp_serial = ocsp_resp_serial_hex(ocsp_der)
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der, meta_serial)
 	if not meta_serial or not resp_serial then
 		return false, "serial_unreadable"
 	end
@@ -1847,7 +2020,7 @@ local function normalize_ocsp_aia_uri(url)
 end
 
 -- All OCSP URIs from leaf AIA (authorityInfoAccess), normalized.
-local function leaf_aia_ocsp_uris(cert_pem)
+function uncached.leaf_aia_ocsp_uris(cert_pem)
 	local out = {}
 	local seen = {}
 	if type(cert_pem) ~= "string" or cert_pem == "" then
@@ -1882,6 +2055,11 @@ local function leaf_aia_ocsp_uris(cert_pem)
 		end
 	end)
 	return out
+end
+
+-- Memoized list is shared: callers must treat it as read-only.
+local function leaf_aia_ocsp_uris(cert_pem)
+	return pem_memo_fetch("aia", cert_pem, uncached.leaf_aia_ocsp_uris)
 end
 
 -- Published staple must name the leaf AIA OCSP URI the job fetched.
@@ -2308,6 +2486,7 @@ end
 local attach_ocsp_staple
 local issuer_path_intermediate_ready
 local clear_connection_staple
+local maybe_rearm_l1_warmer
 
 local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, chain_blocks)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
@@ -2394,8 +2573,79 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 	return nil
 end
 
--- TLS 1.3 multi-staple when libssl exports SSL_set0_tlsext_status_ocsp_resp_ex
--- (upstream OpenSSL 3.6+; do not gate on version_num — distro backports / forks vary).
+-- OpenSSL staple setters are macros over SSL_ctrl, not exported symbols, so they
+-- must be called through SSL_ctrl (an ffi.C lookup of the macro name throws).
+-- 143 exists from OpenSSL 3.6; earlier libssl returns 0 for an unknown ctrl.
+local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP = 71
+local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX = 143
+
+-- ffi + C with SSL_ctrl, the OpenSSL stack API and the OCSP_RESPONSE codec declared,
+-- or nil. Reuses lua-resty-openssl's typedefs; each fallback declaration gets its own
+-- pcall because a redeclare error aborts the rest of a multi-declaration cdef.
+local _ssl_ffi = nil
+local function ssl_ffi()
+	if _ssl_ffi ~= nil then
+		return _ssl_ffi or nil
+	end
+	local ok_ffi, ffi = pcall(require, "ffi")
+	if not ok_ffi or not ffi then
+		_ssl_ffi = false
+		return nil
+	end
+	pcall(require, "resty.openssl.include.ssl")
+	pcall(require, "resty.openssl.include.stack")
+	for _, decl in ipairs({
+		"long SSL_ctrl(void *ssl, int cmd, long larg, void *parg);",
+		"const void *TLS_server_method(void);",
+		"void *SSL_CTX_new(const void *meth);",
+		"void SSL_CTX_free(void *ctx);",
+		"void *SSL_new(void *ctx);",
+		"void SSL_free(void *ssl);",
+		"void *OPENSSL_sk_new_null(void);",
+		"int OPENSSL_sk_push(void *st, const void *data);",
+		"void OPENSSL_sk_pop_free(void *st, void (*func)(void *));",
+		"void *d2i_OCSP_RESPONSE(void **a, const unsigned char **pp, long length);",
+		"void OCSP_RESPONSE_free(void *r);",
+	}) do
+		pcall(ffi.cdef, decl)
+	end
+	local ok_sym = pcall(function()
+		return ffi.C.SSL_ctrl
+	end)
+	if not ok_sym then
+		_ssl_ffi = false
+		return nil
+	end
+	_ssl_ffi = { ffi = ffi, C = ffi.C }
+	return _ssl_ffi
+end
+
+-- True when this libssl accepts the TLS 1.3 multi-staple ctrl (143 → 1 on a scratch SSL).
+-- A capability probe, not a version gate: distro backports and forks vary.
+local function probe_multi_staple_ctrl()
+	local st = ssl_ffi()
+	if not st then
+		return false
+	end
+	local ok, capable = pcall(function()
+		local C = st.C
+		local sctx = C.SSL_CTX_new(C.TLS_server_method())
+		if sctx == nil then
+			return false
+		end
+		local rc = 0
+		local s = C.SSL_new(sctx)
+		if s ~= nil then
+			rc = tonumber(C.SSL_ctrl(s, SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX, 0, nil)) or 0
+			C.SSL_free(s)
+		end
+		C.SSL_CTX_free(sctx)
+		return rc == 1
+	end)
+	return ok and capable == true
+end
+
+-- TLS 1.3 multi-staple via SSL_ctrl(ssl, 143, 0, STACK_OF(OCSP_RESPONSE)).
 -- Colony capability is the MIN across live workers (not last-writer on one file):
 -- each worker writes .multi_staple_attach.d/<host-pid-wid>; aggregate .multi_staple_attach
 -- is "1" only when every live marker is "1". Any leaf-only worker forces fleet leaf-only
@@ -2407,8 +2657,6 @@ local MULTI_STAPLE_PUBLISH_INTERVAL = 15 -- rate-limit colony republish on hot p
 local _multi_staple_state = nil -- nil=unprobed, false=unavailable, table=ready
 local _multi_staple_worker_id = nil
 local _multi_staple_last_publish = 0
--- tostring(SSL_CTX*) values that already received empty_cb on this worker.
-local _status_cb_installed = {}
 
 -- Colony vote filename. Hash the full hostname (do not truncate to 64 chars):
 -- two pods that share a long name prefix must not publish into the same file
@@ -2571,10 +2819,10 @@ local function publish_multi_staple_attach(ready, force)
 end
 
 -- True when this worker can multi-staple AND the colony MIN allows it.
--- Probes SSL_set0_tlsext_status_ocsp_resp_ex, publishes the vote, then still
--- fails closed with why_not="colony" while any live peer is leaf-only.
+-- Probes SSL_ctrl 143 once, publishes the vote, then still fails closed with
+-- why_not="colony" while any live peer is leaf-only.
 local function openssl_multi_staple_ready()
-	-- Local symbol probe (publishes this worker's vote). Colony min may still force
+	-- Local capability probe (publishes this worker's vote). Colony min may still force
 	-- leaf-only while any live peer cannot attach — even if this worker is 3.6+.
 	local function finish_local(local_ok)
 		if not local_ok then
@@ -2593,41 +2841,13 @@ local function openssl_multi_staple_ready()
 		publish_multi_staple_attach(_multi_staple_state ~= false, false)
 		return finish_local(_multi_staple_state ~= false)
 	end
-	local ok_ffi, ffi = pcall(require, "ffi")
-	if not ok_ffi or not ffi then
+	local st = ssl_ffi()
+	if not st or not probe_multi_staple_ctrl() then
 		_multi_staple_state = false
 		publish_multi_staple_attach(false, true)
 		return false, nil, "libssl"
 	end
-	-- cdef may fail on re-entry (types already declared); symbol probe is the real gate.
-	pcall(ffi.cdef, [[
-		typedef struct ocsp_response_st OCSP_RESPONSE;
-		typedef struct stack_st OPENSSL_STACK;
-		OPENSSL_STACK *OPENSSL_sk_new_null(void);
-		int OPENSSL_sk_push(OPENSSL_STACK *st, const void *data);
-		void OPENSSL_sk_pop_free(OPENSSL_STACK *st, void (*func)(void *));
-		OCSP_RESPONSE *d2i_OCSP_RESPONSE(OCSP_RESPONSE **a, const unsigned char **pp, long length);
-		void OCSP_RESPONSE_free(OCSP_RESPONSE *r);
-		long SSL_set0_tlsext_status_ocsp_resp_ex(void *ssl, OPENSSL_STACK *resp);
-		void *SSL_get_SSL_CTX(const void *ssl);
-		long SSL_CTX_set_tlsext_status_cb(void *ctx, int (*cb)(void *ssl, void *arg));
-	]])
-	local ok_sym, sym = pcall(function()
-		return ffi.C.SSL_set0_tlsext_status_ocsp_resp_ex
-	end)
-	if not ok_sym or type(sym) ~= "cdata" then
-		_multi_staple_state = false
-		publish_multi_staple_attach(false, true)
-		return false, nil, "libssl"
-	end
-	-- OpenSSL emits a staple already stored on the SSL object only when the
-	-- SSL_CTX status callback returns SSL_TLSEXT_ERR_OK (0). The callback
-	-- pointer must stay alive for the process (ffi.cast is not GC'd here).
-	-- Do not delete this callback: without it, SSL_set0 responses are not sent.
-	local cb = ffi.cast("int (*)(void *, void *)", function()
-		return 0 -- SSL_TLSEXT_ERR_OK
-	end)
-	_multi_staple_state = { ffi = ffi, C = ffi.C, empty_cb = cb }
+	_multi_staple_state = st
 	publish_multi_staple_attach(true, true)
 	return finish_local(true)
 end
@@ -2708,17 +2928,7 @@ local function chain_has_intermediate_must_staple(chain_blocks)
 	end
 	for i = 2, #chain_blocks do
 		local pem = chain_blocks[i]
-		local self_signed = false
-		pcall(function()
-			local x509 = require("resty.openssl.x509")
-			local c = x509.new(pem)
-			if c and c.get_subject_name and c.get_issuer_name then
-				local s = tostring(c:get_subject_name() or "")
-				local iss = tostring(c:get_issuer_name() or "")
-				self_signed = (s ~= "" and s == iss)
-			end
-		end)
-		if self_signed then
+		if is_self_signed(pem) then
 			break
 		end
 		local tls_ms = has_must_staple(pem)
@@ -2754,17 +2964,7 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 	for i = 2, #chain_blocks do
 		local pem = chain_blocks[i]
 		-- Self-signed / trust-anchor: no status on the root.
-		local self_signed = false
-		pcall(function()
-			local x509 = require("resty.openssl.x509")
-			local c = x509.new(pem)
-			if c and c.get_subject_name and c.get_issuer_name then
-				local s = tostring(c:get_subject_name() or "")
-				local iss = tostring(c:get_issuer_name() or "")
-				self_signed = (s ~= "" and s == iss)
-			end
-		end)
-		if self_signed then
+		if is_self_signed(pem) then
 			break
 		end
 		local inter_must = cert_must_staple_bool(pem, true)
@@ -2803,9 +3003,9 @@ local function clear_multi_staple_attach_note()
 	note_multi_staple_attach(0, 0)
 end
 
--- Attach leaf OCSP; when the colony can multi-staple (every live worker exports
--- SSL_set0_tlsext_status_ocsp_resp_ex) also attach intermediate responses in chain
--- order. Colony leaf-only (any live 3.5 peer) or missing local symbol: leaf-only.
+-- Attach leaf OCSP; when the colony can multi-staple (every live worker's libssl
+-- accepts SSL_ctrl 143) also attach intermediate responses in chain order.
+-- Colony leaf-only (any live pre-3.6 peer) or local probe failed: leaf-only.
 -- Intermediate Must-Staple then refuses — never log leaf success while a TLS 1.3
 -- client would still abort on the missing CertificateEntry status.
 --
@@ -2901,7 +3101,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	if stack == nil then
 		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
-	local parsed = {}
+	local free_resp = ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free)
 	local push_ok = true
 	for _, der in ipairs(ders) do
 		if der == false or der == nil then
@@ -2911,7 +3111,7 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 			end
 		else
 			local buf = ffi.new("unsigned char[?]", #der)
-			ffi.copy(buf, der)
+			ffi.copy(buf, der, #der)
 			local pp = ffi.new("const unsigned char *[1]")
 			pp[0] = buf
 			local resp_obj = C.d2i_OCSP_RESPONSE(nil, pp, #der)
@@ -2919,40 +3119,25 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 				push_ok = false
 				break
 			end
-			parsed[#parsed + 1] = resp_obj
 			if C.OPENSSL_sk_push(stack, resp_obj) == 0 then
+				C.OCSP_RESPONSE_free(resp_obj)
 				push_ok = false
 				break
 			end
 		end
 	end
 	if not push_ok then
-		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
+		C.OPENSSL_sk_pop_free(stack, free_resp)
 		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 
-	local ctx = C.SSL_get_SSL_CTX(ssl_ptr)
-	-- Install at most once per SSL_CTX on this worker. Nginx's status callback
-	-- lives on the shared server ctx; replacing it on every handshake via this
-	-- FFI path races other connections that share that ctx.
-	-- OpenSSL still requires SOME callback that returns SSL_TLSEXT_ERR_OK or it
-	-- will not emit staples already stored on the SSL object. Staple bytes stay
-	-- on the SSL, not the ctx.
-	-- Note: ocsp.set_ocsp_status_resp (called just above) still reinstalls
-	-- lua-nginx's empty cb every handshake when the client sent status_request —
-	-- both callbacks return OK, so staples still emit. This once-per-ctx guard
-	-- only avoids stacking extra FFI installs of st.empty_cb on top of that.
-	if ctx ~= nil then
-		local ctx_key = tostring(ctx)
-		if not _status_cb_installed[ctx_key] then
-			C.SSL_CTX_set_tlsext_status_cb(ctx, st.empty_cb)
-			_status_cb_installed[ctx_key] = true
-		end
-	end
+	-- The status callback that makes OpenSSL emit stored staples is already on the
+	-- ctx: ocsp.set_ocsp_status_resp above installs lua-nginx's, and it only skips
+	-- that when the client sent no status_request (nothing would be sent anyway).
 	-- Ownership of stack + responses transfers to SSL on success.
-	local rc = C.SSL_set0_tlsext_status_ocsp_resp_ex(ssl_ptr, stack)
-	if rc == 0 then
-		C.OPENSSL_sk_pop_free(stack, ffi.cast("void (*)(void *)", C.OCSP_RESPONSE_free))
+	local rc = C.SSL_ctrl(ssl_ptr, SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX, 0, stack)
+	if tonumber(rc) ~= 1 then
+		C.OPENSSL_sk_pop_free(stack, free_resp)
 		return refuse_or_leaf_only("multi_staple_attach_failed")
 	end
 	note_multi_staple_attach(#ders, null_slots)
@@ -2969,12 +3154,10 @@ attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 end
 
 -- Drop staples stored on this connection's SSL object.
--- Leaf: SSL_set_tlsext_status_ocsp_resp(NULL) (or SSL_ctrl 71).
--- Multi (OpenSSL 3.6+): SSL_set0_tlsext_status_ocsp_resp_ex(ssl, NULL) so a
--- previous CertificateEntry stack cannot survive clear_certs / context swap
--- onto another leaf. The ex symbol is optional; older libssl ignores it.
+-- Leaf: SSL_ctrl 71 with NULL. Multi (only when this worker's probe proved ctrl 143):
+-- SSL_ctrl 143 with NULL, so a previous CertificateEntry stack cannot survive
+-- clear_certs / context swap onto another leaf.
 -- SSL_certs_clear does not clear either staple slot.
-local _ssl_ocsp_clear_cdef_done = false
 -- Assigns the forward-declared local so attach_ocsp_staple's refuse_or_leaf_only sees it.
 clear_connection_staple = function()
 	local prev = ngx.ctx and ngx.ctx.bw_ocsp_stapled_fp or nil
@@ -2984,7 +3167,8 @@ clear_connection_staple = function()
 		ngx.ctx.bw_ocsp_multi_stapled = nil
 		ngx.ctx.bw_ocsp_multi_null_slots = nil
 	end
-	local ok_clear = pcall(function()
+	local ok_clear = false
+	pcall(function()
 		local ssl_mod = require "ngx.ssl"
 		if not ssl_mod.get_req_ssl_pointer then
 			return
@@ -2993,28 +3177,14 @@ clear_connection_staple = function()
 		if not ptr then
 			return
 		end
-		local ffi = require "ffi"
-		if not _ssl_ocsp_clear_cdef_done then
-			pcall(ffi.cdef, [[
-				int SSL_set_tlsext_status_ocsp_resp(void *ssl, void *resp, long len);
-				long SSL_ctrl(void *ssl, int cmd, long larg, void *parg);
-				long SSL_set0_tlsext_status_ocsp_resp_ex(void *ssl, void *resp);
-			]])
-			_ssl_ocsp_clear_cdef_done = true
+		local st = ssl_ffi()
+		if not st then
+			return
 		end
-		-- Prefer the named API; fall back to SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP (71).
-		-- Separate pcalls: a missing symbol on one API must not skip the other.
-		pcall(function()
-			if ffi.C.SSL_set_tlsext_status_ocsp_resp then
-				ffi.C.SSL_set_tlsext_status_ocsp_resp(ptr, nil, 0)
-			else
-				ffi.C.SSL_ctrl(ptr, 71, 0, nil)
-			end
-		end)
-		-- OpenSSL 3.6+ multi-staple stack. Older libssl has no symbol; ignore.
-		pcall(function()
-			ffi.C.SSL_set0_tlsext_status_ocsp_resp_ex(ptr, nil)
-		end)
+		ok_clear = tonumber(st.C.SSL_ctrl(ptr, SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP, 0, nil)) == 1
+		if type(_multi_staple_state) == "table" then
+			pcall(st.C.SSL_ctrl, ptr, SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX, 0, nil)
+		end
 	end)
 	if prev and ok_clear then
 		log(
@@ -3041,7 +3211,7 @@ function _M.on_ssl_context_swap(internalstore)
 end
 
 -- Classify leaf PEM as "ec", "rsa", "ed", or nil (for dual-cert staple selection).
-local function cert_pubkey_kind(cert_pem)
+function uncached.cert_pubkey_kind(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
@@ -3070,6 +3240,10 @@ local function cert_pubkey_kind(cert_pem)
 	return kind
 end
 
+local function cert_pubkey_kind(cert_pem)
+	return pem_memo_fetch("kind", cert_pem, uncached.cert_pubkey_kind)
+end
+
 -- OpenSSL NIDs for TLS 1.3 CertificateVerify EC/Ed schemes (OBJ_sn2nid when available).
 local NID_P256, NID_P384, NID_P521, NID_ED25519, NID_ED448 = 415, 715, 716, 1087, 1088
 do
@@ -3091,7 +3265,8 @@ do
 end
 
 -- kind + curve_nid for matching ClientHello signature_algorithms schemes.
-local function cert_sig_profile(cert_pem)
+-- The returned table is memoized and shared: callers must treat it as read-only.
+function uncached.cert_sig_profile(cert_pem)
 	local profile = { kind = nil, curve_nid = nil }
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return profile
@@ -3136,6 +3311,10 @@ local function cert_sig_profile(cert_pem)
 		end
 	end)
 	return profile
+end
+
+local function cert_sig_profile(cert_pem)
+	return pem_memo_fetch("sigprof", cert_pem, uncached.cert_sig_profile)
 end
 
 -- True when this leaf can produce a CertificateVerify for the TLS SignatureScheme.
@@ -3275,8 +3454,12 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 				end_i = #sigalgs_ext
 			end
 			local matched = false
+			local offered_ecdsa = false
 			while i + 1 <= end_i do
 				local scheme = sigalgs_ext:byte(i) * 256 + sigalgs_ext:byte(i + 1)
+				if scheme == 0x0403 or scheme == 0x0503 or scheme == 0x0603 then
+					offered_ecdsa = true
+				end
 				for li = 1, #leaves do
 					if leaf_matches_scheme(profiles[li], scheme) then
 						matched = true
@@ -3284,6 +3467,17 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 					end
 				end
 				i = i + 2
+			end
+			-- TLS 1.2 ECDSA schemes name only the hash, not the curve, so an EC leaf on
+			-- another curve is still usable there. Rank it after every exact match so a
+			-- TLS 1.3 client (curve-bound schemes) still gets an exact leaf first.
+			if offered_ecdsa then
+				for li = 1, #leaves do
+					if profiles[li].kind == "ec" and not seen[li] then
+						matched = true
+						add(li)
+					end
+				end
 			end
 			if matched then
 				return ordered
@@ -3409,35 +3603,12 @@ local function key_spki_fingerprint(key_pem)
 end
 
 local function cert_spki_fingerprint(cert_pem)
-	local fingerprint = nil
-	pcall(function()
-		local x509 = require("resty.openssl.x509")
-		local digest_lib = require("resty.openssl.digest")
-		local cert_obj = x509.new(cert_pem)
-		local pub = cert_obj and cert_obj:get_pubkey()
-		local spki = pub and pub:tostring("public", "DER")
-		if not spki then
-			return
-		end
-		local digest_ctx = digest_lib.new("sha256")
-		digest_ctx:update(spki)
-		fingerprint = to_hex(digest_ctx:final())
-	end)
-	return fingerprint
+	return spki_fingerprint(cert_pem)
 end
 
--- Subject / issuer DN strings for issuer-path linking (empty on parse failure).
+-- Subject / issuer DN strings for issuer-path linking (nil on parse failure).
 local function cert_subject_issuer_dns(pem)
-	local subject, issuer = nil, nil
-	pcall(function()
-		local x509 = require("resty.openssl.x509")
-		local c = x509.new(pem)
-		if c and c.get_subject_name and c.get_issuer_name then
-			subject = tostring(c:get_subject_name() or "")
-			issuer = tostring(c:get_issuer_name() or "")
-		end
-	end)
-	return subject, issuer
+	return pem_names(pem)
 end
 
 -- Several bag PEMs can share one subject DN (cross-signs). Do not take cands[1]
@@ -3724,17 +3895,7 @@ issuer_path_intermediate_ready = function(chain_pem_or_blocks)
 	local leaf_pem = blocks[1]
 	for i = 2, #blocks do
 		local pem = blocks[i]
-		local self_signed = false
-		pcall(function()
-			local x509 = require("resty.openssl.x509")
-			local c = x509.new(pem)
-			if c and c.get_subject_name and c.get_issuer_name then
-				local s = tostring(c:get_subject_name() or "")
-				local iss = tostring(c:get_issuer_name() or "")
-				self_signed = (s ~= "" and s == iss)
-			end
-		end)
-		if self_signed then
+		if is_self_signed(pem) then
 			break
 		end
 		local inter_must = cert_must_staple_bool(pem, true)
@@ -3767,17 +3928,7 @@ local function issuer_path_null_slots(chain_pem_or_blocks)
 	local nulls = 0
 	for i = 2, #blocks do
 		local pem = blocks[i]
-		local self_signed = false
-		pcall(function()
-			local x509 = require("resty.openssl.x509")
-			local c = x509.new(pem)
-			if c and c.get_subject_name and c.get_issuer_name then
-				local s = tostring(c:get_subject_name() or "")
-				local iss = tostring(c:get_issuer_name() or "")
-				self_signed = (s ~= "" and s == iss)
-			end
-		end)
-		if self_signed then
+		if is_self_signed(pem) then
 			break
 		end
 		local der = load_paged_intermediate_staple(pem, leaf_pem)
@@ -3892,10 +4043,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			-- Pass blocks (not depleted PEM) so probe/presentable keep unresolved_must_staple.
 			local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, blocks, leaf.fp, false)
 			if not probe_ok then
+				-- Skip-leaf: no peer-bus write (tombstone / floor / canary are meta-derived,
+				-- so every sibling refuses on its own without this worker revoking the pin).
 				local detail = probe_detail or probe_reason or "probe_failed"
-				if leaf.fp and mode == "normal" then
-					record_peer_refuse(leaf.fp, read_ocsp_json(leaf.fp), nil, detail)
-				end
 				log(
 					ngx.ERR,
 					format_staple_decision(detail, {
@@ -3962,10 +4112,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 				local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, blocks, leaf.fp, false)
 				if not probe_ok then
 					leaf_ok = false
+					-- Skip-leaf demotion never writes the peer bus (see install_one).
 					leaf_detail = probe_detail or probe_reason or "probe_failed"
-					if leaf.fp and mode == "normal" then
-						record_peer_refuse(leaf.fp, read_ocsp_json(leaf.fp), nil, leaf_detail)
-					end
 					log(
 						ngx.ERR,
 						format_staple_decision(leaf_detail, {
@@ -4339,7 +4487,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 				return false
 			end
-			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
 			local ok_id, why = certid_matches_handshake_leaf(leaf_pem, cached, issuers)
 			if not ok_id then
 				log(ngx.ERR, "OCSP CertID refuse L1 staple reason=" .. tostring(why) .. " fp=" .. fingerprint:sub(1, 16) .. "...")
@@ -4405,7 +4553,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 				return false
 			end
-			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
 			local result, result_detail = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
 			if result == true then
 				if must_staple then
@@ -4478,7 +4626,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint)
+		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then
 				return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
@@ -4553,6 +4701,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if not internalstore then
 		return false
 	end
+	maybe_rearm_l1_warmer()
 
 	local mode = ocsp_staple_mode(internalstore, server_name)
 	local fp_hint = normalize_fp_hint(cert_fp_hint)
@@ -4581,7 +4730,18 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	-- Drop off-path bag PEMs (sibling dual-cert leaf, cross-signs) before Must-Staple scan.
 	blocks = presentable_chain_blocks(blocks)
 	leaf_pem = blocks[1] or leaf_pem
-	local must_tri = resolve_leaf_must_staple(leaf_pem, fp_hint)
+
+	-- Staple only this leaf's SPKI. Never use a dual-cert sibling hint (RSA hint on ECDSA leaf),
+	-- including for the Must-Staple decision below.
+	local leaf_fp = spki_fingerprint(leaf_pem)
+	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
+		log_ocsp_staple_skip(cert_pubkey_kind(leaf_pem) == "ec" and "rsa" or "ec", fp_hint, "wrong_key_type_hint", server_name)
+		fp_hint = nil
+	end
+	-- No SPKI from PEM: fingerprint-only path (no sibling borrow possible without a second leaf).
+	local fingerprint = leaf_fp or fp_hint
+
+	local must_tri = resolve_leaf_must_staple(leaf_pem, fingerprint)
 	-- Fail closed: unknown (nil) enforces Must-Staple; proven false does not.
 	local must_staple = must_tri ~= false
 
@@ -4589,6 +4749,8 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if must_staple and mode == "open" then
 		log(ngx.NOTICE, "OCSP_STAPLE_MODE=open - Must-Staple enforcement disabled for " .. (server_name or "unknown"))
 		must_staple = false
+	elseif must_tri == true and fingerprint then
+		log(ngx.INFO, "OCSP-Must-Staple for fp=" .. fingerprint:sub(1, 16) .. "...")
 	end
 
 	if not stapling_enabled(internalstore, server_name) then
@@ -4608,27 +4770,6 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		return false
 	end
 	local ssl = require "ngx.ssl"
-
-	-- Staple only this leaf's SPKI. Never use a dual-cert sibling hint (RSA hint on ECDSA leaf).
-	local leaf_fp = spki_fingerprint(leaf_pem, internalstore)
-	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
-		log_ocsp_staple_skip(cert_pubkey_kind(leaf_pem) == "ec" and "rsa" or "ec", fp_hint, "wrong_key_type_hint", server_name)
-		fp_hint = nil
-	end
-	local fingerprint = leaf_fp
-	if not fingerprint and fp_hint then
-		-- No SPKI from PEM; fingerprint-only path (no sibling borrow possible without a second leaf).
-		fingerprint = fp_hint
-	end
-	if fingerprint then
-		must_tri = resolve_leaf_must_staple(leaf_pem, fingerprint)
-		must_staple = must_tri ~= false
-		if must_staple and mode == "open" then
-			must_staple = false
-		elseif must_tri == true then
-			log(ngx.INFO, "OCSP-Must-Staple for fp=" .. fingerprint:sub(1, 16) .. "...")
-		end
-	end
 
 	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, false, mode)
 	if result == true then
@@ -4654,6 +4795,7 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not internalstore then
 		return false
 	end
+	maybe_rearm_l1_warmer()
 	local mode = ocsp_staple_mode(internalstore, server_name)
 	-- open disables Must-Staple entirely: leaf may load without a live staple.
 	if mode == "open" then
@@ -4696,13 +4838,17 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not path_ok then
 		return finish(false, "must_staple", path_detail or "unmet")
 	end
-	local must_tri = resolve_leaf_must_staple(leaf_pem, fp_hint)
+	-- Never let a dual-cert sibling hint decide this leaf's Must-Staple bit.
+	local leaf_fp = spki_fingerprint(leaf_pem)
+	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
+		fp_hint = nil
+	end
+	local fingerprint = leaf_fp or fp_hint
 	-- Fail closed: unknown enforces Must-Staple; proven false may load unstapled.
-	if must_tri == false then
+	if resolve_leaf_must_staple(leaf_pem, fingerprint) == false then
 		-- Optional leaf stapling: path already scored; leaf may load without a live body.
 		return true
 	end
-	local must_staple = true
 	if not stapling_enabled(internalstore, server_name) then
 		return finish(false, "must_staple", "ssl_use_ocsp_stapling_no")
 	end
@@ -4711,16 +4857,8 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 		return finish(false, "must_staple", "ngx_ocsp_unavailable")
 	end
 	local ssl = require "ngx.ssl"
-	local leaf_fp = spki_fingerprint(leaf_pem, internalstore)
-	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
-		fp_hint = nil
-	end
-	local fingerprint = leaf_fp or fp_hint
 	if not fingerprint then
 		return finish(false, "must_staple", "fingerprint_unavailable")
-	end
-	if resolve_leaf_must_staple(leaf_pem, fingerprint) == false then
-		return true
 	end
 	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, true, server_name, true, mode)
 	if result == true then
@@ -4771,7 +4909,7 @@ function _M.requires_must_staple(cert_pem, cert_fp_hint)
 		local blocks = pem_blocks(cert_pem)
 		leaf_pem = blocks[1]
 	end
-	local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem, nil) or nil
+	local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem) or nil
 	return resolve_leaf_must_staple(leaf_pem, leaf_fp or fp_hint) ~= false
 end
 
@@ -4887,6 +5025,10 @@ local l1_warmer_started = false
 local l1_warmer_no_add_logged = false
 local l1_warmer_last_epoch = nil
 local l1_warmer_last_full = 0
+-- Store the warmer was armed with; lets a handshake re-arm it after a failed reschedule.
+local l1_warmer_store = nil
+local l1_warmer_rearm_at = 0
+local L1_WARMER_REARM_INTERVAL = 5
 
 local function warmer_lease_token()
 	local wid = (ngx.worker and ngx.worker.id and ngx.worker.id()) or 0
@@ -5030,15 +5172,19 @@ function _M.warm_l1_from_disk(internalstore)
 		return 0
 	end
 	local fps = list_ocsp_fingerprints()
+	-- Read each ocsp.json once: reading inside the comparator cost O(n log n) disk
+	-- reads, and a file changing mid-sort made the order inconsistent, so table.sort
+	-- raised "invalid order function" and the whole pass was lost.
+	local is_must = {}
+	for _, fp in ipairs(fps) do
+		local meta = read_ocsp_json(fp)
+		is_must[fp] = type(meta) == "table" and meta.must_staple == true
+	end
 	table.sort(fps, function(a, b)
-		local ma = read_ocsp_json(a)
-		local mb = read_ocsp_json(b)
-		local am = type(ma) == "table" and ma.must_staple == true
-		local bm = type(mb) == "table" and mb.must_staple == true
-		if am ~= bm then
-			return am
+		if is_must[a] ~= is_must[b] then
+			return is_must[a]
 		end
-		return tostring(a) < tostring(b)
+		return a < b
 	end)
 	local warmed = 0
 	for _, fp in ipairs(fps) do
@@ -5073,6 +5219,7 @@ function _M.start_l1_warmer(internalstore)
 	-- Publish multi-staple attach capability for ocsp-refresh (intermediate fetch gate).
 	pcall(openssl_multi_staple_ready)
 	l1_warmer_started = true
+	l1_warmer_store = internalstore
 
 		local function tick(premature)
 			if premature then
@@ -5124,6 +5271,22 @@ function _M.start_l1_warmer(internalstore)
 	return true
 end
 
+-- A failed ngx.timer.at reschedule used to stop the warmer for the worker's lifetime.
+-- Handshakes re-arm it (throttled) once it has been started at least once.
+maybe_rearm_l1_warmer = function()
+	if l1_warmer_started or not l1_warmer_store then
+		return
+	end
+	if ngx.worker and ngx.worker.exiting and ngx.worker.exiting() then
+		return
+	end
+	local now = ngx.now()
+	if now - l1_warmer_rearm_at < L1_WARMER_REARM_INTERVAL then
+		return
+	end
+	l1_warmer_rearm_at = now
+	pcall(_M.start_l1_warmer, l1_warmer_store)
+end
 
 -- Public attach: presentable_chain_blocks first, then attach_ocsp_staple.
 -- Reviewers: multi-staple build/set0 failure refuses when intermediate Must-Staple
