@@ -121,6 +121,7 @@ local STAPLE_DECISION = {
 	peer_refuse = true,
 	peer_refuse_bus = true,
 	await_sni = true,
+	intermediate_must_staple_libssl = true,
 	unmet = true,
 }
 
@@ -376,6 +377,8 @@ local PEER_REFUSE_STICKY = {
 	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
+	-- Platform cannot emit CertificateEntry staples (OpenSSL < 3.6).
+	intermediate_must_staple_libssl = true,
 }
 
 local function l1_shm_ttl(expires_unix)
@@ -1663,7 +1666,11 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 		if ok_set and set_ok then
 			return true
 		end
-		log(ngx.ERR, "OCSP failed to set stapling: " .. tostring(set_err or set_ok))
+		local detail = tostring(set_err or set_ok)
+		log(ngx.ERR, "OCSP failed to set stapling: " .. detail)
+		if detail == "intermediate_must_staple_libssl" then
+			return false, detail
+		end
 		return false
 	end
 	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand match.
@@ -1761,6 +1768,37 @@ local function load_paged_intermediate_staple(cert_pem)
 	return der, fp
 end
 
+-- True when any non-root chain cert carries Must-Staple (PEM TLS Feature or ocsp.json).
+local function chain_has_intermediate_must_staple(chain_blocks)
+	if type(chain_blocks) ~= "table" or #chain_blocks < 2 then
+		return false
+	end
+	for i = 2, #chain_blocks do
+		local pem = chain_blocks[i]
+		local self_signed = false
+		pcall(function()
+			local x509 = require("resty.openssl.x509")
+			local c = x509.new(pem)
+			if c and c.get_subject_name and c.get_issuer_name then
+				local s = tostring(c:get_subject_name() or "")
+				local iss = tostring(c:get_issuer_name() or "")
+				self_signed = (s ~= "" and s == iss)
+			end
+		end)
+		if self_signed then
+			break
+		end
+		if has_must_staple(pem) then
+			return true
+		end
+		local fp = spki_fingerprint(pem)
+		if fp and ocsp_json_must_staple(read_ocsp_json(fp)) then
+			return true
+		end
+	end
+	return false
+end
+
 -- Build Certificate-message-ordered OCSP DER list: leaf, then each intermediate
 -- (skip self-signed / no-AIA). Missing intermediate → nil slot (OpenSSL omits that
 -- CertificateEntry's status_request). Intermediate Must-Staple without a GOOD body
@@ -1807,12 +1845,15 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 end
 
 -- Attach leaf OCSP; on OpenSSL 3.6+ also attach intermediate responses in chain order.
--- Intermediate Must-Staple is only fail-closed when libssl can actually emit
--- multi-staple (3.6+). On 3.5 the server can only send the leaf status, so
--- collecting intermediates first would refuse handshakes for a staple we cannot set.
+-- On OpenSSL < 3.6: leaf-only. If an intermediate requires Must-Staple, refuse with
+-- intermediate_must_staple_libssl (capability gap) — never log leaf success while a
+-- TLS 1.3 client would still abort on the missing CertificateEntry status.
 attach_ocsp_staple = function(ocsp, leaf_resp, chain_blocks)
 	local ready, st = openssl_multi_staple_ready()
 	if not ready then
+		if chain_has_intermediate_must_staple(chain_blocks) then
+			return nil, "intermediate_must_staple_libssl"
+		end
 		return ocsp.set_ocsp_status_resp(leaf_resp)
 	end
 
@@ -2733,8 +2774,16 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 				return true
 			end
-			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. tostring(set_err or set_ok))
+			local attach_detail = tostring(set_err or set_ok)
+			log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
 			drop_cache(internalstore, fingerprint)
+			if attach_detail == "intermediate_must_staple_libssl" or must_staple then
+				local detail = attach_detail
+				if detail ~= "intermediate_must_staple_libssl" then
+					detail = "set_staple_failed"
+				end
+				return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+			end
 			end
 		else
 			if serial_blacklist_blocks(fingerprint, cached) then
@@ -2745,7 +2794,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return false
 			end
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
-			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
+			local result, result_detail = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
 			if result == true then
 				if must_staple then
 					meta = meta or read_ocsp_json(fingerprint)
@@ -2763,9 +2812,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return true
 			end
 			if result == false then
-				if must_staple then
+				if result_detail == "intermediate_must_staple_libssl" or must_staple then
 					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
-					local detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
+					local detail = result_detail
+					if detail ~= "intermediate_must_staple_libssl" then
+						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
+					end
 					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
 				end
 				return false
@@ -2793,7 +2845,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
+		local result, result_detail = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, blocks)
 		if result == true then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
@@ -2807,8 +2859,11 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			return true
 		end
 		if result == false then
-			if must_staple then
-				local detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
+			if result_detail == "intermediate_must_staple_libssl" or must_staple then
+				local detail = result_detail
+				if detail ~= "intermediate_must_staple_libssl" then
+					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
+				end
 				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
 			end
 			return false
