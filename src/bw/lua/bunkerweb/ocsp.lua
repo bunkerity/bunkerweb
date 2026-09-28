@@ -1848,7 +1848,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		for _, intermediate in ipairs(intermediates) do
 			chain_pem = chain_pem .. "\n" .. intermediate
 		end
-		-- Must-Staple leaves require a live shard probe before set_cert (normal mode).
+		-- Must-Staple leaves require a live shard probe before set_cert.
+		-- open disables Must-Staple entirely; staple_only still probes (skip leaf on
+		-- miss) and only softens handshake abort when nothing installable remains.
 		local leaf_must = has_must_staple(leaf.pem)
 		if not leaf_must and leaf.fp then
 			leaf_must = ocsp_json_must_staple(read_ocsp_json(leaf.fp))
@@ -1857,7 +1859,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			leaf_must = false
 		end
 		local skip_leaf = false
-		if leaf_must and internalstore and mode == "normal" then
+		if leaf_must and internalstore and mode ~= "open" then
 			-- apply_soften=false: log skip_leaf here (dual-cert may still install another leaf).
 			local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, chain_pem, leaf.fp, false)
 			if not probe_ok then
@@ -1871,7 +1873,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 					format_staple_decision(refuse_detail or "probe_failed", {
 						tag = "OCSP_MUST_STAPLE_REFUSE",
 						action = "skip_leaf",
-						mode = "normal",
+						mode = mode,
 						fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
 					})
 				)
@@ -2363,9 +2365,10 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 end
 
 -- Live staple probe for a leaf/shard without installing the cert or setting the staple.
--- Must-Staple leaves must pass this before set_cert (normal mode). Soft fuses continue
--- when apply_soften is not false (default). Pass apply_soften=false for skip-leaf callers
--- that log their own action (e.g. set_certs_from_pem).
+-- Must-Staple leaves must pass this before set_cert (normal and staple_only). Soft fuses
+-- only affect handshake abort after install fails entirely — not the skip-leaf gate.
+-- Pass apply_soften=false for skip-leaf callers that log their own action
+-- (e.g. set_certs_from_pem). open mode short-circuits to true (Must-Staple off).
 -- Returns true, or false, "must_staple", detail (abort), or false (soft continue without abort tag).
 function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soften)
 	if not internalstore then

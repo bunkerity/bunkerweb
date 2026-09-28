@@ -108,7 +108,7 @@
     "OCSP_STAPLE_MODE": {
       "context": "multisite",
       "default": "normal",
-      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet (default). staple_only = keep trying to staple but do not abort. open = disable Must-Staple enforcement (panic / recovery). Does not replace SSL_USE_OCSP_STAPLING.",
+      "help": "Must-Staple enforcement fuse read by both HTTP and stream TLS. normal = refuse the handshake when Must-Staple is unmet (default). staple_only = probe before set_cert and skip unprobed Must-Staple leaves, but do not abort the handshake. open = disable Must-Staple enforcement (panic / recovery). Does not replace SSL_USE_OCSP_STAPLING.",
       "id": "ocsp-staple-mode",
       "label": "OCSP staple mode",
       "regex": "^(normal|staple_only|open)$",
