@@ -45,11 +45,13 @@ try:
     from jobs import (  # type: ignore
         Job,
         encode_ocsp_floor_payload,
+        normalize_restored_ocsp_json_bytes,
         ocsp_floor_published_unix,
         ocsp_restore_skip_fingerprints,
         parse_ocsp_floor_bytes,
         parse_ocsp_floor_cache_name,
         load_disk_ocsp_floor,
+        publish_ocsp_restore_coherence,
         should_keep_disk_ocsp_floor,
     )
 except ImportError as e:
@@ -3406,6 +3408,10 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
 
     Never overwrites a newer on-disk SPKI shard with an older complete DB trio
     (checksum mismatch alone is not a freshness signal).
+
+    Restored ocsp.json always gets ``paged=false`` (foreign canary is not local
+    proof). After any shard leaf lands, bump epoch and clear peer-refuse like
+    scheduler generate_caches.
     """
     if not db:
         log_debug("ℹ️ OCSP database not available, skipping cache restoration")
@@ -3417,6 +3423,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         replaced_count = 0
         ok_count = 0
         skipped_newer = 0
+        restored_ocsp_fps: set = set()
 
         # Get all OCSP cache entries from database for this job
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
@@ -3453,6 +3460,7 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     if not issuer_path.is_file() or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
                         issuer_path.write_bytes(entry["data"])
                         issuer_path.chmod(0o640)
+                        restored_ocsp_fps.add(issuer_fp)
                         log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore issuer certificate for %s: %s", file_name, e)
@@ -3469,9 +3477,14 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     continue
                 try:
                     meta_path = _resolved_sharded_ocsp_path(meta_fp) / "ocsp.json"
-                    if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
-                        meta_path.write_bytes(entry["data"])
+                    write_data = normalize_restored_ocsp_json_bytes(entry["data"])
+                    if write_data is None:
+                        continue
+                    if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(write_data).hexdigest().lower():
+                        meta_path.parent.mkdir(parents=True, exist_ok=True)
+                        meta_path.write_bytes(write_data)
                         meta_path.chmod(0o640)
+                        restored_ocsp_fps.add(meta_fp)
                         log_debug("✓ OCSP restored metadata for %s", meta_fp[:16])
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
@@ -3516,15 +3529,23 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                         ocsp_path.write_bytes(db_data)
                         ocsp_path.chmod(0o640)
                         replaced_count += 1
+                        restored_ocsp_fps.add(fingerprint)
                 else:
                     # File missing — restore from database
                     ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
                     ocsp_path.write_bytes(db_data)
                     ocsp_path.chmod(0o640)
                     restored_count += 1
+                    restored_ocsp_fps.add(fingerprint)
                     log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
             except Exception as e:
                 log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
+
+        if restored_ocsp_fps:
+            try:
+                publish_ocsp_restore_coherence(CONFIGS_SSL_BASE, restored_ocsp_fps, LOG)
+            except Exception as e:
+                log_warning("⚠️ OCSP restore coherence failed after database sync: %s", e)
 
         if restored_count > 0 or replaced_count > 0 or skipped_newer > 0:
             log_info(

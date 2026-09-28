@@ -530,17 +530,19 @@ def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
 
 def normalize_restored_ocsp_json_bytes(data: Optional[bytes]) -> Optional[bytes]:
     """
-    Restored ocsp.json must not imply canary page when ``paged`` is missing.
+    Restored ocsp.json must not claim canary page.
 
-    Handshake requires explicit ``paged=true``. Legacy/DB rows without the field
-    used to staple as if already canary-paged; stamp false so refresh must re-page.
+    Handshake trusts ``paged=true`` as *local* openssl canary proof and may skip
+    ``ngx.ocsp.validate_ocsp_response``. A DB/peer row's ``paged=true`` is not
+    proof on this node — always stamp false (including when the field is missing
+    or already true) so refresh must re-page locally before canary trust resumes.
     """
     if not data:
         return data
     meta = parse_ocsp_meta_bytes(data)
     if not isinstance(meta, dict):
         return data
-    if meta.get("paged") is True:
+    if meta.get("paged") is False:
         return data
     meta = dict(meta)
     meta["paged"] = False

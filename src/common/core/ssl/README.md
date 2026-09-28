@@ -72,7 +72,7 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 
 Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is **preloaded off the TLS critical path**: every worker arms an OCSP L1 warmer timer; a short shared-dict lease picks one scanner so disk is not walked N times. If the holder dies, another worker takes the lease (well under the 300s L1 shm TTL) and re-warms. The warmer skips (and drops) generations blocked by the peer-refuse bus or `serial-blacklist.json`, same as the handshake refuse gates. A cold miss can still read `ocsp.der` during `ssl_certificate`, but steady-state and post-publish handshakes should hit DRAM first.
 
-When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha256` ligand), the handshake **trusts that canary** and skips `ngx.ocsp.validate_ocsp_response` (openssl CLI and OpenResty FFI can disagree). CertID / leaf binding and `set_ocsp_status_resp` still run.
+When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha256` ligand), the handshake **trusts that canary** and skips `ngx.ocsp.validate_ocsp_response` (openssl CLI and OpenResty FFI can disagree). CertID / leaf binding and `set_ocsp_status_resp` still run. DB restore always stamps `paged=false` (a peer's canary is not local proof) and runs restore coherence (epoch bump + refuse clear) so this node must re-page before canary trust resumes.
 
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
     NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
