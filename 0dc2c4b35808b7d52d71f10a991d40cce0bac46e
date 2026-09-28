@@ -1,0 +1,21 @@
+src/bw/Dockerfile
+  s_0e8bc3630e2267::t_726d391faa1c16 83
+src/all-in-one/Dockerfile
+  s_0e8bc3630e2267::t_6f323976f0c634 177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0dc2c4b35808b7d52d71f10a991d40cce0bac46e",
+  "prompts": {},
+  "sessions": {
+    "s_0e8bc3630e2267": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2718926-1e7d-4fe6-949b-d4392d92e540",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

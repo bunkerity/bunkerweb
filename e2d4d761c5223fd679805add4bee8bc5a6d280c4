@@ -1,0 +1,27 @@
+src/common/core/templates/templates/api.json
+  h_a33a1e80933106 116,121
+  s_0c42a96ba10fcb::t_76f28c2be7dd57 40-52,106-115,117-120,122-123
+src/common/core/templates/templates/ui.json
+  h_a33a1e80933106 21-23,47-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e2d4d761c5223fd679805add4bee8bc5a6d280c4",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_0c42a96ba10fcb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "69829022-47c2-405a-8562-612a3672c4de",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
