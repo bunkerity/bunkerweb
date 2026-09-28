@@ -116,6 +116,7 @@ local STAPLE_DECISION = {
 	thisUpdate_unreadable = true,
 	canary_refused = true,
 	peer_refuse = true,
+	peer_refuse_bus = true,
 	await_sni = true,
 	unmet = true,
 }
@@ -847,11 +848,11 @@ end
 
 local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
-		return false
+		return false, "invalid_inputs"
 	end
 	local sha = der_sha256:lower()
 	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
-		return false
+		return false, "invalid_der_sha256"
 	end
 	local dir = "/var/cache/bunkerweb/ssl/ocsp-refuse"
 	local path = ocsp_refuse_path(fingerprint)
@@ -863,20 +864,26 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 		refused_unix = ngx.time(),
 	})
 	local function try_write()
-		local f = io.open(tmp, "w")
+		local f, open_err = io.open(tmp, "w")
 		if not f then
-			return false
+			return false, "open_tmp:" .. tostring(open_err or "nil")
 		end
-		f:write(payload)
+		local ok_w, write_err = f:write(payload)
 		f:flush()
 		f:close()
-		if not os.rename(tmp, path) then
+		if not ok_w then
 			pcall(os.remove, tmp)
-			return false
+			return false, "write_tmp:" .. tostring(write_err or "nil")
+		end
+		local ok_r, rename_err = os.rename(tmp, path)
+		if not ok_r then
+			pcall(os.remove, tmp)
+			return false, "rename:" .. tostring(rename_err or "nil")
 		end
 		return true
 	end
-	if try_write() then
+	local ok, why = try_write()
+	if ok then
 		return true
 	end
 	pcall(function()
@@ -887,7 +894,11 @@ local function write_peer_refuse(fingerprint, der_sha256, decision, refused_by)
 		lfs.mkdir("/var/cache/bunkerweb/ssl")
 		lfs.mkdir(dir)
 	end)
-	return try_write()
+	ok, why = try_write()
+	if ok then
+		return true
+	end
+	return false, why or "write_failed"
 end
 
 -- If the sibling subsystem refused this generation, both refuse.
@@ -928,12 +939,38 @@ local function peer_refuse_blocks(fingerprint, meta, resp)
 end
 
 local function record_peer_refuse(fingerprint, meta, resp, decision)
+	local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or tostring(fingerprint)
+	local by = (ngx.config and ngx.config.subsystem) or "unknown"
 	local gen = generation_id(meta, resp)
-	if not fingerprint or not gen then
+	if not fingerprint or not is_fp64(fingerprint) then
+		log(
+			ngx.ERR,
+			format_staple_decision("peer_refuse_bus", {
+				tag = "OCSP_PEER_REFUSE_BUS",
+				action = "bus_write_failed",
+				detail = "missing_fingerprint",
+				fp = fp_short,
+				subsystem = by,
+			})
+		)
 		return false
 	end
-	local by = (ngx.config and ngx.config.subsystem) or "unknown"
-	local ok = write_peer_refuse(fingerprint, gen, decision, by)
+	if not gen then
+		-- Without der_sha256 / body the sibling cannot match a generation — escalate loudly.
+		log(
+			ngx.ERR,
+			format_staple_decision("peer_refuse_bus", {
+				tag = "OCSP_PEER_REFUSE_BUS",
+				action = "bus_write_failed",
+				detail = "missing_generation",
+				fp = fp_short,
+				mode = tostring(decision or "unmet"),
+				subsystem = by,
+			})
+		)
+		return false
+	end
+	local ok, why = write_peer_refuse(fingerprint, gen, decision, by)
 	if ok then
 		log(
 			ngx.NOTICE,
@@ -946,8 +983,21 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 				.. " refused_by="
 				.. by
 		)
+		return true
 	end
-	return ok
+	log(
+		ngx.ERR,
+		format_staple_decision("peer_refuse_bus", {
+			tag = "OCSP_PEER_REFUSE_BUS",
+			action = "bus_write_failed",
+			detail = tostring(why or "write_failed"),
+			fp = fp_short,
+			der_sha256 = gen:sub(1, 16) .. "...",
+			mode = tostring(decision or "unmet"),
+			subsystem = by,
+		})
+	)
+	return false
 end
 
 local function must_staple_refuse(fingerprint, meta, resp, detail)

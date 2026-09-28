@@ -66,6 +66,7 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `thisUpdate_future` / `thisUpdate_stale` / `lifetime_too_long` / `thisUpdate_unreadable` | Intrinsic signed-window policy | CA window rejected; check `thisUpdate`/`nextUpdate`; do not force-page. |
 | `canary_refused` | Scheduler canary refused page | Live shard unchanged; see `detail=` (`canary_openssl_verify`, …) and fix before page. |
 | `peer_refuse` | Sibling subsystem (HTTP↔stream) refused this generation | Shared `ocsp-refuse/{fp}` bus. Inspect `refused_by` / prior `staple_decision`; fixed when a new generation is canary-paged. |
+| `peer_refuse_bus` | Local refuse could not be written to the shared bus | Disk/`ocsp-refuse` write failed or generation id missing (`detail=`). Sibling may still staple — fix cache permissions / ensure `der_sha256` is present. |
 | `await_sni` | Stream staple deferred: no SNI-bound leaf yet | Optional: skip staple (`skip_slot` / `detail=await_sni`). Must-Staple: `OCSP_STAPLE_MODE=normal` aborts; `staple_only`/`open` soft-continue unstapled (global mode when SNI is empty). |
 | `unmet` | Must-Staple required and no more specific code | Catch-all—check `detail=` / prior lines; use `OCSP_STAPLE_MODE=staple_only`/`open` only as a temporary fuse. |
 
