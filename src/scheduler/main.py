@@ -57,6 +57,7 @@ from jobs import (  # type: ignore
     parse_ocsp_floor_bytes,
     parse_ocsp_floor_cache_name,
     parse_ocsp_shard_cache_name,
+    publish_ocsp_restore_coherence,
     should_keep_disk_ocsp_floor,
 )
 from cache_restore import (  # type: ignore
@@ -584,9 +585,11 @@ def generate_caches() -> Set[str]:
 
     # Never let DB restore regress a newer on-disk OCSP SPKI shard.
     ocsp_skip: Dict[str, str] = {}
+    restored_ocsp_fps: Set[str] = set()
+    ssl_cache_root = Path(sep, "var", "cache", "bunkerweb", "ssl")
     try:
         ssl_rows = [row for row in (job_cache_files or []) if row.get("plugin_id") == "ssl"]
-        ocsp_skip = ocsp_restore_skip_fingerprints(ssl_rows, Path(sep, "var", "cache", "bunkerweb", "ssl"))
+        ocsp_skip = ocsp_restore_skip_fingerprints(ssl_rows, ssl_cache_root)
         if ocsp_skip:
             LOGGER.info(f"OCSP restore fence: keeping {len(ocsp_skip)} newer on-disk shard(s)")
     except Exception as e:
@@ -696,6 +699,10 @@ def generate_caches() -> Set[str]:
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
             if checked_path.stat().st_mode & 0o777 != desired_perms:
                 checked_path.chmod(desired_perms)
+            if job_cache_file.get("plugin_id") == "ssl":
+                written = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
+                if written:
+                    restored_ocsp_fps.add(written[0])
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(
@@ -704,6 +711,14 @@ def generate_caches() -> Set[str]:
             )
             failed_restores.add(failure_id)
             failed_plugins.add(job_path)
+
+    # Match ocsp-refresh publish: clear sticky HTTP↔stream refuse + bump L1 epoch
+    # after allowed shard leaves land (skipped/fenced fps are not in the set).
+    if restored_ocsp_fps:
+        try:
+            publish_ocsp_restore_coherence(ssl_cache_root, restored_ocsp_fps, LOGGER)
+        except Exception as e:
+            LOGGER.warning(f"OCSP restore coherence failed after generate_caches: {e}")
 
     for plugin_path in plugin_dirs:
         if plugin_path in failed_plugins or not plugin_path.is_dir():
@@ -726,6 +741,9 @@ def generate_caches() -> Set[str]:
             if resource_path not in plugin_cache_files and resource_path.is_file():
                 if plugin_path.name == "ssl":
                     rel = resource_path.relative_to(plugin_path).as_posix()
+                    # Local-only coherence files — never DB-backed; keep across restore sweeps.
+                    if rel == ".ocsp_epoch" or rel.startswith("ocsp-refuse/"):
+                        continue
                     parsed = parse_ocsp_shard_cache_name(rel)
                     if parsed and parsed[0] in ocsp_skip:
                         continue
@@ -741,7 +759,10 @@ def generate_caches() -> Set[str]:
                 continue
             elif resource_path.is_dir() and not list(resource_path.iterdir()):
                 if plugin_path.name == "ssl" and (
-                    resource_path == plugin_path / "ocsp-floor" or resource_path.parent == plugin_path / "ocsp-floor"
+                    resource_path == plugin_path / "ocsp-floor"
+                    or resource_path.parent == plugin_path / "ocsp-floor"
+                    or resource_path == plugin_path / "ocsp-refuse"
+                    or resource_path.parent == plugin_path / "ocsp-refuse"
                 ):
                     continue
                 LOGGER.debug(f"Removing empty directory {resource_path}")
@@ -751,7 +772,10 @@ def generate_caches() -> Set[str]:
             # Directories only: a retained regular cache file keeps the 0640 it was restored with.
             if resource_path.is_dir():
                 if plugin_path.name == "ssl" and (
-                    resource_path == plugin_path / "ocsp-floor" or resource_path.parent == plugin_path / "ocsp-floor"
+                    resource_path == plugin_path / "ocsp-floor"
+                    or resource_path.parent == plugin_path / "ocsp-floor"
+                    or resource_path == plugin_path / "ocsp-refuse"
+                    or resource_path.parent == plugin_path / "ocsp-refuse"
                 ):
                     continue
                 desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750

@@ -14,8 +14,9 @@ from re import compile as re_compile
 from shutil import rmtree
 from tarfile import open as tar_open
 from threading import Lock
+from time import time_ns
 from traceback import format_exc
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Literal, Optional, Set, Tuple, Union
 
 from common_utils import bytes_hash, file_hash
 from cache_restore import (
@@ -155,6 +156,68 @@ def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
     if not isinstance(floor, dict):
         return 0
     return _ocsp_meta_unix(floor, "published_unix")
+
+
+def clear_ocsp_peer_refuse(cache_root: Path, fingerprint: str, logger: Optional[Logger] = None) -> bool:
+    """Drop HTTP↔stream generation refuse marker for this SPKI (new page / restore)."""
+    if not fingerprint or len(fingerprint) != 64:
+        return False
+    fp = fingerprint.lower()
+    try:
+        refuse_dir = Path(cache_root) / "ocsp-refuse"
+        refuse_dir.mkdir(parents=True, exist_ok=True)
+        path = refuse_dir / fp
+        if path.is_file():
+            path.unlink()
+            if logger is not None:
+                logger.debug(f"OCSP cleared peer-refuse bus for fp={fp[:16]}...")
+        return True
+    except Exception as e:
+        if logger is not None:
+            logger.debug(f"OCSP could not clear peer-refuse for {fp[:16]}...: {e}")
+        return False
+
+
+def bump_ocsp_cache_epoch(cache_root: Path, logger: Optional[Logger] = None) -> bool:
+    """
+    Bump shared on-disk generation counter so HTTP and stream L1 both drop stale
+    OCSP entries after publish or DB restore. Workers compare packed L1 epoch to
+    this file; they cannot cross-delete each other's shared dicts.
+    """
+    try:
+        root = Path(cache_root)
+        root.mkdir(parents=True, exist_ok=True)
+        _write_atomic(root / ".ocsp_epoch", f"{time_ns()}\n".encode("ascii"))
+        if logger is not None:
+            logger.debug("OCSP bumped .ocsp_epoch after restore/publish coherence")
+        return True
+    except Exception as e:
+        if logger is not None:
+            logger.debug(f"OCSP could not bump cache epoch: {e}")
+        return False
+
+
+def publish_ocsp_restore_coherence(
+    cache_root: Path,
+    fingerprints: Iterable[str],
+    logger: Optional[Logger] = None,
+) -> None:
+    """
+    After DB restore wrote one or more OCSP shard leaves for these fingerprints,
+    clear sticky peer-refuse markers and bump .ocsp_epoch once (same side effects
+    as ocsp-refresh publish). Skipped/fenced fingerprints must not be passed in.
+    """
+    fps: Set[str] = set()
+    for fingerprint in fingerprints:
+        if isinstance(fingerprint, str) and len(fingerprint) == 64 and fingerprint.isalnum():
+            fps.add(fingerprint.lower())
+    if not fps:
+        return
+    for fp in sorted(fps):
+        clear_ocsp_peer_refuse(cache_root, fp, logger)
+    bump_ocsp_cache_epoch(cache_root, logger)
+    if logger is not None:
+        logger.info(f"OCSP restore coherence: cleared refuse + bumped epoch for {len(fps)} shard(s)")
 
 
 def encode_ocsp_floor_payload(published_unix: int, job_run_id: Optional[str] = None) -> bytes:
@@ -395,6 +458,7 @@ class Job:
 
         # Never regress a newer on-disk OCSP shard with an older DB complete trio.
         ocsp_skip: Dict[str, str] = {}
+        restored_ocsp_fps: Set[str] = set()
         if self.job_path.name == "ssl":
             try:
                 ocsp_skip = ocsp_restore_skip_fingerprints(list(job_cache_files or []), self.job_path)
@@ -451,6 +515,8 @@ class Job:
                         continue
                 _write_atomic(checked_cache_path(self.job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"]), job_cache_file["data"])
                 ignored_dirs.add(cache_path.parent)
+                if parsed:
+                    restored_ocsp_fps.add(parsed[0])
                 self.logger.debug(
                     "Restored cache file " + ((job_cache_file["service_id"] + "/") if job_cache_file["service_id"] else "") + job_cache_file["file_name"]
                 )
@@ -462,6 +528,12 @@ class Job:
                     + f" :\n{e}"
                 )
                 ret = False
+
+        if restored_ocsp_fps:
+            try:
+                publish_ocsp_restore_coherence(self.job_path, restored_ocsp_fps, self.logger)
+            except Exception as e:
+                self.logger.warning(f"OCSP restore coherence failed: {e}")
 
         with LOCK:
             # An empty row set means the plugin's cache is unknown, not that everything on disk is
@@ -480,6 +552,8 @@ class Job:
                     self.logger.debug(f"Checking if {file} should be removed")
                     if (file.is_symlink() or file.is_file()) and file not in plugin_cache_files:
                         rel = file.relative_to(self.job_path).as_posix()
+                        if self.job_path.name == "ssl" and (rel == ".ocsp_epoch" or rel.startswith("ocsp-refuse/")):
+                            continue
                         parsed = parse_ocsp_shard_cache_name(rel)
                         if parsed and parsed[0] in ocsp_skip:
                             continue
@@ -489,7 +563,12 @@ class Job:
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
                     elif not file.is_symlink() and file.is_dir() and file != self.job_path and not any(file.iterdir()):
-                        if file == self.job_path / "ocsp-floor" or file.parent == self.job_path / "ocsp-floor":
+                        if self.job_path.name == "ssl" and (
+                            file == self.job_path / "ocsp-floor"
+                            or file.parent == self.job_path / "ocsp-floor"
+                            or file == self.job_path / "ocsp-refuse"
+                            or file.parent == self.job_path / "ocsp-refuse"
+                        ):
                             continue
                         self.logger.debug(f"Removing empty directory {file}")
                         rmtree(file, ignore_errors=True)
