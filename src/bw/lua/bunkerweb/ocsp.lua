@@ -1769,28 +1769,72 @@ local function openssl_multi_staple_ready()
 	return true, _multi_staple_state
 end
 
+-- Per-tenant control key for intermediate OCSP negatives (must match Python
+-- _intermediate_control_fp). Body stays under inter SPKI; refuse/tombstone/
+-- blacklist/floor for one leaf must not brick every site on that CA.
+local function intermediate_control_fp(leaf_pem, inter_pem)
+	local leaf_fp = spki_fingerprint(leaf_pem)
+	local inter_fp = spki_fingerprint(inter_pem)
+	if not leaf_fp or not inter_fp then
+		return nil
+	end
+	local out = nil
+	pcall(function()
+		local digest_lib = require("resty.openssl.digest")
+		local digest_ctx = digest_lib.new("sha256")
+		digest_ctx:update(leaf_fp .. ":" .. inter_fp)
+		out = to_hex(digest_ctx:final())
+	end)
+	if is_fp64(out) then
+		return out
+	end
+	return nil
+end
+
 -- Load a canary-paged, still-fresh OCSP DER for an intermediate SPKI (or nil).
-local function load_paged_intermediate_staple(cert_pem)
-	local fp = spki_fingerprint(cert_pem)
-	if not fp then
+-- Negatives (tombstone / peer-refuse / serial-blacklist / floor) are checked on
+-- the tenant control key when leaf_pem is provided — never on the shared SPKI alone.
+local function load_paged_intermediate_staple(cert_pem, leaf_pem)
+	local body_fp = spki_fingerprint(cert_pem)
+	if not body_fp then
 		return nil, nil
 	end
-	local meta = read_ocsp_json(fp)
+	local control_fp = nil
+	if type(leaf_pem) == "string" and leaf_pem ~= "" then
+		control_fp = intermediate_control_fp(leaf_pem, cert_pem)
+	end
+	if control_fp then
+		local cmeta = read_ocsp_json(control_fp)
+		if meta_tombstoned(cmeta) then
+			return nil, body_fp
+		end
+		if peer_refuse_blocks(control_fp, cmeta, nil, true) then
+			return nil, body_fp
+		end
+		if cluster_floor_blocks(control_fp, cmeta) then
+			return nil, body_fp
+		end
+	end
+	local meta = read_ocsp_json(body_fp)
+	-- Legacy shared tombstones still block (pre-isolation); new code never writes them.
 	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
-		return nil, fp
+		return nil, body_fp
 	end
-	local fresh = resp_still_fresh(nil, fp, meta)
+	local fresh = resp_still_fresh(nil, body_fp, meta)
 	if not fresh then
-		return nil, fp
+		return nil, body_fp
 	end
-	local der = read_file(ocsp_path(fp))
+	local der = read_file(ocsp_path(body_fp))
 	if type(der) ~= "string" or der == "" then
-		return nil, fp
+		return nil, body_fp
 	end
-	if not ocsp_json_ligand_matches(meta, fp, der) then
-		return nil, fp
+	if not ocsp_json_ligand_matches(meta, body_fp, der) then
+		return nil, body_fp
 	end
-	return der, fp
+	if control_fp and serial_blacklist_blocks(control_fp, der) then
+		return nil, body_fp
+	end
+	return der, body_fp
 end
 
 -- True when any non-root chain cert carries Must-Staple (PEM TLS Feature or ocsp.json).
@@ -1836,6 +1880,7 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 	if type(chain_blocks) ~= "table" or #chain_blocks < 2 then
 		return ders
 	end
+	local leaf_pem = chain_blocks[1]
 	for i = 2, #chain_blocks do
 		local pem = chain_blocks[i]
 		-- Self-signed / trust-anchor: no status on the root.
@@ -1853,7 +1898,7 @@ local function collect_chain_staple_ders(leaf_resp, chain_blocks)
 			break
 		end
 		local inter_must = has_must_staple(pem)
-		local der, fp = load_paged_intermediate_staple(pem)
+		local der, fp = load_paged_intermediate_staple(pem, leaf_pem)
 		if not der and not inter_must and fp then
 			inter_must = ocsp_json_must_staple(read_ocsp_json(fp))
 		end

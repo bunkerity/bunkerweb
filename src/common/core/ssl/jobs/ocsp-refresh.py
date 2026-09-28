@@ -1795,6 +1795,40 @@ def _worker_can_attach_multi_staple() -> bool:
     return ready
 
 
+def _intermediate_control_fp(leaf_fp: Optional[str], inter_fp: Optional[str]) -> Optional[str]:
+    """
+    Per-tenant control key for intermediate OCSP negatives.
+    Body stays under inter SPKI (shared); refuse/tombstone/blacklist/floor use this
+    sha256(leaf_spki || ':' || inter_spki) so one site cannot brick every chain on that CA.
+    Must match Lua intermediate_control_fp().
+    """
+    leaf = _normalize_fingerprint(leaf_fp) if leaf_fp else None
+    inter = _normalize_fingerprint(inter_fp) if inter_fp else None
+    if not leaf or not inter:
+        return None
+    return hashlib.sha256(f"{leaf}:{inter}".encode("ascii")).hexdigest()
+
+
+def _clear_tenant_control_negatives(control_fp: Optional[str]) -> None:
+    """Drop tenant-scoped intermediate negatives after a successful GOOD page for that lease."""
+    normalized = _normalize_fingerprint(control_fp) if control_fp else None
+    if not normalized:
+        return
+    _clear_nongood_marker(normalized)
+    _clear_ocsp_peer_refuse(normalized)
+    _clear_serial_blacklist(normalized)
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        # Control shards are negative-only (no ocsp.der). Remove tombstone meta so the
+        # tenant can staple the shared SPKI body again.
+        der = shard / "ocsp.der"
+        meta_path = shard / "ocsp.json"
+        if meta_path.is_file() and not der.is_file():
+            meta_path.unlink()
+    except Exception as e:
+        log_debug("⚠️ OCSP could not clear control meta for %s: %s", normalized[:16], e)
+
+
 def _process_cert_chain(
     cert_name: str,
     pem_data: bytes,
@@ -1813,9 +1847,21 @@ def _process_cert_chain(
                 _MULTI_STAPLE_ATTACH_PATH.as_posix(),
             )
         return results
+    leaf_fp = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
     for iname, ipem in _intermediate_ocsp_targets(cert_name, pem_data):
         try:
-            results.append(_process_cert(iname, ipem, db, stats, force_fetch=force_fetch))
+            inter_fp = _get_cert_pubkey_fingerprint(_clean_pem(ipem))
+            control_fp = _intermediate_control_fp(leaf_fp, inter_fp)
+            results.append(
+                _process_cert(
+                    iname,
+                    ipem,
+                    db,
+                    stats,
+                    force_fetch=force_fetch,
+                    control_fp=control_fp,
+                )
+            )
             if stats is not None:
                 stats["ocsp_intermediate_processed"] = stats.get("ocsp_intermediate_processed", 0) + 1
         except Exception as e:
@@ -3963,11 +4009,22 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
         log_debug("OCSP exception while attempting cache sync: %s", e)
 
 
-def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, stats: Optional[dict] = None, force_fetch: bool = False) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]:
+def _process_cert(
+    cert_name: str,
+    pem_data: bytes,
+    db: Optional[Any] = None,
+    stats: Optional[dict] = None,
+    force_fetch: bool = False,
+    control_fp: Optional[str] = None,
+) -> Tuple[str, Optional[bytes], int, str, bytes, Optional[str], bool]:
     """
     Process a single certificate for OCSP stapling. Works with in-memory PEM data.
     If force_fetch is True, skips the cached TTL check and retrieves a new response from upstream PKI.
     On error with force_fetch, returns ocsp_der=None, and disk files are NOT replaced (existing files kept intact).
+
+    control_fp: when set (intermediate refresh), GOOD bodies still publish under the cert SPKI
+    (shared), but nongood / tombstone / serial-blacklist / peer-refuse use this tenant key so a
+    public intermediate cannot become a colony-wide kill switch.
 
     Returns a tuple of (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, was_attempted) for batched database writes.
     If ocsp_der is None, it means the fetch was skipped or failed (disk files remain untouched).
@@ -3984,6 +4041,7 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
     pem_data = _clean_pem(pem_data)
     cert_checksum = _calculate_cert_checksum(pem_data)
     cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+    control_fp = _normalize_fingerprint(control_fp) if control_fp else None
 
     # Check per-service OCSP stapling setting
     if not _is_ocsp_enabled_for_service(service_name):
@@ -4027,6 +4085,16 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
         fingerprint = cert_fp
         if not fingerprint:
             log_warning("⚠️ OCSP could not compute fingerprint for %s, treating as new fetch", cert_name)
+        # Negatives for intermediates: tenant control key. Body/TTL: shared SPKI.
+        neg_fp = control_fp or fingerprint
+        if control_fp and fingerprint:
+            stats.setdefault("ocsp_inter_control_by_body", {})[fingerprint] = control_fp
+            log_debug(
+                "🔗 OCSP intermediate body_fp=%s... control_fp=%s... for %s",
+                fingerprint[:16],
+                control_fp[:16],
+                cert_name,
+            )
 
         # === HTTP error backoff (400/500) ===
         # Skip only when the same leaf serial + OCSP URL is still in backoff.
@@ -4092,25 +4160,29 @@ def _process_cert(cert_name: str, pem_data: bytes, db: Optional[Any] = None, sta
                 verified_nongood = exc
                 break
             if ocsp_der:
-                if _serial_blacklist_blocks(fingerprint, ocsp_der, cert_name):
+                if neg_fp and _serial_blacklist_blocks(neg_fp, ocsp_der, cert_name):
                     stats["ocsp_serial_blacklist_blocked"] = stats.get("ocsp_serial_blacklist_blocked", 0) + 1
                     return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
-                _clear_nongood_marker(fingerprint)
+                if neg_fp:
+                    _clear_nongood_marker(neg_fp)
                 break
             if attempt == 1:
                 log_warning("⚠️ OCSP fetch failed for %s, retrying once after 2 seconds ...", cert_name)
                 time.sleep(2)
 
         if verified_nongood is not None:
+            # Intermediate: tombstone/blacklist/nongood streak on control_fp only — never
+            # unlink the shared SPKI body (would brick every tenant on that CA).
             tombstoned, halved_ttl = _note_verified_nongood(
-                fingerprint,
+                neg_fp,
                 verified_nongood.serial,
                 verified_nongood.status_name,
                 cert_name,
                 db,
                 verified_nongood.this_update_unix,
+                body_fp=fingerprint if control_fp else None,
             )
             if tombstoned:
                 stats["ocsp_tombstoned"] = stats.get("ocsp_tombstoned", 0) + 1
@@ -5757,12 +5829,16 @@ def _note_verified_nongood(
     cert_name: str,
     db: Optional[Any],
     this_update_unix: Optional[int] = None,
+    body_fp: Optional[str] = None,
 ) -> Tuple[bool, Optional[int]]:
     """
     Count one verified non-GOOD answer. Tombstone the shard at the threshold.
     First sighting below threshold: halve leftover GOOD TTL (staple still served).
     From _NON_GOOD_UNPAGE_AFTER (UNKNOWN: 2): soft-recall with paged=false.
     Returns (tombstoned, remaining_ttl_after_halve_or_None).
+
+    body_fp: when set (intermediate tenant control), fingerprint is the control key —
+    never halve/unpage/tombstone the shared SPKI body_fp (would brick every site on that CA).
     """
     if not fingerprint:
         log_error("❌ OCSP CertStatus=%s for %s but fingerprint is missing; cannot tombstone", status_name, cert_name)
@@ -5770,6 +5846,10 @@ def _note_verified_nongood(
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
         return False, None
+    shared_body = _normalize_fingerprint(body_fp) if body_fp else None
+    # Refuse to operate negatives on the shared body key when a control key was intended.
+    if shared_body and shared_body == normalized:
+        shared_body = None
     threshold = _NON_GOOD_TOMBSTONE_AFTER.get(status_name, 1)
     path = _nongood_marker_path(normalized)
     if path is None:
@@ -5801,20 +5881,28 @@ def _note_verified_nongood(
         log_error("❌ OCSP could not record non-GOOD streak for %s: %s", cert_name, e)
         return False, None
     log_error(
-        "❌ OCSP verified CertStatus=%s for %s (serial=%s) streak=%d/%d",
+        "❌ OCSP verified CertStatus=%s for %s (serial=%s) streak=%d/%d%s",
         status_name,
         cert_name,
         serial,
         consecutive,
         threshold,
+        f" control_fp={normalized[:16]}..." if shared_body else "",
     )
     if consecutive < threshold:
         halved = None
-        if consecutive == 1:
-            halved = _halve_cached_staple_ttl(normalized, cert_name, db)
-        unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
-        if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
-            _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
+        # Shared intermediate body: do not halve/unpage the colony SPKI shard.
+        if not shared_body:
+            if consecutive == 1:
+                halved = _halve_cached_staple_ttl(normalized, cert_name, db)
+            unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
+            if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
+                _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
+        else:
+            unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
+            if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
+                # Soft-recall only the tenant control meta (no shared DER).
+                _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
         return False, halved
     return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix), None
 
@@ -5842,6 +5930,12 @@ def _persist_ocsp_results_to_disk(
         stats = {}
 
     published_fps: List[str] = []
+    published_controls: List[str] = []
+    control_map = {}
+    if isinstance(stats, dict):
+        raw_map = stats.get("ocsp_inter_control_by_body")
+        if isinstance(raw_map, dict):
+            control_map = raw_map
     for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
         if not ocsp_der:
             continue
@@ -5853,7 +5947,14 @@ def _persist_ocsp_results_to_disk(
                 log_error("❌ OCSP cannot store response for %s: failed to compute fingerprint", cert_name)
                 stats["errors"] = stats.get("errors", 0) + 1
                 continue
-            if _serial_blacklist_blocks(cert_fp, ocsp_der, cert_name):
+            control_fp = control_map.get(cert_fp)
+            if isinstance(control_fp, str):
+                control_fp = _normalize_fingerprint(control_fp)
+            else:
+                control_fp = None
+            # Intermediate: blacklist is tenant-scoped; never block shared publish via another tenant's ban.
+            bl_fp = control_fp or cert_fp
+            if _serial_blacklist_blocks(bl_fp, ocsp_der, cert_name):
                 stats["ocsp_serial_blacklist_blocked"] = stats.get("ocsp_serial_blacklist_blocked", 0) + 1
                 continue
 
@@ -5946,13 +6047,17 @@ def _persist_ocsp_results_to_disk(
                     db=db,
                 )
                 published_fps.append(cert_fp)
+                # Intermediate GOOD: advance / clear tenant control key, not the shared SPKI floor/refuse.
+                floor_fp = control_fp or cert_fp
                 _advance_ocsp_cluster_floor(
-                    cert_fp,
+                    floor_fp,
                     meta.get("this_update_unix"),
                     meta.get("job_run_id"),
                     db,
                     meta.get("published_unix"),
                 )
+                if control_fp:
+                    published_controls.append(control_fp)
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
                     cert_name,
@@ -5995,6 +6100,8 @@ def _persist_ocsp_results_to_disk(
         _bump_ocsp_cache_epoch()
         for fp in published_fps:
             _clear_ocsp_peer_refuse(fp)
+        for cfp in published_controls:
+            _clear_tenant_control_negatives(cfp)
 
 
 def main() -> int:
