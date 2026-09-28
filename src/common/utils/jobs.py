@@ -30,6 +30,7 @@ EXPIRE_TIME = {
 
 # OCSP SPKI shard keys under /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp64}/…
 _OCSP_SHARD_FILE_RE = re_compile(r"^([0-9a-fA-F])/([0-9a-fA-F])/([0-9a-fA-F]{64})/(ocsp\.der|ocsp\.json|issuer\.pem)$")
+_OCSP_FLOOR_FILE_RE = re_compile(r"^ocsp-floor/([0-9a-fA-F]{64})$")
 
 
 def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
@@ -49,6 +50,30 @@ def parse_ocsp_shard_cache_name(file_name: str) -> Optional[Tuple[str, str]]:
     return fp, leaf
 
 
+def parse_ocsp_floor_cache_name(file_name: str) -> Optional[str]:
+    """If file_name is ocsp-floor/{fp64}, return fingerprint_lower."""
+    if not file_name:
+        return None
+    match = _OCSP_FLOOR_FILE_RE.match(str(file_name).replace("\\", "/"))
+    if not match:
+        return None
+    return match.group(1).lower()
+
+
+def ocsp_job_run_id_rank(run_id: Any) -> int:
+    """Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable."""
+    if not isinstance(run_id, str) or not run_id:
+        return 0
+    parts = run_id.rsplit(".", 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return int(parts[1])
+    return 0
+
+
+def _ocsp_job_run_id_rank(run_id: Any) -> int:
+    return ocsp_job_run_id_rank(run_id)
+
+
 def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
     raw = meta.get(key)
     if isinstance(raw, (int, float)) and int(raw) > 0:
@@ -58,14 +83,43 @@ def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
     return 0
 
 
-def _ocsp_job_run_id_rank(run_id: Any) -> int:
-    """Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable."""
-    if not isinstance(run_id, str) or not run_id:
-        return 0
-    parts = run_id.rsplit(".", 1)
-    if len(parts) == 2 and parts[1].isdigit():
-        return int(parts[1])
-    return 0
+def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[str]:
+    """Extract job_run_id from an ocsp-floor file body."""
+    if not data:
+        return None
+    try:
+        text = data.decode("utf-8").strip()
+    except Exception:
+        return None
+    if not text:
+        return None
+    # First token only (ignore trailing noise).
+    return text.split()[0]
+
+
+def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[str]:
+    """Read on-disk cluster floor job_run_id for fingerprint, or None."""
+    if not fingerprint or len(fingerprint) != 64:
+        return None
+    path = Path(cache_root) / "ocsp-floor" / fingerprint.lower()
+    if not path.is_file():
+        return None
+    try:
+        return parse_ocsp_floor_bytes(path.read_bytes())
+    except Exception:
+        return None
+
+
+def should_keep_disk_ocsp_floor(disk_run_id: Optional[str], incoming_run_id: Optional[str]) -> bool:
+    """
+    True when the on-disk cluster floor must not be overwritten by restore.
+
+    Floor is max-only: equal or higher disk rank wins. Missing disk → allow restore.
+    """
+    disk_rank = _ocsp_job_run_id_rank(disk_run_id)
+    if disk_rank <= 0:
+        return False
+    return disk_rank >= _ocsp_job_run_id_rank(incoming_run_id)
 
 
 def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
@@ -303,6 +357,18 @@ class Job:
                     )
                     ignored_dirs.add(cache_path.parent.as_posix())
                     continue
+                # Cluster floor: max-only — never lower a peer-advanced floor from an older DB row.
+                floor_fp = parse_ocsp_floor_cache_name(job_cache_file.get("file_name") or "")
+                if floor_fp:
+                    incoming_run = parse_ocsp_floor_bytes(job_cache_file.get("data"))
+                    disk_run = load_disk_ocsp_floor(self.job_path, floor_fp)
+                    if should_keep_disk_ocsp_floor(disk_run, incoming_run):
+                        self.logger.info(
+                            f"OCSP floor restore skip fp={floor_fp[:16]}... "
+                            f"disk={disk_run} incoming={incoming_run}"
+                        )
+                        ignored_dirs.add(cache_path.parent.as_posix())
+                        continue
                 _write_atomic(cache_path, job_cache_file["data"])
                 ignored_dirs.add(cache_path.parent.as_posix())
                 self.logger.debug(
@@ -326,8 +392,12 @@ class Job:
                     self.logger.debug(f"Checking if {file} should be removed")
                     if file not in plugin_cache_files and file.is_file():
                         # Never unlink a newer OCSP shard the fence just preserved.
-                        parsed = parse_ocsp_shard_cache_name(file.relative_to(self.job_path).as_posix())
+                        rel = file.relative_to(self.job_path).as_posix()
+                        parsed = parse_ocsp_shard_cache_name(rel)
                         if parsed and parsed[0] in ocsp_skip:
+                            continue
+                        # Never wipe a local cluster floor (max-only; may outrank DB).
+                        if parse_ocsp_floor_cache_name(rel):
                             continue
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
@@ -337,6 +407,9 @@ class Job:
                             if file.parent == self.job_path:
                                 break
                     elif file.is_dir():
+                        # Keep ocsp-floor/ even when empty of DB-tracked names.
+                        if file == self.job_path / "ocsp-floor" or file.parent == self.job_path / "ocsp-floor":
+                            continue
                         self.logger.debug(f"Removing directory {file}")
                         rmtree(file, ignore_errors=True)
 

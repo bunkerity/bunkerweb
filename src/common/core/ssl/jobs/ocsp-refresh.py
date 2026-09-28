@@ -42,7 +42,15 @@ for deps_path in [
 
 # Gracefully handle import failures
 try:
-    from jobs import Job, ocsp_restore_skip_fingerprints  # type: ignore
+    from jobs import (  # type: ignore
+        Job,
+        ocsp_job_run_id_rank,
+        ocsp_restore_skip_fingerprints,
+        parse_ocsp_floor_bytes,
+        parse_ocsp_floor_cache_name,
+        load_disk_ocsp_floor,
+        should_keep_disk_ocsp_floor,
+    )
 except ImportError as e:
     print(f"FATAL: Could not import Job: {e}", file=_sys.stderr)
     _sys.exit(1)
@@ -3006,6 +3014,14 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
             file_name = entry.get("file_name", "")
             if not entry.get("data"):
                 continue
+            # Cluster floor rows: max-only merge before shard leaves.
+            if parse_ocsp_floor_cache_name(file_name):
+                try:
+                    if _restore_ocsp_cluster_floor_entry(file_name, entry["data"]):
+                        restored_count += 1
+                except Exception as e:
+                    log_debug("⚠️ OCSP could not restore cluster floor %s: %s", file_name, e)
+                continue
             issuer_fp = _fingerprint_from_issuer_name(file_name)
             if issuer_fp:
                 if issuer_fp in ocsp_skip:
@@ -4320,6 +4336,100 @@ def _bump_ocsp_cache_epoch() -> None:
         log_debug("⚠️ OCSP could not bump cache epoch: %s", e)
 
 
+def _ocsp_floor_relpath(fingerprint: str) -> Optional[str]:
+    """Job-cache file_name for the per-SPKI cluster floor."""
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return None
+    return f"ocsp-floor/{normalized}"
+
+
+def _advance_ocsp_cluster_floor(
+    fingerprint: str,
+    job_run_id: Optional[str],
+    db: Optional[Any] = None,
+) -> bool:
+    """
+    Raise the colony floor for this SPKI to job_run_id when it ranks higher.
+
+    Must-Staple Lua refuses until local ocsp.json job_run_id is at least this floor,
+    so a peer that already published/tombstoned cannot be undercut by a lagging node's
+    older GOOD body. Floor is max-only on disk and in the DB mirror.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not isinstance(job_run_id, str) or not job_run_id:
+        return False
+    new_rank = ocsp_job_run_id_rank(job_run_id)
+    if new_rank <= 0:
+        return False
+
+    floor_dir = CONFIGS_SSL_BASE / "ocsp-floor"
+    floor_path = floor_dir / normalized
+    try:
+        floor_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        log_debug("⚠️ OCSP could not create floor dir: %s", e)
+        return False
+
+    disk_run = load_disk_ocsp_floor(CONFIGS_SSL_BASE, normalized)
+    if should_keep_disk_ocsp_floor(disk_run, job_run_id):
+        # Disk already at or above; still ensure DB has at least disk's value.
+        mirror_id = disk_run or job_run_id
+    else:
+        try:
+            _atomic_write_text(floor_path, job_run_id + "\n", mode=0o640)
+            mirror_id = job_run_id
+            log_info(
+                "📈 OCSP cluster floor advanced fp=%s... job_run_id=%s (was %s)",
+                normalized[:16],
+                job_run_id,
+                disk_run or "none",
+            )
+        except Exception as e:
+            log_error("❌ OCSP could not advance cluster floor for %s: %s", normalized[:16], e)
+            return False
+
+    if db is not None and mirror_id:
+        rel = _ocsp_floor_relpath(normalized)
+        if rel:
+            try:
+                payload = (mirror_id + "\n").encode("utf-8")
+                db.upsert_job_cache(
+                    service_id=None,
+                    file_name=rel,
+                    data=payload,
+                    job_name="ocsp-refresh",
+                    checksum=hashlib.sha256(payload).hexdigest().lower(),
+                )
+            except Exception as e:
+                log_debug("⚠️ OCSP could not mirror cluster floor for %s: %s", normalized[:16], e)
+    return True
+
+
+def _restore_ocsp_cluster_floor_entry(file_name: str, data: bytes) -> bool:
+    """Max-only restore of one ocsp-floor/{fp} row from DB. Returns True if applied."""
+    floor_fp = parse_ocsp_floor_cache_name(file_name)
+    if not floor_fp:
+        return False
+    incoming = parse_ocsp_floor_bytes(data)
+    disk_run = load_disk_ocsp_floor(CONFIGS_SSL_BASE, floor_fp)
+    if should_keep_disk_ocsp_floor(disk_run, incoming):
+        log_info(
+            "⏭️ OCSP floor restore skip fp=%s... disk=%s incoming=%s",
+            floor_fp[:16],
+            disk_run,
+            incoming,
+        )
+        return False
+    if not incoming:
+        return False
+    floor_dir = CONFIGS_SSL_BASE / "ocsp-floor"
+    floor_dir.mkdir(parents=True, exist_ok=True)
+    _atomic_write_text(floor_dir / floor_fp, incoming + "\n", mode=0o640)
+    log_info("📈 OCSP floor restored fp=%s... job_run_id=%s", floor_fp[:16], incoming)
+    return True
+
+
 def _nongood_marker_path(fingerprint: str) -> Optional[Path]:
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -4511,6 +4621,7 @@ def _tombstone_ocsp_shard(
             return False
         _delete_ocsp_der_db_rows(db, normalized)
         _bump_ocsp_cache_epoch()
+        _advance_ocsp_cluster_floor(normalized, meta.get("job_run_id"), db)
         log_error(
             "🧹 OCSP tombstoned shard for %s (fp=%s..., CertStatus=%s, serial=%s); previous GOOD staple removed",
             cert_name,
@@ -4758,6 +4869,7 @@ def _persist_ocsp_results_to_disk(
                     db=db,
                 )
                 published_any = True
+                _advance_ocsp_cluster_floor(cert_fp, meta.get("job_run_id"), db)
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
                     cert_name,

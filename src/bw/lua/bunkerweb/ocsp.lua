@@ -594,6 +594,47 @@ local function read_ocsp_json(fingerprint)
 	return nil
 end
 
+-- Rank job_run_id (pid.time_ns) by the ns token; 0 if unreadable.
+local function job_run_id_rank(run_id)
+	if type(run_id) ~= "string" or run_id == "" then
+		return 0
+	end
+	local ns = run_id:match("%.(%d+)$")
+	return tonumber(ns) or 0
+end
+
+-- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone.
+-- Must-Staple stays closed while local ocsp.json job_run_id ranks below the floor.
+local function cluster_floor_blocks(fingerprint, meta)
+	if not is_fp64(fingerprint) then
+		return false
+	end
+	local raw = read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint)
+	if not raw or raw == "" then
+		return false
+	end
+	local floor_id = raw:match("^%s*(%S+)")
+	local floor_rank = job_run_id_rank(floor_id)
+	if floor_rank <= 0 then
+		return false
+	end
+	local local_id = meta and meta.job_run_id or nil
+	local local_rank = job_run_id_rank(local_id)
+	if local_rank >= floor_rank then
+		return false
+	end
+	log(
+		ngx.ERR,
+		"OCSP cluster floor ahead of local job_run_id; Must-Staple closed fp="
+			.. fingerprint:sub(1, 16)
+			.. "... floor="
+			.. tostring(floor_id)
+			.. " local="
+			.. tostring(local_id or "none")
+	)
+	return true
+end
+
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
 -- A different serial (reissue on the same key) is allowed. Unreadable serial
 -- while the file exists fails closed.
@@ -1307,6 +1348,10 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 		log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
 	end
 
+	if must_staple and cluster_floor_blocks(fingerprint, meta) then
+		return false, "must_staple", "cluster_floor"
+	end
+
 	if not stapling_enabled(internalstore, server_name) then
 		if must_staple then
 			return false, "must_staple", "ssl_use_ocsp_stapling_no"
@@ -1447,6 +1492,9 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	local shard_issuer_pem = read_file(issuer_path(fingerprint))
 	local shard_issuer_spki = shard_issuer_pem and spki_fingerprint(shard_issuer_pem) or nil
 	local meta = must_staple and read_ocsp_json(fingerprint) or nil
+	if must_staple and cluster_floor_blocks(fingerprint, meta) then
+		return false, "must_staple", "cluster_floor"
+	end
 	local cached, cached_verified, cached_epoch, cached_expires = get_l1(internalstore, fingerprint)
 	if cached then
 		if not l1_matches_disk(internalstore, fingerprint, cached, cached_epoch) then
