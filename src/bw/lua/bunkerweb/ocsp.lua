@@ -913,7 +913,8 @@ end
 
 -- If the sibling subsystem refused this generation, both refuse.
 -- Returns staple_decision code, or nil when clear / expired.
-local function peer_refuse_blocks(fingerprint, meta, resp)
+-- quiet=true: skip ERR log (L1 warmer polls this every rescan).
+local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 	local gen = generation_id(meta, resp)
 	if not gen then
 		return nil
@@ -937,19 +938,21 @@ local function peer_refuse_blocks(fingerprint, meta, resp)
 	if type(decision) ~= "string" or decision == "" then
 		decision = "peer_refuse"
 	end
-	log(
-		ngx.ERR,
-		"OCSP generation peer-refuse bus hit fp="
-			.. fingerprint:sub(1, 16)
-			.. "... der="
-			.. gen:sub(1, 16)
-			.. "... decision="
-			.. tostring(decision)
-			.. " refused_by="
-			.. tostring(by)
-			.. " subsystem="
-			.. tostring(self_sub)
-	)
+	if not quiet then
+		log(
+			ngx.ERR,
+			"OCSP generation peer-refuse bus hit fp="
+				.. fingerprint:sub(1, 16)
+				.. "... der="
+				.. gen:sub(1, 16)
+				.. "... decision="
+				.. tostring(decision)
+				.. " refused_by="
+				.. tostring(by)
+				.. " subsystem="
+				.. tostring(self_sub)
+		)
+	end
 	return decision
 end
 
@@ -2824,23 +2827,37 @@ end
 
 -- Load one paged shard into L1 without crypto validate (meta ligand is enough
 -- for the handshake authorize path). Runs off the TLS critical path only.
+-- Do not re-warm generations the handshake would refuse (peer-refuse bus or
+-- serial-blacklist): that churns shm and forces refuse/drop on every hit.
 local function warm_one_shard(internalstore, fingerprint)
 	if not internalstore or not is_fp64(fingerprint) then
 		return false
 	end
 	local meta = read_ocsp_json(fingerprint)
 	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
+		drop_cache(internalstore, fingerprint)
 		return false
 	end
 	if not resp_still_fresh(nil, fingerprint, meta) then
+		drop_cache(internalstore, fingerprint)
 		return false
 	end
 	local resp = read_file(ocsp_path(fingerprint))
 	if type(resp) ~= "string" or resp == "" then
+		drop_cache(internalstore, fingerprint)
 		return false
 	end
 	local ligand_ok = ocsp_json_ligand_matches(meta, fingerprint, resp)
 	if not ligand_ok then
+		drop_cache(internalstore, fingerprint)
+		return false
+	end
+	if peer_refuse_blocks(fingerprint, meta, resp, true) then
+		drop_cache(internalstore, fingerprint)
+		return false
+	end
+	if serial_blacklist_blocks(fingerprint, resp) then
+		drop_cache(internalstore, fingerprint)
 		return false
 	end
 	-- mark_verified=false: no leaf PEM here; handshake may still authorize via meta.
