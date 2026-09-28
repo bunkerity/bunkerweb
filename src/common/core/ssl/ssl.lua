@@ -11,6 +11,16 @@ function ssl:initialize(ctx)
 	plugin.initialize(self, "ssl", ctx)
 end
 
+function ssl:init_workers()
+	-- Preload OCSP L1 off the TLS handshake path (worker 0 timer; HTTP zone).
+	local ocsp = require "bunkerweb.ocsp"
+	local ok, err = pcall(ocsp.start_l1_warmer, self.internalstore)
+	if not ok then
+		return self:ret(true, "OCSP L1 warmer start error: " .. tostring(err))
+	end
+	return self:ret(true, "OCSP L1 warmer armed")
+end
+
 function ssl:access()
 	-- Check if we need to redirect to HTTPS
 	if

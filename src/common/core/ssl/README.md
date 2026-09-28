@@ -68,6 +68,8 @@ Every staple outcome logs a closed **`staple_decision=CODE`**. That code **is** 
 | `await_sni` | Stream staple deferred: no SNI-bound leaf yet | Optional: skip staple (`skip_slot` / `detail=await_sni`). Must-Staple: abort until ClientHello SNI selects the site leaf. |
 | `unmet` | Must-Staple required and no more specific code | Catch-all—check `detail=` / prior lines; use `OCSP_STAPLE_MODE=staple_only`/`open` only as a temporary fuse. |
 
+Handshake L1 (`TLS:SSL:ocsp:*` in `internalstore` / `internalstore_stream`) is **preloaded off the TLS critical path**: worker 0 runs an OCSP L1 warmer timer that scans paged shards after start and whenever `.ocsp_epoch` bumps. A cold miss can still read `ocsp.der` during `ssl_certificate`, but steady-state and post-publish handshakes should hit DRAM first.
+
 !!! warning "Dual-certificate (RSA + ECDSA) Must-Staple limits"
     NGINX / `ngx.ocsp` can attach **one** OCSP staple per handshake. When a service installs both an RSA and an ECDSA leaf (typical dual-cert / hybrid deployment), BunkerWeb picks **one** leaf for that slot:
 

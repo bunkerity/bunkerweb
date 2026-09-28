@@ -2529,5 +2529,163 @@ function _M.handshake_sni(fallback)
 	return nil
 end
 
+-- --- Off-handshake L1 warmer -------------------------------------------------
+-- Cold L1 misses used to open ocsp.der (+ often validate) inside ssl_certificate.
+-- Worker timers preload paged shards into the subsystem shared dict so the
+-- critical path stays on get_l1 whenever possible. HTTP and stream each warm
+-- their own zone (dicts are not shared across subsystems).
+
+local L1_WARMER_INTERVAL = 5
+local L1_WARMER_RESCAN = 60
+local l1_warmer_started = false
+local l1_warmer_last_epoch = nil
+local l1_warmer_last_full = 0
+
+local function list_ocsp_fingerprints()
+	local fps = {}
+	local root = "/var/cache/bunkerweb/ssl"
+	local ok_lfs, lfs = pcall(require, "lfs")
+	if ok_lfs and lfs and lfs.dir then
+		local ok_root, iter = pcall(lfs.dir, root)
+		if ok_root and iter then
+			for a in iter do
+				if type(a) == "string" and #a == 1 and a:match("^[0-9a-f]$") then
+					local path_a = root .. "/" .. a
+					local ok_a, iter_a = pcall(lfs.dir, path_a)
+					if ok_a and iter_a then
+						for b in iter_a do
+							if type(b) == "string" and #b == 1 and b:match("^[0-9a-f]$") then
+								local path_b = path_a .. "/" .. b
+								local ok_b, iter_b = pcall(lfs.dir, path_b)
+								if ok_b and iter_b then
+									for fp in iter_b do
+										if is_fp64(fp) then
+											fps[#fps + 1] = fp
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		return fps
+	end
+	local ok_p, pipe = pcall(io.popen, "find " .. root .. " -mindepth 3 -maxdepth 3 -type d 2>/dev/null")
+	if not ok_p or not pipe then
+		return fps
+	end
+	for line in pipe:lines() do
+		local fp = line:match("([0-9a-f]+)$")
+		if is_fp64(fp) then
+			fps[#fps + 1] = fp
+		end
+	end
+	pipe:close()
+	return fps
+end
+
+-- Load one paged shard into L1 without crypto validate (meta ligand is enough
+-- for the handshake authorize path). Runs off the TLS critical path only.
+local function warm_one_shard(internalstore, fingerprint)
+	if not internalstore or not is_fp64(fingerprint) then
+		return false
+	end
+	local meta = read_ocsp_json(fingerprint)
+	if not meta or shard_not_paged(meta) then
+		return false
+	end
+	if not resp_still_fresh(nil, fingerprint, meta) then
+		return false
+	end
+	local resp = read_file(ocsp_path(fingerprint))
+	if type(resp) ~= "string" or resp == "" then
+		return false
+	end
+	local ligand_ok = ocsp_json_ligand_matches(meta, fingerprint, resp)
+	if not ligand_ok then
+		return false
+	end
+	-- mark_verified=false: no leaf PEM here; handshake may still authorize via meta.
+	warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
+	return true
+end
+
+-- Scan the OCSP cache tree and warm every paged GOOD shard into this subsystem's L1.
+-- Returns warmed count.
+function _M.warm_l1_from_disk(internalstore)
+	if not internalstore then
+		return 0
+	end
+	-- Drop cached epoch so we compare against the live .ocsp_epoch file.
+	if ngx.ctx then
+		ngx.ctx.bw_ocsp_epoch = nil
+	end
+	local warmed = 0
+	for _, fp in ipairs(list_ocsp_fingerprints()) do
+		local ok, did = pcall(warm_one_shard, internalstore, fp)
+		if ok and did then
+			warmed = warmed + 1
+		end
+	end
+	if warmed > 0 then
+		log(ngx.INFO, "OCSP L1 warmer loaded " .. tostring(warmed) .. " shard(s) subsystem=" .. tostring(ngx.config.subsystem))
+	end
+	return warmed
+end
+
+-- Start a recurring timer (once per worker Lua VM) that re-warms when .ocsp_epoch bumps.
+-- Prefer worker 0 so N workers are not all scanning disk every interval.
+function _M.start_l1_warmer(internalstore)
+	if not internalstore then
+		return false
+	end
+	if l1_warmer_started then
+		return true
+	end
+	local wid = ngx.worker and ngx.worker.id and ngx.worker.id() or 0
+	if wid ~= 0 then
+		return true
+	end
+	if not ngx.timer or not ngx.timer.at then
+		return false
+	end
+	l1_warmer_started = true
+
+	local function tick(premature)
+		if premature then
+			return
+		end
+		if ngx.ctx then
+			ngx.ctx.bw_ocsp_epoch = nil
+		end
+		local epoch = current_ocsp_epoch()
+		local now = ngx.time()
+		-- Re-warm on publish (epoch bump) or periodically so shm TTL expiry
+		-- does not push the next handshake onto a cold ocsp.der read.
+		local need = epoch ~= l1_warmer_last_epoch or (now - l1_warmer_last_full) >= L1_WARMER_RESCAN
+		if need then
+			l1_warmer_last_epoch = epoch
+			l1_warmer_last_full = now
+			pcall(_M.warm_l1_from_disk, internalstore)
+		end
+		local ok, err = ngx.timer.at(L1_WARMER_INTERVAL, tick)
+		if not ok then
+			l1_warmer_started = false
+			log(ngx.ERR, "OCSP L1 warmer reschedule failed: " .. tostring(err))
+		end
+	end
+
+	local ok, err = ngx.timer.at(0, tick)
+	if not ok then
+		l1_warmer_started = false
+		log(ngx.ERR, "OCSP L1 warmer start failed: " .. tostring(err))
+		return false
+	end
+	log(ngx.INFO, "OCSP L1 warmer started subsystem=" .. tostring(ngx.config.subsystem))
+	return true
+end
+
 
 return _M
