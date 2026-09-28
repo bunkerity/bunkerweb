@@ -1243,7 +1243,7 @@ local function normalize_fp_hint(cert_fp_hint)
 	return nil
 end
 
-local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki)
+local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
 		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
@@ -1251,6 +1251,9 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki)
 	end
 	for _, issuer_pem in ipairs(issuers) do
 		if validate(ocsp, ssl, resp, leaf_pem, issuer_pem, shard_issuer_spki) then
+			if probe_only then
+				return true
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
@@ -1432,7 +1435,7 @@ end
 -- Install all leaf/key pairs from PEM (dual-cert aware). Returns preferred leaf PEM + SPKI fp
 -- for OCSP (ECDSA preferred when both RSA and ECDSA leaves are present).
 -- Returns: true, leaf_pem, leaf_fp  OR  false, err_msg
-function _M.set_certs_from_pem(cert_pem, key_pem)
+function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name)
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
 		return false, "cert_pem and key_pem strings are required"
 	end
@@ -1479,26 +1482,68 @@ function _M.set_certs_from_pem(cert_pem, key_pem)
 		return false, "no certificate matched any private key"
 	end
 
+	local mode = "normal"
+	if internalstore then
+		mode = ocsp_staple_mode(internalstore, server_name)
+	end
+
 	local installed = {}
+	local must_staple_refused = false
+	local refuse_detail = nil
 	for _, leaf in ipairs(leaves) do
 		local chain_pem = leaf.pem
 		for _, intermediate in ipairs(intermediates) do
 			chain_pem = chain_pem .. "\n" .. intermediate
 		end
-		local parsed_cert, cert_err = ssl.parse_pem_cert(chain_pem)
-		local parsed_key, key_err = ssl.parse_pem_priv_key(leaf.key)
-		if not parsed_cert or not parsed_key then
-			return false, "failed to parse cert/key: " .. tostring(cert_err or key_err)
+		-- Must-Staple leaves require a live shard probe before set_cert (normal mode).
+		local leaf_must = has_must_staple(leaf.pem)
+		if not leaf_must and leaf.fp then
+			leaf_must = ocsp_json_must_staple(read_ocsp_json(leaf.fp))
 		end
-		local ok_cert, err_cert = ssl.set_cert(parsed_cert)
-		if not ok_cert then
-			return false, "set_cert failed: " .. tostring(err_cert)
+		if leaf_must and mode == "open" then
+			leaf_must = false
 		end
-		local ok_key, err_key = ssl.set_priv_key(parsed_key)
-		if not ok_key then
-			return false, "set_priv_key failed: " .. tostring(err_key)
+		local skip_leaf = false
+		if leaf_must and internalstore and mode == "normal" then
+			-- apply_soften=false: log skip_leaf here (dual-cert may still install another leaf).
+			local probe_ok, probe_reason, probe_detail = _M.probe(internalstore, server_name, chain_pem, leaf.fp, false)
+			if not probe_ok then
+				must_staple_refused = true
+				refuse_detail = probe_detail or probe_reason or "probe_failed"
+				log(
+					ngx.ERR,
+					"OCSP_MUST_STAPLE_REFUSE reason="
+						.. tostring(refuse_detail)
+						.. " action=skip_leaf mode=normal fp="
+						.. tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil")
+						.. "..."
+				)
+				skip_leaf = true
+			end
 		end
-		installed[#installed + 1] = leaf
+		if not skip_leaf then
+			local parsed_cert, cert_err = ssl.parse_pem_cert(chain_pem)
+			local parsed_key, key_err = ssl.parse_pem_priv_key(leaf.key)
+			if not parsed_cert or not parsed_key then
+				return false, "failed to parse cert/key: " .. tostring(cert_err or key_err)
+			end
+			local ok_cert, err_cert = ssl.set_cert(parsed_cert)
+			if not ok_cert then
+				return false, "set_cert failed: " .. tostring(err_cert)
+			end
+			local ok_key, err_key = ssl.set_priv_key(parsed_key)
+			if not ok_key then
+				return false, "set_priv_key failed: " .. tostring(err_key)
+			end
+			installed[#installed + 1] = leaf
+		end
+	end
+
+	if #installed == 0 then
+		if must_staple_refused then
+			return false, "must_staple", refuse_detail or "probe_failed"
+		end
+		return false, "no certificates installed"
 	end
 
 	local leaf_pems = {}
@@ -1519,7 +1564,7 @@ end
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
 -- Acceptance: prior crypto-verified L1 binding, or job meta that binds fingerprint + der_sha256
 -- to the exact DER bytes. Never promote fingerprint-only accepts to ocsp_verified.
-local function staple_from_fingerprint(internalstore, server_name, fingerprint)
+local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only)
 	local meta = read_ocsp_json(fingerprint)
 	local must_staple = ocsp_json_must_staple(meta)
 	if must_staple then
@@ -1592,6 +1637,9 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 					end
 					return false
 				end
+				if probe_only then
+					return true
+				end
 				local ok_set, set_ok, set_err = pcall(function()
 					return ocsp.set_ocsp_status_resp(cached)
 				end)
@@ -1648,6 +1696,9 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 				end
 				return false
 			end
+			if probe_only then
+				return true
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(resp)
 			end)
@@ -1670,7 +1721,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint)
 	return false
 end
 
-local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name)
+local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, probe_only)
 	if not fingerprint then
 		return nil
 	end
@@ -1722,6 +1773,9 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					return false, "must_staple", ligand_detail
 				end
 			end
+			if probe_only then
+				return true
+			end
 			local ok_set, set_ok, set_err = pcall(function()
 				return ocsp.set_ocsp_status_resp(cached)
 			end)
@@ -1741,7 +1795,7 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return false
 			end
 			issuers = issuer_candidates(blocks, leaf_pem, fingerprint)
-			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki)
+			local result = try_staple(ocsp, ssl, cached, leaf_pem, issuers, shard_issuer_spki, probe_only)
 			if result == true then
 				if must_staple then
 					meta = meta or read_ocsp_json(fingerprint)
@@ -1750,6 +1804,9 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 						drop_cache(internalstore, fingerprint)
 						return false, "must_staple", ligand_detail
 					end
+				end
+				if probe_only then
+					return true
 				end
 				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires))
 				log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
@@ -1782,11 +1839,14 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			end
 			return false
 		end
-		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki)
+		local result = try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only)
 		if result == true then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
 				return false, "must_staple", ligand_detail
+			end
+			if probe_only then
+				return true
 			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
 			log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, resp)
@@ -1823,7 +1883,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 
 	if not pem_ok then
 		if fp_hint then
-			return soften_must_staple(mode, staple_from_fingerprint(internalstore, server_name, fp_hint))
+			return soften_must_staple(mode, staple_from_fingerprint(internalstore, server_name, fp_hint, false))
 		end
 		return false
 	end
@@ -1887,7 +1947,7 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 		end
 	end
 
-	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name)
+	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, must_staple, server_name, false)
 	if result == true then
 		return true
 	end
@@ -1900,5 +1960,84 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	end
 	return false
 end
+
+-- Live staple probe for a leaf/shard without installing the cert or setting the staple.
+-- Must-Staple leaves must pass this before set_cert (normal mode). Soft fuses continue
+-- when apply_soften is not false (default). Pass apply_soften=false for skip-leaf callers
+-- that log their own action (e.g. set_certs_from_pem).
+-- Returns true, or false, "must_staple", detail (abort), or false (soft continue without abort tag).
+function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soften)
+	if not internalstore then
+		return false
+	end
+	local mode = ocsp_staple_mode(internalstore, server_name)
+	-- open disables Must-Staple entirely: leaf may load without a live staple.
+	if mode == "open" then
+		return true
+	end
+	local soften = apply_soften ~= false
+	local function finish(ok, reason, detail)
+		if ok then
+			return true
+		end
+		if soften then
+			return soften_must_staple(mode, false, reason, detail)
+		end
+		return false, reason, detail
+	end
+	local pem_ok = type(cert_pem) == "string" and cert_pem ~= ""
+	local fp_hint = normalize_fp_hint(cert_fp_hint)
+	if not pem_ok then
+		if fp_hint then
+			local ok, reason, detail = staple_from_fingerprint(internalstore, server_name, fp_hint, true)
+			return finish(ok, reason, detail)
+		end
+		return true
+	end
+	local blocks = pem_blocks(cert_pem)
+	local leaf_pem = blocks[1]
+	if not leaf_pem then
+		return false
+	end
+	local must_staple = has_must_staple(leaf_pem)
+	if not must_staple and fp_hint then
+		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
+	end
+	if not must_staple then
+		-- Optional stapling: leaf may load without a live probe.
+		return true
+	end
+	if not stapling_enabled(internalstore, server_name) then
+		return finish(false, "must_staple", "ssl_use_ocsp_stapling_no")
+	end
+	local ok_ocsp, ocsp = pcall(require, "ngx.ocsp")
+	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
+		return finish(false, "must_staple", "ngx_ocsp_unavailable")
+	end
+	local ssl = require "ngx.ssl"
+	local leaf_fp = spki_fingerprint(leaf_pem, internalstore)
+	if fp_hint and leaf_fp and fp_hint ~= leaf_fp then
+		fp_hint = nil
+	end
+	local fingerprint = leaf_fp or fp_hint
+	if not fingerprint then
+		return finish(false, "must_staple", "fingerprint_unavailable")
+	end
+	if not must_staple then
+		must_staple = ocsp_json_must_staple(read_ocsp_json(fingerprint))
+	end
+	if not must_staple then
+		return true
+	end
+	local result, reason, detail = staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint, true, server_name, true)
+	if result == true then
+		return true
+	end
+	if result == false then
+		return finish(false, reason, detail)
+	end
+	return finish(false, "must_staple", "response_not_found")
+end
+
 
 return _M
