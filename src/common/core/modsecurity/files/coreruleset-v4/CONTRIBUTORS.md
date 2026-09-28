@@ -30,6 +30,8 @@
 
 ## Contributors:
 
+- [Prateeksaini12](https://github.com/Prateeksaini12)
+- [zoutjebot](https://github.com/zoutjebot)
 - [etiennemunnich](https://github.com/etiennemunnich)
 - [securestep9](https://github.com/securestep9)
 - [HackingRepo](https://github.com/HackingRepo)

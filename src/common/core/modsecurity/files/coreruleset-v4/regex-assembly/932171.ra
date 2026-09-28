@@ -1,0 +1,11 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 932171: Remote Command Execution: Shellshock (CVE-2014-6271)
+##!
+##! Allow an optional 'json.' prefix so that libModSecurity3/Coraza's JSON
+##! body processor (which prepends 'json.' to ARGS_NAMES) is still matched.
+
+##!^ ^(?:json\.)?
+
+\(\s*\)\s+\{

@@ -17,7 +17,7 @@
     "LETS_ENCRYPT_PASSTHROUGH": {
       "context": "multisite",
       "default": "no",
-      "help": "Pass through Let's Encrypt requests to the web server.",
+      "help": "Pass through Let's Encrypt requests to the web server. A GET or HEAD of a single ACME token is then whitelisted and reaches the web server without any other check, including the ban check.",
       "id": "lets-encrypt-passthrough",
       "label": "Pass Through Let's Encrypt",
       "regex": "^(yes|no)$",
@@ -62,30 +62,30 @@
     },
     "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
       "context": "multisite",
-      "default": "2",
-      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot.",
+      "default": "2s",
+      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-retry-delay",
       "label": "ZeroSSL API Retry Delay",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
       "context": "multisite",
-      "default": "5",
-      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot.",
+      "default": "5s",
+      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-connect-timeout",
       "label": "ZeroSSL API Connect Timeout",
-      "regex": "^[1-9]\\d*$",
-      "type": "number"
+      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
       "context": "multisite",
-      "default": "20",
-      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot.",
+      "default": "20s",
+      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-max-time",
       "label": "ZeroSSL API Max Time",
-      "regex": "^[1-9]\\d*$",
-      "type": "number"
+      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "LETS_ENCRYPT_CHALLENGE": {
       "context": "multisite",
@@ -131,6 +131,7 @@
         "nsone",
         "ovh",
         "pdns",
+        "porkbun",
         "rfc2136",
         "route53",
         "sakuracloud",
@@ -141,16 +142,16 @@
     "LETS_ENCRYPT_DNS_PROPAGATION": {
       "context": "multisite",
       "default": "default",
-      "help": "The time to wait for DNS propagation in seconds for DNS challenges.",
+      "help": "The time to wait for DNS propagation in seconds for DNS challenges. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-dns-propagation",
       "label": "DNS Propagation",
-      "regex": "^(default|\\d+)$",
+      "regex": "^(default|\\d+(ms?|[shdwMy])?)$",
       "type": "text"
     },
     "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
       "context": "multisite",
       "default": "",
-      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object)",
+      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider for DNS challenges. Write it as the key, whitespace, then the value (e.g. 'cloudflare_api_token 123456'); do not quote the key. The value can also be base64 encoded, or the whole item can be a base64 encoded json object.",
       "id": "lets-encrypt-dns-credential-item",
       "label": "Credential Item",
       "regex": "^.*",
@@ -197,7 +198,7 @@
     "LETS_ENCRYPT_PROFILE": {
       "context": "multisite",
       "default": "classic",
-      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments.",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and up to 100 names. 'tlsserver' is optimized for TLS server authentication with 45-day lifetime, up to 25 names, and smaller payload. 'shortlived' offers 160-hour certificates with up to 25 names for enhanced security in automated environments.",
       "id": "lets-encrypt-profile",
       "label": "Certificate Profile",
       "regex": "^(classic|tlsserver|shortlived)$",
@@ -239,6 +240,15 @@
       "label": "Concurrent Certificate Requests",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+      "context": "global",
+      "default": "50",
+      "help": "Maximum number of rotated certbot log files to keep per job. Certbot's own default is 1000, which piles up quickly. Set to 0 to keep only the live log.",
+      "id": "lets-encrypt-max-log-backups",
+      "label": "Maximum Certbot Log Backups",
+      "regex": "^\\d+$",
+      "type": "number"
     }
   },
   "jobs": [

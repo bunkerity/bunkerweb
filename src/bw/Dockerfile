@@ -1,4 +1,4 @@
-FROM nginx:1.28.2-alpine-slim@sha256:a00b591ab482fcfcc4a971a5efd04ebdbb6f9fe8ffe95dec9009019b8c0582e8 AS builder
+FROM nginx:1.30.5-alpine-slim@sha256:6d9f34e1499384d1c8c72c149a0868ea547083d37943044efe7cf07b5c51bcd7 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev cargo lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
@@ -51,9 +51,9 @@ COPY src/deps/package-lock.json package-lock.json
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-  apk add --no-cache nodejs npm parallel && \
+  apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts && \
+  npm ci --ignore-scripts --engine-strict && \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
   parallel 'npx html-minifier-terser \
   --collapse-whitespace \
@@ -69,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.28.2-alpine-slim@sha256:a00b591ab482fcfcc4a971a5efd04ebdbb6f9fe8ffe95dec9009019b8c0582e8
+FROM nginx:1.30.5-alpine-slim@sha256:6d9f34e1499384d1c8c72c149a0868ea547083d37943044efe7cf07b5c51bcd7
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -78,8 +78,11 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
 # Fix CVEs
-RUN apk add --no-cache "libpng>=1.6.55-r0" # CVE-2026-25646
-RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
+RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
+RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "expat>=2.8.5-r0" "libexpat>=2.8.5-r0" # CVE-2026-66046 CVE-2026-76641 CVE-2026-76956 CVE-2026-76957 CVE-2026-93990
+RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 CVE-2026-18924 CVE-2026-19931 CVE-2026-80229 CVE-2026-80230 CVE-2026-80231 CVE-2026-80255 CVE-2026-80256 CVE-2026-82208 CVE-2026-82209
+RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -94,7 +97,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
   chmod 2770 /var/tmp/bunkerweb && \
@@ -109,7 +112,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.9"
+LABEL version="1.6.16~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

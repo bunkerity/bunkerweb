@@ -12,8 +12,12 @@ local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local get_variable = utils.get_variable
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
@@ -58,6 +62,8 @@ function greylist:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		local header_rules = self.internalstore:get("plugin_greylist_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
 	end
 end
 
@@ -137,6 +143,14 @@ function greylist:init()
 			["URI"] = {},
 		}
 	end
+	local header_rules, header_err = get_header_rules("GREYLIST_HEADER")
+	if not header_rules then
+		return self:ret(false, header_err)
+	end
+	local header_ok, header_store_err = self.internalstore:set("plugin_greylist_header_rules", header_rules, nil, true)
+	if not header_ok then
+		return self:ret(false, header_store_err)
+	end
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -144,6 +158,12 @@ function greylist:access()
 	-- Check if access is needed
 	if not self:is_needed() then
 		return self:ret(true, "access not needed")
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "GREYLIST_HEADER_VALUE")
+	if matched_header then
+		return self:ret(true, "header " .. matched_header .. " is in greylist")
 	end
 	-- Check the caches
 	local checks = {
@@ -247,14 +267,12 @@ function greylist:is_greylisted_ip()
 		-- Get rDNS
 		-- luacheck: ignore 421
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
-		-- Check if rDNS is in greylist
+		-- Check if rDNS is in greylist (forward-confirmed before granting)
 		if rdns_list then
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						return true, "rDNS " .. suffix
-					end
-				end
+			local rdns_suffix =
+				rdns_forward_confirmed(rdns_list, self.lists["RDNS"], self.ctx, self.ctx.bw.remote_addr, self.logger)
+			if rdns_suffix then
+				return true, "rDNS " .. rdns_suffix
 			end
 		else
 			self.logger:log(ERR, "error while getting rdns : " .. err)
@@ -282,7 +300,7 @@ end
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
 	for _, uri in ipairs(self.lists["URI"]) do
-		if regex_match(self.ctx.bw.uri, uri) then
+		if regex_match(self.ctx.bw.uri, uri, nil, "GREYLIST_URI(_URLS)") then
 			return true, "URI " .. uri
 		end
 	end
@@ -293,7 +311,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for _, ua in ipairs(self.lists["USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ua, nil, "GREYLIST_USER_AGENT(_URLS)") then
 			return true, "UA " .. ua
 		end
 	end

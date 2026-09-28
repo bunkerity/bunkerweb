@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.append("scripts"); sys.path.append("framework/scripts")'
+init-hook='import sys; sys.path += ["scripts", "framework/scripts", "tf-psa-crypto/scripts/project_knowledge"]'
 min-similarity-lines=10
 
 [BASIC]

@@ -31,6 +31,8 @@ namespace Utils {
 class IpTree {
  public:
     IpTree();
+    IpTree(const IpTree&) = delete;
+    IpTree& operator=(const IpTree&) = delete;
     ~IpTree();
 
     bool contains(const std::string &ip);

@@ -63,11 +63,8 @@ files=(
 # Safely find additional requirements files
 # Use find with explicit constraints instead of globstar
 while IFS= read -r -d '' file; do
-    # Skip ansible-related files
-    if [[ "$file" != *"ansible"* ]]; then
-        files+=("$file")
-    fi
-done < <(find ../common ../docs ../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
+    files+=("$file")
+done < <(find ../common ../../docs ../../misc -type f -name 'requirements*.in' -print0 2>/dev/null)
 
 # Process each file
 for file in "${files[@]}"; do

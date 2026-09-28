@@ -198,16 +198,6 @@ def pre_render(**kwargs):
                 data["count"].append(item["count"])
             ret["top_authbasic_users"]["data"] = data
 
-            format_data = [
-                {"ip": key.replace("counter_failed_ip_", ""), "count": int(value)} for key, value in metrics.items() if key.startswith("counter_failed_ip_")
-            ]
-            format_data.sort(key=itemgetter("count"), reverse=True)
-            data = {"ip": [], "count": []}
-            for item in format_data:
-                data["ip"].append(item["ip"])
-                data["count"].append(item["count"])
-            ret["top_authbasic_failed_ips"]["data"] = data
-
         # Build configured users table from successful authentication usernames
         # This provides visibility into which users are actively authenticating
         configured_users_data = {"scope": [], "username": [], "auth_count": []}

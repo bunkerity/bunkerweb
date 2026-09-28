@@ -8,7 +8,7 @@ local param_lib = require "resty.openssl.param"
 local ctx_lib = require "resty.openssl.ctx"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local _M = {}
 local mt = {__index = _M}
@@ -21,8 +21,8 @@ local param_types = {
 local params = {}
 
 function _M.new(key, typ, cipher, digest, properties)
-  if not OPENSSL_3X then
-    return false, "EVP_MAC is only supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return false, "EVP_MAC is only supported on OpenSSL 3.0 or later"
   end
 
   local algo = C.EVP_MAC_fetch(ctx_lib.get_libctx(), typ, properties)

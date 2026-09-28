@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40 AS builder
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -12,13 +12,12 @@ COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
-COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -45,9 +44,9 @@ ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
-  apk add --no-cache nodejs npm parallel && \
+  apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts; \
+  npm ci --ignore-scripts --engine-strict; \
   fi
 
 # Minify JS files
@@ -66,7 +65,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -78,12 +77,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
+RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata libjpeg-turbo && \
   addgroup -g 101 ui && \
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
+RUN apk add --no-cache "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -97,7 +97,7 @@ RUN echo "Docker" > INTEGRATION && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:ui INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find . \( -path './ui' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
@@ -105,7 +105,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.9"
+LABEL version="1.6.16~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

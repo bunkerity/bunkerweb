@@ -7,8 +7,8 @@ from user_agents import parse
 
 from app.models.totp import totp as TOTP
 
-from app.dependencies import DATA, DB
-from app.utils import USER_PASSWORD_RX, flash, gen_password_hash
+from app.dependencies import DB
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, revoke_sessions
 
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
@@ -155,9 +155,7 @@ def totp_disable():
 
     verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
-        request.form["totp_token"], user=current_user
-    ):
+    if not TOTP.verify_totp(request.form["totp_token"], user=current_user) and not TOTP.verify_recovery_code(request.form["totp_token"], user=current_user):
         return handle_error("The totp token is invalid.", "profile")
 
     ret = DB.update_ui_user(
@@ -187,26 +185,18 @@ def totp_enable():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
-        request.form["totp_token"], user=current_user
-    ):
+    totp_secret = session.get("tmp_totp_secret", "")
+    match = TOTP.match_totp(request.form["totp_token"], totp_secret)
+    if match is None:
         return handle_error("The totp token is invalid.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
-    totp_secret = session.pop("tmp_totp_secret", "")
 
-    ret = DB.update_ui_user(
-        current_user.get_id(),
-        current_user.password.encode("utf-8"),
-        totp_secret,
-        theme=current_user.theme,
-        totp_recovery_codes=totp_recovery_codes,
-        method=current_user.method,
-        language=current_user.language,
-    )
+    ret = DB.enable_ui_user_totp(current_user.get_id(), totp_secret, match.counter, totp_recovery_codes)
     if ret:
         return handle_error(f"Couldn't enable the two-factor authentication in the database: {ret}", "profile")
 
+    session.pop("tmp_totp_secret", None)
     session["totp_validated"] = True
     session["totp_refreshed"] = True
     session["decrypted_recovery_codes"] = totp_recovery_codes
@@ -270,6 +260,16 @@ def edit_profile():
                 "The new password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
                 "profile",
             )
+        elif password_exceeds_bcrypt_limit(request.form["new_password"]):
+            LOGGER.warning(
+                f"Rejected password change for user {current_user.get_id()}: new password is "
+                f"{len(request.form['new_password'].encode('utf-8'))} bytes, over bcrypt's {MAX_PASSWORD_BYTES}-byte limit."
+            )
+            return handle_error(
+                f"The new password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
+                "accented or emoji characters count as several bytes each.",
+                "profile",
+            )
         elif current_user.check_password(request.form["new_password"]):
             return handle_error("The new password is the same as the current one.", "profile")
 
@@ -289,6 +289,15 @@ def edit_profile():
     flash("The profile has been successfully updated.")
 
     if "new_password" in request.form:
+        # OWASP session management: a password change must invalidate every OTHER active
+        # session for this user, so a parallel or stolen session cannot outlive the
+        # credential it was authenticated with. Reuses the same revocation path as
+        # /profile/wipe-other-sessions; the current session is ended by the logout below.
+        other_ids = [db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
+        err = revoke_sessions(other_ids)
+        if err:
+            LOGGER.error(f"Couldn't revoke the other sessions after the password change: {err}")
+        DB.delete_ui_user_old_sessions(current_user.username, keep_session_id=session.get("session_id"))
         return redirect(url_for("logout.logout_page"))
 
     return redirect(url_for("profile.profile_page"))
@@ -305,11 +314,12 @@ def wipe_old_sessions():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    DATA["REVOKED_SESSIONS"] = [
-        db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")
-    ]
+    other_ids = [db_session["id"] for db_session in DB.get_ui_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
+    err = revoke_sessions(other_ids)
+    if err:
+        return handle_error(f"Couldn't revoke the other sessions: {err}", "profile")
 
-    ret = DB.delete_ui_user_old_sessions(current_user.username)
+    ret = DB.delete_ui_user_old_sessions(current_user.username, keep_session_id=session.get("session_id"))
     if ret:
         return handle_error(f"Couldn't wipe the other sessions in the database: {ret}", "profile")
 

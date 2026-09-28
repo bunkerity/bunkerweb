@@ -43,6 +43,7 @@
                                              |NGX_HTTP_UPSTREAM_FT_HTTP_429)
 
 #define NGX_HTTP_UPSTREAM_INVALID_HEADER     40
+#define NGX_HTTP_UPSTREAM_EARLY_HINTS        41
 
 
 #define NGX_HTTP_UPSTREAM_IGN_XA_REDIRECT    0x00000002
@@ -54,6 +55,9 @@
 #define NGX_HTTP_UPSTREAM_IGN_XA_BUFFERING   0x00000080
 #define NGX_HTTP_UPSTREAM_IGN_XA_CHARSET     0x00000100
 #define NGX_HTTP_UPSTREAM_IGN_VARY           0x00000200
+
+
+#define NGX_HTTP_UPSTREAM_NOTIFY_HEADER      0x1
 
 
 typedef struct {
@@ -109,8 +113,9 @@ typedef struct {
     ngx_str_t                        service;
 #endif
 
-    NGX_COMPAT_BEGIN(2)
-    NGX_COMPAT_END
+#if (NGX_HTTP_UPSTREAM_SID || NGX_COMPAT)
+    ngx_str_t                        sid;
+#endif
 } ngx_http_upstream_server_t;
 
 
@@ -185,6 +190,7 @@ typedef struct {
     ngx_flag_t                       pass_request_headers;
     ngx_flag_t                       pass_request_body;
     ngx_flag_t                       pass_trailers;
+    ngx_flag_t                       pass_early_hints;
 
     ngx_flag_t                       ignore_client_abort;
     ngx_flag_t                       intercept_errors;
@@ -251,7 +257,7 @@ typedef struct {
 
     ngx_str_t                        module;
 
-    NGX_COMPAT_BEGIN(2)
+    NGX_COMPAT_BEGIN(6)
     NGX_COMPAT_END
 } ngx_http_upstream_conf_t;
 
@@ -354,6 +360,7 @@ struct ngx_http_upstream_s {
 
     ngx_buf_t                        buffer;
     off_t                            length;
+    off_t                            early_hints_length;
 
     ngx_chain_t                     *out_bufs;
     ngx_chain_t                     *busy_bufs;
@@ -387,6 +394,7 @@ struct ngx_http_upstream_s {
 
 #if (NGX_HTTP_SSL || NGX_COMPAT)
     ngx_str_t                        ssl_name;
+    ngx_str_t                        ssl_alpn_protocol;
 #endif
 
     ngx_http_cleanup_pt             *cleanup;

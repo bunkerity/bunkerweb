@@ -17,10 +17,16 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                             |
-| :------------------ | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
-| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                             |
+| ----------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`           |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.                                                                                                             |
+| `BLACKLIST_COUNTRY`           |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.                                                                                                                  |
+| `COUNTRY_IGNORE_URI`          |          | Multisite | Nein     | Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Länderprüfung zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                                |
+| `COUNTRY_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                      |
+
+!!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+    Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 ### Unterstützte Ländergruppen
 
@@ -40,7 +46,10 @@ Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgli
 - `@LATAM`: in diesem Plugin verwendete Lateinamerika-Gruppe.
 
 !!! tip "Whitelist vs. Blacklist"
-    Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
+    Wählen Sie den Ansatz, der zu Ihren Anforderungen passt:
+
+    - Verwenden Sie die Whitelist, wenn Sie den Zugriff auf wenige Länder beschränken möchten.
+    - Verwenden Sie die Blacklist, wenn Sie bestimmte problematische Regionen blockieren und alle anderen zulassen möchten.
 
 !!! warning "Priorität"
     Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.

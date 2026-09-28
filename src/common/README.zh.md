@@ -94,34 +94,35 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                   | 默认值       | 上下文 | 多个 | 描述                                                              |
-    | ---------------------- | ------------ | ------ | ---- | ----------------------------------------------------------------- |
-    | `HTTP_PORT`            | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。                               |
-    | `HTTPS_PORT`           | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。                             |
-    | `USE_IPV6`             | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                                  |
-    | `DNS_RESOLVERS`        | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。                      |
-    | `CLIENT_BODY_TIMEOUT`  | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。               |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。              |
-    | `KEEPALIVE_TIMEOUT`    | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。            |
-    | `SEND_TIMEOUT`         | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                       |
+    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                       |
+    | ----------------------- | ------------ | ------ | ---- | ---------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
+    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
+    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
+    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
 
 === "流服务器设置"
 
-    | 设置                     | 默认值 | 上下文    | 多个 | 描述                                      |
-    | ------------------------ | ------ | --------- | ---- | ----------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`  | multisite | 否   | **监听流：** 启用对非 SSL（直通）的监听。 |
-    | `LISTEN_STREAM_PORT`     | `1337` | multisite | 是   | **流端口：** 非 SSL（直通）的监听端口。留空以禁用非SSL流监听。   |
+    | 设置                     | 默认值 | 上下文    | 多个 | 描述                                                           |
+    | ------------------------ | ------ | --------- | ---- | -------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`  | multisite | 否   | **监听流：** 启用对非 SSL（直通）的监听。                      |
+    | `LISTEN_STREAM_PORT`     | `1337` | multisite | 是   | **流端口：** 非 SSL（直通）的监听端口。留空以禁用非SSL流监听。 |
     | `LISTEN_STREAM_PORT_SSL` | `4242` | multisite | 是   | **流 SSL 端口：** SSL（直通）的监听端口。留空以禁用SSL流监听。 |
-    | `USE_TCP`                | `yes`  | multisite | 否   | **TCP 监听：** 启用 TCP 监听（流）。      |
-    | `USE_UDP`                | `no`   | multisite | 否   | **UDP 监听：** 启用 UDP 监听（流）。      |
+    | `USE_TCP`                | `yes`  | multisite | 否   | **TCP 监听：** 启用 TCP 监听（流）。                           |
+    | `USE_UDP`                | `no`   | multisite | 否   | **UDP 监听：** 启用 UDP 监听（流）。                           |
 
 === "工作进程设置"
 
-    | 设置                   | 默认值 | 上下文 | 多个 | 描述                                                              |
-    | ---------------------- | ------ | ------ | ---- | ----------------------------------------------------------------- |
-    | `WORKER_PROCESSES`     | `auto` | global | 否   | **工作进程数：** 工作进程的数量。设置为 `auto` 以使用可用核心数。 |
-    | `WORKER_CONNECTIONS`   | `1024` | global | 否   | **工作连接数：** 每个工作进程的最大连接数。                       |
-    | `WORKER_RLIMIT_NOFILE` | `2048` | global | 否   | **文件描述符限制：** 每个工作进程的最大打开文件数。               |
+    | 设置                      | 默认值 | 上下文 | 多个 | 描述                                                                                                  |
+    | ------------------------- | ------ | ------ | ---- | ----------------------------------------------------------------------------------------------------- |
+    | `WORKER_PROCESSES`        | `auto` | global | 否   | **工作进程数：** 工作进程的数量。设置为 `auto` 以使用可用核心数。                                     |
+    | `WORKER_CONNECTIONS`      | `1024` | global | 否   | **工作连接数：** 每个工作进程的最大连接数。                                                           |
+    | `WORKER_RLIMIT_NOFILE`    | `2048` | global | 否   | **文件描述符限制：** 每个工作进程的最大打开文件数。                                                   |
+    | `WORKER_SHUTDOWN_TIMEOUT` | `30s`  | global | 否   | **工作进程关闭超时：** 工作进程优雅关闭的超时时间。在重新加载期间，旧工作进程在此超时后将被强制终止。 |
 
 === "内存设置"
 
@@ -129,10 +130,12 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | ------------------------------ | ------ | ------ | ---- | ---------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。 |
     | `DATASTORE_MEMORY_SIZE`        | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                      |
+    | `DATASTORE_LRU_SIZE`           | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                      |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。          |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。      |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。   |
 
 === "日志设置"
 
@@ -150,13 +153,12 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "集成设置"
 
-    | 设置              | 默认值 | 上下文    | 多个 | 描述                                                        |
-    | ----------------- | ------ | --------- | ---- | ----------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。              |
-    | `SWARM_MODE`      | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                   |
-    | `KUBERNETES_MODE` | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                |
-    | `KEEP_CONFIG_ON_RESTART` | `no` | global | 否 | **重启时保留配置：** 重启时保留配置。设置为 'yes' 以防止重启时重置配置。 |
-    | `USE_TEMPLATE`    |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。 |
+    | 设置                     | 默认值 | 上下文    | 多个 | 描述                                                                     |
+    | ------------------------ | ------ | --------- | ---- | ------------------------------------------------------------------------ |
+    | `AUTOCONF_MODE`          | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                           |
+    | `SWARM_MODE`             | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                |
+    | `KUBERNETES_MODE`        | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                             |
+    | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值；在服务上设置的值会覆盖模板。              |
 
 === "Nginx 设置"
 
@@ -214,4 +216,26 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     LISTEN_STREAM_PORT: "1337"
     USE_TCP: "yes"
     USE_UDP: "no"
+    ```
+
+=== "禁用监听模式"
+
+    您可以通过将端口设置留空来禁用特定的监听模式：
+
+    ```yaml
+    # 禁用 HTTP 监听（仅 HTTPS）
+    HTTP_PORT: ""
+    HTTPS_PORT: "8443"
+
+    # 禁用 HTTPS 监听（仅 HTTP）
+    HTTP_PORT: "8080"
+    HTTPS_PORT: ""
+
+    # Stream：禁用非 SSL 监听（仅 SSL）
+    LISTEN_STREAM_PORT: ""
+    LISTEN_STREAM_PORT_SSL: "4242"
+
+    # Stream：禁用 SSL 监听（仅非 SSL）
+    LISTEN_STREAM_PORT: "1337"
+    LISTEN_STREAM_PORT_SSL: ""
     ```

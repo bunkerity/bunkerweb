@@ -14,18 +14,22 @@ Comment ça marche :
 2. Extensions : définissez `CLIENT_CACHE_EXTENSIONS` pour les types de fichiers à mettre en cache.
 3. Directives Cache-Control : personnalisez `CLIENT_CACHE_CONTROL`.
 4. ETag : activez ou non via `CLIENT_CACHE_ETAG`.
+5. Laisser BunkerWeb faire le reste : une fois configuré, les en-têtes de cache sont appliqués automatiquement aux réponses éligibles.
 
 ### Paramètres
 
 | Paramètre                 | Défaut                                                                    | Contexte  | Multiple | Description                                                  |
-| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------ | --- |
+| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------ |
 | `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | non      | Activer la mise en cache côté client des fichiers statiques. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg\|jpeg\|png\|bmp\|ico\|svg\|tif\|css\|js\|otf\|ttf\|eot\|woff\|woff2` | global    | non      | Extensions mises en cache (séparées par `                    | `). |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg\|jpeg\|png\|bmp\|ico\|svg\|tif\|css\|js\|otf\|ttf\|eot\|woff\|woff2` | global    | non      | Extensions mises en cache, séparées par des pipes.          |
 | `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | non      | Valeur de l’en‑tête HTTP Cache-Control.                      |
 | `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | non      | Envoi d’un ETag pour les ressources statiques.               |
 
 !!! tip "Optimiser le cache"
     Contenu fréquemment mis à jour : durée plus courte. Contenu versionné ou peu changeant : durée plus longue. La valeur par défaut (180 jours) convient souvent.
+
+!!! info "Comportement des navigateurs"
+    Les navigateurs respectent les en-têtes Cache-Control et ETag selon leurs propres règles de cache. Les utilisateurs peuvent toujours forcer un rechargement ou vider leur cache, ce qui déclenche un nouveau téléchargement.
 
 ### Exemples
 

@@ -163,7 +163,7 @@
             </tbody>
         </table>
     </div>
-    {% if not is_readonly %}
+    {% if not is_readonly and user_admin %}
         <div class="modal modal-xl fade"
              id="modal-add-plugins"
              data-bs-backdrop="static"

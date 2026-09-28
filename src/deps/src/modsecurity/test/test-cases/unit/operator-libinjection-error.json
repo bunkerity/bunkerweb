@@ -1,0 +1,40 @@
+[
+  {
+    "type": "op",
+    "name": "detectXSS",
+    "param": "",
+    "input": "<div<div>",
+    "ret": 1,
+    "capture": 1,
+    "libinjection_override": "error",
+    "output": "<div<div>"
+  },
+  {
+    "type": "op",
+    "name": "detectSQLi",
+    "param": "",
+    "input": "''''''",
+    "ret": 1,
+    "capture": 1,
+    "libinjection_override": "error",
+    "output": "''''''"
+  },
+  {
+    "type": "op",
+    "name": "detectXSS",
+    "param": "",
+    "input": "<script>alert(1)</script>",
+    "ret": 1,
+    "capture": 1,
+    "output": "<script>alert(1)</script>"
+  },
+  {
+    "type": "op",
+    "name": "detectSQLi",
+    "param": "",
+    "input": "ascii(substring(version() from 1 for 1))",
+    "ret": 1,
+    "capture": 1,
+    "output": "f(f(f"
+  }
+]

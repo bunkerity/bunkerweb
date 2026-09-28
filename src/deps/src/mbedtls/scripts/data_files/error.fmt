@@ -1,11 +1,11 @@
-/*
+/* -*-c-*-
  *  Error message information
  *
  *  Copyright The Mbed TLS Contributors
  *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
  */
 
-#include "common.h"
+#include "mbedtls_common.h"
 
 #include "mbedtls/error.h"
 
@@ -20,7 +20,7 @@
 
 HEADER_INCLUDED
 
-const char *mbedtls_high_level_strerr(int error_code)
+static const char *mbedtls_high_level_strerr(int error_code)
 {
     int high_level_error_code;
 
@@ -43,7 +43,7 @@ const char *mbedtls_high_level_strerr(int error_code)
     return NULL;
 }
 
-const char *mbedtls_low_level_strerr(int error_code)
+static const char *mbedtls_low_level_strerr(int error_code)
 {
     int low_level_error_code;
 

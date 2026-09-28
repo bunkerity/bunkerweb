@@ -6,7 +6,7 @@ require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.evp.md"
 local evp = require("resty.openssl.include.evp")
 local ctypes = require "resty.openssl.auxiliary.ctypes"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local void_ptr = ctypes.void_ptr
 
@@ -16,7 +16,7 @@ local _M = {
   EVP_PKEY_HKDEF_MODE_EXPAND_ONLY        = 2,
 }
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.provider"
 
   ffi.cdef [[

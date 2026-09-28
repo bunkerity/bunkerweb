@@ -101,17 +101,29 @@ int RulesSet::load(const char *plainRules) {
 }
 
 
-std::string RulesSet::getParserError() {
+std::string RulesSet::getParserError() const {
     return this->m_parserError.str();
 }
 
+std::string RulesSet::getParserError() {
+    return static_cast<const RulesSet&>(*this).getParserError();
+}
+
+void RulesSet::cleanMatchedVars(Transaction *trans) {
+    ms_dbg_a(trans, 9, "Matched vars cleaned.");
+    // cppcheck-suppress ctunullpointer
+    trans->m_variableMatchedVar.unset();
+    trans->m_variableMatchedVars.unset();
+    trans->m_variableMatchedVarName.unset();
+    trans->m_variableMatchedVarsNames.unset();
+}
 
 int RulesSet::evaluate(int phase, Transaction *t) {
     if (phase >= modsecurity::Phases::NUMBER_OF_PHASES) {
        return 0;
     }
 
-    Rules *rules = m_rulesSetPhases[phase];
+    const Rules *rules = m_rulesSetPhases[phase];
 
     ms_dbg_a(t, 9, "This phase consists of " \
         + std::to_string(rules->size()) + " rule(s).");
@@ -208,6 +220,7 @@ int RulesSet::evaluate(int phase, Transaction *t) {
             }
 
             rule->evaluate(t);
+            cleanMatchedVars(t);
             if (t->m_it.disruptive > 0) {
 
                 ms_dbg_a(t, 8, "Skipping this phase as this " \

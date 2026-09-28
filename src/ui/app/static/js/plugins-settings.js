@@ -1,3 +1,6 @@
+import { parseRawSettings } from "./modules/raw-settings.js";
+import { initCertificateValidation } from "./modules/certificate-validation.js";
+
 $(document).ready(() => {
   // Ensure i18next is loaded before using it
   const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
@@ -94,6 +97,60 @@ $(document).ready(() => {
       return new RegExp(pattern, "s");
     }
     return new RegExp(pattern);
+  };
+
+  // Canonical RAW-editor key universe emitted by the server (#raw-known-keys).
+  // Shared by the raw-config parser (issue #3651) and the settings fold mode.
+  // Returns {keys, bases, multiline, multilineBases} (all arrays).
+  const parseRawKeySpec = () => {
+    try {
+      const parsed = JSON.parse($("#raw-known-keys").val() || "{}") || {};
+      return {
+        keys: parsed.keys || [],
+        bases: parsed.bases || [],
+        multiline: parsed.multiline || [],
+        multilineBases: parsed.multilineBases || [],
+      };
+    } catch (_e) {
+      return { keys: [], bases: [], multiline: [], multilineBases: [] };
+    }
+  };
+
+  // Build the shared RAW key predicates from #raw-known-keys. Single source of
+  // truth for the raw-config parser, the locked-line highlighter, and the
+  // settings fold mode, so "what is a setting key" / "what can be multiline" is
+  // decided identically everywhere (issue #3651).
+  const makeRawKeyPredicates = () => {
+    const spec = parseRawKeySpec();
+    const knownKeys = new Set(spec.keys);
+    const multilineKeys = new Set(spec.multiline);
+    const matchesKeySet = (token, keySet, baseList) => {
+      if (!token) return false;
+      if (keySet.has(token)) return true;
+      for (let i = 0; i < baseList.length; i++) {
+        const base = baseList[i];
+        if (
+          base &&
+          token.indexOf(base + "_") === 0 &&
+          /^\d+$/.test(token.slice(base.length + 1))
+        ) {
+          return true;
+        }
+      }
+      return false;
+    };
+    return {
+      spec,
+      // The setting key a physical line declares, or null if it is not a
+      // `KEY=...` line at all.
+      keyOfLine: (line) => {
+        const eq = line.indexOf("=");
+        return eq === -1 ? null : line.slice(0, eq).trim();
+      },
+      isKnownSettingKey: (token) => matchesKeySet(token, knownKeys, spec.bases),
+      isMultilineKey: (token) =>
+        matchesKeySet(token, multilineKeys, spec.multilineBases),
+    };
   };
 
   const FILE_NAME_STORAGE_PREFIX = "bw-file-setting-name::";
@@ -541,7 +598,7 @@ $(document).ready(() => {
     }
   };
 
-  const resetTemplateConfig = (templateId = currentTemplate) => {
+  const resetTemplateConfig = (templateId = currentTemplate, options = {}) => {
     const normalizedTemplate = normalizeTemplateId(templateId);
     if (!normalizedTemplate) return;
 
@@ -550,13 +607,34 @@ $(document).ready(() => {
     templateContainer
       .find(".global-override-badge")
       .addClass("visually-hidden");
+    const isNewService = window.location.pathname.endsWith("/new");
+    const useTemplateDefaults =
+      isNewService || normalizedTemplate !== usedTemplate;
+    // When auto-applying a different template to an EXISTING service (template
+    // switch), keep fields the user customized (value differs from the setting
+    // default) instead of wiping them to the new template's default. The
+    // explicit "Reset template configuration" button passes no flag, so it
+    // still performs a full reset. New services have nothing to preserve.
+    const preserveCustomizations =
+      !!options.preserveCustomizations && useTemplateDefaults && !isNewService;
+    const resolveTemplateValue = ($field, fieldId) => {
+      const original = $field.data("original");
+      const customized =
+        preserveCustomizations &&
+        original !== undefined &&
+        String(original) !== String($field.data("default"));
+      if (useTemplateDefaults && !customized) {
+        return $(`#${fieldId}-template`).val();
+      }
+      // jQuery .data() coerces numeric-looking values to numbers; the
+      // multiselect/multivalue blocks call .split() on this, so keep a string.
+      return original === undefined ? undefined : String(original);
+    };
+
     templateContainer.find("input, select").each(function () {
       const $field = $(this);
       const type = $field.attr("type");
-      const isNewEndpoint = window.location.pathname.endsWith("/new");
-      const templateValue = isNewEndpoint
-        ? $(`#${this.id}-template`).val()
-        : $field.data("original");
+      const templateValue = resolveTemplateValue($field, this.id);
 
       if ($field.hasClass("plugin-setting-file-upload")) {
         $field.val("");
@@ -566,6 +644,14 @@ $(document).ready(() => {
       if (
         $field.prop("disabled") ||
         (type === "hidden" && !$field.hasClass("plugin-setting-file-text"))
+      ) {
+        return;
+      }
+
+      // Skip multiselect option checkboxes — handled separately below
+      if (
+        type === "checkbox" &&
+        $field.closest(".multiselect-options").length
       ) {
         return;
       }
@@ -592,10 +678,103 @@ $(document).ready(() => {
       }
     });
 
+    // Reset multiselect fields (hidden input + option checkboxes)
+    templateContainer
+      .find(".multiselect-container input.plugin-setting[type='hidden']")
+      .each(function () {
+        const $input = $(this);
+        if ($input.prop("disabled")) return;
+        const templateValue = resolveTemplateValue($input, this.id);
+        if (templateValue === undefined) return;
+
+        $input.val(templateValue).trigger("input");
+        const $dropdown = $input.closest(".dropdown");
+        const separator = $dropdown.data("separator");
+        const separatorValue =
+          separator === undefined ? " " : String(separator);
+        const selectedValues = templateValue
+          ? separatorValue === ""
+            ? templateValue.split("")
+            : templateValue.split(separatorValue)
+          : [];
+        $dropdown.find(".form-check-input").each(function () {
+          const $checkbox = $(this);
+          $checkbox.prop("checked", selectedValues.includes($checkbox.val()));
+        });
+        // Sync badge/footer from the actually-checked boxes (not the parsed
+        // token count) and set data-i18n-options so applyTranslations keeps it.
+        // The hidden value set above is preserved (no recompute from boxes).
+        const checkedCount = $dropdown.find(".form-check-input:checked").length;
+        $dropdown
+          .find("[data-selected-count]")
+          .text(
+            t("template.editor.multiselect_summary", {
+              count: checkedCount,
+              defaultValue: `${checkedCount} selected`,
+            }),
+          )
+          .attr("data-i18n-options", JSON.stringify({ count: checkedCount }));
+        $dropdown.find("[data-selected-badge]").text(checkedCount);
+      });
+
+    // Reset multivalue fields (hidden input + visible text inputs)
+    templateContainer.find(".multivalue-hidden-input").each(function () {
+      const $input = $(this);
+      if ($input.prop("disabled")) return;
+      const templateValue = resolveTemplateValue($input, this.id);
+      if (templateValue === undefined) return;
+
+      const $container = $input.closest(".multivalue-container");
+      const separator = $container.data("separator") || " ";
+      const values = templateValue ? templateValue.split(separator) : [""];
+      $container.find(".multivalue-input-group").remove();
+      $container.find(".multivalue-toggle").remove();
+
+      const $inputsContainer = $container.find(".multivalue-inputs");
+      values.forEach((value, index) => {
+        const $inputGroup = $("<div>", {
+          class: "input-group mb-2 multivalue-input-group",
+        });
+        const $input = $("<input>", {
+          type: "text",
+          class: "form-control multivalue-input",
+        });
+        $input.val(value.trim());
+        $inputGroup.append($input);
+        $inputGroup.append(
+          `<button type="button"
+                    class="btn btn-outline-success add-multivalue-item">
+              <i class="bx bx-plus"></i>
+            </button>`,
+        );
+        if (index > 0 || values.length > 1) {
+          $inputGroup.append(
+            `<button type="button"
+                    class="btn btn-outline-danger remove-multivalue-item">
+              <i class="bx bx-x"></i>
+            </button>`,
+          );
+        }
+        $inputsContainer.append($inputGroup);
+      });
+      updateMultivalueHiddenInput($container);
+    });
+
     templateContainer.find(".ace-editor").each(function () {
       const editor = ace.edit(this);
-      const editorDefaultElem = $(`#${this.id}-default`).val();
-      const editorValue = editorDefaultElem ? editorDefaultElem.trim() : "";
+      const editorDefault = ($(`#${this.id}-default`).val() || "").trim();
+      const $valueEl = $(`#${this.id}-value`);
+      // Saved custom-config content (falls back to the template default when the
+      // value element is absent, preserving the old reset-to-default behavior).
+      const editorSaved = $valueEl.length
+        ? ($valueEl.val() || "").trim()
+        : editorDefault;
+      // Mirror the scalar customized test: keep a custom-config the user edited
+      // away from this template's default instead of wiping it on switch.
+      const customized =
+        preserveCustomizations && editorSaved !== editorDefault;
+      const editorValue =
+        useTemplateDefaults && !customized ? editorDefault : editorSaved;
       editor.setValue(editorValue);
       editor.session.setValue(editorValue);
       editor.gotoLine(0);
@@ -726,7 +905,19 @@ $(document).ready(() => {
       if (nextTemplateId)
         setCurrentTemplate(nextTemplateId, { clearType: true });
 
-      if (!isInit) resetTemplateConfig(previousTemplate);
+      if (!isInit) {
+        resetTemplateConfig(previousTemplate, { preserveCustomizations: true });
+        // On existing services, apply the new template's defaults to fields the
+        // user left at the setting default, while keeping customized values
+        if (
+          !window.location.pathname.endsWith("/new") &&
+          currentTemplate !== usedTemplate
+        ) {
+          resetTemplateConfig(currentTemplate, {
+            preserveCustomizations: true,
+          });
+        }
+      }
     }
 
     return true; // Tab change is allowed
@@ -942,6 +1133,16 @@ $(document).ready(() => {
       );
     };
 
+    // Skip default-method values the user didn't touch; submitting them would
+    // create a method="ui" DB row that shadows the template/default overlay.
+    const shouldSkipUnchangedDefault = ($input, currentValue) => {
+      const method = $input.attr("data-method");
+      if (method !== "default") return false;
+      const original = $input.attr("data-original");
+      if (original === undefined) return false;
+      return String(currentValue) === String(original);
+    };
+
     const addChildrenToForm = (form, elem, isEasy = false) => {
       elem.find("input, select").each(function () {
         const $this = $(this);
@@ -966,11 +1167,26 @@ $(document).ready(() => {
         }
 
         if (isFileTextSetting) {
+          if (shouldSkipUnchangedDefault($this, settingValue)) {
+            const lastFileName = String(
+              $this.data("lastFileName") || $this.attr("data-file-name") || "",
+            ).trim();
+            const originalFileName = String(
+              $this.attr("data-original-file-name") || "",
+            ).trim();
+            if (lastFileName === originalFileName) {
+              return;
+            }
+          }
           const settingFileName = String(
             $this.data("lastFileName") || $this.attr("data-file-name") || "",
           ).trim();
           appendHiddenInput(form, settingName, settingValue, true);
           appendHiddenInput(form, `${settingName}__FILE_NAME`, settingFileName);
+          return;
+        }
+
+        if (shouldSkipUnchangedDefault($this, settingValue)) {
           return;
         }
 
@@ -990,6 +1206,9 @@ $(document).ready(() => {
           if ($hiddenInput.length && $hiddenInput.attr("name")) {
             const settingName = $hiddenInput.attr("name");
             const settingValue = $hiddenInput.val() || "";
+            if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+              return;
+            }
             appendHiddenInput(form, settingName, settingValue);
           }
         });
@@ -1002,6 +1221,9 @@ $(document).ready(() => {
         if ($hiddenInput.length && $hiddenInput.attr("name")) {
           const settingName = $hiddenInput.attr("name");
           const settingValue = $hiddenInput.val() || "";
+          if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+            return;
+          }
           appendHiddenInput(form, settingName, settingValue);
         }
       });
@@ -1028,23 +1250,31 @@ $(document).ready(() => {
     } else if (currentMode === undefined || currentMode === "advanced") {
       addChildrenToForm(form, $("div[id^='navs-plugins-']"));
     } else if (currentMode === "raw") {
-      // Helper function to parse configuration strings into an object
+      // Key universe emitted by the RAW template (#raw-known-keys): every valid
+      // setting key, the base-prefixes of "multiple" settings, and the subset of
+      // keys that hold multiline values (type:"file" settings such as
+      // CUSTOM_SSL_CERT_DATA / CUSTOM_SSL_KEY_DATA / *_TRUSTED_CERTIFICATE_DATA).
+      // The parser below uses it so a PEM/base64 block is reassembled instead of
+      // being shattered into bogus variables on save (issue #3651).
+      const { isKnownSettingKey, isMultilineKey } = makeRawKeyPredicates();
+
+      // Parse env-style raw config into ordered [key, value] pairs. A physical
+      // line begins a new pair only when the token before its first "=" is a
+      // known setting key; any other line is a continuation that is folded back
+      // into the current value — but ONLY when the current key is multiline
+      // capable, so ordinary single-line settings can never absorb stray lines.
+      // Split once on the first "=" (indexOf, not split) so base64 "==" padding
+      // and "=" inside values survive untouched.
+      const parseRawConfig = (rawText) =>
+        parseRawSettings(rawText, { isKnownSettingKey, isMultilineKey });
+
+      // Helper to fold a raw config blob into a {key: value} object.
       const parseConfig = (selector) => {
-        const rawConfig = $(selector).val();
-        if (!rawConfig) return {};
-        return rawConfig
-          .trim()
-          .split("\n")
-          .reduce((acc, line) => {
-            const [key, ...valueParts] = line
-              .split("=")
-              .map((str) => str.trim());
-            const value = valueParts.join("=");
-            if (key && value !== undefined) {
-              acc[key.trim()] = value.trim();
-            }
-            return acc;
-          }, {});
+        const acc = {};
+        parseRawConfig($(selector).val()).forEach(({ key, value }) => {
+          if (key) acc[key] = value;
+        });
+        return acc;
       };
 
       // Parse original and default configurations
@@ -1060,33 +1290,45 @@ $(document).ready(() => {
       const rawConfigSource = rawEditor
         ? rawEditor.getValue()
         : $("#raw-config").val();
-      if (rawConfigSource) {
-        const configLines = rawConfigSource
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line && !line.startsWith("#"));
-
-        configLines.forEach((line) => {
-          const [key, ...valueParts] = line.split("=").map((str) => str.trim());
-          const value = valueParts.join("=");
-          if (!key || value === undefined) {
-            console.warn(`Skipping malformed line: ${line}`);
-            return;
-          }
-          if (key === "IS_DRAFT") {
-            skippedKeys.add(key);
-            return;
-          }
-
-          appendHiddenInput(form, key, value);
-          formKeys.add(key);
-        });
-      }
+      const seenRawKeys = new Set();
+      const rawEntries = parseRawConfig(rawConfigSource).filter(({ key }) => {
+        if (seenRawKeys.has(key)) return false;
+        seenRawKeys.add(key);
+        return true;
+      });
+      appendHiddenInput(
+        form,
+        "RAW_PRESENT_SETTINGS",
+        JSON.stringify([...seenRawKeys]),
+      );
+      appendHiddenInput(
+        form,
+        "RAW_DRAFT_SETTINGS",
+        JSON.stringify(
+          rawEntries
+            .filter((entry) => rawDraftSettings.has(entry.key))
+            .map((entry) => entry.key),
+        ),
+      );
+      rawEntries.forEach(({ key, value }) => {
+        if (!key) return;
+        if (key === "IS_DRAFT") {
+          skippedKeys.add(key);
+          return;
+        }
+        appendHiddenInput(form, key, value, String(value).indexOf("\n") !== -1);
+        formKeys.add(key);
+      });
 
       // Append default values if they are not already in the form and not skipped
       Object.entries(configDefaults).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
-          appendHiddenInput(form, key, value);
+          appendHiddenInput(
+            form,
+            key,
+            value,
+            String(value).indexOf("\n") !== -1,
+          );
           formKeys.add(key);
         }
       });
@@ -1094,7 +1336,12 @@ $(document).ready(() => {
       // Append original values if they are not already in the form and not skipped
       Object.entries(entireconfigOriginals).forEach(([key, value]) => {
         if (!formKeys.has(key) && !skippedKeys.has(key)) {
-          appendHiddenInput(form, key, value);
+          appendHiddenInput(
+            form,
+            key,
+            value,
+            String(value).indexOf("\n") !== -1,
+          );
           formKeys.add(key);
         }
       });
@@ -1993,14 +2240,39 @@ $(document).ready(() => {
   $(".toggle-draft").on("click", function () {
     const draftInput = $("#is-draft");
     const isDraft = draftInput.val() === "yes";
+    const newValue = isDraft ? "no" : "yes";
 
-    draftInput.val(isDraft ? "no" : "yes");
+    draftInput.val(newValue);
     const newStatusKey = isDraft ? "status.online" : "status.draft";
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
       }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(newStatusKey)}</span>`,
     );
+
+    // Keep the raw editor's IS_DRAFT line in sync with the toggle button. Without
+    // this the raw editor would still display the previous IS_DRAFT value after
+    // toggling, and a subsequent direct edit in the editor (which is the source
+    // of truth in raw mode through the editor->#is-draft change handler) would
+    // overwrite the toggle's new value with the stale editor line.
+    const rawEditor = editorRegistry["raw-config-editor"];
+    if (rawEditor) {
+      const lines = rawEditor.getValue().split("\n");
+      let mutated = false;
+      for (let i = 0; i < lines.length; i++) {
+        if (/^\s*IS_DRAFT\s*=/.test(lines[i])) {
+          const replacement = `IS_DRAFT=${newValue}`;
+          if (lines[i] !== replacement) {
+            lines[i] = replacement;
+            mutated = true;
+          }
+          break;
+        }
+      }
+      if (mutated) {
+        rawEditor.setValue(lines.join("\n"), -1);
+      }
+    }
   });
 
   $(".copy-settings").on("click", function () {
@@ -2110,28 +2382,30 @@ $(document).ready(() => {
 
               const $inputsContainer = $container.find(".multivalue-inputs");
               values.forEach((value, index) => {
-                const inputGroupHtml = `
-                  <div class="input-group mb-2 multivalue-input-group">
-                    <input type="text"
-                           class="form-control multivalue-input"
-                           value="${value.trim()}">
-                    <button type="button"
+                const $inputGroup = $("<div>", {
+                  class: "input-group mb-2 multivalue-input-group",
+                });
+                const $input = $("<input>", {
+                  type: "text",
+                  class: "form-control multivalue-input",
+                });
+                $input.val(value.trim());
+                $inputGroup.append($input);
+                $inputGroup.append(
+                  `<button type="button"
                             class="btn btn-outline-success add-multivalue-item">
                       <i class="bx bx-plus"></i>
-                    </button>
-                    ${
-                      index > 0 || values.length > 1
-                        ? `
-                    <button type="button"
+                    </button>`,
+                );
+                if (index > 0 || values.length > 1) {
+                  $inputGroup.append(
+                    `<button type="button"
                             class="btn btn-outline-danger remove-multivalue-item">
                       <i class="bx bx-x"></i>
-                    </button>
-                    `
-                        : ""
-                    }
-                  </div>
-                `;
-                $inputsContainer.append(inputGroupHtml);
+                    </button>`,
+                  );
+                }
+                $inputsContainer.append($inputGroup);
               });
               updateMultivalueHiddenInput($container);
             } else if (
@@ -2153,9 +2427,7 @@ $(document).ready(() => {
                 const checkboxVal = $checkbox.val();
                 $checkbox.prop("checked", selectedValues.includes(checkboxVal));
               });
-              const selectedCount = selectedValues.filter((v) => v).length;
-              const $label = $dropdown.find(".multiselect-toggle label");
-              $label.text(`(${selectedCount} selected)`);
+              updateMultiselectDisplay($dropdown);
             } else {
               // Handle simple text-like inputs and textareas
               $input.val(settingValue).trigger("input");
@@ -2304,6 +2576,9 @@ $(document).ready(() => {
   const AceRange = ace.require("ace/range").Range;
   var editors = [];
   var editorRegistry = {};
+  const rawDraftSettings = new Set(
+    JSON.parse($("#raw-draft-settings").val() || "[]"),
+  );
   const triggerRawConfigSave = () => {
     const $saveBtn = $(".raw-config-save-btn").not(".disabled");
     if ($saveBtn.length) {
@@ -2342,6 +2617,12 @@ $(document).ready(() => {
         }),
     );
 
+    // Same key predicates as the raw parser, so a locked MULTILINE setting
+    // (e.g. a method-managed CUSTOM_SSL_CERT_DATA) highlights its whole
+    // PEM/base64 block, not just the header row.
+    const { keyOfLine, isKnownSettingKey, isMultilineKey } =
+      makeRawKeyPredicates();
+
     const refreshDisabledIndicators = () => {
       rawDisabledMarkers.forEach((id) => editor.session.removeMarker(id));
       rawDisabledMarkers = [];
@@ -2356,23 +2637,41 @@ $(document).ready(() => {
       const disabledAnnotations = [];
 
       const lines = editor.session.getDocument().getAllLines();
-      lines.forEach((line, index) => {
-        const key = line.split("=")[0].trim();
-        if (!key || !disabledMap.has(key)) return;
+      let row = 0;
+      while (row < lines.length) {
+        const key = keyOfLine(lines[row]);
+        if (!key || !isKnownSettingKey(key) || !disabledMap.has(key)) {
+          row++;
+          continue;
+        }
+
+        // A locked multiline setting spans its continuation rows too, up to the
+        // next real KEY= line.
+        let endRow = row;
+        if (isMultilineKey(key)) {
+          while (
+            endRow + 1 < lines.length &&
+            !isKnownSettingKey(keyOfLine(lines[endRow + 1]) || "")
+          ) {
+            endRow++;
+          }
+        }
 
         const methodKey = disabledMap.get(key);
         const methodLabel = methodKey
           .replace(/_/g, " ")
           .replace(/\b\w/g, (char) => char.toUpperCase());
-        const range = new AceRange(index, 0, index, Infinity);
-        rawDisabledMarkers.push(
-          editor.session.addMarker(range, "raw-disabled-line", "fullLine"),
-        );
-        editor.session.addGutterDecoration(index, "raw-disabled-gutter");
-        rawDisabledGutterRows.push(index);
+        for (let r = row; r <= endRow; r++) {
+          const range = new AceRange(r, 0, r, Infinity);
+          rawDisabledMarkers.push(
+            editor.session.addMarker(range, "raw-disabled-line", "fullLine"),
+          );
+          editor.session.addGutterDecoration(r, "raw-disabled-gutter");
+          rawDisabledGutterRows.push(r);
+        }
 
         disabledAnnotations.push({
-          row: index,
+          row,
           column: 0,
           rawDisabled: true,
           type: "info",
@@ -2383,7 +2682,8 @@ $(document).ready(() => {
             rawMethod: methodKey,
           }),
         });
-      });
+        row = endRow + 1;
+      }
 
       editor.session.setAnnotations(
         baseAnnotations.concat(disabledAnnotations),
@@ -2392,6 +2692,71 @@ $(document).ready(() => {
 
     refreshDisabledIndicators();
     editor.on("change", refreshDisabledIndicators);
+  };
+
+  const setupRawDraftActions = (editor) => {
+    // Reserve space for a visual comment prefix without changing setting values.
+    editor.renderer.setPadding(24);
+    const predicates = makeRawKeyPredicates();
+    const locked = new Set(
+      ($("#raw-config-disabled").val() || "")
+        .split(/\r?\n/)
+        .map((line) => line.split("::")[0]),
+    );
+    const controls = new Set([
+      "SERVER_NAME",
+      "OLD_SERVER_NAME",
+      "MULTISITE",
+      "IS_DRAFT",
+      "USE_TEMPLATE",
+      "DATABASE_URI",
+      "DATABASE_URI_READONLY",
+      "USE_UI",
+      "OVERRIDE_NON_GLOBAL_SERVICES",
+    ]);
+    let markers = [];
+    const selected = () => {
+      const row = editor.getCursorPosition().row;
+      return parseRawSettings(editor.getValue(), predicates).find(
+        (entry) => entry.start === row,
+      );
+    };
+    const refresh = () => {
+      markers.forEach((id) => editor.session.removeMarker(id));
+      markers = parseRawSettings(editor.getValue(), predicates)
+        .filter((entry) => rawDraftSettings.has(entry.key))
+        .map((entry) =>
+          editor.session.addMarker(
+            new AceRange(entry.start, 0, entry.end, Infinity),
+            "raw-draft-line",
+            "fullLine",
+            true,
+          ),
+        );
+    };
+    // Handle the visual prefix separately from RAW text, especially multiline values.
+    editor.commands.on("exec", (event) => {
+      if (
+        editor.getReadOnly() ||
+        !editor.selection.isEmpty() ||
+        editor.getCursorPosition().column !== 0
+      )
+        return;
+      const entry = selected();
+      if (!entry) return;
+      const toggle =
+        event.command.name === "insertstring" && event.args === "#";
+      const activate =
+        event.command.name === "backspace" && rawDraftSettings.has(entry.key);
+      if (!toggle && !activate) return;
+      event.preventDefault();
+      if (locked.has(entry.key) || controls.has(entry.key)) return;
+      if (rawDraftSettings.has(entry.key)) rawDraftSettings.delete(entry.key);
+      else rawDraftSettings.add(entry.key);
+      refresh();
+    });
+    editor.on("change", refresh);
+    refresh();
   };
 
   $(".ace-editor").each(function () {
@@ -2451,6 +2816,55 @@ $(document).ready(() => {
     }
 
     if (elementId === "raw-config-editor") {
+      // Env-style settings get their own fold-aware mode instead of the generic
+      // nginx grammar: multiline file values (PEM/base64) collapse under their
+      // KEY= header. The fold predicates come from the SAME #raw-known-keys the
+      // save-time parser uses (issue #3651) and are stashed on the session so
+      // the (schema-agnostic) FoldMode can read them.
+      setupRawDraftActions(editor);
+      const rawFoldPreds = makeRawKeyPredicates();
+      const lineKeyMatches = (line, test) => {
+        const key = rawFoldPreds.keyOfLine(line || "");
+        return key !== null && test(key);
+      };
+      editor.session.$bwRawFold = {
+        isKnownKeyLine: (line) =>
+          lineKeyMatches(line, rawFoldPreds.isKnownSettingKey),
+        isMultilineKeyLine: (line) =>
+          lineKeyMatches(line, rawFoldPreds.isMultilineKey),
+      };
+      editor.session.setMode("ace/mode/bunkerweb_settings");
+
+      // foldAll()/the gutter chevron create folds with the default "..."
+      // placeholder; copy back the FoldMode's "⋯ N lines" label (same trick as
+      // the logs viewer).
+      editor.session.on("changeFold", (e) => {
+        const fold = e.data;
+        if (
+          e.action === "add" &&
+          fold &&
+          fold.placeholder === "..." &&
+          fold.range &&
+          fold.range.placeholder
+        ) {
+          fold.placeholder = fold.range.placeholder;
+        }
+      });
+
+      // Collapse-all / expand-all toggle in the raw toolbar (default expanded).
+      const $foldToggle = $(".raw-config-fold-toggle");
+      if ($foldToggle.length) {
+        let collapsed = false;
+        $foldToggle.on("click", function () {
+          collapsed = !collapsed;
+          $(this)
+            .toggleClass("active", collapsed)
+            .attr("aria-pressed", String(collapsed));
+          if (collapsed) editor.session.foldAll();
+          else editor.session.unfold();
+        });
+      }
+
       editor.commands.addCommand({
         name: "saveRawConfigShortcut",
         bindKey: { win: "Ctrl-S", mac: "Command-S" },
@@ -2467,6 +2881,33 @@ $(document).ready(() => {
           $rawConfigHidden.val(editor.getValue());
         });
       }
+
+      // Mirror direct edits to the IS_DRAFT line back into the canonical
+      // #is-draft hidden input (and the visible toggle button). The form-build
+      // path posts IS_DRAFT from #is-draft, so without this sync a user typing
+      // IS_DRAFT=yes directly in the raw editor would never reach the route.
+      const syncDraftFromEditor = () => {
+        const $draftInput = $("#is-draft");
+        if (!$draftInput.length) return;
+        const draftLine = editor
+          .getValue()
+          .split("\n")
+          .map((l) => l.trim())
+          .find((l) => /^IS_DRAFT\s*=/.test(l));
+        if (!draftLine) return;
+        const value = draftLine.split("=").slice(1).join("=").trim();
+        if (value !== "yes" && value !== "no") return;
+        if ($draftInput.val() === value) return;
+        $draftInput.val(value);
+        const statusKey = value === "yes" ? "status.draft" : "status.online";
+        $(".toggle-draft").html(
+          `<i class="bx bx-sm bx-${
+            value === "yes" ? "file-blank" : "globe"
+          }"></i>&nbsp; <span data-i18n="${statusKey}">${t(statusKey)}</span>`,
+        );
+      };
+      syncDraftFromEditor();
+      editor.on("change", syncDraftFromEditor);
 
       setupRawDisabledHighlight(editor);
     }
@@ -2801,30 +3242,30 @@ $(document).ready(() => {
       // Add inputs for each value
       const $inputsContainer = $container.find(".multivalue-inputs");
       values.forEach((value, index) => {
-        const inputGroupHtml = `
-          <div class="input-group mb-2 multivalue-input-group">
-            <input type="text"
-                   class="form-control multivalue-input"
-                   value="${value.trim()}">
-
-            <button type="button"
+        const $inputGroup = $("<div>", {
+          class: "input-group mb-2 multivalue-input-group",
+        });
+        const $input = $("<input>", {
+          type: "text",
+          class: "form-control multivalue-input",
+        });
+        $input.val(value.trim());
+        $inputGroup.append($input);
+        $inputGroup.append(
+          `<button type="button"
                     class="btn btn-outline-success add-multivalue-item">
               <i class="bx bx-plus"></i>
-            </button>
-
-            ${
-              index > 0 || values.length > 1
-                ? `
-            <button type="button"
+            </button>`,
+        );
+        if (index > 0 || values.length > 1) {
+          $inputGroup.append(
+            `<button type="button"
                     class="btn btn-outline-danger remove-multivalue-item">
               <i class="bx bx-x"></i>
-            </button>
-            `
-                : ""
-            }
-          </div>
-        `;
-        $inputsContainer.append(inputGroupHtml);
+            </button>`,
+          );
+        }
+        $inputsContainer.append($inputGroup);
       });
 
       updateMultivalueHiddenInput($container);
@@ -2846,9 +3287,7 @@ $(document).ready(() => {
         const checkboxVal = $checkbox.val();
         $checkbox.prop("checked", selectedValues.includes(checkboxVal));
       });
-      const selectedCount = selectedValues.filter((v) => v).length;
-      const $label = $dropdown.find(".multiselect-toggle label");
-      $label.text(`(${selectedCount} selected)`);
+      updateMultiselectDisplay($dropdown);
     } else {
       $settingField.val(valueToSet).trigger("input");
     }
@@ -2872,6 +3311,8 @@ $(document).ready(() => {
     setFileSettingMode($fileTextInput, "upload");
     setFileSettingStatus($fileTextInput);
   });
+
+  initCertificateValidation(t);
 
   $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
     const $toggle = $(this);
@@ -3109,31 +3550,37 @@ $(document).ready(() => {
     const newIndex = currentCount + 1;
     const inputId = `${baseId}_${newIndex}`;
 
-    const inputGroupHtml = `
-      <div class="form-floating multivalue-input-group">
-        <div class="input-group">
-          <input type="text"
-                 class="form-control multivalue-input"
-                 value="${value}"
-                 id="${inputId}">
-          <button type="button"
-                  class="btn btn-outline-success add-multivalue-item">
+    const $inputGroup = $("<div>", {
+      class: "form-floating multivalue-input-group",
+    });
+    const $innerGroup = $("<div>", { class: "input-group" });
+    const $input = $("<input>", {
+      type: "text",
+      class: "form-control multivalue-input",
+      id: inputId,
+    });
+    $input.val(value);
+    $innerGroup.append($input);
+    $innerGroup.append(
+      `<button type="button"
+                class="btn btn-outline-success add-multivalue-item">
             <i class="bx bx-plus"></i>
           </button>
           <button type="button"
-                  class="btn btn-outline-danger remove-multivalue-item">
+                class="btn btn-outline-danger remove-multivalue-item">
             <i class="bx bx-x"></i>
-          </button>
-        </div>
-        <label for="${inputId}" class="text-truncate">Temporary</label>
-      </div>
-    `;
+          </button>`,
+    );
+    $inputGroup.append($innerGroup);
+    $inputGroup.append(
+      $("<label>", { for: inputId, class: "text-truncate", text: "Temporary" }),
+    );
 
     if ($insertAfter && $insertAfter.length) {
-      $insertAfter.after(inputGroupHtml);
+      $insertAfter.after($inputGroup);
     } else {
       const $inputsContainer = $container.find(".multivalue-inputs");
-      $inputsContainer.append(inputGroupHtml);
+      $inputsContainer.append($inputGroup);
     }
 
     // Update margin bottom for all input groups
@@ -3363,7 +3810,11 @@ $(document).ready(() => {
     // None/empty, so we need to initialise from the stored value or the default.
     const $hiddenInput = $dropdown.find('input[type="hidden"]');
     if ($hiddenInput.length) {
-      const rawValue = $hiddenInput.val() || $hiddenInput.data("default") || "";
+      const hiddenVal = $hiddenInput.val();
+      // An empty string is a valid multiselect value (no options selected).
+      // Only fall back to data-default when the value is truly absent.
+      const rawValue =
+        hiddenVal != null ? hiddenVal : $hiddenInput.data("default") || "";
       const initValue = String(rawValue);
       if (initValue) {
         const separator = $dropdown.data("separator");
@@ -3408,6 +3859,18 @@ $(document).ready(() => {
     if ($toggle.length) {
       new bootstrap.Dropdown($toggle[0], {
         autoClose: "outside",
+        popperConfig: {
+          strategy: "fixed",
+          modifiers: [
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: { top: 80 },
+              },
+            },
+          ],
+        },
       });
     }
 

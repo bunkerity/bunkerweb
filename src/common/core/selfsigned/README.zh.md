@@ -29,7 +29,7 @@
 | --------------------------- | ---------------------- | --------- | ---- | ---------------------------------------------------------------------------------------------- |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | 否   | **启用自签名：** 设置为 `yes` 以启用自动自签名证书生成。                                       |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | 否   | **证书算法：** 用于证书生成的算法：`ec-prime256v1`、`ec-secp384r1`、`rsa-2048` 或 `rsa-4096`。 |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。                                         |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为天。 |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | 否   | **证书主题：** 证书的主题字段，用于标识域名。                                                  |
 
 !!! tip "开发环境"

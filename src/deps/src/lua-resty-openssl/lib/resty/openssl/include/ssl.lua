@@ -3,7 +3,7 @@ local C = ffi.C
 
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.stack"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   // SSL_METHOD
@@ -64,7 +64,7 @@ ffi.cdef [[
   long SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   ffi.cdef [[
     X509 *SSL_get1_peer_certificate(const SSL *ssl);
   ]]

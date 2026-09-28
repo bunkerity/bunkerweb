@@ -1,7 +1,7 @@
-FROM redhat/ubi8:8.10@sha256:7dee295fba93ab1a9dfcb6e94e47e1050c6b51242449c33421ea3244d977e802 AS builder
+FROM redhat/ubi8:8.10@sha256:2e142da56e1add24860e0e8a74be12b3e7471482098124e8d85cccff7ec3ede2 AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.28.2
+ENV NGINX_VERSION=1.30.5
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
@@ -16,7 +16,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 # Install Nginx, fpm and dependencies
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-  dnf install -y --setopt=install_weak_deps=False readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre2-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel ssdeep-devel cargo && \
+  dnf install -y --setopt=install_weak_deps=False readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre2-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel ssdeep-devel rust-toolset patch && \
   dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -47,6 +47,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   python3.11 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   python3.11 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+  grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+  rm -f /tmp/certbot-dns-alias.patch
+
 RUN dnf install -y pigz && \
   tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
   rm -rf deps
@@ -76,6 +83,8 @@ COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
 ARG NODE_VERSION=24.11.1
+ARG NODE_SHA256_X64=60e3b0a8500819514aca603487c254298cd776de0698d3cd08f11dba5b8289a8
+ARG NODE_SHA256_ARM64=6b0863fb9f627bf4a6c5948dce1de4398174a2e05dbe717503d828e211ca01f0
 ENV PATH="/opt/node/bin:${PATH}"
 
 ARG SKIP_MINIFY=no
@@ -83,59 +92,57 @@ ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-  dnf install -y xz parallel && \
-  arch="$(uname -m)" && \
-  case "$arch" in \
-  x86_64) node_arch="x64" ;; \
-  aarch64) node_arch="arm64" ;; \
-  *) echo "Unsupported architecture: $arch" >&2; exit 1 ;; \
-  esac && \
-  wget -qO node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz" && \
-  mkdir -p /opt/node && \
-  tar -xJf node.tar.xz -C /opt/node --strip-components=1 && \
-  rm -f node.tar.xz && \
-  cd /tmp && \
-  npm ci --ignore-scripts; \
-  fi
+    set -eux; \
+    dnf install -y xz parallel; \
+    case "$(uname -m)" in \
+    x86_64) node_arch="x64"; node_sha="$NODE_SHA256_X64" ;; \
+    aarch64) node_arch="arm64"; node_sha="$NODE_SHA256_ARM64" ;; \
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz"; \
+    echo "${node_sha}  node.tar.xz" | sha256sum -c -; \
+    mkdir -p /opt/node; \
+    tar -xJf node.tar.xz -C /opt/node --strip-components=1; \
+    rm -f node.tar.xz; \
+    node --version; npm --version; \
+    cd /tmp; \
+    npm ci --ignore-scripts --engine-strict; \
+    fi
 
 # Minify JS files
-ARG SKIP_MINIFY=no
-ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
-  find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
-  | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
-  else \
-  echo "Skipping JS minification"; \
-  fi
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
-  find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
-  | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
-  else \
-  echo "Skipping CSS minification"; \
-  fi
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
+    else \
+    echo "Skipping CSS minification"; \
+    fi
 
 # Minify HTML files
-ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-  find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
-  parallel 'npx html-minifier-terser \
-  --collapse-whitespace \
-  --remove-comments \
-  --remove-optional-tags \
-  --remove-redundant-attributes \
-  --remove-script-type-attributes \
-  --remove-style-link-type-attributes \
-  --minify-css true \
-  --minify-js true \
-  --output {} {}'; \
-  else \
-  echo "Skipping HTML minification"; \
-  fi
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
+    fi
 
-FROM redhat/ubi8:8.10@sha256:7dee295fba93ab1a9dfcb6e94e47e1050c6b51242449c33421ea3244d977e802
+FROM redhat/ubi8:8.10@sha256:2e142da56e1add24860e0e8a74be12b3e7471482098124e8d85cccff7ec3ede2
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -159,7 +166,7 @@ WORKDIR /usr/share/bunkerweb
 RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
   echo "Linux" > INTEGRATION && \
   mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
-  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
   touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb

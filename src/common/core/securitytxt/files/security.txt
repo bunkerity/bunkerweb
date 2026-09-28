@@ -6,7 +6,7 @@ Expires: {*expires*}
 Encryption: {*e*}
 {% end %}
 {% for _, a in ipairs(acknowledgements) do %}
-Acknowledgements: {*a*}
+Acknowledgments: {*a*}
 {% end %}
 Preferred-Languages: {*preferred_lang*}
 {% if canonical and #canonical > 0 then %}

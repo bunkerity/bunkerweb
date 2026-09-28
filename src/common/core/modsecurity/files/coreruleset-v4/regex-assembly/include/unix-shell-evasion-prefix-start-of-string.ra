@@ -2,5 +2,6 @@
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
 ##! ifconfig (start of string)
-^
+^(?:json\.)?
+
 ##!> include unix-shell-evasion-prefix.ra

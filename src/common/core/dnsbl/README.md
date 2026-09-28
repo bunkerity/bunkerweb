@@ -28,10 +28,15 @@ Follow these steps to configure and use the DNSBL feature:
 
 **Ignore Lists**
 
-| Setting                | Default | Context   | Multiple | Description                                                                                    |
-| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
-| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
+| Setting                     | Default | Context   | Multiple | Description                                                                                                                               |
+| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`           | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
+| `DNSBL_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the DNSBL checks. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
+| `DNSBL_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.          |
+| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
+
+!!! warning "A header rule is a shared secret"
+    Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:

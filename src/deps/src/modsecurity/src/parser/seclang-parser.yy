@@ -27,6 +27,7 @@ class Driver;
 #include "src/actions/chain.h"
 #include "src/actions/ctl/audit_engine.h"
 #include "src/actions/ctl/audit_log_parts.h"
+#include "src/actions/ctl/parse_xml_into_args.h"
 #include "src/actions/ctl/request_body_access.h"
 #include "src/actions/ctl/rule_engine.h"
 #include "src/actions/ctl/request_body_processor_json.h"
@@ -478,7 +479,7 @@ using namespace modsecurity::operators;
   OPERATOR_VERIFY_CC                           "OPERATOR_VERIFY_CC"
   OPERATOR_VERIFY_CPF                          "OPERATOR_VERIFY_CPF"
   OPERATOR_VERIFY_SSN                          "OPERATOR_VERIFY_SSN"
-  OPERATOR_VERIFY_SVNR                          "OPERATOR_VERIFY_SVNR"
+  OPERATOR_VERIFY_SVNR                         "OPERATOR_VERIFY_SVNR"
   OPERATOR_WITHIN                              "OPERATOR_WITHIN"
 
   CONFIG_DIR_AUDIT_LOG_FMT
@@ -502,6 +503,7 @@ using namespace modsecurity::operators;
   ACTION_CTL_BDY_XML                           "ACTION_CTL_BDY_XML"
   ACTION_CTL_BDY_URLENCODED                    "ACTION_CTL_BDY_URLENCODED"
   ACTION_CTL_FORCE_REQ_BODY_VAR                "ACTION_CTL_FORCE_REQ_BODY_VAR"
+  ACTION_CTL_PARSE_XML_INTO_ARGS               "ACTION_CTL_PARSE_XML_INTO_ARGS"
   ACTION_CTL_REQUEST_BODY_ACCESS               "ACTION_CTL_REQUEST_BODY_ACCESS"
   ACTION_CTL_RULE_REMOVE_BY_ID                 "ACTION_CTL_RULE_REMOVE_BY_ID"
   ACTION_CTL_RULE_REMOVE_BY_TAG                "ACTION_CTL_RULE_REMOVE_BY_TAG"
@@ -593,6 +595,7 @@ using namespace modsecurity::operators;
   CONFIG_DIR_AUDIT_LOG2                        "CONFIG_DIR_AUDIT_LOG2"
   CONFIG_DIR_AUDIT_LOG_P                       "CONFIG_DIR_AUDIT_LOG_P"
   CONFIG_DIR_AUDIT_STS                         "CONFIG_DIR_AUDIT_STS"
+  CONFIG_DIR_AUDIT_PREFIX                      "CONFIG_DIR_AUDIT_PREFIX"
   CONFIG_DIR_AUDIT_TPE                         "CONFIG_DIR_AUDIT_TPE"
   CONFIG_DIR_DEBUG_LOG                         "CONFIG_DIR_DEBUG_LOG"
   CONFIG_DIR_DEBUG_LVL                         "CONFIG_DIR_DEBUG_LVL"
@@ -649,6 +652,7 @@ using namespace modsecurity::operators;
   CONFIG_VALUE_ABORT                           "CONFIG_VALUE_ABORT"
   CONFIG_VALUE_DETC                            "CONFIG_VALUE_DETC"
   CONFIG_VALUE_HTTPS                           "CONFIG_VALUE_HTTPS"
+  CONFIG_VALUE_ONLYARGS                        "CONFIG_VALUE_ONLYARGS"
   CONFIG_VALUE_OFF                             "CONFIG_VALUE_OFF"
   CONFIG_VALUE_ON                              "CONFIG_VALUE_ON"
   CONFIG_VALUE_PARALLEL                        "CONFIG_VALUE_PARALLEL"
@@ -658,6 +662,7 @@ using namespace modsecurity::operators;
   CONFIG_VALUE_SERIAL                          "CONFIG_VALUE_SERIAL"
   CONFIG_VALUE_WARN                            "CONFIG_VALUE_WARN"
   CONFIG_XML_EXTERNAL_ENTITY                   "CONFIG_XML_EXTERNAL_ENTITY"
+  CONFIG_XML_PARSE_XML_INTO_ARGS               "CONFIG_XML_PARSE_XML_INTO_ARGS"
   CONGIG_DIR_RESPONSE_BODY_MP                  "CONGIG_DIR_RESPONSE_BODY_MP"
   CONGIG_DIR_SEC_ARG_SEP                       "CONGIG_DIR_SEC_ARG_SEP"
   CONGIG_DIR_SEC_COOKIE_FORMAT                 "CONGIG_DIR_SEC_COOKIE_FORMAT"
@@ -710,6 +715,16 @@ using namespace modsecurity::operators;
 %type <std::unique_ptr<std::vector<std::unique_ptr<Variable> > > > variables
 %type <std::unique_ptr<Variable>> var
 
+// Destructor directives to prevent memory leaks on parse errors.
+// When YYERROR is called, these ensure proper cleanup of semantic values.
+// Empty bodies are correct: with api.value.type variant, the variant's
+// destructor automatically calls std::unique_ptr's destructor.
+%destructor { } <std::unique_ptr<actions::Action>>
+%destructor { } <std::unique_ptr<RunTimeString>>
+%destructor { } <std::unique_ptr<std::vector<std::unique_ptr<actions::Action> > > >
+%destructor { } <std::unique_ptr<Operator>>
+%destructor { } <std::unique_ptr<Variable>>
+%destructor { } <std::unique_ptr<std::vector<std::unique_ptr<Variable> > > >
 
 //%printer { yyoutput << $$; } <*>;
 
@@ -797,6 +812,13 @@ audit_log:
         driver.m_auditLog->setRelevantStatus(relevant_status);
       }
 
+    /* SecAuditLogPrefix */
+    | CONFIG_DIR_AUDIT_PREFIX
+      {
+        std::string prefix($1);
+        driver.m_auditLog->setPrefix(prefix);
+      }
+
     /* SecAuditLogType */
     | CONFIG_DIR_AUDIT_TPE CONFIG_VALUE_SERIAL
       {
@@ -827,13 +849,19 @@ audit_log:
       }
     | CONFIG_UPLOAD_FILE_LIMIT
       {
-        driver.m_uploadFileLimit.m_set = true;
-        driver.m_uploadFileLimit.m_value = strtol($1.c_str(), NULL, 10);
+        std::string errmsg = "";
+        if (driver.m_uploadFileLimit.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecUploadFileLimit: " + errmsg);
+          YYERROR;
+        }
       }
     | CONFIG_UPLOAD_FILE_MODE
       {
-        driver.m_uploadFileMode.m_set = true;
-        driver.m_uploadFileMode.m_value = strtol($1.c_str(), NULL, 8);
+        std::string errmsg = "";
+        if (driver.m_uploadFileMode.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecUploadFileMode: " + errmsg);
+          YYERROR;
+        }
       }
     | CONFIG_UPLOAD_DIR
       {
@@ -1604,13 +1632,19 @@ expression:
     /* Body limits */
     | CONFIG_DIR_REQ_BODY_LIMIT
       {
-        driver.m_requestBodyLimit.m_set = true;
-        driver.m_requestBodyLimit.m_value = atoi($1.c_str());
+        std::string errmsg = "";
+        if (driver.m_requestBodyLimit.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecRequestBodyLimit: " + errmsg);
+          YYERROR;
+        }
       }
     | CONFIG_DIR_REQ_BODY_NO_FILES_LIMIT
       {
-        driver.m_requestBodyNoFilesLimit.m_set = true;
-        driver.m_requestBodyNoFilesLimit.m_value = atoi($1.c_str());
+        std::string errmsg = "";
+        if (driver.m_requestBodyNoFilesLimit.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecRequestsBodyNoFilesLimit: " + errmsg);
+          YYERROR;
+        }
       }
     | CONFIG_DIR_REQ_BODY_IN_MEMORY_LIMIT
       {
@@ -1623,8 +1657,11 @@ expression:
       }
     | CONFIG_DIR_RES_BODY_LIMIT
       {
-        driver.m_responseBodyLimit.m_set = true;
-        driver.m_responseBodyLimit.m_value = atoi($1.c_str());
+        std::string errmsg = "";
+        if (driver.m_responseBodyLimit.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecResponseBodyLimit: " + errmsg);
+          YYERROR;
+        }
       }
     | CONFIG_DIR_REQ_BODY_LIMIT_ACTION CONFIG_VALUE_PROCESS_PARTIAL
       {
@@ -1657,8 +1694,11 @@ expression:
 */
     | CONFIG_DIR_PCRE_MATCH_LIMIT
       {
-        driver.m_pcreMatchLimit.m_set = true;
-        driver.m_pcreMatchLimit.m_value = atoi($1.c_str());
+        std::string errmsg = "";
+        if (driver.m_pcreMatchLimit.parse(std::string($1), &errmsg) != true) {
+          driver.error(@0, "Failed to parse SecPcreMatchLimit: " + errmsg);
+          YYERROR;
+        }
       }
     | CONGIG_DIR_RESPONSE_BODY_MP
       {
@@ -1685,6 +1725,18 @@ expression:
     | CONFIG_XML_EXTERNAL_ENTITY CONFIG_VALUE_ON
       {
         driver.m_secXMLExternalEntity = modsecurity::RulesSetProperties::TrueConfigBoolean;
+      }
+    | CONFIG_XML_PARSE_XML_INTO_ARGS CONFIG_VALUE_ONLYARGS
+      {
+        driver.m_secXMLParseXmlIntoArgs = modsecurity::RulesSetProperties::OnlyArgsConfigXMLParseXmlIntoArgs;
+      }
+    | CONFIG_XML_PARSE_XML_INTO_ARGS CONFIG_VALUE_OFF
+      {
+        driver.m_secXMLParseXmlIntoArgs = modsecurity::RulesSetProperties::FalseConfigXMLParseXmlIntoArgs;
+      }
+    | CONFIG_XML_PARSE_XML_INTO_ARGS CONFIG_VALUE_ON
+      {
+        driver.m_secXMLParseXmlIntoArgs = modsecurity::RulesSetProperties::TrueConfigXMLParseXmlIntoArgs;
       }
     | CONGIG_DIR_SEC_TMP_DIR
       {
@@ -2695,6 +2747,18 @@ act:
       {
         //ACTION_NOT_SUPPORTED("CtlForceReequestBody", @0);
         ACTION_CONTAINER($$, new actions::Action($1));
+      }
+    | ACTION_CTL_PARSE_XML_INTO_ARGS CONFIG_VALUE_ON
+      {
+        ACTION_CONTAINER($$, new actions::ctl::ParseXmlIntoArgs("ctl:parseXmlIntoArgs=on"));
+      }
+    | ACTION_CTL_PARSE_XML_INTO_ARGS CONFIG_VALUE_OFF
+      {
+        ACTION_CONTAINER($$, new actions::ctl::ParseXmlIntoArgs("ctl:parseXmlIntoArgs=off"));
+      }
+    | ACTION_CTL_PARSE_XML_INTO_ARGS CONFIG_VALUE_ONLYARGS
+      {
+        ACTION_CONTAINER($$, new actions::ctl::ParseXmlIntoArgs("ctl:parseXmlIntoArgs=onlyargs"));
       }
     | ACTION_CTL_REQUEST_BODY_ACCESS CONFIG_VALUE_ON
       {

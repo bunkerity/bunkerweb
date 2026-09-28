@@ -18,7 +18,22 @@
   "aria": {
     "label": {
       "close": "Zamknij",
-      "raw_configuration": "Konfiguracja ręczna"
+      "copy": "Kopiuj logi",
+      "download_log": "Pobierz ten plik logu",
+      "follow": "Śledź",
+      "select_file": "Wybierz plik",
+      "select_page": "Wybierz stronę",
+      "issue_count": "Liczba błędów i ostrzeżeń",
+      "level_filter": "Filtruj wiersze logu według poziomu",
+      "local_time": "Pokaż znaczniki czasu w czasie lokalnym",
+      "collapse_multiline": "Zwiń wpisy wielowierszowe",
+      "next_issue": "Następny błąd lub ostrzeżenie",
+      "prev_issue": "Poprzedni błąd lub ostrzeżenie",
+      "search_logs": "Szukaj w logach",
+      "toggle_wrap": "Przełącz zawijanie wierszy",
+      "configs_dropzone": "Wybierz plik eksportu konfiguracji niestandardowych albo upuść go tutaj",
+      "raw_configuration": "Konfiguracja ręczna",
+      "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj"
     }
   },
   "badge": {
@@ -42,6 +57,7 @@
     "bans": "Blokady",
     "cache": "Pamięć podręczna",
     "configs": "Konfiguracje",
+    "crowdsec": "CrowdSec",
     "extra_pages": "Dodatkowe strony",
     "global_settings": "Ustawienia globalne",
     "home": "Strona główna",
@@ -94,10 +110,8 @@
     "enable_totp": "Włącz TOTP",
     "entire_config": "Cała konfiguracja",
     "export": "Eksport",
-    "export_csv_all": "CSV (Wszystkie)",
-    "export_csv_visible": "CSV (Widoczne)",
-    "export_excel_all": "Excel (Wszystkie)",
-    "export_excel_visible": "Excel (Widoczne)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Pobierz ustawienia globalne",
     "filters_suffix": " Filtry",
     "follow": "Śledź",
@@ -107,6 +121,7 @@
     "go_back": "Wróć",
     "hide": "Ukryj",
     "history": "Historia",
+    "import_configs": "Importuj konfiguracje niestandardowe",
     "import_services": "Importuj usługi",
     "login": "Logowanie",
     "multiple_add": "DODAJ",
@@ -122,6 +137,7 @@
     "plugin_page": "Strona wtyczki",
     "proceed": "Proceduj",
     "refresh_recovery_codes": "Odśwież kody odzyskiwania",
+    "refresh_ui_plugins": "Odśwież wtyczki UI",
     "reload": "Odśwież",
     "reset": "Reset",
     "reset_columns": "Resetuj kolumny",
@@ -130,6 +146,10 @@
     "run_selected_jobs": "Uruchom wybrane zadania",
     "save": "Zapisz",
     "save_changes": "Zapisz zmiany",
+    "local_time": "Czas lokalny",
+    "collapse_multiline": "Zwiń",
+    "search": "Szukaj",
+    "wrap": "Zawijaj",
     "select_file": "Wybierz plik",
     "select_page": "Wybierz stronę",
     "service": "Usługa",
@@ -148,7 +168,164 @@
     "upload_photo": "Prześlij nowe zdjęcie",
     "view_details": "Zobacz szczegóły",
     "view_raw_data": "Wyświetl ręczne dane",
-    "wipe_other_sessions": "Wyczyść inne sesje"
+    "wipe_other_sessions": "Wyczyść inne sesje",
+    "ban_all_filtered": "Zablokuj wszystkie pasujące zgłoszenia",
+    "filtered_actions": "Filtrowane akcje",
+    "unban_all_filtered": "Odblokuj wszystkie pasujące blokady",
+    "update_duration_all_filtered": "Zaktualizuj czas trwania wszystkich pasujących blokad",
+    "validate_certificate": "Zweryfikuj certyfikat"
+  },
+  "crowdsec": {
+    "alert": {
+      "id": "Alert ID",
+      "load": "Load full evidence",
+      "started": "Started",
+      "stopped": "Stopped"
+    },
+    "captured_history": "Captured history",
+    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "connection": {
+      "appsec": "Last AppSec observation",
+      "choose": "Choose a connection",
+      "connected": "Connected",
+      "connection_error": "Connection error",
+      "configured": "Configured",
+      "global": "all services",
+      "help": "Each instance and service scope is a separate connection.",
+      "label": "CrowdSec connection",
+      "last_sync": "Last successful sync",
+      "local_api": "Local API",
+      "management": "Management",
+      "mode": "Mode",
+      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
+      "read_only": "Read only",
+      "required": "Choose a CrowdSec connection first.",
+      "sync": "Decision sync",
+      "sync_current": "Up to date",
+      "sync_not_synchronized": "Not synchronized yet",
+      "sync_stale": "Stale",
+      "selected": "Wybrane połączenie",
+      "scope_help": "Wybrane połączenie dotyczy poniższych decyzji, list dozwolonych adresów i analizy IP."
+    },
+    "current_state": "Current state",
+    "current_state_help": "Current state may change after this observation.",
+    "decision": {
+      "duration": "Duration",
+      "expires": "Expires",
+      "id": "Decision ID",
+      "origin": "Origin",
+      "scenario": "Scenario",
+      "scope": "Scope",
+      "target": "Target",
+      "type": "Type"
+    },
+    "decisions": {
+      "count": "Showing {{start}}–{{end}} of {{total}}",
+      "help": "This is current state read directly from the selected CrowdSec engine.",
+      "none": "No active decisions match these filters.",
+      "pagination": "Decision pages",
+      "title": "Active decisions"
+    },
+    "error": {
+      "request": "The CrowdSec request failed."
+    },
+    "investigation": {
+      "alerts": "Available CrowdSec alert evidence",
+      "current_decisions": "Current CrowdSec decisions",
+      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
+      "ip": "IP address",
+      "local_bans": "Current local BunkerWeb bans",
+      "no_alerts": "No alert evidence is available.",
+      "no_bans": "No current local ban was found.",
+      "no_decisions": "No current CrowdSec decision was found.",
+      "no_reports": "No recent captured report was found.",
+      "placeholder": "192.0.2.10",
+      "reports": "Recent BunkerWeb reports",
+      "result": "Investigation for {{ip}}",
+      "submit": "Investigate",
+      "title": "Investigate an IP",
+      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
+      "unavailable": "Unavailable: {{error}}",
+      "summary": "Evidence found for this IP",
+      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
+      "summary_decisions": "CrowdSec decisions",
+      "summary_bans": "Local BunkerWeb bans",
+      "summary_alerts": "CrowdSec alert evidence",
+      "summary_reports": "BunkerWeb reports",
+      "summary_active": "{{total}} active",
+      "summary_available": "{{total}} available",
+      "summary_captured": "{{total}} captured",
+      "summary_none": "None found",
+      "summary_unreadable": "Could not be read"
+    },
+    "local_ban": {
+      "expires": "Expires",
+      "reason": "Reason",
+      "service": "Service"
+    },
+    "next": "Next",
+    "observed_at": "Observed {{time}}",
+    "previous": "Previous",
+    "refresh": "Refresh status",
+    "remove": {
+      "action": "Remove",
+      "confirm": "I understand and want to remove this decision.",
+      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
+      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "submit": "Remove decision",
+      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
+      "title": "Remove CrowdSec decision"
+    },
+    "report": {
+      "captured": "Captured at",
+      "date": "Report time",
+      "decisions": "Captured decisions",
+      "entry": "Security report",
+      "matched_target": "Matched target",
+      "metadata": "Decision metadata",
+      "metadata_complete": "Complete",
+      "metadata_incomplete": "Incomplete",
+      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
+      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
+      "reason": "Reason",
+      "remediation": "Captured remediation",
+      "scope": "Captured service scope",
+      "service": "Service",
+      "source": "Captured source",
+      "identifier": "Report identifier"
+    },
+    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
+    "title": "CrowdSec operator",
+    "unknown": "Unknown",
+    "allowlists": {
+      "title": "CrowdSec allowlists",
+      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
+      "refresh": "Refresh allowlists",
+      "pages": "Allowlist pages",
+      "empty": "No allowlists were found on this engine.",
+      "console": "Console managed",
+      "local": "Locally managed",
+      "no_entries": "No active entries.",
+      "never": "Never",
+      "comment": "Comment",
+      "unknown": "Allowlist status is unavailable.",
+      "not_allowed": "This IP does not match a CrowdSec allowlist.",
+      "allowed": "Allowlisted by CrowdSec",
+      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "guide": {
+        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
+        "title": "How to manage trusted IPs and networks",
+        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
+        "create": "Create a list once, or use an existing locally managed list.",
+        "add": "Add trusted IPs or CIDR networks.",
+        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
+        "inspect": "Inspect the list and its expiry dates.",
+        "remove": "Remove an exception when it is no longer needed.",
+        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
+        "console": "Edit Console-managed lists in the CrowdSec Console.",
+        "docs": "CrowdSec allowlist documentation"
+      }
+    }
   },
   "country": {
     "AD": "Andora",
@@ -469,11 +646,16 @@
       "no_data": "Brak danych"
     },
     "window": {
+      "all_time": "Cały okres",
       "last_days": "Ostatnie {{days}} dni",
       "title": "Okno pulpitu"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Wybierz wszystkie {{count}} pasujące {{entity}}",
+    "bulk_select_all_done": "Wszystkie {{count}} pasujące {{entity}} są zaznaczone.",
+    "bulk_select_clear": "Wyczyść zaznaczenie",
+    "bulk_select_page": "Wszystkie {{count}} {{entity}} na tej stronie są zaznaczone.",
     "info_bans": "Wyświetlanie {{start}} do {{end}} z {{total}} Blokad",
     "info_cache": "Wyświetlanie {{start}} do {{end}} z {{total}} Plików pamięci podręcznej",
     "info_configs": "Pokazywanie {{start}} do {{end}} z {{total}} Konfiguracji niestandardowych",
@@ -605,6 +787,8 @@
     "easter_egg": "Jeśli to czytasz, oznacza to, że jesteś ciekawy 👀",
     "error": "Błąd",
     "message": "Info",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "Masz więcej usług, niż pozwala Twoja licencja PRO. Zaktualizuj licencję lub przekonwertuj niektóre usługi do trybu Szkicu, aby odblokować licencję PRO.",
     "time": {
       "just_now": "właśnie teraz"
     },
@@ -620,6 +804,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Dołącz powiązane konfiguracje niestandardowe",
+      "overwrite_existing_configs": "Nadpisz istniejące konfiguracje niestandardowe UI/API",
       "remember_me": "Zapamiętaj mnie"
     },
     "help": {
@@ -692,11 +878,11 @@
       "use_real_ip": "Użyj prawdziwego IP",
       "username": "Nazwa użytkownika",
       "wildcard_certificates": "Certyfikaty Wildcard",
-      "zerossl_api_connect_timeout": "Limit czasu połączenia API ZeroSSL",
       "zerossl_api_key": "Klucz API ZeroSSL",
-      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL",
       "zerossl_api_retry": "Liczba ponowień API ZeroSSL",
-      "zerossl_api_retry_delay": "Opóźnienie ponowień API ZeroSSL"
+      "zerossl_api_retry_delay": "Opóźnienie ponowień API ZeroSSL",
+      "zerossl_api_connect_timeout": "Limit czasu połączenia API ZeroSSL",
+      "zerossl_api_max_time": "Maksymalny czas API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Wprowadź kod",
@@ -755,11 +941,25 @@
     "upgrade": "Aktualizacja?"
   },
   "logs": {
-    "eventsource_failed": "Połączenie EventSource nie powiodło się.",
-    "parse_error": "Nie udało się przeanalizować danych strumienia: {{error}}",
-    "stream_error": "Błąd strumienia: {{message}}",
-    "stream_init": "Strumień zainicjowany, rozmiar pliku: {{size}}",
-    "stream_initialized": "Strumień zainicjowany odświeżeniem, rozmiar pliku: {{size}}",
+    "annotation_error": "Błąd",
+    "annotation_warning": "Ostrzeżenie",
+    "filter_levels": "Poziomy",
+    "letsencrypt_logs": "Logi Let's Encrypt",
+    "main_logs": "Główne logi",
+    "new_lines_sr": "{{count}} nowych wierszy logu",
+    "issue_summary": "{{errors}} błędów, {{warnings}} ostrzeżeń",
+    "level_critical": "Krytyczny",
+    "level_debug": "Debug",
+    "level_error": "Błąd",
+    "level_info": "Info",
+    "level_notice": "Powiadomienie",
+    "level_warning": "Ostrzeżenie",
+    "lines_all": "Wszystkie",
+    "lines_label": "Wiersze",
+    "meta": "{{size}} · {{lines}} wierszy · zmodyfikowano {{when}}",
+    "new_lines": "nowe wiersze",
+    "showing_all": "{{total}} wierszy",
+    "showing_some": "wyświetlono {{shown}} z {{total}}",
     "trimmed_notice": "--- {{count}} starsze wpisy logów zostały usunięte ze względu na wydajność ---"
   },
   "modal": {
@@ -789,6 +989,9 @@
       "fetch_global_settings_point_1": "Aktualizowane są wyłącznie ustawienia obecne w tym szablonie.",
       "fetch_global_settings_point_2": "Wartości identyczne z wartościami domyślnymi są ignorowane.",
       "fetch_global_settings_point_3": "SERVER_NAME nigdy nie jest nadpisywane.",
+      "export_services_intro": "Wybrane usługi zostaną wyeksportowane. Włącz poniższą opcję, aby dołączyć ich powiązane konfiguracje niestandardowe do archiwum .zip.",
+      "import_configs_dropzone": "Przeciągnij i upuść tutaj plik eksportu konfiguracji niestandardowych albo kliknij, aby wybrać plik.",
+      "import_configs_warning": "Konfiguracje niestandardowe utworzone przez scheduler, autoconf lub templates są zawsze zachowywane. Nadpisywać można tylko konfiguracje UI/API.",
       "import_services_dropzone": "Przeciągnij i upuść plik eksportu usług tutaj lub kliknij, aby wybrać plik.",
       "import_services_warning": "Importowanie usług utworzy nowe usługi interfejsu użytkownika z pliku eksportu. Istniejące usługi są pomijane.",
       "instance_creation_alert": "Nie musisz podawać portu ani nazwy serwera; wartości `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` i `API_SERVER_NAME` zostaną użyte do konfiguracji instancji.",
@@ -799,7 +1002,10 @@
       "services_deletion_confirmation": "Czy na pewno chcesz usunąć wybrane usługi?",
       "unban_confirmation_alert": "Czy na pewno chcesz odblokować wybrany adres IP?",
       "unban_confirmation_alert_plural": "Czy na pewno chcesz odblokować wybrane adresy IP?",
-      "update_duration_alert": "Wybierz nowy czas trwania dla wybranych blokad:"
+      "update_duration_alert": "Wybierz nowy czas trwania dla wybranych blokad:",
+      "ban_filtered_confirmation": "Zablokować adresy IP ze wszystkich {{count}} pasujących zgłoszeń? Zduplikowane cele zostaną zastosowane tylko raz.",
+      "unban_filtered_confirmation": "Czy na pewno chcesz odblokować wszystkie {{count}} pasujące blokady?",
+      "update_filtered_duration_alert": "Wybierz nowy czas trwania dla wszystkich {{count}} pasujących blokad:"
     },
     "button": {
       "fetch_global_settings_confirm": "Zastosuj ustawienia globalne",
@@ -823,8 +1029,10 @@
       "delete_template": "Usuń szablon",
       "edit_template": "Edytuj szablon: {{name}}",
       "fetch_global_settings": "Zastosować ustawienia globalne?",
+      "export_services": "Eksportuj usługi",
       "from_plugin": "z wtyczki",
       "full_url": "Pełny adres URL",
+      "import_configs": "Importuj konfiguracje niestandardowe",
       "import_services": "Importuj usługi",
       "job_history": "Ostatnie 10 wykonanych zadań",
       "job_history_count": "Ostatnie {{count}} wykonań zadania",
@@ -856,6 +1064,7 @@
     "bans": "Blokady",
     "cache": "Pamięć podręczna",
     "configs": "Konfiguracje",
+    "crowdsec": "CrowdSec",
     "extra_pages": "Dodatkowe strony",
     "global_settings": "Ustawienia globalne",
     "home": "Strona główna",
@@ -897,7 +1106,10 @@
       "status": {
         "deactivated": "Wtyczka jest wyłączona, dlatego nie są dostępne żadne informacje.",
         "metrics_deactivated": "Wtyczka Metrics nie jest aktywna, dlatego nie są dostępne żadne informacje.",
-        "not_available": "Strona wtyczki nie jest jeszcze dostępna w fazie beta."
+        "not_available": "Strona wtyczki nie jest jeszcze dostępna w fazie beta.",
+        "pre_render_error": "Błąd wstępnego renderowania",
+        "no_content": "Ta wtyczka nie udostępnia osadzonej strony.",
+        "dedicated_page_unavailable": "Ta wtyczka jest zarządzana na dedykowanej stronie, która nie została jeszcze załadowana. Uruchom ponownie interfejs web, aby uzyskać do niej dostęp."
       }
     },
     "type": {
@@ -994,6 +1206,19 @@
     }
   },
   "reports": {
+    "crowdsec": {
+      "source_lapi": "Decyzja lokalnego API",
+      "source_appsec": "Inspekcja AppSec",
+      "source_failure_policy": "Polityka błędów AppSec",
+      "appsec_help": "AppSec sprawdził to żądanie; decyzja lokalnego API może nie istnieć.",
+      "failure_policy_help": "Po błędzie AppSec zastosowano skonfigurowaną politykę błędów.",
+      "no_decisions": "Nie zarejestrowano szczegółów decyzji dla tego żądania.",
+      "technical_details": "Szczegóły techniczne",
+      "connection_id": "Identyfikator połączenia",
+      "instance": "Instancja",
+      "appsec_action": "Działanie AppSec"
+    },
+    "retention_notice": "Raporty są buforem cyklicznym w pamięci: najstarsze wpisy są usuwane po osiągnięciu skonfigurowanego limitu. Jeśli Redis nie jest włączony, są one również czyszczone przy ponownym uruchomieniu BunkerWeb.",
     "security_incident": "Incydent bezpieczeństwa",
     "security_report_data": "Dane raportu bezpieczeństwa"
   },
@@ -1031,6 +1256,7 @@
     "last_run": "Ostatni stan uruchomienia",
     "last_seen": "Ostatnio widziany",
     "last_update": "Ostatnia aktualizacja",
+    "loading": "Ładowanie paneli wyszukiwania...",
     "method": "Metoda",
     "next_24h": "Najbliższe 24 godziny",
     "next_30d": "Najbliższe 30 dni",
@@ -1095,9 +1321,9 @@
       "section": {
         "custom_certificate": "Certyfikat niestandardowy",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Prawdziwy adres IP",
-        "reverse_proxy": "Reverse Proxy",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "Reverse Proxy"
       },
       "subtitle": "Skonfiguruj ustawienia specyficzne dla interfejsu użytkownika aplikacji internetowej.",
       "title": "Ustawienia interfejsu użytkownika"
@@ -1326,8 +1552,8 @@
       "raw_configs_title": "Importy niestandardowej konfiguracji",
       "raw_configs_upload": "Prześlij pliki konfiguracyjne (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Nie można odczytać jednego z wybranych plików.",
-      "raw_editor_aria": "Edytor surowego JSON szablonu",
       "raw_editor_drop_hint": "Upuść plik JSON szablonu (tylko .json), aby zastąpić bieżącą zawartość.",
+      "raw_editor_aria": "Edytor surowego JSON szablonu",
       "raw_editor_help": "Edytuj pełną definicję szablonu jako JSON. Powrót do trybu Łatwego waliduje i ponownie ładuje edytor wizualny.",
       "raw_editor_import_success": "Szablon JSON zaimportowany pomyślnie.",
       "raw_editor_override_body": "Importowanie tego pliku całkowicie zastąpi bieżący szablon JSON. Zmiany wprowadzone w edytorze zostaną utracone. Czy chcesz kontynuować?",
@@ -1461,6 +1687,7 @@
       "force_check": "Planuje sprawdzenie; pobiera tylko wtedy, gdy istnieją aktualizacje.",
       "force_update": "Pomija sprawdzanie i wymusza pobranie wtyczki PRO; zachowuje aktualny stan w przypadku niepowodzenia.",
       "ping_instance": "Pinguj instancję {{hostname}}",
+      "refresh_ui_plugins": "Przeładowuje wtyczki PRO, które interfejs już posiada, bez pobierania czegokolwiek.",
       "reload_instance": "Przeładuj instancję {{hostname}}",
       "reset_default": "Resetuj do wartości domyślnej",
       "reset_global": "Resetuj wartość globalną",
@@ -1515,8 +1742,8 @@
     "latest_version_installed": "Korzystasz z najnowszej wersji.",
     "lets_encrypt_custom_profile": "Profil niestandardowy do użycia w Let's Encrypt (np. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Wyłącz żądania certyfikatów dla domen pasujących do listy Public Suffix List (zalecane).",
-    "lets_encrypt_profile": "Profil do użycia dla Let's Encrypt (klasyczny, tlsserver, krótkotrwały).",
     "lets_encrypt_server": "Wybierz dostawcę certyfikatów, aby wyświetlić ustawienia specyficzne dla dostawcy.",
+    "lets_encrypt_profile": "Profil do użycia dla Let's Encrypt (klasyczny, tlsserver, krótkotrwały).",
     "license_key": "Twój klucz licencyjny BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Dostęp do strony {{name}}",
@@ -1528,6 +1755,7 @@
       "edit_config": "Edytuj konfigurację niestandardową {{name}}",
       "edit_service": "Edytuj usługę {{service}}",
       "edit_template": "Edytuj szablon {{template}}",
+      "export_config": "Eksportuj konfigurację niestandardową {{name}}",
       "export_service": "Eksportuj konfigurację usługi {{service}}",
       "view_config": "Wyświetl konfigurację niestandardową {{name}}",
       "view_file": "Wyświetl {{filename}}",
@@ -1555,6 +1783,16 @@
     "real_ip_recursive": "Przeszukaj rekurencyjnie nagłówki w poszukiwaniu adresu IP.",
     "remove_ban_entry": "Usuń ten wpis blokady z listy.",
     "reset_template_settings": "Zresetuj wszystkie ustawienia w bieżącym widoku szablonu do wartości domyślnych.",
+    "download_log": "Pobierz ten plik logu",
+    "issue_count": "Błędy i ostrzeżenia w tym widoku",
+    "local_time": "Pokaż znaczniki czasu w Twoim czasie lokalnym",
+    "collapse_multiline": "Zwiń wpisy wielowierszowe (tracebacki, payloady)",
+    "collapse_raw_values": "Zwiń wartości wielowierszowe (certyfikaty, klucze)",
+    "next_issue": "Przejdź do następnego błędu lub ostrzeżenia",
+    "prev_issue": "Przejdź do poprzedniego błędu lub ostrzeżenia",
+    "search_logs": "Szukaj w logach (Ctrl+F)",
+    "toggle_level": "Pokaż / ukryj wiersze {{level}}",
+    "toggle_wrap": "Przełącz zawijanie wierszy",
     "select_file_to_follow": "Wybierz plik, aby włączyć tryb śledzenia",
     "server_name": "Główna nazwa domeny lub nazwa serwera dla tej usługi.",
     "stream_support": {
@@ -1691,16 +1929,23 @@
     "view_full_url": "Kliknij, aby wyświetlić pełny adres URL",
     "wildcard_certificates": "Generuj certyfikaty z symbolami wieloznacznymi (*.domain.com). Wymaga wyzwania DNS.",
     "wildcard_dns_only": "Certyfikaty z symbolami wieloznacznymi są obsługiwane tylko w przypadku typu wyzwania DNS.",
-    "zerossl_api_connect_timeout": "Limit czasu połączenia w sekundach dla wywołań API ZeroSSL.",
     "zerossl_api_key": "Opcjonalny klucz API ZeroSSL używany przez zerossl-bot.",
-    "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL.",
     "zerossl_api_retry": "Liczba ponowień żądań API ZeroSSL (0 wyłącza ponowienia).",
-    "zerossl_api_retry_delay": "Opóźnienie w sekundach między ponowieniami API ZeroSSL."
+    "zerossl_api_retry_delay": "Opóźnienie w sekundach między ponowieniami API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Limit czasu połączenia w sekundach dla wywołań API ZeroSSL.",
+    "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL."
   },
   "totp": {
     "prompt": "Wprowadź swój kod TOTP."
   },
   "validation": {
+    "certificate_checking": "Sprawdzanie ...",
+    "certificate_expires_in": "wygasa za {{days}} dni",
+    "certificate_failed": "Żądanie weryfikacji nie powiodło się.",
+    "certificate_file_mode": "Tutaj można sprawdzić wyłącznie wklejone lub przesłane dane. Ścieżka certyfikatu jest odczytywana przez harmonogram, do którego interfejs webowy nie ma dostępu.",
+    "certificate_missing": "Najpierw podaj zarówno certyfikat, jak i klucz.",
+    "certificate_subject": "Temat:",
+    "certificate_valid": "Certyfikat i klucz są zgodne.",
     "default_field_name": "To pole",
     "invalid_date": "Nieprawidłowa data",
     "ip_global_duplicate": "Ten adres IP jest już globalnie zablokowany.",

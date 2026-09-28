@@ -76,17 +76,18 @@ function headers:init()
 	return self:ret(true, "successfully loaded " .. tostring(i) .. " custom headers")
 end
 
+function headers:should_keep(header)
+	return self.variables["KEEP_UPSTREAM_HEADERS"] == "*"
+		or regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") ~= nil
+end
+
 function headers:header()
 	-- Override upstream headers if needed
 	local ngx_header = ngx.header
 	local ssl = self.ctx.bw.scheme == "https"
 	for variable, header in pairs(self.all_headers) do
-		-- Check if upstream header exists and should be kept
-		local should_keep = self.variables["KEEP_UPSTREAM_HEADERS"] == "*"
-			or regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") ~= nil
-
 		-- Only modify header if it shouldn't be kept or doesn't exist upstream
-		if not (ngx_header[header] ~= nil and should_keep) then
+		if not (ngx_header[header] ~= nil and self:should_keep(header)) then
 			if self.variables[variable] == "" then
 				-- Remove header if value is empty
 				ngx_header[header] = nil
@@ -97,7 +98,11 @@ function headers:header()
 						and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes"
 					then
 						ngx_header["Content-Security-Policy"] = nil
-						ngx_header["Content-Security-Policy-Report-Only"] = self.variables[variable]
+						-- Report-only is not in all_headers, so the keep-list has to be honored here
+						local report_only = "Content-Security-Policy-Report-Only"
+						if not (ngx_header[report_only] ~= nil and self:should_keep(report_only)) then
+							ngx_header[report_only] = self.variables[variable]
+						end
 					else
 						ngx_header[header] = self.variables[variable]
 					end

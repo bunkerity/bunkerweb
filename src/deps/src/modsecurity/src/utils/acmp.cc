@@ -226,7 +226,7 @@ static void acmp_build_binary_tree(ACMP *parser, acmp_node_t *node) {
 
     /* We have array with all children of the node and number of those children
      */
-    for (i = 0; i < count - 1; i++)
+    for (i = 0; i < count - 1; i++) {
         for (j = i + 1; j < count; j++) {
             acmp_node_t *tmp;
 
@@ -236,10 +236,11 @@ static void acmp_build_binary_tree(ACMP *parser, acmp_node_t *node) {
             nodes[i] = nodes[j];
             nodes[j] = tmp;
         }
-        if (node->btree != NULL) {
-            free(node->btree);
-            node->btree = NULL;
-        }
+    }       
+    if (node->btree != NULL) {
+        free(node->btree);
+        node->btree = NULL;
+    }
     node->btree = reinterpret_cast<acmp_btree_node_t *>(calloc(1, sizeof(acmp_btree_node_t)));
 
     /* ENH: Check alloc succeded */
@@ -386,17 +387,20 @@ if (parser->is_active != 0) return -1;
             child->pattern = (char *)"";
             child->letter = letter;
             child->depth = i;
-            child->text = (char *)calloc(1, strlen(pattern) + 2);
+            child->text = (char *)calloc(1, i + 2);
             /* ENH: Check alloc succeded */
-            for (j = 0; j <= i; j++) child->text[j] = pattern[j];
+            for (j = 0; j <= i; j++) {
+                child->text[j] = pattern[j];
+            }
         }
         if (i == length - 1) {
             if (child->is_last == 0) {
                 parser->dict_count++;
                 child->is_last = 1;
-                child->pattern = (char *)calloc(1, strlen(pattern) + 2);
+                child->pattern = (char *)calloc(1, length + 1);
                 /* ENH: Check alloc succeded */
-                strcpy(child->pattern, pattern);
+                memcpy(child->pattern, pattern, length);
+                child->pattern[length] = '\0';
             }
             child->callback = callback;
             child->callback_data = data;

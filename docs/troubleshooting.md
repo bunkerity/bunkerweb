@@ -331,7 +331,7 @@ Pick a retention window (example: 90 days) and review what would be deleted.
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ Once verified, delete the rows.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +412,7 @@ you can force a “change marker” update:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +435,7 @@ you can force a “change marker” update:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -444,6 +444,9 @@ you can force a “change marker” update:
 ## Web UI {#web-ui}
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
+
+!!! warning "2FA stopped working after recreating the container"
+    The keys that decrypt the TOTP secrets are stored in the UI container at `/var/lib/bunkerweb/.totp_encryption_keys.json`, which is `/data/lib` inside the image. Recreating the `bw-ui` container without a persistent volume on `/data` generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on `/data` (see the [Web UI documentation](web-ui.md)) so the keys survive, or provide your own `TOTP_ENCRYPTION_KEYS`.
 
 ### Access database
 
@@ -513,7 +516,7 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "MariaDB / MySQL only"
         The following steps are only valid for MariaDB / MySQL databases. If you are using another database, please refer to the documentation of your database.

@@ -27,30 +27,36 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 ### Ajustes de Configuración
 
-| Ajuste                                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                    |
-| ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
-| `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`          | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`             | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                   | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                   |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
+| Ajuste                                | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                      |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                          |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                    |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                              |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. La ruta debe terminar en `.log`. La rotación mediante esa extensión solo se aplica donde logrotate está instalado (los paquetes de Linux y la imagen All-In-One); en Docker, Swarm y Kubernetes, un nombre distinto del predeterminado no se transmite ni se rota, y crece sin límite dentro del contenedor, porque solo `modsec_audit.log` está enlazado al streaming de logs del contenedor.             |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`.     |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                                 |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                       |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                                |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
     **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
 
     El equipo de CRS mantiene activamente una lista de exclusiones para aplicaciones populares como WordPress, Nextcloud, Drupal y Cpanel, lo que facilita la integración sin afectar la funcionalidad. Los beneficios de seguridad superan con creces el mínimo esfuerzo de configuración necesario para solucionar los falsos positivos.
 
+!!! warning "Recomendación de seguridad para cargas grandes"
+    ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si — **y solo si** — una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL para emitir `modsecurity off;` en su bloque `location`. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
+
+    Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
 ### Versiones de CRS Disponibles
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
-- **`3`**: Estable [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Estable [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**predeterminada**).
+- **`3`**: Estable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
+- **`4`**: Estable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**predeterminada**).
 
 !!! warning "Compilación Nocturna Obsoleta"
     La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.
@@ -170,7 +176,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Configuración Avanzada con Complementos"
@@ -211,3 +217,16 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
 
 !!! note "Valores de tamaño legibles por humanos"
     Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Registros de auditoría Concurrent
+
+| Ajuste | Predeterminado | Descripción |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Modo: `Serial` (predeterminado) o `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Vacío por defecto; `Concurrent` requiere un directorio de almacenamiento absoluto. |
+
+Configure `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` y `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Cree previamente ese directorio en cada instancia de BunkerWeb con permisos de escritura y acceso para el worker nginx. Use un volumen persistente para conservar los registros. BunkerWeb rechaza las configuraciones inválidas antes de aplicarlas; no crea el directorio. En modo CRS global (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure ambos ajustes globalmente; los valores por servicio no seleccionan otro modo de escritura.
+
+`MODSECURITY_SEC_AUDIT_LOG` sigue siendo un archivo `.log` normal que admite bloqueo: contiene registros completos con `Serial` y un índice de archivos por transacción con `Concurrent`. La ruta del índice y sus reglas de rotación no cambian. El operador debe gestionar el espacio, los permisos y la retención recursiva de los subdirectorios fechados. Rotar el índice no elimina los archivos de transacción. Compruebe la compatibilidad de los lectores que esperan registros Serial antes de cambiar.
+
+Concurrent cambia cómo se almacenan los registros; no muestrea las solicitudes ni reduce los datos seleccionados por `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Dimensione el almacenamiento según la tasa de solicitudes, las partes seleccionadas y el período de retención; mida el tamaño de los registros con tráfico representativo en lugar de asumir un coste fijo por solicitud bloqueada.

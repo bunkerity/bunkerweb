@@ -16,9 +16,10 @@ local ERR = ngx.ERR
 local INFO = ngx.INFO
 local WARN = ngx.WARN
 local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
-local HTTP_CLOSED = ngx.HTTP_CLOSED
+local HTTP_CLOSE = ngx.HTTP_CLOSE or 444
 local null = ngx.null
 local re_match = ngx.re.match
+local get_headers = ngx.req and ngx.req.get_headers
 local subsystem = ngx.config.subsystem
 local get_phase = ngx.get_phase
 local kill = ngx.thread.kill
@@ -33,16 +34,31 @@ local char = string.char
 local session_start = session.start
 local tonumber = tonumber
 
+local shared = ngx.shared
+local math_min = math.min
+local math_max = math.max
+
 local datastore = cdatastore:new()
 local internalstore
 
 if subsystem == "http" then
-	internalstore = cdatastore:new(ngx.shared.internalstore)
+	internalstore = cdatastore:new(shared.internalstore)
 else
-	internalstore = cdatastore:new(ngx.shared.internalstore_stream)
+	internalstore = cdatastore:new(shared.internalstore_stream)
 end
 
+-- Cross-subsystem datastore for ban synchronization:
+-- When running in HTTP, try to access the stream datastore (and vice versa).
+-- Will be nil if the other subsystem's shared dict is not accessible.
+local other_dict = subsystem == "http" and shared.datastore_stream or shared.datastore
+local other_datastore = other_dict and cdatastore:new(other_dict) or nil
+
+-- Short TTL for locally cached bans so unbans propagate from Redis within this window
+local BAN_LOCAL_CACHE_TTL = 30
+
 local utils = {}
+
+utils.parse_duration = require("bunkerweb.duration").parse_duration
 
 math.randomseed(os.time())
 
@@ -65,9 +81,14 @@ utils.get_variable = function(variable, site_search, ctx)
 		else
 			server_name = var.server_name
 		end
-		if variables[server_name] then
+		-- Keep the global value when the service has no entry of its own, otherwise a
+		-- partially populated per-service table hides settings that do exist globally.
+		if variables[server_name] and variables[server_name][variable] ~= nil then
 			value = variables[server_name][variable]
 		end
+	end
+	if value == nil then
+		return nil, "not found"
 	end
 	return value, "success"
 end
@@ -82,9 +103,17 @@ utils.has_variable = function(variable, value)
 	local multisite = variables["global"]["MULTISITE"] == "yes"
 	if multisite then
 		local servers = variables["global"]["SERVER_NAME"]
+		local global_value = variables["global"][variable]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][variable] == value then
+			-- Same effective-value rule as get_variable: a service inherits the global value for
+			-- every key its own table does not carry, otherwise a partially populated service
+			-- hides a setting that is enabled globally and every hook gated on this returns false.
+			local server_value = variables[server][variable]
+			if server_value == nil then
+				server_value = global_value
+			end
+			if server_value == value then
 				return true, "success"
 			end
 		end
@@ -137,6 +166,146 @@ utils.get_multiple_variables = function(vars)
 		end
 	end
 	return result
+end
+
+-- Pair <PREFIX>_NAME_<n> with <PREFIX>_VALUE_<n> once, during init. Resolving the numeric
+-- suffixes per request would mean walking every scoped variable on every request.
+-- Returns { [server_name] = { { name = "x-internal-auth", value = "^s3cr3t$" }, ... } } where
+-- a nil value means "match on the header being present, whatever it carries".
+utils.get_header_rules = function(prefix)
+	local variables, err = utils.get_multiple_variables({ prefix .. "_NAME", prefix .. "_VALUE" })
+	if not variables then
+		return nil, err
+	end
+	local global_vars = variables["global"] or {}
+	local name_pattern = "^" .. prefix .. "_NAME(_?%d*)$"
+
+	-- Same effective-value rule as get_variable : a service inherits the global value for every
+	-- key its own table does not carry. Without the fallback a non-multisite setup, which only
+	-- ever has the "global" scope, would silently match nothing.
+	local function build(vars, server)
+		local keys = {}
+		for variable in pairs(global_vars) do
+			keys[variable] = true
+		end
+		for variable in pairs(vars) do
+			keys[variable] = true
+		end
+		local rules = {}
+		for variable in pairs(keys) do
+			local suffix = variable:match(name_pattern)
+			if suffix then
+				local name = vars[variable]
+				if name == nil then
+					name = global_vars[variable]
+				end
+				local value_key = prefix .. "_VALUE" .. suffix
+				local value = vars[value_key]
+				if value == nil then
+					value = global_vars[value_key]
+				end
+				if value == "" then
+					value = nil
+				end
+				if name and name ~= "" then
+					local keep = true
+					if value then
+						-- Compile here so a broken pattern is caught once, at init. It must never reach
+						-- the request path : that error log echoes the pattern, and the pattern holds the
+						-- operator's shared secret. An empty subject isolates compile failure exactly.
+						local _, compile_err = re_match("", value, "o")
+						if compile_err then
+							logger:log(
+								ERR,
+								"ignoring "
+									.. prefix
+									.. " rule for header "
+									.. name
+									.. " on server "
+									.. server
+									.. " : its value is not a valid regex"
+							)
+							keep = false
+						end
+					end
+					if keep then
+						rules[#rules + 1] = { name = name:lower(), value = value }
+					end
+				end
+			end
+		end
+		return rules
+	end
+
+	-- Every scope is stored, empty ones included : an empty service table means "this service
+	-- has no header rules", which must not fall back to the global scope in pick_header_rules.
+	local result = {}
+	for server, vars in pairs(variables) do
+		result[server] = build(vars, server)
+	end
+	return result
+end
+
+-- Pick the rule set that applies to this request. A service falls back to the global scope,
+-- which is the only scope a non-multisite setup ever has.
+utils.pick_header_rules = function(stored, server_name)
+	if not stored then
+		return {}
+	end
+	return (server_name and stored[server_name]) or stored["global"] or {}
+end
+
+-- Deliberately not utils.regex_match : its failure path logs the pattern, which here is the
+-- shared secret. Errors are reported with the header name only.
+local function header_value_matches(value, rule, source)
+	local match, match_err = re_match(value, rule.value, "o")
+	if match_err then
+		logger:log(
+			ERR,
+			"error while matching " .. (source or "header rule") .. " on header " .. rule.name .. " : " .. match_err
+		)
+		return false
+	end
+	return match ~= nil
+end
+
+-- Request-time counterpart of get_header_rules. Returns the name of the header that matched,
+-- never its value, so callers can log the reason without leaking the secret.
+utils.match_header_rules = function(ctx, rules, source)
+	if not rules or #rules == 0 then
+		return nil
+	end
+	-- The stream subsystem has no request headers at all, and no ngx.req.get_headers to call.
+	if not get_headers then
+		return nil
+	end
+	local headers = ctx.bw.http_headers
+	if not headers then
+		-- Without the explicit cap get_headers() silently stops at 100, so raising MAX_HEADERS
+		-- would let a client push the matching header out of reach - and a padded request would
+		-- slip past a blacklist rule entirely.
+		headers = get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+		ctx.bw.http_headers = headers
+	end
+	for _, rule in ipairs(rules) do
+		local value = headers[rule.name]
+		if value ~= nil then
+			if not rule.value then
+				return rule.name
+			end
+			if type(value) == "table" then
+				-- A repeated header arrives as a list : any occurrence may carry the secret.
+				for _, one in ipairs(value) do
+					if header_value_matches(one, rule, source) then
+						return rule.name
+					end
+				end
+			elseif header_value_matches(value, rule, source) then
+				return rule.name
+			end
+		end
+	end
+	return nil
 end
 
 utils.is_ip_in_networks = function(ip, networks)
@@ -321,7 +490,14 @@ utils.get_reason = function(ctx)
 		return var_reason, reason_data, security_mode
 	end
 	-- ngx.var / modsecurity
-	if ngx.var.modsecurity_reason == "modsecurity" then
+	local modsecurity_reason = ngx.var.modsecurity_reason
+	-- Keep parser IDs separate from CRS's accumulated IDs and matched request data.
+	-- A later CRS summary takes precedence in DetectionOnly without mixing metadata.
+	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(20000[25])$")
+	if body_rule_id then
+		return "modsecurity-body", { ids = { body_rule_id } }, security_mode
+	end
+	if modsecurity_reason == "modsecurity" then
 		local reason_data = {}
 
 		-- Handle IDs
@@ -392,8 +568,10 @@ utils.get_reason = function(ctx)
 		end
 		return banned, {}, security_mode
 	end
-	-- unknown
-	if ngx.status == utils.get_deny_status() then
+	-- unknown BunkerWeb denial
+	local upstream_status = var.upstream_status
+	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
+	if ngx.status == utils.get_deny_status() and not upstream_denied then
 		return "unknown", {}
 	end
 	return nil
@@ -434,10 +612,31 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		server_name = var.server_name
 	end
 
+	local variables, variables_err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't get variables : " .. variables_err
+	end
+	local global_variables = variables["global"] or {}
+
+	-- Effective USE_WHITELIST for a service, same rule as get_variable: the service value when
+	-- its table carries one, the global value otherwise. The stored lists exist for every
+	-- service whether or not the plugin is enabled for it, so without this gate a service with
+	-- whitelisting turned off still lifts an active ban through its own configured entries.
+	local function whitelist_enabled(name)
+		local value = variables[name] and variables[name]["USE_WHITELIST"]
+		if value == nil then
+			value = global_variables["USE_WHITELIST"]
+		end
+		return value == "yes"
+	end
+
 	-- Helper to check a specific service whitelist list
 	local function check_service(name)
 		if not name or name == "" then
 			return nil, "no service name"
+		end
+		if not whitelist_enabled(name) then
+			return false, "ok"
 		end
 		-- Fast path: check whitelist cache for the service
 		local cache = require("bunkerweb.cachestore"):new(false)
@@ -482,11 +681,7 @@ utils.is_ip_whitelisted = function(ip, server_name)
 	end
 
 	-- Fallback: iterate all configured services (covers default-server paths)
-	local variables, err = internalstore:get("variables", true)
-	if not variables then
-		return nil, "can't get variables : " .. err
-	end
-	local servers = variables["global"] and variables["global"]["SERVER_NAME"] or ""
+	local servers = global_variables["SERVER_NAME"] or ""
 	for srv in servers:gmatch("%S+") do
 		local ok, info = check_service(srv)
 		if ok then
@@ -494,9 +689,10 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		end
 	end
 
-	-- Last resort: check global whitelist IPs directly (useful when no services matched)
-	local global_wl = variables["global"] and variables["global"]["WHITELIST_IP"] or ""
-	if global_wl ~= "" then
+	-- Last resort: check global whitelist IPs directly (useful when no services matched).
+	-- Gated the same way: a global list is only in force while whitelisting is on globally.
+	local global_wl = global_variables["WHITELIST_IP"] or ""
+	if global_wl ~= "" and global_variables["USE_WHITELIST"] == "yes" then
 		local networks = {}
 		for n in global_wl:gmatch("%S+") do
 			table.insert(networks, n)
@@ -573,7 +769,7 @@ utils.get_rdns = function(ip, ctx, pool)
 	-- Do rDNS query
 	local answers, err = rdns:reverse_query(ip)
 	if not answers then
-		logger:log(ERR, "error while doing reverse DNS query for " .. ip .. " : " .. err)
+		logger:log(WARN, "error while doing reverse DNS query for " .. ip .. " : " .. err)
 		ret_err = err
 	else
 		if answers.errcode then
@@ -594,18 +790,29 @@ utils.get_rdns = function(ip, ctx, pool)
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6, ctx, pool)
-	-- Check cache
+utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
+	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
+	if ipv6 == nil then
+		ipv6 = true
+	end
+	local query_aaaa = force_ipv6 == true
+	if ipv6 and not query_aaaa then
+		-- luacheck: ignore 421
+		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
+		if not use_ipv6 then
+			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
+		else
+			query_aaaa = use_ipv6 == "yes"
+		end
+	end
+	-- Cache entries must match the qtype set; A-only lookups cannot serve AAAA clients.
+	local cache_key = "dns_" .. (query_aaaa and "46_" or "4_") .. fqdn
 	local cachestore = utils.new_cachestore(ctx, pool)
-	local ok, value = cachestore:get("dns_" .. fqdn)
+	local ok, value = cachestore:get(cache_key)
 	if not ok then
 		logger:log(ERR, "can't get dns from cachestore : " .. value)
 	elseif value then
 		return decode(value), "success"
-	end
-	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
-	if ipv6 == nil then
-		ipv6 = true
 	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
@@ -623,14 +830,8 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 	end
 	-- Get query types : AAAA and A if using IPv6 / only A if not using IPv6
 	local qtypes = {}
-	if ipv6 then
-		-- luacheck: ignore 421
-		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
-		if not use_ipv6 then
-			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
-		elseif use_ipv6 == "yes" then
-			table.insert(qtypes, res.TYPE_AAAA)
-		end
+	if query_aaaa then
+		table.insert(qtypes, res.TYPE_AAAA)
 	end
 	table.insert(qtypes, res.TYPE_A)
 	-- Loop on qtypes
@@ -664,11 +865,52 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 		end
 	end
 	-- Save to cache
-	ok, err = cachestore:set("dns_" .. fqdn, encode(ips), 3600)
+	ok, err = cachestore:set(cache_key, encode(ips), 3600)
 	if not ok then
 		logger:log(ERR, "can't set dns into cachestore : " .. err)
 	end
 	return ips, encode(res_errors) .. " " .. encode(ans_errors)
+end
+
+-- Forward-confirmed reverse DNS (FCrDNS) suffix check.
+-- For each PTR in rdns_list, if it ends with any suffix in suffix_list, the name is forward-resolved
+-- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
+-- only when a suffix match is forward-confirmed; returns nil otherwise.
+-- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
+-- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
+-- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
+	if not rdns_list or not suffix_list then
+		return nil
+	end
+	local log_logger = plugin_logger or logger
+	for _, rdns in ipairs(rdns_list) do
+		for _, suffix in ipairs(suffix_list) do
+			if rdns:sub(-#suffix) == suffix then
+				local force_ipv6 = remote_addr:find(":", 1, true) ~= nil
+				local ip_list, err = utils.get_ips(rdns, nil, ctx, true, force_ipv6)
+				if ip_list then
+					local matcher, matcher_err = ipmatcher_new(ip_list)
+					if not matcher then
+						log_logger:log(ERR, "can't build rdns forward matcher : " .. matcher_err)
+					else
+						local matched, match_err = matcher:match(remote_addr)
+						if match_err then
+							log_logger:log(ERR, "can't match IP in rdns forward check : " .. match_err)
+						elseif matched then
+							return suffix, rdns
+						end
+					end
+					if plugin_logger then
+						plugin_logger:log(WARN, "IP " .. remote_addr .. " may spoof reverse DNS " .. rdns)
+					end
+				else
+					log_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
+				end
+			end
+		end
+	end
+	return nil
 end
 
 utils.get_country = function(ip)
@@ -741,9 +983,9 @@ utils.get_deny_status = function()
 			logger:log(ERR, "can't get variables from internalstore : " .. err)
 			return HTTP_FORBIDDEN
 		end
-		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
+		return tonumber(variables["global"]["DENY_HTTP_STATUS"]) or HTTP_FORBIDDEN
 	end
-	return HTTP_CLOSED
+	return HTTP_CLOSE
 end
 
 utils.get_security_mode = function(ctx)
@@ -759,9 +1001,19 @@ utils.get_session = function(ctx)
 	if ctx.bw.sessions_session then
 		return ctx.bw.sessions_session
 	end
+	-- Resolve per-server cookie domain from the multisite SESSIONS_DOMAIN setting. An empty value
+	-- must leave cookie_domain nil so lua-resty-session keeps the host-only default, and the
+	-- multisite lookup guarantees unrelated tenants never receive a cross-tenant Domain attribute.
+	local start_config
+	local sessions_domain, sessions_domain_err = utils.get_variable("SESSIONS_DOMAIN", true, ctx)
+	if sessions_domain == nil then
+		logger:log(ERR, "error while getting variable SESSIONS_DOMAIN : " .. (sessions_domain_err or ""))
+	elseif sessions_domain ~= "" then
+		start_config = { cookie_domain = sessions_domain }
+	end
 	-- Open/create and do an optional refresh
 	local err, exists, refreshed
-	session, err, exists, refreshed = session_start()
+	session, err, exists, refreshed = session_start(start_config)
 	if not session then
 		return nil, err
 	end
@@ -831,16 +1083,7 @@ utils.is_banned = function(ip, server_name)
 	end
 	use_redis = use_redis == "yes"
 
-	local clusterstore
-	if use_redis then
-		clusterstore = require "bunkerweb.clusterstore":new()
-		local ok, connect_err = clusterstore:connect(true)
-		if not ok then
-			return nil, "can't connect to redis: " .. connect_err, nil, nil
-		end
-	end
-
-	-- Helper function to check ban in datastore and Redis
+	-- Check local bans before opening a Redis connection.
 	local function check_ban(key)
 		-- Check local datastore first
 		local value
@@ -874,81 +1117,87 @@ utils.is_banned = function(ip, server_name)
 			return nil, "datastore:get() error: " .. tostring(err), nil, nil
 		end
 
-		-- Check Redis if enabled
-		if not use_redis then
-			return false, "not banned", nil, nil
-		end
-
-		-- Redis atomic script for GET+TTL
-		local redis_script = [[
-			local ret_get = redis.pcall("GET", KEYS[1])
-			if type(ret_get) == "table" and ret_get["err"] ~= nil then
-				return {err = ret_get["err"]}
-			end
-			local ret_ttl = nil
-			if ret_get ~= nil then
-				ret_ttl = redis.pcall("TTL", KEYS[1])
-				if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
-					return {err = ret_ttl["err"]}
-				end
-			end
-			return {ret_get, ret_ttl}
-		]]
-
-		-- Execute Redis script
-		local data, script_err = clusterstore:call("eval", redis_script, 1, key)
-		if not data then
-			return nil, "redis call error: " .. script_err, nil, nil
-		elseif data.err then
-			return nil, "redis script error: " .. data.err, nil, nil
-		elseif data[1] ~= null then
-			-- Update local cache with the full JSON payload
-			local ok_cache, cache_err = datastore:set_with_retries(key, data[1], data[2])
-			if not ok_cache then
-				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
-			end
-
-			-- Parse ban data to extract reason and optional reason_data
-			local reason = data[1]
-			local reason_data
-			local ok, ban_data = pcall(decode, data[1])
-			if ok and type(ban_data) == "table" then
-				reason = ban_data.reason or reason
-				reason_data = ban_data.reason_data
-			end
-
-			local ttl = data[2]
-			-- Redis TTL for permanent keys is -1. Normalize to 0 for consistency.
-			if ttl < 0 then
-				ttl = 0
-			end
-			return true, reason, ttl, reason_data
-		end
-
 		return false, "not banned", nil, nil
 	end
 
-	-- Check for service-specific ban first if server_name is provided
+	local keys = {}
+	local banned, local_reason, ttl, local_reason_data
 	if server_name then
-		local service_key = "bans_service_" .. server_name .. "_ip_" .. ip
-		local banned, reason, ttl, reason_data = check_ban(service_key)
+		keys[1] = "bans_service_" .. server_name .. "_ip_" .. ip
+	end
+	keys[#keys + 1] = "bans_ip_" .. ip
+	local missing = {}
+	for _, key in ipairs(keys) do
+		banned, local_reason, ttl, local_reason_data = check_ban(key)
 		if banned or banned == nil then
-			if clusterstore then
-				clusterstore:close()
-			end
-			return banned, reason, ttl, reason_data
+			-- Earlier Redis misses must resolve before a lower-priority local verdict.
+			break
 		end
+		missing[#missing + 1] = key
+	end
+	if not use_redis or #missing == 0 then
+		return banned, local_reason, ttl, local_reason_data
+	end
+	keys = missing
+
+	local clusterstore = require "bunkerweb.clusterstore":new()
+	local connected, connect_err = clusterstore:connect(true)
+	if not connected then
+		return nil, "can't connect to redis: " .. connect_err, nil, nil
+	end
+	local redis_script = [[
+		for i, key in ipairs(KEYS) do
+			local ret_get = redis.pcall("GET", key)
+			if type(ret_get) == "table" and ret_get["err"] ~= nil then
+				return {err = ret_get["err"]}
+			end
+			local ret_ttl = redis.pcall("TTL", key)
+			if type(ret_ttl) == "table" and ret_ttl["err"] ~= nil then
+				return {err = ret_ttl["err"]}
+			end
+			if ret_get ~= false then
+				return {ret_get, ret_ttl, i}
+			end
+		end
+		return {false, -2, 0}
+	]]
+	local data, script_err = clusterstore:call("eval", redis_script, #keys, unpack(keys))
+	clusterstore:close()
+	if not data then
+		return nil, "redis call error: " .. script_err, nil, nil
+	elseif data.err then
+		return nil, "redis script error: " .. data.err, nil, nil
+	elseif data[1] ~= null then
+		-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
+		-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
+		local redis_ttl = data[2]
+		local cache_ttl = redis_ttl > 0 and math_min(redis_ttl, BAN_LOCAL_CACHE_TTL) or BAN_LOCAL_CACHE_TTL
+		-- The script reports which key hit as an index into the keys it was given; never
+		-- trust it blindly, a nil key would be written as the cache entry.
+		local hit_key = keys[data[3]]
+		if hit_key then
+			local ok_cache, cache_err = datastore:set_with_retries(hit_key, data[1], cache_ttl)
+			if not ok_cache then
+				logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
+			end
+		else
+			logger:log(WARN, "ban script returned an unknown key index: " .. tostring(data[3]))
+		end
+
+		-- Parse ban data to extract reason and optional reason_data
+		local reason = data[1]
+		local reason_data
+		local ok, ban_data = pcall(decode, data[1])
+		if ok and type(ban_data) == "table" then
+			reason = ban_data.reason or reason
+			reason_data = ban_data.reason_data
+		end
+
+		-- Redis TTL for permanent keys is -1; normalize to 0
+		return true, reason, math_max(redis_ttl, 0), reason_data
 	end
 
-	-- Always check for global ban regardless of scope
-	local banned, reason, ttl, reason_data = check_ban("bans_ip_" .. ip)
-
-	-- Close Redis connection if opened
-	if clusterstore then
-		clusterstore:close()
-	end
-
-	return banned, reason, ttl, reason_data
+	return banned, local_reason, ttl, local_reason_data
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
@@ -980,6 +1229,16 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	local ok, err = datastore:set_with_retries(ban_key, ban_data, effective_ttl)
 	if not ok then
 		return false, "datastore:set_with_retries() error : " .. err
+	end
+
+	-- Also write to the other subsystem's datastore (e.g., stream when called from HTTP).
+	-- This ensures bans are immediately visible in both HTTP and stream contexts without
+	-- waiting for a Redis cache refresh cycle.
+	if other_datastore then
+		local ok2, err2 = other_datastore:set_with_retries(ban_key, ban_data, effective_ttl)
+		if not ok2 then
+			logger:log(WARN, "other datastore set_with_retries() error: " .. err2)
+		end
 	end
 
 	-- Set on redis
@@ -1023,52 +1282,61 @@ utils.remove_ban = function(ip, service, ban_scope)
 		ban_scope = "global"
 	end
 
-	-- Connect to redis if needed
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		return nil, "can't get USE_REDIS variable : " .. err
-	end
-	use_redis = use_redis == "yes"
-
-	local clusterstore
-	if use_redis then
-		clusterstore = require "bunkerweb.clusterstore":new()
-		local ok, connect_err = clusterstore:connect()
-		if not ok then
-			return false, "can't connect to redis: " .. connect_err
+	-- Helper: delete a ban key from all local datastores
+	local function delete_local(key)
+		datastore:delete(key)
+		if other_datastore then
+			other_datastore:delete(key)
 		end
 	end
 
-	-- Handle service-specific unban
+	-- Collect keys to delete and remove from local datastores FIRST.
+	-- This ensures unbans take effect locally even if Redis is unreachable.
+	local keys_to_delete = {}
 	if ban_scope == "service" and service then
 		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
-		datastore:delete(ban_key)
-		if use_redis then
-			clusterstore:call("del", ban_key)
-		end
-	-- Handle global unban
+		keys_to_delete[#keys_to_delete + 1] = ban_key
+		delete_local(ban_key)
 	else
-		-- Delete global ban from datastore and redis
-		local global_ban_key = "bans_ip_" .. ip
-		datastore:delete(global_ban_key)
-		if use_redis then
-			clusterstore:call("del", global_ban_key)
-		end
+		-- Delete global ban
+		local global_key = "bans_ip_" .. ip
+		keys_to_delete[#keys_to_delete + 1] = global_key
+		delete_local(global_key)
 
-		-- Delete all service-specific bans for this IP from datastore and redis
+		-- Delete all service-specific bans for this IP
 		local suffix = "_ip_" .. ip
 		for _, k in ipairs(datastore:keys()) do
 			if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
-				datastore:delete(k)
-				if use_redis then
-					clusterstore:call("del", k)
+				keys_to_delete[#keys_to_delete + 1] = k
+				delete_local(k)
+			end
+		end
+		if other_datastore then
+			for _, k in ipairs(other_datastore:keys()) do
+				if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
+					keys_to_delete[#keys_to_delete + 1] = k
+					delete_local(k)
 				end
 			end
 		end
 	end
 
-	if clusterstore then
-		clusterstore:close()
+	-- Now delete from Redis (best-effort — local unbans already applied above)
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. err
+	end
+	if use_redis == "yes" then
+		local clusterstore = require "bunkerweb.clusterstore":new()
+		local ok, connect_err = clusterstore:connect()
+		if not ok then
+			logger:log(ERR, "can't connect to redis for unban: " .. connect_err)
+		else
+			for _, key in ipairs(keys_to_delete) do
+				clusterstore:call("del", key)
+			end
+			clusterstore:close()
+		end
 	end
 
 	return true, "success"
@@ -1087,14 +1355,62 @@ utils.new_cachestore = function(ctx, pool)
 	return require "bunkerweb.cachestore":new(use_redis, ctx, pool == nil or pool)
 end
 
-utils.regex_match = function(str, regex, options)
-	local all_options = "o"
-	if options then
-		all_options = all_options .. options
+local RELOG_INTERVAL = 3600
+-- per worker, per subsystem; cache key -> { ts = <last logged>, err = <compile error> }
+local bad_regexes = {}
+
+-- os.time has no JIT recorder in LuaJIT (lib_os.c declares no LJLIB_REC), so calling it aborts
+-- the enclosing trace. Keep it off the happy path: only the already-failed branches read it.
+local os_time = os.time
+
+local function log_bad_regex(regex, err, source)
+	-- ngx.var is unavailable in init and init_worker and raises inside a timer. pcall guards the
+	-- capability instead of enumerating phases, so a future caller in a new phase degrades to
+	-- "-" rather than dying.
+	local ok, server_name = pcall(function()
+		return var.server_name
+	end)
+	-- %q escapes a newline as backslash plus a real newline, which would split this entry over
+	-- two log lines; collapse it so the record stays parseable.
+	local quoted = (("%q"):format(regex):gsub("\\\n", "\\n"))
+	logger:log(
+		ERR,
+		("invalid regex for %s on server %s : %s (regex = %s)"):format(
+			source or "an unidentified setting",
+			(ok and server_name) or "-",
+			err,
+			quoted
+		)
+	)
+end
+
+local function relog_bad_regex(regex, bad, source)
+	local now = os_time()
+	if now - bad.ts >= RELOG_INTERVAL then
+		bad.ts = now
+		log_bad_regex(regex, bad.err, source)
+	end
+end
+
+utils.regex_match = function(str, regex, options, source)
+	local all_options = "o" .. (options or "")
+	-- Compile validity depends on the flags, so the memo key includes them.
+	local key = all_options .. "\0" .. regex
+	local bad = bad_regexes[key]
+	if bad then
+		relog_bad_regex(regex, bad, source)
+		return nil
 	end
 	local match, err = re_match(str, regex, all_options)
 	if err then
-		logger:log(ERR, "error while matching regex " .. regex .. "with string " .. str)
+		-- ngx.re.match reports runtime failures through the same channel as compile failures,
+		-- but a no-match returns nil with no error (lua-resty-core regex.lua:672-678), so an
+		-- empty subject isolates compile failure exactly. Only that case is memoized.
+		local _, probe_err = re_match("", regex, all_options)
+		if probe_err then
+			bad_regexes[key] = { ts = os_time(), err = probe_err }
+		end
+		log_bad_regex(regex, err, source)
 		return nil
 	end
 	return match
@@ -1108,6 +1424,7 @@ utils.get_phases = function()
 		"rewrite",
 		"access",
 		"content",
+		"ssl_client_hello_default",
 		"ssl_certificate",
 		"header",
 		"log",
@@ -1123,9 +1440,12 @@ utils.is_cosocket_available = function()
 	local phases = {
 		"timer",
 		"rewrite",
+		"server_rewrite",
 		"access",
 		"content",
-		"ssl_certificate",
+		"ssl_cert",
+		"ssl_client_hello",
+		"ssl_session_fetch",
 		"preread",
 	}
 	local current_phase = get_phase()
@@ -1135,6 +1455,15 @@ utils.is_cosocket_available = function()
 		end
 	end
 	return false
+end
+
+utils.is_connection_error = function(err)
+	return err
+		and (err:find("closed", 1, true) or err:find("broken pipe", 1, true) or err:find("connection reset", 1, true))
+end
+
+utils.is_oom_error = function(err)
+	return err and err:find("OOM", 1, true) ~= nil
 end
 
 utils.kill_all_threads = function(threads)

@@ -245,7 +245,7 @@ or
 
 ```nginx
 
-    more_set_headers -s 404 -t 'text/plain' Foo Baz
+    more_set_headers -s 404 -t 'text/plain' Foo Baz;
 ```
 
 See [more_set_headers](#more_set_headers) for more details.
@@ -384,6 +384,9 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
+* **1.29.x**                      (last tested: 1.29.2)
+* **1.27.x**                      (last tested: 1.27.1)
+* **1.25.x**                      (last tested: 1.25.3)
 * **1.21.x**                      (last tested: 1.21.4)
 * **1.19.x**                      (last tested: 1.19.9)
 * **1.17.x**                      (last tested: 1.17.8)
@@ -517,30 +520,11 @@ Copyright & License
 
 The code base is borrowed directly from the standard [headers](http://nginx.org/en/docs/http/ngx_http_headers_module.html) module in Nginx 0.8.24. This part of code is copyrighted by Igor Sysoev.
 
-Copyright (c) 2009-2017, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, OpenResty Inc.
+Copyright (c) 2009-2025, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, OpenResty Inc.
 
 Copyright (c) 2010-2013, Bernd Dorn.
 
-This module is licensed under the terms of the BSD license.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+The license text is available in the [LICENSE](LICENSE) file located in the root directory of the project.
 
 [Back to TOC](#table-of-contents)
 

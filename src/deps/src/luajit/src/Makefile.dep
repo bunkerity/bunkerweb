@@ -149,7 +149,8 @@ lj_mcode.o: lj_mcode.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
  lj_dispatch.h lj_bc.h lj_traceerr.h lj_prng.h lj_vm.h
 lj_meta.o: lj_meta.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h lj_gc.h \
  lj_err.h lj_errmsg.h lj_buf.h lj_str.h lj_tab.h lj_meta.h lj_frame.h \
- lj_bc.h lj_vm.h lj_strscan.h lj_strfmt.h lj_lib.h
+ lj_bc.h lj_vm.h lj_strscan.h lj_strfmt.h lj_lib.h lj_ctype.h lj_cdata.h \
+ lj_carith.h
 lj_obj.o: lj_obj.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h
 lj_opt_dce.o: lj_opt_dce.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
  lj_ir.h lj_jit.h lj_iropt.h
@@ -181,9 +182,9 @@ lj_profile.o: lj_profile.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
  lj_jit.h lj_ir.h lj_trace.h lj_traceerr.h lj_profile.h luajit.h
 lj_record.o: lj_record.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
  lj_err.h lj_errmsg.h lj_str.h lj_tab.h lj_meta.h lj_frame.h lj_bc.h \
- lj_ctype.h lj_gc.h lj_ff.h lj_ffdef.h lj_debug.h lj_ir.h lj_jit.h \
- lj_ircall.h lj_iropt.h lj_trace.h lj_dispatch.h lj_traceerr.h \
- lj_record.h lj_ffrecord.h lj_snap.h lj_vm.h lj_prng.h
+ lj_ctype.h lj_gc.h lj_crecord.h lj_jit.h lj_ir.h lj_ffrecord.h lj_ff.h \
+ lj_ffdef.h lj_debug.h lj_ircall.h lj_iropt.h lj_trace.h lj_dispatch.h \
+ lj_traceerr.h lj_record.h lj_snap.h lj_vm.h lj_prng.h
 lj_serialize.o: lj_serialize.c lj_obj.h lua.h luaconf.h lj_def.h \
  lj_arch.h lj_err.h lj_errmsg.h lj_buf.h lj_gc.h lj_str.h lj_tab.h \
  lj_udata.h lj_ctype.h lj_cdata.h lj_ir.h lj_serialize.h

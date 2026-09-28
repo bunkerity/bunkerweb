@@ -1,172 +1,186 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
         "Content-Length": "27",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "param1=value1&param2=value2"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Executing operator \"Rx"
+    "expected": {
+      "debug_log": "Executing operator \"Rx",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS \"@rx (value1)\" \"id:1,phase:2,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx in implicit form with negation ('!')",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx in implicit form with negation ('!')",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "3",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"HEAD",
-      "body": [ ]
+      "uri": "/",
+      "method": "HEAD",
+      "body": [
+        "a=1"
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Executing operator \"Rx\" with param \"\\^0\\$\"",
-      "error_log":"Matched \"Operator `Rx' with parameter `\\^0\\$'"
+    "expected": {
+      "debug_log": "Executing operator \"Rx\" with param \"\\^0\\$\"",
+      "error_log": "Matched \"Operator `Rx' with parameter `\\^0\\$'",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_HEADERS:Content-Length \"!^0$\" \"id:1,phase:2,pass,t:trim,block\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx with non-compiling pattern",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with non-compiling pattern",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"HEAD",
-      "body": [ ]
+      "uri": "/",
+      "method": "HEAD",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Error with regular expression"
+    "expected": {
+      "debug_log": "Error with regular expression",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_HEADERS:Content-Type \"@rx a(b\" \"id:1,phase:2,pass,t:trim,block\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx with PCRE error",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with PCRE error",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
-      "method":"HEAD",
-      "body": [ ]
+      "uri": "/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
+      "method": "HEAD",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"rx: regex error 'MATCH_LIMIT' for pattern",
-      "error_log":"Matched \"Operator `StrEq' with parameter `1' against variable `MSC_PCRE_ERROR'"
+    "expected": {
+      "debug_log": "rx: regex error 'MATCH_LIMIT' for pattern",
+      "error_log": "Matched \"Operator `StrEq' with parameter `1' against variable `MSC_PCRE_ERROR'",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecPcreMatchLimit 2",
       "SecRule ARGS:rxtest \"@rx (w+)+$\" \"id:1,phase:1,pass,t:trim,block\"",
@@ -174,44 +188,48 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx with PCRE match limits exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with PCRE match limits exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
-      "method":"HEAD",
-      "body": [ ]
+      "uri": "/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
+      "method": "HEAD",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"rx: regex error 'MATCH_LIMIT' for pattern",
-      "error_log":"Matched \"Operator `StrEq' with parameter `1' against variable `MSC_PCRE_LIMITS_EXCEEDED'"
+    "expected": {
+      "debug_log": "rx: regex error 'MATCH_LIMIT' for pattern",
+      "error_log": "Matched \"Operator `StrEq' with parameter `1' against variable `MSC_PCRE_LIMITS_EXCEEDED'",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecPcreMatchLimit 2",
       "SecRule ARGS:rxtest \"@rx (w+)+$\" \"id:1,phase:1,pass,t:trim,block\"",
@@ -219,44 +237,48 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Operator :: @rx with PCRE match limits exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with PCRE match limits exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Content-Length": "27",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
-      "method":"HEAD",
-      "body": [ ]
+      "uri": "/?rxtest=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
+      "method": "HEAD",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"rx: regex error 'MATCH_LIMIT' for pattern",
-      "error_log":"Matched \"Operator `StrEq' with parameter `1' against variable `TX:MSC_PCRE_LIMITS_EXCEEDED'"
+    "expected": {
+      "debug_log": "rx: regex error 'MATCH_LIMIT' for pattern",
+      "error_log": "Matched \"Operator `StrEq' with parameter `1' against variable `TX:MSC_PCRE_LIMITS_EXCEEDED'",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecPcreMatchLimit 2",
       "SecRule ARGS:rxtest \"@rx (w+)+$\" \"id:1,phase:1,pass,t:trim,block\"",

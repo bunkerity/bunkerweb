@@ -10,32 +10,29 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
-from re import fullmatch
+from re import fullmatch, split as resplit
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
 from threading import Lock
 from time import time
 from traceback import format_exc
-from warnings import filterwarnings
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-# Suppress passlib's pkg_resources deprecation warning
-# This is a known issue in passlib that will be fixed in future versions
-filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
-
 from app.models.safe_session_cache import SafeFileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_login import current_user, LoginManager, login_required
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask_compress import Compress
+from markupsafe import Markup
+from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -47,16 +44,19 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
+    is_static_path,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
     get_latest_stable_release,
+    can_delete_service,
     get_multiples,
     handle_stop,
     human_readable_number,
     is_editable_method,
     is_plugin_active,
+    is_session_revoked,
     is_ui_api_method,
     stop,
     restart_workers,
@@ -67,6 +67,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.crowdsec import crowdsec
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
@@ -83,6 +84,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
+from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -90,6 +92,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     totp,
     home,
     logout,
@@ -150,6 +153,7 @@ DB_CHECK_STALE_INTERVAL_SECONDS = 30.0
 DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
 DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
 
+# Flask serves app/static/* at the URL root (static_url_path="/"); before_request short-circuits these.
 # Shared thread pool executors for background tasks to prevent thread spawning on every request
 _db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
 _periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
@@ -170,6 +174,13 @@ _restart_workers_lock = Lock()
 _restart_workers_future = None
 _restart_workers_next_allowed = 0.0
 RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+BW_VERSION = get_version()
+
+
+def _static_cache_control(version_arg: str | None, version: str) -> str | None:
+    if version_arg == version:
+        return "public, max-age=31536000, immutable"
+    return None
 
 
 def _shutdown_executors():
@@ -342,7 +353,7 @@ def refresh_app_context():
 
         active_plugin_paths.add(py_file.parent.parent.parent)
         # Namespace the module name with the plugin directory to avoid collisions
-        plugin_root = py_file.parents[2] if len(py_file.parents) >= 3 else py_file.parent
+        plugin_root = py_file.parents[1] if len(py_file.parents) >= 2 else py_file.parent
         module_name = f"bw_ui_hooks_{plugin_root.name}_{py_file.stem}"
         active_hook_modules.add(module_name)
         hook_dir = str(py_file.parent)
@@ -599,6 +610,13 @@ with app.app_context():
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
+    # Host header allowlist (defense-in-depth). Space/comma separated list of allowed
+    # Host values (wildcards like "*.example.com" supported). Empty = disabled/permissive.
+    _raw_allowed_hosts = getenv("UI_ALLOWED_HOSTS", "").strip()
+    app.config["ALLOWED_HOSTS"] = [h for h in resplit(r"[\s,]+", _raw_allowed_hosts) if h] if _raw_allowed_hosts else []
+    if app.config["ALLOWED_HOSTS"]:
+        LOGGER.info(f"UI Host header allowlist enabled: {app.config['ALLOWED_HOSTS']}")
+
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -606,12 +624,18 @@ with app.app_context():
     # Secure by default — auto-detection in before_request may downgrade if no proxy detected
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
-    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-    app.config["REMEMBER_COOKIE_SECURE"] = True
 
-    app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    # The Flask-Login remember cookie is disabled. It carried only the username, HMAC'd with a
+    # static secret, for 365 days, touched no server-side state, and so outlived logout, password
+    # change and session revocation. "Remember me" is now session.permanent (login.py), bounded by
+    # SESSION_LIFETIME_HOURS / SESSION_ABSOLUTE_HOURS and revocable like any other session.
+    # Pointing REMEMBER_COOKIE_NAME at a name no browser will ever send keeps has_cookie in
+    # flask_login's _load_user permanently False, so a legacy token already sitting in a browser is
+    # dead on the first request after upgrade rather than getting one free authenticated request.
+    # The name deliberately has no __Host- prefix: strong session protection can still emit a
+    # deletion header for it, which is inert unprefixed but would be rejected outright by the UA
+    # if prefixed.
+    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_disabled"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     default_max_content_length = 50 * 1024 * 1024  # 50 MB
@@ -630,63 +654,110 @@ with app.app_context():
         session_lifetime_hours = 12.0
         LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
 
+    try:
+        session_absolute_hours = float(getenv("SESSION_ABSOLUTE_HOURS", "168"))
+    except ValueError:
+        session_absolute_hours = 168.0
+        LOGGER.warning("Invalid SESSION_ABSOLUTE_HOURS, defaulting to 168h (7 days)")
+    if session_absolute_hours < session_lifetime_hours:
+        LOGGER.warning(
+            "SESSION_ABSOLUTE_HOURS (%s) is lower than SESSION_LIFETIME_HOURS (%s); clamping to the latter", session_absolute_hours, session_lifetime_hours
+        )
+        session_absolute_hours = session_lifetime_hours
+
+    try:
+        session_rolling_hours = float(getenv("SESSION_ROLLING_HOURS", "0"))
+    except ValueError:
+        session_rolling_hours = 0.0
+        LOGGER.warning("Invalid SESSION_ROLLING_HOURS, defaulting to 0 (disabled)")
+    if session_rolling_hours < 0:
+        session_rolling_hours = 0.0
+
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
-    app.config["SESSION_REFRESH_EACH_REQUEST"] = False
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+    app.config["SESSION_ABSOLUTE_SECONDS"] = int(session_absolute_hours * 3600)
+    app.config["SESSION_ROLLING_SECONDS"] = int(session_rolling_hours * 3600)
     app.config["SESSION_ID_LENGTH"] = 64
 
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
     session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
 
-    redis_settings = BW_CONFIG.get_config(
-        global_only=True,
-        methods=False,
-        filtered_settings=(
-            "USE_REDIS",
-            "REDIS_HOST",
-            "REDIS_PORT",
-            "REDIS_DATABASE",
-            "REDIS_TIMEOUT",
-            "REDIS_KEEPALIVE_POOL",
-            "REDIS_SSL",
-            "REDIS_USERNAME",
-            "REDIS_PASSWORD",
-            "REDIS_SENTINEL_HOSTS",
-            "REDIS_SENTINEL_USERNAME",
-            "REDIS_SENTINEL_PASSWORD",
-            "REDIS_SENTINEL_MASTER",
-        ),
-    )
-
-    redis_client = None
-    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
-        redis_client = get_common_redis_client(
-            use_redis=True,
-            redis_host=redis_settings.get("REDIS_HOST"),
-            redis_port=redis_settings.get("REDIS_PORT", "6379"),
-            redis_db=redis_settings.get("REDIS_DATABASE", "0"),
-            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
-            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
-            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
-            redis_username=redis_settings.get("REDIS_USERNAME") or None,
-            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
-            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
-            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
-            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
-            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
-        )
-        if redis_client:
-            LOGGER.debug("Using Redis as session backend")
-            app.config["SESSION_TYPE"] = "redis"
-            app.config["SESSION_REDIS"] = redis_client
-            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
-        else:
+    # Same helper the routes use, so the worker ends up with one memoised client and one
+    # connection pool instead of a session pool plus a per-request one.
+    redis_client = get_ui_redis_client()
+    session_fallback_cache = None
+    if redis_client:
+        LOGGER.debug("Using Redis as session backend")
+        app.config["SESSION_TYPE"] = "redis"
+        app.config["SESSION_REDIS"] = redis_client
+        app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        session_fallback_cache = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
+    else:
+        # get_redis_client returns None for both "disabled" and "unreachable"; only the second
+        # is worth a WARNING, because this worker is now pinned to file sessions for its life.
+        if BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
-
-    if not redis_client:
+        LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
         app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    app.config.update(
+        COMPRESS_ALGORITHM=["br", "gzip"],
+        # Static files are streamed responses and use this list; its default has no gzip.
+        COMPRESS_ALGORITHM_STREAMING=["br", "gzip"],
+        COMPRESS_BR_LEVEL=4,
+        COMPRESS_LEVEL=6,
+        COMPRESS_MIN_SIZE=1024,
+        # Do not compress authenticated HTML: it carries CSRF tokens and echoed user input.
+        COMPRESS_MIMETYPES=[
+            "text/css",
+            "text/javascript",
+            "application/javascript",
+            "application/json",
+            "application/geo+json",
+            "image/svg+xml",
+            "font/woff",
+            "font/woff2",
+            "font/ttf",
+            "application/vnd.ms-fontobject",
+            "text/plain",
+        ],
+    )
+    Compress(app)
+
+    # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+    # dies or fills up after this point makes every request raise. Same parameters as the
+    # interface it replaces, plus the local cache it falls back to.
+    if session_fallback_cache is not None:
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it. This branch only runs once a Redis
+        # client exists.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=session_fallback_cache,
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
+
+    # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
+    # every request, so an untouched session is rewritten to the store even for a static
+    # asset. Throttle the expiry-only refreshes; a modified session still writes at once,
+    # which leaves login, logout and _rotate_session_id untouched.
+    _session_lifetime_seconds = app.config["PERMANENT_SESSION_LIFETIME"].total_seconds()
+
+    def _throttled_should_set_storage(flask_app, flask_session) -> bool:
+        return session_storage_due(flask_session, _session_lifetime_seconds)
+
+    app.session_interface.should_set_storage = _throttled_should_set_storage
 
     biscuit = BiscuitMiddleware(app)
 
@@ -699,14 +770,28 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session so a form left open is not rejected before the session expires
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    def lift_form_field_limit():
+        # Flask caps a single non-file form field at 500 kB, below MAX_CONTENT_LENGTH (Easy Resolve posts more).
+        # Only signed-in users get the larger cap, so the login form keeps the default.
+        if request.method == "POST" and current_user.is_authenticated:
+            request.max_form_memory_size = app.config["MAX_CONTENT_LENGTH"]
+
+    # Must run before CSRFProtect's hook, which parses the form
+    app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
+
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
+                # A directory base (img/flags) gets file names appended in JS, so it must stay query-free
+                if endpoint == "static" and not app.debug and "." in values.get("filename", "").rstrip("/").rsplit("/", 1)[-1]:
+                    values.setdefault("v", BW_VERSION)
                 if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
@@ -725,6 +810,7 @@ with app.app_context():
         url_for=custom_url_for,
         is_plugin_active=is_plugin_active,
         is_ui_api_method=is_ui_api_method,
+        can_delete_service=can_delete_service,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
@@ -834,12 +920,13 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+            flash(
+                Markup("""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>here</a>
+</div>""").format(url_for("profile.profile_page")),
                 "error",
+                save=False,
             )
 
     return ui_user
@@ -859,13 +946,18 @@ def handle_csrf_error(_):
     except (AssertionError, RuntimeError):
         user_id = "unknown"
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
-    try:
-        if not current_user:
-            return redirect(url_for("setup.setup_page"), 303)
-    except (AssertionError, RuntimeError):
-        return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
+    if not DB.get_ui_user():
+        # No admin exists yet (e.g. mid-setup-wizard): there is no usable login page for
+        # this reason to land on, so hand it to /setup directly instead.
+        response.headers["Location"] = url_for("setup.setup_page", reason="session_expired")
+    elif request.method == "POST":
+        # A submitted form dies here rather than at the login check, because the CSRF
+        # token lives in the session that just went away. logout_page() clears the
+        # session and the response tells the browser to drop its cookies, so a flash
+        # would not survive: the reason has to travel in the URL.
+        response.headers["Location"] = url_for("login.login_page", reason="session_expired")
     return response
 
 
@@ -995,8 +1087,110 @@ def schedule_restart_workers():
         _restart_workers_next_allowed = now + RESTART_WORKERS_MIN_INTERVAL_SECONDS
 
 
+def _delete_session_store_entry(sid: str) -> None:
+    """Best-effort delete of a session store entry (Redis key or filesystem cache)."""
+    if not sid:
+        return
+    interface = app.session_interface
+    try:
+        # The interface's own delete already covers whichever store backs it, including the
+        # local one a failing Redis falls back to.
+        interface._delete_session(interface._get_store_id(sid))
+    except Exception:
+        LOGGER.exception("Failed to delete session store entry during rotation/expiry")
+
+
+def _rotate_session_id() -> None:
+    """Mirror lua-resty-session rolling_timeout: generate a fresh session ID and drop the old store entry."""
+    interface = app.session_interface
+    regenerate = getattr(interface, "regenerate", None)
+    if callable(regenerate):
+        try:
+            regenerate(session)
+            session.modified = True
+            return
+        except Exception:
+            LOGGER.exception("Failed to regenerate session id via session_interface; falling back to manual rotation")
+
+    old_sid = getattr(session, "sid", None)
+    new_sid = token_urlsafe(app.config.get("SESSION_ID_LENGTH", 64))
+    _delete_session_store_entry(old_sid)
+    try:
+        session.sid = new_sid  # type: ignore[attr-defined]
+    except Exception:
+        LOGGER.exception("Failed to assign new session id during rotation; aborting rotation")
+        return
+    session.modified = True
+
+
+def _enforce_session_lifetime() -> bool:
+    """Mirror lua-resty-session absolute/rolling timeouts. Returns True if the session was invalidated."""
+    if not current_user.is_authenticated:
+        return False
+
+    creation_date = session.get("creation_date")
+    if not isinstance(creation_date, datetime):
+        return False
+
+    now = datetime.now().astimezone()
+    absolute_seconds = app.config.get("SESSION_ABSOLUTE_SECONDS", 0)
+    if absolute_seconds > 0 and (now - creation_date).total_seconds() > absolute_seconds:
+        LOGGER.info("UI session for user %s exceeded SESSION_ABSOLUTE_HOURS, forcing logout", current_user.get_id())
+        old_sid = getattr(session, "sid", None)
+        logout_user()
+        session.clear()
+        _delete_session_store_entry(old_sid)
+        return True
+
+    rolling_seconds = app.config.get("SESSION_ROLLING_SECONDS", 0)
+    if rolling_seconds > 0:
+        last_rotated_at = session.get("last_rotated_at", creation_date)
+        if isinstance(last_rotated_at, datetime) and (now - last_rotated_at).total_seconds() > rolling_seconds:
+            _rotate_session_id()
+            session["last_rotated_at"] = now
+            session.permanent = True  # ensure the new id inherits the sliding TTL
+
+    return False
+
+
+def _host_allowed(host: str, allowed: list) -> bool:
+    """Return True if the request Host matches the configured allowlist.
+
+    Supports exact matches and "*.example.com" wildcards (which also match the bare
+    domain). The port, if present, is ignored for comparison.
+    """
+    if not host:
+        return False
+    hostname = host.split(":", 1)[0].strip().lower()
+    for entry in allowed:
+        e = entry.strip().lower()
+        if not e:
+            continue
+        if e == "*":
+            return True
+        e = e.split(":", 1)[0]
+        if e.startswith("*."):
+            base = e[2:]
+            if hostname == base or hostname.endswith("." + base):
+                return True
+        elif hostname == e:
+            return True
+    return False
+
+
 @app.before_request
 def before_request():
+    # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
+    # returning None lets the static view still serve the file (after_request supplies the nonce).
+    if is_static_path(request.path):
+        return
+
+    # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
+        LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
+        return make_response(jsonify({"message": "Invalid host"}), 400)
+
     DATA.load_from_file()
     if DATA.get("SERVER_STOPPING", False):
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
@@ -1015,43 +1209,50 @@ def before_request():
                 if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
                     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = True
-                    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = True
                 else:
                     app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = False
                     app.config["SESSION_COOKIE_DOMAIN"] = None
-                    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = False
-                    app.config["REMEMBER_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
+    if not is_static_path(request.path):
         metadata = DB.get_metadata()
 
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
-            safe_reload_plugins()
-            schedule_restart_workers()
+            if DB.readonly:
+                LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
+            else:
+                safe_reload_plugins()
+                # Reset the flag BEFORE sending SIGHUP so new workers see it cleared
+                err = DB.checked_changes(changes=["ui_plugins"], value=False)
+                if err:
+                    LOGGER.error(f"Couldn't reset reload_ui_plugins flag: {err}, skipping worker restart to prevent loop")
+                else:
+                    schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
-        if app.config.get("SESSION_TYPE") == "cachelib":
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0).
+        # Covers the Redis fallback cache too, which fills up during an outage and prunes no more than the other.
+        session_file_cache = (
+            app.config["SESSION_CACHELIB"] if app.config.get("SESSION_TYPE") == "cachelib" else getattr(app.session_interface, "fallback", None)
+        )
+        if session_file_cache is not None:
             global _session_cleanup_last_run
             now_ts = time()
             if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
                 _session_cleanup_last_run = now_ts
-                _periodic_tasks_executor.submit(app.config["SESSION_CACHELIB"]._remove_expired, now_ts)
+                _periodic_tasks_executor.submit(session_file_cache._remove_expired, now_ts)
 
         schedule_database_state_check(request.method, request.path)
 
         DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash("Database connection is in read-only mode : no modifications possible.", "error", save=False)
 
         if current_user.is_authenticated:
             passed = True
@@ -1063,14 +1264,20 @@ def before_request():
                 session["ip"] = request.remote_addr
             if "user_agent" not in session:
                 session["user_agent"] = request.headers.get("User-Agent")
+            if "last_rotated_at" not in session:
+                session["last_rotated_at"] = session["creation_date"]
+
+            # Enforce absolute and rolling session lifetimes (mirrors lua-resty-session)
+            if _enforce_session_lifetime():
+                return redirect(url_for("login.login_page"))
 
             # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
                         safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-                    except Exception:
+                    except ValueError:
                         safe_next = url_for("home.home_page")
 
                     return redirect(url_for("totp.totp_page", next=safe_next))
@@ -1081,7 +1288,7 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
-            elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+            elif "session_id" in session and is_session_revoked(session["session_id"]):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
@@ -1116,16 +1323,20 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                flash(
+                    Markup(
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
+                    ),
                     "error",
+                    save=False,
                 )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
+                flash(
+                    Markup("""<div class='d-flex flex-column'>
                         <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
-                    </div>""",
+                        <p class='p-0 m-0 fst-italic'>{}</p>
+                    </div>""").format(metadata["failover_message"]),
                     "error",
+                    save=False,
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
                 flash("The last changes have been applied successfully.")
@@ -1135,6 +1346,9 @@ def before_request():
         fetch_mode = request.headers.get("Sec-Fetch-Mode")
         x_requested_with = request.headers.get("X-Requested-With")
         is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
+
+        # Default to the scheduler-computed flag; refined to a live count below on real page requests.
+        pro_overlapped = metadata["pro_overlapped"]
 
         if not is_cors and current_user.is_authenticated:
             seen = set()
@@ -1146,6 +1360,18 @@ def before_request():
                 flash(content, f["type"], save=f.get("save", True))
             DATA["TO_FLASH"] = []
 
+            # Live, every-request overlap check — the metadata flag is only refreshed daily by the scheduler.
+            if metadata["is_pro"] and metadata["pro_services"]:
+                pro_overlapped = len(DB.get_services()) > metadata["pro_services"]
+                if pro_overlapped and current_endpoint != "pro":
+                    flash(
+                        "You have more services than allowed by your pro license. "
+                        "Upgrade your license or move some services to draft mode to unlock your pro license.",
+                        "pro",
+                        i18n_key="flash.pro_services_exceeded",
+                        save=False,  # transient toast; keep it out of the notification history
+                    )
+
         data = dict(
             current_endpoint=current_endpoint,
             script_nonce=g.script_nonce,
@@ -1156,12 +1382,13 @@ def before_request():
             pro_status=metadata["pro_status"],
             pro_services=metadata["pro_services"],
             pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
-            pro_overlapped=metadata["pro_overlapped"],
-            plugins=BW_CONFIG.get_plugins(),
+            pro_overlapped=pro_overlapped,
+            plugins=BW_CONFIG.get_plugins(metadata=metadata),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
+            user_admin=current_user.admin,
             theme=theme_value,
             language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,
@@ -1238,17 +1465,48 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # * Permissions-Policy header to prevent unwanted behavior
+    # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
+
+    # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the
+    # indexing of a URL discovered elsewhere.
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    # * Cross-origin headers to sever the opener relationship and refuse cross-origin embedding.
+    # COEP is left out on purpose: it would break the third-party resources the CSP allows.
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
+    # cannot render the panel after a logout. Static assets keep theirs, and a route that already
+    # set its own value wins.
+    cache_control = _static_cache_control(request.args.get("v"), BW_VERSION) if is_static_path(request.path) else None
+    if cache_control:
+        response.headers["Cache-Control"] = cache_control
+    elif not is_static_path(request.path):
+        response.headers.setdefault("Cache-Control", "no-store")
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
             resp = hook(response)
-            if resp:
-                return resp
+            if resp is not None:
+                response = resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
+
+    # Evict a pre-upgrade Flask-Login remember token still sitting in a browser. It is already
+    # inert (REMEMBER_COOKIE_NAME points at a sentinel), so this is hygiene, not the fix itself.
+    # Done directly rather than through flask_login's _clear_cookie, which now targets the
+    # sentinel name and so cannot reach these two, and which omits secure= -- werkzeug's
+    # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
+    # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
+    # ponytail: hard-coded name list; drop this block once no issued token can still be live.
+    if not is_static_path(request.path):
+        for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
+            if legacy_cookie in request.cookies:
+                response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
 
     return response
 
@@ -1256,11 +1514,7 @@ def set_security_headers(response):
 @app.teardown_request
 def teardown_request(teardown):
     with suppress(AssertionError, RuntimeError):
-        if (
-            not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-            and current_user.is_authenticated
-            and "session_id" in session
-        ):
+        if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
@@ -1302,6 +1556,40 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+@app.route("/.well-known/security.txt", methods=["GET"])
+def security_txt():
+    # Expires is mandatory and must stay fresh, so it is generated per request instead of
+    # being shipped as a static file like robots.txt.
+    expires = (datetime.now().astimezone() + timedelta(days=365)).replace(microsecond=0).isoformat()
+    fields = [
+        "Contact: mailto:security@bunkerity.com",
+        "Contact: https://github.com/bunkerity/bunkerweb/security/advisories/new",
+        f"Expires: {expires}",
+        "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
+        "Preferred-Languages: en, fr",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/.github/SECURITY.md",
+    ]
+
+    # Canonical is derived from the request, so it is only emitted once the Host header has been
+    # vetted against a real allowlist: this path skips the before_request check, and "*" vets nothing.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and "*" not in allowed_hosts and _host_allowed(request.host, allowed_hosts):
+        fields.append(f"Canonical: {url_for('security_txt', _external=True)}")
+
+    return Response(content_type="text/plain; charset=utf-8", response="\n".join(fields) + "\n")
+
+
+@app.route("/security.txt", methods=["GET"])
+def security_txt_redirect():
+    return redirect(url_for("security_txt"), 301)
+
+
+@app.route("/.well-known/change-password", methods=["GET"])
+def change_password_redirect():
+    # Not permanent on purpose: the page holding the password form may move.
+    return redirect(url_for("profile.profile_page"))
+
+
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 
     @app.route("/healthcheck", methods=["GET"])
@@ -1336,7 +1624,7 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash("Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})

@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha|capjs)$",
       "type": "select",
       "select": [
         "no",
@@ -21,7 +21,8 @@
         "recaptcha",
         "hcaptcha",
         "turnstile",
-        "mcaptcha"
+        "mcaptcha",
+        "capjs"
       ]
     },
     "ANTIBOT_URI": {
@@ -35,20 +36,29 @@
     },
     "ANTIBOT_TIME_RESOLVE": {
       "context": "multisite",
-      "default": "60",
-      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+      "default": "1m",
+      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "antibot-time-resolve",
       "label": "Time to resolve",
-      "regex": "^[0-9]+$",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "ANTIBOT_TIME_VALID": {
       "context": "multisite",
-      "default": "86400",
-      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+      "default": "1d",
+      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "antibot-time-valid",
       "label": "Time valid",
-      "regex": "^[0-9]+$",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "ANTIBOT_SUCCESS_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "Fixed URI to redirect clients to after they solve the challenge, instead of the page they originally requested. Leave empty to return to the originally requested page.",
+      "id": "antibot-success-uri",
+      "label": "Success redirect URL",
+      "regex": "^(\\/([\\w\\].~:?#\\[@!$\\&'\\(\\)*+,;=\\-][\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)?)?$",
       "type": "text"
     },
     "ANTIBOT_CAPTCHA_ALPHABET": {
@@ -60,10 +70,19 @@
       "regex": "^[a-zA-Z2-9+/=%\"'&_(),.;:?!§`^ÄÖÜßäöüé''‚\"\"„-]+$",
       "type": "text"
     },
+    "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+      "context": "multisite",
+      "default": "16",
+      "help": "Proof-of-work difficulty of the JavaScript challenge, in leading zero bits (16 to 28). Each extra bit doubles the average solve time for clients. Regenerate custom JavaScript challenge pages before raising it.",
+      "id": "antibot-javascript-difficulty",
+      "label": "JavaScript difficulty",
+      "regex": "^(1[6-9]|2[0-8])$",
+      "type": "number"
+    },
     "ANTIBOT_IGNORE_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of PCRE regex patterns (separated by spaces) for uris that should be excluded from antibot challenge.",
+      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from antibot challenge. Patterns are checked against the path and the full request URI with query string.",
       "id": "antibot-ignore-uri",
       "label": "Ignored URI",
       "regex": "^.*$",
@@ -113,6 +132,26 @@
       "label": "Ignored User-Agent",
       "regex": "^.*$",
       "type": "multivalue"
+    },
+    "ANTIBOT_IGNORE_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that exempts the request from the antibot challenge. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "antibot-ignore-header-name",
+      "label": "Ignored header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "antibot-ignore-header"
+    },
+    "ANTIBOT_IGNORE_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to exempt the request from the antibot challenge. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "antibot-ignore-header-value",
+      "label": "Ignored header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "antibot-ignore-header"
     },
     "ANTIBOT_IGNORE_COUNTRY": {
       "context": "multisite",
@@ -842,6 +881,42 @@
       "label": "mCaptcha domain",
       "regex": "^.*$",
       "type": "text"
+    },
+    "ANTIBOT_CAPJS_FRONTEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Public origin the browser loads the Cap.js widget from (e.g. https://cap.example.com). Origin only, no path.",
+      "id": "antibot-capjs-frontend-url",
+      "label": "Cap.js frontend URL",
+      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_BACKEND_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Internal origin BunkerWeb calls for /siteverify (e.g. http://cap-server:3000). Origin only, no path. Falls back to the frontend URL when empty.",
+      "id": "antibot-capjs-backend-url",
+      "label": "Cap.js backend URL",
+      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey created in the Cap.js dashboard for this site.",
+      "id": "antibot-capjs-sitekey",
+      "label": "Cap.js sitekey",
+      "regex": "^[A-Za-z0-9._\\-]*$",
+      "type": "text"
+    },
+    "ANTIBOT_CAPJS_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret paired with the sitekey, used by BunkerWeb to authenticate /siteverify calls.",
+      "id": "antibot-capjs-secret",
+      "label": "Cap.js secret",
+      "regex": "^[A-Za-z0-9._\\-]*$",
+      "type": "password"
     }
   }
 }

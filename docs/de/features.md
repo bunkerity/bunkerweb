@@ -124,22 +124,25 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Worker-Einstellungen"
 
-    | Einstellung            | Standard | Kontext | Mehrfach | Beschreibung                                                                                          |
-    | ---------------------- | -------- | ------- | -------- | ----------------------------------------------------------------------------------------------------- |
-    | `WORKER_PROCESSES`     | `auto`   | global  | Nein     | **Worker-Prozesse:** Anzahl der Worker-Prozesse. Auf `auto` setzen, um verfügbare Kerne zu verwenden. |
-    | `WORKER_CONNECTIONS`   | `1024`   | global  | Nein     | **Worker-Verbindungen:** Maximale Anzahl von Verbindungen pro Worker.                                 |
-    | `WORKER_RLIMIT_NOFILE` | `2048`   | global  | Nein     | **Dateideskriptor-Limit:** Maximale Anzahl offener Dateien pro Worker.                                |
+    | Einstellung               | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                                                                   |
+    | ------------------------- | -------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `WORKER_PROCESSES`        | `auto`   | global  | Nein     | **Worker-Prozesse:** Anzahl der Worker-Prozesse. Auf `auto` setzen, um verfügbare Kerne zu verwenden.                                                                          |
+    | `WORKER_CONNECTIONS`      | `1024`   | global  | Nein     | **Worker-Verbindungen:** Maximale Anzahl von Verbindungen pro Worker.                                                                                                          |
+    | `WORKER_RLIMIT_NOFILE`    | `2048`   | global  | Nein     | **Dateideskriptor-Limit:** Maximale Anzahl offener Dateien pro Worker.                                                                                                         |
+    | `WORKER_SHUTDOWN_TIMEOUT` | `30s`    | global  | Nein     | **Worker-Shutdown-Timeout:** Zeitlimit für das ordnungsgemäße Herunterfahren der Worker-Prozesse. Alte Worker werden nach diesem Zeitlimit bei einem Reload erzwungen beendet. |
 
 === "Speichereinstellungen"
 
-    | Einstellung                    | Standard | Kontext | Mehrfach | Beschreibung                                                                         |
-    | ------------------------------ | -------- | ------- | -------- | ------------------------------------------------------------------------------------ |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`    | global  | Nein     | **Workerlock-Speichergröße:** Größe des lua_shared_dict für Initialisierungs-Worker. |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`    | global  | Nein     | **Datastore-Speichergröße:** Größe des internen Datastores.                          |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`    | global  | Nein     | **Cachestore-Speichergröße:** Größe des internen Cachestores.                        |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).          |
+    | Einstellung                       | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                                               |
+    | --------------------------------- | -------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`    | global  | Nein     | **Workerlock-Speichergröße:** Größe des lua_shared_dict für Initialisierungs-Worker.                                                                       |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`    | global  | Nein     | **Datastore-Speichergröße:** Größe des internen Datastores.                                                                                                |
+    | `DATASTORE_LRU_SIZE`              | `1k`     | global  | Nein     | **Datastore-LRU-Größe:** Anzahl der Slots im geteilten per-Worker-Datastore-LRU. Akzeptiert eine Ganzzahl oder `k`/`m`-Kurzform (z. B. `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`    | global  | Nein     | **Cachestore-Speichergröße:** Größe des internen Cachestores.                                                                                              |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).                                                                                    |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).                                                                                  |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).                                                                                |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`    | global  | Nein     | **Sitzungswiderruf-Speichergröße:** Größe des Speichers für widerrufene Cookie-Sitzungskennungen.                                                          |
 
 === "Protokollierungseinstellungen"
 
@@ -158,13 +161,12 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Integrationseinstellungen"
 
-    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                          |
-    | ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`          | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                           |
-    | `SWARM_MODE`             | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                                 |
-    | `KUBERNETES_MODE`        | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                              |
-    | `KEEP_CONFIG_ON_RESTART` | `no`     | global    | Nein     | **Konfiguration bei Neustart behalten:** Konfiguration bei Neustart beibehalten. Auf 'yes' setzen, um das Zurücksetzen der Konfiguration beim Neustart zu verhindern. |
-    | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt.                                                            |
+    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                      |
+    | ----------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                       |
+    | `SWARM_MODE`      | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                             |
+    | `KUBERNETES_MODE` | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                          |
+    | `USE_TEMPLATE`    |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt; ein am Dienst gesetzter Wert überschreibt die Vorlage. |
 
 === "Nginx-Einstellungen"
 
@@ -224,8 +226,82 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     USE_UDP: "no"
     ```
 
+=== "Listening-Modi deaktivieren"
+
+    Sie können bestimmte Listening-Modi deaktivieren, indem Sie die Porteinstellungen leer lassen:
+
+    ```yaml
+    # HTTP-Listening deaktivieren (nur HTTPS)
+    HTTP_PORT: ""
+    HTTPS_PORT: "8443"
+
+    # HTTPS-Listening deaktivieren (nur HTTP)
+    HTTP_PORT: "8080"
+    HTTPS_PORT: ""
+
+    # Stream: Nicht-SSL-Listening deaktivieren (nur SSL)
+    LISTEN_STREAM_PORT: ""
+    LISTEN_STREAM_PORT_SSL: "4242"
+
+    # Stream: SSL-Listening deaktivieren (nur Nicht-SSL)
+    LISTEN_STREAM_PORT: "1337"
+    LISTEN_STREAM_PORT_SSL: ""
+    ```
+
+## ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#acme).
+
+STREAM-Unterstützung :white_check_mark:
+
+Advanced ACME certificate management with custom CA support, certificate monitoring dashboard, expiry alerting, CT log monitoring, and enhanced OCSP stapling. Complements the built-in Let's Encrypt plugin.
+
+| Einstellung                         | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_ACME`                          | `no`         | multisite | nein     | Enable ACME certificate management for this service using a custom ACME-compatible Certificate Authority.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_PASSTHROUGH`                  | `no`         | multisite | nein     | Pass through ACME HTTP-01 challenge requests to the upstream server.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_DIRECTORY_URL`                |              | multisite | nein     | ACME directory URL of the Certificate Authority (e.g. https://ca.example.com/acme/directory for Step CA, https://vault.example.com/v1/pki/acme/directory for Vault PKI).                                                                                                                                                                                                                                                                                                                         |
+| `ACME_EMAIL`                        |              | multisite | nein     | Email address for ACME account registration and notifications.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `ACME_EAB_KID`                      |              | multisite | nein     | External Account Binding Key ID (required by some CAs like Sectigo, Google Trust Services).                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `ACME_EAB_HMAC_KEY`                 |              | multisite | nein     | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_CA_CERT_PATH`                 |              | multisite | nein     | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_CHALLENGE`                    | `http`       | multisite | nein     | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.                                                                                                                                                                                                                                                                                                                                                           |
+| `ACME_DNS_PROVIDER`                 |              | multisite | nein     | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ACME_DNS_CREDENTIAL_ITEM`          |              | multisite | ja       | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
+| `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`        | multisite | ja       | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `ACME_DNS_PROPAGATION`              | `default`    | multisite | nein     | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
+| `ACME_DNS_ALIAS`                    |              | multisite | nein     | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
+| `ACME_KEY_TYPE`                     | `ecdsa`      | multisite | nein     | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_KEY_SIZE`                     | `256`        | multisite | nein     | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_PREFERRED_CHAIN`              |              | multisite | nein     | Preferred certificate chain issuer CN. Selects the preferred chain when the CA provides multiple.                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ACME_RENEWAL_DAYS`                 | `30`         | multisite | nein     | Renew the certificate when it has fewer than this many days until expiry.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_SSL_VERIFY`                   | `yes`        | multisite | nein     | Verify SSL certificates when communicating with the ACME server. Disable only for testing with self-signed CA certs.                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_WILDCARD`                     | `no`         | multisite | nein     | Request wildcard certificate (requires DNS-01 challenge). The base domain is the parent of each server name, so www.example.com yields example.com and *.example.com.                                                                                                                                                                                                                                                                                                                            |
+| `ACME_DISABLE_PUBLIC_SUFFIXES`      | `yes`        | multisite | nein     | Refuse certificate requests for domains matching the Public Suffix List (recommended, default: yes).                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_MUST_STAPLE`                  | `no`         | multisite | nein     | Request the OCSP Must-Staple extension in the certificate.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ACME_MAX_RETRIES`                  | `3`          | multisite | nein     | Number of times to retry certificate generation on failure (0 disables retries).                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `USE_ACME_MONITORING`               | `yes`        | global    | nein     | Enable certificate expiry monitoring and status tracking for all managed certificates (including OSS Let's Encrypt certificates).                                                                                                                                                                                                                                                                                                                                                                |
+| `ACME_ALERT_DAYS`                   | `30 14 7 1`  | global    | nein     | Space-separated list of day thresholds that trigger expiry alerts.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `USE_ACME_ALERT_WEBHOOK`            | `no`         | global    | nein     | Send certificate alerts via webhook.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ACME_ALERT_WEBHOOK_URLS`           |              | global    | nein     | Space-separated list of webhook URLs for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `USE_ACME_ALERT_EMAIL`              | `no`         | global    | nein     | Send certificate alerts via email.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `ACME_ALERT_SMTP_EMAILS`            |              | global    | nein     | Space-separated list of email recipients for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ACME_ALERT_SMTP_HOST`              |              | global    | nein     | SMTP host for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `ACME_ALERT_SMTP_PORT`              | `465`        | global    | nein     | SMTP port for certificate alert emails (SSL=465, TLS=587).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ACME_ALERT_SMTP_FROM_EMAIL`        |              | global    | nein     | Sender email address for certificate alerts.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ACME_ALERT_SMTP_FROM_USER`         |              | global    | nein     | SMTP authentication user for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `ACME_ALERT_SMTP_FROM_PASSWORD`     |              | global    | nein     | SMTP authentication password for certificate alert emails.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ACME_ALERT_SMTP_SSL`               | `SSL`        | global    | nein     | Connection type for certificate alert SMTP.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `USE_ACME_CT_MONITORING`            | `no`         | global    | nein     | Enable Certificate Transparency log monitoring. Queries crt.sh to detect unauthorized certificate issuance for your domains.                                                                                                                                                                                                                                                                                                                                                                     |
+| `ACME_CT_MONITORED_DOMAINS`         |              | global    | nein     | Space-separated list of domains to monitor in CT logs. Leave empty to auto-detect from configured services.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `USE_ACME_OCSP_STAPLING`            | `no`         | multisite | nein     | Enable enhanced OCSP stapling with proactive response fetching and caching.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `ACME_OCSP_CACHE_SIZE`              | `1m`         | global    | nein     | Size of the shared dictionary for OCSP response caching.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
 ## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#anti-ddos-pro).
 
 STREAM-Unterstützung :x:
 
@@ -257,9 +333,9 @@ So funktioniert es:
 
 Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 
-1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
+1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [capjs](#__tabbed_3_8), [javascript](#__tabbed_3_2)).
 2. Aktivieren Sie die Funktion: Setzen Sie den Parameter `USE_ANTIBOT` in Ihrer BunkerWeb-Konfiguration auf den gewählten Typ.
-3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha, Turnstile und mCaptcha erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel.
+3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha und Turnstile erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel. Für mCaptcha und Cap.js können Sie den Anbieter selbst hosten oder einen gehosteten Dienst nutzen und anschließend den erforderlichen Site-Schlüssel und Geheimschlüssel konfigurieren.
 4. Wichtig: Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! important "Über den Parameter `ANTIBOT_URI`"
@@ -272,41 +348,56 @@ Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 
 Die folgenden Parameter werden von allen Herausforderungsmechanismen gemeinsam genutzt:
 
-| Parameter              | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                       |
-| :--------------------- | :----------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_URI`          | `/challenge` | Multisite | nein     | Herausforderungs-URL: Die URL, zu der Benutzer umgeleitet werden, um die Herausforderung abzuschließen. Stellen Sie sicher, dass diese URL nicht für andere Zwecke verwendet wird. |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | Multisite | nein     | Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert.                                        |
-| `ANTIBOT_TIME_VALID`   | `86400`      | Multisite | nein     | Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein.      |
+| Parameter              | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                        |
+| :--------------------- | :----------- | :-------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_URI`          | `/challenge` | Multisite | nein     | Herausforderungs-URL: Die URL, zu der Benutzer umgeleitet werden, um die Herausforderung abzuschließen. Stellen Sie sicher, dass diese URL nicht für andere Zwecke verwendet wird.                                                                  |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | Multisite | nein     | Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.            |
+| `ANTIBOT_TIME_VALID`   | `1d`         | Multisite | nein     | Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `ANTIBOT_SUCCESS_URI`  |              | Multisite | nein     | Erfolgs-Weiterleitungs-URL: Eine feste URL, zu der Benutzer nach erfolgreichem Lösen der Herausforderung weitergeleitet werden, anstatt zur ursprünglich angeforderten Seite. Leer lassen, um Benutzer zu ihrem ursprünglichen Ziel zurückzuleiten. |
 
 ### Ausschließen von Traffic von Herausforderungen
 
 BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die die Antibot-Herausforderung vollständig umgehen sollen. Nützlich für vertrauenswürdige Dienste, interne Netzwerke oder Seiten, die immer zugänglich sein sollen:
 
-| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                              |
-| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.                                                        |
-| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                  |
-| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                            |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                              |
-| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                     |
-| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                 |
-| `ANTIBOT_IGNORE_COUNTRY`    |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                |
-| `ANTIBOT_ONLY_COUNTRY`      |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen. |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                               |
+| ----------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft. |
+| `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                   |
+| `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                             |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                               |
+| `ANTIBOT_IGNORE_ASN`          |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                                                      |
+| `ANTIBOT_IGNORE_USER_AGENT`   |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                                                  |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Antibot-Challenge zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                              |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                        |
+| `ANTIBOT_IGNORE_COUNTRY`      |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                                                 |
+| `ANTIBOT_ONLY_COUNTRY`        |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen.                                  |
+
+!!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+    Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! note "Verhalten der länderspezifischen Einstellungen"
       - Wenn sowohl `ANTIBOT_IGNORE_COUNTRY` als auch `ANTIBOT_ONLY_COUNTRY` gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.
       - Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn `ANTIBOT_ONLY_COUNTRY` gesetzt ist, da kein Ländercode ermittelt werden kann.
+
+!!! tip "Challenge-Zustand über Subdomains hinweg teilen"
+    Der Antibot-Zustand (einschließlich `turnstile`, `hcaptcha`, `recaptcha`, `mcaptcha`, `captcha`, `javascript` und `cookie`) wird im BunkerWeb-[Sitzungs-Cookie](#sessions) gespeichert. Standardmäßig ist dieses Cookie auf genau den Host beschränkt, der es gesetzt hat. Das bedeutet: Wenn ein Benutzer die Herausforderung auf `a.example.com` löst, muss er sie auf `b.example.com` erneut lösen. Damit die Herausforderung einmal für alle gleichrangigen Subdomains derselben registrierbaren Domain gelöst werden kann, setzen Sie [`SESSIONS_DOMAIN`](#sessions) **für jeden relevanten Server** auf die Parent-Domain (zum Beispiel `example.com`). `SESSIONS_DOMAIN` ist eine Multisite-Einstellung – konfigurieren Sie sie pro Server, damit nicht verwandte Mandanten auf derselben BunkerWeb-Instanz niemals ein mandantenübergreifendes `Domain`-Attribut erhalten.
 
 Beispiele:
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   Schließt alle URIs aus, die mit `/api/`, `/webhook/` oder `/assets/` beginnen.
 
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  Schließt exakt die Anfrage `/index.php?a=b&c=d` von der Antibot-Herausforderung aus.
+
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   Schließt das interne Netzwerk `192.168.1.0/24` und die spezifische IP `10.0.0.1` aus.
 
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Schließt Anfragen von Hosts aus, deren Reverse-DNS auf `googlebot.com` oder `bingbot.com` endet.
+
+!!! info "Vorwärts-bestätigtes Reverse-DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der passende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Herausforderung wird nur dann übersprungen, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Herausforderung wird weiterhin erzwungen. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die Herausforderung zu umgehen.
 
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Schließt Anfragen von den ASNs 15169 (Google) und 8075 (Microsoft) aus.
@@ -338,6 +429,8 @@ Beispiele:
     | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "JavaScript"
 
     Die JavaScript-Herausforderung fordert den Client auf, eine Rechenaufgabe mithilfe von JavaScript zu lösen. Dieser Mechanismus stellt sicher, dass der Client JavaScript aktiviert hat und den erforderlichen Code ausführen kann, was für die meisten Bots in der Regel nicht möglich ist.
@@ -353,11 +446,16 @@ Beispiele:
     - Die Herausforderung generiert dynamisch eine einzigartige Aufgabe für jeden Client.
     - Die Rechenaufgabe beinhaltet ein Hashing mit spezifischen Bedingungen (z. B. das Finden eines Hashes mit einem bestimmten Präfix).
 
+    Die Kosten der Herausforderung werden über `ANTIBOT_JAVASCRIPT_DIFFICULTY` festgelegt, in führenden Null-Bits (16 bis 28, Standard 16); jedes zusätzliche Bit verdoppelt die durchschnittliche Lösungszeit. Wenn Sie PRO-eigene JavaScript-Herausforderungsseiten verwenden, regenerieren Sie diese, bevor Sie diese Einstellung über den Standardwert hinaus erhöhen, sonst belegen sie weiterhin die alte, niedrigere Schwierigkeit und werden abgelehnt.
+
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
-    | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | Parameter                        | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
+    | :-------------------------------- | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                     | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`   | `16`     | Multisite | nein     | JavaScript-Schwierigkeit: Proof-of-Work-Schwierigkeit in führenden Null-Bits (16 bis 28). |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "Captcha"
 
@@ -392,6 +490,8 @@ Beispiele:
     | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "reCAPTCHA"
 
     Googles reCAPTCHA bietet eine Benutzervalidierung, die im Hintergrund (v3) ausgeführt wird, um eine Verhaltensbewertung zuzuweisen. Eine Bewertung unterhalb des konfigurierten Schwellenwerts löst eine zusätzliche Überprüfung aus oder blockiert die Anfrage. Bei sichtbaren Herausforderungen (v2) müssen Benutzer mit dem reCAPTCHA-Widget interagieren, bevor sie fortfahren können.
@@ -417,6 +517,8 @@ Beispiele:
     | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "hCaptcha"
 
     Wenn aktiviert, bietet hCaptcha eine effektive Alternative zu reCAPTCHA, indem es Benutzerinteraktionen überprüft, ohne auf einen Bewertungsmechanismus angewiesen zu sein. Es fordert Benutzer mit einem einfachen, interaktiven Test heraus, um ihre Legitimität zu bestätigen.
@@ -431,6 +533,8 @@ Beispiele:
     | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
     | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "Turnstile"
 
     Turnstile ist ein moderner, datenschutzfreundlicher Herausforderungsmechanismus, der auf der Technologie von Cloudflare basiert, um automatisierten Traffic zu erkennen und zu blockieren. Er validiert Benutzerinteraktionen transparent und im Hintergrund, wodurch die Reibung für legitime Benutzer reduziert und Bots effektiv abgeschreckt werden.
@@ -444,6 +548,8 @@ Beispiele:
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
     | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
     | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "mCaptcha"
 
@@ -462,7 +568,32 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
-    Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) ist ein selbst gehostetes, quelloffenes, datenschutzfreundliches Proof-of-Work-CAPTCHA. Statt die Überprüfung an einen Drittanbieter auszulagern, betreiben Sie den Cap.js-Server selbst; BunkerWeb prüft die Tokens gegen diesen Server.
+
+    Verwenden Sie die Frontend-URL für den browserseitig erreichbaren Endpunkt, der das Widget ausliefert. Wenn BunkerWeb den Cap.js-Server über eine interne Adresse erreicht, setzen Sie die Backend-URL auf diesen internen Endpunkt; andernfalls lassen Sie sie leer, und BunkerWeb nutzt die Frontend-URL für `/siteverify`.
+
+    **Parameter:**
+
+    | Parameter                    | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                        |
+    | :--------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`                | `no`     | Multisite | nein     | Antibot aktivieren: Auf `capjs` setzen, um diesen Mechanismus zu aktivieren.                                        |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |          | Multisite | nein     | Browserseitig erreichbare URL des Cap.js-Servers, der das Widget ausliefert.                                        |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |          | Multisite | nein     | Optionale interne URL, die BunkerWeb für `/siteverify` nutzt; fällt auf die Frontend-URL zurück, wenn sie leer ist. |
+    | `ANTIBOT_CAPJS_SITEKEY`      |          | Multisite | nein     | Cap.js Site-Schlüssel.                                                                                              |
+    | `ANTIBOT_CAPJS_SECRET`       |          | Multisite | nein     | Cap.js Geheimschlüssel, mit dem BunkerWeb Tokens überprüft.                                                         |
+
+    !!! note "Anforderungen an den Betrieb"
+        - Verwenden Sie in Produktion HTTPS für `ANTIBOT_CAPJS_FRONTEND_URL`. Der Browser-Worker benötigt `crypto.subtle` in einem sicheren Kontext, und HTTPS verhindert MITM-Manipulationen am Widget.
+        - Konfigurieren Sie CORS für den Cap.js-Site-Schlüssel, damit der geschützte Origin erlaubt ist.
+        - Setzen Sie `ANTIBOT_CAPJS_FRONTEND_URL` und `ANTIBOT_CAPJS_BACKEND_URL` nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.
+        - Verwenden Sie das Cap.js-Widget **0.1.48 oder neuer**. BunkerWeb liefert eine strikte, nonce-basierte CSP aus; ältere Widgets brechen Instrumentierungs-Challenges, weil das eingebettete `<script>` im isolierten `srcdoc`-iframe den Nonce nicht weitergibt. Wenn Sie `tiago2/cap` selbst hosten, pinnen Sie ein aktuelles Tag (z. B. `tiago2/cap:3.1.2` oder neuer) oder setzen Sie `WIDGET_VERSION` auf `0.1.48` oder neuer.
+        - Cap.js-**Instrumentierungs-Challenges** (standardmäßig aktiv) führen vom Server geliefertes JavaScript über `eval` aus, das ein Nonce nicht autorisieren kann. BunkerWeb führt das Widget in einem isolierten, gleichdomänigen iframe aus, das das nötige `'unsafe-eval'` trägt, sodass die Haupt-Challenge-Seite eine strikte, eval-freie CSP behält — keine Konfiguration erforderlich.
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 ### Konfigurationsbeispiele
 
@@ -564,6 +695,19 @@ Beispiele:
     ANTIBOT_TIME_VALID: "86400"
     ```
 
+=== "Cap.js-Herausforderung"
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
 ## Auth basic
 
 STREAM-Unterstützung :x:
@@ -596,6 +740,9 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                                                                                              |
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit scrypt für maximale Sicherheit gehasht.                                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                                                                         |
+
+!!! tip "Verankern Sie den geschützten Pfad so, dass alles darunter erfasst wird"
+    Ein einfacher Pfad wie `/admin` ist ein Präfix-Match und schützt damit auch `/admin/`, `/admin/users` und die kodierten Varianten, die sich darauf normalisieren. Der Modifikator `=` macht den Abgleich exakt, sodass `= /admin` den Pfad `/admin/` ungeschützt lässt, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Behalten Sie die Präfix-Form, sofern Sie nicht wirklich genau einen Pfad meinen.
 
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
@@ -810,8 +957,8 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                                 |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                              |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                       |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                           |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren.      |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
 
 !!! warning "Falsch-Positive"
@@ -958,6 +1105,9 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        Die `BLACKLIST_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der übereinstimmende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Umgehung wird nur angewendet, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Umgehung wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die rDNS-Blacklist-Überprüfungen zu umgehen.
+
 === "ASN"
     **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
@@ -989,6 +1139,22 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_IGNORE_URI`      |          | Multisite | Nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen.     |
     | `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                 |
     | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
+
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+=== "Header"
+    **Was dies bewirkt:** Blockiert Anfragen mit einem bestimmten Request-Header — oder nimmt sie umgekehrt aus —, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert. Eine Ignore-Regel schlägt jeden Blacklist-Treffer, auch zwischengespeicherte.
+
+    | Einstellung                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                             |
+    | ------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Blacklist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `BLACKLIST_HEADER_VALUE`        |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Blacklist zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.    |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -1027,7 +1193,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN von AWS und Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Benutzerdefinierte Ignorierregeln
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"
@@ -1079,24 +1245,25 @@ TrustedMonitor/\d+\.\d+
 
 STREAM-Unterstützung :x:
 
-Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung and beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.
+Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung und beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.
 
-Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien and einer schnelleren Bereitstellung führt.
+Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien und einer schnelleren Bereitstellung führt.
 
 So funktioniert's:
 
 1. Auf Anfrage eines Clients prüft BunkerWeb, ob der Browser Brotli unterstützt.
-2. Wenn ja, wird die Antwort auf dem konfigurierten Niveau (`BROTLI_COMP_LEVEL`) komprimiert.
+2. Wenn ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.
 3. Die entsprechenden Header zeigen die Brotli-Komprimierung an.
 4. Der Browser dekomprimiert vor der Anzeige.
-5. Bandbreite and Ladezeiten nehmen ab.
+5. Bandbreite und Ladezeiten nehmen ab.
 
 ### So wird's verwendet
 
-1. Aktivieren: `USE_BROTLI: yes` (standardmäßig deaktiviert).
+1. Aktivieren: Setzen Sie den Parameter `USE_BROTLI` auf `yes` (standardmäßig deaktiviert).
 2. MIME-Typen: Definieren Sie die zu komprimierenden Inhalte über `BROTLI_TYPES`.
 3. Mindestgröße: `BROTLI_MIN_LENGTH`, um die Komprimierung kleiner Antworten zu vermeiden.
-4. Komprimierungsstufe: `BROTLI_COMP_LEVEL` für das Gleichgewicht zwischen Geschwindigkeit and Verhältnis.
+4. Komprimierungsstufe: `BROTLI_COMP_LEVEL` für das Gleichgewicht zwischen Geschwindigkeit und Verhältnis.
+5. BunkerWeb den Rest erledigen lassen: Nach der Konfiguration wird die Komprimierung automatisch auf geeignete Antworten angewendet.
 
 ### Parameter
 
@@ -1108,7 +1275,10 @@ So funktioniert's:
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | Multisite | nein     | Stufe 0–11: höher = bessere Komprimierung, aber mehr CPU. |
 
 !!! tip "Komprimierungsstufe"
-    `6` bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
+    `6` bietet einen guten Kompromiss. Für statische Inhalte und verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
+
+!!! info "Browser-Unterstützung"
+    Brotli wird von allen modernen Browsern unterstützt. Clients ohne Brotli-Unterstützung erhalten unkomprimierte Antworten oder eine andere verfügbare Codierung.
 
 ### Beispiele
 
@@ -1218,7 +1388,7 @@ Falls Sie noch nicht mit der CrowdSec-Konsolenintegration vertraut sind: [CrowdS
 
 Durch unsere Partnerschaft mit CrowdSec können Sie Ihre BunkerWeb-Instanzen in Ihre [CrowdSec-Konsole](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration) eintragen. Das bedeutet, dass von BunkerWeb blockierte Angriffe in Ihrer CrowdSec-Konsole neben den von CrowdSec Security Engines blockierten Angriffen sichtbar sind, was Ihnen einen einheitlichen Überblick über Bedrohungen gibt.
 
-Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem [CrowdSec-Plugin für BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.
+Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem [CrowdSec-Plugin für BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.
 
 **Schritt 1: Erstellen Sie Ihr CrowdSec-Konsolenkonto**
 
@@ -1277,6 +1447,8 @@ Profi-Tipp: Wenn Sie Ihre Warnungen anzeigen, klicken Sie auf die Option „Spal
 ## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#cache-pro).
+
 STREAM-Unterstützung :x:
 
 Provides caching functionality at the reverse proxy level.
@@ -1326,12 +1498,12 @@ Führen Sie die folgenden Schritte aus, um die Client-Cache-Funktion zu konfigur
 
 ### Konfigurationseinstellungen
 
-| Einstellung               | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                      |
-| ------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | --- |
-| `USE_CLIENT_CACHE`        | `no`                       | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                                               | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | nein | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch ` | `), die vom Client zwischengespeichert werden sollen. |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
-| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
+| Einstellung               | Standard                                                                  | Kontext   | Mehrfach | Beschreibung                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg\|jpeg\|png\|bmp\|ico\|svg\|tif\|css\|js\|otf\|ttf\|eot\|woff\|woff2` | global    | nein     | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch `                                    | `), die vom Client zwischengespeichert werden sollen. |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
+| `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
 
 !!! tip "Optimierung der Cache-Einstellungen"
     Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
@@ -1386,7 +1558,7 @@ Das CORS-Plugin ermöglicht Cross-Origin Resource Sharing (Ressourcenfreigabe zw
 2.  BunkerWeb prüft, ob der anfragende Ursprung basierend auf Ihrer Konfiguration zulässig ist.
 3.  Wenn dies der Fall ist, antwortet BunkerWeb mit den entsprechenden CORS-Headern, die definieren, was die anfragende Website tun darf.
 4.  Bei nicht zulässigen Ursprüngen kann die Anfrage entweder komplett verweigert oder ohne CORS-Header ausgeliefert werden.
-5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
+5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
 
 ### Wie man es benutzt
 
@@ -1411,7 +1583,7 @@ Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren un
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | nein     | **Cross-Origin-Opener-Policy:** Steuert die Kommunikation zwischen Browser-Kontexten.                                                     |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | nein     | **Cross-Origin-Embedder-Policy:** Steuert, ob ein Dokument Ressourcen von anderen Ursprüngen laden kann.                                  |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | nein     | **Cross-Origin-Resource-Policy:** Steuert, welche Websites Ihre Ressourcen einbetten dürfen.                                              |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | nein     | **Cache-Dauer für Preflight:** Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen.                            |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | nein     | **Cache-Dauer für Preflight:** Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | nein     | **Nicht autorisierte Ursprünge ablehnen:** Wenn `yes`, werden Anfragen von nicht autorisierten Ursprüngen mit einem Fehlercode abgelehnt. |
 
 !!! tip "Optimierung von Preflight-Anfragen"
@@ -1524,10 +1696,16 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter           | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
-| :------------------ | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY` |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen. |
-| `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                             |
+| ----------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WHITELIST_COUNTRY`           |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.                                                                                                             |
+| `BLACKLIST_COUNTRY`           |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.                                                                                                                  |
+| `COUNTRY_IGNORE_URI`          |          | Multisite | Nein     | Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Länderprüfung zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                                |
+| `COUNTRY_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                      |
+
+!!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+    Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 ### Unterstützte Ländergruppen
 
@@ -1547,7 +1725,10 @@ Sie können Gruppentokens mit `@` verwenden. Diese werden serverseitig in Mitgli
 - `@LATAM`: in diesem Plugin verwendete Lateinamerika-Gruppe.
 
 !!! tip "Whitelist vs. Blacklist"
-    Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
+    Wählen Sie den Ansatz, der zu Ihren Anforderungen passt:
+
+    - Verwenden Sie die Whitelist, wenn Sie den Zugriff auf wenige Länder beschränken möchten.
+    - Verwenden Sie die Blacklist, wenn Sie bestimmte problematische Regionen blockieren und alle anderen zulassen möchten.
 
 !!! warning "Priorität"
     Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.
@@ -1620,13 +1801,53 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 - Zugriff auf die BunkerWeb-Zugriffsprotokolle (`/var/log/bunkerweb/access.log` standardmäßig), damit der CrowdSec-Agent Anfragen analysieren kann.
 - Zugriff auf `cscli` auf dem CrowdSec-Host, um den BunkerWeb-Bouncer-Schlüssel zu registrieren.
 
+!!! warning "Expliziter Start im All-in-One-Container"
+    Der integrierte CrowdSec-Agent startet nur, wenn der All-in-One-Container die Umgebungsvariable `USE_CROWDSEC=yes` ohne Dienstpräfix und eine lokale `CROWDSEC_API` erhält (Standard: `http://127.0.0.1:8000`). Die Aktivierung für einen einzelnen Dienst startet den integrierten Agenten nicht. Für eine externe Local API müssen Sie den Agenten separat starten und konfigurieren.
+
 ### Integrationsablauf
 
 1. CrowdSec so vorbereiten, dass der Agent die BunkerWeb-Protokolle einliest.
 2. BunkerWeb konfigurieren, damit die CrowdSec Local API abgefragt wird.
 3. Den Link über die API `/crowdsec/ping` oder die CrowdSec-Kachel im Admin-UI validieren.
 
+    Diese Prüfung sendet eine authentifizierte Leseanfrage an jede konfigurierte Local API. Eine nicht erreichbare API, abgelehnte Zugangsdaten, eine ungültige Antwort oder ein nicht geladener Bouncer führen zum Fehlschlag. Bei reinen AppSec-Diensten wird das Laden der Konfiguration bestätigt; die AppSec-Verbindung und -Inspektion werden nicht geprüft.
+
 Die folgenden Abschnitte führen diese Schritte im Detail durch.
+
+### Untersuchung und Entfernen von Entscheidungen
+
+Öffnen Sie **Zusätzliche Seiten → CrowdSec** in der Weboberfläche, um jede konfigurierte Verbindung, den betroffenen Dienst, die Erreichbarkeit der Local API und die Entscheidungssynchronisierung zu prüfen. Die Statuskarte des CrowdSec-Plugins und die Aktionen **IP untersuchen** unter Berichte und Sperren öffnen dieselbe Seite. Untersuchungslinks füllen die Adresse vorab aus. Wählen Sie die Verbindung aus, wenn mehrere Dienste oder Instanzen CrowdSec verwenden.
+
+Eine Untersuchung führt aktuelle CrowdSec-Entscheidungen, verfügbare CrowdSec-Alarme, aufbewahrte BunkerWeb-Berichte und lokale BunkerWeb-Sperren zusammen. Aktuelle Entscheidungen und die in Berichten erfassten Informationen werden getrennt angezeigt. Neue CrowdSec-Berichte bewahren verfügbare Entscheidungs-IDs, Ursprünge, Szenarien, Ziele, Gegenmaßnahmen und Ablaufzeiten auch nach Ablauf oder Entfernung der Entscheidungen auf. AppSec-Ablehnungen und Sperren aufgrund einer AppSec-Fehlerrichtlinie haben unterschiedliche Quellen. Historische Informationen unterliegen den bestehenden Einstellungen zur Berichtsaufbewahrung; ältere Berichte und aus dem Cache verdrängte optionale Metadaten enthalten möglicherweise keine weiteren Details. Die Alarmansicht zeigt begrenzte Ereignismetadaten, keine rohen Anfrageinhalte, Cookies oder Authentifizierungsheader.
+
+Lokale Berichte und dienstspezifische Sperren sind auf den Dienstbereich der ausgewählten Verbindung beschränkt; globale BunkerWeb-Sperren werden ebenfalls einbezogen. Lässt sich dieser Bereich nicht mehr aus der geladenen Instanzkonfiguration bestimmen, wird die Untersuchung abgebrochen, damit keine Daten anderer Dienste zurückgegeben werden. Aufbewahrte Berichte bleiben bei Ausfall der Local API zugänglich, solange die Verbindungskonfiguration noch geladen ist.
+
+Der Abschnitt **CrowdSec-Zulassungslisten** zeigt die nativen Listen der Engine, ihre Einträge, Kommentare, Ablaufzeiten und ob sie lokal oder über die CrowdSec Console verwaltet werden. IP-Untersuchungen prüfen den aktuellen Zulassungslistenstatus der Engine und zeigen den Grund einer Übereinstimmung an. Zum Lesen und Prüfen sind die unten beschriebenen Verwaltungszugangsdaten erforderlich. Eine nicht verfügbare Prüfung wird von einer IP unterschieden, die auf keiner Zulassungsliste steht. Ausnahmen gelten für die gesamte CrowdSec-Engine; lokale BunkerWeb-Sperren werden dadurch nicht entfernt. CrowdSec 1.8.0 stellt Lese- und Prüfoperationen über die LAPI bereit. Native Änderungen an Zulassungslisten erfordern dagegen `cscli` auf dem Host oder einen separaten Verwaltungszugang zur Console.
+
+Der bestehende Wert `CROWDSEC_API_KEY` ist ein **Bouncer-Schlüssel**: Er erlaubt das Lesen von Entscheidungen, jedoch weder deren Entfernung noch die Einsicht in Alarme. Registrieren Sie zum Aktivieren dieser Funktionen eine dedizierte Maschine bei der jeweiligen CrowdSec-Engine und konfigurieren Sie beide optionalen Multisite-Einstellungen:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: die Anmeldekennung der dedizierten Maschine.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: das Passwort dieser Maschine.
+
+Registrieren Sie die Maschine gemäß dem [Authentifizierungsverfahren der Local API](https://doc.crowdsec.net/docs/local_api/authentication/) von CrowdSec. Bewahren Sie die Zugangsdaten vertraulich auf. Bleibt eine der Einstellungen leer, sind die Verwaltungsfunktionen nicht verfügbar. Für integrierte und externe Engines gilt dieselbe Konfiguration: Anfragen werden über die ausgewählte BunkerWeb-Instanz gesendet, sodass eine integrierte Local API weiterhin auf localhost lauschen kann. HTTPS-Verwaltungsanfragen prüfen das Serverzertifikat anhand der TLS-Vertrauenskonfiguration von BunkerWeb, unabhängig von der AppSec-Verifizierungseinstellung.
+
+**CrowdSec-Entscheidung entfernen** ist eine andere Aktion als das Aufheben einer BunkerWeb-Sperre. Die Entfernung in der Weboberfläche erfordert einen Administrator mit Schreibzugriff, konfigurierte Verwaltungszugangsdaten, eine beschreibbare UI-Datenbank und die Bestätigung der ausgewählten Entscheidung. Das Entfernen einer Entscheidung für einen Adressbereich betrifft den gesamten Bereich. Auf einer gemeinsam genutzten Engine wirkt sich die Entfernung auch auf andere Bouncer aus, die diese Entscheidung beziehen. Ausgewählte ID, Geltungsbereich, Ziel und Gegenmaßnahme werden vor der Entfernung erneut geprüft; andere Entscheidungen und lokale Sperren bleiben erhalten.
+
+Eine erfolgreiche Antwort bestätigt die Entfernung in der Local API und zeigt verbleibende passende Entscheidungen an. Bouncer übernehmen die Änderung bei ihrer konfigurierten Stream-Aktualisierung oder nach Ablauf des Live-Caches. Die Oberfläche zeigt die Weitergabe als ausstehend an, ohne zu behaupten, dass bereits alle Clients zugelassen sind. Eine andere Entscheidung, eine lokale Sperre, eine neue Erkennung oder eine AppSec-Regel kann eine Anfrage weiterhin blockieren. Das Ergebnis der Entfernung wird mit dem authentifizierten Akteur sowie der ausgewählten Verbindung und Entscheidung protokolliert.
+
+Die öffentliche API bietet dieselben Operationen:
+
+- `GET /crowdsec`: Verbindungen, Synchronisierungsstatus und Fehler pro Instanz.
+- `GET /crowdsec/{connection_id}/decisions`: nach `ip`, `origin` oder `scenario` filtern; mit `offset` und `limit` paginieren (höchstens 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: Untersuchung mit bis zu 200 Entscheidungen, 50 Alarmen und 50 Berichten, einschließlich Gesamtzahlen oder Grenzen und ausdrücklich als nicht verfügbar gekennzeichneten Abschnitten.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: um sensible Daten bereinigte Alarmdetails.
+- `GET /crowdsec/{connection_id}/allowlists`: native Zulassungslisten mit Paginierung über `offset` und `limit`; bis zu 200 Einträge je Liste, mit Anzeige der vollständigen Eintragszahl.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: aktuelle Zugehörigkeit zu einer nativen Zulassungsliste und Grund der Übereinstimmung.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: die ausgewählten Werte für `scope`, `value` und `decision_type` im JSON-Anfragetext angeben.
+
+Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung `crowdsec_read` oder `crowdsec_delete` unter der bestehenden Ressource `bans`, entweder für eine zurückgegebene Verbindungs-ID oder für `*`. Eine gewöhnliche `ban_delete`-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.
+
+Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
 
 ### Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten
 
@@ -1696,7 +1917,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1713,7 +1934,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -1747,7 +1968,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.6 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
+        image: crowdsecurity/crowdsec:v1.8.0 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
         volumes:
           - cs-data:/var/lib/crowdsec/data # Zum Persistieren der CrowdSec-Daten
           - bw-logs:/var/log:ro # Die BunkerWeb-Protokolle, die von CrowdSec analysiert werden sollen
@@ -1882,33 +2103,50 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
 
 ### Schritt&nbsp;2 – BunkerWeb-Einstellungen konfigurieren
 
-Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens `USE_CROWDSEC`, `CROWDSEC_API` und ein gültiger mit `cscli bouncers add` erzeugter Schlüssel werden benötigt.
+Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens `USE_CROWDSEC`, `CROWDSEC_API` und `CROWDSEC_API_KEY` mit einem gültigen per `cscli bouncers add` erzeugten Schlüssel werden benötigt.
 
 | Parameter                   | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                             |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **CrowdSec aktivieren:** Auf `yes` setzen, um den CrowdSec-Bouncer zu aktivieren.                                                        |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes.                                                                     |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.                                |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.                                                  |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes.                                                                     |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 
 #### Parameter der Anwendungssicherheitskomponente
 
-| Parameter                         | Standardwert  | Kontext | Mehrfach | Beschreibung                                                                                                                         |
-| --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.                                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.                                   |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.                   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
+| Parameter                         | Standardwert  | Kontext   | Mehrfach | Beschreibung                                                                                                                         |
+| --------------------------------- | ------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`       | multisite | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`       | multisite | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`       | multisite | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
 
-!!! info "Über die Betriebsmodi" - Der **Live-Modus** fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz. - Der **Stream-Modus** lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.
+!!! info "Über die Betriebsmodi"
+    - Der **Live-Modus** fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.
+    - Der **Stream-Modus** lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.
+
+#### Endpunkte pro Dienst
+
+Da die Endpunkte `multisite` sind, können Dienste auf derselben Instanz unterschiedliche CrowdSec-Komponenten verwenden, oder nur einen Teil davon. Die beiden Funktionen sind unabhängig voneinander:
+
+- **Entscheidungsabfragen** sind aktiv, wenn `CROWDSEC_API` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die Local API vollständig zu überspringen.
+- **AppSec-Prüfung** ist aktiv, wenn `CROWDSEC_APPSEC_URL` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die tiefgehende Anfrageprüfung zu überspringen.
+
+Ein Dienst, bei dem `USE_CROWDSEC` auf `yes` gesetzt ist und beide URLs leer sind, prüft nichts, und die Instanz protokolliert, dass kein Endpunkt definiert ist.
+
+!!! warning "Ein Entscheidungs-Cache pro Instanz"
+    Zwischengespeicherte Entscheidungen befinden sich in einer einzigen Shared-Memory-Zone für die gesamte Instanz, indiziert nach der Local API, von der sie stammen. Dienste, die auf dieselbe `CROWDSEC_API` verweisen, verwenden gegenseitig ihre zwischengespeicherten Entscheidungen, was die Abfrage günstig hält. Dienste, die auf unterschiedliche Local APIs verweisen, sehen sich gegenseitig nie ihre Entscheidungen. Die Größe dieser Zone gilt instanzweit, sodass sich eine Flotte mit vielen unterschiedlichen Local APIs und großen Entscheidungslisten ein Budget teilt.
+
+!!! info "Bouncer-Schlüssel pro Local API"
+    `CROWDSEC_API_KEY` wird wie jede andere Einstellung pro Dienst aufgelöst. Wenn Dienste unterschiedliche Local APIs ansprechen, geben Sie jedem den mit `cscli bouncers add` auf seinem eigenen CrowdSec-Host registrierten Schlüssel, andernfalls werden die Abfragen als nicht authentifiziert abgelehnt.
 
 ### Konfigurationsbeispiele
 
@@ -1942,26 +2180,56 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Konfiguration pro Dienst"
+
+    AppSec für jeden öffentlichen Dienst, Entscheidungsabfragen für eine Teilmenge, und ein Dienst vollständig ausgenommen. Die Werte ohne Präfix sind die flottenweite Baseline, und jeder Dienst überschreibt nur das, was abweicht:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline für jeden Dienst
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Keine Entscheidungsabfrage, sofern ein Dienst sie nicht anfordert
+    CROWDSEC_API_KEY: ""
+
+    # app1 fügt zusätzlich zu AppSec die Local-API-Entscheidungsabfrage hinzu
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 behält nur AppSec, erbt die leere CROWDSEC_API-Baseline
+
+    # intranet wird überhaupt nicht geprüft
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Ein Dienst kann auch auf einen komplett anderen CrowdSec-Host verweisen, mit seinem eigenen Bouncer-Schlüssel:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Schritt&nbsp;3 – Integration validieren
 
 - Suchen Sie in den Scheduler-Protokollen nach den Einträgen `CrowdSec configuration successfully generated` und `CrowdSec bouncer denied request`, um zu überprüfen, dass das Plugin aktiv ist.
 - Überwachen Sie auf CrowdSec-Seite `cscli metrics show` oder die CrowdSec-Konsole, um sicherzugehen, dass BunkerWeb-Entscheidungen wie erwartet erscheinen.
 - Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.
-    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
-    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
-    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
-    ```
 
 ## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#custom-pages-pro).
+
 STREAM-Unterstützung :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | Einstellung                      | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                       |
 | -------------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |              | multisite | nein     | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |              | multisite | nein     | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |              | global    | nein     | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |              | multisite | nein     | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -1970,6 +2238,7 @@ Tweak BunkerWeb error/antibot/default pages with custom HTML.
 | `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |              | multisite | nein     | Full path of the custom antibot hcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
 | `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |              | multisite | nein     | Full path of the custom antibot turnstile page (must be readable by the scheduler) (Can be a lua template).        |
 | `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |              | multisite | nein     | Full path of the custom antibot mcaptcha page (must be readable by the scheduler) (Can be a lua template).         |
+| `CUSTOM_ANTIBOT_CAPJS_PAGE`      |              | multisite | nein     | Full path of the custom antibot Cap.js page (must be readable by the scheduler) (Can be a lua template).           |
 
 ## Custom SSL certificate
 
@@ -1986,14 +2255,15 @@ So funktioniert's:
 5.  Sie behalten die volle Kontrolle über den Lebenszyklus der Zertifikate.
 
 !!! info "Automatische Überwachung"
-    Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
+    Wenn Sie den Parameter `USE_CUSTOM_SSL` auf `yes` setzen, überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
 
 ### Verwendung
 
-1.  Aktivieren: `USE_CUSTOM_SSL: yes`.
+1.  Aktivieren: Setzen Sie den Parameter `USE_CUSTOM_SSL` auf `yes`.
 2.  Methode: Dateien vs. Daten, Priorität über `CUSTOM_SSL_CERT_PRIORITY`.
 3.  Dateien: Geben Sie die Pfade zum Zertifikat und zum privaten Schlüssel an.
 4.  Daten: Geben Sie die base64- oder Klartext-PEM-Strings an.
+5.  BunkerWeb den Rest erledigen lassen: Nach der Konfiguration werden Ihre benutzerdefinierten Zertifikate automatisch für HTTPS-Verbindungen verwendet.
 
 !!! tip "Stream-Modus"
     Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port.
@@ -2096,18 +2366,22 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 | `DATABASE_URI_READONLY`           |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                                                                                                  |
 | `DATABASE_LOG_LEVEL`              | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.                                                                       |
 | `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden.                                                                    |
-| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                                                                                      |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14d`                                     | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen. |
 | `DATABASE_POOL_SIZE`              | `40`                                      | global  | nein     | **Pool-Größe:** Die Anzahl der Verbindungen im Datenbankverbindungspool.                                                                                                                                       |
 | `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global  | nein     | **Maximaler Pool-Überlauf:** Die maximale Anzahl zusätzlicher Verbindungen über die Pool-Größe hinaus. `-1` für unbegrenzt.                                                                                    |
-| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global  | nein     | **Pool-Zeitlimit:** Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird.                                                                                                               |
-| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global  | nein     | **Pool-Recycling:** Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. `-1` zum Deaktivieren.                                                                                      |
+| `DATABASE_POOL_TIMEOUT`           | `5s`                                      | global  | nein     | **Pool-Zeitlimit:** Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                  |
+| `DATABASE_POOL_RECYCLE`           | `30m`                                     | global  | nein     | **Pool-Recycling:** Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. `-1` zum Deaktivieren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global  | nein     | **Pool-Pre-Ping:** Ob Verbindungen bei jeder Entnahme aus dem Pool auf Erreichbarkeit getestet werden.                                                                                                         |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global  | nein     | **Pool-Reset bei Rückgabe:** Wie Verbindungen bei der Rückgabe in den Pool zurückgesetzt werden. Leer = automatisch (`none` für MySQL/MariaDB, `rollback` für andere). Optionen: `rollback`, `commit`, `none`. |
-| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global  | nein     | **Wiederholungs-Zeitlimit:** Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start.                                                                                                |
+| `DATABASE_RETRY_TIMEOUT`          | `1m`                                      | global  | nein     | **Wiederholungs-Zeitlimit:** Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.   |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global  | nein     | **Wiederholungsversuche:** Die Anzahl der Wiederholungsversuche bei vorübergehenden Datenbankfehlern.                                                                                                          |
-| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global  | nein     | **Wiederholungsverzögerung:** Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern.                                                                                |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `250ms`                                   | global  | nein     | **Wiederholungsverzögerung:** Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 
-!!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
+!!! tip "Auswahl der Datenbank"
+    - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur.
+    - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit.
+    - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten.
+    - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
 
 !!! info "SQLAlchemy-URI-Format"
     Die Datenbank-URI folgt dem SQLAlchemy-Format:
@@ -2120,10 +2394,10 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 !!! warning "Datenbankwartung"
     Das Plugin führt automatisch tägliche Wartungsjobs aus:
 
-- **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
-- **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
+    - **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
+    - **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
 
-Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
+    Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
 
 ## DNSBL
 
@@ -2159,10 +2433,15 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
 
 **Ausnahmelisten**
 
-| Einstellung            | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                            |
-| ---------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``       | multisite | ja       | Durch Leerzeichen getrennte IPs/CIDRs, für die DNSBL-Prüfungen übersprungen werden sollen (Whitelist).                  |
-| `DNSBL_IGNORE_IP_URLS` | ``       | multisite | ja       | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`. |
+| Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                |
+| --------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`           | ``       | multisite | ja       | Durch Leerzeichen getrennte IPs/CIDRs, für die DNSBL-Prüfungen übersprungen werden sollen (Whitelist).                                                      |
+| `DNSBL_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die DNSBL-Prüfungen zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+| `DNSBL_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                         |
+| `DNSBL_IGNORE_IP_URLS`      | ``       | multisite | ja       | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`.                                     |
+
+!!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+    Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! tip "Auswahl von DNSBL-Servern"
     Wählen Sie seriöse DNSBL-Anbieter, um Falschmeldungen zu minimieren. Die Standardliste enthält etablierte Dienste, die für die meisten Websites geeignet sind:
@@ -2241,6 +2520,10 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#easy-resolve-pro).
+
 STREAM-Unterstützung :x:
 
 Provides a simpler way to fix false positives in reports.
@@ -2249,21 +2532,21 @@ Provides a simpler way to fix false positives in reports.
 
 STREAM-Unterstützung :x:
 
-Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Erscheinungsbild der Fehlerantworten für Ihre Benutzer zu definieren. So können Sie klare and konsistente Fehlerseiten anzeigen, die Ihrer Identität entsprechen, anstatt der technischen Standardseiten des Servers.
+Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Erscheinungsbild der Fehlerantworten für Ihre Benutzer zu definieren. So können Sie klare und konsistente Fehlerseiten anzeigen, die Ihrer Identität entsprechen, anstatt der technischen Standardseiten des Servers.
 
 **So funktioniert's:**
 
 1.  Wenn ein HTTP-Fehler auftritt (z.B. 400, 404, 500), fängt BunkerWeb die Antwort ab.
-2.  Anstelle der Standardseite zeigt BunkerWeb eine angepasste and sorgfältig gestaltete Seite an.
+2.  Anstelle der Standardseite zeigt BunkerWeb eine angepasste und sorgfältig gestaltete Seite an.
 3.  Die Fehlerseiten sind konfigurierbar: Sie können für jeden Fehlercode eine HTML-Datei bereitstellen. Die Dateien müssen in dem durch `ROOT_FOLDER` definierten Verzeichnis abgelegt werden (siehe Misc-Plugin).
     - Standardmäßig ist `ROOT_FOLDER` auf `/var/www/html/{server_name}` gesetzt.
     - Im Multisite-Modus hat jede Site ihren eigenen `ROOT_FOLDER`; platzieren Sie die Fehlerseiten im entsprechenden Ordner für jede Site.
-4.  Die Standardseiten erklären das Problem klar and schlagen mögliche Maßnahmen vor.
+4.  Die Standardseiten erklären das Problem klar und schlagen mögliche Maßnahmen vor.
 
 ### Verwendung
 
 1.  **Benutzerdefinierte Seiten definieren:** Verwenden Sie `ERRORS`, um HTTP-Codes mit HTML-Dateien (im `ROOT_FOLDER`) zu verknüpfen.
-2.  **Ihre Seiten konfigurieren:** Verwenden Sie die Standardseiten von BunkerWeb oder Ihre eigenen Dateien.
+2.  **Ihre Seiten konfigurieren:** Verwenden Sie die Standardseiten von BunkerWeb oder Ihre eigenen Dateien (im passenden `ROOT_FOLDER`).
 3.  **Abgefangene Codes definieren:** Wählen Sie mit `INTERCEPTED_ERROR_CODES` die Codes aus, die immer von BunkerWeb verwaltet werden sollen.
 4.  **Lassen Sie BunkerWeb den Rest erledigen:** Die Fehlerverwaltung wird automatisch angewendet.
 
@@ -2275,12 +2558,18 @@ Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Ers
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | Multisite | Nein     | Abgefangene Codes: Liste der Codes, die mit der Standardseite verwaltet werden, wenn keine benutzerdefinierte Seite definiert ist. |
 
 !!! tip "Seiten-Design"
-    Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursachen, vorgeschlagene Maßnahmen and visuelle Anhaltspunkte.
+    Die Standard-Fehlerseiten von BunkerWeb sind informativ, benutzerfreundlich und professionell gestaltet. Sie enthalten:
+
+    - Klare Fehlerbeschreibungen
+    - Informationen zu möglichen Ursachen des Fehlers
+    - Vorgeschlagene Maßnahmen zur Behebung des Problems
+    - Visuelle Hinweise, die erkennen lassen, ob das Problem client- oder serverseitig ist
 
 !!! info "Fehlertypen"
+    Fehlercodes werden nach Typ kategorisiert:
 
-- 4xx (Client-seitig): Ungültige Anfragen, nicht existierende Ressource, fehlende Authentifizierung…
-- 5xx (Server-seitig): Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).
+    - **4xx-Fehler (Client-seitig):** Ungültige Anfragen, nicht existierende Ressource, fehlende Authentifizierung…
+    - **5xx-Fehler (Server-seitig):** Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).
 
 ### Beispiele
 
@@ -2361,6 +2650,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_RDNS_GLOBAL` | `yes`    | multisite | nein     | **Nur globales rDNS:** Führt rDNS-Greylist-Prüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                                    |
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS`-Suffixe werden forward-bestätigt: Der übereinstimmende PTR-Hostname wird zu einer IP zurückaufgelöst, und die Greylist-Freigabe gilt nur, wenn dieser mit der Client-IP übereinstimmt. Ein PTR, der nicht forward-bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und der Zugriff wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein auf die Greylist gesetztes Suffix setzt, um Zugriff zu erlangen.
+
 === "ASN"
     **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
@@ -2384,6 +2676,20 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |          | multisite | nein     | **URI-Greylist:** Liste von URI-Mustern (PCRE-Regex), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.            |
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
+
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+=== "Header"
+    **Was dies bewirkt:** Setzt Anfragen mit einem bestimmten Request-Header auf die Greylist, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert.
+
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Greylist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `GREYLIST_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                     |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -2495,28 +2801,57 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
 
 ### Konfigurationseinstellungen
 
-| Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |
-| ---------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                |
-| `GRPC_HOST`                  |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).            |
-| `GRPC_URL`                   | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird.                                 |
-| `GRPC_CUSTOM_HOST`           |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                   |
-| `GRPC_HEADERS`               |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.              |
-| `GRPC_HIDE_HEADERS`          |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.             |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                   |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                  |
-| `GRPC_READ_TIMEOUT`          | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                 |
-| `GRPC_SEND_TIMEOUT`          | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                             |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                           |
-| `GRPC_SSL_SNI`               | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                             |
-| `GRPC_SSL_SNI_NAME`          |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                               |
-| `GRPC_NEXT_UPSTREAM`         |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                         |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                     |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                      |
-| `GRPC_INCLUDES`              |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks. |
+| Einstellung                             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                           |
+| --------------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_GRPC`                              | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                                                                 |
+| `GRPC_HOST`                             |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).                                                             |
+| `GRPC_URL`                              | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird.                                                                                  |
+| `GRPC_CUSTOM_HOST`                      |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                                                                    |
+| `GRPC_HEADERS`                          |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.                                                               |
+| `GRPC_HIDE_HEADERS`                     |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.                                                              |
+| `GRPC_HEADERS_CLIENT`                   |          | multisite | ja       | **Antwort-Header für Clients:** Semikolon-getrennte Liste von `add_header`-Werten, die an den Client gesendet werden.                                  |
+| `GRPC_PASS_HEADERS`                     |          | multisite | ja       | **Durchgereichte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_pass_header`-Werten, um standardmäßig verborgene Header weiterzugeben.        |
+| `GRPC_IGNORE_HEADERS`                   |          | multisite | ja       | **Ignorierte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_ignore_headers`-Werten, damit NGINX sie nicht verarbeitet.                        |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`     | multisite | nein     | **Unterstriche in Headern:** Aktiviert/deaktiviert `underscores_in_headers`.                                                                           |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                                                                    |
+| `GRPC_BUFFER_SIZE`                      |          | multisite | ja       | **Puffergröße:** Wert für `grpc_buffer_size` (Puffer zum Lesen der Upstream-Antwort).                                                                  |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                                                                   |
+| `GRPC_READ_TIMEOUT`                     | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                                                                  |
+| `GRPC_SEND_TIMEOUT`                     | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                                                                              |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                                                                            |
+| `GRPC_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                                                                              |
+| `GRPC_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                                                                                |
+| `GRPC_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL-Prüfung:** Aktiviert/deaktiviert die Prüfung des gRPC-Upstream-Zertifikats.                                                                      |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle des CA-Bundles, `file` oder `data`.                                                           |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen Zertifikats:** Pfad zu einem PEM-CA-Bundle, das der Scheduler lesen kann (Priorität `file`).                             |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen Zertifikats:** CA-Bundle als base64 oder Klartext-PEM (Priorität `data`).                                               |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL-Prüftiefe:** Prüftiefe in der Upstream-Zertifikatskette.                                                                                         |
+| `GRPC_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                         |
+| `GRPC_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                      |
+| `GRPC_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                   |
+| `GRPC_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.           |
+| `GRPC_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                            |
+| `GRPC_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                             |
+| `GRPC_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                |
+| `GRPC_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                |
+| `GRPC_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                   |
+| `GRPC_NEXT_UPSTREAM`                    |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                                                                          |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                                                                      |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                                                                       |
+| `GRPC_AUTH_REQUEST`                     |          | multisite | ja       | **Auth Request:** Wert für `auth_request`, um über einen externen Anbieter zu authentifizieren.                                                        |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |          | multisite | ja       | **Auth-Request-Anmelde-URL:** Weiterleitungsziel, wenn der Auth-Request 401 zurückgibt.                                                                |
+| `GRPC_AUTH_REQUEST_SET`                 |          | multisite | ja       | **Auth Request Set:** Semikolon-getrennte Liste von `auth_request_set`-Werten.                                                                         |
+| `GRPC_INCLUDES`                         |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks.                                                  |
+| `GRPC_MAX_CLIENT_SIZE`                  |          | multisite | ja       | **Maximale Body-Größe:** Wert für `client_max_body_size` in diesem Location-Block (`0` für unbegrenzt). Ohne Wert gilt `MAX_CLIENT_SIZE` des Dienstes. |
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! warning "ModSecurity in gRPC-Location-Blöcken"
     ModSecurity wird aktuell in den von diesem Plugin generierten gRPC-`location`-Blöcken automatisch deaktiviert, da ModSecurity gRPC-Verkehrsmuster nicht zuverlässig unterstützt.
+
+!!! tip "Upstream-Zertifikat prüfen"
+    `GRPC_SSL_VERIFY` wirkt erst, wenn ein CA-Bundle verfügbar ist. Stellen Sie es über `GRPC_SSL_TRUSTED_CERTIFICATE` (ein für den Scheduler lesbarer Pfad) oder `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 oder Klartext-PEM) bereit und wählen Sie die Quelle mit `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Der Scheduler prüft das Bundle, legt es im Cache ab und verteilt es an die Instanzen. Ohne nutzbares Bundle bleibt die Prüfung deaktiviert.
 
 !!! warning "Lang laufende Streams und Core-Timeouts"
     Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT` in den Einstellungen des General-Plugins angepasst.
@@ -2577,6 +2912,30 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
 
+=== "Geprüftes TLS-Upstream"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpcs://internal-grpc.example.net:443"
+    GRPC_URL: "/"
+    GRPC_SSL_SNI: "yes"
+    GRPC_SSL_SNI_NAME: "internal-grpc.example.net"
+    GRPC_SSL_VERIFY: "yes"
+    GRPC_SSL_TRUSTED_CERTIFICATE: "/etc/ssl/certs/ca-certificates.crt"
+    GRPC_SSL_VERIFY_DEPTH: "2"
+    ```
+
+=== "Externe Authentifizierung"
+
+    ```yaml
+    USE_GRPC: "yes"
+    GRPC_HOST: "grpc://grpcbin:9000"
+    GRPC_URL: "/"
+    GRPC_AUTH_REQUEST: "/auth"
+    GRPC_AUTH_REQUEST_SIGNIN_URL: "https://sso.example.com/login"
+    GRPC_AUTH_REQUEST_SET: "$auth_user $upstream_http_x_user;$auth_email $upstream_http_x_email"
+    GRPC_HEADERS: "x-forwarded-user $auth_user"
+    ```
 ## Gzip
 
 STREAM-Unterstützung :x:
@@ -2589,10 +2948,11 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 2. Falls ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.
 3. Die Header zeigen die Verwendung von GZIP an.
 4. Der Browser dekomprimiert vor der Anzeige.
+5. Bandbreite und Ladezeiten werden reduziert, wodurch sich die Gesamtleistung der Website verbessert.
 
 ### Verwendung
 
-1. Aktivieren: `USE_GZIP: yes` (standardmäßig deaktiviert).
+1. Aktivieren: Setzen Sie den Parameter `USE_GZIP` auf `yes` (standardmäßig deaktiviert).
 2. MIME-Typen: `GZIP_TYPES` definieren.
 3. Mindestgröße: `GZIP_MIN_LENGTH`, um sehr kleine Dateien zu vermeiden.
 4. Kompressionsstufe: `GZIP_COMP_LEVEL` (1–9).
@@ -2610,6 +2970,12 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 
 !!! tip "Kompressionsstufe"
     `5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
+
+!!! info "Browser-Unterstützung"
+    GZIP wird von allen modernen Browsern unterstützt und ist seit vielen Jahren die Standardmethode für die Komprimierung von HTTP-Antworten, was eine sehr gute Kompatibilität über Geräte und Browser hinweg sicherstellt.
+
+!!! warning "Komprimierung vs. CPU-Nutzung"
+    GZIP-Komprimierung reduziert Bandbreite und Ladezeiten, höhere Komprimierungsstufen verbrauchen jedoch mehr CPU-Ressourcen. Für stark frequentierte Websites sollten Sie das richtige Gleichgewicht zwischen Komprimierungseffizienz und Serverleistung finden.
 
 ### Beispiele
 
@@ -2656,7 +3022,7 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 
 STREAM-Unterstützung :x:
 
-HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/de/docs/Web/HTTP/CSP) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
+HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
 
 **Wie es funktioniert**
 
@@ -2676,7 +3042,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
 3.  **Unerwünschte Header entfernen:** Verwenden Sie `REMOVE_HEADERS`, um sicherzustellen, dass Header, die Serverdetails preisgeben könnten, entfernt werden.
 4.  **Cookie-Sicherheit einstellen:** Aktivieren Sie eine robuste Cookie-Sicherheit, indem Sie `COOKIE_FLAGS` konfigurieren und `COOKIE_AUTO_SECURE_FLAG` auf `yes` setzen, damit das Secure-Flag bei HTTPS-Verbindungen automatisch hinzugefügt wird.
 5.  **Upstream-Header beibehalten:** Geben Sie mit `KEEP_UPSTREAM_HEADERS` an, welche Upstream-Header beibehalten werden sollen.
-6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
+6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
 ### Konfigurationsleitfaden
 
@@ -2692,22 +3058,24 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
         - **X-Frame-Options:** Blockiert Clickjacking-Versuche durch die Kontrolle der Iframe-Einbettung.
         - **Referrer Policy:** Begrenzt das Durchsickern sensibler Informationen über Referrer-Header.
 
-    | Einstellung                           | Standard                                                                                            | Kontext   | Mehrfach | Beschreibung                                                                                                                                                    |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | nein     | **HSTS:** Erzwingt sichere HTTPS-Verbindungen und verringert das Risiko von Man-in-the-Middle-Angriffen.                                                        |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | nein     | **CSP:** Beschränkt das Laden von Ressourcen auf vertrauenswürdige Quellen und mindert Cross-Site-Scripting- und Dateninjektionsangriffe.                       |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | nein     | **CSP-Berichtsmodus:** Meldet Verstöße, ohne Inhalte zu blockieren, und hilft beim Testen von Sicherheitsrichtlinien, während Protokolle erfasst werden.        |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | nein     | **X-Frame-Options:** Verhindert Clickjacking, indem es steuert, ob Ihre Website in einem Frame dargestellt werden kann.                                         |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | nein     | **X-Content-Type-Options:** Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen.                                   |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | nein     | **X-DNS-Prefetch-Control:** Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern.                |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | nein     | **Referrer Policy:** Steuert die Menge der gesendeten Referrer-Informationen und schützt die Privatsphäre der Benutzer.                                         |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | nein     | **Header beibehalten:** Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält. |
+    | Einstellung                           | Standard                                                                                              | Kontext   | Mehrfach | Beschreibung                                                                                                                                                    |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | nein     | **HSTS:** Erzwingt sichere HTTPS-Verbindungen und verringert das Risiko von Man-in-the-Middle-Angriffen.                                                        |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | nein     | **CSP:** Beschränkt das Laden von Ressourcen auf vertrauenswürdige Quellen und mindert Cross-Site-Scripting- und Dateninjektionsangriffe.                       |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | nein     | **CSP-Berichtsmodus:** Meldet Verstöße, ohne Inhalte zu blockieren, und hilft beim Testen von Sicherheitsrichtlinien, während Protokolle erfasst werden.        |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | nein     | **X-Frame-Options:** Verhindert Clickjacking, indem es steuert, ob Ihre Website in einem Frame dargestellt werden kann.                                         |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | nein     | **X-Content-Type-Options:** Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen.                                   |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | nein     | **X-DNS-Prefetch-Control:** Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern.                |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | nein     | **Referrer Policy:** Steuert die Menge der gesendeten Referrer-Informationen und schützt die Privatsphäre der Benutzer.                                         |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | nein     | **Header beibehalten:** Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält. |
 
     !!! tip "Bewährte Praktiken"
         - Überprüfen und aktualisieren Sie Ihre Sicherheits-Header regelmäßig, um sie an die sich entwickelnden Sicherheitsstandards anzupassen.
         - Verwenden Sie Tools wie das [Mozilla Observatory](https://observatory.mozilla.org/), um Ihre Header-Konfiguration zu validieren.
         - Testen Sie CSP im `Report-Only`-Modus, bevor Sie es erzwingen, um zu vermeiden, dass die Funktionalität beeinträchtigt wird.
+        - Im `Report-Only`-Modus wird ein vom Upstream gesendeter `Content-Security-Policy`- oder `Content-Security-Policy-Report-Only`-Header standardmäßig beibehalten (`KEEP_UPSTREAM_HEADERS`); entfernen Sie den Header-Namen aus dieser Einstellung, damit die eigene Richtlinie von BunkerWeb Vorrang hat.
+        - Die standardmäßige `PERMISSIONS_POLICY` blockiert auch Client Hints (`ch-*`-Direktiven); wenn ein Dienst auf `Accept-CH` angewiesen ist (zum Beispiel Client-Hint-basierte responsive Bilder oder die Dunkelmodus-Erkennung über `Sec-CH-Prefers-Color-Scheme`), passen Sie `PERMISSIONS_POLICY` an, um die benötigten `ch-*`-Funktionen wieder zuzulassen (zum Beispiel `ch-dpr=(self)`).
 
 === "Cookie-Einstellungen"
 
@@ -2829,9 +3197,17 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
 | `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
 | `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
 
-!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
+!!! tip "Bewährte Praktiken"
+    - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.
+    - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden.
+    - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
 
-!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
+!!! info "Häufige Anwendungsfälle"
+    - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo)
+    - Integration von Chat-Widgets oder Kundensupport-Tools
+    - Einbinden von Tracking-Pixeln für Marketingkampagnen
+    - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen
+    - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
 
 ### Beispielkonfigurationen
 
@@ -2870,6 +3246,57 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
     INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
     INJECT_BODY: "<div id=\"cookie-banner\" class=\"cookie-banner\">Diese Website verwendet Cookies, um sicherzustellen, dass Sie das beste Erlebnis erhalten. <button onclick=\"acceptCookies()\">Akzeptieren</button></div><script>function acceptCookies() { document.getElementById('cookie-banner').style.display = 'none'; localStorage.setItem('cookies-accepted', 'true'); } if(localStorage.getItem('cookies-accepted') === 'true') { document.getElementById('cookie-banner').style.display = 'none'; }</script>"
     ```
+
+## LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#ldap-sso-pro).
+
+STREAM-Unterstützung :x:
+
+LDAP-based single sign-on plugin with session-backed authentication.
+
+| Einstellung                       | Standardwert                                                                                                            | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_LDAP`                        | `no`                                                                                                                    | multisite | nein     | Enable or disable LDAP SSO authentication.                                                                                                                                                                 |
+| `LDAP_HOST`                       |                                                                                                                         | multisite | nein     | LDAP server hostname or IP address.                                                                                                                                                                        |
+| `LDAP_PORT`                       | `389`                                                                                                                   | multisite | nein     | LDAP server port (389 for LDAP/STARTTLS, 636 for LDAPS).                                                                                                                                                   |
+| `LDAP_LDAPS`                      | `no`                                                                                                                    | multisite | nein     | Use LDAPS (TLS from connection start).                                                                                                                                                                     |
+| `LDAP_STARTTLS`                   | `no`                                                                                                                    | multisite | nein     | Use STARTTLS upgrade on LDAP connection.                                                                                                                                                                   |
+| `LDAP_SSL_VERIFY`                 | `yes`                                                                                                                   | multisite | nein     | Verify server TLS certificate.                                                                                                                                                                             |
+| `LDAP_TIMEOUT`                    | `10000`                                                                                                                 | multisite | nein     | LDAP socket timeout in milliseconds.                                                                                                                                                                       |
+| `LDAP_KEEPALIVE_TIMEOUT`          | `60000`                                                                                                                 | multisite | nein     | LDAP keepalive timeout in milliseconds.                                                                                                                                                                    |
+| `LDAP_KEEPALIVE_POOL_SIZE`        | `10`                                                                                                                    | multisite | nein     | LDAP keepalive connection pool size.                                                                                                                                                                       |
+| `LDAP_KEEPALIVE_POOL_NAME`        |                                                                                                                         | multisite | nein     | Optional custom LDAP keepalive pool name.                                                                                                                                                                  |
+| `LDAP_BIND_DN`                    |                                                                                                                         | multisite | nein     | Optional service account DN used to perform LDAP user searches.                                                                                                                                            |
+| `LDAP_BIND_PASSWORD`              |                                                                                                                         | multisite | nein     | Password for LDAP Bind DN service account.                                                                                                                                                                 |
+| `LDAP_USER_SEARCH_BASE_DN`        |                                                                                                                         | multisite | nein     | Base DN for user discovery search (enables enterprise search mode when set).                                                                                                                               |
+| `LDAP_USER_SEARCH_FILTER`         | `(&(objectClass=person)(\|(uid={username})(mail={username})(sAMAccountName={username})(userPrincipalName={username})))` | multisite | nein     | LDAP user search filter template. Use {username} placeholder.                                                                                                                                              |
+| `LDAP_AUTHZ_FILTER`               |                                                                                                                         | multisite | nein     | Optional extra LDAP authorization filter (AND-ed with user search filter).                                                                                                                                 |
+| `LDAP_USER_SEARCH_SCOPE`          | `subtree`                                                                                                               | multisite | nein     | LDAP search scope for user lookup.                                                                                                                                                                         |
+| `LDAP_USER_SEARCH_DEREF_ALIASES`  | `always`                                                                                                                | multisite | nein     | LDAP alias dereferencing mode during user lookup.                                                                                                                                                          |
+| `LDAP_USER_SEARCH_SIZE_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum number of LDAP entries returned by user search.                                                                                                                                                    |
+| `LDAP_USER_SEARCH_TIME_LIMIT`     | `10`                                                                                                                    | multisite | nein     | Maximum LDAP user search time in seconds.                                                                                                                                                                  |
+| `LDAP_USER_SEARCH_ATTRIBUTES`     | `dn`                                                                                                                    | multisite | nein     | Attributes requested during user search (space separated).                                                                                                                                                 |
+| `LDAP_USER_SEARCH_DN_FIELD`       | `object_name`                                                                                                           | multisite | nein     | Preferred field name in search response to extract user DN (e.g. object_name, dn).                                                                                                                         |
+| `LDAP_USER_SEARCH_REQUIRE_UNIQUE` | `yes`                                                                                                                   | multisite | nein     | Require exactly one search result before authenticating user.                                                                                                                                              |
+| `LDAP_USER_DN_TEMPLATE`           | `uid={username},ou=people,dc=example,dc=com`                                                                            | multisite | nein     | User DN template used for direct bind fallback. Must include {username} when set.                                                                                                                          |
+| `LDAP_USERNAME_REGEX`             | `^[A-Za-z0-9@._-]+$`                                                                                                    | multisite | nein     | PCRE regex used to validate submitted usernames.                                                                                                                                                           |
+| `LDAP_LOGIN_PATH`                 | `/ldap/login`                                                                                                           | multisite | nein     | Login page path exposed by the LDAP plugin.                                                                                                                                                                |
+| `LDAP_LOGOUT_PATH`                | `/ldap/logout`                                                                                                          | multisite | nein     | Logout path exposed by the LDAP plugin.                                                                                                                                                                    |
+| `LDAP_SESSION_TTL`                | `3600`                                                                                                                  | multisite | nein     | LDAP session validity duration in seconds.                                                                                                                                                                 |
+| `LDAP_REALM`                      | `LDAP SSO`                                                                                                              | multisite | nein     | Authentication realm displayed on LDAP login form.                                                                                                                                                         |
+| `LDAP_USER_HEADER`                | `X-User`                                                                                                                | multisite | nein     | Header to pass authenticated username to upstream (empty to disable).                                                                                                                                      |
+| `LDAP_EMAIL_HEADER`               | `X-Email`                                                                                                               | multisite | nein     | Header to pass the user email to upstream (empty to disable). Requires search mode and the email attribute returned by the directory.                                                                      |
+| `LDAP_EMAIL_ATTRIBUTE`            | `mail`                                                                                                                  | multisite | nein     | LDAP attribute used for the email header (e.g. mail).                                                                                                                                                      |
+| `LDAP_GROUPS_HEADER`              | `X-Groups`                                                                                                              | multisite | nein     | Header to pass the user groups to upstream (empty to disable). Requires search mode and the groups attribute returned by the directory.                                                                    |
+| `LDAP_GROUPS_ATTRIBUTE`           | `memberOf`                                                                                                              | multisite | nein     | LDAP attribute used for the groups header (e.g. memberOf).                                                                                                                                                 |
+| `LDAP_GROUPS_VALUE`               | `cn`                                                                                                                    | multisite | nein     | How to serialize group values: 'cn' forwards only the first RDN value (group name, recommended with a comma separator), 'dn' forwards full group DNs (use a non-comma separator since DNs contain commas). |
+| `LDAP_GROUPS_SEPARATOR`           | `,`                                                                                                                     | multisite | nein     | Separator used to join multiple group values in the groups header.                                                                                                                                         |
+| `LDAP_NAME_HEADER`                | `X-Name`                                                                                                                | multisite | nein     | Header to pass the user display name to upstream (empty to disable). Requires search mode and the display name attribute returned by the directory.                                                        |
+| `LDAP_NAME_ATTRIBUTE`             | `displayName`                                                                                                           | multisite | nein     | LDAP attribute used for the display name header (e.g. displayName, cn).                                                                                                                                    |
+| `LDAP_REDIRECT_AFTER_LOGIN`       | `/`                                                                                                                     | multisite | nein     | Fallback relative path after successful login when no redirect target is provided.                                                                                                                         |
+| `LDAP_REDIRECT_AFTER_LOGOUT`      | `/`                                                                                                                     | multisite | nein     | Relative path to redirect users to after logout.                                                                                                                                                           |
 
 ## Let's Encrypt
 
@@ -2918,18 +3345,18 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | Einstellung                                 | Standard      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------------------- | ------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | nein     | **Let's Encrypt aktivieren:** Auf `yes` setzen, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht.                                                                                                                                                                  |
+| `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | nein     | **Let's Encrypt durchleiten:** Auf `yes` setzen, um Let's Encrypt-Anfragen an den Webserver weiterzuleiten. Dies ist nützlich, wenn BunkerWeb vor einem anderen Reverse-Proxy mit SSL-Handling steht. Der ACME-Challenge-Pfad umgeht dann jede andere Prüfung.                                                                                                                                                                  |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | nein     | **Kontakt-E-Mail:** E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit `--register-unsafely-without-email`).                                                                                                             |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | nein     | **Zertifizierungsstelle:** Wählen Sie den ACME-Server für die Ausstellung. Optionen: `letsencrypt` oder `zerossl`.                                                                                                                                                                                                                                                     |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | nein     | **ZeroSSL-API-Schlüssel:** Optionaler Schlüssel, der von `zerossl-bot` verwendet wird, wenn `LETS_ENCRYPT_SERVER=zerossl` gesetzt ist. Wenn leer, wird `EMAIL_LETS_ENCRYPT` verwendet, um EAB-Zugangsdaten abzurufen.                                                                                                                                                  |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | nein     | **ZeroSSL-API-Wiederholungen:** Anzahl der Wiederholungen für ZeroSSL-API-Anfragen durch `zerossl-bot` (`0` deaktiviert Wiederholungen).                                                                                                                                                                                                                               |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | nein     | **ZeroSSL-API-Wiederholungsverzögerung:** Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in `zerossl-bot`.                                                                                                                                                                                                                                                |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | nein     | **ZeroSSL-API-Verbindungs-Timeout:** Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in `zerossl-bot`.                                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | nein     | **ZeroSSL-API-Maximalzeit:** Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in `zerossl-bot`.                                                                                                                                                                                                                                                            |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | nein     | **ZeroSSL-API-Wiederholungsverzögerung:** Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                   |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | nein     | **ZeroSSL-API-Verbindungs-Timeout:** Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                            |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | nein     | **ZeroSSL-API-Maximalzeit:** Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                               |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | nein     | **Challenge-Typ:** Methode zur Überprüfung des Domainbesitzes. Optionen: `http` oder `dns`.                                                                                                                                                                                                                                                                            |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | nein     | **DNS-Anbieter:** Bei Verwendung von DNS-Challenges der zu verwendende DNS-Anbieter (z.B. cloudflare, route53, digitalocean).                                                                                                                                                                                                                                          |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet.                                                                                                                                                                                                     |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | ja       | **Anmeldeinformationselement:** Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. `cloudflare_api_token 123456`). Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.                                                                                                                                                              |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                        |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | ja       | **Anmeldeinformationselement:** Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. `cloudflare_api_token 123456`). Schreiben Sie den Schlüssel, ein Leerzeichen und dann den Wert, und setzen Sie den Schlüssel nicht in Anführungszeichen. Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.                                     |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | nein     | **DNS-Anmeldeinformationen Base64 dekodieren:** Dekodiert automatisch base64-kodierte DNS-Anbieter-Anmeldeinformationen, wenn auf `yes` gesetzt. Wenn aktiviert, werden Werte, die dem Base64-Format entsprechen, vor der Verwendung dekodiert (außer beim `rfc2136`-Anbieter). Deaktivieren Sie dies, wenn Ihre Anmeldeinformationen absichtlich Base64-codiert sind. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | nein     | **Wildcard-Zertifikate:** Wenn auf `yes` gesetzt, werden Wildcard-Zertifikate für alle Domains erstellt. Nur mit DNS-Challenges verfügbar.                                                                                                                                                                                                                             |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | nein     | **Staging verwenden:** Wenn auf `yes` gesetzt, wird die Staging-Umgebung von Let's Encrypt zum Testen verwendet. Staging hat höhere Ratenbegrenzungen, aber die Zertifikate sind nicht vertrauenswürdig.                                                                                                                                                               |
@@ -2937,13 +3364,15 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
-| `LETS_ENCRYPT_MAX_RETRIES`                  | `3`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
+| `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
+| `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | nein     | **Maximale Certbot-Log-Backups:** Anzahl rotierter `letsencrypt.log`-Backups, die Certbot pro Job behält. Certbots eigener Standardwert von 1000 sammelt sich schnell an; `50` ist ein sinnvoller Grenzwert. Setzen Sie `0`, um nur das aktuelle Log zu behalten.                                                                                                      |
 
 !!! info "Informationen und Verhalten"
+    - Die lokale Verarbeitung von `/.well-known/acme-challenge/` ist nur aktiv, wenn `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` und `LETS_ENCRYPT_PASSTHROUGH=no` gesetzt sind. Die Ausnahmen für HTTPS-Weiterleitung und Zugriff setzen zusätzlich voraus, dass genau das angeforderte Token als lesbare, nicht leere Datei existiert. Nach dem Löschen des Tokens gelten sofort wieder die normalen Prüfungen. Andere Dienste wenden ihre normalen Routing- und Zugriffsregeln auf diesen Pfad an.
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
     - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
     - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
-    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
+    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein `GET` oder `HEAD` eines einzelnen Tokens unter `/.well-known/acme-challenge/` wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen. Das Backend erhält außerdem den angefragten `Host`, auch wenn `REVERSE_PROXY_CUSTOM_HOST` auf einen festen Namen gesetzt ist, da die Challenge für diesen Namen validiert wird (ein Wert mit nginx-Variablen gilt weiterhin).
 
 !!! tip "HTTP- vs. DNS-Challenges"
     **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
@@ -2961,6 +3390,8 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 
 !!! warning "Wildcard-Zertifikate"
     Wildcard-Zertifikate sind nur mit DNS-Challenges verfügbar. Wenn Sie sie verwenden möchten, müssen Sie die Einstellung `USE_LETS_ENCRYPT_WILDCARD` auf `yes` setzen und Ihre DNS-Anbieter-Anmeldeinformationen korrekt konfigurieren.
+
+    Ein Wildcard-Zertifikat deckt nur eine Ebene ab: `*.example.com` gilt nicht für `a.b.example.com`. Gruppen, die nicht alle konfigurierten Hostnamen abdecken können, werden abgelehnt und der betroffene Dienst als fehlkonfiguriert gemeldet. Teilen Sie diese Namen auf separate Dienste auf. Gültige Gruppen werden weiterhin verarbeitet; kann kein Zertifikat ausgestellt werden, schlägt der Job fehl. Erfolgreich ausgestellte Zertifikate anderer Gruppen lösen weiterhin eine Neuladung aus.
 
 !!! warning "Ratenbegrenzungen"
     Let's Encrypt hat Ratenbegrenzungen für die Ausstellung von Zertifikaten. Verwenden Sie beim Testen von Konfigurationen die Staging-Umgebung, indem Sie `USE_LETS_ENCRYPT_STAGING` auf `yes` setzen, um zu vermeiden, dass Sie die Produktions-Ratenbegrenzungen erreichen. Staging-Zertifikate sind von Browsern nicht vertrauenswürdig, aber nützlich zur Validierung Ihrer Einrichtung.
@@ -2982,7 +3413,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
 | `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
-| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                                 | [Dokumentation](https://github.com/TheophileDiot/certbot-plugin-gandi)                                |
+| `gandi`           | Gandi            | `token`                                                                                                      | `sharing_id`                                                                                                                                                                                                                                                                 | [Dokumentation](https://github.com/bunkerity/certbot-plugin-gandi)                                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (Standard: `600`)                                                                                                                                                                                                                                                      | [Dokumentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (Standard: `service_account`)<br>`auth_uri` (Standard: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (Standard: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (Standard: `https://www.googleapis.com/oauth2/v1/certs`) | [Dokumentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -2995,6 +3426,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `nsone`           | NS1              | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                                  |
 | `ovh`             | OVH              | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (Standard: `ovh-eu`)                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                                    |
 | `pdns`            | PowerDNS         | `endpoint`<br>`api_key`<br>`server_id` (default: `localhost`)<br>`disable_notify` (default: `false`)         |                                                                                                                                                                                                                                                                              | [Documentation](https://github.com/kaechele/certbot-dns-pdns/blob/main/README.md)                     |
+| `porkbun`         | Porkbun          | `api_key`<br>`secret_api_key`                                                                                |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infinityofspace/certbot_dns_porkbun/blob/main/Readme.md)           |
 | `rfc2136`         | RFC 2136         | `server`<br>`name`<br>`secret`                                                                               | `port` (Standard: `53`)<br>`algorithm` (Standard: `HMAC-SHA512`)<br>`sign_query` (Standard: `false`)                                                                                                                                                                         | [Dokumentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                                |
 | `route53`         | Amazon Route 53  | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                                |
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
@@ -3089,19 +3521,22 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 - **Anzahl der Verbindungen pro IP-Adresse** (STREAM-Unterstützung :white_check_mark:)
 - **Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums** (STREAM-Unterstützung :x:)
+- **Aggregierte (globale) Anfragerate pro Dienst, über alle Clients und URLs hinweg** (STREAM-Unterstützung :x:)
 
 ### Wie es funktioniert
 
 1.  **Ratenbegrenzung:** Verfolgt die Anzahl der Anfragen von jeder Client-IP-Adresse an bestimmte URLs. Wenn ein Client die konfigurierte Ratenbegrenzung überschreitet, werden nachfolgende Anfragen vorübergehend abgelehnt.
-2.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
-3.  In beiden Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
+2.  **Globale Ratenbegrenzung:** Verfolgt die Gesamtzahl der Anfragen an einen Dienst unabhängig von Client-IP oder URL und schützt die Kapazität des Ursprungs-/Backend-Servers vor aggregierten Verkehrsspitzen. Dies ist unabhängig von der Begrenzung pro IP/URL und wird vor dieser ausgewertet.
+3.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
+4.  In allen Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
 
 ### Schritte zur Verwendung
 
 1.  **Anforderungsratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ`, um die Anforderungsratenbegrenzung zu aktivieren und URL-Muster zusammen mit ihren entsprechenden Ratenbegrenzungen zu definieren.
-2.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
-3.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
-4.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
+2.  **Globale Ratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ_GLOBAL`, um die gesamte aggregierte Anfragerate für einen Dienst zu begrenzen, unabhängig von Client-IP oder URL — nützlich, wenn der Schutz der Ursprungskapazität wichtiger ist als Fairness pro Client.
+3.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
+4.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
+5.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
 
 ### Konfigurationseinstellungen
 
@@ -3113,15 +3548,28 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
     | `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
     | `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
 
-!!! tip "Format der Ratenbegrenzung"
-    Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
 
-    - `N` die Anzahl der erlaubten Anfragen ist
-    - `r` ein literales 'r' ist (für 'requests')
-    - `/` ein literaler Schrägstrich ist
-    - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
+    !!! tip "Format der Ratenbegrenzung"
+        Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
-    Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+        - `N` die Anzahl der erlaubten Anfragen ist
+        - `r` ein literales 'r' ist (für 'requests')
+        - `/` ein literaler Schrägstrich ist
+        - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
+
+        Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+
+=== "Globale Ratenbegrenzung"
+
+    | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | nein     | **Globale Ratenbegrenzung aktivieren:** Auf `yes` setzen, um die gesamte aggregierte Anfragerate für den Dienst zu begrenzen (alle Clients, alle URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | nein     | **Globale Ratenbegrenzung:** Maximale aggregierte Anfragerate im Format `Nr/t`, gleiche Syntax wie `LIMIT_REQ_RATE`.                                    |
+
+    !!! tip "Wann globale Ratenbegrenzung verwenden"
+        Die Begrenzung pro IP/URL schützt vor einem einzelnen missbräuchlichen Client. Die globale Ratenbegrenzung schützt den Ursprungsserver selbst: Sie begrenzt den gesamten Durchsatz zu einem Dienst, unabhängig davon, wer anfragt. Verwenden Sie sie, wenn Ihr Backend eine bekannte Kapazitätsgrenze hat (z. B. einen Datenbank-Verbindungspool oder eine langsame Drittanbieter-API), die vor jeder Verkehrsspitze geschützt werden muss, ob legitim oder nicht. Sie wird vor den Regeln pro IP/URL geprüft und ist somit die erste Verteidigungslinie unter Last.
 
 === "Verbindungsbegrenzung"
 
@@ -3135,10 +3583,10 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 
-- **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
-- **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
+    - **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
+    - **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
 
-  Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
+    Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
 
 !!! warning "Festlegen angemessener Grenzwerte"
     Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.
@@ -3238,7 +3686,9 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 ## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
-<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#load-balancer-pro).
 
 STREAM-Unterstützung :x:
 
@@ -3265,6 +3715,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | ja       | Type of healthcheck (http or https).                               |
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | ja       | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | ja       | Host header for healthchecks (useful for HTTPS).                   |
+
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#maintenance-pro).
+
+STREAM-Unterstützung :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| Einstellung       | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                              |
+| ----------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`         | multisite | nein     | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
 
 ## Metrics
 
@@ -3359,25 +3822,32 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 
 ### Konfigurationseinstellungen
 
-| Einstellung                          | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
-| ------------------------------------ | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`    | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                     |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `16m`, `32m`).                                                        |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen.                             |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen.                         |
-| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern. |
+| Einstellung                          | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------ | --------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`     | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                                                                                                                                                                                                             |
+| `METRICS_MEMORY_SIZE`                | `16m`     | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `8192`, `16m`, `32m`).                                                                                                                                                                                                                                        |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`.                                                                                                                                                                            |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`.                                                                                                                                                                        |
+| `METRICS_REDIS_TTL`                  | `30d`     | global    | nein     | **Metrics-Redis-TTL:** Sekunden bis Redis-Metrik-Schlüssel ablaufen (`0` = dauerhaft); wird bei jeder Synchronisierung erneuert, sodass aktive Daten nie ablaufen, während verwaiste Daten unter `volatile-lru` evictable werden, damit sich Redis von Speicherdruck (maxmemory) erholt. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `MAX_LRU_HISTORY`                    | `1k`      | global    | nein     | **Max. LRU-Verlauf:** Anzahl der LRU-Slots pro Worker und Limit des Ereignisverlaufsarrays pro Schlüssel (Blockierungsverläufe, Authentifizierungsverläufe usw.). Akzeptiert die Kurzschreibweise `k`/`m`.                                                                                                                        |
+| `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern.                                                                                                                                                                                         |
 
 !!! tip "Dimensionierung der Speicherzuweisung"
-    Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
+    Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
+    Wenn BunkerWeb [Redis](#redis) verwendet, synchronisiert das Metrics-Plugin Berichte über blockierte Anfragen automatisch mit Redis. Bei Erreichen von `maxmemory` bleiben abgelehnte Berichte für einen erneuten Versuch im begrenzten Worker-Puffer. Ein voller Puffer, LRU-Verdrängung oder Redis-Datenverlust kann dennoch zum Verlust von Berichten führen. Unvollständige Filterzähler werden aus der gespeicherten Anfrageliste neu aufgebaut. Gespeicherte Berichte mit fehlerhaften Daten (unbrauchbarer Zeitstempel oder Bezeichner) werden aus der Berichtstabelle und deren Summen ausgeschlossen.
+
+    Zählerstände werden vor der Synchronisierung bei Bedarf aus Redis geladen, auch nach einer Verdrängung aus dem lokalen LRU-Cache. Inaktive Redis-Zähler bleiben bis zum Ablauf von `METRICS_REDIS_TTL` erhalten; `0` bewahrt sie absichtlich unbefristet auf. Überwachen Sie daher den Redis-Speicher bei Metriken mit vielen unterschiedlichen Schlüsseln.
 
 !!! warning "Leistungsüberlegungen"
     Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.
 
 !!! note "Worker-spezifischer Speicher"
     Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.
+
+!!! warning "Aufbewahrung der Berichte"
+    Berichte über blockierte Anfragen sind ein rollierender Puffer, kein Audit-Log. Sobald das Limit erreicht ist, werden die ältesten Berichte verworfen, um Platz für neue zu schaffen. Die in der Web-UI angezeigte Gesamtzahl bleibt deshalb konstant: ohne Redis liegt diese Obergrenze bei `METRICS_MAX_BLOCKED_REQUESTS` multipliziert mit der Anzahl der NGINX-Worker jeder Instanz, mit Redis bei `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Berichte liegen im Shared Memory und werden bei jedem Neustart von BunkerWeb gelöscht, auch bei Paket-Upgrades, sofern Redis nicht aktiviert und persistent ist. Leiten Sie die NGINX-Logs an einen Syslog-Server oder ein SIEM weiter, wenn Sie eine langfristige Aufbewahrung benötigen.
 
 ### Beispielkonfigurationen
 
@@ -3388,8 +3858,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -3402,6 +3873,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -3414,6 +3886,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -3427,6 +3900,8 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#migration-pro).
 
 STREAM-Unterstützung :white_check_mark:
 
@@ -3510,18 +3985,18 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
 
     Die Beschränkung der HTTP-Methoden auf nur diejenigen, die von Ihrer Anwendung benötigt werden, ist eine grundlegende Sicherheitsmaßnahme, die dem Prinzip der geringsten Rechte folgt. Indem Sie explizit zulässige HTTP-Methoden definieren, können Sie das Risiko der Ausnutzung durch ungenutzte oder gefährliche Methoden minimieren.
 
-    Diese Funktion wird mit der Einstellung `ALLOWED_METHODS` konfiguriert, wobei die Methoden aufgelistet und durch ein `|` getrennt sind (Standard: `GET|POST|HEAD`). Wenn ein Client versucht, eine nicht aufgelistete Methode zu verwenden, antwortet der Server mit einem **405 - Method Not Allowed**-Status.
+    Diese Funktion wird mit der Einstellung `ALLOWED_METHODS` konfiguriert, wobei die Methoden aufgelistet und durch ein `|` getrennt sind (Standard: `GET|POST|HEAD|QUERY`). Wenn ein Client versucht, eine nicht aufgelistete Methode zu verwenden, antwortet der Server mit einem **405 - Method Not Allowed**-Status.
 
-    Für die meisten Websites ist der Standardwert `GET|POST|HEAD` ausreichend. Wenn Ihre Anwendung RESTful-APIs verwendet, müssen Sie möglicherweise Methoden wie `PUT` und `DELETE` hinzufügen.
+    Für die meisten Websites ist der Standardwert `GET|POST|HEAD|QUERY` ausreichend. Wenn Ihre Anwendung RESTful-APIs verwendet, müssen Sie möglicherweise Methoden wie `PUT` und `DELETE` hinzufügen. Benutzerdefinierte Großbuchstaben-Methoden dürfen zudem Unterstriche und Bindestriche enthalten, um mit nicht standardisierten Protokollen kompatibel zu sein (z. B. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Sicherheitsvorteile"
         - Verhindert die Ausnutzung von ungenutzten oder unnötigen HTTP-Methoden
         - Reduziert die Angriffsfläche durch Deaktivierung potenziell schädlicher Methoden
         - Blockiert von Angreifern verwendete Techniken zur Aufzählung von HTTP-Methoden
 
-    | Einstellung       | Standard | Kontext | Mehrfach | Beschreibung |
-    | ----------------- | -------- | ------- | -------- | ------------ |
-    | `ALLOWED_METHODS` | `GET     | POST    | HEAD`    | multisite    | nein | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). |
+    | Einstellung       | Standard                 | Kontext   | Mehrfach | Beschreibung                                                                         |
+    | ----------------- | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------ |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | nein     | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). Benutzerdefinierte Großbuchstaben-Methoden dürfen Unterstriche und Bindestriche enthalten. |
 
     !!! abstract "CORS und Preflight-Anfragen"
         Wenn Ihre Anwendung [Cross-Origin Resource Sharing (CORS)](#cors) unterstützt, sollten Sie die `OPTIONS`-Methode in der `ALLOWED_METHODS`-Einstellung aufnehmen, um Preflight-Anfragen zu bearbeiten. Dies gewährleistet die ordnungsgemäße Funktionalität für Browser, die Cross-Origin-Anfragen stellen.
@@ -3543,9 +4018,10 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         - Verhindert Angriffe durch Datei-Uploads
         - Reduziert das Risiko der Erschöpfung von Serverressourcen
 
-    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-    | ----------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`    | multisite | nein     | **Maximale Anforderungsgröße:** Die maximal zulässige Größe für Client-Anforderungskörper (z. B. Datei-Uploads). |
+    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                          |
+    | ----------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`    | multisite | nein     | **Maximale Anforderungsgröße:** Die maximal zulässige Größe für Client-Anforderungskörper (z. B. Datei-Uploads).                                      |
+    | `MAX_HEADERS`     | `100`    | global    | nein     | **Maximale Header:** Maximale Anzahl an Header-Zeilen pro Anfrage. Anfragen, die dieses Limit überschreiten, werden mit `400 Bad Request` abgewiesen. |
 
     !!! tip "Best Practices für die Konfiguration der Anforderungsgröße"
         Wenn Sie einen Anforderungskörper von unbegrenzter Größe zulassen müssen, können Sie den Wert `MAX_CLIENT_SIZE` auf `0` setzen. Dies wird jedoch aufgrund potenzieller Sicherheits- und Leistungsrisiken **nicht empfohlen**.
@@ -3581,6 +4057,8 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         NGINX hat ab Version 1.25.0 experimentelle Unterstützung für HTTP/3 und QUIC eingeführt. Diese Funktion ist jedoch noch experimentell, und bei der Verwendung in der Produktion ist Vorsicht geboten. Weitere Einzelheiten finden Sie in der [offiziellen Dokumentation von NGINX](https://nginx.org/en/docs/quic.html).
 
         Gründliche Tests werden empfohlen, bevor HTTP/3 in Produktionsumgebungen aktiviert wird.
+
+        HTTP/3 wird stillschweigend deaktiviert, wenn `USE_PROXY_PROTOCOL` auf `yes` gesetzt ist. NGINX kann den PROXY-Protocol-Header auf einem QUIC-Listener nicht lesen, daher werden weder ein `quic`-Listener noch ein `Alt-Svc`-Header erzeugt, obwohl `HTTP3` weiterhin `yes` meldet, und `LIMIT_CONN_MAX_HTTP3` bleibt wirkungslos. Beenden Sie das PROXY-Protocol vorgelagert oder beschränken Sie sich auf HTTP/1.1 und HTTP/2.
 
 === "Bereitstellung statischer Dateien"
 
@@ -3765,30 +4243,36 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 
 ### Konfigurationseinstellungen
 
-| Einstellung                           | Standard       | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                    |
-| ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                               |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                            |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                   |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                          |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                           |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                   |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`). |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                 |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | nein     | **CRS-Plugin-Liste:** Leerzeichengetrennte Liste von Plugins zum Herunterladen und Installieren (`plugin-name[/tag]` oder URL).                                                 |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                        |
+| Einstellung                           | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein     | **Audit-Protokoll-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist. Der Pfad muss auf `.log` enden. Die Rotation über diese Endung gilt nur dort, wo logrotate installiert ist (die Linux-Pakete und das All-In-One-Image); bei Docker, Swarm und Kubernetes wird ein abweichender Name weder gestreamt noch rotiert und wächst unbegrenzt im Container, da nur `modsec_audit.log` in den Log-Stream des Containers verlinkt ist. |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`).                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | nein     | **CRS-Plugin-Liste:** Leerzeichengetrennte Liste von Plugins zum Herunterladen und Installieren (`plugin-name[/tag]` oder URL).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 !!! warning "ModSecurity und das OWASP Core Rule Set"
     **Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
 
     Das CRS-Team pflegt aktiv eine Liste von Ausschlüssen für beliebte Anwendungen wie WordPress, Nextcloud, Drupal und Cpanel, was die Integration erleichtert, ohne die Funktionalität zu beeinträchtigen. Die Sicherheitsvorteile überwiegen bei weitem den minimalen Konfigurationsaufwand, der zur Behebung von Falsch-Positiven erforderlich ist.
 
+!!! warning "Sicherheitsempfehlung für große Uploads"
+    ModSecurity puffert den vollständigen Anforderungskörper im Arbeitsspeicher und kann ihn bei Uploads mit mehreren GB nicht begrenzen, was zu einem OOM des Workers führen kann. Wenn — **und nur wenn** — eine Reverse-Proxy-URL *ausschließlich* für Datei-Uploads verwendet wird (z. B. ein dedizierter `/upload`-Endpunkt), setzen Sie `REVERSE_PROXY_MODSECURITY_N: "no"` für diese URL, um `modsecurity off;` in ihrem `location`-Block auszugeben. Deaktivieren Sie dies nicht für gemischt genutzte URLs: Sie würden die WAF-Abdeckung für alles verlieren, was von dieser Location bereitgestellt wird.
+
+    Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
+
 ### Verfügbare CRS-Versionen
 
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
-- **`3`**: Stabile [v3.3.8](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.8).
-- **`4`**: Stabile [v4.24.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.24.1) (**Standard**).
+- **`3`**: Stabile [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
+- **`4`**: Stabile [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**Standard**).
 
 !!! warning "Nightly-Build veraltet"
     Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.
@@ -3908,7 +4392,7 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Erweiterte Konfiguration mit Plugins"
@@ -3950,6 +4434,20 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
 !!! note "Menschenlesbare Größenwerte"
     Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
+
+### Concurrent-Auditprotokolle
+
+| Einstellung | Standard | Beschreibung |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
+
+Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` und `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Erstellen Sie das Verzeichnis vorher auf jeder BunkerWeb-Instanz mit Schreib- und Suchrechten für den nginx-Worker. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab und erstellt das Verzeichnis nicht. Im globalen CRS-Modus (`USE_MODSECURITY_GLOBAL_CRS=yes`) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.
+
+`MODSECURITY_SEC_AUDIT_LOG` bleibt eine normale, sperrbare `.log`-Datei: Bei `Serial` enthält sie vollständige Datensätze, bei `Concurrent` einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.
+
+Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit `MODSECURITY_SEC_AUDIT_LOG_PARTS` ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.
+
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
@@ -3965,7 +4463,7 @@ BunkerWeb monitoring pro system. This plugin is a prerequisite for some other pl
 
 ## Mutual TLS
 
-STREAM-Unterstützung :white_check_mark:
+STREAM-Unterstützung :warning:
 
 Das Mutual-TLS-Plugin (mTLS) schützt sensible Anwendungen, indem nur Clients mit Zertifikaten akzeptiert werden, die von Ihren vertrauenswürdigen Zertifizierungsstellen ausgestellt wurden. Mit aktivem Plugin authentifiziert BunkerWeb jede Anfrage bereits an der Perimeter-Grenze und hält interne Tools sowie Partner-Integrationen abgeschirmt.
 
@@ -3990,31 +4488,58 @@ BunkerWeb bewertet jeden TLS-Handshake anhand des von Ihnen bereitgestellten CA-
 Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 1. **Funktion aktivieren:** Setzen Sie `USE_MTLS` auf `yes` für die Site, die Zertifikatsauthentifizierung benötigt.
-2. **CA-Bundle bereitstellen:** Legen Sie Ihre vertrauenswürdigen Aussteller in einer PEM-Datei ab und verweisen Sie mit `MTLS_CA_CERTIFICATE` auf den absoluten Pfad.
+2. **CA-Bundle bereitstellen:** Verweisen Sie mit `MTLS_CA_CERTIFICATE` auf eine PEM-Datei, die für den Scheduler lesbar ist, oder übergeben Sie das Bundle direkt als base64/PEM-Daten mit `MTLS_CA_CERTIFICATE_DATA`. Der Scheduler validiert, cached und verteilt das Bundle an jede Instanz, sodass keine Einbindung pro Instanz nötig ist.
 3. **Verifizierungsmodus wählen:** Nutzen Sie `on` für verpflichtende Zertifikate, `optional` für fallback-fähige Szenarien oder `optional_no_ca` kurzfristig zur Diagnose.
 4. **Kettentiefe anpassen:** Erhöhen oder verringern Sie `MTLS_VERIFY_DEPTH`, falls Ihre PKI mehrere Zwischenstellen nutzt.
 5. **Ergebnisse weiterreichen (optional):** Belassen Sie `MTLS_FORWARD_CLIENT_HEADERS` auf `yes`, wenn nachgelagerte Anwendungen Zertifikatsinformationen benötigen.
-6. **Revokationslisten pflegen:** Verknüpfen Sie `MTLS_CRL`, sobald Sie eine CRL publizieren, damit BunkerWeb widerrufene Zertifikate ablehnt.
+6. **Revokationslisten pflegen:** Setzen Sie `MTLS_CRL` (oder `MTLS_CRL_DATA`), sobald Sie eine CRL publizieren, damit BunkerWeb widerrufene Zertifikate ablehnt.
+
+Der Scheduler prüft das vollständige neue CA-Bundle sowie jede CRL, bevor eine der Cache-Dateien ersetzt wird. Eine CRL wird abgelehnt, wenn sie nicht gelesen werden kann oder wenn ihr Aussteller Teil des Bundles ist und die Signatur nicht dagegen verifiziert; eine CRL, die von einer CA außerhalb des Bundles signiert wurde, wird mit einer Warnung veröffentlicht, da NGINX die Kette aus den vom Client gesendeten Zwischenzertifikaten aufbaut. Bei unlesbaren, ungültigen oder nicht zusammenpassenden Daten bleibt das bisherige CA/CRL-Paar erhalten und ein Fehler wird protokolliert. Erneuern Sie CA und CRL gemeinsam und korrigieren Sie ungültige Quellen zeitnah, insbesondere vor Ablauf einer CRL. Wenn sowohl `MTLS_CRL` als auch `MTLS_CRL_DATA` geleert werden, wird die Sperrlistenprüfung bewusst entfernt. Das Entfernen der CA-Konfiguration, das Deaktivieren von mTLS oder das Löschen des Dienstes entfernt dessen Cache-Dateien; solange `USE_MTLS` auf `yes` bleibt und der Modus nicht `optional_no_ca` ist, gilt `ssl_verify_client` dann gegen eine eingebaute Platzhalter-CA: mit `on` erhält jeder Client eine 400, mit `optional` jeder Client, der ein Zertifikat vorlegt, bis wieder eine CA konfiguriert ist. Tatsächliche Entfernungen lösen eine Neuladung aus.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                   | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                            |
-| ----------------------------- | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                      |
-| `MTLS_CA_CERTIFICATE`         |              | multisite | nein     | **Client-CA-Bundle:** Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist; muss lesbar sein. |
-| `MTLS_VERIFY_CLIENT`          | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).      |
-| `MTLS_VERIFY_DEPTH`           | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                            |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.     |
-| `MTLS_CRL`                    |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                              |
+| Einstellung                    | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                    |
+| ------------------------------ | ------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`         | multisite | nein     | **Mutual TLS verwenden:** Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.                                                                                                                                                                                              |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`       | multisite | nein     | **Priorität des Client-CA-Bundles:** Quelle des Client-CA-Bundles: `file` (Pfad) oder `data` (base64/PEM).                                                                                                                                                                                      |
+| `MTLS_CA_CERTIFICATE`          |              | multisite | nein     | **Client-CA-Bundle-Pfad:** Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM), lesbar für den Scheduler. Erforderlich, wenn `MTLS_VERIFY_CLIENT` `on` oder `optional` ist.                                                                                                                      |
+| `MTLS_CA_CERTIFICATE_DATA`     |              | multisite | nein     | **Client-CA-Bundle-Daten:** Vertrauenswürdiges Client-CA-Bundle direkt als base64 oder PEM (z. B. über die Web-UI).                                                                                                                                                                             |
+| `MTLS_VERIFY_CLIENT`           | `on`         | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).                                                                                                                              |
+| `MTLS_URL`                     |              | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen.                   |
+| `MTLS_VERIFY_DEPTH`            | `2`          | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                                                                                                                                                    |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`        | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter. Vom Client gesendete `X-SSL-*`-Header werden beim Eingang stets entfernt, sodass diese Werte nicht gefälscht werden können. |
+| `MTLS_CRL_PRIORITY`            | `file`       | multisite | nein     | **Priorität der Client-CRL:** Quelle der CRL: `file` (Pfad) oder `data` (base64/PEM).                                                                                                                                                                                                           |
+| `MTLS_CRL`                     |              | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste, lesbar für den Scheduler. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde. NGINX benötigt in der CRL-Datei eine Sperrliste für jede CA in der Verifizierungskette.                                    |
+| `MTLS_CRL_DATA`                |              | multisite | nein     | **Client-CRL-Daten:** Sperrliste direkt als base64 oder PEM.                                                                                                                                                                                                                                    |
 
-!!! tip "Zertifikate aktuell halten"
-    Speichern Sie CA-Bundles und Sperrlisten in einem eingehängten Volume, das der Scheduler lesen kann, damit Neustarts die neuesten Vertrauensanker übernehmen.
+!!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+    Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+!!! tip "Einmal konfigurieren, überall verteilt"
+    CA-Bundles und Sperrlisten müssen nicht in die BunkerWeb-Container eingehängt werden. Stellen Sie sie nur dem Scheduler bereit, als Dateipfad oder als Inline-Daten; der Scheduler validiert sie, cached sie und verteilt sie an jede Instanz. Aktualisierungen werden beim nächsten Job-Lauf automatisch übernommen und neu verteilt.
 
 !!! warning "CA-Bundle für strenge Modi obligatorisch"
-    Sobald `MTLS_VERIFY_CLIENT` auf `on` oder `optional` steht, muss die CA-Datei zur Laufzeit vorhanden sein. Fehlt sie, ignoriert BunkerWeb die mTLS-Direktiven, um keinen Dienst mit ungültigem Pfad zu starten. Verwenden Sie `optional_no_ca` nur zur Fehlersuche – dieser Modus schwächt die Client-Authentifizierung.
+    Sobald `MTLS_VERIFY_CLIENT` auf `on` oder `optional` steht, muss der Scheduler ein Client-CA-Bundle validieren und cachen können. Solange keines validiert und verteilt wurde, greift jede Instanz auf eine Platzhalter-CA zurück, zu der kein Client eine Vertrauenskette bilden kann. Bei `on` wird damit jeder Client abgewiesen, wo der Dienst zuvor ganz ohne Client-Prüfung lief. Bei `optional` wird ein Client ohne Zertifikat weiterhin durchgelassen, denn genau das bedeutet dieser Modus; die Durchsetzung für solche Anfragen kommt aus `MTLS_URL`, sofern es gesetzt ist, und bleibt ganz aus, wenn es leer ist. Ein Client, der ein Zertifikat vorlegt, wird abgewiesen, weil sich gegen die Platzhalter-CA keine Vertrauenskette bilden lässt. Verwenden Sie `optional_no_ca` nur zur Fehlersuche – dieser Modus schwächt die Client-Authentifizierung. Nach einem Neustart des Schedulers mit einem nicht persistenten `/var/cache/bunkerweb` bleibt dieser Zustand bestehen, bis der erste Job-Lauf abgeschlossen ist und das CA-Bundle neu verteilt hat; verwenden Sie deshalb ein persistentes Cache-Volume, wenn eine strikte Durchsetzung erforderlich ist.
 
 !!! info "Vertrauensquelle und Verifizierung"
     BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.
+
+!!! info "Eingehende `X-SSL-*`-Header werden stets entfernt"
+    BunkerWeb entfernt jeden vom Client gesendeten `X-SSL-*`-Request-Header, bevor die Anfrage Ihre Anwendung erreicht – auf jeder Site, unabhängig davon, ob mTLS aktiviert ist, und gleichermaßen unter HTTP/1.1, HTTP/2 und HTTP/3. Weitergegeben werden nur die Werte, die BunkerWeb aus dem verifizierten TLS-Handshake ableitet, und auch nur dann, wenn `MTLS_FORWARD_CLIENT_HEADERS` auf `yes` steht. Ein Client kann `X-SSL-Client-Verify: SUCCESS` somit nicht fälschen.
+
+    Steht BunkerWeb hinter einem weiteren Proxy, der mTLS terminiert und diese Header selbst setzt, müssen Sie den Wert vor dem Entfernen sichern und erneut veröffentlichen. Legen Sie dazu eine eigene `server-http`-Konfiguration an:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    und geben Sie ihn anschließend mit `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"` weiter. `REVERSE_PROXY_HEADERS` allein genügt nicht: `$http_x_ssl_client_verify` ist bereits leer, wenn `proxy_set_header` ausgewertet wird, während `set` in der Server-Rewrite-Phase und damit vor dem Entfernen läuft.
+
+!!! warning "Pfadbezogenes mTLS erfordert den optionalen Modus"
+    Die NGINX-Direktive `ssl_verify_client` ist nur im `server`-Kontext gültig – sie kann nicht in einem `location`-Block stehen. Um ein Zertifikat nur auf bestimmten Pfaden zu verlangen, setzen Sie `MTLS_VERIFY_CLIENT` auf `optional` (oder `optional_no_ca`), damit der Handshake für jeden Pfad abgeschlossen wird, und listen Sie die geschützten Pfade in `MTLS_URL_n` auf. BunkerWeb erzwingt das Zertifikat dann pro Anfrage in Lua auf den passenden URLs. Belassen Sie `MTLS_VERIFY_CLIENT` auf `on`, während Sie `MTLS_URL_n` setzen, weist NGINX Clients ohne Zertifikat bereits beim Handshake ab, bevor die pfadbezogene Logik greift – die Erzwingung bleibt dann site-weit.
+
+!!! info "Browser-Zertifikatsabfragen im optionalen Modus"
+    Der TLS-Handshake erfolgt, bevor NGINX die angeforderte URL kennt; im Modus `optional` sendet NGINX daher weiterhin bei jeder Verbindung einen `CertificateRequest`. Die Erzwingung wird pfadbezogen, die Einladung auf Handshake-Ebene jedoch nicht – Browser fragen unter Umständen auch auf ungeschützten Pfaden nach einem Zertifikat (Verhalten je nach Browser unterschiedlich). Auf diesen Pfaden lässt BunkerWeb die Anfrage zu, ob ein Zertifikat vorgelegt wird oder nicht.
 
 ### Konfigurationsbeispiele
 
@@ -4051,8 +4576,32 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
     MTLS_FORWARD_CLIENT_HEADERS: "no"
     ```
 
+=== "Pfadbezogenes mTLS (z. B. nur `/login`)"
+
+    Verlangen Sie Client-Zertifikate nur auf ausgewählten Pfaden und lassen Sie den Rest der Site offen. Die Verifizierung läuft im Modus `optional`, damit der Handshake auf nicht authentifizierten Pfaden abgeschlossen wird; BunkerWeb erzwingt das Zertifikat anschließend pro Anfrage auf URLs, die zu `MTLS_URL_n` passen (eine Regex pro Eintrag):
+
+    ```yaml
+    USE_MTLS: "yes"
+    MTLS_CA_CERTIFICATE: "/etc/bunkerweb/mtls/partner-ca.pem"
+    MTLS_VERIFY_CLIENT: "optional"
+    MTLS_URL_1: "^/login"
+    MTLS_URL_2: "^/admin"
+    MTLS_FORWARD_CLIENT_HEADERS: "yes"
+    ```
+
+    | Anfrage      | Zertifikat            | Ergebnis                                 |
+    | ------------ | --------------------- | ---------------------------------------- |
+    | `GET /`      | keines                | Erlaubt (Pfad ohne mTLS)                 |
+    | `GET /login` | keines                | Abgelehnt (`403`)                        |
+    | `GET /login` | gültig                | Erlaubt, `X-SSL-Client-*` weitergeleitet |
+    | `GET /login` | ungültig / abgelaufen | Abgelehnt (`403`)                        |
+
 ## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#openapi-validator-pro).
 
 STREAM-Unterstützung :x:
 
@@ -4072,47 +4621,63 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 ## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#openid-connect-pro).
+
 STREAM-Unterstützung :x:
 
 OpenID Connect authentication plugin providing SSO capabilities with identity providers.
 
-| Einstellung                               | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
-| ----------------------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_OPENIDC`                             | `no`                   | multisite | nein     | Enable or disable OpenID Connect authentication.                                                                                                        |
-| `OPENIDC_DISCOVERY`                       |                        | multisite | nein     | OpenID Connect discovery URL (e.g. https://idp.example.com/.well-known/openid-configuration).                                                           |
-| `OPENIDC_CLIENT_ID`                       |                        | multisite | nein     | OAuth 2.0 client identifier registered with the IdP.                                                                                                    |
-| `OPENIDC_CLIENT_SECRET`                   |                        | multisite | nein     | OAuth 2.0 client secret registered with the IdP.                                                                                                        |
-| `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD`      | `basic`                | multisite | nein     | Token endpoint auth method: basic (recommended, HTTP Basic), post (POST body), secret_jwt (JWT with client secret), private_key_jwt (JWT with RSA key). |
-| `OPENIDC_CLIENT_RSA_PRIVATE_KEY`          |                        | multisite | nein     | PEM-encoded RSA private key for private_key_jwt authentication.                                                                                         |
-| `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`       |                        | multisite | nein     | Optional key ID (kid) for private_key_jwt authentication.                                                                                               |
-| `OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN` |                        | multisite | nein     | JWT assertion lifetime in seconds (empty to use library default).                                                                                       |
-| `OPENIDC_REDIRECT_URI`                    | `/callback`            | multisite | nein     | URI path where the IdP redirects after authentication.                                                                                                  |
-| `OPENIDC_SCOPE`                           | `openid email profile` | multisite | nein     | Space-separated list of OAuth 2.0 scopes to request.                                                                                                    |
-| `OPENIDC_AUTHORIZATION_PARAMS`            |                        | multisite | nein     | Additional authorization params as comma-separated key=value pairs (e.g. audience=api,resource=xyz). URL-encode values if needed.                       |
-| `OPENIDC_USE_NONCE`                       | `yes`                  | multisite | nein     | Use nonce in authentication requests to prevent replay attacks.                                                                                         |
-| `OPENIDC_USE_PKCE`                        | `no`                   | multisite | nein     | Use PKCE (Proof Key for Code Exchange) for authorization code flow.                                                                                     |
-| `OPENIDC_FORCE_REAUTHORIZE`               | `no`                   | multisite | nein     | Force re-authorization on every request (not recommended for production).                                                                               |
-| `OPENIDC_REFRESH_SESSION_INTERVAL`        |                        | multisite | nein     | Interval in seconds to silently re-authenticate (empty to disable).                                                                                     |
-| `OPENIDC_IAT_SLACK`                       | `120`                  | multisite | nein     | Allowed clock skew in seconds for token validation.                                                                                                     |
-| `OPENIDC_ACCESS_TOKEN_EXPIRES_IN`         | `3600`                 | multisite | nein     | Default access token lifetime (seconds) if not provided by IdP.                                                                                         |
-| `OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY`    | `yes`                  | multisite | nein     | Automatically renew access token using refresh token when expired.                                                                                      |
-| `OPENIDC_ACCEPT_UNSUPPORTED_ALG`          | `no`                   | multisite | nein     | Accept tokens signed with unsupported algorithms (not recommended).                                                                                     |
-| `OPENIDC_LOGOUT_PATH`                     | `/logout`              | multisite | nein     | URI path for logout requests.                                                                                                                           |
-| `OPENIDC_REVOKE_TOKENS_ON_LOGOUT`         | `no`                   | multisite | nein     | Revoke tokens at the IdP when logging out.                                                                                                              |
-| `OPENIDC_REDIRECT_AFTER_LOGOUT_URI`       |                        | multisite | nein     | URI to redirect after logout (leave empty for IdP default).                                                                                             |
-| `OPENIDC_POST_LOGOUT_REDIRECT_URI`        |                        | multisite | nein     | URI to redirect after IdP logout is complete.                                                                                                           |
-| `OPENIDC_TIMEOUT_CONNECT`                 | `10000`                | multisite | nein     | Connection timeout in milliseconds for IdP requests.                                                                                                    |
-| `OPENIDC_TIMEOUT_SEND`                    | `10000`                | multisite | nein     | Send timeout in milliseconds for IdP requests.                                                                                                          |
-| `OPENIDC_TIMEOUT_READ`                    | `10000`                | multisite | nein     | Read timeout in milliseconds for IdP requests.                                                                                                          |
-| `OPENIDC_SSL_VERIFY`                      | `yes`                  | multisite | nein     | Verify SSL certificates when communicating with the IdP.                                                                                                |
-| `OPENIDC_KEEPALIVE`                       | `yes`                  | multisite | nein     | Enable HTTP keepalive for connections to the IdP.                                                                                                       |
-| `OPENIDC_HTTP_PROXY`                      |                        | multisite | nein     | HTTP proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                            |
-| `OPENIDC_HTTPS_PROXY`                     |                        | multisite | nein     | HTTPS proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                           |
-| `OPENIDC_USER_HEADER`                     | `X-User`               | multisite | nein     | Header to pass user info to upstream (empty to disable).                                                                                                |
-| `OPENIDC_USER_HEADER_CLAIM`               | `sub`                  | multisite | nein     | ID token claim to use for the user header (e.g. sub, email, preferred_username).                                                                        |
-| `OPENIDC_DISPLAY_CLAIM`                   | `preferred_username`   | multisite | nein     | Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.                      |
-| `OPENIDC_DISCOVERY_DICT_SIZE`             | `1m`                   | global    | nein     | Size of the shared dictionary to cache discovery data.                                                                                                  |
-| `OPENIDC_JWKS_DICT_SIZE`                  | `1m`                   | global    | nein     | Size of the shared dictionary to cache JWKS data.                                                                                                       |
+| Einstellung                               | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                                                |
+| ----------------------------------------- | ---------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_OPENIDC`                             | `no`                   | multisite | nein     | Enable or disable OpenID Connect authentication.                                                                                                            |
+| `OPENIDC_DISCOVERY`                       |                        | multisite | nein     | OpenID Connect discovery URL (e.g. https://idp.example.com/.well-known/openid-configuration).                                                               |
+| `OPENIDC_CLIENT_ID`                       |                        | multisite | nein     | OAuth 2.0 client identifier registered with the IdP.                                                                                                        |
+| `OPENIDC_CLIENT_SECRET`                   |                        | multisite | nein     | OAuth 2.0 client secret registered with the IdP.                                                                                                            |
+| `OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD`      | `basic`                | multisite | nein     | Token endpoint auth method: basic (recommended, HTTP Basic), post (POST body), secret_jwt (JWT with client secret), private_key_jwt (JWT with RSA key).     |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY`          |                        | multisite | nein     | PEM-encoded RSA private key for private_key_jwt authentication.                                                                                             |
+| `OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID`       |                        | multisite | nein     | Optional key ID (kid) for private_key_jwt authentication.                                                                                                   |
+| `OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN` |                        | multisite | nein     | JWT assertion lifetime in seconds (empty to use library default).                                                                                           |
+| `OPENIDC_REDIRECT_URI`                    | `/callback`            | multisite | nein     | URI path where the IdP redirects after authentication.                                                                                                      |
+| `OPENIDC_SCOPE`                           | `openid email profile` | multisite | nein     | Space-separated list of OAuth 2.0 scopes to request.                                                                                                        |
+| `OPENIDC_AUTHORIZATION_PARAMS`            |                        | multisite | nein     | Additional authorization params as comma-separated key=value pairs (e.g. audience=api,resource=xyz). URL-encode values if needed.                           |
+| `OPENIDC_USE_NONCE`                       | `yes`                  | multisite | nein     | Use nonce in authentication requests to prevent replay attacks.                                                                                             |
+| `OPENIDC_USE_PKCE`                        | `no`                   | multisite | nein     | Use PKCE (Proof Key for Code Exchange) for authorization code flow.                                                                                         |
+| `OPENIDC_FORCE_REAUTHORIZE`               | `no`                   | multisite | nein     | Force re-authorization on every request (not recommended for production).                                                                                   |
+| `OPENIDC_REFRESH_SESSION_INTERVAL`        |                        | multisite | nein     | Interval in seconds to silently re-authenticate (empty to disable).                                                                                         |
+| `OPENIDC_IAT_SLACK`                       | `120`                  | multisite | nein     | Allowed clock skew in seconds for token validation.                                                                                                         |
+| `OPENIDC_ACCESS_TOKEN_EXPIRES_IN`         | `3600`                 | multisite | nein     | Default access token lifetime (seconds) if not provided by IdP.                                                                                             |
+| `OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY`    | `yes`                  | multisite | nein     | Automatically renew access token using refresh token when expired.                                                                                          |
+| `OPENIDC_ACCEPT_UNSUPPORTED_ALG`          | `no`                   | multisite | nein     | Accept tokens signed with unsupported algorithms (not recommended).                                                                                         |
+| `OPENIDC_LOGOUT_PATH`                     | `/logout`              | multisite | nein     | URI path for logout requests.                                                                                                                               |
+| `OPENIDC_REVOKE_TOKENS_ON_LOGOUT`         | `no`                   | multisite | nein     | Revoke tokens at the IdP when logging out.                                                                                                                  |
+| `OPENIDC_REDIRECT_AFTER_LOGOUT_URI`       |                        | multisite | nein     | URI to redirect after logout (leave empty for IdP default).                                                                                                 |
+| `OPENIDC_POST_LOGOUT_REDIRECT_URI`        |                        | multisite | nein     | URI to redirect after IdP logout is complete.                                                                                                               |
+| `OPENIDC_TIMEOUT_CONNECT`                 | `10000`                | multisite | nein     | Connection timeout in milliseconds for IdP requests.                                                                                                        |
+| `OPENIDC_TIMEOUT_SEND`                    | `10000`                | multisite | nein     | Send timeout in milliseconds for IdP requests.                                                                                                              |
+| `OPENIDC_TIMEOUT_READ`                    | `10000`                | multisite | nein     | Read timeout in milliseconds for IdP requests.                                                                                                              |
+| `OPENIDC_SSL_VERIFY`                      | `yes`                  | multisite | nein     | Verify SSL certificates when communicating with the IdP.                                                                                                    |
+| `OPENIDC_KEEPALIVE`                       | `yes`                  | multisite | nein     | Enable HTTP keepalive for connections to the IdP.                                                                                                           |
+| `OPENIDC_HTTP_PROXY`                      |                        | multisite | nein     | HTTP proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                                |
+| `OPENIDC_HTTPS_PROXY`                     |                        | multisite | nein     | HTTPS proxy URL for IdP connections (e.g. http://proxy:8080).                                                                                               |
+| `OPENIDC_USER_HEADER`                     | `X-User`               | multisite | nein     | Header to pass user info to upstream (empty to disable).                                                                                                    |
+| `OPENIDC_USER_HEADER_CLAIM`               | `sub`                  | multisite | nein     | ID token claim to use for the user header (e.g. sub, email, preferred_username).                                                                            |
+| `OPENIDC_DISPLAY_CLAIM`                   | `preferred_username`   | multisite | nein     | Claim to use for display in logs and metrics (e.g. preferred_username, name, email). Falls back to User Header Claim if not found.                          |
+| `OPENIDC_EMAIL_HEADER`                    | `X-Email`              | multisite | nein     | Header to pass the user email to upstream (empty to disable).                                                                                               |
+| `OPENIDC_EMAIL_CLAIM`                     | `email`                | multisite | nein     | ID token/userinfo claim used for the email header (e.g. email).                                                                                             |
+| `OPENIDC_GROUPS_HEADER`                   | `X-Groups`             | multisite | nein     | Header to pass the user groups to upstream (empty to disable).                                                                                              |
+| `OPENIDC_GROUPS_CLAIM`                    | `groups`               | multisite | nein     | ID token/userinfo claim used for the groups header (e.g. groups, roles).                                                                                    |
+| `OPENIDC_GROUPS_SEPARATOR`                | `,`                    | multisite | nein     | Separator used to join multiple group values in the groups header.                                                                                          |
+| `OPENIDC_NAME_HEADER`                     | `X-Name`               | multisite | nein     | Header to pass the user display name to upstream (empty to disable).                                                                                        |
+| `OPENIDC_NAME_CLAIM`                      | `name`                 | multisite | nein     | ID token/userinfo claim used for the display name header (e.g. name).                                                                                       |
+| `OPENIDC_DISCOVERY_DICT_SIZE`             | `1m`                   | global    | nein     | Size of the shared dictionary to cache discovery data.                                                                                                      |
+| `OPENIDC_JWKS_DICT_SIZE`                  | `1m`                   | global    | nein     | Size of the shared dictionary to cache JWKS data.                                                                                                           |
+| `OPENIDC_USE_ACL`                         | `no`                   | multisite | nein     | Enable claim-based access control (ACL) after OIDC authentication. When enabled, only users whose claims match the configured rules will be granted access. |
+| `OPENIDC_ACL_MATCH_MODE`                  | `all`                  | multisite | nein     | How multiple ACL rules are evaluated. 'all' means every rule must pass (AND logic). 'any' means at least one rule must pass (OR logic).                     |
+| `OPENIDC_ACL_DENIED_URL`                  |                        | multisite | nein     | URL to redirect to when access is denied by ACL. If empty, returns a 403 Forbidden response.                                                                |
+| `OPENIDC_ACL_CLAIM`                       |                        | multisite | ja       | Name of the OIDC claim to check (e.g. groups, email, sub, preferred_username).                                                                              |
+| `OPENIDC_ACL_CLAIM_VALUE`                 |                        | multisite | ja       | Expected value for the claim. For array claims (e.g. groups), checks if this value is a member. For string claims, checks strict equality.                  |
 
 ## PHP
 
@@ -4249,20 +4814,20 @@ Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren u
 
 **F: Was passiert, wenn meine Pro-Lizenz abläuft?**
 
-A: Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.
+**A:** Wenn Ihre Pro-Lizenz abläuft, wird der Zugriff auf Premium-Funktionen und -Plugins deaktiviert. Ihre BunkerWeb-Installation wird jedoch weiterhin mit allen Funktionen der Community-Edition betrieben. Um wieder Zugriff auf die Pro-Funktionen zu erhalten, erneuern Sie einfach Ihre Lizenz.
 
 **F: Werden die Pro-Funktionen meine bestehende Konfiguration stören?**
 
-A: Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.
+**A:** Nein, die Pro-Funktionen sind so konzipiert, dass sie sich nahtlos in Ihr aktuelles BunkerWeb-Setup integrieren. Sie erweitern die Funktionalität, ohne Ihre bestehende Konfiguration zu verändern oder zu stören, und gewährleisten so ein reibungsloses und zuverlässiges Erlebnis.
 
 **F: Kann ich die Pro-Funktionen vor dem Kauf ausprobieren?**
 
-A: Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:
+**A:** Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen entsprechen:
 
 - **BunkerWeb PRO Standard:** Voller Zugriff auf die Pro-Funktionen ohne technischen Support.
 - **BunkerWeb PRO Enterprise:** Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.
 
-Sie können die Pro-Funktionen mit einer kostenlosen 1-monatigen Testversion erkunden, indem Sie den Promo-Code `freetrial` verwenden. Besuchen Sie das [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), um Ihre Testversion zu aktivieren und mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste zu erfahren.
+Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste.
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4283,20 +4848,20 @@ Prometheus exporter for BunkerWeb internal metrics.
 
 STREAM-Unterstützung :warning:
 
-Das Real IP Plugin stellt sicher, dass BunkerWeb die IP-Adresse des Clients auch hinter Proxys korrekt identifiziert. Dies ist unerlässlich für die Anwendung von Sicherheitsregeln, Ratenbegrenzung and zuverlässige Protokolle; andernfalls würden alle Anfragen von der IP des Proxys zu kommen scheinen.
+Das Real IP Plugin stellt sicher, dass BunkerWeb die IP-Adresse des Clients auch hinter Proxys korrekt identifiziert. Dies ist unerlässlich für die Anwendung von Sicherheitsregeln, Ratenbegrenzung und zuverlässige Protokolle; andernfalls würden alle Anfragen von der IP des Proxys zu kommen scheinen.
 
 So funktioniert's:
 
 1.  Nach der Aktivierung prüft BunkerWeb die Header (z.B. [`X-Forwarded-For`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For)), die die ursprüngliche IP enthalten.
 2.  Es wird überprüft, ob die Quell-IP in `REAL_IP_FROM` (Liste vertrauenswürdiger Proxys) enthalten ist, um nur legitime Proxys zu akzeptieren.
-3.  Die Client-IP wird aus dem Header `REAL_IP_HEADER` extrahiert and für die Sicherheitsbewertung and Protokollierung verwendet.
-4.  Bei IP-Ketten kann eine rekursive Suche über `REAL_IP_RECURSIVE` die ursprüngliche IP ermitteln.
+3.  Die Client-IP wird aus dem Header `REAL_IP_HEADER` extrahiert und für die Sicherheitsbewertung und Protokollierung verwendet.
+4.  Bei IP-Ketten kann eine rekursive Suche die ursprüngliche IP ermitteln.
 5.  Die Unterstützung für das [PROXY-Protokoll](https://netnut.io/what-is-proxy-protocol-and-how-does-it-work/) kann aktiviert werden, um die Client-IP direkt von kompatiblen Proxys (z.B. [HAProxy](https://www.haproxy.org/)) zu empfangen.
 6.  Listen mit vertrauenswürdigen Proxy-IPs können automatisch über URLs heruntergeladen werden.
 
 ### Verwendung
 
-1.  Aktivieren: `USE_REAL_IP: yes`.
+1.  Aktivieren: Setzen Sie den Parameter `USE_REAL_IP` auf `yes`.
 2.  Vertrauenswürdige Proxys: Geben Sie IP/Bereiche in `REAL_IP_FROM` ein.
 3.  Header: Geben Sie an, welcher Header die echte IP über `REAL_IP_HEADER` enthält.
 4.  Rekursiv: Aktivieren Sie `REAL_IP_RECURSIVE` bei Bedarf.
@@ -4330,10 +4895,71 @@ So funktioniert's:
 
 === "Basis (hinter Reverse Proxy)"
 
+    Einfache Konfiguration für eine Website hinter einem Reverse Proxy:
+
     ```yaml
     USE_REAL_IP: "yes"
     REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
     REAL_IP_HEADER: "X-Forwarded-For"
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Cloud Load Balancer"
+
+    Konfiguration für eine Website hinter einem Cloud Load Balancer:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "PROXY-Protokoll"
+
+    Konfiguration mit PROXY-Protokoll und einem kompatiblen Load Balancer:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24"
+    REAL_IP_HEADER: "proxy_protocol"
+    USE_PROXY_PROTOCOL: "yes"
+    ```
+
+=== "Mehrere Proxy-Quellen mit URLs"
+
+    Erweiterte Konfiguration mit automatisch aktualisierten Proxy-IP-Listen:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_HEADER: "X-Real-IP"
+    REAL_IP_RECURSIVE: "yes"
+    REAL_IP_FROM_URLS: "https://example.com/proxy-ips.txt file:///etc/bunkerweb/custom-proxies.txt"
+    ```
+
+=== "CDN-Konfiguration"
+
+    Konfiguration für eine Website hinter einem CDN:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    REAL_IP_FROM_URLS: "https://cdn-provider.com/ip-ranges.txt"
+    REAL_IP_HEADER: "CF-Connecting-IP"  # Beispiel für Cloudflare
+    REAL_IP_RECURSIVE: "no"  # Bei Headern mit einzelner IP nicht erforderlich
+    ```
+
+=== "Hinter Cloudflare"
+
+    Konfiguration für eine Website hinter Cloudflare:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # Wir vertrauen nur Cloudflare-IPs
+    REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Cloudflare-IPs automatisch herunterladen
+    REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare-Header für Client-IP
+    REAL_IP_RECURSIVE: "yes"
     ```
 
 ## Redirect
@@ -4470,43 +5096,43 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 
 STREAM-Unterstützung :white_check_mark:
 
-Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung and für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken and andere Informationen zwischen mehreren Knoten zu teilen.
+Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung und für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken und andere Informationen zwischen mehreren Knoten zu teilen.
 
 **Funktionsweise:**
 
 1.  Nach der Aktivierung verbindet sich BunkerWeb mit dem konfigurierten Redis-/Valkey-Server.
 2.  Kritische Daten (Sitzungen, Metriken, Sicherheit) werden dort gespeichert.
 3.  Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.
-4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
-5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
+4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS und Redis Sentinel.
+5.  Automatische Wiederverbindung und konfigurierbare Timeouts sorgen für Robustheit.
 
 ### Verwendung
 
-1.  **Aktivieren:** `USE_REDIS: yes`.
-2.  **Verbindung:** Host/IP and Port.
+1.  **Aktivieren:** Setzen Sie den Parameter `USE_REDIS` auf `yes`.
+2.  **Verbindung:** Host/IP und Port.
 3.  **Sicherheit:** Anmeldeinformationen, falls erforderlich.
-4.  **Erweitert:** Datenbank, SSL and Timeouts.
+4.  **Erweitert:** Datenbank, SSL und Timeouts.
 5.  **Hochverfügbarkeit:** Konfigurieren Sie Sentinel, falls verwendet.
 
 ### Parameter
 
-| Parameter                 | Standard   | Kontext | Mehrfach | Beschreibung                                                  |
-| :------------------------ | :--------- | :------ | :------- | :------------------------------------------------------------ |
-| `USE_REDIS`               | `no`       | global  | nein     | Aktiviert die Redis-/Valkey-Integration (Cluster-Modus).      |
-| `REDIS_HOST`              |            | global  | nein     | Host/IP des Redis-/Valkey-Servers.                            |
-| `REDIS_PORT`              | `6379`     | global  | nein     | Redis-/Valkey-Port.                                           |
-| `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                       |
-| `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                            |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
-| `REDIS_TIMEOUT`           | `5`        | global  | nein     | Timeout (Sekunden).                                           |
-| `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
-| `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
-| `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).     |
-| `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                            |
-| `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                    |
-| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | nein     | TCP-Keepalive-Intervall (Sekunden) für inaktive Verbindungen. |
-| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
+| Parameter                 | Standard   | Kontext | Mehrfach | Beschreibung                                                                                                                                   |
+| :------------------------ | :--------- | :------ | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REDIS`               | `no`       | global  | nein     | Aktiviert die Redis-/Valkey-Integration (Cluster-Modus).                                                                                       |
+| `REDIS_HOST`              |            | global  | nein     | Host/IP des Redis-/Valkey-Servers. Nicht erforderlich, wenn `REDIS_SENTINEL_HOSTS` gesetzt ist (der Master wird über die Sentinels aufgelöst). |
+| `REDIS_PORT`              | `6379`     | global  | nein     | Redis-/Valkey-Port.                                                                                                                            |
+| `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                                                                                                        |
+| `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                                                                                                             |
+| `REDIS_SSL_VERIFY`        | `no`       | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                                                                                                      |
+| `REDIS_TIMEOUT`           | `1s`       | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                                                                                                    |
+| `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                                                                                                      |
+| `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).                                                                                      |
+| `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                                                                                                             |
+| `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                                                                                                             |
+| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                                                                                                     |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen, pro NGINX-Worker.                                                                         |
 
 !!! tip "Hochverfügbarkeit"
     Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
@@ -4556,6 +5182,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 
     ```yaml
     USE_REDIS: "yes"
+    # REDIS_HOST ist nicht erforderlich: Der Master wird über die Sentinels aufgelöst
     REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
     REDIS_SENTINEL_MASTER: "mymaster"
     REDIS_SENTINEL_PASSWORD: "sentinel-password"
@@ -4572,10 +5199,19 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_PORT: "6379"
     REDIS_PASSWORD: "your-strong-password"
     REDIS_DATABASE: "3"
-    REDIS_TIMEOUT: "3"
-    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_TIMEOUT: "3000"
+    REDIS_KEEPALIVE_IDLE: "60000"
     REDIS_KEEPALIVE_POOL: "5"
     ```
+
+!!! info "Redis auf Kubernetes (vom Scheduler gesteuerte Konfiguration)"
+    Auf Kubernetes liest der **Scheduler** die Einstellungen und überträgt die generierte
+    Konfiguration an die BunkerWeb-Instanzen — die Instanzen lesen diese Redis-Einstellungen nicht aus
+    ihrer eigenen Pod-Umgebung. Konfigurieren Sie Redis mit dem offiziellen Helm-Chart unter
+    `settings.redis`, einschließlich Sentinel über `settings.redis.redisSentinelHosts` und
+    `settings.redis.redisSentinelMaster` (Chart ≥ v1.0.21). Für jede Einstellung ohne dedizierten
+    Chart-Schlüssel verwenden Sie `scheduler.extraEnvs`. Werden sie nur auf `bunkerweb.extraEnvs`
+    gesetzt, hat dies **keine Wirkung**.
 
 ### Redis Best Practices
 
@@ -4583,7 +5219,9 @@ Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb dies
 
 #### Speicherverwaltung
 - **Speichernutzung überwachen:** Konfigurieren Sie Redis mit geeigneten `maxmemory`-Einstellungen, um Fehler wegen unzureichendem Speicher zu vermeiden
-- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` oder `allkeys-lru`)
+- **Verdrängungsrichtlinie festlegen:** Verwenden Sie eine für Ihren Anwendungsfall geeignete `maxmemory-policy` (z. B. `volatile-lru` für den allgemeinen Einsatz oder `allkeys-lru` für stark cache-lastige Workloads)
+- **All-in-One-Standards:** Das AIO-Docker-Image liefert Redis bereits mit `maxmemory=256mb` und `maxmemory-policy=volatile-lru` aus; überschreiben Sie dies über die Umgebungsvariablen `REDIS_MAXMEMORY` und `REDIS_MAXMEMORY_POLICY`. Mit `volatile-lru` werden temporäre Zähler (Rate-Limit, Bad-Behavior) vor Schlüsseln mit für Sessions und befristete Sperren wichtigen TTLs verdrängt, und Schlüssel ohne Ablaufzeit (dauerhafte Sperren) bleiben unangetastet. Dieselbe Richtlinie wird auch für externe Redis- oder Valkey-Server empfohlen.
+- **Halten Sie die Sicherheitsberichte aus dem Eviction-Pool heraus:** Mit dem Standardwert von `METRICS_REDIS_TTL` tragen die Berichte zu blockierten Anfragen ein Ablaufdatum, und genau dieses Ablaufdatum macht sie unter `volatile-lru` überhaupt erst zu Eviction-Kandidaten. Die Liste ist ein einziger Schlüssel, der das gesamte gespeicherte Fenster enthält: Eine Eviction entfernt alles auf einmal, nicht die ältesten Berichte. Setzen Sie `METRICS_REDIS_TTL=0` auf jeder Instanz, die denselben Server nutzt, sonst setzt eine Instanz mit dem Standardwert das Ablaufdatum innerhalb von Sekunden neu. Unter `allkeys-lru` ändert das nichts, dort ist kein Schlüssel immun, und der Speicherdruck sinkt dadurch nicht, er verlagert sich auf die Schlüssel, die weiterhin ablaufen, darunter zeitlich begrenzte Sperren, Sitzungen und zwischengespeicherte Urteile. Dimensionieren Sie `maxmemory` für die aufbewahrten Berichte, statt sich auf Eviction zu verlassen: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` legt diese Obergrenze fest.
 - **Große Schlüssel vermeiden:** Stellen Sie sicher, dass einzelne Redis-Schlüssel eine angemessene Größe behalten, um Leistungseinbußen zu vermeiden
 
 #### Datenpersistenz
@@ -4592,7 +5230,7 @@ Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb dies
 - **Backup-Strategie:** Implementieren Sie regelmäßige Redis-Backups als Teil Ihres Disaster-Recovery-Plans
 
 #### Leistungsoptimierung
-- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen
+- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen. `REDIS_KEEPALIVE_POOL` gilt pro NGINX-Worker: im Dauerbetrieb liegt die Zahl der Verbindungen bei etwa `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x Instanzen`. Setzen Sie das `maxclients`-Limit von Redis/Valkey darüber an, denn eine abgewiesene Verbindung verhindert für diese Anfrage die Prüfung der nur in Redis gehaltenen Sperren
 - **Pipelining:** Verwenden Sie, wenn möglich, Pipelining für Massenoperationen, um den Netzwerk-Overhead zu reduzieren
 - **Teure Operationen vermeiden:** Seien Sie vorsichtig mit Befehlen wie KEYS in Produktionsumgebungen
 - **Benchmarken Sie Ihre Arbeitslast:** Verwenden Sie redis-benchmark, um Ihre spezifischen Arbeitslastmuster zu testen
@@ -4611,20 +5249,21 @@ STREAM-Unterstützung :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-| Einstellung                    | Standardwert       | Kontext | Mehrfach | Beschreibung                                                                                                                       |
-| ------------------------------ | ------------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global  | nein     | Enable sending the report via email.                                                                                               |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global  | nein     | Enable sending the report via webhook.                                                                                             |
-| `REPORTING_SCHEDULE`           | `weekly`           | global  | nein     | The frequency at which reports are sent.                                                                                           |
-| `REPORTING_WEBHOOK_URLS`       |                    | global  | nein     | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
-| `REPORTING_SMTP_EMAILS`        |                    | global  | nein     | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
-| `REPORTING_SMTP_HOST`          |                    | global  | nein     | The host server used for SMTP sending.                                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`              | global  | nein     | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | nein     | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
-| `REPORTING_SMTP_FROM_USER`     |                    | global  | nein     | The user authentication value for sending via the from email address.                                                              |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | nein     | The password authentication value for sending via the from email address.                                                          |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global  | nein     | Determine whether or not to use a secure connection for SMTP.                                                                      |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | nein     | The subject line of the email.                                                                                                     |
+| Einstellung                    | Standardwert       | Kontext | Mehrfach | Beschreibung                                                                                                                                                                           |
+| ------------------------------ | ------------------ | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | nein     | Enable sending the report via email.                                                                                                                                                   |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | nein     | Enable sending the report via webhook.                                                                                                                                                 |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | nein     | The frequency at which reports are sent.                                                                                                                                               |
+| `REPORTING_TOP_N`              | `3`                | global  | nein     | Number of entries shown in 'Top' tables (IPs, AS, reasons, countries, URIs and offenders). Range: 1-50. Values are clamped at runtime; the upstream metric caps at rank 50 per server. |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | nein     | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                                                                          |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | nein     | List of email addresses to receive the report in HTML format (separated by spaces).                                                                                                    |
+| `REPORTING_SMTP_HOST`          |                    | global  | nein     | The host server used for SMTP sending.                                                                                                                                                 |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | nein     | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).                                                     |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | nein     | The email address used as the sender. Note that 2FA must be disabled for this email address.                                                                                           |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | nein     | The user authentication value for sending via the from email address.                                                                                                                  |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | nein     | The password authentication value for sending via the from email address.                                                                                                              |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | nein     | Determine whether or not to use a secure connection for SMTP.                                                                                                                          |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | nein     | The subject line of the email.                                                                                                                                                         |
 
 ## Reverse proxy
 
@@ -4664,16 +5303,19 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Protokollbehandlung:** Unterstützung für HTTP, HTTPS, WebSockets und andere Protokolle
         - **Fehlerabfang:** Passen Sie Fehlerseiten für ein einheitliches Benutzererlebnis an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                      |
-    | --------------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                |
-    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                   |
-    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird.                                               |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource. |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.    |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.            |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                     |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.                 |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                       |
+    | --------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                 |
+    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                    |
+    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt.                                                                            |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                     |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.                                                                                                                             |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1. |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                      |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.                                                                                                                                  |
+
+    BunkerWeb setzt den Pfad oder Regex-Ausdruck beim Erzeugen der NGINX-Location in Anführungszeichen und erhält dabei enthaltene Anführungszeichen, `#` und Regex-Backslashes. Geben Sie den Wert ohne zusätzliche NGINX-Anführungszeichen an. Die bestehenden Einschränkungen für Leerraum, `;`, `{` und `}` gelten weiterhin.
 
     !!! tip "Bewährte Praktiken"
         - Geben Sie in `REVERSE_PROXY_HOST` immer die vollständige URL an, einschließlich des Protokolls (http:// oder https://)
@@ -4719,10 +5361,34 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Zertifikatsvalidierung:** Kontrollieren Sie, wie Backend-Serverzertifikate validiert werden
         - **SNI-Unterstützung:** Geben Sie die Server Name Indication für Backends an, die mehrere Websites hosten
 
-    | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                  |
-    | ---------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`      | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.          |
-    | `REVERSE_PROXY_SSL_SNI_NAME` |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist. |
+    | Einstellung                                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                               |
+    | ------------------------------------------------ | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.                                                       |
+    | `REVERSE_PROXY_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist.                                              |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.                                                       |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM).                                |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI).                                 |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                                                                      |
+    | `REVERSE_PROXY_SSL_CERT_PRIORITY`                | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Zertifikat und Schlüssel, `file` oder `data`.                                                             |
+    | `REVERSE_PROXY_SSL_CERT`                         |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS vorgelegt wird (Priorität `file`).                          |
+    | `REVERSE_PROXY_SSL_CERT_DATA`                    |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als base64 oder Klartext-PEM (Priorität `data`).                                                       |
+    | `REVERSE_PROXY_SSL_KEY`                          |          | multisite | nein     | **Pfad des Client-Schlüssels:** Zum Client-Zertifikat passender privater PEM-Schlüssel (Priorität `file`). Er darf nicht verschlüsselt sein.               |
+    | `REVERSE_PROXY_SSL_KEY_DATA`                     |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität `data`).                                                |
+    | `REVERSE_PROXY_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Upstream-Prüfung angewendet wird. Hat Vorrang vor den CRL-Daten.                                                 |
+    | `REVERSE_PROXY_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                                    |
+    | `REVERSE_PROXY_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer behält den NGINX-Standard bei.                                                    |
+    | `REVERSE_PROXY_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Chiffren:** Dem Upstream angebotene Cipher-Suite. Leer behält den NGINX-Standard bei.                                                       |
+
+    !!! info "Zertifikatsüberprüfung"
+        Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
+
+        - **Vertrauenswürdige CA:** entweder als Dateipfad (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`, für den Scheduler lesbar) oder als base64/PEM-Daten (`REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`) bereitstellen, ausgewählt über `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Der Scheduler validiert sie, speichert sie im Cache und verteilt sie an jede Instanz, sodass Sie sie nur einmal konfigurieren, ohne Einbindung pro Instanz.
+        - **Erforderlich:** ein vertrauenswürdiges Zertifikat ist Pflicht; NGINX hat keinen impliziten System-Speicher für die Upstream-Überprüfung. Um einen öffentlichen Upstream zu überprüfen, verweisen Sie den Pfad auf das System-CA-Bundle (z. B. `/etc/ssl/certs/ca-certificates.crt`).
+        - **Name:** wird standardmäßig gegen den Host aus `REVERSE_PROXY_HOST` geprüft. Wenn der CN/SAN des Backend-Zertifikats abweicht, setzen Sie `REVERSE_PROXY_SSL_SNI` auf `yes` und `REVERSE_PROXY_SSL_SNI_NAME` auf den erwarteten Namen.
+        - **Ausfallsicher:** Wenn kein gültiges vertrauenswürdiges Zertifikat verfügbar ist, wird die Überprüfung für diesen Server deaktiviert, anstatt jede Upstream-Verbindung zu unterbrechen.
+
+        Diese Einstellungen gelten pro Dienst: Alle Upstream-Einträge (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) teilen sich dieselbe Überprüfungskonfiguration.
 
     !!! info "SNI erklärt"
         Server Name Indication (SNI) ist eine TLS-Erweiterung, die es einem Client ermöglicht, den Hostnamen anzugeben, mit dem er während des Handshake-Prozesses eine Verbindung herstellen möchte. Dies ermöglicht es Servern, mehrere Zertifikate auf derselben IP-Adresse und demselben Port zu präsentieren, sodass mehrere sichere (HTTPS-)Websites von einer einzigen IP-Adresse aus bedient werden können, ohne dass alle diese Websites dasselbe Zertifikat verwenden müssen.
@@ -4816,13 +5482,23 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Leistungsoptimierung:** Optimieren Sie die Anforderungsbehandlung für bestimmte Anwendungsfälle
         - **Flexibilität:** Passen Sie sich mit speziellen Konfigurationen an einzigartige Anwendungsanforderungen an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                              |
-    | --------------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.          |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers. |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                       |
+    | --------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                   |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                          |
+    | `REVERSE_PROXY_MODSECURITY`       | `yes`    | multisite | ja       | **ModSecurity (pro Location):** Auf `no` setzen, um `modsecurity off;` in dieser Location auszugeben; umgeht die WAF auf Endpunkten für große Uploads, um OOM zu vermeiden (siehe Hinweis unten). |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |          | multisite | ja       | **Maximale Körpergröße (pro Location):** Maximale Körpergröße für diese Location (`0` für unbegrenzt). Wenn leer, gilt das `MAX_CLIENT_SIZE` des Dienstes.                                        |
 
     !!! warning "Sicherheitsüberlegungen"
         Seien Sie vorsichtig, wenn Sie benutzerdefinierte Konfigurationsausschnitte einfügen, da diese die Sicherheitseinstellungen von BunkerWeb überschreiben oder bei unsachgemäßer Konfiguration Schwachstellen einführen können.
+
+    !!! warning "Sicherheitsempfehlung für große Uploads"
+        ModSecurity puffert den vollständigen Anforderungskörper im Arbeitsspeicher und kann ihn bei Uploads mit mehreren GB nicht begrenzen, was zu einem OOM des Workers führen kann. Wenn, **und nur wenn**, eine Reverse-Proxy-URL *ausschließlich* für Datei-Uploads verwendet wird (z. B. ein dedizierter `/upload`-Endpunkt), setzen Sie `REVERSE_PROXY_MODSECURITY_N: "no"` für diese URL. Deaktivieren Sie dies nicht für gemischt genutzte URLs: Sie würden die WAF-Abdeckung für alles verlieren, was von dieser Location bereitgestellt wird.
+
+        Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
+
+    !!! tip "Körpergröße pro URL"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` begrenzt den Körper nur für eine URL, sodass ein dedizierter Upload-Endpunkt große Dateien annehmen kann, während der Rest des Dienstes beim strengeren `MAX_CLIENT_SIZE` bleibt. Es setzt außerdem das ModSecurity-Limit für den Anforderungskörper in dieser Location und überschreibt dabei sowohl den Dienstwert als auch ein ausdrückliches `MODSECURITY_SEC_REQUEST_BODY_LIMIT`, sodass der Upload nicht von der WAF abgelehnt wird und jede andere URL ihr eigenes Limit behält. Zwei Limits bleiben unberührt: JSON, XML und formularkodierte Körper werden weiterhin durch `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` begrenzt (standardmäßig `131072`, darüber `400`), und `0` deaktiviert das ModSecurity-Limit in dieser Location, die dann einen Körper beliebiger Größe puffert. ModSecurity liest den gesamten Körper, bevor die Anfrage weitergeleitet wird, setzen Sie den Wert also auf das, was der Endpunkt wirklich benötigt.
 
 === "Caching-Konfiguration"
 
@@ -4854,6 +5530,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Verwenden Sie je nach Inhaltstyp geeignete Cache-Dauern (statische Assets können länger zwischengespeichert werden)
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
+
+!!! tip "Gegenseitiges TLS zum Upstream"
+    Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
 !!! danger "Docker Compose-Benutzer - NGINX-Variablen"
     Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.
@@ -4957,7 +5636,6 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     REVERSE_PROXY_HOST_2: "http://auth-service:8080"
     REVERSE_PROXY_URL_2: "/auth"
     ```
-
 ## Reverse scan
 
 STREAM-Unterstützung :white_check_mark:
@@ -4994,7 +5672,7 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Scan-Funktion zu konfigur
 | ---------------------- | -------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | nein     | **Reverse-Scan aktivieren:** Auf `yes` setzen, um das Scannen von Client-Ports zu aktivieren.       |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | nein     | **Zu scannende Ports:** Leerzeichengetrennte Liste der zu überprüfenden Ports auf der Client-Seite. |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | nein     | **Scan-Timeout:** Maximale Zeit in Millisekunden, die für das Scannen eines Ports zulässig ist.     |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | nein     | **Scan-Timeout:** Maximale Zeit in Millisekunden, die für das Scannen eines Ports zulässig ist. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
 
 !!! warning "Leistungsüberlegungen"
     Das Scannen mehrerer Ports kann die Latenz bei Client-Verbindungen erhöhen. Verwenden Sie einen angemessenen Zeitüberschreitungswert und begrenzen Sie die Anzahl der gescannten Ports, um eine gute Leistung aufrechtzuerhalten.
@@ -5131,18 +5809,63 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 
 **Mit Kopf- und Fußzeile**
 
-````yaml
+```yaml
 USE_ROBOTSTXT: "yes"
 ROBOTSTXT_HEADER: "# Dies ist eine benutzerdefinierte Kopfzeile"
 ROBOTSTXT_RULE: "User-agent: *"
 ROBOTSTXT_RULE_1: "Disallow: /private"
 ROBOTSTXT_FOOTER: "# Dies ist eine benutzerdefinierte Fußzeile"
-ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"```
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
 
 ---
 
 Weitere Informationen finden Sie in der [robots.txt-Dokumentation](https://www.robotstxt.org/robotstxt.html).
-````
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#saml-pro).
+
+STREAM-Unterstützung :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| Einstellung                     | Standardwert     | Kontext   | Mehrfach | Beschreibung                                                                                                                                               |
+| ------------------------------- | ---------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_SAML`                      | `no`             | multisite | nein     | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                  | multisite | nein     | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                  | multisite | nein     | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                  | multisite | nein     | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                  | multisite | nein     | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                  | multisite | nein     | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                  | multisite | nein     | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                  | multisite | nein     | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                  | multisite | nein     | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`      | multisite | nein     | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`   | multisite | nein     | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`      | multisite | nein     | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata` | multisite | nein     | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`              | multisite | nein     | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`             | multisite | nein     | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`            | multisite | nein     | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`           | multisite | nein     | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`         | multisite | nein     | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`         | multisite | nein     | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                  | multisite | nein     | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`          | multisite | nein     | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                  | multisite | nein     | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`         | multisite | nein     | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                  | multisite | nein     | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`           | multisite | nein     | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`              | multisite | nein     | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                  | multisite | nein     | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`             | multisite | nein     | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`            | multisite | nein     | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                  | multisite | nein     | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                  | multisite | ja       | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                  | multisite | ja       | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`            | global    | nein     | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Security.txt
 
@@ -5253,10 +5976,11 @@ So funktioniert's:
 
 ### Verwendung
 
-1.  Aktivieren: `GENERATE_SELF_SIGNED_SSL: yes`.
+1.  Aktivieren: Setzen Sie den Parameter `GENERATE_SELF_SIGNED_SSL` auf `yes`.
 2.  Algorithmus: Wählen Sie über `SELF_SIGNED_SSL_ALGORITHM`.
 3.  Gültigkeit: Dauer in Tagen über `SELF_SIGNED_SSL_EXPIRY`.
 4.  Betreff: Betrefffeld über `SELF_SIGNED_SSL_SUBJ`.
+5.  BunkerWeb den Rest erledigen lassen: Nach der Konfiguration werden Zertifikate automatisch generiert und auf Ihre Domains angewendet.
 
 !!! tip "Stream-Modus"
     Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
@@ -5267,8 +5991,14 @@ So funktioniert's:
 | :-------------------------- | :--------------------- | :-------- | :------- | :-------------------------------------------------------------------- |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | Multisite | nein     | Aktiviert die automatische Generierung selbstsignierter Zertifikate.  |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | Multisite | nein     | Algorithmus: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048`, `rsa-4096`. |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | Multisite | nein     | Gültigkeit (Tage).                                                    |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | Multisite | nein     | Gültigkeit (Tage). Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen. |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | Multisite | nein     | Betreff des Zertifikats (identifiziert die Domain).                   |
+
+!!! tip "Entwicklungsumgebungen"
+    Selbstsignierte Zertifikate eignen sich für Entwicklungs- und Testumgebungen, in denen Sie die vertrauenswürdigen Zertifikate der Clients kontrollieren können. Für öffentliche Produktionsumgebungen sollten Sie eine anerkannte Zertifizierungsstelle verwenden.
+
+!!! info "Zertifikatsinformationen"
+    Das generierte Zertifikat enthält die konfigurierten Servernamen und verwendet den konfigurierten Algorithmus. Passen Sie den Zertifikatsbetreff an, damit er die Hauptdomain widerspiegelt.
 
 ### Beispiele
 
@@ -5308,34 +6038,36 @@ Das Sessions-Plugin bietet eine robuste HTTP-Sitzungsverwaltung für BunkerWeb u
 
 **So funktioniert es:**
 
-1.  Wenn ein Benutzer zum ersten Mal mit Ihrer Website interagiert, erstellt BunkerWeb eine eindeutige Sitzungs-ID.
-2.  Diese ID wird sicher in einem Cookie im Browser des Benutzers gespeichert.
-3.  Bei nachfolgenden Anfragen ruft BunkerWeb die Sitzungs-ID aus dem Cookie ab und verwendet sie, um auf die Sitzungsdaten des Benutzers zuzugreifen.
-4.  Sitzungsdaten können lokal oder in [Redis](#redis) für verteilte Umgebungen mit mehreren BunkerWeb-Instanzen gespeichert werden.
-5.  Sitzungen werden automatisch mit konfigurierbaren Zeitüberschreitungen verwaltet, um die Sicherheit bei gleichzeitiger Benutzerfreundlichkeit zu gewährleisten.
-6.  Die kryptografische Sicherheit von Sitzungen wird durch einen geheimen Schlüssel gewährleistet, der zum Signieren von Sitzungs-Cookies verwendet wird.
+1. Wenn ein Benutzer zum ersten Mal mit Ihrer Website interagiert, erstellt BunkerWeb eine eindeutige Sitzungs-ID.
+2. Diese ID wird sicher in einem Cookie im Browser des Benutzers gespeichert.
+3. Bei nachfolgenden Anfragen ruft BunkerWeb die Sitzungs-ID aus dem Cookie ab und verwendet sie, um auf die Sitzungsdaten des Benutzers zuzugreifen.
+4. Sitzungsdaten können lokal oder in [Redis](#redis) für verteilte Umgebungen mit mehreren BunkerWeb-Instanzen gespeichert werden.
+5. Sitzungen werden automatisch mit konfigurierbaren Zeitüberschreitungen verwaltet, um die Sicherheit bei gleichzeitiger Benutzerfreundlichkeit zu gewährleisten.
+6. Die kryptografische Sicherheit von Sitzungen wird durch einen geheimen Schlüssel gewährleistet, der zum Signieren von Sitzungs-Cookies verwendet wird.
 
 ### Wie man es benutzt
 
 Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfigurieren und zu verwenden:
 
-1.  **Sitzungssicherheit konfigurieren:** Legen Sie einen starken, eindeutigen `SESSIONS_SECRET` fest, um sicherzustellen, dass Sitzungs-Cookies nicht gefälscht werden können. (Der Standardwert ist "random", wodurch BunkerWeb einen zufälligen geheimen Schlüssel generiert.)
-2.  **Sitzungsnamen wählen:** Passen Sie optional den `SESSIONS_NAME` an, um zu definieren, wie Ihr Sitzungs-Cookie im Browser heißen soll. (Der Standardwert ist "random", wodurch BunkerWeb einen zufälligen Namen generiert.)
-3.  **Sitzungs-Timeouts festlegen:** Konfigurieren Sie mit den Timeout-Einstellungen (`SESSIONS_IDLING_TIMEOUT`, `SESSIONS_ROLLING_TIMEOUT`, `SESSIONS_ABSOLUTE_TIMEOUT`), wie lange Sitzungen gültig bleiben.
-4.  **Redis-Integration konfigurieren:** Setzen Sie für verteilte Umgebungen `USE_REDIS` auf "yes" und konfigurieren Sie Ihre [Redis-Verbindung](#redis), um Sitzungsdaten über mehrere BunkerWeb-Knoten hinweg zu teilen.
-5.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration erfolgt die Sitzungsverwaltung für Ihre Website automatisch.
+1. **Sitzungssicherheit konfigurieren:** Legen Sie einen starken, eindeutigen `SESSIONS_SECRET` fest, um sicherzustellen, dass Sitzungs-Cookies nicht gefälscht werden können. (Der Standardwert ist "random", wodurch BunkerWeb einen zufälligen geheimen Schlüssel generiert.)
+2. **Sitzungsnamen wählen:** Passen Sie optional den `SESSIONS_NAME` an, um zu definieren, wie Ihr Sitzungs-Cookie im Browser heißen soll. (Der Standardwert ist "random", wodurch BunkerWeb einen zufälligen Namen generiert.)
+3. **Sitzungs-Timeouts festlegen:** Konfigurieren Sie mit den Timeout-Einstellungen (`SESSIONS_IDLING_TIMEOUT`, `SESSIONS_ROLLING_TIMEOUT`, `SESSIONS_ABSOLUTE_TIMEOUT`), wie lange Sitzungen gültig bleiben.
+4. **Cookie über Subdomains teilen (optional, pro Server):** Standardmäßig ist das Sitzungs-Cookie hostgebunden. Wenn ein bestimmter Server mehrere Subdomains derselben registrierbaren Domain hostet (zum Beispiel `a.example.com` und `b.example.com`) und Sie möchten, dass Anti-Bot-/Challenge-Zustände übernommen werden, setzen Sie `SESSIONS_DOMAIN` **nur auf diesem Server** auf die Parent-Domain (`example.com`). `SESSIONS_DOMAIN` ist eine Multisite-Einstellung, daher erhalten nicht verwandte Mandanten auf derselben BunkerWeb-Instanz niemals ein mandantenübergreifendes `Domain`-Attribut.
+5. **Redis-Integration konfigurieren:** Setzen Sie für verteilte Umgebungen `USE_REDIS` auf "yes" und konfigurieren Sie Ihre [Redis-Verbindung](#redis), um Sitzungsdaten über mehrere BunkerWeb-Knoten hinweg zu teilen.
+6. **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration erfolgt die Sitzungsverwaltung für Ihre Website automatisch.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                 | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                                                               |
-| --------------------------- | -------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SESSIONS_SECRET`           | `random` | global  | nein     | **Sitzungsgeheimnis:** Kryptografischer Schlüssel zum Signieren von Sitzungs-Cookies. Sollte eine starke, zufällige Zeichenfolge sein, die für Ihre Website eindeutig ist. |
-| `SESSIONS_NAME`             | `random` | global  | nein     | **Cookie-Name:** Der Name des Cookies, in dem die Sitzungs-ID gespeichert wird.                                                                                            |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`   | global  | nein     | **Leerlauf-Timeout:** Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird.                                                                        |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`   | global  | nein     | **Rollierendes Timeout:** Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss.                                                                            |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`  | global  | nein     | **Absolutes Timeout:** Maximale Zeit (in Sekunden), bevor eine Sitzung unabhängig von der Aktivität zerstört wird.                                                         |
-| `SESSIONS_CHECK_IP`         | `yes`    | global  | nein     | **IP prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich die IP-Adresse des Clients ändert.                                                             |
-| `SESSIONS_CHECK_USER_AGENT` | `yes`    | global  | nein     | **User-Agent prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich der User-Agent des Clients ändert.                                                     |
+| Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                             |
+| --------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SESSIONS_SECRET`           | `random` | global    | nein     | **Sitzungsgeheimnis:** Kryptografischer Schlüssel zum Signieren von Sitzungs-Cookies. Sollte eine starke, zufällige Zeichenfolge sein, die für Ihre Website eindeutig ist.                                                                                                                               |
+| `SESSIONS_NAME`             | `random` | global    | nein     | **Cookie-Name:** Der Name des Cookies, in dem die Sitzungs-ID gespeichert wird.                                                                                                                                                                                                                          |
+| `SESSIONS_DOMAIN`           |          | multisite | nein     | **Cookie-Domain:** Optionales `Domain`-Attribut für das Sitzungs-Cookie (zum Beispiel `example.com`). Leer lassen, um das Cookie hostgebunden zu halten. Pro Server setzen, um Sitzungszustände (Anti-Bot, Challenges, …) zwischen gleichrangigen Subdomains derselben registrierbaren Domain zu teilen. |
+| `SESSIONS_IDLING_TIMEOUT`   | `30m`    | global    | nein     | **Leerlauf-Timeout:** Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                         |
+| `SESSIONS_ROLLING_TIMEOUT`  | `1h`     | global    | nein     | **Rollierendes Timeout:** Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                             |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `1d`     | global    | nein     | **Absolutes Timeout:** Maximale Zeit (in Sekunden), bevor eine Sitzung unabhängig von der Aktivität zerstört wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                          |
+| `SESSIONS_CHECK_IP`         | `yes`    | global    | nein     | **IP prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich die IP-Adresse des Clients ändert.                                                                                                                                                                                           |
+| `SESSIONS_CHECK_USER_AGENT` | `yes`    | global    | nein     | **User-Agent prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich der User-Agent des Clients ändert.                                                                                                                                                                                   |
 
 !!! warning "Sicherheitshinweise"
     Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bedeutung. In Produktionsumgebungen:
@@ -5351,6 +6083,13 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
     1. Setzen Sie `USE_REDIS` auf `yes` und konfigurieren Sie Ihre Redis-Verbindung
     2. Stellen Sie sicher, dass alle Instanzen genau denselben `SESSIONS_SECRET` und `SESSIONS_NAME` verwenden
     3. Dies stellt sicher, dass Benutzer ihre Sitzung beibehalten, unabhängig davon, welche BunkerWeb-Instanz ihre Anfragen bearbeitet
+
+!!! info "Sitzungswiderruf"
+    Ohne Redis liegen die Sitzungsdaten im Cookie selbst. Das Zerstören einer Sitzung löschte sie deshalb nur im Browser, und das signierte Cookie blieb bis zum Zeitablauf gültig. BunkerWeb führt eine Sperrliste der zerstörten Sitzungskennungen im gemeinsamen Speicher, sodass ein zerstörtes Cookie bei der nächsten Verwendung abgelehnt wird.
+
+    - Gilt nur, wenn die Sitzungsdaten im Cookie gespeichert sind. Mit `USE_REDIS` auf `yes` liegen die Daten serverseitig und werden beim Zerstören bereits entfernt.
+    - Die Sperrliste ist lokal zu jeder BunkerWeb-Instanz. Verwenden Sie Redis, um Sitzungen clusterweit zu widerrufen.
+    - Die Größe steuert `SESSIONS_REVOCATION_MEMORY_SIZE`. Ist der Speicher voll oder nicht verfügbar, gilt die Sitzung als gültig und es wird eine Warnung protokolliert.
 
 ### Beispielkonfigurationen
 
@@ -5406,6 +6145,39 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
     SESSIONS_ABSOLUTE_TIMEOUT: "604800"  # 7 Tage
     ```
 
+=== "Subdomain-übergreifende Sitzungen (ein Mandant)"
+
+    Teilen Sie das Sitzungs-Cookie über alle Subdomains von `example.com`, damit der Anti-Bot-/Challenge-Zustand einmal für die gesamte Website gelöst wird:
+
+    ```yaml
+    SERVER_NAME: "app.example.com api.example.com shop.example.com"
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "crossdomainsession"
+    # SESSIONS_DOMAIN ist eine Multisite-Einstellung: Präfix mit dem Servernamen, damit sie nur für passende Hosts gilt
+    app.example.com_SESSIONS_DOMAIN: "example.com"
+    api.example.com_SESSIONS_DOMAIN: "example.com"
+    shop.example.com_SESSIONS_DOMAIN: "example.com"
+    USE_ANTIBOT: "turnstile"
+    ```
+
+=== "Subdomain-übergreifende Sitzungen (gemischte Mandanten)"
+
+    Wenn dieselbe BunkerWeb-Instanz mehrere nicht verwandte registrierbare Domains hostet, begrenzen Sie `SESSIONS_DOMAIN` auf die Server, die das Cookie tatsächlich teilen sollen. Server ohne diese Einstellung behalten das standardmäßige hostgebundene Cookie, sodass Mandanten isoliert bleiben:
+
+    ```yaml
+    SERVER_NAME: "app.example.com api.example.com billing.acme.org www.unrelated.io"
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "tenantsession"
+    # Teilen Sie das Cookie nur über example.com-Subdomains
+    app.example.com_SESSIONS_DOMAIN: "example.com"
+    api.example.com_SESSIONS_DOMAIN: "example.com"
+    # billing.acme.org und www.unrelated.io bleiben absichtlich hostgebunden
+    USE_ANTIBOT: "turnstile"
+    ```
+
+    !!! note
+        `SESSIONS_DOMAIN` muss immer eine Parent-Domain des Servers sein, auf den es angewendet wird. Zum Beispiel ist `example.com` sowohl für `example.com` als auch für jeden `*.example.com`-Host gültig, und ein führender Punkt (`.example.com`) wird aus Kompatibilitätsgründen weiterhin toleriert. Wenn Sie eine nicht verwandte registrierbare Domain setzen, lehnen Browser das Cookie ab.
+
 ## SSL
 
 STREAM-Unterstützung :white_check_mark:
@@ -5418,6 +6190,12 @@ So funktioniert's:
 2.  Das Plugin erzwingt moderne Protokolle und starke Suiten und deaktiviert anfällige Optionen.
 3.  Optimierte Sitzungsparameter verbessern die Leistung, ohne die Sicherheit zu beeinträchtigen.
 4.  Die Präsentation der Zertifikate folgt Best Practices für Kompatibilität und Sicherheit.
+
+!!! success "Sicherheitsvorteile"
+    - **Datenschutz:** Verschlüsselt Daten während der Übertragung und verhindert Abhören sowie Man-in-the-Middle-Angriffe.
+    - **Authentifizierung:** Bestätigt Clients die Identität Ihres Servers.
+    - **Integrität:** Stellt sicher, dass Daten während der Übertragung nicht manipuliert wurden.
+    - **Moderne Standards:** Auf bewährte Verfahren und Sicherheitsstandards der Branche ausgerichtet.
 
 ### Verwendung
 
@@ -5498,32 +6276,39 @@ Integrate easily the BunkerWeb UI.
 ## UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#ui-single-sign-on-pro).
+
 STREAM-Unterstützung :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| Einstellung                   | Standardwert        | Kontext | Mehrfach | Beschreibung                                                                                     |
-| ----------------------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `USE_UI_SSO`                  | `no`                | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                         |
-| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global  | nein     | HTTP header containing the authenticated username                                                |
-| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global  | nein     | HTTP header containing the user's email address                                                  |
-| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global  | nein     | HTTP header containing the user's groups (comma or space separated)                              |
-| `UI_SSO_HEADER_NAME`          | `X-Name`            | global  | nein     | HTTP header containing the user's display name                                                   |
-| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers |
-| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                 |
-| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global  | nein     | Default role assigned to new SSO users when no group mapping matches                             |
-| `UI_SSO_GROUP_ADMIN`          |                     | global  | nein     | Group name that grants admin role (highest priority)                                             |
-| `UI_SSO_GROUP_WRITER`         |                     | global  | nein     | Group name that grants writer role                                                               |
-| `UI_SSO_GROUP_READER`         |                     | global  | nein     | Group name that grants reader role                                                               |
-| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                        |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global  | nein     | Update user information (email, role) from SSO headers on each login                             |
-| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global  | nein     | How to match incoming SSO users to local accounts                                                |
-| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                       |
+| Einstellung                       | Standardwert        | Kontext | Mehrfach | Beschreibung                                                                                                                                |
+| --------------------------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_UI_SSO`                      | `no`                | global  | nein     | Enable or disable UI Single Sign-On authentication for the web interface                                                                    |
+| `UI_SSO_PROVIDER`                 | `custom`            | global  | nein     | Select your SSO provider to auto-configure headers and group parsing. Use 'Custom' for manual header configuration.                         |
+| `UI_SSO_HEADER_USERNAME`          | `X-User`            | global  | nein     | HTTP header containing the authenticated username                                                                                           |
+| `UI_SSO_HEADER_EMAIL`             | `X-Email`           | global  | nein     | HTTP header containing the user's email address                                                                                             |
+| `UI_SSO_HEADER_GROUPS`            | `X-Groups`          | global  | nein     | HTTP header containing the user's groups (comma or space separated)                                                                         |
+| `UI_SSO_HEADER_NAME`              | `X-Name`            | global  | nein     | HTTP header containing the user's display name                                                                                              |
+| `UI_SSO_TRUSTED_IPS`              | `127.0.0.1,::1`     | global  | nein     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers                                            |
+| `UI_SSO_AUTO_CREATE_USERS`        | `yes`               | global  | nein     | Automatically create new users when they authenticate via SSO for the first time                                                            |
+| `UI_SSO_DEFAULT_ROLE`             | `reader`            | global  | nein     | Default role assigned to new SSO users when no group mapping matches                                                                        |
+| `UI_SSO_GROUP_ADMIN`              |                     | global  | nein     | Group name that grants admin role (highest priority)                                                                                        |
+| `UI_SSO_GROUP_WRITER`             |                     | global  | nein     | Group name that grants writer role                                                                                                          |
+| `UI_SSO_GROUP_READER`             |                     | global  | nein     | Group name that grants reader role                                                                                                          |
+| `UI_SSO_FALLBACK_TO_LOGIN`        | `yes`               | global  | nein     | Allow users to fall back to normal login when SSO headers are not present                                                                   |
+| `UI_SSO_UPDATE_USER_ON_LOGIN`     | `yes`               | global  | nein     | Update user information (email) from SSO headers on each login                                                                              |
+| `UI_SSO_SYNC_ROLES`               | `no`                | global  | nein     | Synchronize user roles from SSO group mappings on each login when the groups header is present and at least one group mapping is configured |
+| `UI_SSO_SYNC_ROLES_PROTECT_ADMIN` | `yes`               | global  | nein     | Prevent SSO role sync from downgrading users who currently have the admin role                                                              |
+| `UI_SSO_ACCOUNT_LINKING`          | `username_or_email` | global  | nein     | How to match incoming SSO users to local accounts                                                                                           |
+| `UI_SSO_LOGOUT_REDIRECT_URL`      |                     | global  | nein     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                                                                  |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
-<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Benutzer-Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#user-manager-pro).
 
 STREAM-Unterstützung :x:
 
@@ -5621,6 +6406,20 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | `WHITELIST_IGNORE_URI`      |          | multisite | nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Whitelist-Prüfungen umgehen sollen.                                                  |
     | `WHITELIST_URI_URLS`        |          | multisite | nein     | **URI-Whitelist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
     | `WHITELIST_IGNORE_URI_URLS` |          | multisite | nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.                                        |
+
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+=== "Header"
+    **Was dies bewirkt:** Setzt Anfragen mit einem bestimmten Request-Header auf die Whitelist, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert. Nützlich für eine vertrauenswürdige Sonde oder ein Gateway, das ein gemeinsames Geheimnis senden kann.
+
+    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                             |
+    | ------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Whitelist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `WHITELIST_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts. Sie hebt außerdem keine bestehende Sperre auf: eine gesperrte IP wird abgewiesen, bevor die Whitelist läuft.
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -5721,3 +6520,16 @@ Beispieldateien im erwarteten Format:
 (?:^|\s)FriendlyScanner(?:\s|$)
 TrustedMonitor/\d+\.\d+
 ```
+
+## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Eine ausführlichere Anleitung finden Sie in der Dokumentation zur [erweiterten Nutzung](advanced.md#wildcard-pro).
+
+STREAM-Unterstützung :x:
+
+Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.
+
+| Einstellung    | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                      |
+| -------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `USE_WILDCARD` | `no`         | multisite | nein     | Enable wildcard server_name for this service (adds *.domain for the first domain in SERVER_NAME). |

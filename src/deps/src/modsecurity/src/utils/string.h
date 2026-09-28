@@ -16,6 +16,7 @@
 #ifndef SRC_UTILS_STRING_H_
 #define SRC_UTILS_STRING_H_
 
+#include <cstddef>
 #include <ctime>
 #include <string>
 #include <cstring>
@@ -238,6 +239,29 @@ inline unsigned char *c2x(unsigned what, unsigned char *where) {
     *where++ = c2x_table[what & 0x0f];
 
     return where;
+}
+
+
+inline std::string string_to_hex(const std::byte *input, size_t size) {
+    static const char* const lut = "0123456789abcdef";
+
+    std::string a(size*2, 0);
+    char *d = a.data();
+
+    for (size_t i = 0; i < size; ++i) {
+        const std::byte b = input[i];
+        *d++ = lut[std::to_integer<unsigned>(b >> 4)];
+        *d++ = lut[std::to_integer<unsigned>(b & std::byte{0x0F})];
+    }
+
+    return a;
+}
+
+
+inline std::string string_to_hex(const unsigned char *input, size_t size) {
+    return string_to_hex(
+        static_cast<const std::byte *>(static_cast<const void *>(input)),
+        size);
 }
 
 

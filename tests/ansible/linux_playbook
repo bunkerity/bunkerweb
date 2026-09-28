@@ -19,15 +19,15 @@
 - hosts: all
   name: Install GH runner
   vars:
-    - runner_user: user
-    - access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
-    - runner_extra_config_args: "--ephemeral"
-    - runner_name: "bw-linux-{{ ansible_date_time.iso8601_micro | to_uuid }}"
-    - github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
-    - github_owner: bunkerity
-    - github_repo: bunkerweb
-    - runner_labels:
-        - bw-linux
+    runner_user: user
+    access_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+    runner_extra_config_args: "--ephemeral"
+    runner_name: "bw-linux-{{ ansible_date_time.iso8601_micro | to_uuid }}"
+    github_account: "{{ lookup('env', 'GITHUB_ACCOUNT') }}"
+    github_owner: bunkerity
+    github_repo: bunkerweb
+    runner_labels:
+      - bw-linux
   roles:
     - monolithprojects.github_actions_runner
 

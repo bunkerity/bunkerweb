@@ -24,9 +24,17 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
 | `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
 | `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
 
-!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
+!!! tip "Bewährte Praktiken"
+    - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.
+    - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden.
+    - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.
 
-!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
+!!! info "Häufige Anwendungsfälle"
+    - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo)
+    - Integration von Chat-Widgets oder Kundensupport-Tools
+    - Einbinden von Tracking-Pixeln für Marketingkampagnen
+    - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen
+    - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern
 
 ### Beispielkonfigurationen
 

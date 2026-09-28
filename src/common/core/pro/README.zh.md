@@ -57,4 +57,4 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 - **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
 - **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
-您可以使用促销码 `freetrial` 免费试用 Pro 功能 1 个月。请访问 [BunkerWeb 面板](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。
+您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。

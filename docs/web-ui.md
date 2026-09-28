@@ -2,7 +2,7 @@
 
 ## Role of the Web UI
 
-The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy.
+The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy. It compresses responses and serves versioned static assets with a long-lived cache header, so direct access on a trusted network is not penalized.
 
 !!! warning "Keep it behind BunkerWeb"
     The UI can change configuration, run jobs, and deploy custom snippets. Keep it on a trusted network, route it through BunkerWeb, and gate it with strong credentials and 2FA.
@@ -11,7 +11,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
     - Default listener: `0.0.0.0:7000` in containers, `127.0.0.1:7000` in packages (change with `UI_LISTEN_ADDR`/`UI_LISTEN_PORT`)
     - Reverse-proxy aware: honors `X-Forwarded-*` via `UI_FORWARDED_ALLOW_IPS`; set `PROXY_NUMBERS` when multiple proxies add headers
     - Auth: local admin account (password policy enforced), optional roles, TOTP 2FA backed by `TOTP_ENCRYPTION_KEYS`
-    - Sessions: signed with `FLASK_SECRET`, default lifetime 12h, pinned to IP and User-Agent; `ALWAYS_REMEMBER` controls persistent cookies
+    - Sessions: server-side, default idle lifetime 12h with a 7-day hard cap, pinned to IP and User-Agent; `ALWAYS_REMEMBER` keeps the session cookie across browser restarts without extending those limits
     - Logs: `/var/log/bunkerweb/ui.log` (+ access log when captured), UID/GID 101 inside the container
     - Health: optional `GET /healthcheck` when `ENABLE_HEALTHCHECK=yes`
     - Dependencies: shares the BunkerWeb database and talks to the API to reload, ban, or query instances
@@ -20,10 +20,10 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
 
 - Run the UI behind BunkerWeb on an internal network; pick a hard-to-guess `REVERSE_PROXY_URL` and restrict source IPs.
 - Set strong `ADMIN_USERNAME` / `ADMIN_PASSWORD`; enable `OVERRIDE_ADMIN_CREDS=yes` only when you intentionally want to reset credentials.
-- Provide `TOTP_ENCRYPTION_KEYS` and enable TOTP on admin accounts; keep recovery codes safe.
+- Enable TOTP on admin accounts and keep recovery codes safe. The encryption keys are generated on first start, so `TOTP_ENCRYPTION_KEYS` only matters when you cannot persist the UI volume.
 - Use TLS (terminate at BunkerWeb or set `UI_SSL_ENABLED=yes` with cert/key paths); set `UI_FORWARDED_ALLOW_IPS` to trusted proxies.
-- Persist secrets: mount `/var/lib/bunkerweb` so `FLASK_SECRET`, Biscuit keys, and TOTP material survive restarts.
-- Keep `CHECK_PRIVATE_IP=yes` (default) to bind sessions to the client IP and `ALWAYS_REMEMBER=no` unless you explicitly want long-lived cookies.
+- Persist secrets: in containers mount a volume on `/data` (`/var/lib/bunkerweb` is a symlink to `/data/lib` in the images) so `FLASK_SECRET`, Biscuit keys, and TOTP encryption keys survive a container recreation. Without it, recreating the UI container wipes every 2FA enrollment.
+- Keep `CHECK_PRIVATE_IP=yes` (default) to bind sessions to the client IP. `ALWAYS_REMEMBER=yes` only makes the session cookie survive a browser restart; it never extends `SESSION_LIFETIME_HOURS` or `SESSION_ABSOLUTE_HOURS`.
 - Ensure `/var/log/bunkerweb` is writable by UID/GID 101 (or the mapped ID when running rootless) so the UI can read logs.
 
 ## Run it
@@ -47,7 +47,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -62,7 +62,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -86,15 +86,16 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.16-rc2
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!" # Remember to set a stronger password for the admin user
-          TOTP_ENCRYPTION_KEYS: "set-me"  # Remember to set a stronger secret key (see below)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -136,6 +137,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
       bw-data:
       bw-storage:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -150,7 +152,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
         name: bw-db
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
 
     Add `bunkerweb-autoconf` and apply labels on the UI container instead of explicit `BUNKERWEB_INSTANCES`. The scheduler still reverse-proxies the UI through the `ui` template and a secret `REVERSE_PROXY_URL`.
@@ -170,24 +172,45 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 - Bind defaults: Docker images listen on `0.0.0.0:7000`; Linux packages bind to `127.0.0.1:7000`. Override with `UI_LISTEN_ADDR` / `UI_LISTEN_PORT`.
 - Proxy headers: `UI_FORWARDED_ALLOW_IPS` defaults to `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`; `UI_PROXY_ALLOW_IPS` defaults to the value of `FORWARDED_ALLOW_IPS`. On Linux installations set them to your reverse proxy IPs for tighter defaults.
-- Secrets and state: `/var/lib/bunkerweb` stores `FLASK_SECRET`, Biscuit keys, and TOTP material. Mount it in Docker; on Linux it is created and managed by the package scripts.
+- Secrets and state: `/var/lib/bunkerweb` stores `FLASK_SECRET`, Biscuit keys, and TOTP encryption keys. In containers that path is a symlink to `/data/lib`, so mount a volume on `/data`; on Linux the directory is created and managed by the package scripts.
 - Logs: `/var/log/bunkerweb` must be readable by UID/GID 101 (or the mapped UID in rootless Docker). Packages create the path; containers need a volume with correct ownership.
 - Wizard behavior: easy-install on Linux starts the UI and wizard automatically; Docker users reach the wizard via the reverse-proxied URL unless they preseed env vars.
 
 ## Authentication and sessions
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
-- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database.
+- Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
+- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so `admin` and `writer` hold the same capabilities and `reader` is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO `user_manager` plugin, documented under [advanced usages](advanced.md#user-manager-pro).
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
-
+- 2FA: TOTP secrets are stored in the database, encrypted with keys kept in `/var/lib/bunkerweb/.totp_encryption_keys.json`. The UI generates them on first start, so nothing is required as long as that file is persisted. Set `TOTP_ENCRYPTION_KEYS` (space-separated keys or a JSON map) to supply your own; each key must then be exactly **43 characters**, anything else is discarded with an `Invalid TOTP secret for key` warning and replaced by a random key. Generate one with:
 
     ```bash
     python3 -c "from passlib import totp; print(totp.generate_secret())"
     ```
 
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
-- Sessions: default lifetime is 12h (`SESSION_LIFETIME_HOURS`). Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
+- Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
+- Session storage: sessions live in Redis when `USE_REDIS=yes`, otherwise in a local cache under `/var/lib/bunkerweb`. A Redis that stops answering, or that refuses writes because it hit `maxmemory`, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size `maxmemory` for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to `SESSION_LIFETIME_HOURS` after another replica deletes that session through Redis. `UI_USE_REDIS=no` takes the UI off Redis on its own, unlike the global `USE_REDIS` which also stops bans and reports being shared between instances.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
+
+!!! warning "2FA is gone after recreating the container"
+    TOTP secrets are stored encrypted in the database, and the keys that decrypt them live **on disk**, not in the database. At every start the UI takes the first source available: `/var/lib/bunkerweb/.totp_encryption_keys.json`, then `TOTP_ENCRYPTION_KEYS` (alias `TOTP_SECRETS`). When neither is usable it generates a new random set, the stored secrets can no longer be decrypted, the admin enrollment is removed from the database, and every user has to enroll again.
+
+    Restarting a container is harmless. What loses the keys is losing the container filesystem: `docker compose down` then `up`, a recreation after an image or environment change, `docker rm`, or a new pod. Mounting a persistent volume on `/data` in the `bw-ui` container is enough, and every example on this page does it: the keys are generated on first start and kept in `/data/lib`, which leaves `TOTP_ENCRYPTION_KEYS` optional.
+
+    Set the variable yourself only when that volume cannot be persisted, or to control rotation. If you do, mind the length: a placeholder like `changeme` is **not** a valid key — keys are 43 characters, as produced by `passlib`'s `generate_secret()`. An invalid value is discarded and replaced by a random key, and unlike an unset variable it also stops the admin enrollment from being reset, so 2FA stays unusable until it is [cleared manually](troubleshooting.md#web-ui). Rotating is possible with a JSON map: keep the old keys next to the new one and existing enrollments stay valid.
+
+!!! tip "Pre-hashed admin password"
+    `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below `10` is **rejected**; `10`–`11` logs a warning (`12`+ recommended). Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.
+
+    Generate a hash:
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+!!! warning "A wrong hash locks you out"
+    Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different `ADMIN_PASSWORD` plus `OVERRIDE_ADMIN_CREDS=yes`.
 
 ## Configuration sources and precedence
 
@@ -195,6 +218,10 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 2. Secrets in `/run/secrets/<VAR>` (Docker)
 3. Env file at `/etc/bunkerweb/ui.env` (Linux packages)
 4. Built-in defaults
+
+## Drafts in the RAW editor
+
+The RAW editor of a service or of the global settings can keep a setting as a **draft**: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a `KEY=value` line and press `#` to toggle the draft state, or `Backspace` on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.
 
 ## Configuration reference
 
@@ -219,17 +246,20 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 ### Auth, sessions, and cookies
 
-| Setting                                     | Description                                                              | Accepted values          | Default                   |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced)                            | Strings                  | unset                     |
-| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                | `yes` or `no`            | `no`                      |
-| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`) | Hex/base64/opaque string | auto-generated            |
-| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)           | Strings / JSON           | auto-generated if missing |
-| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                       | Hex strings              | auto-generated & stored   |
-| `SESSION_LIFETIME_HOURS`                    | Session lifetime                                                         | Number (hours)           | `12`                      |
-| `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                      | `yes` or `no`            | `no`                      |
-| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)        | `yes` or `no`            | `yes`                     |
-| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                        | Integer                  | `1`                       |
+| Setting                                     | Description                                                                                              | Accepted values          | Default                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`          | Seed admin account (password policy enforced; `ADMIN_PASSWORD` also accepts a bcrypt hash, stored as-is) | Strings / bcrypt hash    | unset                     |
+| `OVERRIDE_ADMIN_CREDS`                      | Force updating admin credentials from env                                                                | `yes` or `no`            | `no`                      |
+| `FLASK_SECRET`                              | Session signing secret (persisted to `/var/lib/bunkerweb/.flask_secret`)                                 | Hex/base64/opaque string | auto-generated            |
+| `TOTP_ENCRYPTION_KEYS` (`TOTP_SECRETS`)     | Encryption keys for TOTP secrets (space-separated or JSON map)                                           | Strings / JSON           | auto-generated if missing |
+| `BISCUIT_PUBLIC_KEY`, `BISCUIT_PRIVATE_KEY` | Optional Biscuit keys (hex) used to mint UI tokens                                                       | Hex strings              | auto-generated & stored   |
+| `SESSION_LIFETIME_HOURS`                    | Idling session lifetime (sliding TTL, refreshed on every request)                                        | Number (hours)           | `12`                      |
+| `SESSION_ABSOLUTE_HOURS`                    | Absolute session cap regardless of activity (logout after this many hours since login)                   | Number (hours)           | `168`                     |
+| `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                                                     | Number (hours)           | `0`                       |
+| `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
+| `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
+| `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `UI_USE_REDIS`                              | Take the web UI off Redis without touching the global `USE_REDIS`                                        | `yes` or `no`            | `yes`                     |
 
 ### Logging
 
@@ -318,10 +348,9 @@ log {
 ## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"
-    Use the code `freetrial` on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) for a one-month trial.
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 
-<figure markdown>
 <figure markdown>
   ![PRO upgrade](assets/img/ui-pro.png){ align=center, width="700" }
 </figure>

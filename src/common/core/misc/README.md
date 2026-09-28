@@ -72,9 +72,9 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
 
-    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
+    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD|QUERY`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
 
-    For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`.
+    For most websites, the default `GET|POST|HEAD|QUERY` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Security Benefits"
         - Prevents exploitation of unused or unnecessary HTTP methods
@@ -83,7 +83,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     | Setting           | Default           | Context   | Multiple | Description                                                                            |
     | ----------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
 
     !!! abstract "CORS and Pre-flight Requests"
         If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
@@ -105,9 +105,10 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - Prevents file upload attacks
         - Reduces the risk of server resource exhaustion
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                        |
-    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
+    | Setting           | Default | Context   | Multiple | Description                                                                                                                            |
+    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads).                                     |
+    | `MAX_HEADERS`     | `100`   | global    | no       | **Maximum Headers:** Maximum number of header lines per request. Requests exceeding this limit are rejected with `400 Bad Request`.    |
 
     !!! tip "Request Size Configuration Best Practices"
         If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
@@ -143,6 +144,8 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         NGINX introduced experimental support for HTTP/3 and QUIC starting with version 1.25.0. However, this feature is still experimental, and caution is advised for production use. For more details, see [NGINX's official documentation](https://nginx.org/en/docs/quic.html).
 
         Thorough testing is recommended before enabling HTTP/3 in production environments.
+
+        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
 
 === "Static File Serving"
 
@@ -292,3 +295,4 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     OPEN_FILE_CACHE_ERRORS: "yes"
     OPEN_FILE_CACHE_MIN_USES: "3"
     OPEN_FILE_CACHE_VALID: "60s"
+    ```

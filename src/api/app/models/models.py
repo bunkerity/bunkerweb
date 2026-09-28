@@ -39,4 +39,6 @@ class UiUsers(Users, UserMixin):
         return self.username
 
     def check_password(self, password: str) -> bool:
-        return checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+        # bcrypt 5.x raises ValueError on >72 bytes; hashing truncates to 72 (see
+        # app/utils.py:_bcrypt_secret), so truncate here too to keep verification symmetric.
+        return checkpw(password.encode("utf-8")[:72], self.password.encode("utf-8"))

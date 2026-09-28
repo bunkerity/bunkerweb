@@ -1,3 +1,238 @@
+function formatCrowdSecReportData(data, t) {
+  const object = (value) =>
+    value && typeof value === "object" && !Array.isArray(value);
+  data = object(data) ? data : {};
+  const unknown = t("crowdsec.unknown", "Unknown");
+  const value = (input) =>
+    (typeof input === "string" && input.trim()) ||
+    (typeof input === "number" && Number.isFinite(input))
+      ? String(input)
+      : unknown;
+  const element = (tag, className, text) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const field = (container, label, text) => {
+    const item = element("div", "col-sm-6");
+    item.append(
+      element("dt", "small text-muted fw-normal mb-1", label),
+      element("dd", "text-break mb-0", value(text)),
+    );
+    container.append(item);
+  };
+  const date = (input) => {
+    if (value(input) === unknown) return unknown;
+    const numeric = Number(input);
+    const parsed = Number.isFinite(numeric)
+      ? new Date(numeric < 1e12 ? numeric * 1000 : numeric)
+      : new Date(input);
+    return Number.isFinite(parsed.getTime())
+      ? parsed.toLocaleString(document.documentElement.lang || undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZoneName: "short",
+        })
+      : unknown;
+  };
+  const badge = (input) =>
+    element(
+      "span",
+      `badge text-wrap text-start ${input === "ban" ? "bg-danger" : input === "captcha" ? "bg-warning" : "bg-secondary"}`,
+      value(input),
+    );
+  const sourceLabels = {
+    lapi: t("reports.crowdsec.source_lapi", "Local API decision"),
+    appsec: t("reports.crowdsec.source_appsec", "AppSec inspection"),
+    failure_policy: t(
+      "reports.crowdsec.source_failure_policy",
+      "AppSec failure policy",
+    ),
+  };
+  const sourceValue = value(data.source);
+  const source = Object.hasOwn(sourceLabels, sourceValue)
+    ? sourceLabels[sourceValue]
+    : sourceValue;
+  const root = element("div", "crowdsec-report");
+  const header = element(
+    "div",
+    "d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3",
+  );
+  header.append(element("h6", "mb-0 text-primary", source));
+  root.append(header);
+  const summary = element("dl", "row g-3 mb-4");
+  field(
+    summary,
+    t("crowdsec.report.remediation", "Captured remediation"),
+    data.remediation,
+  );
+  field(
+    summary,
+    t("crowdsec.report.captured", "Captured at"),
+    date(data.captured_at),
+  );
+  field(
+    summary,
+    t("crowdsec.report.service", "Service"),
+    data.service_scope === "global"
+      ? t("scope.global_all_services", "Global (all services)")
+      : data.service_scope,
+  );
+  field(
+    summary,
+    t("crowdsec.report.matched_target", "Matched target"),
+    data.matched_target,
+  );
+  root.append(summary);
+  root.append(
+    element(
+      "p",
+      "small text-muted mb-3",
+      t(
+        "crowdsec.captured_history_help",
+        "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+      ),
+    ),
+  );
+
+  const decisions = Array.isArray(data.decisions)
+    ? data.decisions.filter(object)
+    : [];
+  if (
+    data.metadata_available !== true ||
+    !Array.isArray(data.decisions) ||
+    decisions.length !== data.decisions.length
+  ) {
+    root.append(
+      element(
+        "div",
+        "alert alert-warning py-2",
+        data.metadata_available === undefined
+          ? t(
+              "crowdsec.report.metadata_unavailable",
+              "CrowdSec snapshot metadata is unavailable for this older report.",
+            )
+          : t(
+              "crowdsec.report.metadata_warning",
+              "Some captured decision metadata was unavailable at request time.",
+            ),
+      ),
+    );
+  }
+  if (data.source === "appsec" || data.source === "failure_policy") {
+    root.append(
+      element(
+        "p",
+        "mb-3",
+        data.source === "appsec"
+          ? t(
+              "reports.crowdsec.appsec_help",
+              "AppSec inspected this request; a Local API decision may not exist.",
+            )
+          : t(
+              "reports.crowdsec.failure_policy_help",
+              "The configured failure policy was applied after an AppSec error.",
+            ),
+      ),
+    );
+  }
+  if (object(data.appsec)) {
+    const appsec = element("dl", "row g-3 mb-4");
+    field(
+      appsec,
+      `AppSec HTTP · ${t("table.header.status_code", "Status Code")}`,
+      data.appsec.status,
+    );
+    field(
+      appsec,
+      t("reports.crowdsec.appsec_action", "AppSec action"),
+      data.appsec.action,
+    );
+    root.append(appsec);
+  }
+  if (!decisions.length) {
+    root.append(
+      element(
+        "p",
+        "text-muted mb-3",
+        t(
+          "reports.crowdsec.no_decisions",
+          "No decision details were captured for this request.",
+        ),
+      ),
+    );
+  } else {
+    root.append(
+      element(
+        "h6",
+        "mb-3",
+        t("crowdsec.report.decisions", "Captured decisions"),
+      ),
+    );
+    if (decisions.length > 20) {
+      root.append(
+        element(
+          "p",
+          "small text-warning mb-3",
+          t("crowdsec.decisions.count", `Showing 1–20 of ${decisions.length}`, {
+            start: 1,
+            end: 20,
+            total: decisions.length,
+          }),
+        ),
+      );
+    }
+    for (const decision of decisions.slice(0, 20)) {
+      const card = element("article", "border rounded p-3 mb-3");
+      const title = element(
+        "div",
+        "d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3",
+      );
+      title.append(
+        element("h6", "mb-0 text-break", value(decision.scenario)),
+        badge(decision.type),
+      );
+      const details = element("dl", "row g-3 mb-0");
+      field(details, t("crowdsec.decision.origin", "Origin"), decision.origin);
+      field(details, t("crowdsec.decision.scope", "Scope"), decision.scope);
+      field(details, t("crowdsec.decision.target", "Target"), decision.value);
+      field(
+        details,
+        t("crowdsec.decision.expires", "Expires"),
+        date(decision.expires_at),
+      );
+      field(details, t("crowdsec.decision.id", "Decision ID"), decision.id);
+      card.append(title, details);
+      root.append(card);
+    }
+  }
+  if (value(data.connection) !== unknown || value(data.instance) !== unknown) {
+    const technical = element("details", "border-top pt-3 mt-4");
+    technical.append(
+      element(
+        "summary",
+        "text-muted",
+        t("reports.crowdsec.technical_details", "Technical details"),
+      ),
+    );
+    const details = element("dl", "row g-3 mt-1 mb-0 small");
+    field(
+      details,
+      t("reports.crowdsec.connection_id", "Connection ID"),
+      data.connection,
+    );
+    field(details, t("reports.crowdsec.instance", "Instance"), data.instance);
+    technical.append(details);
+    root.append(technical);
+  }
+  return root;
+}
+
 $(document).ready(function () {
   // Ensure i18next is loaded before using it
   const t =
@@ -5,62 +240,16 @@ $(document).ready(function () {
       ? i18next.t
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const crowdsecUrl = $("#crowdsec-url").val().trim();
+  const crowdsecLogoUrl = $("#crowdsec-logo-url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const filtersStateCache = new Map();
   const filtersStateTtlMs = 10000;
   const filtersStateMaxEntries = 100;
 
-  const collectSearchPaneEntries = (requestData) => {
-    if (!requestData || typeof requestData !== "object") return [];
-
-    const entries = Object.keys(requestData)
-      .filter((key) => key.startsWith("searchPanes["))
-      .map((key) => [key, String(requestData[key] || "")]);
-
-    const flattenNestedPanes = (value, path) => {
-      if (value === null || typeof value === "undefined") return;
-
-      if (Array.isArray(value)) {
-        value.forEach((item, index) =>
-          flattenNestedPanes(item, `${path}[${index}]`),
-        );
-        return;
-      }
-
-      if (typeof value === "object") {
-        Object.keys(value)
-          .sort((a, b) => a.localeCompare(b))
-          .forEach((key) =>
-            flattenNestedPanes(value[key], `${path}[${String(key)}]`),
-          );
-        return;
-      }
-
-      entries.push([path, String(value)]);
-    };
-
-    if (
-      requestData.searchPanes &&
-      typeof requestData.searchPanes === "object"
-    ) {
-      flattenNestedPanes(requestData.searchPanes, "searchPanes");
-    }
-
-    // Remove duplicates while keeping all distinct key/value pairs.
-    const seen = new Set();
-    return entries
-      .filter(([key, value]) => {
-        const signature = `${key}=${value}`;
-        if (seen.has(signature)) return false;
-        seen.add(signature);
-        return true;
-      })
-      .sort((a, b) => a[0].localeCompare(b[0]));
-  };
-
   const hasActiveSearchPaneSelections = (requestData) =>
-    collectSearchPaneEntries(requestData).some(
+    collectDataTableSearchPaneEntries(requestData).some(
       ([, value]) => value.trim() !== "",
     );
 
@@ -74,7 +263,7 @@ $(document).ready(function () {
             .toLowerCase()
         : "";
 
-    const paneEntries = collectSearchPaneEntries(requestData);
+    const paneEntries = collectDataTableSearchPaneEntries(requestData);
 
     return JSON.stringify({ search: searchValue, panes: paneEntries });
   };
@@ -111,6 +300,20 @@ $(document).ready(function () {
     if (!payload.searchPanes || !payload.searchPanes.options) return;
     pruneFiltersStateCache();
     filtersStateCache.set(stateKey, { ts: Date.now(), payload });
+  };
+
+  // Build the server-side export URL, forwarding the current search,
+  // ordering, and any active SearchPanes selections so the file matches
+  // what the user sees in the table.
+  const buildReportsExportUrl = (dt, format) => {
+    const exportParams = {
+      ...getDataTableStateParams(dt),
+      csrf_token: $("#csrf_token").val(),
+    };
+
+    return `${window.location.pathname}/export/${format}?${$.param(
+      exportParams,
+    )}`;
   };
 
   const headers = [
@@ -226,7 +429,7 @@ $(document).ready(function () {
     },
     bottomStart: {
       pageLength: {
-        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+        menu: [10, 25, 50, 100, 500, 1000],
       },
       info: true,
     },
@@ -285,72 +488,17 @@ $(document).ready(function () {
           },
         },
         {
-          extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_csv_visible">CSV (Visible)</span>',
-          bom: true,
-          filename: "bw_report_visible",
-          exportOptions: {
-            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
-          },
-        },
-        {
-          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_csv_all">CSV (All)</span>',
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_csv">CSV</span>',
           className: "buttons-csv",
           action: function (e, dt, button, config) {
-            // Get current table state for filters
-            const params = dt.ajax.params();
-            // Build URL with parameters for server-side export
-            const exportUrl = `${window.location.pathname}/export/csv?${$.param(
-              {
-                csrf_token: $("#csrf_token").val(),
-                draw: params.draw,
-                search: params.search ? params.search.value : "",
-                order_column:
-                  params.order && params.order.length > 0
-                    ? params.columns[params.order[0].column].data
-                    : "",
-                order_dir:
-                  params.order && params.order.length > 0
-                    ? params.order[0].dir
-                    : "",
-              },
-            )}`;
-            // Trigger download
-            window.location.href = exportUrl;
+            window.location.href = buildReportsExportUrl(dt, "csv");
           },
         },
         {
-          extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_excel_visible">Excel (Visible)</span>',
-          filename: "bw_report_visible",
-          exportOptions: {
-            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
-          },
-        },
-        {
-          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_excel_all">Excel (All)</span>',
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_excel">Excel</span>',
           className: "buttons-excel",
           action: function (e, dt, button, config) {
-            // Get current table state for filters
-            const params = dt.ajax.params();
-            // Build URL with parameters for server-side export
-            const exportUrl = `${
-              window.location.pathname
-            }/export/excel?${$.param({
-              csrf_token: $("#csrf_token").val(),
-              draw: params.draw,
-              search: params.search ? params.search.value : "",
-              order_column:
-                params.order && params.order.length > 0
-                  ? params.columns[params.order[0].column].data
-                  : "",
-              order_dir:
-                params.order && params.order.length > 0
-                  ? params.order[0].dir
-                  : "",
-            })}`;
-            // Trigger download
-            window.location.href = exportUrl;
+            window.location.href = buildReportsExportUrl(dt, "excel");
           },
         },
       ],
@@ -363,6 +511,23 @@ $(document).ready(function () {
       )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [{ extend: "ban_selected", className: "text-danger" }],
+    },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-filter-alt bx-18px me-md-2" aria-hidden="true"></span><span class="d-none d-md-inline" data-i18n="button.filtered_actions">${t(
+        "button.filtered_actions",
+        "Filtered actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary filtered-action-button",
+      buttons: [{ extend: "ban_filtered_reports", className: "text-danger" }],
+      init: function (dt, node) {
+        const updateState = () => {
+          const disabled = isReadOnly || dt.page.info().recordsDisplay === 0;
+          $(node).toggleClass("disabled", disabled).prop("disabled", disabled);
+        };
+        dt.on("draw.filteredReportActions", updateState);
+        updateState();
+      },
     },
   ];
 
@@ -405,12 +570,11 @@ $(document).ready(function () {
 
       if (!bans.length) return;
 
-      // Submit form to /bans/ban in new tab
+      // Submit form to /bans/ban in the same tab
       const form = $("<form>", {
         method: "POST",
         action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
         class: "visually-hidden",
-        target: "_blank",
       });
       form.append(
         $("<input>", {
@@ -426,6 +590,63 @@ $(document).ready(function () {
           value: JSON.stringify(bans),
         }),
       );
+      form.appendTo("body").submit();
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.ban_filtered_reports = {
+    text: `<span class="tf-icons bx bx-block bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.ban_all_filtered">${t(
+      "button.ban_all_filtered",
+      "Ban all matching reports",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+
+      const count = dt.page.info().recordsDisplay;
+      if (
+        count === 0 ||
+        !window.confirm(
+          t(
+            "modal.body.ban_filtered_confirmation",
+            "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
+            { count: count },
+          ),
+        )
+      ) {
+        return;
+      }
+
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+        class: "visually-hidden",
+      });
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "csrf_token",
+          value: $("#csrf_token").val(),
+        }),
+        $("<input>", {
+          type: "hidden",
+          name: "selection_mode",
+          value: "filtered",
+        }),
+        $("<input>", {
+          type: "hidden",
+          name: "source",
+          value: "reports",
+        }),
+      );
+      appendDataTableStateInputs(form, dt);
       form.appendTo("body").submit();
     },
   };
@@ -454,6 +675,10 @@ $(document).ready(function () {
         .addClass("btn-primary");
       autoRefreshInterval = setInterval(() => {
         if (!autoRefresh) return;
+        // Skip the poll while the tab is backgrounded so a hidden tab with
+        // auto-refresh on stops hitting /reports/fetch + /reports/filters every
+        // 10s. A visibilitychange listener refreshes once when it returns.
+        if (document.hidden) return;
         $("#reports").DataTable().ajax.reload(null, false);
       }, 10000); // 10 seconds
     } else {
@@ -472,6 +697,14 @@ $(document).ready(function () {
       toggleAutoRefresh();
     },
   };
+
+  // When the tab comes back to the foreground with auto-refresh on, reload once
+  // immediately instead of waiting up to 10s (polls are skipped while hidden).
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && autoRefresh) {
+      $("#reports").DataTable().ajax.reload(null, false);
+    }
+  });
 
   // Initialize DataTable
   const reports_config = {
@@ -512,24 +745,24 @@ $(document).ready(function () {
           targets: 5,
           render: function (data) {
             const countryCode = data.toLowerCase();
+            const isNotApplicable =
+              countryCode === "unknown" ||
+              countryCode === "local" ||
+              countryCode === "n/a";
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
+                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
               }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+                isNotApplicable ? "unknown" : countryCode.toUpperCase()
               }">
                 <img src="${escapeHtml(baseFlagsUrl)}/${
-                  countryCode === "local" ? "zz" : escapeHtml(countryCode)
+                  isNotApplicable ? "zz" : escapeHtml(countryCode)
                 }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
-                &nbsp;－&nbsp;${
-                  countryCode === "local" ? "N/A" : escapeHtml(data)
-                }
+                &nbsp;－&nbsp;${isNotApplicable ? "N/A" : escapeHtml(data)}
               </span>`;
           },
         },
@@ -641,8 +874,31 @@ $(document).ready(function () {
                     "This action is not allowed in read-only mode.",
                   )
                 : t("tooltip.button.ban_ip", "Ban this IP address");
+              // The investigation page only knows about CrowdSec decisions.
+              const isCrowdsecReport =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecReport
+                ? `<a class="btn btn-outline-crowdsec btn-sm d-inline-flex align-items-center"
+                       href="${crowdsecUrl}?ip=${encodeURIComponent(
+                         String(row.ip || ""),
+                       )}"
+                       aria-label="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="bottom"
+                       data-bs-original-title="${t(
+                         "crowdsec.investigation.submit",
+                         "Investigate",
+                       )} · CrowdSec">
+                      <img src="${crowdsecLogoUrl}" width="16" height="16" alt="" aria-hidden="true" />
+                    </a>`
+                : "";
               return `
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center align-items-center">
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
                           data-ip="${row.ip}"
@@ -653,6 +909,7 @@ $(document).ready(function () {
                           data-bs-original-title="${banTooltip}">
                     <i class="bx bx-block bx-xs"></i>
                   </button>
+                  ${investigateLink}
                 </div>
               `;
             }
@@ -666,7 +923,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       processing: true,
@@ -1238,6 +1495,9 @@ $(document).ready(function () {
     const normalizedReason = String(reason || "")
       .trim()
       .toLowerCase();
+    if (normalizedReason === "crowdsec") {
+      return formatCrowdSecReportData(data, t);
+    }
     const badBehaviorEntries = normalizeBadBehaviorEntries(data);
     const shouldFilterByServer = shouldFilterBadBehaviorByServer(serverName);
     const filteredBadBehaviorEntries = shouldFilterByServer
@@ -1287,30 +1547,58 @@ $(document).ready(function () {
       return [];
     }
 
+    let entries;
     if (Array.isArray(data)) {
-      return data.filter((entry) => isBadBehaviorEntry(entry));
-    }
-
-    if (typeof data === "object") {
+      entries = data.filter((entry) => isBadBehaviorEntry(entry));
+    } else if (typeof data === "object") {
       if (Array.isArray(data.events)) {
-        return data.events.filter((entry) => isBadBehaviorEntry(entry));
+        entries = data.events.filter((entry) => isBadBehaviorEntry(entry));
+      } else {
+        const numericKeys = Object.keys(data).filter((key) =>
+          /^\d+$/.test(key),
+        );
+        if (numericKeys.length) {
+          entries = numericKeys
+            .map((key) => data[key])
+            .filter((entry) => isBadBehaviorEntry(entry));
+        } else if (isBadBehaviorEntry(data)) {
+          entries = [data];
+        } else {
+          entries = [];
+        }
       }
-
-      const numericKeys = Object.keys(data).filter((key) => /^\d+$/.test(key));
-
-      if (numericKeys.length) {
-        return numericKeys
-          .sort((a, b) => Number(a) - Number(b))
-          .map((key) => data[key])
-          .filter((entry) => isBadBehaviorEntry(entry));
-      }
-
-      if (isBadBehaviorEntry(data)) {
-        return [data];
-      }
+    } else {
+      return [];
     }
 
-    return [];
+    // Sort newest-first by entry.date so all input shapes match the rest of
+    // the Reports UI. Entries with no parseable timestamp keep their relative
+    // order at the bottom.
+    return entries
+      .map((entry, idx) => ({
+        entry,
+        idx,
+        ts: parseBadBehaviorEntryTimestamp(entry),
+      }))
+      .sort((a, b) => (b.ts !== a.ts ? b.ts - a.ts : a.idx - b.idx))
+      .map((item) => item.entry);
+  }
+
+  function parseBadBehaviorEntryTimestamp(entry) {
+    if (
+      !entry ||
+      entry.date === null ||
+      entry.date === undefined ||
+      entry.date === ""
+    ) {
+      return -Infinity;
+    }
+    const numeric = Number(entry.date);
+    if (Number.isFinite(numeric)) {
+      return numeric < 1e12 ? numeric * 1000 : numeric;
+    }
+    const parsed = Date.parse(entry.date);
+    return Number.isFinite(parsed) ? parsed : -Infinity;
   }
 
   function isBadBehaviorEntry(entry) {
@@ -1880,7 +2168,6 @@ $(document).ready(function () {
       method: "POST",
       action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
       class: "visually-hidden",
-      target: "_blank",
     });
     form.append(
       $("<input>", {

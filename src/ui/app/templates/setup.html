@@ -6,7 +6,7 @@
 {% endblock %}
 {% block page %}
     <!-- Content -->
-    <div class="bg-light-subtle">
+    <div class="theme-bg-surface">
         <div class="login-background">
             <input type="hidden" id="ui_user" value="{{ 'yes' if ui_user else 'no' }}" />
             <input type="hidden"
@@ -16,7 +16,7 @@
                    id="csrf_token"
                    name="csrf_token"
                    value="{{ csrf_token() }}" />
-            <input type="hidden" name="theme" value="light" />
+            <input type="hidden" name="theme" value="{{ theme }}" />
             <div class="container-xxl">
                 <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1050;">
                     <!-- prettier-ignore -->
@@ -24,7 +24,7 @@
                         <!-- Language Selector -->
                         <div class="me-3">{% include "language-selector.html" %}</div>
                         <!-- Theme Toggle -->
-                        <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
+                        <div class="toggle-container d-flex align-items-center theme-toggle-pill p-2 rounded-pill shadow-lg me-3">
                             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                                    for="dark-mode-toggle"
                                    data-i18n="theme.light">Light</label>
@@ -41,6 +41,17 @@
                                    data-i18n="theme.dark">Dark</label>
                         </div>
                         <ul class="d-flex mb-0 list-unstyled">
+                            {% if current_user.is_authenticated %}
+                                <li class="me-3">
+                                    <a class="btn btn-sm btn-outline-danger fw-bold text-uppercase d-flex align-items-center h-100"
+                                       href="{{ url_for('logout') }}"
+                                       aria-label="Log Out"
+                                       data-i18n-aria-label="navbar.dropdown.logout">
+                                        <i class="bx bx-power-off me-0 me-md-2" aria-hidden="true"></i>
+                                        <span class="d-none d-md-inline" data-i18n="navbar.dropdown.logout">Log Out</span>
+                                    </a>
+                                </li>
+                            {% endif %}
                             <li class="me-3">
                                 <a role="button"
                                    class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
@@ -85,6 +96,9 @@
                                 </div>
                             </div>
                             <div class="card-body p-2 pb-8">
+                                {% if notice %}
+                                    <div class="alert alert-warning" role="alert">{{ notice }}</div>
+                                {% endif %}
                                 <div class="d-flex justify-content-center">
                                     <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
                                          aria-label="breadcrumb">
@@ -228,6 +242,7 @@
                                                                    aria-labelledby="label-password"
                                                                    autocomplete="off"
                                                                    required
+                                                                   maxlength="72"
                                                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$" />
                                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                                         </div>
@@ -281,6 +296,7 @@
                                                                    aria-labelledby="label-confirm_password"
                                                                    autocomplete="off"
                                                                    required
+                                                                   maxlength="72"
                                                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$" />
                                                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                                         </div>
@@ -700,12 +716,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           type="number"
-                                                                           min="0"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_retry_delay }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -735,12 +750,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           type="number"
-                                                                           min="1"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -770,12 +784,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           type="number"
-                                                                           min="1"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_max_time }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -876,6 +889,7 @@
                                                             "nsone",
                                                             "ovh",
                                                             "pdns",
+                                                            "porkbun",
                                                             "rfc2136",
                                                             "route53",
                                                             "sakuracloud",
@@ -1657,13 +1671,10 @@
                                                 <span class="text-primary shine">BunkerWeb PRO free trial</span>
                                             </h5>
                                             <p class="mb-0 mt-2 text-primary">
-                                                Want to quickly test BunkerWeb PRO for one month? Use the code <strong>freetrial</strong> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc"
+                                                Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
     target="_blank"
     rel="noopener"
-    class="alert-link">BunkerWeb panel</a> or by <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
-    target="_blank"
-    rel="noopener"
-    class="alert-link">clicking here</a> to directly apply the promo code (will be effective at checkout).
+    class="alert-link">BunkerWeb panel</a>.
                                             </p>
                                         </div>
                                         <div class="pt-1 pb-4">
@@ -1859,7 +1870,7 @@
                                                    class="form-check-input"
                                                    name="OPT_IN"
                                                    required />
-                                            <label class="form-check-label" for="privacyPolicyCheck">
+                                            <label class="form-check-label" for="setup-subscribe-newsletter">
                                                 <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
                                                 <a class="fst-italic"
                                                    href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"

@@ -9,9 +9,8 @@ from qrcode import make
 from qrcode.image.pil import PilImage
 
 from app.models.models import UiUsers
-from app.dependencies import DATA
+from app.dependencies import DB
 from app.utils import LIB_DIR, LOGGER, stop
-
 
 # Try to load the new .totp_encryption_keys.json file first, fallback to .totp_secrets.json for backward compatibility
 encryption_keys_path = LIB_DIR.joinpath(".totp_encryption_keys.json")
@@ -54,23 +53,47 @@ class Totp:
             return
 
         for i, encrypted_code in enumerate(user.list_recovery_codes):
-            if checkpw(code.encode("utf-8"), encrypted_code.encode("utf-8")):
+            # Truncate to 72 bytes: bcrypt 5.x raises ValueError past that, and generated
+            # recovery codes are far shorter, so this only stops oversized garbage input
+            # from turning an "invalid code" into a 500.
+            if checkpw(code.encode("utf-8")[:72], encrypted_code.encode("utf-8")):
                 return user.list_recovery_codes.pop(i)
 
+    def match_totp(self, token: str, totp_secret: str) -> Optional[TotpMatch]:
+        """Validate a token without consuming it; enrollment persists the match with its secret."""
+        if not totp_secret:
+            return None
+        try:
+            return self._totp.verify(token, totp_secret, window=3)
+        except (MalformedTokenError, TokenError):
+            return None
+        except (ValueError, TypeError) as e:
+            # A wrong code is routine; an unreadable stored secret is not, and the user only sees "invalid token".
+            LOGGER.error(f"Stored TOTP secret is unusable ({type(e).__name__}), the code cannot be checked")
+            return None
+
     def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[UiUsers] = None) -> bool:
-        """Verifies token for specific user."""
+        """Verify a token, consuming it atomically when authenticating an existing user."""
         if not totp_secret and not user:
             raise ValueError("Either totp_secret or user must be provided")
-        elif not totp_secret:
-            totp_secret = user.totp_secret
-
-        try:
-            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
-            if user:
-                self.set_last_counter(user, tmatch)
-            return True
-        except (MalformedTokenError, TokenError):
+        totp_secret = totp_secret or user.totp_secret
+        match = self.match_totp(token, totp_secret)
+        if match is None:
             return False
+        # An explicit secret that is not the stored one is an enrollment: there is no counter to
+        # consume yet, the caller persists the match together with the secret.
+        if not user or totp_secret != user.totp_secret:
+            return True
+        if not DB.readonly:
+            consumed = DB.use_ui_user_totp(user.get_id(), totp_secret, match.counter)
+            # A failed write can be the moment the database is found read-only; re-check before
+            # treating the refusal as a replay.
+            if consumed or not DB.readonly:
+                return consumed
+        # The database is the only replay store; in read-only fallback mode keep the login
+        # available and accept the code without consuming its counter.
+        LOGGER.warning("Database is read-only, TOTP code accepted without replay protection")
+        return True
 
     def get_totp_uri(self, username: str, totp_secret: str) -> str:
         """Generate provisioning url for use with the qrcode scanner built into the app"""
@@ -84,18 +107,6 @@ class Totp:
             image_as_str = b64encode(virtual_file.getvalue()).decode("ascii")
 
         return f"data:image/jpeg;base64,{image_as_str}"
-
-    def get_last_counter(self, user: UiUsers) -> Optional[int]:
-        """Fetch stored last_counter from cache."""
-        DATA.load_from_file()
-        return DATA.get("totp_last_counter", {}).get(user.get_id())
-
-    def set_last_counter(self, user: UiUsers, tmatch: TotpMatch) -> None:
-        """Cache last_counter."""
-        DATA.load_from_file()
-        if "totp_last_counter" not in DATA:
-            DATA["totp_last_counter"] = {}
-        DATA["totp_last_counter"][user.get_id()] = tmatch.counter
 
 
 totp = Totp()

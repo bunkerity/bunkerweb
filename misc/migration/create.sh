@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Optimized migration script
+# Migration script — always boots scheduler at the original tag (1.5.0-beta),
+# applies all existing migrations in bulk, then generates only the new one.
 set -euo pipefail
 
 log() {
@@ -72,16 +73,29 @@ version_lt() {
 log "🌐 Fetching tags from GitHub"
 page=1
 all_tags_json=()
+github_auth=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+  github_auth=(-H "Authorization: token $GITHUB_TOKEN")
+fi
 
 while :; do
-  resp=$(curl -s "https://api.github.com/repos/bunkerity/bunkerweb/tags?per_page=100&page=$page")
-  # Stop when an empty array is returned
+  if ! resp=$(curl -sf "${github_auth[@]}" \
+    "https://api.github.com/repos/bunkerity/bunkerweb/tags?per_page=100&page=$page"); then
+    log "❌ GitHub API request failed (rate limited or network error)"
+    log "💡 Set GITHUB_TOKEN to increase rate limit (60/hr → 5000/hr)"
+    exit 1
+  fi
+  # Verify the response is a JSON array (error objects are not arrays)
+  if [[ "$(jq -r 'type' <<<"$resp")" != "array" ]]; then
+    log "❌ Unexpected GitHub API response: $(jq -r '.message // "unknown error"' <<<"$resp")"
+    exit 1
+  fi
   [[ $(jq 'length' <<<"$resp") -eq 0 ]] && break
-  all_tags_json+=( "$resp" )
+  all_tags_json+=("$resp")
   ((page++))
 done
 
-# 2) Extract, normalize, filter and sort
+# Extract, normalize, filter and sort (oldest first)
 tags=$(printf '%s\n' "${all_tags_json[@]}" \
   | jq -r '.[].name | sub("^v"; "")' \
   | jq -R -s -c '
@@ -124,130 +138,118 @@ cd misc/migration || exit 1
 
 db_dir=$(realpath ../../src/common/db)
 
-# Process each tag and database combination
+# Process each database
 log "🏗️ Processing migration tags and databases"
-NEXT_TAG="dev"
-jq -r 'to_entries[] | "\(.key) \(.value)"' databases.json | while read -r database database_uri; do
-  started=0
+mapfile -t db_entries < <(grep -v '^\s*//' databases.json | jq -r 'to_entries[] | "\(.key) \(.value)"')
+for entry in "${db_entries[@]}"; do
+  read -r database database_uri <<< "$entry"
+  migration_dir="${db_dir}/alembic/${database}_versions"
 
-  for tag in $(echo "$tags" | jq -r '.[]'); do
-    if [ "$tag" == "$NEXT_TAG" ]; then
-      continue
-    fi
+  # Build the tags array
+  mapfile -t tags_array < <(echo "$tags" | jq -r '.[]')
+  total=${#tags_array[@]}
 
-    # Skip Oracle migrations for versions earlier than 1.6.2-rc1
-    if [[ "$database" == "oracle" ]] && version_lt "$tag" "1.6.2-rc1"; then
-      log "⏭️ Skipping Oracle migration for version $tag (Oracle support starts from 1.6.2-rc1)"
-      continue
-    fi
+  if [[ $total -lt 2 ]]; then
+    log "⚠️ Not enough tags to generate migrations, skipping"
+    continue
+  fi
 
-    export DATABASE="$database"
-    export DATABASE_URI="${database_uri//+psycopg}"
+  target_tag="${tags_array[$((total - 1))]}"
 
-    if [[ "$started" -eq 0 ]]; then
-      tag_index=$(echo "$tags" | jq -r --arg current_tag "$tag" 'index($current_tag)')
-      next_tag_index=$((tag_index + 1))
-      export TAG="$tag"
-      NEXT_TAG=$(echo "$tags" | jq -r --argjson idx "$next_tag_index" '.[$idx] // empty')
-      export NEXT_TAG
+  # Check if the target tag already has a migration
+  transformed_target="${target_tag//[.~-]/_}.py"
+  has_target_migration=0
+  if compgen -G "$migration_dir"/*_"$transformed_target" > /dev/null; then
+    has_target_migration=1
+  fi
 
-      if [[ -z "$NEXT_TAG" ]]; then
-        log "🔚 Skipping migration for the last tag $tag"
-        continue
+  # Always boot the scheduler at the first tag to create the initial DB schema
+  first_tag="${tags_array[0]}"
+  if [[ "$database" == "oracle" ]]; then
+    for ((i = 0; i < total; i++)); do
+      if ! version_lt "${tags_array[$i]}" "1.6.2-rc1"; then
+        first_tag="${tags_array[$i]}"
+        break
       fi
+    done
+  fi
 
-      log "✨ Creating migration scripts from version $TAG to $NEXT_TAG and database $database"
+  if [[ $has_target_migration -eq 1 ]]; then
+    log "🔄 Migration exists for $target_tag ($database), testing it"
+  else
+    log "✨ Generating migration for $database: $first_tag → $target_tag"
+  fi
 
-      started=1
+  export DATABASE="$database"
+  export TAG="$first_tag"
+  export NEXT_TAG="$target_tag"
 
-      # Start the database stack if not SQLite
-      if [[ "$database" != "sqlite" ]]; then
-        log "🚀 Starting Docker stack for $database"
-        docker compose -f "$database.yml" pull || true
-        if ! docker compose -f "$database.yml" up -d; then
-          log "❌ Failed to start the Docker stack for $database"
-          docker compose down -v --remove-orphans
-          find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} +
-          exit 1
-        fi
-      fi
-
-      log "🚀 Starting Docker stack for BunkerWeb"
-      if ! docker compose up -d; then
-        log "❌ Failed to start the Docker stack for BunkerWeb"
-        docker compose down -v --remove-orphans
-        find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} +
-        exit 1
-      fi
-
-      # Wait for the scheduler to be healthy
-      log "⏳ Waiting for the scheduler to become healthy"
-      timeout=60
-      until docker compose ps bw-scheduler | grep -q "(healthy)" || [[ $timeout -le 0 ]]; do
-        sleep 5
-        timeout=$((timeout - 5))
-      done
-
-      if [[ $timeout -le 0 ]]; then
-        log "❌ Timeout waiting for the scheduler to be healthy"
-        docker compose logs bw-scheduler
-        docker compose down -v --remove-orphans
-        find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} +
-        exit 1
-      fi
-
-      log "✅ Scheduler is healthy"
-
-      docker compose stop bw-scheduler bunkerweb || true
-    else
-      export NEXT_TAG="$tag"
-
-      if [[ -z "$NEXT_TAG" ]]; then
-        log "🔚 Skipping migration for the last tag $tag"
-        continue
-      fi
-
-      log "✨ Creating migration scripts from version $TAG to $NEXT_TAG and database $database"
-    fi
-
-    transformed_tag="${NEXT_TAG//[.~-]/_}.py"
-    migration_dir="${db_dir}/alembic/${database}_versions"
-
-    # Skip if migration script already exists
-    export ONLY_UPDATE=0
-    if compgen -G "$migration_dir"/*_"$transformed_tag" > /dev/null; then
-      log "🔄 Migration scripts for version $tag and database $database already exist"
-      export ONLY_UPDATE=1
-    fi
-
-    export DATABASE_URI="$database_uri"
-
-    # Run the migration script
-    log "🦃 Running migration script for $tag and $database"
-    if ! docker run --rm \
-      --network=bw-db \
-      -v bw-data:/data \
-      -v bw-db:/db \
-      -v bw-sqlite:/var/lib/bunkerweb \
-      -v "$migration_dir":/usr/share/migration/versions \
-      -e TAG \
-      -e DATABASE \
-      -e DATABASE_URI \
-      -e NEXT_TAG \
-      -e ONLY_UPDATE \
-      -e UID="$(id -u)" \
-      -e GID="$(id -g)" \
-      local/bw-migration; then
-      log "❌ Failed to run the migration script"
+  # Start the database stack if not SQLite
+  export DATABASE_URI="${database_uri//+psycopg}"
+  if [[ "$database" != "sqlite" ]]; then
+    log "🚀 Starting Docker stack for $database"
+    docker compose -f "$database.yml" pull || true
+    if ! docker compose -f "$database.yml" up -d; then
+      log "❌ Failed to start the Docker stack for $database"
       docker compose down -v --remove-orphans
-      find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} +
+      find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
       exit 1
     fi
+  fi
 
-    export TAG="$tag"
+  log "🚀 Starting Docker stack for BunkerWeb"
+  if ! docker compose up -d; then
+    log "❌ Failed to start the Docker stack for BunkerWeb"
+    docker compose down -v --remove-orphans
+    find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    exit 1
+  fi
 
-    echo ""
+  # Wait for the scheduler to be healthy
+  log "⏳ Waiting for the scheduler to become healthy"
+  timeout=60
+  until docker compose ps bw-scheduler | grep -q "(healthy)" || [[ $timeout -le 0 ]]; do
+    sleep 5
+    timeout=$((timeout - 5))
   done
+
+  if [[ $timeout -le 0 ]]; then
+    log "❌ Timeout waiting for the scheduler to be healthy"
+    docker compose logs bw-scheduler
+    docker compose down -v --remove-orphans
+    find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    exit 1
+  fi
+
+  log "✅ Scheduler is healthy"
+  docker compose stop bw-scheduler bunkerweb || true
+
+  export ONLY_UPDATE="$has_target_migration"
+  # Strip +psycopg to use psycopg2 — psycopg3 opens two connections during
+  # bulk 'alembic upgrade head' which deadlocks on PostgreSQL table locks.
+  export DATABASE_URI="${database_uri//+psycopg}"
+
+  # Run the migration (applies existing migrations in bulk + generates new one)
+  log "🦃 Running migration for $first_tag → $target_tag ($database)"
+  if ! docker run --rm \
+    --network=bw-db \
+    -v bw-data:/data \
+    -v bw-db:/db \
+    -v bw-sqlite:/var/lib/bunkerweb \
+    -v "$migration_dir":/usr/share/migration/versions \
+    -e TAG \
+    -e DATABASE \
+    -e DATABASE_URI \
+    -e NEXT_TAG \
+    -e ONLY_UPDATE \
+    -e UID="$(id -u)" \
+    -e GID="$(id -g)" \
+    local/bw-migration; then
+    log "❌ Failed to run the migration script"
+    docker compose down -v --remove-orphans
+    find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    exit 1
+  fi
 
   # Clean up Docker stack
   log "🧹 Cleaning up Docker stack"
@@ -259,6 +261,4 @@ log "🎉 Migration scripts generation completed"
 # Final cleanup
 log "🛑 Stopping and cleaning up any remaining Docker stacks"
 docker compose down -v --remove-orphans || true
-find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} +
-
-cd "$current_dir" || exit
+find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

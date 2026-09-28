@@ -1,3 +1,33 @@
+// Markup a flash message is allowed to carry. Everything else - scripts, event
+// handlers, forms, embedded content - is dropped by DOMPurify before the toast
+// body is filled in.
+const FLASH_ALLOWED_TAGS = [
+  "a",
+  "b",
+  "br",
+  "code",
+  "div",
+  "em",
+  "h5",
+  "h6",
+  "i",
+  "li",
+  "ol",
+  "p",
+  "span",
+  "strong",
+  "ul",
+];
+const FLASH_ALLOWED_ATTR = [
+  "class",
+  "href",
+  "rel",
+  "role",
+  "target",
+  "aria-pressed",
+  "aria-label",
+];
+
 function throttle(func, limit, ...throttleArgs) {
   let inThrottle;
   return function (...args) {
@@ -541,8 +571,8 @@ $(document).ready(() => {
     updateNotificationsBadge();
   });
 
-  // Debounced clear notifications logic
-  const clearNotifications = debounce((rootUrl) => {
+  // Clear notifications logic (see saveTheme: no debounce, keepalive request)
+  const clearNotifications = (rootUrl) => {
     const csrfToken = $("#csrf_token").val();
     const data = new FormData();
     data.append("csrf_token", csrfToken);
@@ -555,6 +585,7 @@ $(document).ready(() => {
       method: "POST",
       credentials: "same-origin",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
@@ -576,13 +607,58 @@ $(document).ready(() => {
           error,
         );
       });
-  }, 300);
+  };
 
   $(document).on("click", "#clear-notifications-btn", function () {
     clearNotifications($(this).data("root-url"));
   });
 
-  const saveTheme = debounce((rootUrl, theme) => {
+  // Per-tab record of a theme choice whose /set_theme write has not been
+  // acknowledged yet. sessionStorage: it must survive the navigation that
+  // causes the race, and it must not leak into other tabs or outlive the tab.
+  // Only a fresh marker is replayed: the race it covers resolves in
+  // milliseconds, while a stale one left by another tab would fight that tab
+  // for the stored theme on every navigation.
+  const PENDING_THEME_TTL = 15000;
+
+  const readPendingTheme = () => {
+    try {
+      const [theme, at] = (sessionStorage.getItem("pendingTheme") || "").split(
+        "|",
+      );
+      if (theme !== "light" && theme !== "dark") return null;
+      if (!(Date.now() - Number(at) < PENDING_THEME_TTL)) {
+        sessionStorage.removeItem("pendingTheme");
+        return null;
+      }
+      return theme;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const setPendingTheme = (theme) => {
+    try {
+      sessionStorage.setItem("pendingTheme", `${theme}|${Date.now()}`);
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  const clearPendingTheme = () => {
+    try {
+      sessionStorage.removeItem("pendingTheme");
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  // One-shot user action: post it right away and mark the request keepalive so a
+  // navigation started just after the toggle cannot cancel it. A debounce here
+  // dropped the write entirely when the user clicked a link within a second of
+  // toggling, and the next page then re-synced localStorage from the stale DB
+  // theme, so the choice was lost until the user toggled again.
+  const saveTheme = (rootUrl, theme) => {
     const csrfToken = $("#csrf_token").val();
 
     const data = new FormData();
@@ -592,41 +668,95 @@ $(document).ready(() => {
     fetch(rootUrl, {
       method: "POST",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        // Handle success, redirect, etc.
+        // Not cleared here: a page whose render started before this write
+        // committed can still be showing the old theme. The marker is dropped
+        // by the next render that agrees with it (or when it expires).
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
       });
-  }, 1000);
+  };
 
-  // Check if there's a saved theme preference in localStorage
-  let savedTheme = localStorage.getItem("theme");
+  // Server renders the authoritative theme on <html> and #theme; anon pages get
+  // it resolved into window.__bwResolvedTheme by the head script. Repaint only
+  // when it differs from what was painted -> logged-in is a no-op (zero flicker).
+  const serverTheme = ($("#theme").val() || "light").trim();
+  const desiredTheme =
+    typeof window.__bwResolvedTheme === "string"
+      ? window.__bwResolvedTheme
+      : serverTheme;
 
-  if (!savedTheme) {
-    // If no saved preference, use the system's preferred color scheme
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    savedTheme = systemPrefersDark ? "dark" : "light";
+  const isAuthenticated = $("body").attr("data-authenticated") === "true";
+
+  // A toggle followed immediately by a navigation leaves /set_theme in flight
+  // while the next page is already being rendered, so that page can still read
+  // the previous theme from the database. The tab remembers the intent until
+  // the write is acknowledged; whatever is left over is replayed here.
+  const pendingTheme = readPendingTheme();
+  const replayPending = pendingTheme !== null && pendingTheme !== serverTheme;
+  const effectiveTheme = replayPending ? pendingTheme : desiredTheme;
+  if (pendingTheme !== null && !replayPending) {
+    clearPendingTheme(); // the database caught up on its own
   }
 
-  // Apply the saved or system-preferred theme
-  applyTheme(savedTheme);
+  if (isAuthenticated) {
+    try {
+      localStorage.setItem("theme", effectiveTheme); // sync cache with DB
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  }
+  // Anon pages: only an explicit toggle may persist; an OS-resolved write here
+  // would masquerade as a choice and freeze live OS tracking (base.html).
 
-  // Toggle theme on change
+  if (effectiveTheme !== serverTheme) {
+    // <html> already fixed pre-paint; reconcile body assets only. A replayed
+    // choice also gets re-sent, so the database stops disagreeing with the tab.
+    applyTheme(
+      effectiveTheme,
+      replayPending ? $("#dark-mode-toggle").data("root-url") : null,
+    );
+  }
+
+  // Explicit user choice -> always persist, even on anon pages.
   $("#dark-mode-toggle").on("change", function () {
     const darkMode = $(this).prop("checked");
     const theme = darkMode ? "dark" : "light";
-    applyTheme(theme, $(this).data("root-url"));
+    applyTheme(theme, $(this).data("root-url"), true);
   });
 
-  // Function to apply the theme
-  function applyTheme(theme, rootUrl = null) {
+  // Profile page theme <select>: live-apply on change so the control and the
+  // rendered theme never disagree (persists like the navbar toggle).
+  $("#theme-toggle").on("change", function () {
+    applyTheme($(this).val(), $(this).data("root-url"), true);
+  });
+
+  // On login, submit the user's EXPLICIT theme choice so it persists to the
+  // profile (login.py reads [name='theme']). localStorage only ever holds
+  // explicit toggles -- never OS-resolved themes -- so this write can't clobber
+  // a saved preference; setting it at submit time overrides any OS-resolved
+  // value the anti-FOUC script (base.html) placed in the field on page load.
+  // #login-form only exists on the login page, so this handler is inert elsewhere.
+  $("#login-form").on("submit", function () {
+    let choice = "";
+    try {
+      const s = localStorage.getItem("theme");
+      if (s === "light" || s === "dark") choice = s;
+    } catch (e) {
+      // Storage unavailable (private mode): submit empty -> keep DB theme.
+    }
+    $(this).find("[name='theme']").val(choice);
+  });
+
+  // persist gates the localStorage write; the anon initial reconcile must not
+  // persist (see above).
+  function applyTheme(theme, rootUrl = null, persist = isAuthenticated) {
     $themeSelector = $("#theme-toggle");
 
     if (theme === "dark") {
@@ -645,7 +775,9 @@ $(document).ready(() => {
         .removeClass("bg-light-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-sun").addClass("bx-moon");
       $("#dark-mode-toggle").prop("checked", true);
-      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo-white").val());
+      $("[alt='BunkerWeb logo']")
+        .not(".bw-logo-light, .bw-logo-dark")
+        .attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
       $themeSelector.find("option[value='dark']").prop("selected", true);
     } else {
@@ -664,7 +796,9 @@ $(document).ready(() => {
         .removeClass("bg-dark-subtle");
       $(".dark-mode-toggle-icon").removeClass("bx-moon").addClass("bx-sun");
       $("#dark-mode-toggle").prop("checked", false);
-      $("[alt='BunkerWeb logo']").attr("src", $("#bw-logo").val());
+      $("[alt='BunkerWeb logo']")
+        .not(".bw-logo-light, .bw-logo-dark")
+        .attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
       $themeSelector.find("option[value='light']").prop("selected", true);
     }
@@ -672,11 +806,18 @@ $(document).ready(() => {
     // Update input values
     $("#theme").val(theme);
     $("[name='theme']").val(theme);
-    localStorage.setItem("theme", theme); // Save user preference
+    if (persist) {
+      try {
+        localStorage.setItem("theme", theme); // Save user preference
+      } catch (e) {
+        // Storage unavailable (private mode / disabled): non-fatal.
+      }
+    }
 
     if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
+    setPendingTheme(theme);
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
   }
 
@@ -705,6 +846,23 @@ $(document).ready(() => {
   if (extraPagesCollapse === "hide") {
     $("#extraPagesCollapse").collapse("hide");
   }
+
+  // Flash messages are authored as HTML (a link, a heading) but interpolate
+  // user-controlled values (service names, IPs, config names), so the server
+  // delivers them escaped in data-flash-html and they are sanitised here
+  // instead of being trusted as markup.
+  $("[data-flash-html]").each(function () {
+    const raw = this.dataset.flashHtml || "";
+    if (typeof DOMPurify === "undefined") {
+      this.textContent = raw;
+    } else {
+      this.innerHTML = DOMPurify.sanitize(raw, {
+        ALLOWED_TAGS: FLASH_ALLOWED_TAGS,
+        ALLOWED_ATTR: FLASH_ALLOWED_ATTR,
+      });
+    }
+    this.removeAttribute("data-flash-html");
+  });
 
   $("#feedback-toast-container .bs-toast").each(function () {
     const toast = new bootstrap.Toast(this);

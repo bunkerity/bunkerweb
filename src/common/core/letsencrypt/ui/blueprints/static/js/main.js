@@ -25,6 +25,45 @@
     const isReadOnly = $("#is-read-only").val()?.trim() === "True";
     const userReadOnly = $("#user-read-only").val()?.trim() === "True";
 
+    // All dynamic HTML interpolations route through DOMPurify before reaching
+    // innerHTML. Cert names and account UUIDs are mutable via the renewal-conf
+    // basename / inside the conf body — a DB compromise (or any future
+    // server-side bug that lets attacker text flow into the cache) would
+    // otherwise yield stored XSS in the operator's browser. DOMPurify is
+    // loaded globally from src/ui/app/templates/base.html.
+    //
+    // `sanitizeHtml` strips script tags, event-handler attributes, and any
+    // markup that escapes the intended structure. The plain-text variant for
+    // attribute values is the same call — DOMPurify's DOMParser-based parsing
+    // normalizes whichever attribute-injection payload an attacker tries.
+    const sanitizeHtml = (s) => {
+      if (typeof DOMPurify === "undefined") {
+        // Hard fallback: if DOMPurify failed to load, refuse to render any
+        // dynamic markup at all rather than ship raw user input to .html().
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+      return DOMPurify.sanitize(String(s ?? ""), { ALLOWED_TAGS: ["strong", "em", "code", "a", "br", "p", "ul", "li"], ALLOWED_ATTR: ["href", "data-cert", "class"] });
+    };
+
+    // Text-only context (attribute values, plain interpolation in text nodes).
+    // Forces ALLOWED_TAGS=[] so no markup survives — pure text content.
+    const sanitizeText = (s) => {
+      if (typeof DOMPurify === "undefined") {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+      return DOMPurify.sanitize(String(s ?? ""), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    };
+
     const headers = [
       {
         title: "Domain",
@@ -60,23 +99,25 @@
       },
     ];
 
-    // Set up the delete confirmation modal
+    // Set up the delete confirmation modal. All dynamic interpolations sanitize
+    // the cert name, and the final HTML string is sanitized again at the .html()
+    // sink as belt-and-suspenders against any markup that slips past the inner
+    // sanitization (e.g. via future template changes).
     const setupDeleteCertModal = (certs) => {
       const $modalBody = $("#deleteCertContent");
-      $modalBody.empty(); // Clear previous content
+      $modalBody.empty();
 
       if (certs.length === 1) {
         $modalBody.html(
-          `<p>You are about to delete the certificate for: <strong>${certs[0].domain}</strong></p>`
+          sanitizeHtml(`<p>You are about to delete the certificate for: <strong>${sanitizeText(certs[0].domain)}</strong></p>`)
         );
         $("#confirmDeleteCertBtn").data("cert-name", certs[0].domain);
       } else {
         const certList = certs
-          .map((cert) => `<li>${cert.domain}</li>`)
+          .map((cert) => `<li>${sanitizeText(cert.domain)}</li>`)
           .join("");
         $modalBody.html(
-          `<p>You are about to delete these certificates:</p>
-         <ul>${certList}</ul>`
+          sanitizeHtml(`<p>You are about to delete these certificates:</p><ul>${certList}</ul>`)
         );
         $("#confirmDeleteCertBtn").data(
           "cert-names",
@@ -85,10 +126,14 @@
       }
     };
 
-    // Set up error modal
+    // Error modal. Title uses `.text()` (string-only context). The message body
+    // routes through `.html()`; the SHARED defense — sanitizeHtml at the sink —
+    // catches anything callers forgot to escape per-interpolation. Caller is
+    // still expected to use `sanitizeText` for embedded dynamic values; this is
+    // belt-and-suspenders.
     const showErrorModal = (title, message) => {
       $("#errorModalLabel").text(title);
-      $("#errorModalContent").html(message);
+      $("#errorModalContent").html(sanitizeHtml(message));
       const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
       errorModal.show();
     };
@@ -120,6 +165,68 @@
       // Hide modal after starting delete process
       $("#deleteCertModal").modal("hide");
     });
+
+    // ----- Per-row quick actions -----
+    // Delegated click handlers wired once. DataTables re-renders rows on each
+    // ajax.reload() so binding on `document` keeps the handlers live across reloads.
+    $(document).on("click", "#letsencrypt tbody .delete-single", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isReadOnly) {
+        alert(t("alert.readonly_mode", "This action is not allowed in read-only mode."));
+        return;
+      }
+      const certName = $(this).data("cert");
+      if (!certName) return;
+      setupDeleteCertModal([{ domain: certName }]);
+      const modal = new bootstrap.Modal(document.getElementById("deleteCertModal"));
+      modal.show();
+    });
+
+    $(document).on("click", "#letsencrypt tbody .heal-single", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isReadOnly) {
+        alert(t("alert.readonly_mode", "This action is not allowed in read-only mode."));
+        return;
+      }
+      const certName = $(this).data("cert");
+      if (!certName) return;
+      // Inline confirmation — heal is destructive (drops the cert from disk) so it deserves a prompt.
+      const msg = t(
+        "confirm.heal_cert",
+        `Heal orphan certificate "${certName}" by removing it from disk and re-issuing with a fresh ACME account on the next scheduler tick?`
+      );
+      if (!confirm(msg)) return;
+      healCertificate(certName);
+    });
+
+    function healCertificate(certName) {
+      $.ajax({
+        url: `${window.location.pathname}/heal`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ cert_name: certName }),
+        headers: { "X-CSRFToken": $("#csrf_token").val() },
+        success: function (response) {
+          if (response.status === "ok") {
+            $("#letsencrypt").DataTable().ajax.reload(null, false);
+          } else {
+            showErrorModal(
+              "Heal Failed",
+              `<p>Could not heal certificate <strong>${sanitizeText(certName)}</strong>:</p><p>${sanitizeText(response.message || "Unknown error")}</p>`
+            );
+          }
+        },
+        error: function (xhr) {
+          const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || "Request failed";
+          showErrorModal(
+            "Heal Failed",
+            `<p>Could not heal certificate <strong>${sanitizeText(certName)}</strong>:</p><p>${sanitizeText(msg)}</p>`
+          );
+        },
+      });
+    }
 
     function deleteCertificate(certName, callback) {
       $.ajax({
@@ -374,13 +481,58 @@
       },
     };
 
+    // Per-row quick actions (Delete, Heal orphan). Mirrors the pattern used by
+    // src/ui/app/static/js/pages/reports.js (per-row Ban button). Heal button is
+    // hidden when the cert is not orphaned (row.is_orphan === false).
+    function renderRowActions(data, type, row) {
+      if (type !== "display") return "";
+      const readOnly = typeof isReadOnly !== "undefined" && isReadOnly;
+      const ro = readOnly ? " disabled" : "";
+      const roTip = readOnly
+        ? t("tooltip.readonly_mode", "This action is not allowed in read-only mode.")
+        : "";
+      // Every dynamic attribute value is text-only — sanitizeText neutralizes any
+      // markup or attribute-breakout payload before the string reaches innerHTML
+      // via DataTables. i18n tooltip strings get the same treatment in case a
+      // translator embeds `"` or HTML.
+      const certName = sanitizeText(row.domain || "");
+      const delTip = sanitizeText(roTip || t("tooltip.delete_cert", "Delete this certificate"));
+      const healTip = sanitizeText(roTip || t("tooltip.heal_cert", "Heal orphan certificate (re-issue with a fresh ACME account)"));
+      const healBtn = row.is_orphan
+        ? `<button type="button"
+                   class="btn btn-outline-warning btn-sm me-1 heal-single${ro}"
+                   data-cert="${certName}"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="bottom"
+                   data-bs-original-title="${healTip}">
+             <i class="bx bx-first-aid bx-xs"></i>
+           </button>`
+        : "";
+      const html = `
+        <div class="d-flex justify-content-center">
+          ${healBtn}
+          <button type="button"
+                  class="btn btn-outline-danger btn-sm delete-single${ro}"
+                  data-cert="${certName}"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-original-title="${delTip}">
+            <i class="bx bx-trash bx-xs"></i>
+          </button>
+        </div>`;
+      // Final defense-in-depth: pass the assembled HTML through DOMPurify so any
+      // attribute-injection payload that survived sanitizeText (e.g. via locale
+      // misconfiguration) gets stripped before it reaches the row.
+      return typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html, { ADD_ATTR: ["data-cert", "data-bs-toggle", "data-bs-placement", "data-bs-original-title"] }) : html;
+    }
+
     // Create columns configuration
     function buildColumnDefs() {
       return [
         { orderable: false, className: "dtr-control", targets: 0 },
         { orderable: false, render: DataTable.render.select(), targets: 1 },
         { type: "string", targets: 2 }, // domain
-        { orderable: true, targets: -1 },
+        { orderable: false, targets: -1, render: renderRowActions },
         {
           targets: [5, 6],
           render: function (data, type, row) {
@@ -481,6 +633,13 @@
         {
           data: "version",
           title: "Version",
+        },
+        {
+          data: null,
+          defaultContent: "",
+          orderable: false,
+          searchable: false,
+          title: "Actions",
         },
       ];
     }

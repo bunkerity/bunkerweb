@@ -1,0 +1,20 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Stricter PL2 sibling of 934210 (ref Y4H-260326). Detects an ORM lookup
+##! operator suffix preceded by nested relationship traversal, i.e. at least
+##! two `__` separators, e.g. `created_by__departments__user__username__startswith`.
+##! Deep relationship traversal exposed to clients is rarely legitimate, so
+##! this higher-confidence form sits at PL2. A single `field__operator` (normal
+##! django-filter usage) does NOT match here and is left to 934210 at PL3.
+##!
+##! Same two targets as 934210 (ARGS_NAMES + REQUEST_BODY JSON key). The
+##! `[^"&=]` traversal class excludes quotes so a raw-body match cannot span
+##! across two separate JSON keys.
+
+##!^ __[^"&=]*__
+##!$ (?:$|"\s*:)
+
+##!> assemble
+  ##!> include orm-lookup-operators
+##!<

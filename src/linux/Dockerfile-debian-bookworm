@@ -1,12 +1,18 @@
-FROM debian:bookworm-slim@sha256:74d56e3931e0d5a1dd51f8c8a2466d21de84a271cd3b5a733b803aa91abf4421 AS builder
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends gnupg2 ca-certificates \
-    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev cargo coreutils python3.11 python3.11-dev python3-pip -y
+    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libbrotli-dev libgd-dev liblmdb-dev libfuzzy-dev coreutils python3.11 python3.11-dev python3-pip -y
+
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | \
+    sh -s -- -y --no-modify-path --profile minimal --default-toolchain 1.86.0
 
 ENV OS=debian
-ENV NGINX_VERSION=1.28.2
+ENV NGINX_VERSION=1.30.5
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -44,6 +50,13 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     python3.11 -m pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
     python3.11 -m pip install --break-system-packages --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
+# Apply BunkerWeb patches to vendored Python deps before they are tarballed (DNS alias / CNAME delegation for certbot).
+COPY src/deps/misc/certbot-dns-alias.patch /tmp/certbot-dns-alias.patch
+RUN patch -p1 -F0 --dry-run -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    patch -p1 -F0 --no-backup-if-mismatch -d /usr/share/bunkerweb/deps/python < /tmp/certbot-dns-alias.patch && \
+    grep -q '_load_domain_aliases' /usr/share/bunkerweb/deps/python/certbot/plugins/dns_common.py && \
+    rm -f /tmp/certbot-dns-alias.patch
+
 RUN apt-get install -y pigz && \
     tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
     rm -rf deps
@@ -72,19 +85,35 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
+ARG NODE_VERSION=24.11.1
+ARG NODE_SHA256_X64=60e3b0a8500819514aca603487c254298cd776de0698d3cd08f11dba5b8289a8
+ARG NODE_SHA256_ARM64=6b0863fb9f627bf4a6c5948dce1de4398174a2e05dbe717503d828e211ca01f0
+ENV PATH="/opt/node/bin:${PATH}"
+
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-    apt-get install -y nodejs npm parallel && \
-    cd /tmp && \
-    npm ci --ignore-scripts; \
+    set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends xz-utils parallel; \
+    case "$(uname -m)" in \
+    x86_64) node_arch="x64"; node_sha="$NODE_SHA256_X64" ;; \
+    aarch64) node_arch="arm64"; node_sha="$NODE_SHA256_ARM64" ;; \
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz"; \
+    echo "${node_sha}  node.tar.xz" | sha256sum -c -; \
+    mkdir -p /opt/node; \
+    tar -xJf node.tar.xz -C /opt/node --strip-components=1; \
+    rm -f node.tar.xz; \
+    node --version; npm --version; \
+    cd /tmp; \
+    npm ci --ignore-scripts --engine-strict; \
     fi
 
 # Minify JS files
-ARG SKIP_MINIFY=no
-ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
     | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
@@ -93,7 +122,6 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
     | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
@@ -102,7 +130,6 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     fi
 
 # Minify HTML files
-ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
     parallel 'npx html-minifier-terser \
@@ -119,7 +146,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM debian:bookworm-slim@sha256:74d56e3931e0d5a1dd51f8c8a2466d21de84a271cd3b5a733b803aa91abf4421
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -142,7 +169,7 @@ WORKDIR /usr/share/bunkerweb
 RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     echo "Linux" > INTEGRATION && \
     mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
-    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
     touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb

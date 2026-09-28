@@ -665,6 +665,15 @@ ngx_http_v3_process_header(ngx_http_request_t *r, ngx_str_t *name,
         }
 
     } else {
+        cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
+
+        if (r->headers_in.count++ >= cscf->max_headers) {
+            ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+                          "client sent too many header lines");
+            ngx_http_finalize_request(r, NGX_HTTP_REQUEST_HEADER_TOO_LARGE);
+            return NGX_ERROR;
+        }
+
         h = ngx_list_push(&r->headers_in.headers);
         if (h == NULL) {
             ngx_http_close_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
@@ -904,6 +913,7 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
     u_char     *p;
     ngx_int_t   rc;
     ngx_str_t   host;
+    in_port_t   port;
 
     if (r->request_line.len) {
         return NGX_OK;
@@ -961,11 +971,11 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
         host.len = r->host_end - r->host_start;
         host.data = r->host_start;
 
-        rc = ngx_http_validate_host(&host, r->pool, 0);
+        rc = ngx_http_validate_host(&host, &port, r->pool, 0);
 
         if (rc == NGX_DECLINED) {
             ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                          "client sent invalid host in request line");
+                          "client sent invalid \":authority\" header");
             goto failed;
         }
 
@@ -979,6 +989,7 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
         }
 
         r->headers_in.server = host;
+        r->port = port;
     }
 
     if (ngx_list_init(&r->headers_in.headers, r->pool, 20,
@@ -1216,7 +1227,7 @@ ngx_http_v3_construct_cookie_header(ngx_http_request_t *r)
     if (hh->handler(r, h, hh->offset) != NGX_OK) {
         /*
          * request has been finalized already
-         * in ngx_http_process_multi_header_lines()
+         * in ngx_http_process_header_line()
          */
         return NGX_ERROR;
     }

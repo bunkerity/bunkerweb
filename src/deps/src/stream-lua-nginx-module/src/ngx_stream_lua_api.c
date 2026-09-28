@@ -18,6 +18,7 @@
 #include "ddebug.h"
 
 #if (NGX_LINUX)
+#include <linux/if.h>
 #include <linux/netfilter_ipv4.h>
 #if (NGX_HAVE_INET6)
 #include <linux/netfilter_ipv6.h>
@@ -274,7 +275,7 @@ ngx_stream_lua_ffi_req_dst_addr(ngx_stream_lua_request_t *r, char *buf,
             return NGX_ERROR;
         }
 
-#if (NGX_HAVE_INET6)
+#if (NGX_HAVE_INET6) && defined(IP6T_SO_ORIGINAL_DST)
 
     } else if (family == AF_INET6) {
         /* IPv6 */

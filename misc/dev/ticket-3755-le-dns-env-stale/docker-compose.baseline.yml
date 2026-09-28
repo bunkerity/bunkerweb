@@ -1,0 +1,6 @@
+# Overlay that reverts ONLY the JobScheduler fix, to reproduce the bug before/after.
+#   docker compose -f docker-compose.yml -f docker-compose.baseline.yml up -d
+services:
+  bunkerweb-all-in-one:
+    volumes:
+      - ./generated/JobScheduler.head.py:/usr/share/bunkerweb/scheduler/JobScheduler.py:ro

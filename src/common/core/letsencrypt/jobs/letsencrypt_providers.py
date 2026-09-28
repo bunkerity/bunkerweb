@@ -99,7 +99,11 @@ class ClouDNSProvider(Provider):
 
     @model_validator(mode="after")
     def validate_cloudns_credentials(self):
-        """Validate ClouDNS credentials."""
+        """Validate ClouDNS credentials.
+
+        Keep the message a literal. It reaches the scheduler log, so interpolating any field
+        of this model would publish a credential.
+        """
         if not self.dns_cloudns_auth_id and not self.dns_cloudns_sub_auth_id and not self.dns_cloudns_sub_auth_user:
             raise ValueError("Either 'dns_cloudns_auth_id', 'dns_cloudns_sub_auth_id', or 'dns_cloudns_sub_auth_user' must be provided.")
         return self
@@ -131,7 +135,11 @@ class CloudflareProvider(Provider):
 
     @model_validator(mode="after")
     def validate_cloudflare_credentials(self):
-        """Validate Cloudflare credentials."""
+        """Validate Cloudflare credentials.
+
+        Keep the message a literal. It reaches the scheduler log, so interpolating any field
+        of this model would publish a credential.
+        """
         if not self.dns_cloudflare_api_token and not (self.dns_cloudflare_email and self.dns_cloudflare_api_key):
             raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
         return self
@@ -558,6 +566,25 @@ class PowerdnsProvider(Provider):
     def get_extra_args() -> dict:
         """Return additional arguments for the provider."""
         return ["-a", "dns-pdns"]
+
+
+class PorkbunProvider(Provider):
+    """Porkbun DNS provider."""
+
+    dns_porkbun_key: str
+    dns_porkbun_secret: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_porkbun_key": ("dns_porkbun_key", "porkbun_key", "api_key", "key"),
+            "dns_porkbun_secret": ("dns_porkbun_secret", "porkbun_secret", "secret_api_key", "secret", "api_secret"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-porkbun"]
 
 
 class Rfc2136Provider(Provider):

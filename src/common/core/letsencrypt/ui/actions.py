@@ -10,12 +10,22 @@ from traceback import format_exc
 from typing import Tuple
 from uuid import uuid4
 
+from common_utils import safe_tar_extractall  # type: ignore
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 
 
 def _is_allowed_member(member):
-    """Filter tar members to only extract live/, archive/, renewal/ dirs."""
+    """Filter tar members to only extract live/, archive/, renewal/ dirs.
+
+    SAFE to use here because extract_cache() targets a per-request tmp UUID dir
+    that is rmtree'd in pre_render's finally block — the filtered state never
+    flows back into the canonical DB cache row. DO NOT reuse this filter on any
+    path that re-tars and writes back to the cache: dropping accounts/ from the
+    snapshot poisons renewals with certbot AccountNotFound. The canonical
+    restore lives in blueprints/letsencrypt.py:download_certificates() and is
+    intentionally unfiltered.
+    """
     parts = Path(member.name).parts
     if member.name == ".":
         return True
@@ -31,10 +41,7 @@ def extract_cache(folder_path, cache_files):
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
                 members = [m for m in tar.getmembers() if _is_allowed_member(m)]
-                try:
-                    tar.extractall(folder_path, members=members, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(folder_path, members=members)
+                safe_tar_extractall(tar, folder_path, links="contained", members=members)
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
@@ -48,6 +55,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
         "serial_number": [],
         "fingerprint": [],
         "version": [],
+        "preferred_profile": [],
         "challenge": [],
         "authenticator": [],
         "key_type": [],
@@ -92,8 +100,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                     cert_info["issuer"] = issuer[0].value
 
                 # ? Getting the validity period
-                cert_info["valid_from"] = cert.not_valid_before.strftime("%d-%m-%Y %H:%M:%S UTC")
-                cert_info["valid_to"] = cert.not_valid_after.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_from"] = cert.not_valid_before_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_to"] = cert.not_valid_after_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
 
                 # ? Getting the serial number
                 cert_info["serial_number"] = str(cert.serial_number)

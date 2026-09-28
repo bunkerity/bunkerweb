@@ -31,7 +31,7 @@ If you think a new integration should be supported, do not hesitate to open a [n
 ## Settings
 
 !!! tip "BunkerWeb PRO settings"
-    Some plugins are reserved for the **PRO version**. Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
+    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) directory of the repository.
 
 ## Database
 
@@ -163,15 +163,15 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 ### Database compatibility matrix
 
-| Integration        | PostgreSQL                                   | MariaDB             | MySQL              | SQLite      |
-| :----------------- | :------------------------------------------- | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier (all-in-one: ✅ `v17`)   | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier                          | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Linux packages** | See notes below                              | See notes below     | See notes below    | ✅ Supported |
+| Integration        | PostgreSQL          | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :------------------ | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below     | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
-    - **PostgreSQL**: Alpine packages now ship with the `v18` client, so `v18` and earlier are supported out of the box; the all-in-one image still embeds `v17`, so `v18` is unsupported there.
+    - **PostgreSQL**: Alpine-based images, including all-in-one, now ship with the `v18` client, so `v18` and earlier are supported out of the box.
     - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
     - **SQLite**: Ships with the packages and is ready to use.
 
@@ -229,6 +229,10 @@ BunkerWeb leverages the power of templates to simplify the configuration process
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
 
+!!! tip "Ready-to-use community templates"
+
+    Browse the [BunkerWeb templates repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) and follow its installation guide. The web UI method is recommended for most users; a plugin layout is also documented for managed deployments. Once installed, select the template through easy mode or with the `USE_TEMPLATE` setting.
+
 With the web User Interface, templates are available through **easy mode** when you add or edit a service:
 
 <figure markdown>
@@ -252,6 +256,16 @@ Creating a custom template is a straightforward process that involves defining t
 * **Template file**: The custom template is defined in a JSON file in a `templates` folder inside the plugin directory that adheres to the specified structure. The template file contains a name, the settings, custom configurations, and steps required to configure BunkerWeb according to the user's preferences.
 
 * **Selecting a template**: Once the custom template is defined, users can select it during the easy-mode configuration process of a service in the web UI. A template can also be selected with the `USE_TEMPLATE` setting in the configuration. The name of the template file (without the `.json` extension) should be specified as the value of the `USE_TEMPLATE` setting.
+
+!!! warning "Templates and settings you configure yourself"
+
+    Where a template declares a setting you also configure yourself, which one applies depends on where the template is selected:
+
+    * selected on the service (`www.example.com_USE_TEMPLATE=medium`), the template's value wins over the value you set in the global settings;
+    * selected globally (`USE_TEMPLATE=medium`), the value you set in the global settings wins over the template's;
+    * a value set on the service itself always wins over both.
+
+    This matters because the `low`, `medium` and `api` templates set `CONTENT_SECURITY_POLICY` to an empty value, and `low` does the same for `PERMISSIONS_POLICY`: a service that selects one of them sends no such header even when your global settings carry a policy. Set the value on the service, `www.example.com_CONTENT_SECURITY_POLICY=...`, to keep it.
 
 Example of a custom template file:
 ```json

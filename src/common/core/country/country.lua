@@ -7,6 +7,10 @@ local country = class("country", plugin)
 
 local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
+local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local decode = cjson.decode
 local encode = cjson.encode
 local WARN = ngx.WARN
@@ -169,12 +173,74 @@ function country:initialize(ctx)
 	-- Initialize whitelist and blacklist sets once
 	self.whitelist = string_to_set(self.variables["WHITELIST_COUNTRY"], self.logger)
 	self.blacklist = string_to_set(self.variables["BLACKLIST_COUNTRY"], self.logger)
+
+	-- Initialize ignore URI list once
+	self.ignore_uri = {}
+	local ignore_uri_var = self.variables["COUNTRY_IGNORE_URI"]
+	if ignore_uri_var and ignore_uri_var ~= "" then
+		for pattern in ignore_uri_var:gmatch("%S+") do
+			table.insert(self.ignore_uri, pattern)
+		end
+	end
+
+	-- Only request phases have a server name to look the rules up with.
+	self.header_rules = {}
+	if self.is_request then
+		local header_rules = self.internalstore:get("plugin_country_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
+	end
+end
+
+function country:init()
+	-- COUNTRY_IGNORE_HEADER_NAME/_VALUE are numbered pairs : resolve them once here instead of
+	-- walking every scoped variable on every request.
+	local rules, err = get_header_rules("COUNTRY_IGNORE_HEADER")
+	if not rules then
+		return self:ret(false, err)
+	end
+	local ok, store_err = self.internalstore:set("plugin_country_header_rules", rules, nil, true)
+	if not ok then
+		return self:ret(false, store_err)
+	end
+	return self:ret(true, "successfully loaded country ignore header rules")
+end
+
+function country:is_ignored_uri()
+	local uri = self.ctx.bw.uri
+	if not uri then
+		return false
+	end
+	local request_uri = self.ctx.bw.request_uri
+	for _, pattern in ipairs(self.ignore_uri) do
+		if regex_match(uri, pattern, nil, "COUNTRY_IGNORE_URI") then
+			return true, pattern
+		end
+		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern, nil, "COUNTRY_IGNORE_URI") then
+			return true, pattern
+		end
+	end
+	return false
 end
 
 function country:access()
 	-- Don't go further if nothing is enabled
 	if self.variables["WHITELIST_COUNTRY"] == "" and self.variables["BLACKLIST_COUNTRY"] == "" then
 		return self:ret(true, "country not activated")
+	end
+
+	-- Skip check if URI is ignored
+	if #self.ignore_uri > 0 then
+		local ignored, pattern = self:is_ignored_uri()
+		if ignored then
+			return self:ret(true, "URI " .. self.ctx.bw.uri .. " is ignored (pattern = " .. pattern .. ")")
+		end
+	end
+
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "COUNTRY_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
 	end
 
 	-- Check if IP is in cache

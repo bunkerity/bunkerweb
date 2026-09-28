@@ -13,6 +13,7 @@ Comment ça marche :
 1. Choisissez local vs distant.
 2. Connexion : chemin du socket (local) ou hôte+port (distant).
 3. Racine de documents : pointez vers le dossier contenant vos fichiers PHP.
+4. Laisser BunkerWeb faire le reste : une fois configuré, BunkerWeb route automatiquement les requêtes PHP vers votre instance PHP-FPM.
 
 ### Paramètres
 
@@ -25,7 +26,10 @@ Comment ça marche :
 | `LOCAL_PHP_PATH`  |        | multisite | non      | Chemin racine des fichiers côté PHP‑FPM local.                                 |
 
 !!! tip "Local vs distant"
-    Local : meilleures perfs (socket). Distant : flexibilité et scalabilité.
+    Choisissez la configuration adaptée à votre infrastructure :
+
+    - **PHP-FPM local** offre de meilleures performances grâce à la communication par socket et convient lorsque PHP s’exécute sur la même machine que BunkerWeb.
+    - **PHP-FPM distant** apporte davantage de flexibilité et de scalabilité en déportant le traitement PHP sur des serveurs séparés.
 
 !!! warning "Chemins"
     `REMOTE_PHP_PATH`/`LOCAL_PHP_PATH` doivent correspondre au chemin réel des fichiers sous peine d’erreurs « File not found ».

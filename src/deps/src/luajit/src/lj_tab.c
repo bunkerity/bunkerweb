@@ -147,9 +147,9 @@ GCtab *lj_tab_new(lua_State *L, uint32_t asize, uint32_t hbits)
 }
 
 /* The API of this function conforms to lua_createtable(). */
-GCtab *lj_tab_new_ah(lua_State *L, int32_t a, int32_t h)
+GCtab *lj_tab_new_ah(lua_State *L, uint32_t a, uint32_t h)
 {
-  return lj_tab_new(L, (uint32_t)(a > 0 ? a+1 : 0), hsize2hbits(h));
+  return lj_tab_new(L, a ? a+1 : 0, hsize2hbits(h));
 }
 
 #if LJ_HASJIT
@@ -663,6 +663,14 @@ MSize LJ_FASTCALL lj_tab_len(GCtab *t)
 {
   size_t hi = (size_t)t->asize;
   if (hi) hi--;
+#if LJ_TARGET_PPC && LJ_ARCH_BITS == 64
+  /* On ppc64 non-GC64, direct arrayslot access for the binary search is
+  ** unreliable: the compiler generates incorrect code for the variable-index
+  ** array slot address calculation, causing tvisnil to misread the type tag.
+  ** Skip the fast path entirely and always use the slow path which accesses
+  ** array elements via lj_tab_getint (a separate, correct code path). */
+  return tab_len_slow(t, hi);
+#else
   /* In a growing array the last array element is very likely nil. */
   if (hi > 0 && LJ_LIKELY(tvisnil(arrayslot(t, hi)))) {
     /* Binary search to find a non-nil to nil transition in the array. */
@@ -675,6 +683,7 @@ MSize LJ_FASTCALL lj_tab_len(GCtab *t)
   }
   /* Without a hash part, there's an implicit nil after the last element. */
   return t->hmask ? tab_len_slow(t, hi) : (MSize)hi;
+#endif
 }
 
 #if LJ_HASJIT

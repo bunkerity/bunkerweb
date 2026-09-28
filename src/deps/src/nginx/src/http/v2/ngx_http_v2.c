@@ -1823,6 +1823,15 @@ ngx_http_v2_state_process_header(ngx_http_v2_connection_t *h2c, u_char *pos,
         }
 
     } else {
+        cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
+
+        if (r->headers_in.count++ >= cscf->max_headers) {
+            ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+                          "client sent too many header lines");
+            ngx_http_finalize_request(r, NGX_HTTP_REQUEST_HEADER_TOO_LARGE);
+            goto error;
+        }
+
         h = ngx_list_push(&r->headers_in.headers);
         if (h == NULL) {
             return ngx_http_v2_connection_error(h2c,
@@ -3519,6 +3528,7 @@ static ngx_int_t
 ngx_http_v2_parse_authority(ngx_http_request_t *r, ngx_str_t *value)
 {
     ngx_int_t  rc;
+    in_port_t  port;
 
     if (r->host_start) {
         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
@@ -3529,7 +3539,7 @@ ngx_http_v2_parse_authority(ngx_http_request_t *r, ngx_str_t *value)
     r->host_start = value->data;
     r->host_end = value->data + value->len;
 
-    rc = ngx_http_validate_host(value, r->pool, 0);
+    rc = ngx_http_validate_host(value, &port, r->pool, 0);
 
     if (rc == NGX_DECLINED) {
         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
@@ -3551,6 +3561,7 @@ ngx_http_v2_parse_authority(ngx_http_request_t *r, ngx_str_t *value)
     }
 
     r->headers_in.server = *value;
+    r->port = port;
 
     return NGX_OK;
 }
@@ -3722,7 +3733,7 @@ ngx_http_v2_construct_cookie_header(ngx_http_request_t *r)
     if (hh->handler(r, h, hh->offset) != NGX_OK) {
         /*
          * request has been finalized already
-         * in ngx_http_process_multi_header_lines()
+         * in ngx_http_process_header_line()
          */
         return NGX_ERROR;
     }

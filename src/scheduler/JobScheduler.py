@@ -14,23 +14,49 @@ from logging import Logger
 from pathlib import Path
 from re import compile as re_compile
 from sys import modules as sys_modules
-from typing import Any, Dict, List, Optional
+from time import monotonic
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import schedule
 from sys import path as sys_path
 from threading import Lock
+from stat import S_ISDIR, S_ISLNK, S_IMODE
 
 # Add dependencies to sys.path
 for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import effective_cpu_count  # type: ignore
-from Database import Database  # type: ignore
+from cache_restore import cache_tree  # type: ignore
+from common_utils import effective_cpu_count, parse_duration  # type: ignore
+from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
 
 
 class JobScheduler(ApiCaller):
+    # Auto-default bounds for the job executor. Scheduler jobs are I/O bound (LE,
+    # blocklist sync, plugin downloads); ceiling caps DB-pool pressure, floor keeps a
+    # slow LE renew from serializing the loop. Override via SCHEDULER_MAX_WORKERS.
+    _SCHEDULER_WORKERS_AUTO_CEILING = 8
+    _SCHEDULER_WORKERS_AUTO_FLOOR = 2
+    _SCHEDULER_WORKERS_AUTO_MULTIPLIER = 2
+
+    # run_pending() is called once a second from the scheduler main loop. Retrying a failed
+    # publication at that cadence turns one unreachable instance into a generator storm on the
+    # scheduler and a folder-push storm on the instances that are still up, so a failure backs
+    # off exponentially between these bounds and the delay resets once a publication succeeds.
+    PUBLISH_RETRY_MIN_DELAY = 1
+    PUBLISH_RETRY_MAX_DELAY = 300
+
+    @classmethod
+    def _auto_max_workers(cls) -> int:
+        """Conservative I/O-bound default for the job executor: ``min(ceiling, max(floor, cpu * mult))``."""
+        cpu = max(1, effective_cpu_count())
+        return min(
+            cls._SCHEDULER_WORKERS_AUTO_CEILING,
+            max(cls._SCHEDULER_WORKERS_AUTO_FLOOR, cpu * cls._SCHEDULER_WORKERS_AUTO_MULTIPLIER),
+        )
+
     def __init__(
         self,
         logger: Optional[Logger] = None,
@@ -38,17 +64,30 @@ class JobScheduler(ApiCaller):
         db: Optional[Database] = None,
         lock: Optional[Lock] = None,
         apis: Optional[list] = None,
+        generate_configs: Optional[Callable[[], bool]] = None,
     ):
         super().__init__(apis or [])
         self.__logger = logger or getLogger("SCHEDULER.JOB_SCHEDULER")
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
+        # The dict published as ``os.environ`` once the first config is set. See __set_env.
+        self.__job_env: Optional[Dict[str, Any]] = None
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
+        # Names of jobs that failed in the most recent run_once/run_pending batch. Exposed
+        # via the ``failed_jobs`` property so callers can log which specific jobs failed
+        # instead of only knowing that "at least one" did.
+        self.__failed_jobs: List[str] = []
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(8, effective_cpu_count() * 4))
+        self.__job_regenerate = False
+        # A push or reload failure must not re-render what generate_configs() already produced.
+        self.__configs_generated = False
+        self.__publish_retry_at: Optional[float] = None
+        self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+        self.__generate_configs = generate_configs
+        self.__executor = ThreadPoolExecutor(max_workers=self.__resolve_max_workers())
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
@@ -56,6 +95,49 @@ class JobScheduler(ApiCaller):
         self.__module_cache_lock = Lock()  # Lock for module cache access
         self.__cache_permissions_updated = False  # Track if permissions were updated
         self.update_jobs()
+
+    def __resolve_max_workers(self) -> int:
+        """Resolve ``SCHEDULER_MAX_WORKERS`` or fall back to :py:meth:`_auto_max_workers`.
+
+        Warns on invalid/non-positive values and on resolved > DB pool capacity
+        (``DATABASE_POOL_SIZE`` + ``DATABASE_POOL_MAX_OVERFLOW``). ``max_overflow<0``
+        is SQLAlchemy's "unlimited" sentinel and skips the cap check.
+        """
+        default = self._auto_max_workers()
+        raw = os.getenv("SCHEDULER_MAX_WORKERS", "").strip()
+        if not raw:
+            resolved = default
+        else:
+            try:
+                value = int(raw)
+            except ValueError:
+                self.__logger.warning(f"Invalid SCHEDULER_MAX_WORKERS value: {raw!r}, using default ({default})")
+                resolved = default
+            else:
+                if value <= 0:
+                    self.__logger.warning(f"SCHEDULER_MAX_WORKERS must be > 0 (got {value}), using default ({default})")
+                    resolved = default
+                else:
+                    resolved = value
+
+        # Advisory cap check vs DB pool. Reuses Database.py defaults so the two stay aligned.
+        with suppress(Exception):
+            pool_size_raw = os.getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE)).strip() or str(DEFAULT_POOL_SIZE)
+            overflow_raw = os.getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW)).strip() or str(DEFAULT_POOL_MAX_OVERFLOW)
+            pool_size = int(pool_size_raw) if pool_size_raw.isdigit() else DEFAULT_POOL_SIZE
+            try:
+                overflow = int(overflow_raw)
+            except ValueError:
+                overflow = DEFAULT_POOL_MAX_OVERFLOW
+            # SQLAlchemy QueuePool: any max_overflow < 0 means "unlimited".
+            if overflow >= 0 and resolved > pool_size + overflow:
+                self.__logger.warning(
+                    f"SCHEDULER_MAX_WORKERS={resolved} exceeds the DB pool capacity "
+                    f"(DATABASE_POOL_SIZE={pool_size} + DATABASE_POOL_MAX_OVERFLOW={overflow} = {pool_size + overflow}); "
+                    "scheduler threads may stall on pool checkout under burst."
+                )
+
+        return resolved
 
     def __compile_regexes(self):
         """Precompile regular expressions for job validation."""
@@ -70,8 +152,39 @@ class JobScheduler(ApiCaller):
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        os.environ = self.__base_env.copy()  # Reset to base environment
-        os.environ.update(env)  # Update with new environment
+        self.__set_env(env)
+
+    def __set_env(self, env: Dict[str, Any]) -> None:
+        """Publish ``base_env | env`` as ``os.environ`` without ever changing its identity.
+
+        Jobs run in-process and a job helper module that does ``from os import environ``
+        binds whatever object ``os.environ`` is at its first import. Those helpers stay in
+        ``sys.modules`` across reloads (``cleanup_modules`` only drops the ``bw_job_*``
+        entrypoints), so rebinding ``os.environ`` on every reload froze them on a
+        start-time snapshot: a service created after startup was invisible to them, and
+        only a restart brought it back. Mutate the same dict instead.
+
+        Never ``clear()`` first. The SIGHUP handler runs in this very thread between two
+        bytecodes and reads ``getenv("PATH")`` / ``getenv("DATABASE_URI")`` to build the
+        env of the config-saver subprocess, so ``os.environ`` must never be observable
+        half-empty. Update, then prune.
+
+        The prune loop is load-bearing, not tidying: a deleted service must lose its
+        ``{service}_*`` keys, which resetting from ``base_env`` used to do for free.
+
+        Callers must hold the main thread with no job batch in flight. This mutates a dict
+        other modules read directly, so a concurrent ``environ.items()`` would raise
+        ``RuntimeError``. ``run_once``/``run_pending`` join every job future before
+        returning, and ``reload()`` calls this before starting a batch.
+        """
+        new_env = self.__base_env | env
+        if self.__job_env is None:
+            self.__job_env = new_env
+            os.environ = self.__job_env  # single atomic rebind, already fully populated
+            return
+        self.__job_env.update(new_env)
+        for key in self.__job_env.keys() - new_env.keys():
+            del self.__job_env[key]
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -142,10 +255,10 @@ class JobScheduler(ApiCaller):
 
     def __reload(self) -> bool:
         self.__logger.info("Reloading nginx...")
-        reload_min_timeout = self.env.get("RELOAD_MIN_TIMEOUT", "5")
-
-        if not reload_min_timeout.isdigit():
-            self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+        try:
+            reload_min_timeout = parse_duration(self.env.get("RELOAD_MIN_TIMEOUT", "5"), "s")
+        except ValueError:
+            self.__logger.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
             reload_min_timeout = 5
 
         reload_success = self.send_to_apis(
@@ -200,6 +313,7 @@ class JobScheduler(ApiCaller):
 
         # Register in sys.modules to allow proper imports
         qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
+        module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
         # Execute the module
@@ -224,17 +338,24 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
         end_date = datetime.now().astimezone()
 
         if ret == 1:
             with self.__thread_lock:
                 self.__job_reload = True
+                if (plugin, name) in (("mtls", "client-cert"), ("modsecurity", "download-crs-plugins")):
+                    self.__job_regenerate = True
+                    # A render kept from before a failed push predates this job's change, and
+                    # the retry would publish it. Every new request renders again.
+                    self.__configs_generated = False
 
         if self.__job_success and (ret < 0 or ret >= 2):
             success = False
             self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
+                self.__failed_jobs.append(f"{plugin}/{name}")
 
         # Use the executor to manage threads
         self.__executor.submit(self.__add_job_run, name, success, start_date, end_date)
@@ -263,12 +384,15 @@ class JobScheduler(ApiCaller):
 
         try:
             # Process directories and files in a single pass
-            for item in cache_path.rglob("*"):
-                current_mode = item.stat().st_mode & 0o777
-                target_mode = DIR_MODE if item.is_dir() else FILE_MODE
+            for item in cache_tree(cache_path):
+                mode = item.lstat().st_mode
+                if S_ISLNK(mode):
+                    continue
+                current_mode = S_IMODE(mode)
+                target_mode = DIR_MODE if S_ISDIR(mode) else FILE_MODE
 
                 if current_mode != target_mode:
-                    item.chmod(target_mode)
+                    item.chmod(target_mode, follow_symlinks=False)
 
             self.__cache_permissions_updated = True
         except Exception as e:
@@ -290,15 +414,16 @@ class JobScheduler(ApiCaller):
     def run_pending(self) -> bool:
         pending_jobs = [job for job in schedule.jobs if job.should_run]
 
-        if not pending_jobs:
+        if not pending_jobs and not (self.__job_reload and self.__publish_due()):
             return True
 
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
-        self.__job_success = True
-        self.__job_reload = False
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
 
         try:
             # Use ThreadPoolExecutor to run jobs
@@ -313,21 +438,15 @@ class JobScheduler(ApiCaller):
 
             if self.__job_reload:
                 try:
-                    if self.apis:
-                        cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
-                        self.__logger.info(f"Sending '{cache_path}' folder...")
-                        if not self.send_files(cache_path, "/cache"):
-                            success = False
-                            self.__logger.error(f"Error while sending '{cache_path}' folder")
-                        else:
-                            self.__logger.info(f"Successfully sent '{cache_path}' folder")
-
-                    if not self.__reload():
+                    if self.__publish_pending():
+                        self.__clear_pending_publication()
+                    else:
                         success = False
+                        self.__defer_publish_retry()
                 except Exception as e:
                     success = False
+                    self.__defer_publish_retry()
                     self.__logger.error(f"Exception while reloading after job scheduling: {e}")
-                self.__job_reload = False
 
             if pending_jobs:
                 self.__logger.info("All scheduled jobs have been executed")
@@ -336,6 +455,9 @@ class JobScheduler(ApiCaller):
         finally:
             # Reset flag for next batch
             self.__cache_permissions_updated = False
+
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
 
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
@@ -346,13 +468,84 @@ class JobScheduler(ApiCaller):
 
             self.__update_cache_permissions()
 
+    def __publish_due(self) -> bool:
+        """False while a failed publication is backing off, so idle ticks stay cheap."""
+        return self.__publish_retry_at is None or monotonic() >= self.__publish_retry_at
+
+    def __defer_publish_retry(self) -> None:
+        self.__publish_retry_at = monotonic() + self.__publish_retry_delay
+        self.__logger.debug(f"Next pending publication retry in {self.__publish_retry_delay}s")
+        self.__publish_retry_delay = min(self.PUBLISH_RETRY_MAX_DELAY, self.__publish_retry_delay * 2)
+
+    def __clear_pending_publication(self) -> None:
+        self.__job_reload = False
+        self.__job_regenerate = False
+        self.__configs_generated = False
+        self.__publish_retry_at = None
+        self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+
+    def consume_pending_publication(self) -> Tuple[bool, bool]:
+        """Hand the pending (reload, regenerate) state to a caller that publishes it itself.
+
+        run_once()/run_single() only record what their jobs changed; the caller that ran them
+        publishes right after. Without this the next run_pending() rediscovers the same flags and
+        renders, pushes and reloads a second time for every applied change.
+        """
+        with self.__thread_lock:
+            pending = (self.__job_reload, self.__job_regenerate)
+            self.__clear_pending_publication()
+        return pending
+
+    def __publish_pending(self) -> bool:
+        """Only acknowledge a changed generation after every publication step succeeds."""
+        if self.__job_regenerate and not self.__configs_generated:
+            # Before the API check: with no instance the flags are cleared below, and the
+            # healthcheck only renders for an instance that answers "loading". One that stayed
+            # up behind a partition is re-added without a render, and both regenerate-worthy
+            # jobs report a change once a day, so /etc/nginx would keep the old generation.
+            if self.__generate_configs is None or not self.__generate_configs():
+                self.__logger.error("Configuration generation failed; keeping the pending job publication for retry")
+                return False
+            self.__configs_generated = True
+        if not self.apis:
+            # No instance to publish to: /etc/nginx is current (rendered above) and nothing is
+            # left pending, exactly as __reload() answered True for an empty API list. The push
+            # is deliberately left to the next change or to the healthcheck, which serves an
+            # instance that answers "loading"; latching the flags here only burns main-loop ticks.
+            return True
+
+        try:
+            send_files_min_timeout = parse_duration(self.env.get("SEND_FILES_MIN_TIMEOUT", "30"), "s")
+        except ValueError:
+            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 30")
+            send_files_min_timeout = 30
+        paths = [(os.path.join(os.sep, "var", "cache", "bunkerweb"), "/cache")]
+        if self.__job_regenerate:
+            paths.append((os.path.join(os.sep, "etc", "nginx"), "/confs"))
+        for path, endpoint in paths:
+            if not self.send_files(
+                path,
+                endpoint,
+                timeout=folder_push_timeout(int(send_files_min_timeout), len(self.env.get("SERVER_NAME", "www.example.com").split())),
+            ):
+                self.__logger.error(f"Error sending '{path}'; keeping the pending job publication for retry")
+                return False
+        return self.__reload()
+
+    @property
+    def failed_jobs(self) -> List[str]:
+        """Names of jobs (``plugin/name``) that failed in the most recent run batch."""
+        with self.__thread_lock:
+            return self.__failed_jobs.copy()
+
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
-        self.__job_success = True
-        self.__job_reload = False
+        with self.__thread_lock:
+            self.__job_success = True
+            self.__failed_jobs = []
 
         plugins = plugins or []
 
@@ -388,6 +581,9 @@ class JobScheduler(ApiCaller):
         finally:
             # Reset flag for next batch
             self.__cache_permissions_updated = False
+
+            # Clean up cached modules to free memory
+            self.cleanup_modules()
 
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -454,14 +650,17 @@ class JobScheduler(ApiCaller):
         """Clean up cached modules to free memory."""
         with self.__module_cache_lock:
             for module_key, module in self.__module_cache.items():
-                # Try to get the qualified name from sys.modules and remove it
-                qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
+                # Use the stored qualified name for reliable cleanup
+                qualified_name = getattr(module, "__bw_qualified_name__", None)
+                if qualified_name is None:
+                    qualified_name = f"bw_job_{getattr(module, '__name__', 'unknown')}_{hash(module_key) & 0x7FFFFFFF}"
                 if qualified_name in sys_modules:
                     del sys_modules[qualified_name]
 
             module_count = len(self.__module_cache)
             self.__module_cache.clear()
-            self.__logger.info(f"Cleared {module_count} cached job modules")
+            if module_count > 0:
+                self.__logger.debug(f"Cleared {module_count} cached job modules")
 
     def __del__(self):
         """Destructor to clean up resources."""
@@ -476,8 +675,7 @@ class JobScheduler(ApiCaller):
             # Clear module cache on reload to pick up changes
             self.cleanup_modules()
 
-            os.environ = self.__base_env.copy()
-            os.environ.update(env)  # Update with new environment
+            self.__set_env(env)
             super().__init__(apis or self.apis)
             self.clear()
             self.update_jobs()

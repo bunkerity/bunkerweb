@@ -226,9 +226,20 @@ bool Rbl::evaluate(Transaction *t, RuleWithActions *rule,
         return false;
     }
 
-    struct sockaddr *addr = info->ai_addr;
-    struct sockaddr_in *sin = (struct sockaddr_in *) addr;
-    furtherInfo(sin, ipStr, t, m_provider);
+    // SonarCloud suggested to use the init-statement to declare "addr" inside the if statement.
+    // I think that's not good here, because we need that in the else block
+    const struct sockaddr *addr = info->ai_addr;  // NOSONAR
+    if (addr->sa_family == AF_INET) {  // NOSONAR
+        struct sockaddr_in sin{};  // initialize an empty struct; we don't need port info
+        memcpy(&sin.sin_addr, addr->sa_data + 2, sizeof(sin.sin_addr));
+        sin.sin_family = AF_INET;
+        furtherInfo(&sin, ipStr, t, m_provider);
+    }
+    else {
+        ms_dbg_a(t, 7,  "Unsupported address family: " + std::to_string(addr->sa_family));
+        freeaddrinfo(info);
+        return false;
+    }
 
     freeaddrinfo(info);
     if (rule && t && rule->hasCaptureAction()) {

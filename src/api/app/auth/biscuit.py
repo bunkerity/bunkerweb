@@ -5,14 +5,13 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, Request
-from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact
+from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact, Rule
 
 from common_utils import get_version  # type: ignore
 
 from ..config import api_config
 from ..utils import BISCUIT_PUBLIC_KEY_FILE
 from .common import get_auth_header, parse_bearer_token
-
 
 OPERATION_BY_METHOD = {
     "GET": "read",
@@ -22,6 +21,30 @@ OPERATION_BY_METHOD = {
     "PATCH": "write",
     "DELETE": "write",
 }
+
+# biscuit-rust authorizes under a wall-clock budget defaulting to 1 ms, and reports blowing it as
+# the same AuthorizationError a policy denial raises. An honest token authorizes in ~0.01 ms, but a
+# CPU-starved host still overran 1 ms often enough to turn valid tokens into 401s. Raise the clock
+# only: max_facts and max_iterations are the dimensions a token's own content drives, so they keep
+# their defaults and keep denying fast.
+AUTHORIZE_MAX_TIME = timedelta(milliseconds=100)
+
+# Whole-message marker for a run-limit abort, used only to log the cause. With the clock at 100 ms
+# a residual abort means the token's own Datalog exploded the fact/iteration limits, which any
+# holder of any valid token can arrange offline by appending a block (biscuit attenuation needs no
+# private key). It is a hostile credential, not a busy host, so the status is the phase's normal
+# denial and this marker is not a security boundary. Match the whole message anyway: a denial
+# quotes back check text that token content can influence, so a substring test would misreport a
+# plain denial as a run-limit abort.
+RUN_LIMIT_ERROR = "Reached Datalog execution limits"
+
+
+def _raise_time_budget(az: AuthorizerBuilder) -> None:
+    # limits() hands back a copy, so set_limits() is what actually applies the change.
+    limits = az.limits()
+    limits.max_time = AUTHORIZE_MAX_TIME
+    az.set_limits(limits)
+
 
 # Default fine-grained permission verb mapping by method
 PERM_VERB_BY_METHOD = {
@@ -107,16 +130,20 @@ def _resolve_global_settings(method_u: str) -> tuple[Optional[str], Optional[str
     """Resolve global_settings endpoints to fine-grained permissions.
 
     Supported endpoints:
-    - GET              /global_settings       -> global_settings_read
-    - POST|PUT|PATCH   /global_settings       -> global_settings_update
-    Also accepts hyphenated path prefix (global-settings) but canonicalizes rtype to global_settings.
+    - GET              /global_settings       -> global_config_read
+    - POST|PUT|PATCH   /global_settings       -> global_config_update
+    Also accepts /global_config as an alias; both paths resolve to resource type global_config.
+
+    The permission names are global_config_*, not global_settings_*: those are the only names
+    API_PERMISSION_ENUM accepts, so any other spelling resolves to a grant that cannot exist and
+    refuses every non-admin user.
     """
-    rtype = "global_settings"
+    rtype = "global_config"
     verb = PERM_VERB_BY_METHOD.get(method_u)
     if verb == "read":
-        return rtype, "global_settings_read"
+        return rtype, "global_config_read"
     if verb in {"create", "update"}:
-        return rtype, "global_settings_update"
+        return rtype, "global_config_update"
     # For DELETE or other methods, no fine-grained permission mapping
     return rtype, None
 
@@ -126,7 +153,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
 
     Permissions are named with singular prefix (service_*), resource_type is plural "services".
     Special endpoints:
-    - POST   /services/convert -> service_convert
+    - POST   /services/{id}/convert -> service_convert
     - GET    /services/export  -> service_export
     CRUD:
     - GET    /services or /services/{id} -> service_read
@@ -139,7 +166,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
     parts = [seg for seg in p.split("/") if seg]
 
     # Special actions
-    if p == "/services/convert" and method_u == "POST":
+    if len(parts) == 3 and parts[0] == "services" and parts[2] == "convert" and method_u == "POST":
         return rtype, "service_convert"
     if p == "/services/export" and method_u in {"GET", "OPTIONS"}:
         return rtype, "service_export"
@@ -318,6 +345,11 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     first = parts[0].lower()
     method_u = method.upper()
 
+    if first == "crowdsec":
+        # Reuse the persisted bans resource enum, with independent permissions.
+        # Existing ban_delete grants must not gain authority over a shared engine.
+        return "bans", "crowdsec_delete" if method_u == "DELETE" else "crowdsec_read"
+
     # Bans category
     if first == "bans" or p.startswith("/bans"):
         return _resolve_bans(p, method_u)
@@ -325,7 +357,7 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Instances special cases
     if first in {"instances", "reload", "stop"}:
         return _resolve_instances(p, method_u)
-    # Global settings special cases (canonicalize hyphenated version)
+    # Global settings endpoint and canonical resource-name alias
     if first in {"global_settings", "global_config"}:
         return _resolve_global_settings(method_u)
     # Services special cases
@@ -369,7 +401,7 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_settings", "global-settings"}:
         return None
     # Skip services action endpoints when extracting ID
-    if parts[0] == "services" and len(parts) >= 2 and parts[1] in {"convert", "export"}:
+    if parts[0] == "services" and len(parts) == 2 and parts[1] in {"convert", "export"}:
         return None
     # Skip upload pseudo-id segments for configs/plugins
     if parts[0] in {"configs", "plugins"} and len(parts) >= 2 and parts[1] == "upload":
@@ -384,6 +416,12 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     if len(parts) >= 2:
         return parts[1]
     return None
+
+
+def _add_fine_grained_policies(az: AuthorizerBuilder) -> None:
+    az.add_policy(Policy("allow if admin(true)"))
+    az.add_policy(Policy('allow if api_perm($rt, "*", $perm), required_perm($perm), resource_type($rt)'))
+    az.add_policy(Policy("allow if api_perm($rt, $rid, $perm), required_perm($perm), resource_type($rt), resource_id($rid)"))
 
 
 class BiscuitGuard:
@@ -437,6 +475,18 @@ class BiscuitGuard:
             self._logger.debug(f"Biscuit token parsing failed with unexpected error:\n{format_exc()}")
             raise HTTPException(status_code=401, detail="Unauthorized")
 
+        # Every token this product issues is a single authority block: both mints (routers/auth.py
+        # here, models/biscuit.py in the UI) add every fact to one builder and never append. Nothing
+        # in the product or its docs attenuates, so an extra block only ever comes from an attacker,
+        # and it is the entire attenuation DoS: the Datalog run limits are checked only *between*
+        # iterations, so one crafted join inside an appended block runs to completion however small
+        # max_time is. Rejecting on the block count costs the parse we already did instead of ~17 s
+        # of blocked event loop. Revisit only if attenuation ever becomes a supported feature, and
+        # bound block size rather than reallowing this.
+        if token.block_count() != 1:
+            self._logger.warning(f"Biscuit token carries {token.block_count()} blocks, expected 1 (attenuated token), rejecting")
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
         # Phase 1: freshness and IP binding
         try:
             az = AuthorizerBuilder()
@@ -454,17 +504,23 @@ class BiscuitGuard:
 
             client_ip = request.client.host if request.client else "0.0.0.0"
             if api_config.check_private_ip or not ip_address(client_ip).is_private:
-                az.add_check(Check(f'check if client_ip("{client_ip}")'))
+                az.add_check(Check("check if client_ip({client_ip})", {"client_ip": client_ip}))
                 self._logger.debug(f"Biscuit phase1: enforce client_ip={client_ip} (check_private_ip={api_config.check_private_ip})")
             else:
                 self._logger.debug(f"Biscuit phase1: skip client_ip check for private IP {client_ip}")
 
             az.add_policy(Policy("allow if true"))
+            _raise_time_budget(az)
             self._logger.debug("Biscuit phase1: authorizing freshness/IP checks")
             az.build(token).authorize()
             self._logger.debug("Biscuit phase1: authorization success")
-        except AuthorizationError:
+            request.state.biscuit_token = token
+        except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase1: authorization failed (AuthorizationError):\n{format_exc()}")
+            if str(e) == RUN_LIMIT_ERROR:
+                # Say so explicitly: this is a hostile token, not the ACL misconfiguration the
+                # generic "auth failed" line sends operators hunting.
+                self._logger.warning("Biscuit phase1: token exhausted the Datalog fact/iteration limits, rejecting")
             raise HTTPException(status_code=401, detail="Unauthorized")
         except Exception:
             self._logger.debug(f"Biscuit phase1: authorization failed (unexpected error):\n{format_exc()}")
@@ -476,40 +532,72 @@ class BiscuitGuard:
 
             # Always add operation fact for observability
             operation = OPERATION_BY_METHOD.get(request.method.upper(), "read")
-            az.add_fact(Fact(f'operation("{operation}")'))
+            az.add_fact(Fact("operation({operation})", {"operation": operation}))
             self._logger.debug(f"Biscuit phase2: operation={operation}")
 
-            # Derive fine-grained context
+            # Derive fine-grained context. The request path is attacker-controlled, so it
+            # is bound as a parameter to prevent Datalog fact injection into the authorizer.
             rtype, req_perm = _resolve_resource_and_perm(path, request.method)
             if rtype and req_perm:
-                az.add_fact(Fact(f'resource("{path}")'))
-                az.add_fact(Fact(f'resource_type("{rtype}")'))
-                az.add_fact(Fact(f'required_perm("{req_perm}")'))
+                az.add_fact(Fact("resource({resource})", {"resource": path}))
+                az.add_fact(Fact("resource_type({resource_type})", {"resource_type": rtype}))
+                az.add_fact(Fact("required_perm({required_perm})", {"required_perm": req_perm}))
                 rid = _extract_resource_id(path, rtype)
                 if rid is not None:
-                    az.add_fact(Fact(f'resource_id("{rid}")'))
+                    az.add_fact(Fact("resource_id({resource_id})", {"resource_id": str(rid)}))
                 self._logger.debug(f"Biscuit phase2: rtype={rtype}, required_perm={req_perm}, resource_id={rid if rid is not None else '*none*'}")
 
                 # Enforce fine-grained authorization
-                az.add_policy(Policy("allow if admin(true)"))
-                # Global grant (resource_id == "*")
-                az.add_policy(Policy('allow if api_perm($rt, "*", $perm), required_perm($perm), resource_type($rt)'))
-                # Specific resource grant
-                az.add_policy(Policy("allow if api_perm($rt, $rid, $perm), required_perm($perm), resource_type($rt), resource_id($rid)"))
+                _add_fine_grained_policies(az)
             else:
                 # Fallback to coarse role-based authorization when no fine-grained mapping exists
                 az.add_policy(Policy("allow if role($role, $perms), operation($op), $perms.contains($op)"))
                 self._logger.debug("Biscuit phase2: fallback to coarse role-based authorization")
 
+            _raise_time_budget(az)
             self._logger.debug("Biscuit phase2: authorizing route access")
-            az.build(token).authorize()
+            authorized = az.build(token)
+            authorized.authorize()
+            if path.startswith("/crowdsec") and hasattr(request, "state"):
+                subjects = authorized.query(Rule("subject($name) <- user($name) trusting authority"))
+                request.state.auth_subject = str(subjects[0].terms[0]) if subjects else "biscuit"
             self._logger.debug("Biscuit phase2: authorization success")
-        except AuthorizationError:
+        except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase2: authorization failed (AuthorizationError):\n{format_exc()}")
+            if str(e) == RUN_LIMIT_ERROR:
+                # Say so explicitly: this is a hostile token, not the ACL misconfiguration the
+                # generic "auth failed" line sends operators hunting.
+                self._logger.warning("Biscuit phase2: token exhausted the Datalog fact/iteration limits, rejecting")
             raise HTTPException(status_code=403, detail="Forbidden")
         except Exception:
             self._logger.debug(f"Biscuit phase2: authorization failed (unexpected error):\n{format_exc()}")
             raise HTTPException(status_code=403, detail="Forbidden")
+
+
+def authorize_resource(request: Request, resource_type: str, permission: str, resource_id: str) -> None:
+    """Authorize a second resource with the same policies as the route guard."""
+    if getattr(request.state, "auth_admin", False):
+        return
+
+    token = getattr(request.state, "biscuit_token", None)
+    if token is None:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    try:
+        az = AuthorizerBuilder()
+        az.add_fact(Fact("resource_type({resource_type})", {"resource_type": resource_type}))
+        az.add_fact(Fact("required_perm({required_perm})", {"required_perm": permission}))
+        az.add_fact(Fact("resource_id({resource_id})", {"resource_id": resource_id}))
+        _add_fine_grained_policies(az)
+        _raise_time_budget(az)
+        az.build(token).authorize()
+    except AuthorizationError:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    except Exception:
+        from ..utils import LOGGER  # local import to avoid cycles
+
+        LOGGER.debug(f"Biscuit destination check failed unexpectedly for {resource_type}/{resource_id}:\n{format_exc()}")
+        raise HTTPException(status_code=403, detail="Forbidden")
 
 
 guard = BiscuitGuard()

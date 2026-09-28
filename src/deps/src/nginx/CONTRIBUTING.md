@@ -5,34 +5,34 @@ We really appreciate that you are considering contributing!
 
 ## Table of Contents
 
-- [Ask a Question](#ask-a-question)
 - [Report a Bug](#report-a-bug)
 - [Suggest a Feature or Enhancement](#suggest-a-feature-or-enhancement)
 - [Open a Discussion](#open-a-discussion)
 - [Submit a Pull Request](#submit-a-pull-request)
 - [Issue Lifecycle](#issue-lifecycle)
 
-## Ask a Question
-
-To ask a question, open an issue on GitHub with the label `question`.
-
 ## Report a Bug
 
 To report a bug, open an issue on GitHub with the label `bug` using the
-available bug report issue template. Before reporting a bug, make sure the
-issue has not already been reported.
+available [bug report issue form](/.github/ISSUE_TEMPLATE/bug_report.yml).
+Please ensure the bug has not already been reported. **If the bug is a
+potential security vulnerability, please report it using our
+[security policy](/SECURITY.md).**
 
 ## Suggest a Feature or Enhancement
 
-To suggest a feature or enhancement, open an issue on GitHub with the label
-`feature` or `enhancement` using the available feature request issue template.
+To suggest a feature or enhancement, please create an issue on GitHub with the
+label `enhancement` using the available
+[feature request issue form](/.github/ISSUE_TEMPLATE/feature_request.yml).
 Please ensure the feature or enhancement has not already been suggested.
 
 ## Open a Discussion
 
 If you want to engage in a conversation with the community and maintainers,
 we encourage you to use
-[GitHub Discussions](https://github.com/nginx/nginx/discussions).
+[GitHub Discussions](https://github.com/nginx/nginx/discussions) to discuss
+the NGINX codebase or the [NGINX Community forum](https://community.nginx.org)
+to chat anything else NGINX (including troubleshooting).
 
 ## Submit a Pull Request
 
@@ -68,9 +68,14 @@ to 76 characters
 code; examples include "Upstream:", "QUIC:", or "Core:"; see the commit history
 to get an idea of the prefixes used
 
-- Reference issues in the the subject line; if the commit fixes an issue,
-[name it](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue)
-accordingly
+- If the commit fixes an open issue then you can use the "Closes:" tag/trailer
+to reference it and have GitHub automatically close it once it's been merged.
+E.g.:
+
+  `Closes: https://github.com/nginx/nginx/issues/9999`
+
+  That should go at the end of the commit message, separated by a blank line,
+  along with any other tags.
 
 ### Before Submitting
 
@@ -89,7 +94,20 @@ git clone https://github.com/nginx/nginx-tests.git
 ```
 
 - Submitting a change implies granting project a permission to use it under the
-[BSD-2-Clause license](https://github.com/nginx/nginx/blob/master/LICENSE)
+[BSD-2-Clause license](/LICENSE)
+
+### F5 Contributor License Agreement (CLA)
+
+F5 requires all contributors to agree to the terms of the F5 CLA
+(available [here](https://github.com/f5/f5-cla/blob/main/docs/f5_cla.md))
+before any of their changes can be incorporated into an F5 Open Source
+repository (even contributions to the F5 CLA itself!).
+
+If you have not yet agreed to the F5 CLA terms and submit a PR to this
+repository, a bot will prompt you to view and agree to the F5 CLA.
+You will have to agree to the F5 CLA terms through a comment in the PR
+before any of your changes can be merged. Your agreement signature
+will be safely stored by F5 and no longer be required in future PRs.
 
 ## Issue Lifecycle
 

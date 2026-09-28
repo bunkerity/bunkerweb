@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40 AS builder
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS builder
 
 ARG TARGETPLATFORM
 
@@ -11,13 +11,12 @@ COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
-COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.arm.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -29,7 +28,7 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/api api
 
-FROM python:3.13-alpine@sha256:bb1f2fdb1065c85468775c9d680dcd344f6442a2d1181ef7916b60a623f11d40
+FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
 
 RUN umask 027
 
@@ -45,7 +44,8 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-RUN apk add --no-cache "zlib>=1.3.2-r0" # CVE-2026-22184, CVE-2026-27171
+RUN apk add --no-cache "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -63,7 +63,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.9"
+LABEL version="1.6.16~rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="api"
 

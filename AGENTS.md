@@ -22,4 +22,4 @@ Use concise, present-tense messages; the history favors Conventional Commits (`f
 
 ## Security & Configuration Tips
 
-Never commit secrets—use sample files in `env/` or add new templates when introducing config. Review `.trivyignore` and `.gitleaksignore` before adjusting dependencies. When touching TLS, keys, or rule bundles, document rotation steps and default hardening in the accompanying docs update.
+Never commit secrets—use sample files in `env/` or add new templates when introducing config. Review `.gitleaksignore` before adjusting dependencies. Docker Scout is used for container image vulnerability scanning in CI/CD—check the `container-build.yml` workflow for current scan configuration. When touching TLS, keys, or rule bundles, document rotation steps and default hardening in the accompanying docs update.

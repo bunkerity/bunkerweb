@@ -21,13 +21,11 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.add_column("bw_selects", sa.Column("order", sa.Integer(), nullable=False))
     op.execute("SET @row_number = 0")
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_selects
         SET `order` = (@row_number:=@row_number + 1)
         ORDER BY setting_id
-    """
-    )
+    """)
     op.create_unique_constraint(None, "bw_selects", ["setting_id", "order"])
 
     # Update version in bw_metadata

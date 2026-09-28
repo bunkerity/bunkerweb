@@ -19,7 +19,7 @@ local robotstxt = class("robotstxt", plugin)
 
 local function is_ignored(rule, ignore_rules)
 	for _, ignore_pattern in ipairs(ignore_rules) do
-		if regex_match(rule, ignore_pattern) then
+		if regex_match(rule, ignore_pattern, nil, "ROBOTSTXT_IGNORE_RULE") then
 			return true
 		end
 	end
@@ -34,7 +34,7 @@ function robotstxt:initialize(ctx)
 		footer = {},
 		sitemap = {},
 	}
-	if get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self.ctx.bw.uri == "/robots.txt" and self:is_needed() then
 		local server_name = self.ctx.bw.server_name
 		local robots_rules, err = self.internalstore:get("plugin_robotstxt_rules_" .. server_name, true)
 		if not robots_rules then

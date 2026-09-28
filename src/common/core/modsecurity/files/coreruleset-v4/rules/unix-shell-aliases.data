@@ -1,0 +1,7 @@
+# This list only includes shell aliases that are included in various Distro's out of the box
+# to limit false positives. The number of shell aliases that can exist are infinite.
+
+# ls
+l
+la
+ll

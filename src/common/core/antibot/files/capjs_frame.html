@@ -1,0 +1,60 @@
+{-raw-}<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="nofollow,noarchive,noindex" name="robots" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <title>Verification</title>
+  </head>
+  <body>
+    {-raw-}
+    <script nonce="{*nonce_script*}">
+      window.CAP_CUSTOM_WASM_URL = "{*capjs_url*}/assets/cap_wasm_bg.wasm";
+      // Nonce the widget's injected <style> and inline <script> (needs cap.js widget >= 0.1.48).
+      window.CAP_CSS_NONCE = "{*nonce_style*}";
+      window.CAP_SCRIPT_NONCE = "{*nonce_script*}";
+    </script>
+    <script
+      src="{*capjs_url*}/assets/widget.js"
+      crossorigin="anonymous"
+      nonce="{*nonce_script*}"
+    ></script>
+    <script nonce="{*nonce_script*}">
+      // Solve here, then postMessage the result to the parent (which submits the token).
+      (function () {
+        function post(msg) {
+          msg.channel = "bw-capjs";
+          try {
+            parent.postMessage(msg, window.location.origin);
+          } catch (e) {}
+        }
+        if (typeof Cap === "undefined") {
+          post({ type: "error" });
+          return;
+        }
+        var cap;
+        try {
+          cap = new Cap({
+            apiEndpoint: "{*capjs_url*}/{*capjs_sitekey*}/",
+          });
+        } catch (e) {
+          post({ type: "error" });
+          return;
+        }
+        cap.addEventListener("progress", function (e) {
+          post({ type: "progress", progress: e.detail.progress });
+        });
+        cap
+          .solve()
+          .then(function (solution) {
+            post({ type: "token", token: solution.token });
+          })
+          .catch(function () {
+            post({ type: "error" });
+          });
+      })();
+    </script>
+    {-raw-}
+  </body>
+</html>
+{-raw-}

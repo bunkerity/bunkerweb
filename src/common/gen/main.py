@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from glob import glob
+from contextlib import suppress
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
+from re import sub as re_sub
 from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -14,9 +15,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
+from modsecurity_audit import validate_audit_log_settings
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -72,8 +75,7 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            with variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(variables_path)
 
         db = None
         if DB_PATH.is_dir():
@@ -127,15 +129,26 @@ if __name__ == "__main__":
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
 
-        # Remove old files
+        # Database-backed candidates bypass Configurator. Reject them before removing working files.
+        validate_audit_log_settings(full_config)
+
+        # Remove old files. iterdir(), not glob("*"), so dotfiles go too.
         LOGGER.info("Removing old files ...")
-        files = glob(join(args.output, "*"))
-        for file in files:
-            file = Path(file)
+        for file in Path(args.output).iterdir():
             if file.is_symlink() or file.is_file():
                 file.unlink()
             elif file.is_dir():
                 rmtree(file.as_posix(), ignore_errors=True)
+
+        # The applied-digest marker for a pushed destination lives outside it, keyed by path,
+        # so the wipe above cannot reach it. Regenerating replaces the content the instance
+        # last acknowledged: a marker left behind makes the next push of that same content
+        # answer "already applied", and the instance keeps serving what this run overwrote.
+        # Keep the key in step with pushswap.applied_path.
+        # A marker this process cannot remove costs one redundant push; aborting the render would
+        # cost the configuration.
+        with suppress(OSError):
+            Path(sep, "var", "tmp", "bunkerweb", "pushswap", f"{re_sub(r'[^A-Za-z0-9]+', '_', output_path.as_posix())}.applied").unlink(missing_ok=True)
 
         # Render the templates
         LOGGER.info("Rendering templates ...")

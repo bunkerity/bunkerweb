@@ -90,22 +90,29 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 | Einstellung                          | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
 | ------------------------------------ | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_METRICS`                        | `yes`    | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                     |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `16m`, `32m`).                                                        |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen.                             |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen.                         |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `8192`, `16m`, `32m`).                                                 |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `METRICS_REDIS_TTL`                  | `30d`    | global    | nein     | **Metrics-Redis-TTL:** Sekunden bis Redis-Metrik-Schlüssel ablaufen (`0` = dauerhaft); wird bei jeder Synchronisierung erneuert, sodass aktive Daten nie ablaufen, während verwaiste Daten unter `volatile-lru` evictable werden, damit sich Redis von Speicherdruck (maxmemory) erholt. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | nein     | **Max. LRU-Verlauf:** Anzahl der LRU-Slots pro Worker und Limit des Ereignisverlaufsarrays pro Schlüssel (Blockierungsverläufe, Authentifizierungsverläufe usw.). Akzeptiert die Kurzschreibweise `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern. |
 
 !!! tip "Dimensionierung der Speicherzuweisung"
-    Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
+    Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
+    Wenn BunkerWeb [Redis](#redis) verwendet, synchronisiert das Metrics-Plugin Berichte über blockierte Anfragen automatisch mit Redis. Bei Erreichen von `maxmemory` bleiben abgelehnte Berichte für einen erneuten Versuch im begrenzten Worker-Puffer. Ein voller Puffer, LRU-Verdrängung oder Redis-Datenverlust kann dennoch zum Verlust von Berichten führen. Unvollständige Filterzähler werden aus der gespeicherten Anfrageliste neu aufgebaut. Gespeicherte Berichte mit fehlerhaften Daten (unbrauchbarer Zeitstempel oder Bezeichner) werden aus der Berichtstabelle und deren Summen ausgeschlossen.
+
+    Zählerstände werden vor der Synchronisierung bei Bedarf aus Redis geladen, auch nach einer Verdrängung aus dem lokalen LRU-Cache. Inaktive Redis-Zähler bleiben bis zum Ablauf von `METRICS_REDIS_TTL` erhalten; `0` bewahrt sie absichtlich unbefristet auf. Überwachen Sie daher den Redis-Speicher bei Metriken mit vielen unterschiedlichen Schlüsseln.
 
 !!! warning "Leistungsüberlegungen"
     Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.
 
 !!! note "Worker-spezifischer Speicher"
     Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.
+
+!!! warning "Aufbewahrung der Berichte"
+    Berichte über blockierte Anfragen sind ein rollierender Puffer, kein Audit-Log. Sobald das Limit erreicht ist, werden die ältesten Berichte verworfen, um Platz für neue zu schaffen. Die in der Web-UI angezeigte Gesamtzahl bleibt deshalb konstant: ohne Redis liegt diese Obergrenze bei `METRICS_MAX_BLOCKED_REQUESTS` multipliziert mit der Anzahl der NGINX-Worker jeder Instanz, mit Redis bei `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Berichte liegen im Shared Memory und werden bei jedem Neustart von BunkerWeb gelöscht, auch bei Paket-Upgrades, sofern Redis nicht aktiviert und persistent ist. Leiten Sie die NGINX-Logs an einen Syslog-Server oder ein SIEM weiter, wenn Sie eine langfristige Aufbewahrung benötigen.
 
 ### Beispielkonfigurationen
 
@@ -116,8 +123,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +138,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +151,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

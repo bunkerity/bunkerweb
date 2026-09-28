@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Literal, Optional, Union
 
@@ -31,6 +32,16 @@ class Config:
         self.__config = {}
         self.__extra_config = {}
 
+        # Signature (set of valid setting ids) as of the last successful apply. Used to detect when
+        # the available settings change out-of-band (e.g. a PRO license became valid and its
+        # settings landed in the DB, an external plugin was added, or PRO expired) so labels that
+        # were previously dropped as invalid can be re-evaluated. None until the first apply.
+        self._applied_settings_signature = None
+
+        # When enabled, services / custom configs removed from the orchestrator are converted
+        # to draft in the DB instead of being hard-deleted, so they can be republished later.
+        self._disable_cleanup = getenv("AUTOCONF_DISABLE_CLEANUP", "no").strip().lower() == "yes"
+
         self._db = Database(self.__logger)
 
     def _update_settings(self):
@@ -41,6 +52,14 @@ class Config:
         self._settings = {}
         for plugin in plugins:
             self._settings.update(plugin["settings"])
+
+    def settings_changed(self) -> bool:
+        """Whether the set of valid setting ids differs from the last successful apply.
+
+        Returns False until the first apply has recorded a baseline (signature is None), so the
+        recheck worker never fires before initial_apply has run.
+        """
+        return self._applied_settings_signature is not None and frozenset(self._settings) != self._applied_settings_signature
 
     def __get_full_env(self) -> dict:
         config = {"SERVER_NAME": "", "MULTISITE": "yes"}
@@ -133,22 +152,18 @@ class Config:
             )
         )
 
-    def wait_applying(self, startup: bool = False):
+    def wait_applying(self):
+        # Ready when DB is initialized and no scheduler apply is in flight.
         current_time = datetime.now().astimezone()
         ready = False
         while not ready and (datetime.now().astimezone() - current_time).seconds < 240:
             db_metadata = self._db.get_metadata()
             if isinstance(db_metadata, str):
-                if not startup:
-                    self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
-            elif (
-                db_metadata["is_initialized"]
-                and db_metadata["first_config_saved"]
-                and not any(
-                    v
-                    for k, v in db_metadata.items()
-                    if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-                )
+                self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+            elif db_metadata["is_initialized"] and not any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ready = True
                 continue
@@ -165,6 +180,7 @@ class Config:
         configs: Optional[Dict[str, Dict[str, bytes]]] = None,
         first: bool = False,
         extra_config: Optional[Dict[str, str]] = None,
+        force: bool = False,
     ) -> bool:
         success = True
 
@@ -189,7 +205,10 @@ class Config:
             changes.append("custom_configs")
         if extra_config != self.__extra_config or first:
             changes.append("extra_config")
-        if "instances" in changes or "services" in changes or "extra_config" in changes:
+        # force=True re-validates labels even when instances/services are unchanged: this is how a
+        # now-valid PRO label (or any label that became valid after the settings set changed) gets
+        # picked up, since __get_full_env() re-checks every label against the current DB settings.
+        if "instances" in changes or "services" in changes or "extra_config" in changes or force:
             old_env = self.__config.copy()
             new_env = self.__get_full_env() | extra_config
             if old_env != new_env or first:
@@ -225,7 +244,7 @@ class Config:
         changed_plugins = []
         if "config" in changes:
             self.__logger.debug(f"Saving config in database: {self.__config}")
-            err = self._db.save_config(self.__config, "autoconf", changed=False)
+            err = self._db.save_config(self.__config, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if isinstance(err, str):
                 success = False
                 self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
@@ -234,7 +253,7 @@ class Config:
         # save custom configs to database
         if "custom_configs" in changes:
             self.__logger.debug(f"Saving custom configs in database: {custom_configs}")
-            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
+            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if err:
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
@@ -245,6 +264,11 @@ class Config:
             self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         self.__logger.info("Successfully saved new configuration 🚀")
+
+        if success:
+            # Record the settings baseline so the recheck worker only re-fires when the valid
+            # settings set actually changes again (not after every normal apply).
+            self._applied_settings_signature = frozenset(self._settings)
 
         return success
 

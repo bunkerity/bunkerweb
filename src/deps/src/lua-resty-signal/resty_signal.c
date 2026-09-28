@@ -135,12 +135,12 @@ resty_signal_signum(int num)
     case RS_URG:
         return SIGURG;
 
+    case RS_SYS:
+        return SIGSYS;
+
 #ifdef __APPLE__
     case RS_EMT:
         return SIGEMT;
-
-    case RS_SYS:
-        return SIGSYS;
 
     case RS_INFO:
         return SIGINFO;

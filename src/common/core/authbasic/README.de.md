@@ -27,6 +27,9 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit scrypt für maximale Sicherheit gehasht.                                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                                                                         |
 
+!!! tip "Verankern Sie den geschützten Pfad so, dass alles darunter erfasst wird"
+    Ein einfacher Pfad wie `/admin` ist ein Präfix-Match und schützt damit auch `/admin/`, `/admin/users` und die kodierten Varianten, die sich darauf normalisieren. Der Modifikator `=` macht den Abgleich exakt, sodass `= /admin` den Pfad `/admin/` ungeschützt lässt, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Behalten Sie die Präfix-Form, sofern Sie nicht wirklich genau einen Pfad meinen.
+
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
 

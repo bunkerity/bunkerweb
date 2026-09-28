@@ -18,8 +18,22 @@
   "aria": {
     "label": {
       "close": "Закрыть",
+      "copy": "Копировать журналы",
+      "download_log": "Скачать этот файл журнала",
+      "follow": "Следить",
+      "select_file": "Выбрать файл",
+      "select_page": "Выбрать страницу",
+      "issue_count": "Количество ошибок и предупреждений",
+      "level_filter": "Фильтровать строки журнала по уровню",
+      "local_time": "Показывать временные метки в местном времени",
+      "collapse_multiline": "Свернуть многострочные записи",
+      "next_issue": "Следующая ошибка или предупреждение",
+      "prev_issue": "Предыдущая ошибка или предупреждение",
+      "search_logs": "Поиск в журналах",
+      "toggle_wrap": "Переключить перенос строк",
+      "configs_dropzone": "Выберите файл экспорта пользовательских конфигураций или перетащите его сюда",
       "raw_configuration": "Необработанная конфигурация",
-      "view_template": "Просмотреть Шаблон {{template}}"
+      "services_dropzone": "Выберите файл экспорта служб или перетащите его сюда"
     }
   },
   "badge": {
@@ -43,6 +57,7 @@
     "bans": "Баны",
     "cache": "Кэш",
     "configs": "Конфигурации",
+    "crowdsec": "CrowdSec",
     "extra_pages": "Дополнительные страницы",
     "global_settings": "Глобальные настройки",
     "home": "Главная",
@@ -95,10 +110,8 @@
     "enable_totp": "Включить TOTP",
     "entire_config": "Вся конфигурация",
     "export": "Экспорт",
-    "export_csv_all": "CSV (Все)",
-    "export_csv_visible": "CSV (Видимые)",
-    "export_excel_all": "Excel (Все)",
-    "export_excel_visible": "Excel (Видимые)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "Получить глобальные настройки",
     "filters_suffix": " Фильтры",
     "follow": "Следить",
@@ -108,6 +121,7 @@
     "go_back": "Вернуться",
     "hide": "Скрыть",
     "history": "История",
+    "import_configs": "Импорт пользовательских конфигураций",
     "import_services": "Импорт служб",
     "login": "Войти",
     "multiple_add": "ДОБАВИТЬ",
@@ -123,6 +137,7 @@
     "plugin_page": "Страница плагина",
     "proceed": "Продолжить",
     "refresh_recovery_codes": "Обновить коды восстановления",
+    "refresh_ui_plugins": "Обновить плагины интерфейса",
     "reload": "Перезагрузить",
     "reset": "Сбросить",
     "reset_columns": "Сбросить столбцы",
@@ -131,6 +146,10 @@
     "run_selected_jobs": "Запустить выбранные задачи",
     "save": "Сохранить",
     "save_changes": "Сохранить изменения",
+    "local_time": "Местное время",
+    "collapse_multiline": "Свернуть",
+    "search": "Поиск",
+    "wrap": "Перенос",
     "select_file": "Выбрать файл",
     "select_page": "Выбрать страницу",
     "service": "Сервис",
@@ -149,7 +168,164 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии"
+    "wipe_other_sessions": "Очистить другие сессии",
+    "ban_all_filtered": "Забанить все совпадающие отчёты",
+    "filtered_actions": "Отфильтрованные действия",
+    "unban_all_filtered": "Разбанить все совпадающие баны",
+    "update_duration_all_filtered": "Обновить продолжительность всех совпадающих банов",
+    "validate_certificate": "Проверить сертификат"
+  },
+  "crowdsec": {
+    "alert": {
+      "id": "Alert ID",
+      "load": "Load full evidence",
+      "started": "Started",
+      "stopped": "Stopped"
+    },
+    "captured_history": "Captured history",
+    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "connection": {
+      "appsec": "Last AppSec observation",
+      "choose": "Choose a connection",
+      "connected": "Connected",
+      "connection_error": "Connection error",
+      "configured": "Configured",
+      "global": "all services",
+      "help": "Each instance and service scope is a separate connection.",
+      "label": "CrowdSec connection",
+      "last_sync": "Last successful sync",
+      "local_api": "Local API",
+      "management": "Management",
+      "mode": "Mode",
+      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
+      "read_only": "Read only",
+      "required": "Choose a CrowdSec connection first.",
+      "sync": "Decision sync",
+      "sync_current": "Up to date",
+      "sync_not_synchronized": "Not synchronized yet",
+      "sync_stale": "Stale",
+      "selected": "Выбранное подключение",
+      "scope_help": "Выбранное подключение используется для решений, списков разрешённых адресов и анализа IP ниже."
+    },
+    "current_state": "Current state",
+    "current_state_help": "Current state may change after this observation.",
+    "decision": {
+      "duration": "Duration",
+      "expires": "Expires",
+      "id": "Decision ID",
+      "origin": "Origin",
+      "scenario": "Scenario",
+      "scope": "Scope",
+      "target": "Target",
+      "type": "Type"
+    },
+    "decisions": {
+      "count": "Showing {{start}}–{{end}} of {{total}}",
+      "help": "This is current state read directly from the selected CrowdSec engine.",
+      "none": "No active decisions match these filters.",
+      "pagination": "Decision pages",
+      "title": "Active decisions"
+    },
+    "error": {
+      "request": "The CrowdSec request failed."
+    },
+    "investigation": {
+      "alerts": "Available CrowdSec alert evidence",
+      "current_decisions": "Current CrowdSec decisions",
+      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
+      "ip": "IP address",
+      "local_bans": "Current local BunkerWeb bans",
+      "no_alerts": "No alert evidence is available.",
+      "no_bans": "No current local ban was found.",
+      "no_decisions": "No current CrowdSec decision was found.",
+      "no_reports": "No recent captured report was found.",
+      "placeholder": "192.0.2.10",
+      "reports": "Recent BunkerWeb reports",
+      "result": "Investigation for {{ip}}",
+      "submit": "Investigate",
+      "title": "Investigate an IP",
+      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
+      "unavailable": "Unavailable: {{error}}",
+      "summary": "Evidence found for this IP",
+      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
+      "summary_decisions": "CrowdSec decisions",
+      "summary_bans": "Local BunkerWeb bans",
+      "summary_alerts": "CrowdSec alert evidence",
+      "summary_reports": "BunkerWeb reports",
+      "summary_active": "{{total}} active",
+      "summary_available": "{{total}} available",
+      "summary_captured": "{{total}} captured",
+      "summary_none": "None found",
+      "summary_unreadable": "Could not be read"
+    },
+    "local_ban": {
+      "expires": "Expires",
+      "reason": "Reason",
+      "service": "Service"
+    },
+    "next": "Next",
+    "observed_at": "Observed {{time}}",
+    "previous": "Previous",
+    "refresh": "Refresh status",
+    "remove": {
+      "action": "Remove",
+      "confirm": "I understand and want to remove this decision.",
+      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
+      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "submit": "Remove decision",
+      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
+      "title": "Remove CrowdSec decision"
+    },
+    "report": {
+      "captured": "Captured at",
+      "date": "Report time",
+      "decisions": "Captured decisions",
+      "entry": "Security report",
+      "matched_target": "Matched target",
+      "metadata": "Decision metadata",
+      "metadata_complete": "Complete",
+      "metadata_incomplete": "Incomplete",
+      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
+      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
+      "reason": "Reason",
+      "remediation": "Captured remediation",
+      "scope": "Captured service scope",
+      "service": "Service",
+      "source": "Captured source",
+      "identifier": "Report identifier"
+    },
+    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
+    "title": "CrowdSec operator",
+    "unknown": "Unknown",
+    "allowlists": {
+      "title": "CrowdSec allowlists",
+      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
+      "refresh": "Refresh allowlists",
+      "pages": "Allowlist pages",
+      "empty": "No allowlists were found on this engine.",
+      "console": "Console managed",
+      "local": "Locally managed",
+      "no_entries": "No active entries.",
+      "never": "Never",
+      "comment": "Comment",
+      "unknown": "Allowlist status is unavailable.",
+      "not_allowed": "This IP does not match a CrowdSec allowlist.",
+      "allowed": "Allowlisted by CrowdSec",
+      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "guide": {
+        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
+        "title": "How to manage trusted IPs and networks",
+        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
+        "create": "Create a list once, or use an existing locally managed list.",
+        "add": "Add trusted IPs or CIDR networks.",
+        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
+        "inspect": "Inspect the list and its expiry dates.",
+        "remove": "Remove an exception when it is no longer needed.",
+        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
+        "console": "Edit Console-managed lists in the CrowdSec Console.",
+        "docs": "CrowdSec allowlist documentation"
+      }
+    }
   },
   "country": {
     "AD": "Андорра",
@@ -470,11 +646,16 @@
       "no_data": "Нет данных"
     },
     "window": {
+      "all_time": "За всё время",
       "last_days": "Последние {{days}} дней",
       "title": "Окно дашборда"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "Выбрать все {{count}} совпадающих {{entity}}",
+    "bulk_select_all_done": "Все {{count}} совпадающих {{entity}} выбраны.",
+    "bulk_select_clear": "Очистить выбор",
+    "bulk_select_page": "Все {{count}} {{entity}} на этой странице выбраны.",
     "info_bans": "Показано с {{start}} по {{end}} из {{total}} банов",
     "info_cache": "Показано с {{start}} по {{end}} из {{total}} файлов кэша",
     "info_configs": "Показано с {{start}} по {{end}} из {{total}} кастомных конфигураций",
@@ -606,6 +787,8 @@
     "easter_egg": "Если вы это читаете, значит, вы любопытны 👀",
     "error": "Ошибка",
     "message": "Информация",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "У вас больше сервисов, чем позволяет ваша лицензия PRO. Обновите лицензию или переведите некоторые сервисы в режим Черновика, чтобы разблокировать лицензию PRO.",
     "time": {
       "just_now": "только что"
     },
@@ -621,6 +804,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "Включить прикрепленные пользовательские конфигурации",
+      "overwrite_existing_configs": "Перезаписать существующие пользовательские конфигурации UI/API",
       "remember_me": "Запомнить меня"
     },
     "help": {
@@ -693,11 +878,11 @@
       "use_real_ip": "Использовать реальный IP",
       "username": "Имя пользователя",
       "wildcard_certificates": "Wildcard-сертификаты",
-      "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
       "zerossl_api_key": "API-ключ ZeroSSL",
-      "zerossl_api_max_time": "Максимальное время API ZeroSSL",
       "zerossl_api_retry": "Повторы API ZeroSSL",
-      "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL"
+      "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL",
+      "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
+      "zerossl_api_max_time": "Максимальное время API ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "Введите код",
@@ -756,11 +941,25 @@
     "upgrade": "Обновить?"
   },
   "logs": {
-    "eventsource_failed": "Соединение EventSource не удалось",
-    "parse_error": "Не удалось разобрать данные потока: {{error}}",
-    "stream_error": "Ошибка потока: {{message}}",
-    "stream_init": "Поток инициализирован, размер файла: {{size}}",
-    "stream_initialized": "Поток инициализирован с обновлением, размер файла: {{size}}",
+    "annotation_error": "Ошибка",
+    "annotation_warning": "Предупреждение",
+    "filter_levels": "Уровни",
+    "letsencrypt_logs": "Журналы Let's Encrypt",
+    "main_logs": "Основные журналы",
+    "new_lines_sr": "{{count}} новых строк журнала",
+    "issue_summary": "{{errors}} ошибок, {{warnings}} предупреждений",
+    "level_critical": "Критический",
+    "level_debug": "Отладка",
+    "level_error": "Ошибка",
+    "level_info": "Инфо",
+    "level_notice": "Уведомление",
+    "level_warning": "Предупреждение",
+    "lines_all": "Все",
+    "lines_label": "Строки",
+    "meta": "{{size}} · {{lines}} строк · изменено {{when}}",
+    "new_lines": "новые строки",
+    "showing_all": "{{total}} строк",
+    "showing_some": "показано {{shown}} из {{total}}",
     "trimmed_notice": "--- {{count}} старых строк лога были удалены для повышения производительности ---"
   },
   "modal": {
@@ -790,6 +989,9 @@
       "fetch_global_settings_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
       "fetch_global_settings_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
       "fetch_global_settings_point_3": "SERVER_NAME никогда не перезаписывается.",
+      "export_services_intro": "Выбранные службы будут экспортированы. Включите параметр ниже, чтобы добавить их прикрепленные пользовательские конфигурации в архив .zip.",
+      "import_configs_dropzone": "Перетащите сюда файл экспорта пользовательских конфигураций или нажмите, чтобы выбрать файл.",
+      "import_configs_warning": "Пользовательские конфигурации, созданные scheduler, autoconf или templates, всегда сохраняются. Перезаписать можно только конфигурации UI/API.",
       "import_services_dropzone": "Перетащите файл экспорта служб сюда или нажмите, чтобы выбрать файл.",
       "import_services_warning": "Импорт служб создаст новые службы пользовательского интерфейса из файла экспорта. Существующие службы пропускаются.",
       "instance_creation_alert": "Вам не нужно указывать порт или имя сервера; для конфигурации экземпляра будут использованы значения `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` и `API_SERVER_NAME`.",
@@ -800,7 +1002,10 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
+      "ban_filtered_confirmation": "Забанить IP из всех {{count}} совпадающих отчётов? Повторяющиеся цели будут применены только один раз.",
+      "unban_filtered_confirmation": "Вы уверены, что хотите разбанить все {{count}} совпадающих банов?",
+      "update_filtered_duration_alert": "Выберите новую продолжительность для всех {{count}} совпадающих банов:"
     },
     "button": {
       "fetch_global_settings_confirm": "Применить глобальные настройки",
@@ -824,8 +1029,10 @@
       "delete_template": "Удалить шаблоны",
       "edit_template": "Редактировать шаблон: {{name}}",
       "fetch_global_settings": "Применить глобальные настройки?",
+      "export_services": "Экспорт служб",
       "from_plugin": "из плагина",
       "full_url": "Полный URL",
+      "import_configs": "Импорт пользовательских конфигураций",
       "import_services": "Импорт служб",
       "job_history": "Последние 10 выполнений задачи",
       "job_history_count": "Последние {{count}} выполнений задачи",
@@ -857,6 +1064,7 @@
     "bans": "Баны",
     "cache": "Кэш",
     "configs": "Конфигурации",
+    "crowdsec": "CrowdSec",
     "extra_pages": "Дополнительные страницы",
     "global_settings": "Глобальные настройки",
     "home": "Главная",
@@ -866,7 +1074,6 @@
     "misc": "Разное",
     "mode_selection": "Выбор режима",
     "more": "Ещё...",
-    "new": "Новый",
     "plugin_activated": "Плагин активирован",
     "plugin_activated_global": "Плагин активирован глобально",
     "plugin_deactivated": "Плагин деактивирован",
@@ -899,7 +1106,10 @@
       "status": {
         "deactivated": "Плагин деактивирован; следовательно, информация недоступна.",
         "metrics_deactivated": "Плагин метрик не активирован; следовательно, информация недоступна.",
-        "not_available": "Страница плагина пока недоступна на этапе бета-тестирования."
+        "not_available": "Страница плагина пока недоступна на этапе бета-тестирования.",
+        "pre_render_error": "Ошибка предварительного рендеринга",
+        "no_content": "Этот плагин не предоставляет встроенную страницу.",
+        "dedicated_page_unavailable": "Этот плагин управляется на отдельной странице, которая ещё не загружена. Перезапустите веб-интерфейс, чтобы получить к ней доступ."
       }
     },
     "type": {
@@ -996,6 +1206,19 @@
     }
   },
   "reports": {
+    "crowdsec": {
+      "source_lapi": "Решение локального API",
+      "source_appsec": "Проверка AppSec",
+      "source_failure_policy": "Политика сбоев AppSec",
+      "appsec_help": "AppSec проверил этот запрос; решение локального API может отсутствовать.",
+      "failure_policy_help": "После ошибки AppSec была применена настроенная политика обработки сбоев.",
+      "no_decisions": "Подробности решений для этого запроса не были сохранены.",
+      "technical_details": "Технические сведения",
+      "connection_id": "Идентификатор подключения",
+      "instance": "Экземпляр",
+      "appsec_action": "Действие AppSec"
+    },
+    "retention_notice": "Отчёты хранятся в кольцевом буфере в оперативной памяти: самые старые записи удаляются при достижении заданного лимита. Если Redis не включён, они также очищаются при перезапуске BunkerWeb.",
     "security_incident": "Инцидент безопасности",
     "security_report_data": "Данные отчета о безопасности"
   },
@@ -1033,6 +1256,7 @@
     "last_run": "Состояние последнего запуска",
     "last_seen": "Последний раз замечен",
     "last_update": "Последнее обновление",
+    "loading": "Загрузка панелей поиска...",
     "method": "Метод",
     "next_24h": "Следующие 24 часа",
     "next_30d": "Следующие 30 дней",
@@ -1097,9 +1321,9 @@
       "section": {
         "custom_certificate": "Пользовательский сертификат",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "Реальный IP",
-        "reverse_proxy": "Обратный прокси",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "Обратный прокси"
       },
       "subtitle": "Настройте специфические параметры веб-интерфейса.",
       "title": "Настройки UI"
@@ -1328,8 +1552,8 @@
       "raw_configs_title": "Импорт пользовательских конфигураций",
       "raw_configs_upload": "Загрузить файлы конфигурации (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "Не удалось прочитать один из выбранных файлов.",
-      "raw_editor_aria": "Редактор необработанного JSON шаблона",
       "raw_editor_drop_hint": "Перетащите файл JSON шаблона (только .json), чтобы заменить текущее содержимое.",
+      "raw_editor_aria": "Редактор необработанного JSON шаблона",
       "raw_editor_help": "Редактировать полное определение шаблона как JSON. Переключение обратно в простой режим проверяет и перезагружает визуальный редактор.",
       "raw_editor_import_success": "Шаблон JSON успешно импортирован.",
       "raw_editor_override_body": "Импорт этого файла полностью заменит текущий JSON шаблона. Изменения, внесенные в редактор, будут потеряны. Вы хотите продолжить?",
@@ -1450,7 +1674,6 @@
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
     "button": {
       "ban_ip": "Забанить этот IP-адрес",
-      "clone_template": "Клонировать Шаблон {{template}}",
       "convert_config_to_draft": "Convert Config {{name}} to Draft",
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
@@ -1461,10 +1684,10 @@
       "delete_plugin": "Удалить плагин {{name}}",
       "delete_service": "Удалить сервис {{name}}",
       "delete_template": "Удалить Шаблон {{name}}",
-      "edit_template": "Редактировать Шаблон {{template}}",
       "force_check": "Запланировать проверку; загрузка только при наличии обновлений.",
       "force_update": "Пропускает проверки и принудительно скачивает PRO-плагины; сохраняет текущее состояние при сбое.",
       "ping_instance": "Пинговать экземпляр {{hostname}}",
+      "refresh_ui_plugins": "Перезагружает PRO-плагины, уже имеющиеся в веб-интерфейсе, ничего не скачивая.",
       "reload_instance": "Перезагрузить экземпляр {{hostname}}",
       "reset_default": "Сбросить на значение по умолчанию",
       "reset_global": "Сбросить до глобального значения",
@@ -1472,10 +1695,7 @@
       "show_selected_only": "Показывать только выбранные",
       "stop_instance": "Остановить экземпляр {{hostname}}",
       "unban_ip": "Разбанить {{ip}}",
-      "value_from_global": "Значение из глобальных настроек",
-      "view_file": "Просмотр {{filename}}",
-      "view_service": "Просмотр Сервиса {{service}}",
-      "view_template": "Просмотреть Шаблон {{template}}"
+      "value_from_global": "Значение из глобальных настроек"
     },
     "cannot_delete_original_ban": "Невозможно удалить исходную запись бана.",
     "cannot_remove_disabled": "Невозможно удалить, так как одна или несколько настроек отключены.",
@@ -1522,8 +1742,8 @@
     "latest_version_installed": "Вы используете последнюю версию.",
     "lets_encrypt_custom_profile": "Пользовательский профиль, который будет использоваться для Let's Encrypt (например, 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Отключить запросы сертификатов для доменов, соответствующих Public Suffix List (рекомендуется).",
-    "lets_encrypt_profile": "Профиль, который будет использоваться для Let's Encrypt (classic, tlsserver, shortlived).",
     "lets_encrypt_server": "Выберите поставщика сертификатов, чтобы показать настройки для выбранного поставщика.",
+    "lets_encrypt_profile": "Профиль, который будет использоваться для Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Ваш лицензионный ключ BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Перейти на страницу {{name}}",
@@ -1535,6 +1755,7 @@
       "edit_config": "Редактировать кастомную конфигурацию {{name}}",
       "edit_service": "Редактировать сервис {{service}}",
       "edit_template": "Редактировать Шаблон {{template}}",
+      "export_config": "Экспортировать пользовательскую конфигурацию {{name}}",
       "export_service": "Экспортировать конфигурацию сервиса {{name}}",
       "view_config": "Просмотреть кастомную конфигурацию {{name}}",
       "view_file": "Просмотреть {{filename}}",
@@ -1562,6 +1783,16 @@
     "real_ip_recursive": "Выполнить рекурсивный поиск в контейнере заголовка IP-адреса.",
     "remove_ban_entry": "Удалить эту запись бана из списка.",
     "reset_template_settings": "Сбросить все настройки в текущем представлении шаблона до значений по умолчанию.",
+    "download_log": "Скачать этот файл журнала",
+    "issue_count": "Ошибки и предупреждения в этом представлении",
+    "local_time": "Показывать временные метки в вашем местном времени",
+    "collapse_multiline": "Свернуть многострочные записи (трассировки, полезные нагрузки)",
+    "collapse_raw_values": "Свернуть многострочные значения (сертификаты, ключи)",
+    "next_issue": "Перейти к следующей ошибке или предупреждению",
+    "prev_issue": "Перейти к предыдущей ошибке или предупреждению",
+    "search_logs": "Поиск в журналах (Ctrl+F)",
+    "toggle_level": "Показать / скрыть строки {{level}}",
+    "toggle_wrap": "Переключить перенос строк",
     "select_file_to_follow": "Выберите файл, чтобы включить режим слежения",
     "server_name": "Основное доменное имя или имя сервера для этого сервиса.",
     "stream_support": {
@@ -1698,16 +1929,23 @@
     "view_full_url": "Нажмите, чтобы просмотреть полный URL",
     "wildcard_certificates": "Генерировать wildcard-сертификаты (*.domain.com). Требуется DNS-вызов.",
     "wildcard_dns_only": "Wildcard-сертификаты поддерживаются только с типом вызова DNS.",
-    "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
     "zerossl_api_key": "Необязательный API-ключ ZeroSSL, используемый zerossl-bot.",
-    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL.",
     "zerossl_api_retry": "Количество повторов для запросов API ZeroSSL (0 отключает повторы).",
-    "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL."
+    "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL.",
+    "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
+    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL."
   },
   "totp": {
     "prompt": "Пожалуйста, введите ваш TOTP-код."
   },
   "validation": {
+    "certificate_checking": "Проверка ...",
+    "certificate_expires_in": "истекает через {{days}} дн.",
+    "certificate_failed": "Запрос на проверку не выполнен.",
+    "certificate_file_mode": "Здесь можно проверить только вставленные или загруженные данные. Путь к сертификату считывается планировщиком, к которому у веб-интерфейса нет доступа.",
+    "certificate_missing": "Сначала укажите сертификат и ключ.",
+    "certificate_subject": "Тема:",
+    "certificate_valid": "Сертификат и ключ совпадают.",
     "default_field_name": "Это поле",
     "invalid_date": "Неверная дата",
     "ip_global_duplicate": "Этот IP-адрес уже забанен глобально.",

@@ -5,7 +5,6 @@ from os.path import join
 from sys import path as sys_path
 from typing import Optional, Union
 
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -19,6 +18,32 @@ but only API model fields are used/stored.
 
 from Database import Database  # type: ignore
 from model import API_RESOURCE_ENUM, API_PERMISSION_ENUM, API_users, API_permissions  # type: ignore
+
+# Write permissions whose payload is rendered verbatim into raw nginx / OpenResty Lua
+# configuration (custom configs, service variables, uploaded plugins, global settings)
+# that runs on the BunkerWeb workers/scheduler. Holding any of these is therefore
+# equivalent to full administrative (code-execution) access, so they must never be
+# granted to a party that is not trusted as an admin.
+#
+# The instance write scopes belong here too: every outbound call to a registered
+# instance carries the process-wide API_TOKEN admin override, and the scheduler pushes
+# the generated configuration and cache (TLS private keys included) to every instance
+# in the database. Registering or repointing an instance therefore hands the endpoint
+# both the admin token and the cluster's secrets.
+ADMIN_EQUIVALENT_PERMISSIONS = frozenset(
+    {
+        "instances_create",
+        "instances_update",
+        "config_create",
+        "config_update",
+        "config_delete",
+        "service_create",
+        "service_update",
+        "service_convert",
+        "plugin_create",
+        "global_config_update",
+    }
+)
 
 
 class APIDatabase(Database):
@@ -138,6 +163,15 @@ class APIDatabase(Database):
             user = session.query(API_users).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
+
+            if granted and permission in ADMIN_EQUIVALENT_PERMISSIONS and not user.admin:
+                self.logger.warning(
+                    f"Granting admin-equivalent permission {permission!r} to non-admin API user {username!r} "
+                    f"(resource {resource_type}/{resource_id or '*'}): this permission is admin-equivalent "
+                    "— it either writes configuration that is rendered into raw nginx/OpenResty Lua, or registers an "
+                    "instance endpoint that receives the API_TOKEN admin override and the pushed configuration and cache. "
+                    "Only grant it to a party you trust as an administrator."
+                )
 
             now = datetime.now().astimezone()
             record = (

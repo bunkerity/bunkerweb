@@ -92,7 +92,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 ## PRO 版本
 
 !!! tip "BunkerWeb PRO 免费试用"
-    想要快速试用 BunkerWeb PRO 一个月吗？在 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)下单时使用代码 `freetrial`，或者点击[这里](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc)直接应用促销代码（将在结账时生效）。
+    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
 
 使用 BunkerWeb 时，您可以选择您想要使用的版本：开源版或 PRO 版。
 
@@ -102,7 +102,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 
 您可以随时轻松地从开源版本升级到 PRO 版本。过程非常简单：
 
-- 在结账时使用 `freetrial` 促销代码，在 [BunkerWeb 面板上领取您的免费试用](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)
+- 开始 [BunkerWeb PRO 的 30 天免费试用](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)
 - 连接到客户区后，复制您的 PRO 许可证密钥
 - 使用 [Web UI](web-ui.md#upgrade-to-pro) 或[特定设置](features.md#pro)将您的私钥粘贴到 BunkerWeb 中
 

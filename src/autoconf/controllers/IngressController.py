@@ -2,7 +2,7 @@
 
 from os import getenv
 from traceback import format_exc
-from typing import List
+from typing import List, Optional, Set, Tuple
 
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
@@ -19,15 +19,69 @@ class IngressController(KubernetesController):
         if self._ingress_class:
             self._logger.info(f"Using Ingress class: {self._ingress_class}")
 
+        self._skip_foreign_classes = getenv("KUBERNETES_SKIP_FOREIGN_CLASSES", "no").strip().lower() == "yes"
+        self._ingress_controller = getenv("KUBERNETES_INGRESS_CONTROLLER", "bunkerweb.io/ingress-controller").strip()
+        self._owned_ingress_keys: Set[Tuple[str, str]] = set()
+        self._last_foreign_ingress_classes: Optional[Set[str]] = None
+        self._ingress_classes_warned = False
+        self._ingress_classes_readable = bool(self._skip_foreign_classes and not self._ingress_class and self._probe_ingress_classes())
+        if self._ingress_classes_readable:
+            self._logger.info(f"Skipping Ingresses whose IngressClass does not use controller {self._ingress_controller}")
+
+    def _warn_ingress_classes(self, reason: str) -> None:
+        if not self._ingress_classes_warned:
+            self._logger.warning(
+                f"Can't list ingressclasses ({reason}), Ingresses of every class will be processed: grant get/list/watch on ingressclasses to the controller"
+            )
+            self._ingress_classes_warned = True
+
+    def _probe_ingress_classes(self) -> bool:
+        try:
+            self._networkingv1.list_ingress_class(limit=1)
+            return True
+        except ApiException as e:
+            self._warn_ingress_classes(f"{e.status} - {e.reason}")
+        except Exception as e:
+            self._warn_ingress_classes(str(e))
+        return False
+
+    @staticmethod
+    def _ingress_class_of(ingress) -> Optional[str]:
+        spec_class = getattr(ingress.spec, "ingress_class_name", None) if ingress.spec else None
+        if spec_class:
+            return spec_class
+        annotations = (ingress.metadata.annotations or {}) if ingress.metadata else {}
+        return annotations.get("kubernetes.io/ingress.class") or None
+
+    def _foreign_ingress_classes(self) -> Optional[Set[str]]:
+        """Names of IngressClasses owned by another controller, or None when ownership filtering is off or they cannot be listed."""
+        if not self._ingress_classes_readable:
+            return None
+        try:
+            classes = self._networkingv1.list_ingress_class().items
+        except Exception as e:
+            self._logger.error(f"Can't list ingressclasses: {e}")
+            return self._last_foreign_ingress_classes
+        return {c.metadata.name for c in classes if c.metadata and c.spec and c.spec.controller != self._ingress_controller}
+
+    def _is_ingress_owned(self, ingress, foreign: Optional[Set[str]]) -> bool:
+        if self._ingress_class:
+            return getattr(ingress.spec, "ingress_class_name", None) == self._ingress_class
+        ingress_class = self._ingress_class_of(ingress)
+        return not ingress_class or foreign is None or ingress_class not in foreign
+
     def _get_controller_services(self) -> list:
         services = []
         ingresses = self._networkingv1.list_ingress_for_all_namespaces(watch=False).items
+        foreign = self._foreign_ingress_classes()
+        self._last_foreign_ingress_classes = foreign
         for ingress in ingresses:
-            if self._ingress_class:
-                ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
-                if ingress_class_name != self._ingress_class:
-                    self._logger.debug(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
-                    continue
+            if not self._is_ingress_owned(ingress, foreign):
+                self._logger.debug(
+                    f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} "
+                    "because its ingress class belongs to another controller or is not allowed"
+                )
+                continue
 
             if self._namespaces and ingress.metadata.namespace not in self._namespaces:
                 self._logger.debug(
@@ -40,6 +94,8 @@ class IngressController(KubernetesController):
                 continue
 
             services.append(ingress)
+        services.sort(key=lambda i: (i.metadata.namespace, i.metadata.name))
+        self._owned_ingress_keys = {(i.metadata.namespace, i.metadata.name) for i in services}
         return services
 
     def _to_services(self, controller_service) -> List[dict]:
@@ -57,6 +113,7 @@ class IngressController(KubernetesController):
 
             service = {}
             service["SERVER_NAME"] = rule.host
+            service["NAMESPACE"] = namespace
             server_names.add(rule.host)
             if not rule.http:
                 services.append(service)
@@ -65,6 +122,9 @@ class IngressController(KubernetesController):
             for location, path in enumerate(rule.http.paths, start=self._reverse_proxy_suffix_start):  # type: ignore
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
+                    continue
+                elif not self._is_valid_reverse_proxy_url(path.path):
+                    self._logger.warning(f"Ignoring ingress rule with path {path.path!r}: not a valid REVERSE_PROXY_URL.")
                     continue
                 elif not path.backend.service:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service.")
@@ -81,6 +141,7 @@ class IngressController(KubernetesController):
 
                 if not service_list:
                     self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
+                    self.note_missing_backend(namespace, path.backend.service.name)
                     continue
 
                 port = 80
@@ -180,23 +241,26 @@ class IngressController(KubernetesController):
         return services
 
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
+        if kind == "IngressClass":
+            return self._ingress_classes_readable
         if kind != "Ingress":
             return False
-
-        if self._ingress_class:
-            ingress_class_name = getattr(obj.spec, "ingress_class_name", None)
-            return ingress_class_name and ingress_class_name == self._ingress_class
-
-        return True
+        # An Ingress adopted by the last relist must be re-evaluated even if it now belongs to another class or is gone
+        if (namespace, name) in self._owned_ingress_keys:
+            return True
+        return self._is_ingress_owned(obj, self._last_foreign_ingress_classes)
 
     def _get_watchers(self):
-        return {
+        watchers = {
             "pod": self._corev1.list_pod_for_all_namespaces,
             "ingress": self._networkingv1.list_ingress_for_all_namespaces,
             "configmap": self._corev1.list_config_map_for_all_namespaces,
             "service": self._corev1.list_service_for_all_namespaces,
             "secret": self._corev1.list_secret_for_all_namespaces,
         }
+        if self._ingress_classes_readable:
+            watchers["ingressclass"] = self._networkingv1.list_ingress_class
+        return watchers
 
     def _patch_ingress_status(self, ingress, ips: List[str]) -> bool:
         if not ips:
@@ -218,8 +282,7 @@ class IngressController(KubernetesController):
 
         # Add all IPs to the ingress status
         for ip in ips:
-            ip_match = self._ip_pattern.match(ip)
-            if ip_match:
+            if self._is_ip_address(ip):
                 patch_body["status"]["loadBalancer"]["ingress"].append({"ip": ip})
             else:
                 patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})

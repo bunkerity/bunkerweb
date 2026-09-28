@@ -90,22 +90,29 @@ For example, `/metrics/requests` returns information about blocked requests.
 | Setting                              | Default  | Context   | Multiple | Description                                                                                                          |
 | ------------------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
 | `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                      |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `16m`, `32m`).                                      |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.                                    |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis.                                |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                              |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.         |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.     |
+| `METRICS_REDIS_TTL`                  | `30d`    | global    | no       | **Metrics Redis TTL:** Seconds before Redis metrics keys expire (`0` = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under `volatile-lru` so Redis recovers from maxmemory. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand.                |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation. |
 
 !!! tip "Sizing Memory Allocation"
-    The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
+    The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
 
 !!! info "Redis Integration"
-    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances.
+    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin automatically synchronizes blocked request data to the Redis server. Under `maxmemory` pressure, rejected reports remain in the bounded worker buffer for retry. Buffer overflow, LRU eviction, or Redis data loss can still discard reports. Incomplete filter counts are rebuilt from the retained request list. Stored reports with malformed data (an unusable timestamp or identifier) are excluded from the reports table and from its totals.
+
+    Counter totals are restored lazily from Redis before synchronization, including after local LRU eviction. Dormant Redis counters remain until `METRICS_REDIS_TTL` expires; `0` intentionally retains them indefinitely, so monitor Redis memory when using high-cardinality metrics.
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
 
 !!! note "Worker-Specific Storage"
     Each NGINX worker maintains its own metrics in memory. When accessing metrics through the API, data from all workers is automatically aggregated to provide a complete view.
+
+!!! warning "Report Retention"
+    Blocked-request reports are a rolling buffer, not an audit log. Once the limit is reached, the oldest reports are dropped to make room for new ones, so the total shown in the web UI plateaus: without Redis that ceiling is `METRICS_MAX_BLOCKED_REQUESTS` multiplied by the number of NGINX workers on each instance, and with Redis it is `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Reports live in shared memory and are cleared whenever BunkerWeb restarts, including package upgrades, unless Redis is enabled and persisted. Ship the NGINX logs to a syslog server or a SIEM if you need long-term retention.
 
 ### Example Configurations
 
@@ -116,8 +123,9 @@ For example, `/metrics/requests` returns information about blocked requests.
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +138,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +151,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

@@ -36,6 +36,9 @@ class LuaScriptBlob {
         m_data(NULL),
         m_len(0) { }
 
+    LuaScriptBlob(const LuaScriptBlob&) = delete;
+    LuaScriptBlob& operator=(const LuaScriptBlob&) = delete;
+
     ~LuaScriptBlob() {
         if (m_data) {
             free(m_data);

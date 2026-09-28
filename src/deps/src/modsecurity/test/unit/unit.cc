@@ -28,6 +28,8 @@
 #include "src/actions/transformations/transformation.h"
 #include "modsecurity/transaction.h"
 #include "modsecurity/actions/action.h"
+#include "src/actions/capture.h"
+#include "src/operators/libinjection_adapter.h"
 
 
 #include "test/common/modsecurity_test.h"
@@ -57,6 +59,34 @@ void print_help() {
 }
 
 
+namespace {
+injection_result_t sqli_force_error(const char *, size_t, char *) {
+    return LIBINJECTION_RESULT_ERROR;
+}
+
+injection_result_t xss_force_error(const char *, size_t) {
+    return LIBINJECTION_RESULT_ERROR;
+}
+
+void configure_libinjection_override(const UnitTest &t) {
+    modsecurity::operators::clearLibinjectionOverridesForTesting();
+
+    if (t.libinjection_override != "error") {
+        return;
+    }
+
+    const std::string operator_name = modsecurity::utils::string::tolower(t.name);
+
+    if (operator_name == "detectsqli") {
+        modsecurity::operators::setLibinjectionSQLiOverrideForTesting(
+            sqli_force_error);
+    } else if (operator_name == "detectxss") {
+        modsecurity::operators::setLibinjectionXSSOverrideForTesting(
+            xss_force_error);
+    }
+}
+}  // namespace
+
 struct OperatorTest {
     using ItemType = Operator;
 
@@ -71,13 +101,42 @@ struct OperatorTest {
     }
 
     static UnitTestResult eval(ItemType &op, const UnitTest &t, modsecurity::Transaction &transaction) {
-        modsecurity::RuleWithActions rule{nullptr, nullptr, "dummy.conf", -1};
+        configure_libinjection_override(t);
+
+        std::unique_ptr<modsecurity::Actions> actions;
+        if (t.capture) {
+            actions = std::make_unique<modsecurity::Actions>();
+            actions->push_back(new modsecurity::actions::Capture("capture"));
+        }
+
+        modsecurity::RuleWithActions rule{actions.release(), nullptr, "dummy.conf", -1};
         modsecurity::RuleMessage ruleMessage{rule, transaction};
-        return {op.evaluate(&transaction, &rule, t.input, ruleMessage), {}};
+
+        const bool matched = op.evaluate(&transaction, &rule, t.input, ruleMessage);
+
+        UnitTestResult result;
+        result.ret = matched;
+        if (t.capture) {
+            auto tx0 = transaction.m_collections.m_tx_collection->resolveFirst("0");
+            if (tx0 != nullptr) {
+                result.output = *tx0;
+            }
+        }
+
+        modsecurity::operators::clearLibinjectionOverridesForTesting();
+        return result;
     }
 
     static bool check(const UnitTestResult &result, const UnitTest &t) {
-        return result.ret != t.ret;
+        if (result.ret != t.ret) {
+            return true;
+        }
+
+        if (t.capture || t.output.empty() == false) {
+            return result.output != t.output;
+        }
+
+        return false;
     }
 };
 
@@ -114,7 +173,9 @@ UnitTestResult perform_unit_test_once(const UnitTest &t, modsecurity::Transactio
 
 
 template<typename TestType>
-UnitTestResult perform_unit_test_multithreaded(const UnitTest &t, modsecurity::Transaction &transaction) {
+UnitTestResult perform_unit_test_multithreaded(const UnitTest &t,
+    modsecurity_test::ModSecurityTestContext &context) {
+    (void)context;
 
     constexpr auto NUM_THREADS = 50;
     constexpr auto ITERATIONS = 5'000;
@@ -129,8 +190,11 @@ UnitTestResult perform_unit_test_multithreaded(const UnitTest &t, modsecurity::T
     {
         auto &result = results[i];
         threads[i] = std::thread(
-            [&item, &t, &result, &transaction]()
+            [&item, &t, &result]()
             {
+                modsecurity_test::ModSecurityTestContext thread_context(
+                    "ModSecurity-unit mtstress-thread");
+                auto transaction = thread_context.create_transaction();
                 for (auto j = 0; j != ITERATIONS; ++j)
                     result = TestType::eval(*item.get(), t, transaction);
             });
@@ -153,12 +217,13 @@ UnitTestResult perform_unit_test_multithreaded(const UnitTest &t, modsecurity::T
 
 template<typename TestType>
 void perform_unit_test_helper(const ModSecurityTest<UnitTest> &test, UnitTest &t,
-    ModSecurityTestResults<UnitTest> &res, modsecurity::Transaction &transaction) {
+    ModSecurityTestResults<UnitTest> &res, modsecurity::Transaction &transaction,
+    modsecurity_test::ModSecurityTestContext &context) {
 
     if (!test.m_test_multithreaded)
         t.result = perform_unit_test_once<TestType>(t, transaction);
     else
-        t.result = perform_unit_test_multithreaded<TestType>(t, transaction);
+        t.result = perform_unit_test_multithreaded<TestType>(t, context);
 
     if (TestType::check(t.result, t)) {
         res.push_back(&t);
@@ -198,9 +263,9 @@ void perform_unit_test(const ModSecurityTest<UnitTest> &test, UnitTest &t,
     }
 
     if (t.type == "op") {
-        perform_unit_test_helper<OperatorTest>(test, t, res, transaction);
+        perform_unit_test_helper<OperatorTest>(test, t, res, transaction, context);
     } else if (t.type == "tfn") {
-        perform_unit_test_helper<TransformationTest>(test, t, res, transaction);
+        perform_unit_test_helper<TransformationTest>(test, t, res, transaction, context);
     } else {
         std::cerr << "Failed. Test type is unknown: << " << t.type;
         std::cerr << std::endl;

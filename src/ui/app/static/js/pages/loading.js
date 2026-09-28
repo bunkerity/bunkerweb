@@ -20,7 +20,11 @@ $(document).ready(function () {
       const validUrl = new URL(rel, window.location.origin);
       // Enforce same origin and that original was a simple path (no scheme injected)
       if (validUrl.origin !== window.location.origin) return null;
-      return validUrl.pathname + validUrl.search + validUrl.hash;
+      // After normalization the pathname can still begin with "//" (e.g. "/..//evil"
+      // collapses to "//evil"), which re-parses as a protocol-relative, cross-origin URL
+      // when navigated; collapse leading slashes so the result stays strictly same-origin.
+      const safePath = validUrl.pathname.replace(/^\/+/, "/");
+      return safePath + validUrl.search + validUrl.hash;
     } catch (e) {
       console.error("Invalid URL detected:", url);
     }
@@ -54,6 +58,8 @@ $(document).ready(function () {
         ) {
           clearInterval(reloadingInterval);
           const redirectUrl = new URL(nextEndpoint, window.location.origin);
+          // Belt-and-suspenders: never navigate cross-origin even if nextEndpoint slips through.
+          if (redirectUrl.origin !== window.location.origin) return;
           if (window.location.hash) {
             redirectUrl.hash = window.location.hash;
           }
@@ -71,6 +77,8 @@ $(document).ready(function () {
             const redirectUrl =
               jqXHR.getResponseHeader("Location") || nextEndpoint;
             const finalUrl = new URL(redirectUrl, window.location.origin);
+            // Never follow a cross-origin Location (or next) value.
+            if (finalUrl.origin !== window.location.origin) return;
             if (window.location.hash) {
               finalUrl.hash = window.location.hash;
             }

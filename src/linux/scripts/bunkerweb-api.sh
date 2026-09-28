@@ -70,7 +70,7 @@ start() {
             echo
             echo "# --- Authentication & Authorization ---"
             echo "# Optional admin Bearer token (grants full access when provided)."
-            echo "API_TOKEN=changeme"
+            echo "# API_TOKEN=changeme"
             echo "# Bootstrap admin user (created/validated on startup if provided)."
             echo "# API_USERNAME="
             echo "# API_PASSWORD="

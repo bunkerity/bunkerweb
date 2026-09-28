@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Update Dockerfile image digests under src/.
+# Update Dockerfile image digests under src/, tests/linux/, misc/migration/, and docs/.
 # Finds FROM lines pinned with @sha256:... and refreshes the digest for the tag.
 #
 # Requires:
@@ -9,7 +9,7 @@ set -euo pipefail
 #   - docker buildx
 #
 # Usage:
-#   ./update-dockerfile-digests.optimized.sh [--dry-run] [--root PATH] [-v]
+#   ./update-dockerfile-digests.sh [--dry-run] [--root PATH] [-v]
 
 DRY_RUN=0
 VERBOSE=0
@@ -17,7 +17,7 @@ ROOT=""
 
 usage() {
   cat <<'EOF'
-Usage: update-dockerfile-digests.optimized.sh [--dry-run] [--root PATH] [-v]
+Usage: update-dockerfile-digests.sh [--dry-run] [--root PATH] [-v]
   --dry-run      Do not modify files; only report what would change
   --root PATH    Project root (default: git top-level or current directory)
   -v, --verbose  Verbose logs
@@ -45,17 +45,41 @@ fi
 command -v docker >/dev/null 2>&1 || { echo "docker is required" >&2; exit 1; }
 docker buildx version >/dev/null 2>&1 || { echo "docker buildx is required" >&2; exit 1; }
 
-SRC_DIR="${ROOT%/}/src"
-if [[ ! -d "$SRC_DIR" ]]; then
-  echo "No src/ directory found under: $ROOT" >&2
+# Directories to scan for pinned Dockerfiles (relative to ROOT).
+SCAN_DIRS=(src tests/linux misc/migration docs)
+
+# Verify each scan dir exists; warn (don't fail) on a missing optional dir.
+existing_dirs=()
+for d in "${SCAN_DIRS[@]}"; do
+  if [[ -d "${ROOT%/}/$d" ]]; then
+    existing_dirs+=("$d")
+  else
+    vlog "Scan dir not found, skipping: ${ROOT%/}/$d"
+  fi
+done
+if (( ${#existing_dirs[@]} == 0 )); then
+  echo "None of the scan directories exist under: $ROOT" >&2
   exit 1
 fi
 
-# Collect Dockerfiles under src/ (including src/linux and any other subtrees)
-mapfile -d '' dockerfiles < <(
-  find "$SRC_DIR" -type f -name 'Dockerfile*' -print0 2>/dev/null \
-  | LC_ALL=C sort -zu
-)
+# Collect Dockerfiles. Prefer git (tracked files only) so untracked dirs
+# (.playwright-mcp/, .claude/, etc.) are never scanned; fall back to find.
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  mapfile -d '' dockerfiles < <(
+    git -C "$ROOT" ls-files -z -- "${existing_dirs[@]}" \
+    | while IFS= read -r -d '' rel; do
+        [[ "${rel##*/}" == Dockerfile* ]] && printf '%s\0' "${ROOT%/}/$rel"
+      done \
+    | LC_ALL=C sort -zu
+  )
+else
+  find_roots=()
+  for d in "${existing_dirs[@]}"; do find_roots+=("${ROOT%/}/$d"); done
+  mapfile -d '' dockerfiles < <(
+    find "${find_roots[@]}" -type f -name 'Dockerfile*' -print0 2>/dev/null \
+    | LC_ALL=C sort -zu
+  )
+fi
 
 if (( ${#dockerfiles[@]} == 0 )); then
   echo "No Dockerfiles found under src/" >&2

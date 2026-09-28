@@ -3,10 +3,14 @@
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
-shopt -s nullglob
-ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
-shopt -u nullglob
-cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+if [[ $(echo "${SKIP_ASCII_BANNER:-no}" | awk '{print tolower($0)}') != "yes" ]] ; then
+	shopt -s nullglob
+	ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
+	shopt -u nullglob
+	if [ ${#ascii_array[@]} -gt 0 ] ; then
+		cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
+	fi
+fi
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
 
@@ -42,6 +46,10 @@ function trap_reload() {
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
 	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
+		if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+			log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+			return 1
+		fi
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
@@ -93,6 +101,14 @@ function set_loading_state() {
 		echo "IS_LOADING=yes" >> "$nginx_variables_path"
 	fi
 
+	# The scheduler skips a push whose archive digest matches the applied marker left by the
+	# previous one. That marker lives outside the tree it describes, keyed by destination path,
+	# so a push never archives its own bookkeeping. Editing variables.env here makes the tree
+	# differ from what the marker describes, so the push carrying IS_LOADING=no would be
+	# answered "already applied" and the instance would stay in the loading state, serving
+	# traffic with every Lua plugin disabled.
+	rm -f "/var/tmp/bunkerweb/pushswap/$(dirname "$nginx_variables_path" | sed 's/[^[:alnum:]][^[:alnum:]]*/_/g').applied"
+
 	return 0
 }
 
@@ -100,6 +116,11 @@ function set_loading_state() {
 tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
 regenerate_temp_config=false
+
+# The occurrence above is heredoc content, so it only reaches the generated file and never sets
+# the shell variable the test below reads. Unset therefore behaved as "yes" on every restart that
+# kept the writable layer, which is the opposite of the documented default.
+KEEP_CONFIG_ON_RESTART="${KEEP_CONFIG_ON_RESTART:-no}"
 
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
 	regenerate_temp_config=true
@@ -120,7 +141,22 @@ if [ -f /var/tmp/bunkerweb_reloading ] ; then
 	rm -f /var/tmp/bunkerweb_reloading
 fi
 
+# Clean orphaned NGINX temp files from previous runs
+for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
+	target="/var/tmp/bunkerweb/$dir"
+	if [ -d "$target" ] && [ ! -L "$target" ]; then
+		if [ -n "$(find "$target" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+			log "ENTRYPOINT" "ℹ️" "Cleaning orphaned temp files from $dir"
+		fi
+		find "$target" -mindepth 1 -delete 2>/dev/null || true
+	fi
+done
+
 # start nginx
+if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+	log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+	exit 1
+fi
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &
 pid="$!"
@@ -128,7 +164,9 @@ pid="$!"
 # wait while nginx is running
 wait "$pid"
 while [ -f "/var/run/bunkerweb/nginx.pid" ] ; do
-	wait "$pid"
+	# Break if the process is no longer alive (e.g. killed by OOM without cleaning up the PID file)
+	kill -0 "$pid" 2>/dev/null || { rm -f "/var/run/bunkerweb/nginx.pid" ; break ; }
+	sleep 1
 done
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"

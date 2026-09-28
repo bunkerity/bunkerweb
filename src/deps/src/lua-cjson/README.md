@@ -16,7 +16,9 @@ Table of Contents
     * [encode_number_precision](#encode_number_precision)
     * [encode_escape_forward_slash](#encode_escape_forward_slash)
     * [encode_skip_unsupported_value_types](#encode_skip_unsupported_value_types)
+    * [encode_indent](#encode_indent)
     * [decode_array_with_array_mt](#decode_array_with_array_mt)
+    * [decode_allow_comment](#decode_allow_comment)
 
 Description
 ===========
@@ -201,6 +203,31 @@ This will generate:
 
 [Back to TOC](#table-of-contents)
 
+encode_indent
+----------------------------
+**syntax:** `cjson.encode_indent(indent)`
+
+If non-empty string provided, JSON values encoded by `cjson.encode()` will be
+formatted in a human-readable way, using `indent` for indentation
+at each nesting level. Also enables newlines and a space after colons.
+
+Example:
+
+```lua
+local cjson = require "cjson"
+
+cjson.encode_indent("  ")
+print(cjson.encode({ a = 1, b = { c = 2 } }))
+-- {
+--   "a": 1,
+--   "b": {
+--     "c": 2
+--   }
+-- }
+```
+
+[Back to TOC](#table-of-contents)
+
 decode_array_with_array_mt
 --------------------------
 **syntax:** `cjson.decode_array_with_array_mt(enabled)`
@@ -234,5 +261,18 @@ local my_json = [[{"my_array":[]}]]
 local t = cjson.decode(my_json)
 cjson.encode(t) -- {"my_array":[]} properly re-encoded as an array
 ```
+
+[Back to TOC](#table-of-contents)
+
+decode_allow_comment
+--------------------------
+**syntax:** `cjson.decode_allow_comment(enabled)`
+
+**default:** false
+
+If enabled, allows JavaScript-style comments in `cjson.decode` input. Comments
+are treated as whitespace and may appear anywhere whitespace is valid in JSON.
+Supports single-line comments beginning with '//' and block comments enclosed
+with '/* ... */'.
 
 [Back to TOC](#table-of-contents)

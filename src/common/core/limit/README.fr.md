@@ -2,19 +2,22 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 - **Le nombre de connexions simultanées par adresse IP** (support STREAM :white_check_mark:)
 - **Le nombre de requêtes par adresse IP et par URL sur une période donnée** (support STREAM :x:)
+- **Le débit de requêtes agrégé (global) par service, tous clients et URL confondus** (support STREAM :x:)
 
 ### Fonctionnement
 
 1.  **Limitation de débit :** Suit le nombre de requêtes de chaque adresse IP cliente vers des URL spécifiques. Si un client dépasse la limite de débit configurée, les requêtes suivantes sont temporairement refusées.
-2.  **Limitation de connexions :** Surveille et restreint le nombre de connexions simultanées de chaque adresse IP cliente. Différentes limites de connexion peuvent être appliquées en fonction du protocole utilisé (HTTP/1, HTTP/2, HTTP/3 ou stream).
-3.  Dans les deux cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP **« 429 - Too Many Requests »**, ce qui aide à prévenir la surcharge du serveur.
+2.  **Limitation de débit globale :** Suit le nombre total de requêtes vers un service, indépendamment de l'adresse IP cliente ou de l'URL, protégeant la capacité de l'origine/backend contre les pics de trafic agrégés. Cette limitation est indépendante de la limitation par IP/URL et est évaluée avant celle-ci.
+3.  **Limitation de connexions :** Surveille et restreint le nombre de connexions simultanées de chaque adresse IP cliente. Différentes limites de connexion peuvent être appliquées en fonction du protocole utilisé (HTTP/1, HTTP/2, HTTP/3 ou stream).
+4.  Dans tous les cas, les clients qui dépassent les limites définies reçoivent un code de statut HTTP **« 429 - Too Many Requests »**, ce qui aide à prévenir la surcharge du serveur.
 
 ### Utilisation
 
 1.  **Activer la limitation de débit de requêtes :** Utilisez `USE_LIMIT_REQ` pour activer la limitation de débit de requêtes et définissez des motifs d'URL avec leurs limites correspondantes.
-2.  **Activer la limitation de connexions :** Utilisez `USE_LIMIT_CONN` pour activer la limitation de connexions et définissez le nombre maximum de connexions simultanées pour différents protocoles.
-3.  **Appliquer un contrôle granulaire :** Créez plusieurs règles de limitation de débit pour différentes URL afin de fournir des niveaux de protection variés sur votre site.
-4.  **Suivre l'efficacité :** Utilisez l'[interface web](web-ui.md) pour consulter les statistiques sur les requêtes et les connexions limitées.
+2.  **Activer la limitation de débit globale :** Utilisez `USE_LIMIT_REQ_GLOBAL` pour plafonner le débit total agrégé de requêtes d'un service, indépendamment de l'adresse IP cliente ou de l'URL, lorsque la protection de la capacité de l'origine prime sur l'équité par client.
+3.  **Activer la limitation de connexions :** Utilisez `USE_LIMIT_CONN` pour activer la limitation de connexions et définissez le nombre maximum de connexions simultanées pour différents protocoles.
+4.  **Appliquer un contrôle granulaire :** Créez plusieurs règles de limitation de débit pour différentes URL afin de fournir des niveaux de protection variés sur votre site.
+5.  **Suivre l'efficacité :** Utilisez l'[interface web](web-ui.md) pour consulter les statistiques sur les requêtes et les connexions limitées.
 
 ### Paramètres
 
@@ -26,15 +29,28 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
 
-!!! tip "Format de la limitation de débit"
-    Le format de la limite de débit est spécifié comme `Nr/t` où :
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
 
-    - `N` est le nombre de requêtes autorisées
-    - `r` est la lettre littérale 'r' (pour 'requêtes')
-    - `/` est une barre oblique littérale
-    - `t` est l'unité de temps : `s` (seconde), `m` (minute), `h` (heure), ou `d` (jour)
+    !!! tip "Format de la limitation de débit"
+        Le format de la limite de débit est spécifié comme `Nr/t` où :
 
-    Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
+        - `N` est le nombre de requêtes autorisées
+        - `r` est la lettre littérale 'r' (pour 'requêtes')
+        - `/` est une barre oblique littérale
+        - `t` est l'unité de temps : `s` (seconde), `m` (minute), `h` (heure), ou `d` (jour)
+
+        Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
+
+=== "Limitation de débit globale"
+
+    | Paramètre               | Défaut    | Contexte  | Multiple | Description                                                                                                                                         |
+    | ----------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | non      | **Activer la limitation de débit globale :** Mettre à `yes` pour plafonner le débit total agrégé de requêtes du service (tous clients, toutes URL). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | non      | **Limite de débit globale :** Débit maximal agrégé de requêtes au format `Nr/t`, même syntaxe que `LIMIT_REQ_RATE`.                                 |
+
+    !!! tip "Quand utiliser la limitation de débit globale"
+        La limitation par IP/URL protège contre un client abusif isolé. La limitation de débit globale protège le serveur d'origine lui-même : elle plafonne le débit total vers un service, quel que soit le demandeur. Utilisez-la lorsque votre backend a une capacité maximale connue (par exemple un pool de connexions à une base de données, ou une API tierce lente) à protéger de tout pic de trafic, légitime ou non. Elle est évaluée avant les règles par IP/URL : c'est donc la première ligne de défense en cas de charge.
 
 === "Limitation de connexions"
 
@@ -46,7 +62,9 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
-!!! info "Limitation de connexions vs de requêtes" - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir. - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
+!!! info "Limitation de connexions vs de requêtes"
+    - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir.
+    - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
 
     L'utilisation des deux méthodes offre une protection complète contre divers types d'abus.
 

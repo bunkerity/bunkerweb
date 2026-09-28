@@ -2,6 +2,12 @@ const controlRegistry = new WeakMap();
 
 const normalizeDefaultValue = (entry, rawValue) => {
   if (typeof rawValue === "undefined" || rawValue === null || rawValue === "") {
+    // For multiselect and multivalue, empty string is a valid value meaning
+    // "no options selected" — do not fall back to the default.
+    const type = (entry?.type || "").toLowerCase();
+    if (rawValue === "" && (type === "multiselect" || type === "multivalue")) {
+      return "";
+    }
     if (Object.prototype.hasOwnProperty.call(entry || {}, "default")) {
       const fallback = entry.default;
       if (typeof fallback === "string") return fallback;
@@ -392,19 +398,11 @@ class SettingControl {
           });
         }
       });
-      if (entries.length === 0) {
-        this.setContent(
-          toggleLabel,
-          "template.editor.multiselect_placeholder",
-          "Select options",
-        );
-      } else {
-        toggleLabel.textContent = entries
-          .map((entry) => entry.label)
-          .join(", ");
-        toggleLabel.removeAttribute("data-i18n");
-        toggleLabel.removeAttribute("data-i18n-options");
-      }
+      this.setContent(
+        toggleLabel,
+        "template.editor.multiselect_placeholder",
+        "Select options",
+      );
       toggleBadge.textContent = entries.length;
       if (footerText) {
         this.setContent(
@@ -498,7 +496,21 @@ class SettingControl {
 
     queueMicrotask(() => {
       if (typeof bootstrap !== "undefined" && bootstrap.Dropdown) {
-        bootstrap.Dropdown.getOrCreateInstance(toggle);
+        new bootstrap.Dropdown(toggle, {
+          autoClose: "outside",
+          popperConfig: {
+            strategy: "fixed",
+            modifiers: [
+              {
+                name: "preventOverflow",
+                options: {
+                  boundary: "viewport",
+                  padding: { top: 80 },
+                },
+              },
+            ],
+          },
+        });
       }
       if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
         // Use a dynamic title function so applyTranslations() updates to

@@ -78,6 +78,9 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        Die `BLACKLIST_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der übereinstimmende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Umgehung wird nur angewendet, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Umgehung wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die rDNS-Blacklist-Überprüfungen zu umgehen.
+
 === "ASN"
     **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
@@ -109,6 +112,22 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | `BLACKLIST_IGNORE_URI`      |          | Multisite | Nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen.     |
     | `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                 |
     | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
+
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+=== "Header"
+    **Was dies bewirkt:** Blockiert Anfragen mit einem bestimmten Request-Header — oder nimmt sie umgekehrt aus —, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert. Eine Ignore-Regel schlägt jeden Blacklist-Treffer, auch zwischengespeicherte.
+
+    | Einstellung                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                             |
+    | ------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Blacklist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `BLACKLIST_HEADER_VALUE`        |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Blacklist zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.    |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                      |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -147,7 +166,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN von AWS und Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Benutzerdefinierte Ignorierregeln
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

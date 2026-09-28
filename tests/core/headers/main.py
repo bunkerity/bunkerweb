@@ -4,7 +4,6 @@ from requests import RequestException, get, head
 from traceback import format_exc
 from time import sleep
 
-
 try:
     ssl = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
 
@@ -53,7 +52,6 @@ try:
     )
     x_frame_options = getenv("X_FRAME_OPTIONS", "SAMEORIGIN")
     x_content_type_options = getenv("X_CONTENT_TYPE_OPTIONS", "nosniff")
-    x_xss_protection = getenv("X_XSS_PROTECTION", "1; mode=block")
     x_dns_prefetch_control = getenv("X_DNS_PREFETCH_CONTROL", "off")
 
     print(
@@ -133,12 +131,6 @@ try:
     elif response.headers.get("X-Content-Type-Options") != x_content_type_options:
         print(
             f'❌ Header "X-Content-Type-Options" doesn\'t have the right value. {response.headers.get("X-Content-Type-Options", "missing header")} (header) != {x_content_type_options} (env), exiting ...\nheaders: {response.headers}',
-            flush=True,
-        )
-        exit(1)
-    elif response.headers.get("X-XSS-Protection") != x_xss_protection:
-        print(
-            f'❌ Header "X-XSS-Protection" doesn\'t have the right value. {response.headers.get("X-XSS-Protection", "missing header")} (header) != {x_xss_protection} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
         )
         exit(1)

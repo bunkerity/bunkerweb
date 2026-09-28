@@ -331,7 +331,7 @@ Elige una ventana de retención (ejemplo: 90 días) y revisa qué se eliminaría
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ Una vez verificado, elimina las filas.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +412,7 @@ puedes forzar una actualización del “marcador de cambios”:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +435,7 @@ puedes forzar una actualización del “marcador de cambios”:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -445,7 +445,10 @@ puedes forzar una actualización del “marcador de cambios”:
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.
 
-### Acceder a la base de datos
+!!! warning "La 2FA dejó de funcionar tras recrear el contenedor"
+    Las claves que descifran los secretos TOTP se guardan en el contenedor de la UI, en `/var/lib/bunkerweb/.totp_encryption_keys.json`, es decir `/data/lib` dentro de la imagen. Recrear el contenedor `bw-ui` sin un volumen persistente en `/data` genera un juego nuevo de claves: los secretos guardados en la base de datos ya no se pueden descifrar, la inscripción del admin se elimina y las demás cuentas deben reiniciarse con el SQL de abajo. Monta un volumen en `/data` (consulta la [documentación de la interfaz web](web-ui.md)) para conservar las claves, o aporta tus propias `TOTP_ENCRYPTION_KEYS`.
+
+### Acceder a la base de datos {#access-database}
 
 === "SQLite"
 
@@ -513,7 +516,7 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "Solo MariaDB / MySQL"
         Los siguientes pasos solo son válidos para bases de datos MariaDB / MySQL. Si estás utilizando otra base de datos, por favor consulta la documentación de tu base de datos.

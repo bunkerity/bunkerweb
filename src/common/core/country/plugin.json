@@ -342,6 +342,35 @@
         { "id": "ZW", "label": "Zimbabwe (ZW)", "value": "ZW" }
       ]
     },
+    "COUNTRY_IGNORE_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from country checks. Patterns are checked against the path and the full request URI with query string.",
+      "id": "country-ignore-uri",
+      "label": "Ignored URI",
+      "regex": "^.*$",
+      "type": "multivalue"
+    },
+    "COUNTRY_IGNORE_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that exempts the request from the country check. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "country-ignore-header-name",
+      "label": "Ignored header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "country-ignore-header"
+    },
+    "COUNTRY_IGNORE_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to exempt the request from the country check. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "country-ignore-header-value",
+      "label": "Ignored header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "country-ignore-header"
+    },
     "WHITELIST_COUNTRY": {
       "context": "multisite",
       "default": "",

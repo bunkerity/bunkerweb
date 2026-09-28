@@ -1,13 +1,23 @@
 [rocky8-base]
-name = Rocky Linux 8 Base OS
-baseurl = https://dl.rockylinux.org/pub/rocky/8/BaseOS/%ARCH%/os/
+name = Rocky Linux 8 - BaseOS
+mirrorlist = https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=BaseOS-8
+#baseurl = https://dl.rockylinux.org/pub/rocky/8/BaseOS/$basearch/os/
 gpgcheck = 1
 enabled = 1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
+countme = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 
 [rocky8-devel]
-name = Rocky Linux 8 Devel
-baseurl = https://dl.rockylinux.org/pub/rocky/8/Devel/%ARCH%/os/
+name = Rocky Linux 8 - Devel
+mirrorlist = https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=Devel-8
+#baseurl = https://dl.rockylinux.org/pub/rocky/8/Devel/$basearch/os/
 gpgcheck = 1
 enabled = 1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
+countme = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
+# Avoid pulling perl/git from Rocky 8 Devel: it ships a perl 5.32 module stream
+# that conflicts with UBI 8 / rocky8-base perl 5.26. Let UBI/AppStream provide
+# perl and git so this Devel repo only contributes packages that aren't already
+# available upstream (geoip-devel, lmdb-devel, ssdeep-devel, etc.).
+excludepkgs = perl perl-* git git-*
+module_hotfixes = 1

@@ -3,7 +3,7 @@
 from fnmatch import fnmatchcase
 from os import getenv
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
@@ -23,6 +23,10 @@ class GatewayController(KubernetesController):
         if self._gateway_class:
             self._logger.info(f"Using Gateway class: {self._gateway_class}")
 
+        self._skip_foreign_classes = getenv("KUBERNETES_SKIP_FOREIGN_CLASSES", "no").strip().lower() == "yes"
+        self._gateway_controller = getenv("KUBERNETES_GATEWAY_CONTROLLER", "bunkerweb.io/gateway-controller").strip()
+        self._gateway_classes_warned = False
+
         self._gateway_api_group = "gateway.networking.k8s.io"
         self._gateway_api_version = getenv("KUBERNETES_GATEWAY_API_VERSION", "v1").strip().lower()
         if self._gateway_api_version not in GATEWAY_API_VERSIONS:
@@ -30,6 +34,9 @@ class GatewayController(KubernetesController):
             self._gateway_api_version = "v1"
 
         self._resource_versions = self._detect_resource_versions()
+        self._gateway_classes_readable = bool(self._skip_foreign_classes and not self._gateway_class and self._resource_versions.get("gatewayclasses"))
+        if self._gateway_classes_readable:
+            self._logger.info(f"Skipping Gateways whose GatewayClass does not use controller {self._gateway_controller}")
         self._gateway_api_available = "gateways" in self._resource_versions
         if self._gateway_api_available:
             self._gateway_api_version = self._resource_versions["gateways"]
@@ -80,7 +87,41 @@ class GatewayController(KubernetesController):
                     self._logger.debug(format_exc())
                     break
 
+        if self._skip_foreign_classes and not self._gateway_class:
+            found = False
+            last_error = ""
+            for version in versions:
+                try:
+                    self._custom_objects.list_cluster_custom_object(self._gateway_api_group, version, "gatewayclasses", limit=1)
+                    resource_versions["gatewayclasses"] = version
+                    found = True
+                    break
+                except ApiException as e:
+                    last_error = f"{e.status} - {e.reason}"
+                except Exception as e:
+                    last_error = str(e)
+            if not found:
+                self._warn_gateway_classes(last_error)
+
         return resource_versions
+
+    def _warn_gateway_classes(self, reason: str) -> None:
+        if not self._gateway_classes_warned:
+            self._logger.warning(
+                f"Can't list gatewayclasses ({reason}), Gateways of every class will be processed: grant get/list/watch on gatewayclasses to the controller"
+            )
+            self._gateway_classes_warned = True
+
+    def _foreign_gateway_classes(self) -> Optional[Set[str]]:
+        """Names of GatewayClasses owned by another controller, or None when ownership filtering is off or they cannot be listed."""
+        if not self._gateway_classes_readable:
+            return None
+        items = self._list_custom_objects("gatewayclasses")
+        return {
+            (item.get("metadata") or {}).get("name")
+            for item in items
+            if (item.get("spec") or {}).get("controllerName") != self._gateway_controller and (item.get("metadata") or {}).get("name")
+        }
 
     def _hostname_matches(self, hostname: str, pattern: Optional[str]) -> bool:
         if not pattern:
@@ -110,6 +151,7 @@ class GatewayController(KubernetesController):
 
     def _get_gateways(self) -> Dict[Tuple[str, str], Dict[str, Any]]:
         gateways: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        foreign = self._foreign_gateway_classes()
         for gateway in self._list_custom_objects("gateways"):
             metadata = gateway.get("metadata") or {}
             namespace = metadata.get("namespace")
@@ -131,6 +173,9 @@ class GatewayController(KubernetesController):
                 if spec.get("gatewayClassName") != self._gateway_class:
                     self._logger.debug(f"Skipping gateway {namespace}/{name} because its gatewayClassName is not allowed")
                     continue
+            elif foreign and (gateway.get("spec") or {}).get("gatewayClassName") in foreign:
+                self._logger.debug(f"Skipping gateway {namespace}/{name} because its GatewayClass belongs to another controller")
+                continue
 
             gateways[(namespace, name)] = gateway
         return gateways
@@ -182,6 +227,7 @@ class GatewayController(KubernetesController):
 
                 routes.append(route)
 
+        routes.sort(key=lambda r: ((r.get("metadata") or {}).get("namespace", ""), (r.get("metadata") or {}).get("name", "")))
         self._gateways_cache = gateways
         return routes
 
@@ -492,7 +538,7 @@ class GatewayController(KubernetesController):
                     self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} without hostnames")
                     return []
 
-            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames)}
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace}
             location = self._reverse_proxy_suffix_start
             listener_protocol = self._get_listener_protocol(controller_service, hostnames[0], allowed_protocols=["HTTP", "HTTPS", "TLS"])
             if not listener_protocol:
@@ -521,7 +567,14 @@ class GatewayController(KubernetesController):
                         if isinstance(match, dict):
                             path = match.get("path")
                             if isinstance(path, dict) and path.get("value"):
-                                path_value = path.get("value")
+                                path_value = path["value"]
+                                # anchor regex paths so the template renders them as a regex location
+                                if path.get("type") == "RegularExpression" and not path_value.startswith("^"):
+                                    path_value = f"^{path_value}"
+
+                        if not self._is_valid_reverse_proxy_url(path_value):
+                            self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name} match with path {path_value!r}: not a valid REVERSE_PROXY_URL.")
+                            continue
 
                         if listener_protocol == "TCP":
                             reverse_proxy_host = f"{backend_name}.{backend_namespace}.svc.{self._domain_name}"
@@ -558,7 +611,7 @@ class GatewayController(KubernetesController):
 
             grpc_scheme = "grpcs" if self._service_protocol == "https" else "grpc"
             location = self._reverse_proxy_suffix_start
-            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "USE_GRPC": "yes"}
+            service: Dict[str, Any] = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace, "USE_GRPC": "yes"}
 
             if rules:
                 for rule in rules:
@@ -602,7 +655,7 @@ class GatewayController(KubernetesController):
                 hostnames = [default_name]
                 self._logger.warning(f"TLSRoute {namespace}/{name} has no hostnames, using {default_name}")
 
-            service = {"SERVER_NAME": " ".join(hostnames), "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
+            service = {"SERVER_NAME": " ".join(hostnames), "NAMESPACE": namespace, "SERVER_TYPE": "stream", "USE_TCP": "yes", "USE_UDP": "no"}
             listener_port = self._get_listener_port(controller_service, hostname=hostnames[0], protocols=["TLS"])
             if listener_port:
                 service["LISTEN_STREAM_PORT_SSL"] = str(listener_port)
@@ -642,6 +695,7 @@ class GatewayController(KubernetesController):
             listener_port = self._get_listener_port(controller_service, protocols=[protocol])
             service = {
                 "SERVER_NAME": " ".join(hostnames),
+                "NAMESPACE": namespace,
                 "SERVER_TYPE": "stream",
                 "USE_TCP": "yes" if protocol == "TCP" else "no",
                 "USE_UDP": "yes" if protocol == "UDP" else "no",
@@ -738,6 +792,8 @@ class GatewayController(KubernetesController):
         return services
 
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
+        if kind == "GatewayClass":
+            return self._gateway_classes_readable
         return kind in ("HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "Gateway")
 
     def _get_watchers(self):
@@ -774,6 +830,8 @@ class GatewayController(KubernetesController):
             "tcproute": make_list("tcproutes"),
             "udproute": make_list("udproutes"),
         }
+        if self._gateway_classes_readable:
+            watchers_map["gatewayclass"] = make_list("gatewayclasses")
 
         watchers.update({key: handler for key, handler in watchers_map.items() if handler})
 
@@ -799,8 +857,7 @@ class GatewayController(KubernetesController):
 
         # Add all IPs to the gateway status
         for ip in ips:
-            ip_match = self._ip_pattern.match(ip)
-            if ip_match:
+            if self._is_ip_address(ip):
                 patch_body["status"]["addresses"].append({"type": "IPAddress", "value": ip})
             else:
                 patch_body["status"]["addresses"].append({"type": "Hostname", "value": ip})

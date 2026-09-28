@@ -1,2 +1,2 @@
-globals = {"ngx", "delay", "unpack"}
+globals = {"ngx", "unpack"}
 ignore = {"411"}

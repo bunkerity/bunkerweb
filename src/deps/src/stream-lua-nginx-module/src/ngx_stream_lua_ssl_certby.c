@@ -45,7 +45,9 @@ static u_char *ngx_stream_lua_log_ssl_cert_error(ngx_log_t *log, u_char *buf,
 static ngx_int_t ngx_stream_lua_ssl_cert_by_chunk(lua_State *L,
     ngx_stream_lua_request_t *r);
 #ifndef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER > 0x101010afL
 static int ngx_stream_lua_is_grease_cipher(uint16_t cipher_id);
+#endif
 #endif
 
 
@@ -981,6 +983,7 @@ ngx_stream_lua_ffi_ssl_raw_client_addr(ngx_stream_lua_request_t *r, char **addr,
 
 
 #ifndef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER > 0x101010afL
 static int
 ngx_stream_lua_is_grease_cipher(uint16_t cipher_id)
 {
@@ -989,6 +992,7 @@ ngx_stream_lua_is_grease_cipher(uint16_t cipher_id)
     /* Check if both bytes follow ?A pattern and high nibbles match */
     return (cipher_id & 0x0F0F) == 0x0A0A;
 }
+#endif
 #endif
 
 
@@ -1000,7 +1004,9 @@ ngx_stream_lua_ffi_req_shared_ssl_ciphers(ngx_stream_lua_request_t *r,
 
     *err = "BoringSSL is not supported for SSL cipher operations";
     return NGX_ERROR;
-
+#elif OPENSSL_VERSION_NUMBER < 0x101010afL
+    *err = "OpenSSL < 1.1.1a is not supported for SSL cipher operations";
+    return NGX_ERROR;
 #else
     ngx_ssl_conn_t         *ssl_conn;
     STACK_OF(SSL_CIPHER)   *sk, *ck;

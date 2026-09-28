@@ -103,7 +103,7 @@ get_upstreams
 
 Get a list of the names for all the named upstream groups (i.e., explicit `upstream {}` blocks).
 
-Note that implicit upstream groups created by `proxy_pass` and etc are excluded.
+Note that implicit upstream groups created by `proxy_pass` and etc are included.
 
 [Back to TOC](#table-of-contents)
 
@@ -111,7 +111,7 @@ get_servers
 -----------
 `syntax: servers = upstream.get_servers(upstream_name)`
 
-Get configurations for all the servers in the specified upstream group. Please one server may take multiple addresses when its server name can be resolved to multiple addresses.
+Get configurations for all the servers in the specified upstream group. Please note that one server may take multiple addresses when its server name can be resolved to multiple addresses.
 
 The return value is an array-like Lua table. Each table entry is a hash-like Lua table that takes the following keys:
 
@@ -123,6 +123,7 @@ The return value is an array-like Lua table. Each table entry is a hash-like Lua
 * max_fails
 * name
 * weight
+* down
 
 [Back to TOC](#table-of-contents)
 

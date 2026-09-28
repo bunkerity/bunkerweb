@@ -18,6 +18,7 @@ L’API BunkerWeb est le plan de contrôle pour gérer instances, services, bans
 
 - Réseau : gardez le trafic interne ; liez sur loopback ou interface interne et restreignez les IP sources avec `API_WHITELIST_IPS` (activé par défaut).
 - Auth présente : définissez `API_USERNAME`/`API_PASSWORD` (admin) et, si besoin, `API_ACL_BOOTSTRAP_FILE` pour d’autres utilisateurs/ACL ; conservez un `API_TOKEN` uniquement pour le break-glass.
+- Portées ACL : les permissions d’**écriture** sur config, service, plugin et global settings sont équivalentes admin (leur contenu est rendu tel quel en NGINX/Lua, donc exécution de code) : ne les accordez qu’à des utilisateurs pleinement fiables. `instances_create` et `instances_update` le sont aussi, par une autre voie : tout appel vers une instance enregistrée transporte l’override admin `API_TOKEN`, et le scheduler pousse la configuration générée et le cache (clés privées TLS comprises) vers chaque instance enregistrée. Voir [Permissions et ACL](#permissions-et-acl).
 - Masquage de chemin : en reverse proxy, choisissez un `API_ROOT_PATH` peu devinable et reflétez-le côté proxy.
 - Rate limiting : laissez activé sauf si une autre couche impose des limites équivalentes ; `/auth` est toujours limité.
 - TLS : terminez au proxy ou activez `API_SSL_ENABLED=yes` avec chemins de cert/clé.
@@ -41,7 +42,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +55,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -76,7 +77,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.9
+        image: bunkerity/bunkerweb-api:1.6.16-rc2
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -108,7 +109,7 @@ Choisissez la saveur adaptée à votre environnement.
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -135,7 +136,7 @@ Choisissez la saveur adaptée à votre environnement.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "Tout-en-un"
 
     ```bash
     docker run -d \
@@ -143,7 +144,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9
+      bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
 === "Linux"
@@ -177,10 +178,10 @@ Choisissez la saveur adaptée à votre environnement.
 
 - Rôle grossier : GET/HEAD/OPTIONS requièrent `read` ; les verbes d’écriture requièrent `write`.
 - L’ACL fine s’applique quand les routes déclarent des permissions ; `admin(true)` contourne les vérifications.
-- Types de ressources : `instances`, `global_settings`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
+- Types de ressources : `instances`, `global_config`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
 - Noms de permissions :
   - `instances_*` : `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
-  - `global_settings_*` : `global_settings_read`, `global_settings_update`
+  - `global_config` : `global_config_read`, `global_config_update`
   - `services` : `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
   - `configs` : `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins` : `plugin_read`, `plugin_create`, `plugin_delete`
@@ -188,7 +189,33 @@ Choisissez la saveur adaptée à votre environnement.
   - `bans` : `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs` : `job_read`, `job_run`
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
-- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Mots de passe en clair ou en hash bcrypt.
+- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
+
+!!! danger "These write permissions are admin-equivalent"
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
+
+    - `instances`: `instances_create`, `instances_update`
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_config`: `global_config_update`
+
+    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+
+!!! tip "Mots de passe de bootstrap pré-hachés"
+    Remplacez le `password` en clair d'un utilisateur par un **hash bcrypt** via `password_hash` (ou `password_bcrypt`) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (`$2a$`/`$2b$`/`$2y$`) dont le coût est d'au moins `10` (`12`+ recommandé). Un hash mal formé ou trop faible est **ignoré** : le chargeur se rabat sur le `password` en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un `password` en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement `API_PASSWORD` de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.
+
+    Générer un hash :
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Utilisez-le ensuite dans le fichier de bootstrap à la place de `password` :
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Bootstrap ACL minimal"
     ```json
@@ -367,7 +394,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `GET /configs` : lister les snippets (service par défaut `global`) ; `with_data=true` intègre le contenu imprimable.
   - `POST /configs`, `POST /configs/upload` : créer des snippets via JSON ou upload de fichier.
   - `GET /configs/{service}/{type}/{name}` : récupérer un snippet ; `with_data=true` pour le contenu.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API. Un déplacement exige aussi `config_update` sur le service de destination (`global` compte comme un service) ; un corps JSON sans `service` conserve le service actuel.
   - `DELETE /configs` ou `DELETE /configs/{service}/{type}/{name}` : supprimer les snippets gérés par l’API ; ceux gérés par template sont ignorés.
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
 - **Bans**
@@ -381,7 +408,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 - **Cache (artefacts de jobs)**
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
-  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache et notifier le scheduler.
+  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache. Le scheduler n’est notifié que pour un plugin dont une ligne a réellement été supprimée ; un `plugin` qui ne possède pas le job est refusé et rien n’est supprimé.
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.

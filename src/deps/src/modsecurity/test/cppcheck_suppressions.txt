@@ -31,6 +31,8 @@ accessMoved:seclang-parser.hh
 returnTempReference:seclang-parser.hh
 duplInheritedMember:seclang-parser.hh
 constVariableReference:seclang-parser.hh
+uninitMemberVar:seclang-parser.hh
+
 
 unreadVariable:src/operators/rx.cc
 unreadVariable:src/operators/rx_global.cc
@@ -59,3 +61,4 @@ uselessCallsSubstr
 
 // Examples
 memleak:examples/using_bodies_in_chunks/simple_request.cc
+

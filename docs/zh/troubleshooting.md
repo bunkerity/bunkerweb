@@ -331,7 +331,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +366,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -411,7 +411,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -434,7 +434,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -444,7 +444,10 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。
 
-### 访问数据库
+!!! warning "重建容器后 2FA 失效"
+    解密 TOTP 秘钥的密钥保存在 UI 容器的 `/var/lib/bunkerweb/.totp_encryption_keys.json`，也就是镜像中的 `/data/lib`。若重建 `bw-ui` 容器时没有挂载 `/data` 持久卷，就会生成一组新密钥：数据库中保存的秘钥再也无法解密，管理员绑定会被删除，其他账户需要用下面的 SQL 重置。请挂载卷到 `/data`（参见 [Web UI 文档](web-ui.md)）以保留密钥，或自行提供 `TOTP_ENCRYPTION_KEYS`。
+
+### 访问数据库 {#access-database}
 
 === "SQLite"
 
@@ -512,7 +515,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "仅限 MariaDB / MySQL"
         以下步骤仅适用于 MariaDB / MySQL 数据库。如果您正在使用其他数据库，请参阅您数据库的文档。

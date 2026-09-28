@@ -10,9 +10,10 @@ Comment ça marche :
 
 ### Comment l’utiliser
 
-1. Activer : `USE_SECURITYTXT: yes`.
+1. Activer : mettez le paramètre `USE_SECURITYTXT` à `yes`.
 2. Contacts : précisez au moins un moyen de contact via `SECURITYTXT_CONTACT`.
 3. Informations additionnelles : configurez expiration, chiffrement, remerciements, URL de politique…
+4. Laisser BunkerWeb faire le reste : une fois configuré, BunkerWeb crée et sert automatiquement le fichier security.txt à l’emplacement standard.
 
 ### Paramètres
 
@@ -31,7 +32,7 @@ Comment ça marche :
 | `SECURITYTXT_CSAF`             |                             | multisite | oui      | Lien vers le provider-metadata.json du fournisseur CSAF.    |
 
 !!! warning "Expiration requise"
-    Le champ `Expires` est obligatoire. Si absent, BunkerWeb définit par défaut une expiration à un an.
+    Le champ `Expires` est obligatoire. Si `SECURITYTXT_EXPIRES` est absent, BunkerWeb définit par défaut une expiration à un an.
 
 !!! info "Contacts essentiels"
     Fournissez au moins un moyen de contact : email, formulaire, téléphone, etc.

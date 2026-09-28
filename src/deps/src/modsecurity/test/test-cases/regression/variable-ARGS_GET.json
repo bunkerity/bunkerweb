@@ -1,238 +1,272 @@
-[  
-  {  
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (1/6)",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (1/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{  
-      "debug_log":"Target value: \"other_value\""
+    "expected": {
+      "debug_log": "Target value: \"other_value\"",
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (2/6)",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (2/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{  
-      "debug_log":"Target value: \"value\""
+    "expected": {
+      "debug_log": "Target value: \"value\"",
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (3/6)",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (3/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value%26withsomestuff=tootherstuff",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value%26withsomestuff=tootherstuff",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{  
-      "debug_log":"Target value: \"other_value&withsomestuff=tootherstuff\""
+    "expected": {
+      "debug_log": "Target value: \"other_value&withsomestuff=tootherstuff\"",
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET \"@contains test \" \"id:1,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (4/6)",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (4/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&secondkey=&key3=val3",
-      "method":"GET"
+      "uri": "/?key=value&secondkey=&key3=val3",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{  
-      "debug_log":"Target value: \"0\""
+    "expected": {
+      "debug_log": "Target value: \"0\"",
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET:secondkey \"0\" \"id:1,phase:2,pass,t:none,t:length\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (5/6)",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (5/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&secondkey=othervalue&",
-      "method":"GET"
+      "uri": "/?key=value&secondkey=othervalue&",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{  
-      "debug_log":"Target value: \"othervalue\""
+    "expected": {
+      "debug_log": "Target value: \"othervalue\"",
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET \"@rx ^othervalue$ \" \"id:1,pass,t:none\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing Variables :: ARGS_GET (6/6)",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: ARGS_GET (6/6)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&second_key=other_value#urifrag",
-      "method":"GET",
-      "http_version":1.1
+      "uri": "/?key=value&second_key=other_value#urifrag",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 403
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRule ARGS_GET \"@streq other_value\" \"id:1,phase:1,deny,status:403\""
     ]
   }
 ]
-

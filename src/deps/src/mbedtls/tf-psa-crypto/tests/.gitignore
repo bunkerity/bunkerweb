@@ -1,0 +1,11 @@
+/test_suite*
+/libtestdriver1/*
+
+###START_GENERATED_FILES###
+# Generated source files
+/suites/*.generated.data
+/suites/test_suite_config.psa_boolean.data
+/suites/test_suite_psa_crypto_storage_format.v[0-9]*.data
+/suites/test_suite_psa_crypto_storage_format.current.data
+/include/test/test_keys.h
+###END_GENERATED_FILES###

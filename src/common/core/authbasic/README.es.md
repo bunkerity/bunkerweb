@@ -27,6 +27,9 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con scrypt para máxima seguridad.                                                                                                                            |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                                                                                                      |
 
+!!! tip "Ancle la ruta protegida para cubrir todo lo que hay por debajo"
+    Una ruta simple como `/admin` es una coincidencia por prefijo, así que también protege `/admin/`, `/admin/users` y las variantes codificadas que se normalizan a ellas. El modificador `=` hace la coincidencia exacta, de modo que `= /admin` deja `/admin/` sin protección mientras su aplicación puede servir ahí el mismo recurso. Mantenga la forma de prefijo salvo que realmente quiera una sola ruta.
+
 !!! warning "Consideraciones de seguridad"
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
 

@@ -18,6 +18,7 @@ local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
 local get_country = utils.get_country
 local get_security_mode = utils.get_security_mode
+local parse_duration = utils.parse_duration
 local tostring = tostring
 local time = os.time
 local date = os.date
@@ -53,7 +54,13 @@ function badbehavior:log()
 	if not self.variables["BAD_BEHAVIOR_STATUS_CODES"]:match(tostring(ngx.status)) then
 		return self:ret(true, "not increasing counter")
 	end
-	-- Check if we are already banned
+	-- Fast path: access phase already flagged this request as banned.
+	-- Reliable even when Redis cosockets are unreachable from log_by_lua*.
+	if self.ctx.bw.is_banned then
+		return self:ret(true, "already banned (ctx)")
+	end
+	-- Best-effort ban lookup from the log phase (local datastore hit only when
+	-- cosockets are disabled; timer phase will re-check authoritatively).
 	if is_banned(self.ctx.bw.remote_addr, self.ctx.bw.server_name) then
 		return self:ret(true, "already banned")
 	end
@@ -76,13 +83,13 @@ function badbehavior:log()
 	if self.ctx.bw.server_name == "_" then
 		ban_scope = "global"
 	end
-	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]) or 0
+	local ban_time = parse_duration(self.variables["BAD_BEHAVIOR_BAN_TIME"], "s") or 0
 
 	local ok, err = self.datastore.dict:rpush(
 		"plugin_badbehavior_incr",
 		encode({
 			ip = self.ctx.bw.remote_addr,
-			count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]),
+			count_time = parse_duration(self.variables["BAD_BEHAVIOR_COUNT_TIME"], "s"),
 			ban_time = ban_time,
 			threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]),
 			use_redis = self.use_redis,
@@ -98,10 +105,12 @@ function badbehavior:log()
 		return self:ret(false, "can't add incr operation : " .. err)
 	end
 	self:set_metric("counters", "status_" .. status, 1)
-	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
 	local request_uri = self.ctx.bw.request_uri or "-"
-	self:set_metric("counters", "url_" .. request_uri, 1)
-	self:set_metric("tables", "increments_" .. self.ctx.bw.remote_addr, {
+	-- The client address and the URI are fields of the event record below, never part of a
+	-- metric key : a key built from request data mints one cache slot per attacker, which
+	-- evicts every other plugin's metrics under a scan flood. Top IPs and top URLs are
+	-- derived from these events instead.
+	self:set_metric("tables", "increments", {
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
 		ip = self.ctx.bw.remote_addr,
@@ -114,7 +123,7 @@ function badbehavior:log()
 		ban_scope = ban_scope,
 		ban_time = ban_time,
 		threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]) or 0,
-		count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]) or 0,
+		count_time = parse_duration(self.variables["BAD_BEHAVIOR_COUNT_TIME"], "s") or 0,
 	})
 	return self:ret(true, "success")
 end
@@ -200,66 +209,86 @@ function badbehavior:timer()
 		local country = incr.country
 		local status = incr.status
 		local ban_scope = incr.ban_scope or "global"
-		local counter, counter_err = self:increase(
-			ip,
-			count_time,
-			ban_time,
-			threshold,
-			use_redis,
-			server_name,
-			security_mode,
-			country,
-			status,
-			ban_scope
-		)
-		if not counter then
-			ret = false
-			ret_err = "can't increase counter : " .. counter_err
+		-- Authoritative re-check: timer context allows cosockets, so this hits
+		-- Redis when USE_REDIS=yes and catches bans added out-of-band (bwcli, API,
+		-- other workers) or cases where access phase never ran (malformed request,
+		-- DISABLE_DEFAULT_SERVER short-circuit). Only skip when the lookup
+		-- authoritatively reports banned; treat nil (lookup error) as not-banned
+		-- to avoid masking counter progress during Redis outages.
+		if is_banned(ip, server_name) then
+			self.logger:log(
+				NOTICE,
+				"skipped counter increase for already banned IP " .. ip .. " on server " .. server_name
+			)
 		else
-			-- Add decrease later
-			local decr_payload = {
-				ip = ip,
-				old_counter = counter,
-				count_time = count_time,
-				threshold = threshold,
-				use_redis = use_redis,
-				timestamp = timestamp + count_time,
-				server_name = server_name,
-				status = status,
-				ban_scope = ban_scope,
-			}
-			local ok, err = self.datastore.dict:rpush("plugin_badbehavior_decr", encode(decr_payload))
-			if not ok then
+			local counter, counter_err = self:increase(
+				ip,
+				count_time,
+				ban_time,
+				threshold,
+				use_redis,
+				server_name,
+				security_mode,
+				country,
+				status,
+				ban_scope
+			)
+			if not counter then
 				ret = false
-				ret_err = "can't add decr list element : " .. err
+				ret_err = "can't increase counter : " .. counter_err
+			else
+				-- Add decrease later
+				local decr_payload = {
+					ip = ip,
+					old_counter = counter,
+					count_time = count_time,
+					threshold = threshold,
+					use_redis = use_redis,
+					timestamp = timestamp + count_time,
+					server_name = server_name,
+					status = status,
+					ban_scope = ban_scope,
+				}
+				local ok, err = self.datastore.dict:rpush("plugin_badbehavior_decr", encode(decr_payload))
+				if not ok then
+					ret = false
+					ret_err = "can't add decr list element : " .. err
+				end
+				-- Save counter info indexed by "ip_serverName"
+				local counter_key = ip
+				if ban_scope == "service" then
+					counter_key = server_name .. "_" .. ip
+				end
+				counters[counter_key] = {
+					ip = ip,
+					counter = counter,
+					count_time = count_time,
+					ban_time = ban_time,
+					threshold = threshold,
+					use_redis = use_redis,
+					server_name = server_name,
+					security_mode = security_mode,
+					country = country,
+					status = status,
+					ban_scope = ban_scope,
+				}
 			end
-			-- Save counter info indexed by "ip_serverName"
-			local counter_key = ip
-			if ban_scope == "service" then
-				counter_key = server_name .. "_" .. ip
-			end
-			counters[counter_key] = {
-				ip = ip,
-				counter = counter,
-				count_time = count_time,
-				ban_time = ban_time,
-				threshold = threshold,
-				use_redis = use_redis,
-				server_name = server_name,
-				security_mode = security_mode,
-				country = country,
-				status = status,
-				ban_scope = ban_scope,
-			}
 		end
 	end
 
-	-- Add bans if needed
+	-- Add bans if needed. The event ring is a single shared table now, so it is fetched and
+	-- indexed by IP once here : re-reading and rescanning it for every banned IP would be
+	-- quadratic in the number of bans, and a scan flood produces plenty of both.
+	local increments_by_ip
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
 			local wl_ip, wl_info = is_ip_whitelisted(data.ip, data.server_name)
 			if wl_ip == nil then
-				self.logger:log(ERR, "can't check whitelist for IP " .. data.ip .. " : " .. wl_info)
+				self:log_throttled(
+					ERR,
+					"whitelist_check",
+					"can't check whitelist for IP " .. data.ip .. " : " .. wl_info
+				)
 			elseif wl_ip then
 				local rm_ok, rm_err = remove_ban(data.ip, data.server_name, data.ban_scope)
 				if rm_ok == false and rm_err then
@@ -277,7 +306,37 @@ function badbehavior:timer()
 				)
 			elseif data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
-				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
+				if not increments_by_ip then
+					increments_by_ip = {}
+					for _, increment in ipairs(self:get_metric("tables", "increments") or {}) do
+						local bucket = increments_by_ip[increment.ip]
+						if not bucket then
+							bucket = {}
+							increments_by_ip[increment.ip] = bucket
+						end
+						bucket[#bucket + 1] = increment
+					end
+				end
+				-- The ring is shared and bounded, so under a distributed flood an IP can be
+				-- banned with none of its own events left in it. Fall back to the counter that
+				-- triggered the ban so the report still carries why it happened.
+				local reason_data = increments_by_ip[data.ip]
+				if not reason_data or #reason_data == 0 then
+					reason_data = {
+						{
+							date = time(date("!*t")),
+							ip = data.ip,
+							country = data.country,
+							server_name = data.server_name,
+							status = data.status,
+							security_mode = data.security_mode,
+							ban_scope = data.ban_scope,
+							ban_time = data.ban_time,
+							threshold = data.threshold,
+							count_time = data.count_time,
+						},
+					}
+				end
 				local ok, err = add_ban(
 					data.ip,
 					"bad behavior",
@@ -323,6 +382,10 @@ function badbehavior:timer()
 			end
 		end
 	end
+
+	-- Flush any end-of-window recaps for errors that stopped repeating.
+	self:flush_log_recaps()
+
 	return self:ret(ret, ret_err)
 end
 
@@ -350,7 +413,11 @@ function badbehavior:increase(
 	if use_redis then
 		local redis_counter, err = self:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
 		if not redis_counter then
-			self.logger:log(ERR, "(increase) redis_increase failed, falling back to local : " .. err)
+			self:log_throttled(
+				ERR,
+				"redis_increase",
+				"(increase) redis_increase failed, falling back to local : " .. err
+			)
 		else
 			counter = redis_counter
 		end
@@ -403,7 +470,11 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 	if use_redis then
 		local redis_counter, err = self:redis_decrease(ip, count_time, server_name, ban_scope)
 		if not redis_counter then
-			self.logger:log(ERR, "(decrease) redis_decrease failed, falling back to local : " .. err)
+			self:log_throttled(
+				ERR,
+				"redis_decrease",
+				"(decrease) redis_decrease failed, falling back to local : " .. err
+			)
 		else
 			counter = redis_counter
 		end

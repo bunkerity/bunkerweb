@@ -5,7 +5,7 @@ local ffi_sizeof = ffi.sizeof
 
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 require "resty.openssl.include.err"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local constchar_ptrptr = ffi.typeof("const char*[1]")
 
@@ -54,13 +54,13 @@ local function format_error(ctx, code, all_errors)
   while C.ERR_peek_error() ~= 0 do
     local code
     if all_errors then
-      if OPENSSL_3X then
+      if OPENSSL_3_UP then
         code = C.ERR_get_error_all(path, line, func, nil, nil)
       else
         code = C.ERR_get_error_line(path, line)
       end
     else
-      if OPENSSL_3X then
+      if OPENSSL_3_UP then
         code = C.ERR_peek_last_error_all(path, line, func, nil, nil)
       else
         code = C.ERR_peek_last_error_line(path, line)
@@ -78,7 +78,7 @@ local function format_error(ctx, code, all_errors)
 
     local err_line
   
-    if OPENSSL_3X then
+    if OPENSSL_3_UP then
       local reason_msg = get_reason_error_string(code)
       local lib_msg = get_lib_error_string(code)
       -- error:04800065:PEM routines:PEM_do_header:bad decrypt:crypto/pem/pem_lib.c:467:

@@ -48,6 +48,7 @@ do
   name="$(echo "$repo" | jq -r .name)"
   url="$(echo "$repo" | jq -r .url)"
   commit="$(echo "$repo" | jq -r .commit)"
+  submodules="$(echo "$repo" | jq -r '.submodules // false')"
   post_install="$(echo "$repo" | jq -r .post_install)"
 
   echo "ℹ️ Clone ${name} from $url at commit/version $commit"
@@ -62,8 +63,24 @@ do
   do_and_check_cmd git -C "src/deps/src/$id" fetch origin "$commit"
   do_and_check_cmd git -C "src/deps/src/$id" checkout FETCH_HEAD
 
+  if [ "$submodules" = "true" ] && [ -f "src/deps/src/$id/.gitmodules" ] ; then
+    echo "ℹ️ Fetching submodules for ${name}"
+    do_and_check_cmd git -C "src/deps/src/$id" submodule update --init --recursive
+  fi
+
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"
+    do_and_check_cmd rm -rf "src/deps/src/$id/.github"
+  fi
+  # Submodules leave dangling `.git` pointer files (gitdir -> parent
+  # .git/modules/...) and nested .gitmodules that break IDE source control
+  # once the parent .git is gone. Only scrub these for submodule-enabled
+  # deps so we don't preempt post_install scripts that expect to remove
+  # `.gitmodules` themselves (e.g. modsecurity, ngx_brotli).
+  if [ "$submodules" = "true" ] ; then
+    do_and_check_cmd find "src/deps/src/$id" -depth \
+      \( -name ".git" -o -name ".github" -o -name ".gitmodules" \) \
+      -exec rm -rf {} +
   fi
 
   if [ "$post_install" != "null" ]; then

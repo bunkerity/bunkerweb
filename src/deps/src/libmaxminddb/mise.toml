@@ -8,7 +8,21 @@ disable_backends = [
 ]
 
 [tools]
+hugo = "latest"
+lychee = "latest"
 node = "latest"
 "pipx:clang-format" = "21.1.8"
 "github:houseabsolute/precious" = "latest"
 "npm:prettier" = "latest"
+
+[tasks.build-docs]
+description = "Build the docs site with Hugo"
+run = "hugo --source docs --minify"
+
+[tasks.serve-docs]
+description = "Serve the docs site locally with Hugo dev server"
+run = "hugo server --source docs"
+
+[tasks.check-links]
+description = "Check links with lychee"
+run = "lychee --no-progress './**/*.md' './src/**/*.c' './include/**/*.h'"

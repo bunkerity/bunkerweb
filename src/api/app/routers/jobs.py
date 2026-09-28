@@ -5,7 +5,6 @@ from ..schemas import RunJobsRequest
 from ..auth.guard import guard
 from ..utils import get_db
 
-
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 

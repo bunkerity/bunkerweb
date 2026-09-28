@@ -2,8 +2,7 @@ version: "3.5"
 
 services:
   bw-db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+    image: mysql:9
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=db

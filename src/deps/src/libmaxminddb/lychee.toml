@@ -1,0 +1,60 @@
+# Lychee link checker configuration
+# https://lychee.cli.rs/#/usage/config
+#
+# Run locally with:
+#   lychee './**/*.md' './src/**/*.c' './include/**/*.h'
+
+# Include URL fragments in checks
+include_fragments = true
+
+# Don't allow any redirects, so links that have moved are surfaced and updated
+# to their canonical destination.
+max_redirects = 0
+
+# Accept these HTTP status codes
+# 100-103: Informational responses
+# 200-299: Success responses
+# 403: Forbidden (some sites use this for rate limiting)
+# 429: Too Many Requests
+# 500-599: Server errors (temporary issues shouldn't fail CI)
+# 999: LinkedIn's custom status code
+accept = ["100..=103", "200..=299", "403", "429", "500..=599", "999"]
+
+# Exclude URL patterns from checking (treated as regular expressions)
+exclude = [
+    # Local / template file URLs (e.g. Hugo layout placeholders)
+    '^file://',
+    # Live / auth-gated endpoints that require login or are queried at runtime
+    '^https://geoip\.maxmind\.com',
+    '^https://geolite\.info',
+    '^https://updates\.maxmind\.com',
+    '^https://www\.maxmind\.com/en/accounts/',
+    # Placeholders / local
+    '^https?://example\.(com|org|net)',
+    '^http://localhost',
+    '127\.0\.0\.1',
+]
+
+# Exclude file paths from getting checked (treated as regular expressions)
+exclude_path = [
+    '(^|/)\.git/',
+    # Build / generated directories
+    '(^|/)build/',
+    '(^|/)\.libs/',
+    '(^|/)autom4te\.cache/',
+    '(^|/)generated/',
+    # Generated Hugo site output
+    '(^|/)docs/public/',
+    # Vendored submodules and test harness/fixtures
+    '(^|/)maxmind-db/',
+    '(^|/)t/',
+    # Changelog: historical entries are preserved as-is, not rewritten
+    '(^|/)Changes\.md$',
+]
+
+# Cache results for 1 day to speed up repeated checks
+cache = true
+max_cache_age = "1d"
+
+# Skip missing input files instead of erroring
+skip_missing = true

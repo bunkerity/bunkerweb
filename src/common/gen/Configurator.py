@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import suppress
 from copy import deepcopy
 from functools import cache
 from json import loads
@@ -10,12 +11,14 @@ from os.path import join
 from pathlib import Path
 from re import DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
 from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from env_file import make_key_predicate, parse_env_file  # type: ignore
+from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
 
 class Configurator:
@@ -59,6 +62,7 @@ class Configurator:
                 "HEALTHCHECK_INTERVAL",
                 "DATABASE_RETRY_TIMEOUT",
                 "RELOAD_MIN_TIMEOUT",
+                "SEND_FILES_MIN_TIMEOUT",
                 "DISABLE_CONFIGURATION_TESTING",
                 "IGNORE_FAIL_SENDING_CONFIG",
                 "GPG_KEY",
@@ -80,8 +84,12 @@ class Configurator:
                 "SERVICE_UI",
                 "SERVICE_API",
                 "IGNORE_REGEX_CHECK",
+                # Read by the entrypoint before anything else runs, so it can only come from the
+                # environment or variables.env, never from the database.
+                "KEEP_CONFIG_ON_RESTART",
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
+                "DISABLE_ONLINE_API",
                 "HIDE_SERVICE_LOGS",
                 "LOG_TYPES",
                 "LOG_FILE_PATH",
@@ -114,6 +122,10 @@ class Configurator:
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
 
+        # Raw variables/environ keys that passed __check_var during the last get_config()
+        # call (service-prefixed and suffixed forms included, default fills excluded).
+        self.explicit_keys: Set[str] = set()
+
     def get_settings(self) -> Dict[str, str]:
         return self.__settings.copy()
 
@@ -129,6 +141,24 @@ class Configurator:
     @cache
     def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
         return {k: v for plugin in self.get_plugins(_type) for k, v in plugin.get("settings", {}).items()}
+
+    @staticmethod
+    def _redact_value(value: str) -> str:
+        """Return a redacted summary safe for log output.
+
+        The Configurator emits a WARN line for every unknown environment variable
+        ("Ignoring variable X : ..."). Because the variable is unknown, its type
+        is also unknown — it may carry a DNS API token, ACME EAB key, or other
+        credential that the operator dropped into the env (e.g. via `env_file`
+        in docker compose). Printing the raw value to syslog / docker logs /
+        downstream log shippers leaks the secret.
+
+        We log only the length so the operator can still spot empty-vs-set
+        misconfigurations. Empty strings stay empty (helpful for typos).
+        """
+        if not value:
+            return "''"
+        return f"'<redacted, length={len(value)}>'"
 
     @cache
     def __map_servers(self) -> Dict[str, List[str]]:
@@ -150,7 +180,7 @@ class Configurator:
 
             # Use get() with default instead of 'in' check
             server_name_var = f"{server_name}_SERVER_NAME"
-            names_str = self.__variables.get(server_name_var, server_name).strip()
+            names_str = self.__variables.get(server_name_var, server_name).strip() or server_name
 
             if names_str == server_name:
                 servers[server_name] = [server_name]
@@ -216,18 +246,45 @@ class Configurator:
             self.__logger.debug(f"Exception details: {e}", exc_info=True)
             self.__logger.error(f"Exception while loading JSON from {file} : {e}")
 
+    def __setting_names(self) -> Tuple[Set[str], Set[str]]:
+        """Every known setting name, and the subset whose value can span several lines."""
+        known: Set[str] = set()
+        multiline: Set[str] = set()
+        for settings in (self.__settings, self.get_plugins_settings("core"), self.get_plugins_settings("external"), self.get_plugins_settings("pro")):
+            for name, data in settings.items():
+                known.add(name)
+                if isinstance(data, dict) and data.get("type") == "file":
+                    multiline.add(name)
+        return known, multiline
+
     def __load_variables(self, path: Path) -> Dict[str, str]:
         try:
-            return dict(
-                line.strip().split("=", 1)
-                for line in path.read_text(encoding="utf-8").splitlines()
-                if line.strip() and not line.strip().startswith("#") and "=" in line
-            )
+            # Split on physical lines and a PEM certificate arrives truncated to its
+            # "-----BEGIN CERTIFICATE-----" line, which get_config() then hands to
+            # save_config() as the operator's declared value.
+            known, multiline = self.__setting_names()
+            return parse_env_file(path, make_key_predicate(multiline), make_key_predicate(known))
         except Exception as e:
             self.__logger.error(f"Failed to load variables from {path}: {e}")
             return {}
 
     def get_config(self, db=None, *, first_run: bool = False) -> Dict[str, str]:
+        # Supplement server list from database Services table.
+        # This ensures autoconf-managed services are recognized even when
+        # SERVER_NAME in the variables hasn't been updated yet (startup timing).
+        # Drafts are excluded so a half-configured service can never leak into
+        # the generated config and produce a server block.
+        if db and self.__multisite:
+            with suppress(Exception):
+                for service in db.get_services(with_drafts=False):
+                    server_id = service.get("id", "")
+                    if server_id and server_id not in self.__servers:
+                        self.__servers[server_id] = [server_id]
+
+        # Reject known audit candidates before regex fallbacks, including DB-supplemented service scopes.
+        audit_variables = self.__variables | {"SERVER_NAME": " ".join(self.__servers)} if self.__multisite else self.__variables
+        validate_audit_log_settings(audit_variables, partial=True)
+
         config = {}
         template = self.__variables.get("USE_TEMPLATE", "")
 
@@ -257,6 +314,7 @@ class Configurator:
                 config[setting] = template_settings.get(setting, data["default"])
 
         # Override with variables
+        self.explicit_keys = set()
         for variable, value in self.__variables.items():
             # Use optimized exclusion checks
             if variable.startswith(self.__excluded_prefixes) or variable in self.__excluded_vars or "CUSTOM_CONF" in variable:
@@ -265,6 +323,7 @@ class Configurator:
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
+                self.explicit_keys.add(variable)
             elif variable == "SERVER_NAME":
                 self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value=!r}")
                 exit(1)
@@ -274,7 +333,10 @@ class Configurator:
                 or variable in self.get_plugins_settings("core")
                 or not self.__variables.get("EXTERNAL_PLUGIN_URLS")
             ) or variable == "KUBERNETES_MODE":
-                self.__logger.warning(f"Ignoring variable {variable} : {err} - {value=!r}")
+                # Redact the value: unknown variables may carry secrets dropped via env_file
+                # (DNS API tokens, ACME EAB keys, etc.). Logging the raw value would leak them
+                # into syslog / docker logs / log shippers downstream.
+                self.__logger.warning(f"Ignoring variable {variable} : {err} - value={self._redact_value(value)}")
 
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
@@ -300,7 +362,19 @@ class Configurator:
                             elif setting in config:
                                 config[key] = service_template_settings.get(setting, config[setting])
 
+        validate_audit_log_settings(config)
         return config
+
+    @staticmethod
+    def __has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
+        # variables.env is line-oriented: Templator writes "KEY=VALUE\n" and load_variables reads
+        # every schema-known key back, so a value carrying its own newline defines a second
+        # setting. Settings of type "file" hold PEM data and are exempt, and trailing newlines
+        # stay valid because a Kubernetes ConfigMap block scalar always leaves one.
+        if setting_type == "file":
+            return False
+        stripped = value.rstrip("\r\n")
+        return "\n" in stripped or "\r" in stripped
 
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
@@ -309,6 +383,9 @@ class Configurator:
             where, real_var = self.__find_var(variable)
             if not where:
                 return False, f"variable name {variable} doesn't exist"
+
+            if self.__has_embedded_newline(value, where[real_var].get("type")):
+                return False, f"value of {variable} contains a newline"
 
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
@@ -325,6 +402,12 @@ class Configurator:
             return False, f"variable name {variable} doesn't exist"
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite"
+        # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+        elif prefixed and real_var == "SERVER_NAME" and not value.strip():
+            return False, f"{variable} can't be empty"
+
+        if self.__has_embedded_newline(value, where[real_var].get("type")):
+            return False, f"value of {variable} contains a newline"
 
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0

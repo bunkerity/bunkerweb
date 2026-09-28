@@ -2,19 +2,22 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 - **Anzahl der Verbindungen pro IP-Adresse** (STREAM-Unterstützung :white_check_mark:)
 - **Anzahl der Anfragen pro IP-Adresse und URL innerhalb eines bestimmten Zeitraums** (STREAM-Unterstützung :x:)
+- **Aggregierte (globale) Anfragerate pro Dienst, über alle Clients und URLs hinweg** (STREAM-Unterstützung :x:)
 
 ### Wie es funktioniert
 
 1.  **Ratenbegrenzung:** Verfolgt die Anzahl der Anfragen von jeder Client-IP-Adresse an bestimmte URLs. Wenn ein Client die konfigurierte Ratenbegrenzung überschreitet, werden nachfolgende Anfragen vorübergehend abgelehnt.
-2.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
-3.  In beiden Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
+2.  **Globale Ratenbegrenzung:** Verfolgt die Gesamtzahl der Anfragen an einen Dienst unabhängig von Client-IP oder URL und schützt die Kapazität des Ursprungs-/Backend-Servers vor aggregierten Verkehrsspitzen. Dies ist unabhängig von der Begrenzung pro IP/URL und wird vor dieser ausgewertet.
+3.  **Verbindungsbegrenzung:** Überwacht und beschränkt die Anzahl der gleichzeitigen Verbindungen von jeder Client-IP-Adresse. Je nach verwendetem Protokoll (HTTP/1, HTTP/2, HTTP/3 oder Stream) können unterschiedliche Verbindungsgrenzen angewendet werden.
+4.  In allen Fällen erhalten Clients, die die definierten Grenzwerte überschreiten, den HTTP-Statuscode **„429 - Too Many Requests“**, was hilft, eine Serverüberlastung zu verhindern.
 
 ### Schritte zur Verwendung
 
 1.  **Anforderungsratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ`, um die Anforderungsratenbegrenzung zu aktivieren und URL-Muster zusammen mit ihren entsprechenden Ratenbegrenzungen zu definieren.
-2.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
-3.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
-4.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
+2.  **Globale Ratenbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_REQ_GLOBAL`, um die gesamte aggregierte Anfragerate für einen Dienst zu begrenzen, unabhängig von Client-IP oder URL — nützlich, wenn der Schutz der Ursprungskapazität wichtiger ist als Fairness pro Client.
+3.  **Verbindungsbegrenzung aktivieren:** Verwenden Sie `USE_LIMIT_CONN`, um die Verbindungsbegrenzung zu aktivieren und die maximale Anzahl gleichzeitiger Verbindungen für verschiedene Protokolle festzulegen.
+4.  **Granulare Kontrolle anwenden:** Erstellen Sie mehrere Ratenbegrenzungsregeln für verschiedene URLs, um unterschiedliche Schutzniveaus auf Ihrer gesamten Website bereitzustellen.
+5.  **Wirksamkeit überwachen:** Verwenden Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.
 
 ### Konfigurationseinstellungen
 
@@ -26,15 +29,28 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
     | `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
     | `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
 
-!!! tip "Format der Ratenbegrenzung"
-    Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
 
-    - `N` die Anzahl der erlaubten Anfragen ist
-    - `r` ein literales 'r' ist (für 'requests')
-    - `/` ein literaler Schrägstrich ist
-    - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
+    !!! tip "Format der Ratenbegrenzung"
+        Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
-    Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+        - `N` die Anzahl der erlaubten Anfragen ist
+        - `r` ein literales 'r' ist (für 'requests')
+        - `/` ein literaler Schrägstrich ist
+        - `t` die Zeiteinheit ist: `s` (Sekunde), `m` (Minute), `h` (Stunde) oder `d` (Tag)
+
+        Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
+
+=== "Globale Ratenbegrenzung"
+
+    | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ_GLOBAL`  | `no`      | multisite | nein     | **Globale Ratenbegrenzung aktivieren:** Auf `yes` setzen, um die gesamte aggregierte Anfragerate für den Dienst zu begrenzen (alle Clients, alle URLs). |
+    | `LIMIT_REQ_GLOBAL_RATE` | `1000r/s` | multisite | nein     | **Globale Ratenbegrenzung:** Maximale aggregierte Anfragerate im Format `Nr/t`, gleiche Syntax wie `LIMIT_REQ_RATE`.                                    |
+
+    !!! tip "Wann globale Ratenbegrenzung verwenden"
+        Die Begrenzung pro IP/URL schützt vor einem einzelnen missbräuchlichen Client. Die globale Ratenbegrenzung schützt den Ursprungsserver selbst: Sie begrenzt den gesamten Durchsatz zu einem Dienst, unabhängig davon, wer anfragt. Verwenden Sie sie, wenn Ihr Backend eine bekannte Kapazitätsgrenze hat (z. B. einen Datenbank-Verbindungspool oder eine langsame Drittanbieter-API), die vor jeder Verkehrsspitze geschützt werden muss, ob legitim oder nicht. Sie wird vor den Regeln pro IP/URL geprüft und ist somit die erste Verteidigungslinie unter Last.
 
 === "Verbindungsbegrenzung"
 
@@ -48,10 +64,10 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 
-- **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
-- **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
+    - **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.
+    - **Anforderungsratenbegrenzung** beschränkt die Anzahl der Anfragen, die eine IP-Adresse innerhalb eines definierten Zeitraums stellen kann.
 
-  Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
+    Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
 
 !!! warning "Festlegen angemessener Grenzwerte"
     Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.

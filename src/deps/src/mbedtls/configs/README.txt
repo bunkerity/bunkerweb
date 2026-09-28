@@ -1,24 +1,28 @@
 This directory contains example configuration files.
 
-The examples are generally focused on a particular usage case (eg, support for
-a restricted number of ciphersuites) and aim at minimizing resource usage for
-this target. They can be used as a basis for custom configurations.
+The examples are generally focused on a particular use case (eg, support for
+a restricted set of ciphersuites) and aim to minimize resource usage for
+the target. They can be used as a basis for custom configurations.
 
-These files are complete replacements for the default mbedtls_config.h. To use one of
-them, you can pick one of the following methods:
+These files come in pairs and are complete replacements for the default
+mbedtls_config.h and crypto_config.h. The two files of a pair share the same or
+very similar name, with the crypto file prefixed by "crypto-". Note
+that some of the cryptography configuration files may be located in
+tf-psa-crypto/configs.
 
-1. Replace the default file include/mbedtls/mbedtls_config.h with the chosen one.
+To use one of these pairs, you can pick one of the following methods:
 
-2. Define MBEDTLS_CONFIG_FILE and adjust the include path accordingly.
-   For example, using make:
+1. Replace the default files include/mbedtls/mbedtls_config.h and
+   tf-psa-crypto/include/psa/crypto_config.h with the chosen ones.
 
-    CFLAGS="-I$PWD/configs -DMBEDTLS_CONFIG_FILE='<foo.h>'" make
+2. Use the MBEDTLS_CONFIG_FILE and TF_PSA_CRYPTO_CONFIG_FILE CMake options. For
+   example, to build out-of-tree with the config-ccm-psk-tls1_2.h and
+   crypto-config-ccm-psk-tls1_2.h configuration pair:
 
-   Or, using cmake:
+   cmake -DMBEDTLS_CONFIG_FILE="configs/config-ccm-psk-tls1_2.h" \
+         -DTF_PSA_CRYPTO_CONFIG_FILE="configs/crypto-config-ccm-psk-tls1_2.h"
+         -B build-psktls12 .
+   cmake --build build-psktls12
 
-    find . -iname '*cmake*' -not -name CMakeLists.txt -exec rm -rf {} +
-    CFLAGS="-I$PWD/configs -DMBEDTLS_CONFIG_FILE='<foo.h>'" cmake .
-    make
-
-Note that the second method also works if you want to keep your custom
-configuration file outside the Mbed TLS tree.
+The second method also works if you want to keep your custom configuration
+files outside the Mbed TLS tree.

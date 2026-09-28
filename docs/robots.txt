@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /latest/
 
+# LLM-friendly documentation
+# llms.txt: /latest/llms.txt
+# llms-full.txt: /latest/llms-full.txt
+
 Sitemap: https://docs.bunkerweb.io/latest/sitemap.xml

@@ -54,6 +54,7 @@ start() {
             echo "FORWARDED_ALLOW_IPS=127.0.0.1,::1"
             echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo "# ENABLE_HEALTHCHECK=no"
+            echo "# UI_USE_REDIS=yes"
             echo "LOG_LEVEL=info"
             echo "LOG_TYPES=file"
             echo "# LOG_FILE_PATH=/var/log/bunkerweb/ui.log"

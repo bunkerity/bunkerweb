@@ -15,8 +15,7 @@ local sub, byte, format = string.sub, string.byte, string.format
 local match, gmatch = string.match, string.gmatch
 local concat = table.concat
 local bit = require("bit")
-local band, bor, ror, tohex = bit.band, bit.bor, bit.ror, bit.tohex
-local lshift, rshift, arshift = bit.lshift, bit.rshift, bit.arshift
+local ror, tohex = bit.ror, bit.tohex
 
 ------------------------------------------------------------------------------
 -- Opcode maps
@@ -373,7 +372,7 @@ local map_datar = {
     [16] = { shift = 7, mask = 1, [0] = map_misc, map_mulh, },
     _ = {
       shift = 0, mask = 0xffffffff,
-      [bor(0xe1a00000)] = "nop",
+      [0xe1a00000|0] = "nop",
       _ = map_data,
     }
   },
@@ -427,7 +426,7 @@ local function putop(ctx, text, operands)
     local sym = ctx.symtab[ctx.rel]
     if sym then
       extra = "\t->"..sym
-    elseif band(ctx.op, 0x0e000000) ~= 0x0a000000 then
+    elseif ctx.op & 0x0e000000 != 0x0a000000 then
       extra = "\t; 0x"..tohex(ctx.rel)
     end
   end
@@ -448,47 +447,47 @@ end
 
 -- Format operand 2 of load/store opcodes.
 local function fmtload(ctx, op, pos)
-  local base = map_gpr[band(rshift(op, 16), 15)]
+  local base = map_gpr[(op >> 16) & 15]
   local x, ofs
-  local ext = (band(op, 0x04000000) == 0)
-  if not ext and band(op, 0x02000000) == 0 then
-    ofs = band(op, 4095)
-    if band(op, 0x00800000) == 0 then ofs = -ofs end
+  local ext = (op & 0x04000000 == 0)
+  if not ext and op & 0x02000000 == 0 then
+    ofs = op & 4095
+    if op & 0x00800000 == 0 then ofs = -ofs end
     if base == "pc" then ctx.rel = ctx.addr + pos + 8 + ofs end
     ofs = "#"..ofs
-  elseif ext and band(op, 0x00400000) ~= 0 then
-    ofs = band(op, 15) + band(rshift(op, 4), 0xf0)
-    if band(op, 0x00800000) == 0 then ofs = -ofs end
+  elseif ext and op & 0x00400000 != 0 then
+    ofs = (op & 0x0f) | ((op >> 4) & 0xf0)
+    if op & 0x00800000 == 0 then ofs = -ofs end
     if base == "pc" then ctx.rel = ctx.addr + pos + 8 + ofs end
     ofs = "#"..ofs
   else
-    ofs = map_gpr[band(op, 15)]
-    if ext or band(op, 0xfe0) == 0 then
-    elseif band(op, 0xfe0) == 0x60 then
+    ofs = map_gpr[op & 15]
+    if ext or op & 0xfe0 == 0 then
+    elseif op & 0xfe0 == 0x60 then
       ofs = format("%s, rrx", ofs)
     else
-      local sh = band(rshift(op, 7), 31)
+      local sh = (op >> 7) & 31
       if sh == 0 then sh = 32 end
-      ofs = format("%s, %s #%d", ofs, map_shift[band(rshift(op, 5), 3)], sh)
+      ofs = format("%s, %s #%d", ofs, map_shift[(op >> 5) & 3], sh)
     end
-    if band(op, 0x00800000) == 0 then ofs = "-"..ofs end
+    if op & 0x00800000 == 0 then ofs = "-"..ofs end
   end
   if ofs == "#0" then
     x = format("[%s]", base)
-  elseif band(op, 0x01000000) == 0 then
+  elseif op & 0x01000000 == 0 then
     x = format("[%s], %s", base, ofs)
   else
     x = format("[%s, %s]", base, ofs)
   end
-  if band(op, 0x01200000) == 0x01200000 then x = x.."!" end
+  if op & 0x01200000 == 0x01200000 then x ..= "!" end
   return x
 end
 
 -- Format operand 2 of vector load/store opcodes.
 local function fmtvload(ctx, op, pos)
-  local base = map_gpr[band(rshift(op, 16), 15)]
-  local ofs = band(op, 255)*4
-  if band(op, 0x00800000) == 0 then ofs = -ofs end
+  local base = map_gpr[(op >> 16) & 15]
+  local ofs = (op & 255) << 2
+  if op & 0x00800000 == 0 then ofs = -ofs end
   if base == "pc" then ctx.rel = ctx.addr + pos + 8 + ofs end
   if ofs == 0 then
     return format("[%s]", base)
@@ -499,9 +498,9 @@ end
 
 local function fmtvr(op, vr, sh0, sh1)
   if vr == "s" then
-    return format("s%d", 2*band(rshift(op, sh0), 15)+band(rshift(op, sh1), 1))
+    return format("s%d", ((op >> sh0-1) & 0x1e) | ((op >> sh1) & 1))
   else
-    return format("d%d", band(rshift(op, sh0), 15)+band(rshift(op, sh1-4), 16))
+    return format("d%d", ((op >> sh0) & 15) | ((op >> sh1-4) & 16))
   end
 end
 
@@ -509,7 +508,7 @@ end
 local function disass_ins(ctx)
   local pos = ctx.pos
   local b0, b1, b2, b3 = byte(ctx.code, pos+1, pos+4)
-  local op = bor(lshift(b3, 24), lshift(b2, 16), lshift(b1, 8), b0)
+  local op = (b3 << 24) | (b2 << 16) | (b1 << 8) | b0
   local operands = {}
   local suffix = ""
   local last, name, pat
@@ -517,35 +516,35 @@ local function disass_ins(ctx)
   ctx.op = op
   ctx.rel = nil
 
-  local cond = rshift(op, 28)
+  local cond = op >> 28
   local opat
   if cond == 15 then
-    opat = map_uncondins[band(rshift(op, 25), 7)]
+    opat = map_uncondins[(op >> 25) & 7]
   else
-    if cond ~= 14 then suffix = map_cond[cond] end
-    opat = map_condins[band(rshift(op, 25), 7)]
+    if cond != 14 then suffix = map_cond[cond] end
+    opat = map_condins[(op >> 25) & 7]
   end
-  while type(opat) ~= "string" do
+  while type(opat) != "string" do
     if not opat then return unknown(ctx) end
-    opat = opat[band(rshift(op, opat.shift), opat.mask)] or opat._
+    opat = opat[(op >> opat.shift) & opat.mask] or opat._
   end
   name, pat = match(opat, "^([a-z0-9]*)(.*)")
   if sub(pat, 1, 1) == "." then
     local s2, p2 = match(pat, "^([a-z0-9.]*)(.*)")
-    suffix = suffix..s2
+    suffix ..= s2
     pat = p2
   end
 
   for p in gmatch(pat, ".") do
     local x = nil
     if p == "D" then
-      x = map_gpr[band(rshift(op, 12), 15)]
+      x = map_gpr[(op >> 12) & 15]
     elseif p == "N" then
-      x = map_gpr[band(rshift(op, 16), 15)]
+      x = map_gpr[(op >> 16) & 15]
     elseif p == "S" then
-      x = map_gpr[band(rshift(op, 8), 15)]
+      x = map_gpr[(op >> 8) & 15]
     elseif p == "M" then
-      x = map_gpr[band(op, 15)]
+      x = map_gpr[op & 15]
     elseif p == "d" then
       x = fmtvr(op, vr, 12, 22)
     elseif p == "n" then
@@ -553,20 +552,20 @@ local function disass_ins(ctx)
     elseif p == "m" then
       x = fmtvr(op, vr, 0, 5)
     elseif p == "P" then
-      if band(op, 0x02000000) ~= 0 then
-	x = ror(band(op, 255), 2*band(rshift(op, 8), 15))
+      if op & 0x02000000 != 0 then
+	x = ror(op & 0xff, (op >> 7) & 0x1e)
       else
-	x = map_gpr[band(op, 15)]
-	if band(op, 0xff0) ~= 0 then
+	x = map_gpr[op & 15]
+	if op & 0xff0 != 0 then
 	  operands[#operands+1] = x
-	  local s = map_shift[band(rshift(op, 5), 3)]
+	  local s = map_shift[(op >> 5) & 3]
 	  local r = nil
-	  if band(op, 0xf90) == 0 then
+	  if op & 0xf90 == 0 then
 	    if s == "ror" then s = "rrx" else r = "#32" end
-	  elseif band(op, 0x10) == 0 then
-	    r = "#"..band(rshift(op, 7), 31)
+	  elseif op & 0x10 == 0 then
+	    r = "#"..((op >> 7) & 31)
 	  else
-	    r = map_gpr[band(rshift(op, 8), 15)]
+	    r = map_gpr[(op >> 8) & 15]
 	  end
 	  if name == "mov" then name = s; x = r
 	  elseif r then x = format("%s %s", s, r)
@@ -578,8 +577,8 @@ local function disass_ins(ctx)
     elseif p == "l" then
       x = fmtvload(ctx, op, pos)
     elseif p == "B" then
-      local addr = ctx.addr + pos + 8 + arshift(lshift(op, 8), 6)
-      if cond == 15 then addr = addr + band(rshift(op, 23), 2) end
+      local addr = ctx.addr + pos + 8 + ((op << 8) ~>> 6)
+      if cond == 15 then addr += (op >> 23) & 2 end
       ctx.rel = addr
       x = "0x"..tohex(addr)
     elseif p == "F" then
@@ -587,52 +586,52 @@ local function disass_ins(ctx)
     elseif p == "G" then
       vr = "d"
     elseif p == "." then
-      suffix = suffix..(vr == "s" and ".f32" or ".f64")
+      suffix ..= vr == "s" ? ".f32" : ".f64"
     elseif p == "R" then
-      if band(op, 0x00200000) ~= 0 and #operands == 1 then
+      if op & 0x00200000 != 0 and #operands == 1 then
 	operands[1] = operands[1].."!"
       end
       local t = {}
       for i=0,15 do
-	if band(rshift(op, i), 1) == 1 then t[#t+1] = map_gpr[i] end
+	if (op >> i) & 1 == 1 then t[#t+1] = map_gpr[i] end
       end
       x = "{"..concat(t, ", ").."}"
     elseif p == "r" then
-      if band(op, 0x00200000) ~= 0 and #operands == 2 then
+      if op & 0x00200000 != 0 and #operands == 2 then
 	operands[1] = operands[1].."!"
       end
       local s = tonumber(sub(last, 2))
-      local n = band(op, 255)
-      if vr == "d" then n = rshift(n, 1) end
+      local n = op & 0xff
+      if vr == "d" then n >>= 1 end
       operands[#operands] = format("{%s-%s%d}", last, vr, s+n-1)
     elseif p == "W" then
-      x = band(op, 0x0fff) + band(rshift(op, 4), 0xf000)
+      x = (op & 0x0fff) | ((op >> 4) & 0xf000)
     elseif p == "T" then
-      x = "#0x"..tohex(band(op, 0x00ffffff), 6)
+      x = "#0x"..tohex(op & 0x00ffffff, 6)
     elseif p == "U" then
-      x = band(rshift(op, 7), 31)
+      x = (op >> 7) & 31
       if x == 0 then x = nil end
     elseif p == "u" then
-      x = band(rshift(op, 7), 31)
-      if band(op, 0x40) == 0 then
-	if x == 0 then x = nil else x = "lsl #"..x end
+      x = (op >> 7) & 31
+      if op & 0x40 == 0 then
+	x = x == 0 ? nil : "lsl #"..x
       else
-	if x == 0 then x = "asr #32" else x = "asr #"..x end
+	x = x == 0 ? "asr #32" : "asr #"..x
       end
     elseif p == "v" then
-      x = band(rshift(op, 7), 31)
+      x = (op >> 7) & 31
     elseif p == "w" then
-      x = band(rshift(op, 16), 31)
+      x = (op >> 16) & 31
     elseif p == "x" then
-      x = band(rshift(op, 16), 31) + 1
+      x = ((op >> 16) & 31) + 1
     elseif p == "X" then
-      x = band(rshift(op, 16), 31) - last + 1
+      x = ((op >> 16) & 31) - last + 1
     elseif p == "Y" then
-      x = band(rshift(op, 12), 0xf0) + band(op, 0x0f)
+      x = ((op >> 12) & 0xf0) | (op & 0x0f)
     elseif p == "K" then
-      x = "#0x"..tohex(band(rshift(op, 4), 0x0000fff0) + band(op, 15), 4)
+      x = "#0x"..tohex(((op >> 4) & 0xfff0) | (op & 0x000f), 4)
     elseif p == "s" then
-      if band(op, 0x00100000) ~= 0 then suffix = "s"..suffix end
+      if op & 0x00100000 != 0 then suffix = "s"..suffix end
     else
       assert(false)
     end
@@ -651,7 +650,7 @@ end
 -- Disassemble a block of code.
 local function disass_block(ctx, ofs, len)
   if not ofs then ofs = 0 end
-  local stop = len and ofs+len or #ctx.code
+  local stop = len ? ofs+len : #ctx.code
   ctx.pos = ofs
   ctx.rel = nil
   while ctx.pos < stop do disass_ins(ctx) end

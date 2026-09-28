@@ -10,7 +10,6 @@ from app.routes.configs import CONFIG_TYPES
 from app.routes.utils import cors_required
 from app.utils import LOGGER, flash
 
-
 templates = Blueprint("templates", __name__)
 
 VIEW_MODES = {"easy", "raw"}

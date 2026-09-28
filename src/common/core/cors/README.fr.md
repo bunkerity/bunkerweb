@@ -6,11 +6,11 @@ Comment ça marche :
 2. BunkerWeb vérifie si l’origine est autorisée.
 3. Si oui, il renvoie les en‑têtes CORS appropriés décrivant ce qui est permis.
 4. Sinon, la requête est refusée ou servie sans en‑têtes CORS selon la configuration.
-5. Des politiques supplémentaires (COEP/COOP/CORP) peuvent renforcer la sécurité.
+5. Des politiques supplémentaires, comme [COEP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) et [CORP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy), peuvent renforcer la sécurité.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_CORS: yes` (désactivé par défaut).
+1. Activer : mettez le paramètre `USE_CORS` à `yes` (désactivé par défaut).
 2. Origines : `CORS_ALLOW_ORIGIN` (regex PCRE, `*` tous, `self` même origine).
 3. Méthodes : `CORS_ALLOW_METHODS`.
 4. En‑têtes : `CORS_ALLOW_HEADERS`.
@@ -29,16 +29,25 @@ Comment ça marche :
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | non      | Politique COOP.                                                               |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | non      | Politique COEP.                                                               |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | non      | Politique CORP.                                                               |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | non      | Durée de cache du preflight (secondes).                                       |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | non      | Durée de cache du preflight (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | non      | Refuser les origines non autorisées avec un code d’erreur.                    |
 
 !!! tip "Optimiser le preflight"
     Augmenter `CORS_MAX_AGE` réduit la fréquence des preflights (par défaut 24h).
 
 !!! warning "Sécurité"
-    Soyez prudent avec `CORS_ALLOW_ORIGIN: *` et/ou `CORS_ALLOW_CREDENTIALS: yes`. Préférez lister explicitement les origines de confiance.
+    Soyez prudent avec le paramètre `CORS_ALLOW_ORIGIN` défini à `*` et/ou le paramètre `CORS_ALLOW_CREDENTIALS` défini à `yes`. Préférez lister explicitement les origines de confiance.
 
 ### Exemples
+
+Voici des exemples de valeurs possibles pour `CORS_ALLOW_ORIGIN`, avec leur comportement :
+
+- **`*`** : autorise les requêtes depuis n’importe quelle origine.
+- **`self`** : autorise automatiquement les requêtes depuis la même origine que le serveur configuré.
+- **`^https://www\.example\.com$`** : autorise uniquement les requêtes depuis `https://www.example.com`.
+- **`^https://.+\.example\.com$`** : autorise les requêtes depuis n’importe quel sous-domaine de `example.com`.
+- **`^https://(www\.example1\.com|www\.example2\.com)$`** : autorise les requêtes depuis `https://www.example1.com` ou `https://www.example2.com`.
+- **`^https?://www\.example\.com$`** : autorise les requêtes depuis `http://www.example.com` et `https://www.example.com`.
 
 === "Configuration basique"
 

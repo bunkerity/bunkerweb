@@ -8,12 +8,20 @@ local utils = require "bunkerweb.utils"
 local plugin = class("plugin")
 local cjson = require "cjson"
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local get_variable = utils.get_variable
 local get_ctx_obj = utils.get_ctx_obj
 local subsystem = ngx.config.subsystem
 local shared = ngx.shared
 local decode = cjson.decode
+
+-- Per-worker (module-level) log-throttle state shared across all plugin
+-- instances in this worker's Lua VM. Keys are namespaced by plugin id to
+-- prevent collisions between plugins. Used by plugin:log_throttled and
+-- plugin:flush_log_recaps (see end of file).
+local log_throttle = {}
+local LOG_THROTTLE_INTERVAL = 60
 
 function plugin:initialize(id, ctx)
 	-- Store common, values
@@ -71,7 +79,11 @@ function plugin:initialize(id, ctx)
 	for k, v in pairs(metadata.settings) do
 		value, err = get_variable(k, v.context == "multisite" and self.is_request)
 		if value == nil then
-			self.logger:log(ERR, "can't get " .. k .. " variable : " .. err)
+			-- A setting declared on disk but absent from the generated config means the
+			-- database is out of sync, not that this request failed. Plugins treat a nil
+			-- value as "feature disabled", so throttle instead of logging per request.
+			-- The key set is bounded by the settings this plugin declares.
+			self:log_throttled(WARN, "missing_variable_" .. k, "can't get " .. k .. " variable : " .. err)
 		end
 		self.variables[k] = value
 	end
@@ -169,6 +181,61 @@ function plugin:get_metric(kind, key)
 		return result_number
 	end
 	return nil
+end
+
+-- Throttled logger with end-of-window recap, intended for timer() hooks and
+-- other recurring code paths that can spam the error log when a shared
+-- upstream (Redis, database, remote API) degrades.
+--
+-- Behavior per (plugin_id, key) pair, per worker:
+--   * first occurrence logs immediately
+--   * repeats within `interval` seconds are counted silently
+--   * on the first call AFTER the window, emits the last message suffixed
+--     with " (repeated N times in the last Xs)" and starts a new window
+--   * if repeats stop before the window expires, the next call to
+--     plugin:flush_log_recaps() (typically at the end of timer()) emits
+--     the pending recap and drops the entry.
+--
+-- Keys MUST be static string literals so the throttle table stays bounded.
+function plugin:log_throttled(level, key, msg, interval)
+	interval = interval or LOG_THROTTLE_INTERVAL
+	local now = ngx.time()
+	local ns_key = self.id .. ":" .. key
+	local entry = log_throttle[ns_key]
+	if entry and now - entry.first < interval then
+		entry.count = entry.count + 1
+		entry.msg = msg
+		entry.level = level
+		return
+	end
+	if entry and entry.count > 1 then
+		self.logger:log(
+			entry.level,
+			entry.msg .. " (repeated " .. entry.count .. " times in the last " .. (now - entry.first) .. "s)"
+		)
+	end
+	self.logger:log(level, msg)
+	log_throttle[ns_key] = { first = now, count = 1, msg = msg, level = level, interval = interval }
+end
+
+-- Emit pending recaps for keys (belonging to this plugin) whose window has
+-- expired without a new hit, and drop entries with no suppressed repeats.
+-- Call at the end of timer() or any other recurring entry point.
+function plugin:flush_log_recaps()
+	local now = ngx.time()
+	local prefix = self.id .. ":"
+	local prefix_len = #prefix
+	for ns_key, entry in pairs(log_throttle) do
+		if ns_key:sub(1, prefix_len) == prefix and now - entry.first >= entry.interval then
+			if entry.count > 1 then
+				self.logger:log(
+					entry.level,
+					entry.msg .. " (repeated " .. entry.count .. " times in the last " .. (now - entry.first) .. "s)"
+				)
+			end
+			log_throttle[ns_key] = nil
+		end
+	end
 end
 
 return plugin

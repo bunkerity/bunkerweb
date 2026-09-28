@@ -1,3 +1,39 @@
+## 1.14.0 - 2026-09-08
+
+- Bounded the resources that `MMDB_get_entry_data_list()` spends decoding a
+  single entry. A crafted database could nest data-section pointers to shared
+  targets so that decoding one entry cost exponential time and memory, or point
+  many times at one large value so that a caller copying the result materialized
+  far more data than the file holds. The decoder now follows the Reader Resource
+  Limits section of the MaxMind DB specification. Each call is limited to 65,536
+  values and 2 MiB of string and bytes payload, in addition to the existing
+  recursive-decoder depth limit of 512. See the `MMDB_get_entry_data_list()`
+  documentation for details.
+  - Exceeding a limit returns the new `MMDB_DECODER_LIMIT_ERROR` status. A
+    full-list failure leaves the output set to `NULL`.
+  - `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` now return
+    `MMDB_DECODER_LIMIT_ERROR` instead of `MMDB_INVALID_DATA_ERROR` when they
+    skip a subtree past the depth limit.
+  - `MMDB_open()` returns `MMDB_INVALID_METADATA_ERROR` when metadata processing
+    exceeds a decoder limit.
+  - The limits can be raised when building the library with
+    `-DMAXIMUM_DATA_STRUCTURE_DEPTH`, `-DMAXIMUM_DATA_STRUCTURE_VALUES`, and
+    `-DMAXIMUM_DATA_STRUCTURE_BYTES`.
+- Fixed an out-of-bounds read in `MMDB_lookup_sockaddr()` when callers passed a
+  `sockaddr` with an unsupported address family. The function now rejects any
+  family other than `AF_INET` and `AF_INET6` with
+  `MMDB_INVALID_NETWORK_ADDRESS_ERROR`.
+- Fixed metadata parsing for files that end immediately after the
+  `\xAB\xCD\xEFMaxMind.com` marker. Such files are now rejected as invalid
+  metadata instead of allowing a zero-length metadata section to reach the
+  decoder.
+- Fixed search-tree validation for records that point into the 16-byte separator
+  before the data section. These records are now rejected as corrupt instead of
+  being exposed as apparent data entries with underflowed offsets.
+- `MMDB_read_node()` now returns `MMDB_CORRUPT_SEARCH_TREE_ERROR` instead of
+  `MMDB_SUCCESS` with `MMDB_RECORD_TYPE_INVALID` record types when a node's
+  child record is invalid.
+
 ## 1.13.3 - 2026-03-05
 
 - Fixed validation of empty maps and arrays at the end of the metadata section.

@@ -1,33 +1,44 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing ctl:ruleRemoveById with range - issue 1444",
-    "expected":{
-      "http_code":200
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing ctl:ruleRemoveById with range - issue 1444",
+    "client": {
+      "ip": "127.0.0.1",
+      "port": 123
     },
-    "client":{
-      "ip":"127.0.0.1",
-      "port":123
+    "server": {
+      "ip": "127.0.0.1",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"index.php?foo=bar&z=xxx",
-      "method":"GET",
-      "body": ""
+      "uri": "index.php?foo=bar&z=xxx",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"127.0.0.1",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
-        "SecRuleEngine On",
-        "SecRule ARGS:foo \"@rx ^bar$\" \"id:100,phase:1,ctl:ruleRemoveById=200-1999\"",
-        "SecRule ARGS:z \"@rx ^xxx$\" \"id:1010,phase:1,deny,status:403\""
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:foo \"@rx ^bar$\" \"id:100,phase:1,ctl:ruleRemoveById=200-1999\"",
+      "SecRule ARGS:z \"@rx ^xxx$\" \"id:1010,phase:1,deny,status:403\""
     ]
   }
 ]

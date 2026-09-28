@@ -19,11 +19,12 @@ services:
       REDIS_SENTINEL_PASSWORD: ""
       REDIS_SENTINEL_MASTER: "bw-master"
     extra_hosts:
-      - "www.example.com:1.0.0.254"
+      - "www.example.com:192.168.77.254"
     networks:
       bw-services:
-        ipv4_address: 1.0.0.253
+        ipv4_address: 192.168.77.253
 
 networks:
   bw-services:
+    name: fixtures_redis_services
     external: true

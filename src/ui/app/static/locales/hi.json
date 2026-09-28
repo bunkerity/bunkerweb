@@ -18,7 +18,22 @@
   "aria": {
     "label": {
       "close": "बंद करें",
-      "raw_configuration": "रॉ कॉन्फ़िगरेशन"
+      "copy": "लॉग कॉपी करें",
+      "download_log": "यह लॉग फ़ाइल डाउनलोड करें",
+      "follow": "अनुसरण करें",
+      "select_file": "फ़ाइल चुनें",
+      "select_page": "पृष्ठ चुनें",
+      "issue_count": "त्रुटि और चेतावनी की संख्या",
+      "level_filter": "लॉग पंक्तियों को स्तर के अनुसार फ़िल्टर करें",
+      "local_time": "टाइमस्टैम्प स्थानीय समय में दिखाएँ",
+      "collapse_multiline": "बहु-पंक्ति प्रविष्टियाँ संक्षिप्त करें",
+      "next_issue": "अगली त्रुटि या चेतावनी",
+      "prev_issue": "पिछली त्रुटि या चेतावनी",
+      "search_logs": "लॉग खोजें",
+      "toggle_wrap": "लाइन रैपिंग टॉगल करें",
+      "configs_dropzone": "कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
+      "raw_configuration": "रॉ कॉन्फ़िगरेशन",
+      "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें"
     }
   },
   "badge": {
@@ -42,6 +57,7 @@
     "bans": "प्रतिबंध",
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
+    "crowdsec": "CrowdSec",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
@@ -94,10 +110,8 @@
     "enable_totp": "TOTP सक्षम करें",
     "entire_config": "संपूर्ण कॉन्फ़िगरेशन",
     "export": "निर्यात करें",
-    "export_csv_all": "CSV (सभी)",
-    "export_csv_visible": "CSV (दृश्यमान)",
-    "export_excel_all": "Excel (सभी)",
-    "export_excel_visible": "Excel (दृश्यमान)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "ग्लोबल सेटिंग्स लाएँ",
     "filters_suffix": " फ़िल्टर",
     "follow": "अनुसरण करें",
@@ -107,6 +121,7 @@
     "go_back": "वापस जाओ",
     "hide": "छिपाएं",
     "history": "इतिहास",
+    "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
     "import_services": "सेवाएं आयात करें",
     "login": "लॉगिन करें",
     "multiple_add": "जोड़ें",
@@ -122,6 +137,7 @@
     "plugin_page": "प्लगइन पृष्ठ",
     "proceed": "आगे बढ़ें",
     "refresh_recovery_codes": "पुनर्प्राप्ति कोड ताज़ा करें",
+    "refresh_ui_plugins": "UI प्लगइन रीफ़्रेश करें",
     "reload": "पुनः लोड करें",
     "reset": "रीसेट करें",
     "reset_columns": "कॉलम रीसेट करें",
@@ -130,6 +146,10 @@
     "run_selected_jobs": "चयनित कार्य चलाएं",
     "save": "सहेजें",
     "save_changes": "परिवर्तन सहेजें",
+    "local_time": "स्थानीय समय",
+    "collapse_multiline": "संक्षिप्त करें",
+    "search": "खोजें",
+    "wrap": "रैप",
     "select_file": "फ़ाइल चुनें",
     "select_page": "पृष्ठ चुनें",
     "service": "सेवा",
@@ -148,7 +168,164 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
+    "ban_all_filtered": "सभी मिलान वाली रिपोर्ट प्रतिबंधित करें",
+    "filtered_actions": "फ़िल्टर की गई कार्रवाइयां",
+    "unban_all_filtered": "सभी मिलान वाले प्रतिबंध हटाएं",
+    "update_duration_all_filtered": "सभी मिलान वाले प्रतिबंधों की अवधि अपडेट करें",
+    "validate_certificate": "प्रमाणपत्र सत्यापित करें"
+  },
+  "crowdsec": {
+    "alert": {
+      "id": "Alert ID",
+      "load": "Load full evidence",
+      "started": "Started",
+      "stopped": "Stopped"
+    },
+    "captured_history": "Captured history",
+    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "connection": {
+      "appsec": "Last AppSec observation",
+      "choose": "Choose a connection",
+      "connected": "Connected",
+      "connection_error": "Connection error",
+      "configured": "Configured",
+      "global": "all services",
+      "help": "Each instance and service scope is a separate connection.",
+      "label": "CrowdSec connection",
+      "last_sync": "Last successful sync",
+      "local_api": "Local API",
+      "management": "Management",
+      "mode": "Mode",
+      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
+      "read_only": "Read only",
+      "required": "Choose a CrowdSec connection first.",
+      "sync": "Decision sync",
+      "sync_current": "Up to date",
+      "sync_not_synchronized": "Not synchronized yet",
+      "sync_stale": "Stale",
+      "selected": "चुना गया कनेक्शन",
+      "scope_help": "चुना गया कनेक्शन नीचे दिए गए निर्णयों, अनुमति सूचियों और IP जाँच पर लागू होता है।"
+    },
+    "current_state": "Current state",
+    "current_state_help": "Current state may change after this observation.",
+    "decision": {
+      "duration": "Duration",
+      "expires": "Expires",
+      "id": "Decision ID",
+      "origin": "Origin",
+      "scenario": "Scenario",
+      "scope": "Scope",
+      "target": "Target",
+      "type": "Type"
+    },
+    "decisions": {
+      "count": "Showing {{start}}–{{end}} of {{total}}",
+      "help": "This is current state read directly from the selected CrowdSec engine.",
+      "none": "No active decisions match these filters.",
+      "pagination": "Decision pages",
+      "title": "Active decisions"
+    },
+    "error": {
+      "request": "The CrowdSec request failed."
+    },
+    "investigation": {
+      "alerts": "Available CrowdSec alert evidence",
+      "current_decisions": "Current CrowdSec decisions",
+      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
+      "ip": "IP address",
+      "local_bans": "Current local BunkerWeb bans",
+      "no_alerts": "No alert evidence is available.",
+      "no_bans": "No current local ban was found.",
+      "no_decisions": "No current CrowdSec decision was found.",
+      "no_reports": "No recent captured report was found.",
+      "placeholder": "192.0.2.10",
+      "reports": "Recent BunkerWeb reports",
+      "result": "Investigation for {{ip}}",
+      "submit": "Investigate",
+      "title": "Investigate an IP",
+      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
+      "unavailable": "Unavailable: {{error}}",
+      "summary": "Evidence found for this IP",
+      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
+      "summary_decisions": "CrowdSec decisions",
+      "summary_bans": "Local BunkerWeb bans",
+      "summary_alerts": "CrowdSec alert evidence",
+      "summary_reports": "BunkerWeb reports",
+      "summary_active": "{{total}} active",
+      "summary_available": "{{total}} available",
+      "summary_captured": "{{total}} captured",
+      "summary_none": "None found",
+      "summary_unreadable": "Could not be read"
+    },
+    "local_ban": {
+      "expires": "Expires",
+      "reason": "Reason",
+      "service": "Service"
+    },
+    "next": "Next",
+    "observed_at": "Observed {{time}}",
+    "previous": "Previous",
+    "refresh": "Refresh status",
+    "remove": {
+      "action": "Remove",
+      "confirm": "I understand and want to remove this decision.",
+      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
+      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "submit": "Remove decision",
+      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
+      "title": "Remove CrowdSec decision"
+    },
+    "report": {
+      "captured": "Captured at",
+      "date": "Report time",
+      "decisions": "Captured decisions",
+      "entry": "Security report",
+      "matched_target": "Matched target",
+      "metadata": "Decision metadata",
+      "metadata_complete": "Complete",
+      "metadata_incomplete": "Incomplete",
+      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
+      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
+      "reason": "Reason",
+      "remediation": "Captured remediation",
+      "scope": "Captured service scope",
+      "service": "Service",
+      "source": "Captured source",
+      "identifier": "Report identifier"
+    },
+    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
+    "title": "CrowdSec operator",
+    "unknown": "Unknown",
+    "allowlists": {
+      "title": "CrowdSec allowlists",
+      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
+      "refresh": "Refresh allowlists",
+      "pages": "Allowlist pages",
+      "empty": "No allowlists were found on this engine.",
+      "console": "Console managed",
+      "local": "Locally managed",
+      "no_entries": "No active entries.",
+      "never": "Never",
+      "comment": "Comment",
+      "unknown": "Allowlist status is unavailable.",
+      "not_allowed": "This IP does not match a CrowdSec allowlist.",
+      "allowed": "Allowlisted by CrowdSec",
+      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "guide": {
+        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
+        "title": "How to manage trusted IPs and networks",
+        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
+        "create": "Create a list once, or use an existing locally managed list.",
+        "add": "Add trusted IPs or CIDR networks.",
+        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
+        "inspect": "Inspect the list and its expiry dates.",
+        "remove": "Remove an exception when it is no longer needed.",
+        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
+        "console": "Edit Console-managed lists in the CrowdSec Console.",
+        "docs": "CrowdSec allowlist documentation"
+      }
+    }
   },
   "country": {
     "AD": "अंडोरा",
@@ -469,11 +646,16 @@
       "no_data": "कोई डेटा नहीं"
     },
     "window": {
+      "all_time": "सर्वकालिक",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "मिलान करने वाले सभी {{count}} {{entity}} चुनें",
+    "bulk_select_all_done": "मिलान करने वाले सभी {{count}} {{entity}} चुने गए हैं।",
+    "bulk_select_clear": "चयन साफ़ करें",
+    "bulk_select_page": "इस पेज पर सभी {{count}} {{entity}} चुने गए हैं।",
     "info_bans": "दिखा रहा है {{start}} से {{end}} तक {{total}} प्रतिबंधों में से",
     "info_cache": "दिखा रहा है {{start}} से {{end}} तक {{total}} कैश फ़ाइलों में से",
     "info_configs": "दिखा रहा है {{start}} से {{end}} तक {{total}} कस्टम कॉन्फ़िगरेशन में से",
@@ -605,6 +787,8 @@
     "easter_egg": "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं 👀",
     "error": "त्रुटि",
     "message": "सूचना",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "आपके पास आपके PRO लाइसेंस द्वारा अनुमत से अधिक सेवाएं हैं। अपना लाइसेंस अपग्रेड करें या कुछ सेवाओं को ड्राफ्ट मोड में बदलकर अपना PRO लाइसेंस अनलॉक करें।",
     "time": {
       "just_now": "अभी"
     },
@@ -620,6 +804,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "संलग्न कस्टम कॉन्फ़िगरेशन शामिल करें",
+      "overwrite_existing_configs": "मौजूदा UI/API कस्टम कॉन्फ़िगरेशन ओवरराइट करें",
       "remember_me": "मुझे याद रखें"
     },
     "help": {
@@ -692,11 +878,11 @@
       "use_real_ip": "वास्तविक आईपी का उपयोग करें",
       "username": "उपयोगकर्ता नाम",
       "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र",
-      "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
       "zerossl_api_key": "ZeroSSL API कुंजी",
-      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
       "zerossl_api_retry": "ZeroSSL API पुनः प्रयास",
-      "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब"
+      "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
+      "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
+      "zerossl_api_max_time": "ZeroSSL API अधिकतम समय"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -755,11 +941,25 @@
     "upgrade": "अपग्रेड करें?"
   },
   "logs": {
-    "eventsource_failed": "इवेंटसोर्स कनेक्शन विफल",
-    "parse_error": "स्ट्रीम डेटा पार्स करने में विफल: {{error}}",
-    "stream_error": "स्ट्रीम त्रुटि: {{message}}",
-    "stream_init": "स्ट्रीम प्रारंभ, फ़ाइल आकार: {{size}}",
-    "stream_initialized": "स्ट्रीम रीफ्रेश के साथ प्रारंभ, फ़ाइल आकार: {{size}}",
+    "annotation_error": "त्रुटि",
+    "annotation_warning": "चेतावनी",
+    "filter_levels": "स्तर",
+    "letsencrypt_logs": "Let's Encrypt लॉग",
+    "main_logs": "मुख्य लॉग",
+    "new_lines_sr": "{{count}} नई लॉग पंक्तियाँ",
+    "issue_summary": "{{errors}} त्रुटि(याँ), {{warnings}} चेतावनी(याँ)",
+    "level_critical": "गंभीर",
+    "level_debug": "डीबग",
+    "level_error": "त्रुटि",
+    "level_info": "जानकारी",
+    "level_notice": "सूचना",
+    "level_warning": "चेतावनी",
+    "lines_all": "सभी",
+    "lines_label": "पंक्तियाँ",
+    "meta": "{{size}} · {{lines}} पंक्तियाँ · संशोधित {{when}}",
+    "new_lines": "नई पंक्तियाँ",
+    "showing_all": "{{total}} पंक्तियाँ",
+    "showing_some": "{{total}} में से {{shown}} दिखा रहे हैं",
     "trimmed_notice": "--- प्रदर्शन के लिए {{count}} पुरानी लॉग लाइनें हटा दी गईं ---"
   },
   "modal": {
@@ -789,6 +989,9 @@
       "fetch_global_settings_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
       "fetch_global_settings_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
       "fetch_global_settings_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता है।",
+      "export_services_intro": "चयनित सेवाएँ निर्यात की जाएँगी। उनके संलग्न कस्टम कॉन्फ़िगरेशन को .zip आर्काइव में शामिल करने के लिए नीचे दिया गया विकल्प सक्षम करें।",
+      "import_configs_dropzone": "अपनी कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल को यहाँ खींचकर छोड़ें या फ़ाइल चुनने के लिए क्लिक करें।",
+      "import_configs_warning": "scheduler, autoconf, या templates द्वारा बनाए गए कस्टम कॉन्फ़िगरेशन हमेशा सुरक्षित रखे जाते हैं। केवल UI/API कॉन्फ़िगरेशन ओवरराइट किए जा सकते हैं।",
       "import_services_dropzone": "अपनी सेवाओं की निर्यात फ़ाइल को यहाँ खींचें और छोड़ें (Drag and drop) या फ़ाइल चुनने के लिए क्लिक करें।",
       "import_services_warning": "सेवाओं को आयात करने से निर्यात फ़ाइल से नई UI सेवाएँ बन जाएँगी। मौजूदा सेवाओं को छोड़ दिया जाता है।",
       "instance_creation_alert": "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।",
@@ -799,7 +1002,10 @@
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
-      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
+      "ban_filtered_confirmation": "सभी {{count}} मिलान वाली रिपोर्ट से IP प्रतिबंधित करें? डुप्लिकेट लक्ष्य केवल एक बार लागू किए जाएंगे।",
+      "unban_filtered_confirmation": "क्या आप वाकई सभी {{count}} मिलान वाले प्रतिबंध हटाना चाहते हैं?",
+      "update_filtered_duration_alert": "सभी {{count}} मिलान वाले प्रतिबंधों के लिए एक नई अवधि चुनें:"
     },
     "button": {
       "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
@@ -823,8 +1029,10 @@
       "delete_template": "टेम्पलेट हटाएं",
       "edit_template": "टेम्प्लेट संपादित करें: {{name}}",
       "fetch_global_settings": "ग्लोबल सेटिंग्स लागू करें?",
+      "export_services": "सेवाएँ निर्यात करें",
       "from_plugin": "प्लगइन से",
       "full_url": "पूर्ण URL",
+      "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
       "import_services": "सेवाएं आयात करें",
       "job_history": "पिछले 10 कार्य निष्पादन",
       "job_history_count": "कार्य {{count}} निष्पादन",
@@ -856,6 +1064,7 @@
     "bans": "प्रतिबंध",
     "cache": "कैश",
     "configs": "कॉन्फ़िगरेशन",
+    "crowdsec": "CrowdSec",
     "extra_pages": "अतिरिक्त पृष्ठ",
     "global_settings": "ग्लोबल सेटिंग्स",
     "home": "होम",
@@ -897,7 +1106,10 @@
       "status": {
         "deactivated": "प्लगइन निष्क्रिय है; इसलिए, कोई जानकारी उपलब्ध नहीं है।",
         "metrics_deactivated": "मेट्रिक्स प्लगइन सक्रिय नहीं है; इसलिए, कोई जानकारी उपलब्ध नहीं है।",
-        "not_available": "प्लगइन पृष्ठ बीटा चरण के दौरान अभी उपलब्ध नहीं है।"
+        "not_available": "प्लगइन पृष्ठ बीटा चरण के दौरान अभी उपलब्ध नहीं है।",
+        "pre_render_error": "प्री-रेंडरिंग त्रुटि",
+        "no_content": "यह प्लगइन कोई एम्बेडेड पेज प्रदान नहीं करता है।",
+        "dedicated_page_unavailable": "यह प्लगइन एक समर्पित पेज पर प्रबंधित होता है जो अभी लोड नहीं हुआ है। इसे एक्सेस करने के लिए वेब UI को पुनरारंभ करें।"
       }
     },
     "type": {
@@ -994,6 +1206,19 @@
     }
   },
   "reports": {
+    "crowdsec": {
+      "source_lapi": "स्थानीय API निर्णय",
+      "source_appsec": "AppSec जाँच",
+      "source_failure_policy": "AppSec विफलता नीति",
+      "appsec_help": "AppSec ने इस अनुरोध की जाँच की; स्थानीय API का निर्णय मौजूद न भी हो सकता है।",
+      "failure_policy_help": "AppSec त्रुटि के बाद कॉन्फ़िगर की गई विफलता नीति लागू की गई।",
+      "no_decisions": "इस अनुरोध के लिए निर्णय विवरण दर्ज नहीं किए गए।",
+      "technical_details": "तकनीकी विवरण",
+      "connection_id": "कनेक्शन आईडी",
+      "instance": "इंस्टेंस",
+      "appsec_action": "AppSec कार्रवाई"
+    },
+    "retention_notice": "रिपोर्ट मेमोरी में एक रोलिंग बफ़र के रूप में रखी जाती हैं: निर्धारित सीमा तक पहुँचने पर सबसे पुरानी प्रविष्टियाँ हटा दी जाती हैं। जब तक Redis सक्षम न हो, BunkerWeb के पुनः आरंभ होने पर भी ये मिट जाती हैं।",
     "security_incident": "सुरक्षा घटना",
     "security_report_data": "सुरक्षा रिपोर्ट डेटा"
   },
@@ -1031,6 +1256,7 @@
     "last_run": "अंतिम रन स्थिति",
     "last_seen": "अंतिम बार देखा गया",
     "last_update": "अंतिम अपडेट",
+    "loading": "खोज पैन लोड हो रहे हैं...",
     "method": "विधि",
     "next_24h": "अगले 24 घंटे",
     "next_30d": "अगले 30 दिन",
@@ -1095,9 +1321,9 @@
       "section": {
         "custom_certificate": "कस्टम प्रमाणपत्र",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "वास्तविक आईपी",
-        "reverse_proxy": "रिवर्स प्रॉक्सी",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "रिवर्स प्रॉक्सी"
       },
       "subtitle": "वेब UI विशिष्ट सेटिंग्स कॉन्फ़िगर करें।",
       "title": "UI सेटिंग्स"
@@ -1326,8 +1552,8 @@
       "raw_configs_title": "कस्टम कॉन्फ़िग आयात",
       "raw_configs_upload": "कॉन्फ़िग फाइलें अपलोड करें (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "चयनित फ़ाइलों में से एक को पढ़ने में असमर्थ।",
-      "raw_editor_aria": "रॉ टेम्पलेट JSON एडिटर",
       "raw_editor_drop_hint": "वर्तमान सामग्री को बदलने के लिए एक टेम्पलेट JSON फ़ाइल (.json केवल) छोड़ें।",
+      "raw_editor_aria": "रॉ टेम्पलेट JSON एडिटर",
       "raw_editor_help": "संपूर्ण टेम्पलेट परिभाषा को JSON के रूप में संपादित करें। आसान मोड पर वापस स्विच करने से विज़ुअल संपादक मान्य और पुनः लोड हो जाता है।",
       "raw_editor_import_success": "टेम्पलेट JSON सफलतापूर्वक आयात किया गया।",
       "raw_editor_override_body": "इस फ़ाइल को आयात करने से वर्तमान टेम्पलेट JSON पूरी तरह से बदल जाएगा। संपादक में किए गए परिवर्तन खो जाएंगे। क्या आप जारी रखना चाहते हैं?",
@@ -1461,6 +1687,7 @@
       "force_check": "एक जांच शेड्यूल करता है; केवल अपडेट होने पर डाउनलोड करता है।",
       "force_update": "जांचों को छोड़कर PRO प्लगइन्स का फोर्स डाउनलोड; विफल होने पर वर्तमान स्थिति बनी रहती है।",
       "ping_instance": "पिंग इंस्टेंस {{hostname}}",
+      "refresh_ui_plugins": "वेब UI में पहले से मौजूद PRO प्लगइन को बिना कुछ डाउनलोड किए फिर से लोड करता है।",
       "reload_instance": "इंस्टेंस {{hostname}} पुनः लोड करें",
       "reset_default": "डिफ़ॉल्ट मान पर रीसेट करें",
       "reset_global": "वैश्विक मान पर रीसेट करें",
@@ -1515,8 +1742,8 @@
     "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
     "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची से मेल खाने वाले डोमेन के लिए प्रमाणपत्र अनुरोध अक्षम करें (अनुशंसित)।",
-    "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
     "lets_encrypt_server": "प्रदाता-विशिष्ट सेटिंग्स दिखाने के लिए अपना प्रमाणपत्र प्रदाता चुनें।",
+    "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
     "license_key": "आपकी BunkerWeb PRO लाइसेंस कुंजी।",
     "link": {
       "access_plugin_page": "एक्सेस {{name}} पृष्ठ",
@@ -1528,6 +1755,7 @@
       "edit_config": "कस्टम कॉन्फ़िगरेशन {{name}} संपादित करें",
       "edit_service": "सेवा {{service}} संपादित करें",
       "edit_template": "टेम्पलेट {{template}} संपादित करें",
+      "export_config": "कस्टम कॉन्फ़िगरेशन {{name}} निर्यात करें",
       "export_service": "सेवा {{name}} कॉन्फ़िगरेशन निर्यात करें",
       "view_config": "कस्टम कॉन्फ़िगरेशन {{name}} देखें",
       "view_file": "देखें {{filename}}",
@@ -1555,6 +1783,16 @@
     "real_ip_recursive": "आईपी पते वाले हेडर कंटेनर में एक पुनरावर्ती खोज करें।",
     "remove_ban_entry": "सूची से इस प्रतिबंध प्रविष्टि को हटाएं।",
     "reset_template_settings": "वर्तमान टेम्पलेट दृश्य में सभी सेटिंग्स को उनके डिफ़ॉल्ट पर रीसेट करें।",
+    "download_log": "यह लॉग फ़ाइल डाउनलोड करें",
+    "issue_count": "इस दृश्य में त्रुटियाँ और चेतावनियाँ",
+    "local_time": "टाइमस्टैम्प आपके स्थानीय समय में दिखाएँ",
+    "collapse_multiline": "बहु-पंक्ति प्रविष्टियाँ संक्षिप्त करें (ट्रेसबैक, पेलोड)",
+    "collapse_raw_values": "बहु-पंक्ति मान संक्षिप्त करें (प्रमाणपत्र, कुंजियाँ)",
+    "next_issue": "अगली त्रुटि या चेतावनी पर जाएँ",
+    "prev_issue": "पिछली त्रुटि या चेतावनी पर जाएँ",
+    "search_logs": "लॉग खोजें (Ctrl+F)",
+    "toggle_level": "{{level}} पंक्तियाँ दिखाएँ / छिपाएँ",
+    "toggle_wrap": "लाइन रैपिंग टॉगल करें",
     "select_file_to_follow": "फ़ॉलो मोड सक्षम करने के लिए एक फ़ाइल चुनें",
     "server_name": "इस सेवा के लिए प्राथमिक डोमेन नाम या सर्वर नाम।",
     "stream_support": {
@@ -1691,16 +1929,23 @@
     "view_full_url": "पूर्ण URL देखने के लिए क्लिक करें",
     "wildcard_certificates": "वाइल्डकार्ड प्रमाणपत्र (*.domain.com) उत्पन्न करें। DNS चुनौती की आवश्यकता है।",
     "wildcard_dns_only": "वाइल्डकार्ड प्रमाणपत्र केवल DNS चुनौती प्रकार के साथ समर्थित हैं।",
-    "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
     "zerossl_api_key": "zerossl-bot द्वारा उपयोग की जाने वाली वैकल्पिक ZeroSSL API कुंजी।",
-    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।",
     "zerossl_api_retry": "ZeroSSL API अनुरोधों के लिए पुनः प्रयासों की संख्या (0 पुनः प्रयास बंद करता है)।",
-    "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।"
+    "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।",
+    "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
+    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।"
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
   },
   "validation": {
+    "certificate_checking": "जांच की जा रही है ...",
+    "certificate_expires_in": "{{days}} दिनों में समाप्त होगा",
+    "certificate_failed": "सत्यापन अनुरोध विफल रहा।",
+    "certificate_file_mode": "यहां केवल पेस्ट किया गया या अपलोड किया गया डेटा जांचा जा सकता है। प्रमाणपत्र पथ शेड्यूलर द्वारा पढ़ा जाता है, जिस तक वेब UI की पहुंच नहीं है।",
+    "certificate_missing": "पहले प्रमाणपत्र और कुंजी दोनों उपलब्ध कराएं।",
+    "certificate_subject": "विषय:",
+    "certificate_valid": "प्रमाणपत्र और कुंजी मेल खाते हैं।",
     "default_field_name": "यह फ़ील्ड",
     "invalid_date": "अमान्य दिनांक",
     "ip_global_duplicate": "यह आईपी पता पहले से ही विश्व स्तर पर प्रतिबंधित है।",

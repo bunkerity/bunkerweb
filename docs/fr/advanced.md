@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -85,7 +85,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9
+            bunkerity/bunkerweb-all-in-one:1.6.16-rc2
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -96,7 +96,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9
+            bunkerity/bunkerweb-all-in-one:1.6.16-rc2
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -260,7 +260,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         ```bash
         # Télécharger le script et sa somme
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh.sha256
 
         # Vérifier l'empreinte
         sha256sum -c install-bunkerweb.sh.sha256
@@ -499,16 +499,19 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
         !!! danger "Avis de sécurité"
             Vérifiez toujours l'intégrité du script avec la somme fournie avant de l'exécuter.
 
-    2. **Choisissez l'option 2) Manager** et suivez les invites :
+    2. **Sélectionnez Manager** au menu du type d'installation (utilisez ↑/↓ puis Entrée), puis suivez les invites :
 
-        | Invite                       | Action                                                                                                      |
-        | :--------------------------- | :---------------------------------------------------------------------------------------------------------- |
-        | **Instances BunkerWeb**      | Saisissez les IP de vos nœuds worker séparées par des espaces (ex : `192.168.10.11 192.168.10.12`).         |
-        | **Whitelist IP**             | Acceptez l'IP détectée ou saisissez un sous-réseau (ex : `192.168.10.0/24`) pour autoriser l'accès à l'API. |
-        | **Résolveurs DNS**           | Appuyez sur `N` pour la valeur par défaut ou fournissez les vôtres.                                         |
-        | **HTTPS pour l'API interne** | **Recommandé :** `Y` pour générer automatiquement des certificats et sécuriser les échanges manager-worker. |
-        | **Service Web UI**           | `Y` pour activer l'interface Web (fortement recommandé).                                                    |
-        | **Service API**              | `N` sauf besoin d'API REST publique pour des outils externes.                                               |
+        | Invite                       | Action                                                                                                                     |
+        | :--------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+        | **Instances BunkerWeb**      | Saisissez les IP de vos nœuds worker séparées par des espaces (ex : `192.168.10.11 192.168.10.12`).                        |
+        | **Whitelist IP**             | Acceptez l'IP détectée ou saisissez un sous-réseau (ex : `192.168.10.0/24`) pour autoriser l'accès à l'API.                |
+        | **Résolveurs DNS**           | Choisissez **Non** pour conserver les valeurs par défaut, ou fournissez les vôtres.                                        |
+        | **HTTPS pour l'API interne** | **Recommandé :** choisissez **Oui** pour générer automatiquement des certificats et sécuriser les échanges manager-worker. |
+        | **Service Web UI**           | Choisissez **Oui** pour activer l'interface Web (fortement recommandé).                                                    |
+        | **Service API**              | Choisissez **Non** sauf besoin d'API REST publique pour des outils externes.                                               |
+
+        !!! note "Interface des invites"
+            L'installateur utilise la TUI [gum](https://github.com/charmbracelet/gum). Au premier lancement interactif, il télécharge le binaire `gum` officiel depuis la release GitHub (SHA256 épinglé), l'exécute depuis un répertoire temporaire et supprime ce répertoire à la fin — aucun paquet système n'est installé. Utilisez les flèches + Entrée pour répondre aux invites. Passez `--no-tui` si vous préférez les invites en texte brut.
 
     #### Sécuriser et exposer l'UI
 
@@ -543,7 +546,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         Pour plus d'isolation, installez l'UI sur un nœud séparé.
 
-        1. Lancez l'installateur et choisissez **Option 5) Web UI Only**.
+        1. Lancez l'installateur et sélectionnez le type d'installation **Web UI Only**.
         2. Éditez `/etc/bunkerweb/ui.env` pour pointer vers la base du Manager :
 
             ```ini
@@ -585,7 +588,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
@@ -604,14 +607,16 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.16-rc2
         ports:
           - "7000:7000" # Exposer le port de l'UI
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remplacez par un mot de passe plus fort
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remplacez par une clé plus forte (voir la section Prérequis)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
+        volumes:
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -637,7 +642,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -650,6 +655,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -687,7 +693,7 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -992,7 +998,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
 === "Docker"
@@ -1020,7 +1026,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1031,7 +1037,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1116,6 +1122,9 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Le rechargement relit le dossier"
+        Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :
@@ -1145,7 +1154,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1185,7 +1194,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
 === "Docker"
@@ -1208,7 +1217,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1251,7 +1260,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1321,7 +1330,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1450,6 +1459,22 @@ Si vous rencontrez des erreurs comme celle-ci, en particulier sur le Scheduler :
 
 Vous devrez augmenter le `max_allowed_packet` sur votre serveur de base de données.
 
+La valeur recommandée est `67108864` octets (64 Mio). Lorsque la base de données s'exécute dans un conteneur, définissez-la via la directive `command:` :
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+Pour une base de données installée localement ou externe, ajoutez plutôt le paramètre à la configuration du serveur (par exemple, un fichier dédié dans `/etc/mysql/mariadb.conf.d/` ou `/etc/my.cnf.d/`) :
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
+
 ## Persistance des interdictions et des signalements {#persistence-of-bans-and-reports}
 
 Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin de données Lua local. Bien que simple et efficace, cette configuration signifie que des données sont perdues lors du redémarrage de l'instance. Pour vous assurer que les bannissements et les rapports persistent lors des redémarrages, vous pouvez configurer BunkerWeb pour utiliser un [ serveur Redis](https://redis.io/) ou [Valkey](https://valkey.io/) distant  .
@@ -1551,7 +1576,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1574,7 +1599,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1589,7 +1614,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1640,7 +1665,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1870,7 +1895,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2000,7 +2025,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -2044,7 +2069,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2059,7 +2084,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2153,7 +2178,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2166,7 +2191,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2181,7 +2206,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2421,7 +2446,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2520,7 +2545,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2554,10 +2579,10 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     systemctl status bunkerweb
     ```
 
-    S'il est déjà en cours d'exécution, nous pouvons le redémarrer :
+    S'il est déjà en cours d'exécution, nous pouvons redémarrer le scheduler pour qu'il régénère la configuration NGINX avec IPv6 activé :
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl restart bunkerweb-scheduler
     ```
 
     Sinon, nous devrons le démarrer :
@@ -2579,17 +2604,20 @@ Il y a deux catégories principales de journaux à configurer :
 
 Les journaux de service sont contrôlés par le paramètre `LOG_TYPES`, qui peut accepter plusieurs valeurs séparées par des espaces (par exemple, `LOG_TYPES="stderr syslog"`).
 
-| Valeur   | Description                                                                                                |
-| :------- | :--------------------------------------------------------------------------------------------------------- |
-| `file`   | Écrit les journaux dans un fichier. Requis pour le visualiseur de journaux de l'interface Web.             |
-| `stderr` | Écrit les journaux vers l'erreur standard. Standard pour les environnements conteneurisés (`docker logs`). |
-| `syslog` | Envoie les journaux vers un serveur syslog. Nécessite que `LOG_SYSLOG_ADDRESS` soit défini.                |
+| Valeur   | Description                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Écrit les journaux dans un fichier plat. Sur les installations Linux, la rotation externe est assurée par `logrotate`. Dans un conteneur, rien ne fait tourner un fichier qu'un service écrit lui-même : la rétention revient à l'opérateur, montez donc le fichier dans un volume et gérez sa rotation vous-même, ou préférez `stderr`/`syslog` dans ce cas. Requis pour le visualiseur de journaux de l'interface Web. |
+| `stderr` | Écrit les journaux vers l'erreur standard. Standard pour les environnements conteneurisés (`docker logs`).                                                                                                                                                                                                                                                                                                               |
+| `syslog` | Envoie les journaux vers un serveur syslog. Nécessite que `LOG_SYSLOG_ADDRESS` soit défini.                                                                                                                                                                                                                                                                                                                              |
+
+Lors de l'utilisation de `file`, vous devriez également configurer :
+
+- `LOG_FILE_PATH` : Chemin où les fichiers de logs sont écrits lorsque `LOG_TYPES` inclut `file`.
 
 Lors de l'utilisation de `syslog`, vous devriez également configurer :
 
 - `LOG_SYSLOG_ADDRESS` : L'adresse du serveur syslog (par exemple, `udp://bw-syslog:514` ou `/dev/log`).
 - `LOG_SYSLOG_TAG` : Une étiquette unique pour le service (par exemple, `bw-scheduler`) pour distinguer ses entrées.
-- `LOG_FILE_PATH` : Chemin pour la sortie fichier lorsque `LOG_TYPES` inclut `file` (par exemple, `/var/log/bunkerweb/scheduler.log`).
 
 ### Journaux d'accès et d'erreur
 
@@ -2614,11 +2642,29 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Rétention des fichiers journaux {#log-file-retention}
+
+Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` chaque jour, ou plus tôt si le fichier dépasse 100 Mo, conserve quatorze générations numérotées (`modsec_audit.log.1`, `.2.gz`, etc.) et utilise `copytruncate`.
+
+- **Linux** : les paquets dépendent de `logrotate`, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.
+- **All-in-one** : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec ce même fichier de politique.
+- **Docker, Autoconf, Swarm et Kubernetes** : rien à faire tourner. `src/bw/Dockerfile` remplace `access.log`, `error.log` et `modsec_audit.log` par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même à la construction de l'image, si bien que la rétention relève du pilote de journalisation de votre environnement d'exécution de conteneurs (voir [les bonnes pratiques de journalisation Docker](#docker-logging-best-practices) plus bas).
+
+`copytruncate` est ce qui permet à une seule politique de convenir à toutes. Il copie le fichier de côté et vide l'original sur place au lieu de le renommer, de sorte qu'un processus qui ne rouvre jamais son journal continue d'écrire dans le bon fichier. ModSecurity est exactement ce genre de processus : il ouvre le journal d'audit une seule fois, au chargement de la configuration, et garde le descripteur. Une rotation par renommage le laisserait écrire dans l'archive pour toujours, avec le fichier actif vide.
+
+Modifiez `/etc/logrotate.d/bunkerweb` pour changer le seuil, le nombre de générations, ou pour ajouter un `maxage`. Sur l'All-in-one, montez votre propre fichier par-dessus ce chemin.
+
+Deux directives y sont déterminantes. `maxsize` est ce qui garde `daily` actif : la directive `size`, très proche, est exclusive des directives d'intervalle et ne ferait donc tourner qu'à la taille. Et ajouter `dateext` nommerait chaque archive d'après la date, si bien qu'une deuxième rotation le même jour échouerait avec `destination ... already exists, skipping rotation`, laissant le fichier actif non tourné jusqu'au changement de date.
+
+L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même. Le paramètre n'accepte qu'un chemin sous `/var/log/bunkerweb`, il ne peut donc pas pointer vers `/data` : pour conserver l'historique d'audit après une recréation du conteneur, montez un volume sur `/var/log/bunkerweb` lui-même, ce qui préserve l'ensemble des journaux et pas seulement le journal d'audit.
+
+Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la partie `C` place le corps de la requête dans le journal d'audit. Traitez ce fichier comme sensible avant de le copier ailleurs.
+
 ### Valeurs par défaut et exemples d'intégration
 
 === "Linux"
 
-    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`.
+    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`. La rotation est gérée par la configuration système `logrotate` installée dans `/etc/logrotate.d/bunkerweb` (quotidienne ou au-delà de 100 Mo, quatorze générations, compression via `copytruncate`).
 
     **Exemple** : Conserver les fichiers locaux (pour l'interface Web) et les reproduire également vers le syslog système.
 
@@ -2640,6 +2686,8 @@ LOG_LEVEL_1=error
 
     **Comportement par défaut** : `LOG_TYPES="stderr"`. Les journaux sont visibles via `docker logs`.
 
+    Ces images n'ont, dès le départ, aucun fichier journal géré par BunkerWeb à borner : `src/bw/Dockerfile` supprime `access.log`, `error.log` et `modsec_audit.log` à la construction de l'image et remplace les trois par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même, si bien que `ACCESS_LOG`, `ERROR_LOG` et `MODSECURITY_SEC_AUDIT_LOG` partent directement dans le flux de journalisation du conteneur par défaut. La rétention y relève de votre environnement d'exécution, via le pilote de journalisation (voir [les bonnes pratiques de journalisation Docker](#docker-logging-best-practices) plus bas) ou un collecteur externe ; BunkerWeb n'embarque aucun `logrotate` dans ses images.
+
     **Exemple (Adapté du guide de démarrage rapide)** : Conserver `docker logs` (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).
 
     ```yaml
@@ -2660,7 +2708,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2673,7 +2721,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
@@ -2690,11 +2738,12 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.16-rc2
         environment:
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # Permet à l'UI de lire les logs syslog
+          - bw-ui-data:/data # Sert à conserver les secrets de l'interface web (secret Flask, clés de chiffrement TOTP, clés Biscuit)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2720,7 +2769,7 @@ LOG_LEVEL_1=error
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -2751,6 +2800,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -2764,6 +2814,41 @@ LOG_LEVEL_1=error
       bw-db:
         name: bw-db
     ```
+
+=== "Tout-en-un"
+
+    **Comportement par défaut** : comme Docker (`LOG_TYPES="stderr"`), mais l'image All-in-one conserve `ACCESS_LOG`, `ERROR_LOG` et `MODSECURITY_SEC_AUDIT_LOG` comme des fichiers réels sous `/var/log/bunkerweb/` (les mêmes valeurs par défaut que sous Linux), car le CrowdSec embarqué et le visualiseur de journaux de l'interface Web les lisent tous deux depuis le disque.
+
+    BunkerWeb les borne pour vous à cet endroit : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec la même politique que celle installée par les paquets Linux (voir [Rétention des fichiers journaux](#log-file-retention) plus haut). Comme la rotation se fait avec `copytruncate`, les fichiers conservent leur inode, si bien que l'analyseur CrowdSec et le visualiseur de journaux les suivent à travers une rotation sans avoir besoin de redémarrer.
+
+=== "Kubernetes"
+
+    **Comportement par défaut** : Les journaux sont écrits sur `stderr` et visibles via `kubectl logs`.
+
+    **Exemple** : Activer le sidecar syslog intégré dans le chart Helm pour collecter les journaux pour l'interface Web (nécessite BunkerWeb 1.6.7+).
+
+    ```yaml
+    ui:
+      logs:
+        # Activer le sidecar de collecte de journaux
+        enabled: true
+
+        # Adresse syslog pour le transfert des journaux
+        # Automatiquement défini sur le service Sidecar si vide
+        syslogAddress: ""
+
+        # Conteneur syslog-ng pour la collecte de journaux
+        repository: docker.io/balabit/syslog-ng
+        pullPolicy: Always
+        tag: 4.8.0
+
+        # Stockage persistant pour les journaux
+        persistence:
+          size: 5Gi
+          storageClass: ""
+    ```
+
+    Consultez l'[exemple complet logging.yaml](https://github.com/bunkerity/bunkerweb-helm/blob/dev/examples/logging.yaml) dans le [dépôt bunkerity/bunkerweb-helm](https://github.com/bunkerity/bunkerweb-helm).
 
 ### Configuration de syslog-ng
 
@@ -2812,7 +2897,7 @@ log {
 };
 ```
 
-## Meilleures pratiques de journalisation Docker
+## Meilleures pratiques de journalisation Docker {#docker-logging-best-practices}
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
 
@@ -2825,7 +2910,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     logging:
       driver: "json-file"
       options:
@@ -2917,7 +3002,7 @@ Les variables couramment utilisées sont :
     sudo systemctl restart bunkerweb-scheduler
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     Fournissez les variables lors de la création du conteneur (et montez le bundle CA si nécessaire). L'image All-in-one inclut le Scheduler, ce qui couvre les tâches sortantes :
 
@@ -2934,7 +3019,7 @@ Les variables couramment utilisées sont :
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
@@ -2945,7 +3030,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -2964,7 +3049,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3007,7 +3092,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3037,10 +3122,11 @@ Le plugin de surveillance vous permet de collecter et de récupérer des métriq
 
 **Liste des paramètres**
 
-| Réglage                        | Défaut | Contexte | Multiple | Description                                                        |
-| ------------------------------ | ------ | -------- | -------- | ------------------------------------------------------------------ |
-| `USE_MONITORING`               | `yes`  | global   | Non      | Activez la surveillance de BunkerWeb.                              |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`  | global   | Non      | Taille du dictionnaire pour stocker les métriques de surveillance. |
+| Réglage                        | Défaut | Contexte | Multiple | Description                                                                                         |
+| ------------------------------ | ------ | -------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`  | global   | Non      | Activez la surveillance de BunkerWeb.                                                               |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`  | global   | Non      | Taille du dictionnaire pour stocker les métriques de surveillance.                                  |
+| `MONITORING_IGNORE_URLS`       |        | global   | Non      | Liste de chemins d'URL séparés par des espaces à exclure de la surveillance (ex. `/health /ready`). |
 
 ### Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -3208,39 +3294,9 @@ Vous pouvez également spécifier un compartiment S3 personnalisé pour la sauve
     docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
     ```
 
-!!! note "Spécifications pour MariaDB/MySQL"
+!!! note "Compatibilité du client MariaDB/MySQL"
 
-    Si vous utilisez MariaDB/MySQL, vous pouvez rencontrer l'erreur suivante lors de la sauvegarde de votre base de données :
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Pour résoudre ce problème, vous pouvez exécuter la commande suivante pour changer le plugin d'authentification en `mysql_native_password` :
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Si vous utilisez l'intégration Docker, vous pouvez ajouter la commande suivante au fichier `docker-compose.yml` pour changer automatiquement le plugin d'authentification :
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
+    Les images Docker de BunkerWeb incluent les plugins d'authentification de MariaDB Connector/C requis par `caching_sha2_password` de MySQL. Sous Linux, si le client indique que `caching_sha2_password` n'a pas pu être chargé, installez les plugins d'authentification MariaDB Connector/C de votre distribution ou un client MySQL compatible. Ne basculez pas le compte de base de données vers `mysql_native_password`, qui n'est pas disponible dans MySQL `v9`.
 
 #### Restauration manuelle
 
@@ -3290,7 +3346,136 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Serveur MCP
+
+Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et **Claude Desktop** de gérer votre installation BunkerWeb via le [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+
+!!! warning "Prérequis"
+    Le serveur MCP nécessite le déploiement de l'**API externe BunkerWeb** (`bunkerity/bunkerweb-api`). Il communique avec BunkerWeb exclusivement via cette API.
+
+### Fonctionnalités
+
+- **43 outils** pour gérer les instances, services, configurations, bans, plugins, jobs et cache
+- **Ressources MCP** pour un accès en lecture seule (`@config://global`, `@bans://active`, etc.)
+- **Plusieurs transports** : Stdio, HTTP, WebSocket
+
+### Exemple Docker Compose
+
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples/mcp-stack) :
+
+```yaml
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.16-rc2
+    environment:
+      API_TOKEN: "my-bearer-token-for-mcp"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    networks:
+      - bw-universe
+      - bw-db
+      - bw-mcp
+
+  bw-mcp:
+    image: bunkerity/bunkerweb-mcp:0.2.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      BUNKERWEB_BASE_URL: "http://bw-api:8888"
+      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
+      BUNKERWEB_LOG_LEVEL: INFO
+    networks:
+      - bw-mcp
+```
+
+### Utilisation avec Claude Code
+
+=== "Configuration projet"
+
+    Ajoutez un fichier `.mcp.json` à la racine de votre projet (ou dans `~/.claude/.mcp.json` pour une configuration globale) :
+
+    ```json
+    {
+      "mcpServers": {
+        "bunkerweb": {
+          "type": "http",
+          "url": "http://127.0.0.1:8080/mcp/"
+        }
+      }
+    }
+    ```
+
+Exemples de requêtes :
+
+```
+> Liste toutes les instances BunkerWeb
+> Montre-moi les bans actuels
+> Analyse @config://global et suggère des améliorations de sécurité
+```
+
+### Intégration Kubernetes
+
+Le serveur MCP peut être déployé aux côtés de BunkerWeb en utilisant le chart Helm officiel. Un exemple complet est disponible dans [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml).
+
+#### Valeurs Helm
+
+```yaml
+mcp:
+  # Activer le serveur MCP
+  enabled: true
+
+  # Configuration de l'image
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: 0.2.0
+
+  # Paramètres du serveur MCP
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # Identifiants pour l'authentification MCP vers l'API BunkerWeb
+  secrets:
+    bunkerwebApiToken: "votre-token-api-securise"
+
+  # Configuration Ingress (optionnel)
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # SÉCURITÉ : Restreindre l'accès aux IPs de confiance uniquement
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### Déploiement
+
+```bash
+# Déployer BunkerWeb avec MCP activé
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# Accéder au MCP localement via port-forward (recommandé pour la sécurité)
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# Configurer Claude Code avec http://localhost:8080/mcp
+```
+
+!!! warning "Sécurité"
+    Le serveur MCP n'a pas d'authentification intégrée pour le endpoint `/mcp`. Sécurisez l'accès en utilisant :
+
+    - **Liste blanche d'IPs** via les annotations BunkerWeb (`USE_WHITELIST`, `WHITELIST_IP`)
+    - **Politiques réseau** pour restreindre la communication entre pods
+    - **Port-forward** au lieu d'exposer externellement (recommandé pour le développement)
+
+Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://github.com/bunkerity/bunkerweb-mcp).
+
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
 Prise en charge STREAM :white_check_mark:
 
@@ -3330,39 +3515,9 @@ Pour créer manuellement un fichier de migration, exécutez la commande suivante
 
 Cette commande créera une sauvegarde de votre base de données et la stockera dans le répertoire de sauvegarde spécifié dans la commande.
 
-!!! note "Spécifications pour MariaDB/MySQL"
+!!! note "Compatibilité du client MariaDB/MySQL"
 
-    Si vous utilisez MariaDB/MySQL, vous pouvez rencontrer l'erreur suivante lors de la sauvegarde de votre base de données :
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Pour résoudre ce problème, vous pouvez exécuter la commande suivante pour changer le plugin d'authentification en `mysql_native_password` :
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Si vous utilisez l'intégration Docker, vous pouvez ajouter la commande suivante au fichier `docker-compose.yml` pour changer automatiquement le plugin d'authentification :
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
+    Les images Docker de BunkerWeb incluent les plugins d'authentification de MariaDB Connector/C requis par `caching_sha2_password` de MySQL. Sous Linux, si le client indique que `caching_sha2_password` n'a pas pu être chargé, installez les plugins d'authentification MariaDB Connector/C de votre distribution ou un client MySQL compatible. Ne basculez pas le compte de base de données vers `mysql_native_password`, qui n'est pas disponible dans MySQL `v9`.
 
 ### Initialiser une migration
 
@@ -3404,7 +3559,7 @@ Pour initialiser manuellement une migration, exécutez la commande suivante :
 
 Cette commande migre de manière transparente vos données BunkerWeb pour qu'elles correspondent précisément à la configuration décrite dans le fichier de migration.
 
-## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#anti-ddos-pro}
 
 Prise en charge de STREAM :x:
 
@@ -3441,40 +3596,105 @@ Personnalisez le comportement du plug-in à l'aide des paramètres suivants :
 - **Révision du code d'état :** mettez régulièrement à jour `ANTIDDOS_STATUS_CODES` pour capturer les comportements suspects nouveaux ou en évolution.
 - **Surveillance :** analysez régulièrement les journaux et les métriques pour affiner les paramètres et améliorer la protection globale.
 
-## Gestionnaire d'utilisateurs <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#user-manager-pro}
+
+STREAM support :x:
 
 <p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Gestionnaire d'utilisateurs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-Le plug-in de gestion des utilisateurs offre une interface robuste pour l'administration des comptes d'utilisateurs au sein de votre système.
+Le plugin **User Manager** offre une interface robuste pour l'administration des comptes utilisateurs au sein de votre système.
 
-Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles des utilisateurs, basculer l'authentification à deux facteurs (2FA) et afficher des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plug-in simplifie les tâches de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.
+Avec ce plugin, les administrateurs peuvent aisément créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles, basculer l'authentification à deux facteurs (2FA) et consulter des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plugin simplifie les tâches courantes de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.
 
 ### Fonctionnalités
 
-- **Opérations de compte d'utilisateur :** importez au format CSV/XSLX, créez, modifiez et supprimez des comptes d'utilisateur en toute simplicité.
-- **Contrôle d'accès basé sur les rôles :** Attribuez et modifiez les rôles d'utilisateur pour gérer les autorisations et les niveaux d'accès.
+- **Opérations de compte utilisateur :** importez au format CSV/XLSX, créez, modifiez et supprimez des comptes utilisateur en toute simplicité.
+- **Contrôle d'accès basé sur les rôles :** attribuez et modifiez les rôles d'utilisateur pour gérer les autorisations et les niveaux d'accès.
 - **Gestion 2FA :** désactivez l'authentification à deux facteurs en fonction des décisions administratives.
 - **Informations complètes sur les utilisateurs :** surveillez les données clés des utilisateurs, notamment les heures de dernière connexion, les dates de création de compte et le statut actif/inactif.
 - **Journalisation des audits :** conservez une piste d'audit pour toutes les actions de gestion des utilisateurs afin d'améliorer la sécurité et la conformité.
 
+### Configuration
+
+| Paramètre           | Défaut | Contexte | Multiple | Description                                                           |
+| ------------------- | ------ | -------- | -------- | --------------------------------------------------------------------- |
+| `USERS_REQUIRE_2FA` | `no`   | global   | non      | Exiger l'authentification à deux facteurs pour tous les utilisateurs. |
+
 <figure markdown>
   ![Vue d'ensemble](assets/img/user-manager.png){ align=center }
-  <figcaption>Page Gestionnaire d'utilisateurs</figcaption>
+  <figcaption>Page User Manager</figcaption>
 </figure>
 
 <figure markdown>
   ![Créer un formulaire utilisateur](assets/img/user-manager-create.png){ align=center }
-  <figcaption>Gestionnaire d'utilisateurs - Créer un formulaire d'utilisateur</figcaption>
+  <figcaption>User Manager - Formulaire de création d'utilisateur</figcaption>
 </figure>
 
 <figure markdown>
   ![Page d'activités](assets/img/user-manager-activities.png){ align=center }
-  <figcaption>Gestionnaire d'utilisateurs - Page Activités</figcaption>
+  <figcaption>User Manager - Page Activités</figcaption>
 </figure>
 
-## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ui-single-sign-on-pro}
+
+STREAM support :x:
+
+Le plugin **UI Single Sign-On** permet l'authentification SSO pour l'interface web de BunkerWeb en lisant les en-têtes définis par un proxy d'authentification externe (tel qu'Authentik, Authelia, Keycloak ou Traefik Forward Auth) placé devant l'interface web.
+
+Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs peuvent déléguer l'authentification à un fournisseur d'identité existant. Le proxy d'authentification gère la connexion des utilisateurs et injecte des en-têtes d'identité avant de transmettre les requêtes à l'interface web de BunkerWeb.
+
+!!! danger "Risque d'usurpation d'en-têtes"
+    Les en-têtes SSO peuvent être facilement falsifiés par n'importe quel client. Vous **devez** restreindre `UI_SSO_TRUSTED_IPS` aux adresses IP de votre proxy d'authentification. Si ce paramètre est mal configuré, n'importe quel client peut envoyer de faux en-têtes et obtenir un accès non autorisé, y compris un accès administrateur.
+
+    La valeur par défaut `127.0.0.1,::1` ne fait confiance qu'au localhost. Dans les déploiements **Docker, Swarm ou Kubernetes**, le proxy d'authentification s'exécute dans un conteneur séparé avec sa propre adresse IP. Définissez `UI_SSO_TRUSTED_IPS` sur l'adresse IP ou le CIDR réel du conteneur du proxy d'authentification (par ex. `10.20.30.5` ou `172.18.0.0/16`). Ne le définissez jamais à `0.0.0.0/0`.
+
+### Fonctionnalités
+
+- **Authentification par en-têtes :** lit le nom d'utilisateur, l'e-mail, le nom d'affichage et les groupes depuis les en-têtes du proxy d'authentification.
+- **Correspondance groupe-rôle :** associez les groupes de l'IdP aux rôles BunkerWeb (admin, writer, reader).
+- **Provisionnement automatique des utilisateurs :** crée des comptes locaux lors de la première connexion SSO avec un rôle par défaut configurable.
+- **Liaison de comptes :** associe les utilisateurs SSO entrants aux comptes locaux existants par nom d'utilisateur ou e-mail.
+- **Restriction par IP de confiance :** n'accepte les en-têtes SSO que depuis les adresses IP ou plages CIDR configurées.
+- **Repli vers la connexion classique :** permet optionnellement la connexion par mot de passe lorsque les en-têtes SSO sont absents.
+- **Redirection de déconnexion :** redirige les utilisateurs vers l'endpoint de déconnexion du fournisseur SSO après la déconnexion locale.
+
+### Configuration
+
+| Paramètre                     | Défaut              | Contexte | Multiple | Description                                                                                                            |
+| ----------------------------- | ------------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `USE_UI_SSO`                  | `no`                | global   | non      | Activer ou désactiver l'authentification UI Single Sign-On pour l'interface web.                                       |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`            | global   | non      | En-tête HTTP contenant le nom d'utilisateur authentifié.                                                               |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | global   | non      | En-tête HTTP contenant l'adresse e-mail de l'utilisateur.                                                              |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | global   | non      | En-tête HTTP contenant les groupes de l'utilisateur (séparés par des virgules ou des espaces).                         |
+| `UI_SSO_HEADER_NAME`          | `X-Name`            | global   | non      | En-tête HTTP contenant le nom d'affichage de l'utilisateur.                                                            |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | global   | non      | Liste d'adresses IP ou de plages CIDR de confiance autorisées à envoyer les en-têtes SSO, séparées par des virgules.   |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | global   | non      | Créer automatiquement de nouveaux utilisateurs lors de leur première authentification SSO.                             |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`            | global   | non      | Rôle par défaut attribué aux nouveaux utilisateurs SSO lorsqu'aucune correspondance de groupe n'est trouvée.           |
+| `UI_SSO_GROUP_ADMIN`          |                     | global   | non      | Nom du groupe accordant le rôle admin (priorité la plus haute).                                                        |
+| `UI_SSO_GROUP_WRITER`         |                     | global   | non      | Nom du groupe accordant le rôle writer.                                                                                |
+| `UI_SSO_GROUP_READER`         |                     | global   | non      | Nom du groupe accordant le rôle reader.                                                                                |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global   | non      | Permettre aux utilisateurs de se rabattre sur la connexion classique lorsque les en-têtes SSO sont absents.            |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global   | non      | Mettre à jour les informations utilisateur (e-mail, rôle) depuis les en-têtes SSO à chaque connexion.                  |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global   | non      | Mode de correspondance des utilisateurs SSO entrants avec les comptes locaux (`username_only` ou `username_or_email`). |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global   | non      | URL de redirection après déconnexion (par ex. endpoint de déconnexion du fournisseur SSO).                             |
+
+### Démarrage rapide
+
+1. Placez un proxy d'authentification (Authentik, Authelia, Keycloak, etc.) devant l'interface web de BunkerWeb.
+2. Activez le plugin : `USE_UI_SSO=yes`.
+3. Vérifiez que le proxy définit les en-têtes attendus (`X-User`, `X-Email`, `X-Groups`, `X-Name`) -- ou ajustez les noms d'en-têtes via les paramètres `UI_SSO_HEADER_*`.
+4. Restreignez les sources de confiance : définissez `UI_SSO_TRUSTED_IPS` sur les adresses IP du proxy d'authentification.
+5. Associez les groupes aux rôles : définissez `UI_SSO_GROUP_ADMIN`, `UI_SSO_GROUP_WRITER` et `UI_SSO_GROUP_READER` pour correspondre aux noms de groupes de votre IdP.
+
+### Conseils d'utilisation
+
+- Définissez `UI_SSO_FALLBACK_TO_LOGIN=no` en production pour imposer un accès exclusivement SSO. Lorsque la valeur est laissée à `yes` (par défaut), les utilisateurs peuvent contourner le SSO et se connecter avec des identifiants locaux, ignorant ainsi les politiques MFA ou de session imposées par votre fournisseur d'identité.
+- Conservez `UI_SSO_UPDATE_USER_ON_LOGIN` à sa valeur par défaut (`yes`) pour garantir la synchronisation des rôles avec les modifications de groupes de l'IdP.
+- Avec `UI_SSO_ACCOUNT_LINKING=username_or_email`, les comptes locaux existants sont automatiquement liés lors de la première connexion SSO si le nom d'utilisateur ou l'e-mail correspond. Utilisez `username_only` si votre IdP permet aux utilisateurs de définir des adresses e-mail arbitraires, afin de prévenir la prise de contrôle de comptes par usurpation d'e-mail.
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#easy-resolve-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/45vX0WJqjxo" title="Easy Resolve" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -3495,7 +3715,7 @@ Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et 
   <figcaption>Page Rapports - avec Easy Resolve</figcaption>
 </figure>
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#load-balancer-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -3557,13 +3777,15 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 - Activez `LOADBALANCER_UPSTREAM_RESOLVE` lorsque vous pointez vers des hostnames qui peuvent changer via DNS.
 - Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.
 
-## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#custom-pages-pro}
 
 Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerWeb (pages d'erreur, page du serveur par défaut et pages de défi antibot) par vos propres modèles HTML ou Lua personnalisés. Cela vous permet de maintenir une image de marque cohérente sur toutes les pages destinées aux utilisateurs servies par BunkerWeb.
 
+Pour le comportement et la personnalisation de la Maintenance, consultez le [guide avancé sur la Maintenance](advanced.md#maintenance-pro).
+
 ### Fonctionnalités
 
-- **Pages d'erreur personnalisées par service** et **pages de défi antibot** (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha).
+- **Pages d'erreur personnalisées par service** et **pages de défi antibot** (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha, Cap.js).
 - **Page du serveur par défaut personnalisée globale** pour le vhost de repli/par défaut.
 - **Analyse HTML et vérifications d'équilibre des balises de modèle Lua** avant qu'un modèle soit accepté.
 - **Mise en cache automatique** vers `/var/cache/bunkerweb/custom_pages` avec détection des modifications pour déclencher les rechargements.
@@ -3580,6 +3802,7 @@ Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerW
 
 | Paramètre                        | Défaut | Contexte  | Description                                                                  |
 | -------------------------------- | ------ | --------- | ---------------------------------------------------------------------------- |
+| `CUSTOM_MAINTENANCE_PAGE`        |        | multisite | Chemin absolu vers le modèle de page Maintenance personnalisé.               |
 | `CUSTOM_ERROR_PAGE`              |        | multisite | Chemin absolu vers le modèle de page d'erreur personnalisé.                  |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | Chemin absolu vers le modèle de page du serveur par défaut personnalisé.     |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | Chemin absolu vers la page de défi CAPTCHA antibot personnalisée.            |
@@ -3588,6 +3811,7 @@ Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerW
 | `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |        | multisite | Chemin absolu vers la page hCaptcha antibot personnalisée.                   |
 | `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |        | multisite | Chemin absolu vers la page Turnstile antibot personnalisée.                  |
 | `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |        | multisite | Chemin absolu vers la page mCaptcha antibot personnalisée.                   |
+| `CUSTOM_ANTIBOT_CAPJS_PAGE`      |        | multisite | Chemin absolu vers la page Cap.js antibot personnalisée.                     |
 
 ### Référence des variables de modèle
 
@@ -3668,6 +3892,13 @@ Ces variables sont disponibles dans les modèles de page de défi antibot :
 | ------------------ | ------ | -------------------------- |
 | `mcaptcha_sitekey` | string | Votre clé de site mCaptcha |
 | `mcaptcha_url`     | string | Votre URL mCaptcha         |
+
+**Cap.js (`CUSTOM_ANTIBOT_CAPJS_PAGE`) :**
+
+| Variable        | Type   | Description                    |
+| --------------- | ------ | ------------------------------ |
+| `capjs_sitekey` | string | Votre clé de site Cap.js       |
+| `capjs_url`     | string | URL de base du frontend Cap.js |
 
 ### Syntaxe de modèle
 
@@ -3911,10 +4142,10 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
         ```
 
-    3. Rechargez BunkerWeb :
+    3. Rechargez le scheduler BunkerWeb pour qu'il prenne en compte les nouveaux modèles :
 
         ```bash
-        sudo systemctl reload bunkerweb
+        sudo systemctl reload bunkerweb-scheduler
         ```
 
 === "Docker"
@@ -3959,11 +4190,11 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.9
+            image: bunkerity/bunkerweb:1.6.16-rc2
             # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.9
+            image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4046,7 +4277,7 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.9
+                  image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -4076,7 +4307,65 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
 - **Conformité CSP** : Utilisez toujours les variables `nonce_script` et `nonce_style` pour les scripts et styles inline afin d'assurer une bonne gestion de la Content Security Policy.
 - **Test des modèles** : Vous pouvez tester vos modèles localement en les rendant avec un moteur de modèle Lua avant de les déployer sur BunkerWeb.
 
-## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#maintenance-pro}
+
+La Maintenance remplace les réponses des emplacements de proxy inverse standard par une page de maintenance lorsque l'application est indisponible. Elle est activée au niveau de chaque service, renvoie `503 Service Unavailable` et n'atteint jamais l'upstream. Le paramètre multisite est défini par défaut sur `no`.
+
+### Activer et appliquer le mode maintenance
+
+Définissez `USE_MAINTENANCE` sur `yes` pour un service multisite existant qui utilise le proxy inverse standard. Cet extrait présente les clés d'environnement concernées ; fusionnez-le dans votre configuration du scheduler au lieu de le considérer comme un fichier Compose complet :
+
+```yaml
+# Fragment : environnement du scheduler pour un service avec proxy inverse
+environment:
+  app.example.com_USE_REVERSE_PROXY: "yes"
+  app.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+  app.example.com_USE_MAINTENANCE: "yes"
+```
+
+Appliquez ce réglage via votre intégration BunkerWeb habituelle. Le scheduler génère la configuration du service et recharge les workers. Définissez `app.example.com_USE_MAINTENANCE` sur `no`, puis appliquez de nouveau pour rétablir le proxy. Si les paramètres du proxy inverse existent déjà, seul ce paramètre est nécessaire.
+
+L'interface Web propose deux boutons d'activation rapide : le bouton avec une icône de clé à molette dans la colonne **Maintenance** sur la page des services et le bouton flottant en forme de clé à molette sur la page de modification d'un service. Les deux mettent à jour le paramètre du service et l'appliquent sans rechargement de la page. Le formulaire de modification reste synchronisé, y compris les modes Facile/Avancé et l'éditeur brut, tandis que les modifications non enregistrées sans lien restent en place.
+
+Les boutons nécessitent une base de données accessible en écriture et un accès en écriture au service. Ils sont désactivés pour les utilisateurs en lecture seule, les bases de données en lecture seule et les services `USE_UI=yes`, afin que l'interface intégrée reste disponible. Ils refusent de remplacer une valeur `USE_MAINTENANCE` gérée de l'extérieur ; modifiez-la auprès de son propriétaire. Un bouton est rejeté lorsqu'une application est en cours.
+
+### Comportement et portée des requêtes
+
+La Maintenance s'applique uniquement aux emplacements générés à partir de la configuration de proxy inverse standard de BunkerWeb, y compris `REVERSE_PROXY_HOST` et ses variantes numérotées. Elle n'ajoute pas d'emplacements de proxy, ne modifie pas les emplacements personnalisés et ne prend pas en charge les gestionnaires de réécriture manuels. Si une configuration personnalisée remplace ces gestionnaires ou les variables du backend, intégrez vous-même la réponse de maintenance.
+
+La Maintenance conserve la politique HTTPS existante : une redirection HTTP vers HTTPS activée s'effectue d'abord. Sur l'origine HTTPS effective, elle renvoie `503` avec `Cache-Control: no-store`, une Content Security Policy restrictive et `X-Content-Type-Options: nosniff`.
+
+Les requêtes GET, POST, OPTIONS et les handshakes WebSocket reçoivent la page de maintenance. BunkerWeb ignore le corps de la requête : le corps d'une requête POST n'est jamais transmis ni rejoué. Une requête HEAD reçoit le même statut et les mêmes en-têtes, sans corps. Les WebSockets existantes ne sont pas fermées explicitement ; l'arrêt normal des workers lors du rechargement s'applique.
+
+La Maintenance s'exécute avant l'authentification, l'antibot et les autres contrôles d'accès ; les clients autorisés et les services en mode détection la reçoivent donc également. Les emplacements NGINX locaux, l'API interne et les endpoints de santé conservent leur comportement normal. Il en va de même pour `/.well-known/acme-challenge/` et le passthrough Let's Encrypt configuré. La Maintenance conserve cette exception ; elle n'émet pas de certificats et ne crée pas de gestionnaire ACME.
+
+### Personnaliser la page de maintenance
+
+La page fournie fonctionne sans Custom Pages. Pour la personnaliser avec Custom Pages, ouvrez l'éditeur Custom Pages et choisissez **Maintenance**. Le **Mode facile** modifie le titre et le message de maintenance, le favicon, le logo/texte du pied de page et l'illustration SVG. Le titre met à jour le titre du navigateur et l'en-tête ; un titre ou une illustration vide conserve la valeur par défaut. Conservez les classes SVG `maintenance-top` et `maintenance-tool` pour l'animation de l'illustration.
+
+En **Mode avancé**, modifiez le modèle HTML/Lua complet. Les variables disponibles sont :
+
+| Variable       | Rôle                                                          |
+| -------------- | ------------------------------------------------------------- |
+| `title`        | `Site under maintenance`, titre de page fourni par le plugin. |
+| `nonce_style`  | Nonce CSP par réponse pour les éléments `<style>` inline.     |
+| `nonce_script` | Nonce CSP par réponse pour les éléments `<script>` inline.    |
+
+Utilisez les valeurs nonce dans chaque style et script inline, par exemple `nonce="{* nonce_style *}"`. La réponse autorise les images intégrées, les SVG et les polices via des URL `data:` et bloque les autres origines. Intégrez les ressources en ligne ou sous forme d'URL de données ; les URL de ressources de l'application reçoivent également la maintenance et ne peuvent pas charger de dépendances.
+
+Pour une page gérée par fichier, définissez `CUSTOM_MAINTENANCE_PAGE` sur un chemin absolu lisible par le scheduler. Cette valeur est prioritaire sur un modèle UI et verrouille cette portée dans l'éditeur. Sans cette valeur, un service utilise son propre modèle UI ou hérite du modèle global. **Supprimer** retire la surcharge du service et rétablit l'héritage. **Réinitialiser** supprime le modèle UI et force la page fournie, même lorsqu'une personnalisation globale existe. L'enregistrement d'une nouvelle surcharge de service efface son marqueur de réinitialisation. Activez ou désactivez la maintenance séparément avec `USE_MAINTENANCE`.
+
+Le job Custom Pages valide le HTML et se protège contre les problèmes connus de compilation des modèles Lua avant la mise en cache. Une source invalide conserve le dernier cache accepté. Une page active indisponible ou défaillante revient à la page fournie, puis à une page d'urgence minimale. Un échec de rendu ne rétablit jamais le trafic vers le proxy.
+
+### Dépannage de la Maintenance
+
+- **Le bouton est désactivé ou rejeté :** vérifiez les droits d'écriture, `USE_UI` et la gestion externe de `USE_MAINTENANCE` ; modifiez les valeurs gérées de l'extérieur auprès de leur propriétaire.
+- **L'application répond toujours :** vérifiez qu'un emplacement de proxy inverse standard possède `USE_REVERSE_PROXY=yes` et `USE_MAINTENANCE=yes`. Les chemins locaux et ACME sont des exceptions.
+- **Vous recevez une redirection au lieu de `503` :** la politique HTTPS existante redirige d'abord ; suivez l'URL HTTPS.
+- **La page fournie est utilisée :** vérifiez le fichier lisible par le scheduler, la validation du modèle et le journal du scheduler ; un paramètre de fichier verrouille le modèle UI.
+- **Des ressources ou scripts inline sont absents :** intégrez-les et utilisez `nonce_style` ou `nonce_script` ; les URL de l'application ne sont pas disponibles.
+
+## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openid-connect-pro}
 
 <p align="center">
   <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -4153,6 +4442,32 @@ sequenceDiagram
 - `OPENIDC_IAT_SLACK` (défaut : `120`) : tolérance de dérive d'horloge (secondes) pour la validation des jetons.
 - `OPENIDC_ACCEPT_UNSUPPORTED_ALG` (défaut : `no`) : accepter des jetons signés avec des algorithmes non supportés (non recommandé).
 - `OPENIDC_FORCE_REAUTHORIZE` (défaut : `no`) : forcer la ré-autorisation à chaque requête (debug uniquement).
+
+#### Contrôle d'accès par claims (ACL)
+
+Les claims sont des paires clé-valeur du jeton OIDC qui décrivent l'utilisateur (par ex. `email`, `groups`, `sub`). La fonctionnalité ACL vous permet de restreindre l'accès en fonction de valeurs spécifiques de claims.
+
+| Paramètre                 | Défaut | Contexte  | Multiple | Description                                                                                                                                                                   |
+| ------------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENIDC_USE_ACL`         | `no`   | multisite | non      | Activer le contrôle d'accès par claims après l'authentification OIDC. Seuls les utilisateurs dont les claims correspondent aux règles configurées se voient accorder l'accès. |
+| `OPENIDC_ACL_MATCH_MODE`  | `all`  | multisite | non      | Mode d'évaluation des règles ACL multiples. `all` = toutes les règles doivent passer (ET). `any` = au moins une règle doit passer (OU).                                       |
+| `OPENIDC_ACL_DENIED_URL`  |        | multisite | non      | URL de redirection en cas de refus par l'ACL. Si vide, renvoie une réponse 403 Forbidden.                                                                                     |
+| `OPENIDC_ACL_CLAIM`       |        | multisite | oui      | Nom du claim OIDC à vérifier (par ex. `groups`, `email`, `sub`). Associé à `OPENIDC_ACL_CLAIM_VALUE`.                                                                         |
+| `OPENIDC_ACL_CLAIM_VALUE` |        | multisite | oui      | Valeur attendue pour le claim. Pour les claims de type tableau (par ex. `groups`), vérifie l'appartenance. Pour les claims de type chaîne, vérifie l'égalité stricte.         |
+
+!!! tip "Règles ACL multiples"
+    Utilisez des suffixes numériques pour définir plusieurs règles. Chaque paire `OPENIDC_ACL_CLAIM` / `OPENIDC_ACL_CLAIM_VALUE` constitue une règle :
+
+    ```yaml
+    OPENIDC_USE_ACL: "yes"
+    OPENIDC_ACL_MATCH_MODE: "any"
+    OPENIDC_ACL_CLAIM: "groups"
+    OPENIDC_ACL_CLAIM_VALUE: "engineering"
+    OPENIDC_ACL_CLAIM_1: "email"
+    OPENIDC_ACL_CLAIM_VALUE_1: "admin@example.com"
+    ```
+
+    Avec `OPENIDC_ACL_MATCH_MODE=any`, l'accès est accordé si l'utilisateur fait partie du groupe `engineering` **ou** possède l'e-mail `admin@example.com`. Avec `all`, les deux conditions doivent être remplies.
 
 #### Cycle de vie session/jetons
 
@@ -4262,7 +4577,301 @@ Options fréquentes de durcissement / tuning :
 - **Header utilisateur absent** : vérifiez que le claim de `OPENIDC_USER_HEADER_CLAIM` existe dans l'ID token/userinfo.
 - **Déploiements multi-instance** : activez `USE_REDIS=yes` et configurez `REDIS_HOST` (ou Sentinel) pour partager les sessions.
 
-## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#saml-pro}
+
+Le plugin **SAML** (PRO) transforme BunkerWeb en fournisseur de services (SP) SAML 2.0 pour le SSO dans le navigateur. Il accepte une réponse IdP dont l'assertion est couverte par une signature de confiance, crée une session et peut exposer certains attributs à l'upstream protégé sous forme d'en-têtes. Il prend en charge BunkerWeb 1.6.14 et les versions 1.6.x ultérieures.
+
+### Prérequis et éléments de confiance
+
+Utilisez une origine HTTPS publique pour chaque service protégé, telle que `https://app.example.com`, sans barre oblique finale, chemin ni chaîne de requête. Un port HTTPS non standard est autorisé. SAML nécessite trois éléments au format PEM :
+
+- une **clé privée RSA non chiffrée** pour le SP ;
+- le certificat SP correspondant au format PEM ;
+- le certificat de signature PEM de l'IdP, que BunkerWeb utilise pour vérifier les assertions.
+
+La clé et le certificat SP doivent correspondre et être des clés RSA d'au moins 2048 bits. L'URL SSO de l'IdP et, si elle est fournie, son URL SLO doivent utiliser HTTPS. Gardez la clé privée secrète ; BunkerWeb l'utilise pour signer les requêtes d'authentification et de déconnexion.
+
+### Configurer SAML dans l'interface
+
+Ouvrez **SAML** pour le service cible et choisissez sa portée. Le formulaire regroupe les paramètres dans les sections IdP, SP, session, en-têtes d'identité et ACL. Suivez cet ordre :
+
+1. Activez `USE_SAML` pour le service.
+2. Saisissez l'origine SP publique, l'identifiant d'entité SP, le certificat SP et la clé privée RSA non chiffrée.
+3. Saisissez l'identifiant d'entité IdP, l'URL SSO HTTPS, le certificat de signature PEM approuvé et, éventuellement, l'URL SLO HTTPS. Une URL SLO vide utilise l'URL SSO.
+4. Conservez les chemins locaux par défaut sauf s'ils sont en conflit avec une route existante. Enregistrez et appliquez la configuration.
+5. Utilisez **Exporter les métadonnées** pour télécharger ou afficher les métadonnées SP de BunkerWeb, puis enregistrez ces métadonnées ainsi que les URL ACS/SLO exactes auprès de l'IdP.
+6. Configurez les attributs d'identité et les règles ACL, puis enregistrez et appliquez de nouveau.
+
+BunkerWeb exporte les métadonnées SP ; il n'importe pas les métadonnées IdP et ne les actualise pas automatiquement. Configurez d'abord les champs et certificats IdP, puis exportez les métadonnées afin d'éviter une boucle de configuration.
+
+### Flux de requête du navigateur
+
+Une connexion initiée par le SP signe l'AuthnRequest avec la clé privée SP et l'envoie à l'IdP via HTTP-Redirect. L'IdP renvoie à l'ACS une réponse dont l'assertion est couverte par sa signature via HTTP-POST. BunkerWeb valide la corrélation, la destination, l'émetteur, les horodatages de l'assertion, la signature et l'état de rejeu avant de créer une session. Le corps de la requête initiale n'est pas rejoué.
+
+```mermaid
+sequenceDiagram
+  participant B as Navigateur
+  participant BW as BunkerWeb (SP SAML)
+  participant IdP as Fournisseur d'identité
+  participant Up as Upstream
+
+  B->>BW: GET /protected
+  BW-->>B: 302 AuthnRequest HTTP-Redirect signé
+  B->>IdP: GET URL SSO avec SAMLRequest
+  IdP-->>B: 200/POST SAMLResponse avec assertion protégée par signature
+  B->>BW: POST ACS avec SAMLResponse
+  BW->>BW: Valider signature, émetteur, destination, expiration, rejeu
+  BW-->>B: 302 /protected avec cookie de session
+  B->>BW: GET /protected
+  BW->>Up: Requête et en-têtes d'identité configurés
+  Up-->>BW: Réponse
+  BW-->>B: Réponse
+```
+
+### Endpoints
+
+Tous les chemins d'endpoint sont des chemins locaux sur l'origine SP publique. Les valeurs par défaut sont des paramètres multisite et peuvent être modifiées lorsqu'elles sont disponibles pour le service.
+
+| Endpoint                         | Paramètre            | Défaut           | Méthode et objectif                                                                                     |
+| -------------------------------- | -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| Métadonnées SP                   | `SAML_METADATA_PATH` | `/saml/metadata` | `GET` ou `HEAD` ; publie les métadonnées d'entité SP, ACS, SLO et du certificat de signature.           |
+| Assertion Consumer Service (ACS) | `SAML_ACS_PATH`      | `/saml/acs`      | `POST` ; reçoit la réponse IdP dont l'assertion est couverte par sa signature.                          |
+| Déconnexion locale               | `SAML_LOGOUT_PATH`   | `/saml/logout`   | Lance la déconnexion locale ; une session authentifiée déclenche une requête de déconnexion IdP signée. |
+| Single Logout Service (SLS)      | `SAML_SLS_PATH`      | `/saml/sls`      | `GET` ou `POST` ; reçoit une requête ou une réponse de déconnexion IdP.                                 |
+
+`SAML_LOGOUT_REDIRECT` (par défaut `/`) est le chemin local utilisé après la déconnexion. Conservez les quatre chemins d'endpoint distincts et exempts de chaînes de requête, fragments, barres obliques inverses, espaces ou segments de traversée.
+
+### Enregistrement de Keycloak 26.5.2
+
+Le [guide du client SAML Keycloak 26.5.2](https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc) utilise les onglets client **Settings**, **Keys** et **Advanced**. Utilisez les valeurs suivantes pour la disposition d'endpoint par défaut de BunkerWeb. Remplacez `https://app.example.com` par la valeur exacte de `SAML_SP_BASE_URL`.
+
+Créez un client SAML activé avec ces valeurs d'enregistrement. Dans l'interface Keycloak, **Enabled** et **Front channel logout** sont activés (`true`) ; le protocole client est `SAML`.
+
+| Paramètre client     | Valeur                                                                   |
+| -------------------- | ------------------------------------------------------------------------ |
+| Client ID            | `https://app.example.com/saml/metadata`                                  |
+| Protocol             | `SAML`                                                                   |
+| Enabled              | `true`                                                                   |
+| Front channel logout | `true`                                                                   |
+| Valid redirect URIs  | `https://app.example.com/saml/acs` et `https://app.example.com/saml/sls` |
+
+Dans les paramètres du client, exigez les assertions et documents signés, exigez les signatures client, sélectionnez **RSA_SHA256** et activez **Force POST Binding**. Laissez **Encrypt Assertions** désactivé : BunkerWeb exige que l'assertion soit couverte par une signature IdP de confiance, sur l'assertion ou sur la réponse complète, et n'accepte pas les assertions chiffrées. Dans **Keys**, activez **Client Signature Required**. Définissez **Use metadata descriptor URL** sur **OFF** et fournissez manuellement le certificat SP afin que Keycloak puisse vérifier les requêtes signées de BunkerWeb sans cycle d'importation de métadonnées IdP. Dans **Advanced**, définissez l'**Assertion Consumer Service POST Binding URL** sur `/saml/acs` et les **Logout Service POST Binding URL** et **Logout Service Redirect Binding URL** sur `/saml/sls` sur l'origine publique. Définissez le format Name ID sur `username` et forcez ce format.
+
+Les attributs client correspondants sont :
+
+```yaml
+saml.assertion.signature: "true"
+saml.server.signature: "true"
+saml.client.signature: "true"
+saml.encrypt: "false"
+saml.force.post.binding: "true"
+saml.authnstatement: "true"
+saml.signature.algorithm: "RSA_SHA256"
+saml_name_id_format: "username"
+saml_force_name_id_format: "true"
+saml.signing.certificate: "SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"
+saml_assertion_consumer_url_post: "https://app.example.com/saml/acs"
+saml_single_logout_service_url_post: "https://app.example.com/saml/sls"
+saml_single_logout_service_url_redirect: "https://app.example.com/saml/sls"
+```
+
+Ajoutez des mappers de protocole pour `email`, `groups` et `name`. Pour chaque mapper, utilisez `protocol: "saml"`, `protocolMapper: "saml-user-attribute-mapper"` et `consentRequired: false` ; définissez `config.user.attribute` et `config.attribute.name` sur le même attribut, et `config.attribute.nameformat` sur `Basic`. Vérifiez que l'utilisateur IdP possède réellement ces attributs ; l'absence d'un claim ne produit pas l'en-tête upstream correspondant.
+
+### Paramètres (expliqués)
+
+Les valeurs par défaut ci-dessous proviennent des paramètres du plugin SAML. Les valeurs par défaut vides sont indiquées par `empty`.
+
+#### Activation, confiance et routes
+
+| Paramètre              | Défaut           | Objectif                                                     |
+| ---------------------- | ---------------- | ------------------------------------------------------------ |
+| `USE_SAML`             | `no`             | Active SAML pour le service.                                 |
+| `SAML_SP_ENTITY_ID`    | `empty`          | Émetteur SP et identifiant client.                           |
+| `SAML_SP_BASE_URL`     | `empty`          | Origine HTTPS publique sans chemin ni requête.               |
+| `SAML_IDP_ENTITY_ID`   | `empty`          | Émetteur IdP approuvé.                                       |
+| `SAML_IDP_SSO_URL`     | `empty`          | Endpoint de connexion IdP en HTTPS.                          |
+| `SAML_IDP_SLO_URL`     | `empty`          | Endpoint de déconnexion IdP en HTTPS ; vide, il utilise SSO. |
+| `SAML_SP_CERT`         | `empty`          | Certificat SP correspondant au format PEM.                   |
+| `SAML_SP_PRIVATE_KEY`  | `empty`          | Clé privée RSA correspondante, non chiffrée, au format PEM.  |
+| `SAML_IDP_CERT`        | `empty`          | Certificat de signature IdP approuvé au format PEM.          |
+| `SAML_ACS_PATH`        | `/saml/acs`      | Chemin ACS local.                                            |
+| `SAML_LOGOUT_PATH`     | `/saml/logout`   | Chemin de déconnexion local.                                 |
+| `SAML_SLS_PATH`        | `/saml/sls`      | Chemin de callback SLS local.                                |
+| `SAML_METADATA_PATH`   | `/saml/metadata` | Chemin des métadonnées SP locales.                           |
+| `SAML_LOGOUT_REDIRECT` | `/`              | Chemin local après la déconnexion.                           |
+
+#### Sessions et en-têtes d'identité
+
+| Paramètre                       | Défaut   | Objectif                                                                      |
+| ------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `SAML_CLOCK_SKEW`               | `60`     | Décalage d'horloge d'assertion autorisé en secondes ; plage valide : 0–300.   |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`    | Durée de vie d'inactivité de la session en secondes ; plage valide : 1–86400. |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`   | Durée de vie maximale de la session en secondes ; plage valide : 1–86400.     |
+| `SAML_USER_HEADER`              | `X-User` | En-tête upstream pour la valeur utilisateur ; vide, il est désactivé.         |
+| `SAML_USER_ATTRIBUTE`           | `NameID` | Attribut de la valeur utilisateur ; `NameID` désigne l'identifiant du sujet.  |
+| `SAML_EMAIL_HEADER`             | `empty`  | En-tête upstream pour l'adresse e-mail ; vide, il est désactivé.              |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`  | Attribut de l'adresse e-mail ; `NameID` désigne l'identifiant du sujet.       |
+| `SAML_GROUPS_HEADER`            | `empty`  | En-tête upstream pour les groupes ; vide, il est désactivé.                   |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups` | Attribut des groupes ; `NameID` désigne l'identifiant du sujet.               |
+| `SAML_NAME_HEADER`              | `empty`  | En-tête upstream pour le nom affiché ; vide, il est désactivé.                |
+| `SAML_NAME_ATTRIBUTE`           | `name`   | Attribut du nom affiché ; `NameID` désigne l'identifiant du sujet.            |
+| `SAML_GROUPS_SEPARATOR`         | `,`      | Séparateur de plusieurs valeurs dans un en-tête.                              |
+
+Avant l'authentification, BunkerWeb efface chaque en-tête d'identité SAML configuré de la requête entrante. Il n'ajoute un en-tête qu'après une réponse valide et uniquement lorsque l'attribut mappé existe. Les noms d'en-tête doivent être uniques, syntaxiquement valides et ne peuvent pas utiliser de préfixes liés au routage ou sensibles à la sécurité, tels que `X-Forwarded-*`, `Proxy-*` ou `Sec-*`. Ces en-têtes transmettent l'identité à l'upstream protégé ; ils n'ouvrent pas de session pour l'utilisateur dans l'interface Web BunkerWeb.
+
+#### ACL d'attributs
+
+| Paramètre             | Défaut  | Objectif                                                                    |
+| --------------------- | ------- | --------------------------------------------------------------------------- |
+| `SAML_ACL_RULE_COUNT` | `empty` | Nombre explicite de règles numérotées ; `0` efface la liste.                |
+| `SAML_USE_ACL`        | `no`    | Active le contrôle d'accès basé sur les attributs après la validation SAML. |
+| `SAML_ACL_MATCH_MODE` | `all`   | Combine les règles avec `all` ou `any`.                                     |
+| `SAML_ACL_DENIED_URL` | `empty` | Redirection en cas de refus ; vide, renvoie le statut de refus.             |
+| `SAML_ACL_ATTRIBUTE`  | `empty` | Nom de l'attribut d'une règle ACL.                                          |
+| `SAML_ACL_VALUE`      | `empty` | Valeur requise pour une règle ACL.                                          |
+
+Par exemple, ce service exige à la fois l'appartenance à `engineering` et l'adresse e-mail de l'administrateur :
+
+```yaml
+app.example.com_USE_SAML: "yes"
+app.example.com_SAML_USE_ACL: "yes"
+app.example.com_SAML_ACL_RULE_COUNT: "2"
+app.example.com_SAML_ACL_MATCH_MODE: "all"
+app.example.com_SAML_ACL_ATTRIBUTE_1: "groups"
+app.example.com_SAML_ACL_VALUE_1: "engineering"
+app.example.com_SAML_ACL_ATTRIBUTE_2: "email"
+app.example.com_SAML_ACL_VALUE_2: "admin@example.com"
+```
+
+La première paire est `_1` et la seconde `_2` ; l'interface numérote les règles à partir de 1. Avec un nombre explicite de `2`, les deux paires sont requises ; l'absence d'un attribut refuse l'accès, tandis qu'une valeur configurée vide constitue un refus. Avec `all`, toutes les règles doivent correspondre ; avec `any`, une seule règle correspondante suffit. Sans règle, tous les utilisateurs authentifiés sont autorisés. À la portée d'un service, l'interface hérite de la liste de règles globale jusqu'à ce que vous choisissiez une liste de service ; l'enregistrement d'une liste de service remplace cette liste héritée, y compris lorsque le remplacement est explicitement vide. Laissez `SAML_ACL_RULE_COUNT` vide pour découvrir les règles numérotées jusqu'au premier des 100 emplacements. Définissez-le sur `0` pour effacer toutes les règles. Un mode invalide ou une liste explicite mal formée échoue de manière restrictive. `SAML_ACL_DENIED_URL` redirige lorsqu'il est défini ; sinon BunkerWeb renvoie son statut de refus.
+
+#### Protection contre le rejeu
+
+| Paramètre               | Défaut | Contexte | Objectif                                                                             |
+| ----------------------- | ------ | -------- | ------------------------------------------------------------------------------------ |
+| `SAML_REPLAY_DICT_SIZE` | `10m`  | global   | Capacité de la mémoire partagée pour la protection contre le rejeu sur une instance. |
+
+Chaque identifiant d'assertion accepté est ajouté de manière atomique au magasin de rejeu pendant la durée où il pourrait encore être accepté. L'identifiant AuthnRequest en attente est une valeur de corrélation de session distincte. Sur une instance, augmentez `SAML_REPLAY_DICT_SIZE` lorsque le dictionnaire partagé est trop petit. Pour les répliques, activez le mode de session core `USE_REDIS=yes` et pointez chaque instance vers le même service Redis afin que les clés de rejeu utilisent le magasin partagé. Conservez également le même `SESSIONS_SECRET` core sur chaque réplique ; sinon une session créée par un worker ne peut pas être lue par un autre. Les sessions utilisent par défaut des cookies sécurisés limités à l'hôte, avec `HttpOnly`, `Secure` et `SameSite=None`. Lorsque Redis est activé, les données de session passent dans un magasin Redis avec espace de noms au lieu du cookie. Le `SessionNotOnOrAfter` de l'IdP peut terminer une session avant les délais configurés. Une assertion consommée reste consommée si une étape ultérieure du callback échoue.
+
+### Déconnexion
+
+Une requête vers `SAML_LOGOUT_PATH` efface l'état authentifié, enregistre une corrélation de déconnexion en attente et démarre le SLO en frontal. BunkerWeb envoie une requête de déconnexion signée avec le binding Redirect. Après une `LogoutResponse` signée valide, il détruit la session locale et redirige le navigateur vers `SAML_LOGOUT_REDIRECT`. Une `LogoutRequest` initiée par l'IdP peut arriver sur `SAML_SLS_PATH` ; le SLS valide l'émetteur, la destination, le NameID, l'index de session et l'état de rejeu, détruit la session locale et renvoie une réponse signée à l'IdP. Si aucune session locale n'existe, la route de déconnexion détruit la session vide et redirige localement.
+
+### Limites et dépannage
+
+SAML prend actuellement en charge la connexion navigateur initiée par le SP avec un AuthnRequest Redirect signé et une réponse ACS POST. Il ne prend pas en charge la connexion initiée par l'IdP, les assertions chiffrées ni l'importation et l'actualisation automatiques des métadonnées IdP. Configurez l'IdP pour signer les documents/assertions et envoyer la réponse avec le binding POST. Les corps POST d'authentification et de déconnexion sont limités à 256 KiB ; les requêtes trop volumineuses sont rejetées avant traitement.
+
+- **L'interface ne peut pas activer SAML :** vérifiez l'origine HTTPS, les trois certificats/clés, la correspondance de la clé et du certificat RSA, les valeurs d'entité/SSO IdP et les quatre chemins locaux distincts. Une configuration invalide est rejetée et la requête échoue de manière restrictive avec `503` ; aucune requête n'atteint l'upstream.
+- **L'IdP rejette l'AuthnRequest :** comparez l'identifiant d'entité SP, les URL ACS/SLS exactes, le certificat SP, le réglage RSA-SHA256 et l'exigence de signature client. Dans Keycloak, vérifiez que **Use metadata descriptor URL** est désactivé et que le certificat SP fourni manuellement est à jour.
+- **L'ACS renvoie une erreur ou `503` :** vérifiez le certificat de signature IdP, la couverture de signature de l'assertion, l'émetteur, la destination, la synchronisation de l'horloge, le binding de réponse, la corrélation de requête en attente et le fait que l'identifiant d'assertion n'a pas déjà été consommé. Vérifiez que l'IdP envoie les attributs mappés.
+- **Un utilisateur s'authentifie mais reçoit un refus :** activez les attributs ACL attendus, confirmez les paires numérotées et `SAML_ACL_RULE_COUNT`, puis vérifiez `all` par rapport à `any`. Une valeur d'attribut vide ou un claim absent peut refuser l'accès par conception.
+- **Une session disparaît derrière un équilibreur de charge :** utilisez le même magasin Redis et le même secret de session core sur chaque réplique. Redis doit être disponible lorsque `USE_REDIS=yes` ; la protection contre le rejeu et les sessions ne reviennent pas silencieusement à un état par worker.
+
+## LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ldap-sso-pro}
+
+STREAM support :x:
+
+Le plugin **LDAP SSO** ajoute le Single Sign-On basé sur LDAP à vos services BunkerWeb. Il fournit un formulaire de connexion, authentifie les utilisateurs auprès d'un annuaire LDAP, crée une session et transmet optionnellement le nom d'utilisateur authentifié à votre upstream via un en-tête configurable.
+
+Le plugin prend en charge deux modes d'authentification :
+
+- **Mode recherche puis liaison (search-then-bind)** (recommandé, aussi appelé "mode recherche enterprise") : un compte de service recherche l'utilisateur dans l'annuaire, puis se lie au DN trouvé pour vérifier le mot de passe. Activé lorsque `LDAP_USER_SEARCH_BASE_DN` est défini.
+- **Mode liaison directe (direct bind)** : construit le DN de l'utilisateur à partir d'un modèle (`LDAP_USER_DN_TEMPLATE`) et effectue une liaison directe. Utilisé en repli lorsque le mode recherche n'est pas configuré.
+
+### Fonctionnalités
+
+- **LDAP/LDAPS/STARTTLS :** connexion en LDAP non chiffré, LDAPS (TLS dès le départ) ou montée en STARTTLS.
+- **Mode recherche puis liaison :** un compte de service effectue la découverte d'utilisateurs avec base de recherche, filtre, portée et limites de taille/temps configurables.
+- **Repli en liaison directe :** authentification basée sur un modèle de DN lorsque le mode recherche n'est pas nécessaire.
+- **Filtre d'autorisation :** filtre LDAP supplémentaire optionnel pour restreindre l'accès au-delà de l'authentification de base.
+- **Pool de connexions :** keepalive avec taille de pool et timeout configurables pour réduire les allers-retours LDAP.
+- **Gestion des sessions :** TTL configurable avec nettoyage automatique des sessions.
+- **Transmission du header utilisateur :** transmet le nom d'utilisateur authentifié aux upstreams via un en-tête configurable (défaut : `X-User`).
+- **Chemins de connexion/déconnexion :** endpoints dédiés pour l'authentification et la terminaison de session.
+
+!!! danger "Les identifiants sont transmis en clair par défaut"
+    Avec les paramètres par défaut (`LDAP_LDAPS=no`, `LDAP_STARTTLS=no`), les mots de passe des utilisateurs sont transmis en clair au serveur LDAP. **Activez toujours `LDAP_LDAPS=yes` (avec `LDAP_PORT=636`) ou `LDAP_STARTTLS=yes` en production.** Conservez `LDAP_SSL_VERIFY=yes` pour prévenir les attaques par dégradation TLS.
+
+### Configuration
+
+**Paramètres principaux**
+
+| Paramètre         | Défaut  | Contexte  | Multiple | Description                                                    |
+| ----------------- | ------- | --------- | -------- | -------------------------------------------------------------- |
+| `USE_LDAP`        | `no`    | multisite | non      | Activer ou désactiver l'authentification LDAP SSO.             |
+| `LDAP_HOST`       |         | multisite | non      | Nom d'hôte ou adresse IP du serveur LDAP.                      |
+| `LDAP_PORT`       | `389`   | multisite | non      | Port du serveur LDAP (389 pour LDAP/STARTTLS, 636 pour LDAPS). |
+| `LDAP_LDAPS`      | `no`    | multisite | non      | Utiliser LDAPS (TLS dès le début de la connexion).             |
+| `LDAP_STARTTLS`   | `no`    | multisite | non      | Utiliser la montée en STARTTLS sur la connexion LDAP.          |
+| `LDAP_SSL_VERIFY` | `yes`   | multisite | non      | Vérifier le certificat TLS du serveur.                         |
+| `LDAP_TIMEOUT`    | `10000` | multisite | non      | Timeout du socket LDAP en millisecondes.                       |
+
+**Pool de connexions**
+
+| Paramètre                  | Défaut  | Contexte  | Multiple | Description                                        |
+| -------------------------- | ------- | --------- | -------- | -------------------------------------------------- |
+| `LDAP_KEEPALIVE_TIMEOUT`   | `60000` | multisite | non      | Timeout du keepalive LDAP en millisecondes.        |
+| `LDAP_KEEPALIVE_POOL_SIZE` | `10`    | multisite | non      | Taille du pool de connexions keepalive LDAP.       |
+| `LDAP_KEEPALIVE_POOL_NAME` |         | multisite | non      | Nom personnalisé optionnel du pool keepalive LDAP. |
+
+**Mode recherche enterprise**
+
+| Paramètre                         | Défaut                                                                                                                  | Contexte  | Multiple | Description                                                                                                                                                                                                                             |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LDAP_BIND_DN`                    |                                                                                                                         | multisite | non      | DN du compte de service utilisé pour effectuer les recherches d'utilisateurs LDAP.                                                                                                                                                      |
+| `LDAP_BIND_PASSWORD`              |                                                                                                                         | multisite | non      | Mot de passe du compte de service LDAP (bind DN).                                                                                                                                                                                       |
+| `LDAP_USER_SEARCH_BASE_DN`        |                                                                                                                         | multisite | non      | DN de base pour la recherche d'utilisateurs (active le mode recherche enterprise lorsque défini).                                                                                                                                       |
+| `LDAP_USER_SEARCH_FILTER`         | `(&(objectClass=person)(\|(uid={username})(mail={username})(sAMAccountName={username})(userPrincipalName={username})))` | multisite | non      | Modèle de filtre de recherche LDAP. Utilisez le placeholder `{username}`.                                                                                                                                                               |
+| `LDAP_AUTHZ_FILTER`               |                                                                                                                         | multisite | non      | Filtre d'autorisation LDAP supplémentaire optionnel (combiné en ET avec le filtre de recherche).                                                                                                                                        |
+| `LDAP_USER_SEARCH_SCOPE`          | `subtree`                                                                                                               | multisite | non      | Portée de la recherche LDAP : `base`, `onelevel` ou `subtree`.                                                                                                                                                                          |
+| `LDAP_USER_SEARCH_DEREF_ALIASES`  | `always`                                                                                                                | multisite | non      | Mode de déréférencement des alias LDAP : `always`, `never`, `in_searching` ou `finding_base`.                                                                                                                                           |
+| `LDAP_USER_SEARCH_SIZE_LIMIT`     | `10`                                                                                                                    | multisite | non      | Nombre maximum d'entrées LDAP retournées par la recherche d'utilisateurs.                                                                                                                                                               |
+| `LDAP_USER_SEARCH_TIME_LIMIT`     | `10`                                                                                                                    | multisite | non      | Durée maximale de la recherche d'utilisateurs LDAP en secondes.                                                                                                                                                                         |
+| `LDAP_USER_SEARCH_ATTRIBUTES`     | `dn`                                                                                                                    | multisite | non      | Attributs demandés lors de la recherche d'utilisateurs (séparés par des espaces).                                                                                                                                                       |
+| `LDAP_USER_SEARCH_DN_FIELD`       | `object_name`                                                                                                           | multisite | non      | Nom du champ dans la réponse de recherche pour extraire le DN de l'utilisateur. La valeur par défaut `object_name` est le champ DN retourné par la bibliothèque LDAP sous-jacente ; en général, il n'est pas nécessaire de le modifier. |
+| `LDAP_USER_SEARCH_REQUIRE_UNIQUE` | `yes`                                                                                                                   | multisite | non      | Exiger exactement un seul résultat de recherche avant d'authentifier l'utilisateur.                                                                                                                                                     |
+
+**Mode liaison directe**
+
+| Paramètre               | Défaut                                       | Contexte  | Multiple | Description                                                                                 |
+| ----------------------- | -------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+| `LDAP_USER_DN_TEMPLATE` | `uid={username},ou=people,dc=example,dc=com` | multisite | non      | Modèle de DN utilisateur pour la liaison directe. Doit inclure `{username}` lorsque défini. |
+
+**Session et chemins**
+
+| Paramètre                    | Défaut               | Contexte  | Multiple | Description                                                                                           |
+| ---------------------------- | -------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `LDAP_USERNAME_REGEX`        | `^[A-Za-z0-9@._-]+$` | multisite | non      | Regex PCRE utilisée pour valider les noms d'utilisateur soumis.                                       |
+| `LDAP_LOGIN_PATH`            | `/ldap/login`        | multisite | non      | Chemin de la page de connexion exposé par le plugin LDAP.                                             |
+| `LDAP_LOGOUT_PATH`           | `/ldap/logout`       | multisite | non      | Chemin de déconnexion exposé par le plugin LDAP.                                                      |
+| `LDAP_SESSION_TTL`           | `3600`               | multisite | non      | Durée de validité de la session LDAP en secondes.                                                     |
+| `LDAP_REALM`                 | `LDAP SSO`           | multisite | non      | Realm d'authentification affiché sur le formulaire de connexion LDAP.                                 |
+| `LDAP_USER_HEADER`           | `X-User`             | multisite | non      | En-tête pour transmettre le nom d'utilisateur authentifié à l'upstream (vide pour désactiver).        |
+| `LDAP_REDIRECT_AFTER_LOGIN`  | `/`                  | multisite | non      | Chemin relatif de repli après une connexion réussie lorsqu'aucune cible de redirection n'est fournie. |
+| `LDAP_REDIRECT_AFTER_LOGOUT` | `/`                  | multisite | non      | Chemin relatif vers lequel rediriger les utilisateurs après la déconnexion.                           |
+
+### Démarrage rapide
+
+1. Définissez les valeurs minimales par service protégé :
+    - `USE_LDAP=yes`
+    - `LDAP_HOST=ldap.example.com`
+2. Pour le mode recherche enterprise (recommandé), définissez également :
+    - `LDAP_BIND_DN=cn=readonly,dc=example,dc=com`
+    - `LDAP_BIND_PASSWORD=secret` (utilisez les [secrets Docker](integrations.md#docker) en production)
+    - `LDAP_USER_SEARCH_BASE_DN=ou=people,dc=example,dc=com`
+3. Pour le mode liaison directe, ajustez `LDAP_USER_DN_TEMPLATE` pour correspondre à la structure de votre annuaire.
+4. Optionnellement, restreignez l'accès avec `LDAP_AUTHZ_FILTER` (par ex. `(memberOf=cn=allowed,ou=groups,dc=example,dc=com)`).
+
+### Conseils d'utilisation
+
+- Privilégiez le mode recherche puis liaison par rapport à la liaison directe : il prend en charge des recherches flexibles sur plusieurs attributs (uid, mail, sAMAccountName, UPN).
+- Utilisez LDAPS (`LDAP_LDAPS=yes`) ou STARTTLS (`LDAP_STARTTLS=yes`) en production pour chiffrer les identifiants en transit.
+- Lorsque vous activez LDAPS (`LDAP_LDAPS=yes`), pensez également à définir `LDAP_PORT=636`. Le port ne change pas automatiquement.
+- Conservez `LDAP_SSL_VERIFY=yes` sauf pour des tests avec des certificats auto-signés.
+- Ajustez `LDAP_KEEPALIVE_POOL_SIZE` en fonction du volume d'utilisateurs simultanés attendu afin de réduire la surcharge de connexions LDAP.
+- Définissez `LDAP_USER_HEADER` sur une valeur vide pour désactiver la transmission de l'identité aux upstreams.
+
+## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openapi-validator-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -4317,7 +4926,7 @@ Autorisez éventuellement les chemins inconnus pendant le déploiement :
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
 
-## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#cache-pro}
 
 Prise en charge de STREAM :x:
 
@@ -4395,3 +5004,393 @@ Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse p
     - Utilisez des suffixes numériques pour les valeurs répétées, par exemple `CACHE_PATH_1`, `CACHE_PATH_2`, `CACHE_VALID_1` et `CACHE_VALID_2`.
     - Gardez le trafic authentifié ou spécifique à un utilisateur hors cache, sauf si votre `CACHE_KEY` varie explicitement selon cet état.
     - `CACHE_LOCK=yes` et `CACHE_BACKGROUND_UPDATE=yes` permettent de réduire les rafales de requêtes vers l'origine.
+
+## ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#acme}
+
+STREAM support :white_check_mark:
+
+Le plugin **ACME** fournit une gestion avancée des certificats via le protocole ACME avec prise en charge d'autorités de certification personnalisées (Step CA, Vault PKI, Sectigo, Google Trust Services, etc.). Il complète le plugin Let's Encrypt intégré en ajoutant la prise en charge de CA personnalisées, les challenges DNS-01 et TLS-ALPN-01, les certificats wildcard, la surveillance des certificats avec alertes d'expiration, la surveillance des logs Certificate Transparency et un OCSP stapling amélioré.
+
+!!! tip "Quand utiliser ACME ou le plugin Let's Encrypt intégré"
+    Si vous avez uniquement besoin de certificats Let's Encrypt avec des challenges HTTP-01, le plugin Let's Encrypt intégré (`AUTO_LETS_ENCRYPT=yes`) est suffisant. Utilisez le plugin ACME lorsque vous avez besoin de CA personnalisées, de challenges DNS-01 ou TLS-ALPN-01, de certificats wildcard, ou de surveillance des certificats avec alertes.
+
+### Fonctionnalités
+
+- **Prise en charge de CA personnalisées :** utilisez n'importe quelle autorité de certification compatible ACME, pas uniquement Let's Encrypt.
+- **Plusieurs types de challenges :** HTTP-01, DNS-01 (requis pour les wildcards) et TLS-ALPN-01.
+- **Intégration de fournisseurs DNS :** prise en charge intégrée de Cloudflare, Route53, DigitalOcean, OVH et d'autres.
+- **External Account Binding (EAB) :** pour les CA nécessitant des clés pré-enregistrées (Sectigo, Google Trust Services).
+- **Certificats wildcard :** via le challenge DNS-01.
+- **Surveillance des certificats :** suit l'expiration de tous les certificats gérés (y compris le Let's Encrypt OSS) avec des seuils d'alerte configurables.
+- **Alertes d'expiration :** envoi d'alertes par webhook ou e-mail lorsque les certificats approchent de leur expiration.
+- **Surveillance Certificate Transparency :** interroge crt.sh pour détecter l'émission non autorisée de certificats pour vos domaines.
+- **OCSP stapling amélioré :** récupération et mise en cache proactives des réponses OCSP.
+- **Types de clés configurables :** ECDSA (256/384) ou RSA (2048/4096).
+
+### Prérequis
+
+#### Le challenge HTTP-01 nécessite `LETS_ENCRYPT_PASSTHROUGH=yes`
+
+Lorsque vous utilisez `ACME_CHALLENGE=http` (la valeur par défaut), vous **devez** définir `LETS_ENCRYPT_PASSTHROUGH=yes` sur le même service.
+
+Le plugin Let's Encrypt intégré de BunkerWeb inclut à la fois un bloc location NGINX et un gestionnaire d'accès Lua pour `/.well-known/acme-challenge/`. Comme le bloc location NGINX correspond avant que le code des plugins Lua ne s'exécute, il intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Définir `LETS_ENCRYPT_PASSTHROUGH=yes` désactive les deux mécanismes afin que le plugin ACME PRO puisse gérer correctement les tokens du challenge HTTP-01.
+
+Cela n'est **nécessaire que pour HTTP-01**. Les challenges DNS-01 et TLS-ALPN-01 ne sont pas concernés.
+
+#### Passthrough ACME vers l'amont (`ACME_PASSTHROUGH`)
+
+Si le serveur amont derrière BunkerWeb exécute déjà son propre client ACME et doit gérer lui-même la validation HTTP-01, définissez `ACME_PASSTHROUGH=yes` sur le service. Le plugin ACME PRO cessera alors de rendre son bloc location `/.well-known/acme-challenge/` et n'ajoutera plus les chemins de challenge à la liste blanche en phase `access`, afin que les fichiers de validation servis par l'amont parviennent à la CA sans être interceptés.
+
+Laissez `ACME_PASSTHROUGH=no` (la valeur par défaut) lorsque vous voulez que le plugin ACME PRO obtienne et renouvelle lui-même les certificats. La combinaison standard HTTP-01 pour les services gérés par ACME PRO est `LETS_ENCRYPT_PASSTHROUGH=yes` (pour que le plugin OSS Let's Encrypt cède son bloc location de challenge) associé à `ACME_PASSTHROUGH=no`. Ne passez `ACME_PASSTHROUGH` à `yes` que lorsque l'amont possède le cycle de vie complet du certificat — dans ce mode, BunkerWeb n'essaiera pas d'émettre de certificat pour ce service.
+
+Ce paramètre reproduit le comportement du `LETS_ENCRYPT_PASSTHROUGH` du cœur OSS et n'affecte que HTTP-01 ; les challenges DNS-01 et TLS-ALPN-01 ne sont pas concernés.
+
+#### Ordre d'exécution des plugins
+
+Le plugin ACME se réordonne automatiquement pour s'exécuter en premier dans la phase NGINX `ssl_certificate`, garantissant que les certificats de challenge TLS-ALPN-01 sont servis avant que d'autres plugins fournisseurs de certificats (selfsigned, letsencrypt, customcert) ne court-circuitent la boucle.
+
+Lorsque vous utilisez ACME aux côtés d'autres plugins PRO nécessitant un TLS valide (par ex. OpenID Connect, UI SSO), il est recommandé d'ajouter explicitement `acme` juste après `customcert` dans les paramètres d'ordre des phases concernées :
+
+```env
+PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
+PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert acme letsencrypt selfsigned
+```
+
+Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont ajoutés par ordre alphabétique après les plugins principaux explicitement ordonnés.
+
+!!! warning "N'activez pas `USE_ACME` et `AUTO_LETS_ENCRYPT` sur le même service"
+    Le plugin ACME et le plugin Let's Encrypt intégré utilisent des stockages et des chemins de challenge séparés, mais les activer tous les deux sur le même service provoquera des conflits. Utilisez l'un ou l'autre par service. En mode multisite, différents services peuvent utiliser différents plugins -- par exemple, `app1.example.com_USE_ACME=yes` et `app2.example.com_AUTO_LETS_ENCRYPT=yes`.
+
+### Configuration
+
+**Paramètres principaux ACME**
+
+| Paramètre              | Défaut  | Contexte  | Multiple | Description                                                                                                   |
+| ---------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `USE_ACME`             | `no`    | multisite | non      | Activer la gestion des certificats ACME pour ce service.                                                      |
+| `ACME_PASSTHROUGH`     | `no`    | multisite | non      | Laisser passer les requêtes du challenge HTTP-01 vers le serveur amont (l'amont gère son propre client ACME). |
+| `ACME_DIRECTORY_URL`   |         | multisite | non      | URL du répertoire ACME de l'autorité de certification.                                                        |
+| `ACME_EMAIL`           |         | multisite | non      | Adresse e-mail pour l'enregistrement du compte ACME et les notifications.                                     |
+| `ACME_CHALLENGE`       | `http`  | multisite | non      | Type de challenge ACME : `http`, `dns` ou `alpn`.                                                             |
+| `ACME_KEY_TYPE`        | `ecdsa` | multisite | non      | Type de clé pour le certificat : `ecdsa` ou `rsa`.                                                            |
+| `ACME_KEY_SIZE`        | `256`   | multisite | non      | Taille de la clé en bits. ECDSA : `256` ou `384`. RSA : `2048` ou `4096`.                                     |
+| `ACME_RENEWAL_DAYS`    | `30`    | multisite | non      | Renouveler le certificat lorsqu'il reste moins de ce nombre de jours avant l'expiration.                      |
+| `ACME_SSL_VERIFY`      | `yes`   | multisite | non      | Vérifier les certificats SSL lors de la communication avec le serveur ACME.                                   |
+| `ACME_WILDCARD`        | `no`    | multisite | non      | Demander un certificat wildcard (nécessite le challenge DNS-01).                                              |
+| `ACME_MUST_STAPLE`     | `no`    | multisite | non      | Demander l'extension OCSP Must-Staple dans le certificat.                                                     |
+| `ACME_MAX_RETRIES`     | `3`     | multisite | non      | Nombre de tentatives de génération du certificat en cas d'échec (0 désactive les tentatives).                 |
+| `ACME_PREFERRED_CHAIN` |         | multisite | non      | CN de l'émetteur de la chaîne de certificats préférée lorsque la CA fournit plusieurs chaînes.                |
+| `ACME_CA_CERT_PATH`    |         | multisite | non      | Chemin du fichier du certificat racine CA pour les serveurs ACME privés.                                      |
+
+**External Account Binding (EAB)**
+
+| Paramètre           | Défaut | Contexte  | Multiple | Description                                                     |
+| ------------------- | ------ | --------- | -------- | --------------------------------------------------------------- |
+| `ACME_EAB_KID`      |        | multisite | non      | Key ID de l'External Account Binding (requis par certaines CA). |
+| `ACME_EAB_HMAC_KEY` |        | multisite | non      | Clé HMAC de l'External Account Binding (encodée en base64).     |
+
+**Challenge DNS-01**
+
+| Paramètre                           | Défaut    | Contexte  | Multiple | Description                                                                                                                                                                                                                                     |
+| ----------------------------------- | --------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ACME_DNS_PROVIDER`                 |           | multisite | non      | Fournisseur DNS pour les challenges DNS-01.                                                                                                                                                                                                     |
+| `ACME_DNS_CREDENTIAL_ITEM`          |           | multisite | oui      | Identifiant du fournisseur DNS au format `key value` (par ex. `cloudflare_api_token YOUR_TOKEN`). Utilisez des suffixes numériques pour plusieurs éléments (par ex. `ACME_DNS_CREDENTIAL_ITEM_1`). Les valeurs peuvent être encodées en base64. |
+| `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | oui      | Décoder automatiquement les identifiants DNS encodés en base64. Désactivez si vos identifiants sont du texte brut qui se trouve être du base64 valide.                                                                                          |
+| `ACME_DNS_PROPAGATION`              | `default` | multisite | non      | Temps d'attente pour la propagation DNS en secondes (`default` ou un nombre).                                                                                                                                                                   |
+
+**Surveillance des certificats**
+
+| Paramètre             | Défaut      | Contexte | Multiple | Description                                                                                                               |
+| --------------------- | ----------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ACME_MONITORING` | `yes`       | global   | non      | Activer la surveillance de l'expiration des certificats pour tous les certificats gérés (y compris le Let's Encrypt OSS). |
+| `ACME_ALERT_DAYS`     | `30 14 7 1` | global   | non      | Liste de seuils en jours séparés par des espaces déclenchant des alertes d'expiration.                                    |
+
+**Alertes (webhook)**
+
+| Paramètre                 | Défaut | Contexte | Multiple | Description                                                       |
+| ------------------------- | ------ | -------- | -------- | ----------------------------------------------------------------- |
+| `USE_ACME_ALERT_WEBHOOK`  | `no`   | global   | non      | Envoyer les alertes de certificat par webhook.                    |
+| `ACME_ALERT_WEBHOOK_URLS` |        | global   | non      | Liste d'URL de webhook séparées par des espaces pour les alertes. |
+
+**Alertes (e-mail)**
+
+| Paramètre                       | Défaut | Contexte | Multiple | Description                                                    |
+| ------------------------------- | ------ | -------- | -------- | -------------------------------------------------------------- |
+| `USE_ACME_ALERT_EMAIL`          | `no`   | global   | non      | Envoyer les alertes de certificat par e-mail.                  |
+| `ACME_ALERT_SMTP_EMAILS`        |        | global   | non      | Liste de destinataires e-mail séparés par des espaces.         |
+| `ACME_ALERT_SMTP_HOST`          |        | global   | non      | Hôte SMTP pour les e-mails d'alerte de certificat.             |
+| `ACME_ALERT_SMTP_PORT`          | `465`  | global   | non      | Port SMTP (SSL=465, TLS=587).                                  |
+| `ACME_ALERT_SMTP_FROM_EMAIL`    |        | global   | non      | Adresse e-mail de l'expéditeur pour les alertes de certificat. |
+| `ACME_ALERT_SMTP_FROM_USER`     |        | global   | non      | Utilisateur d'authentification SMTP.                           |
+| `ACME_ALERT_SMTP_FROM_PASSWORD` |        | global   | non      | Mot de passe d'authentification SMTP.                          |
+| `ACME_ALERT_SMTP_SSL`           | `SSL`  | global   | non      | Type de connexion : `no`, `SSL` ou `TLS`.                      |
+
+**Surveillance Certificate Transparency**
+
+| Paramètre                   | Défaut | Contexte | Multiple | Description                                                                                           |
+| --------------------------- | ------ | -------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `USE_ACME_CT_MONITORING`    | `no`   | global   | non      | Activer la surveillance des logs CT via crt.sh pour détecter l'émission non autorisée de certificats. |
+| `ACME_CT_MONITORED_DOMAINS` |        | global   | non      | Liste de domaines à surveiller séparés par des espaces. Laisser vide pour la détection automatique.   |
+
+**OCSP stapling**
+
+| Paramètre                | Défaut | Contexte  | Multiple | Description                                                                                  |
+| ------------------------ | ------ | --------- | -------- | -------------------------------------------------------------------------------------------- |
+| `USE_ACME_OCSP_STAPLING` | `no`   | multisite | non      | Activer l'OCSP stapling amélioré avec récupération et mise en cache proactives des réponses. |
+| `ACME_OCSP_CACHE_SIZE`   | `1m`   | global    | non      | Taille du dictionnaire partagé pour la mise en cache des réponses OCSP.                      |
+
+### Démarrage rapide
+
+1. Définissez les valeurs minimales par service protégé :
+    - `USE_ACME=yes`
+    - `ACME_DIRECTORY_URL=https://ca.example.com/acme/directory`
+    - `ACME_EMAIL=admin@example.com`
+2. Pour les certificats wildcard, passez au challenge DNS-01 :
+    - `ACME_CHALLENGE=dns`
+    - `ACME_DNS_PROVIDER=cloudflare`
+    - `ACME_DNS_CREDENTIAL_ITEM=cloudflare_api_token YOUR_TOKEN` (utilisez les [secrets Docker](integrations.md#docker) en production)
+    - `ACME_WILDCARD=yes`
+3. Pour les CA nécessitant l'External Account Binding :
+    - `ACME_EAB_KID=your-key-id`
+    - `ACME_EAB_HMAC_KEY=your-base64-hmac-key` (utilisez les [secrets Docker](integrations.md#docker) en production)
+4. Pour les CA privées avec des certificats racines auto-signés :
+    - `ACME_CA_CERT_PATH=/path/to/ca-root.pem`
+    - `ACME_SSL_VERIFY=yes` (fournir `ACME_CA_CERT_PATH` permet à la vérification de fonctionner avec des CA privées sans désactiver la vérification SSL)
+
+### Conseils d'utilisation
+
+- La surveillance des certificats (`USE_ACME_MONITORING`) est activée par défaut et suit également les certificats Let's Encrypt OSS. Configurez les seuils `ACME_ALERT_DAYS` et au moins un canal d'alerte (webhook ou e-mail) pour recevoir les avertissements d'expiration.
+- Activez la surveillance CT (`USE_ACME_CT_MONITORING=yes`) pour détecter les certificats non autorisés émis pour vos domaines via les logs Certificate Transparency.
+- Utilisez les clés ECDSA (par défaut) pour des certificats plus compacts et plus rapides. Passez à RSA uniquement lorsque la compatibilité avec des clients anciens est requise.
+- Lors de l'utilisation des challenges DNS-01, ajustez `ACME_DNS_PROPAGATION` si votre fournisseur DNS est lent à propager les enregistrements.
+- Définissez `ACME_MAX_RETRIES=0` pour désactiver les tentatives automatiques si vous préférez investiguer les échecs manuellement.
+
+### Coexistence avec le Let's Encrypt intégré
+
+Le plugin ACME PRO et le plugin Let's Encrypt OSS utilisent des stockages, des endpoints API et des clés de cache entièrement séparés. Les deux peuvent être actifs simultanément sur différents services en mode multisite :
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "app1.example.com app2.example.com"
+
+# ACME PRO pour app1 (CA privée)
+app1.example.com_USE_ACME: "yes"
+app1.example.com_ACME_DIRECTORY_URL: "https://ca.internal:9000/acme/acme/directory"
+app1.example.com_ACME_CA_CERT_PATH: "/certs/step-ca-root.pem"
+app1.example.com_LETS_ENCRYPT_PASSTHROUGH: "yes"  # nécessaire pour HTTP-01
+
+# Let's Encrypt intégré pour app2
+app2.example.com_AUTO_LETS_ENCRYPT: "yes"
+```
+
+### Dépannage
+
+- **Échec du challenge HTTP-01** : vérifiez que `LETS_ENCRYPT_PASSTHROUGH=yes` est défini -- sans cela, le bloc location intégré de BunkerWeb intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Vérifiez également que le port 80 est accessible depuis le serveur ACME et que `AUTO_LETS_ENCRYPT` n'est pas également activé pour le même service.
+- **Échec du challenge TLS-ALPN-01** : vérifiez que le port 443 est accessible depuis le serveur ACME et qu'aucun autre plugin ne sert de certificat avant ACME dans la phase `ssl_certificate`. Vérifiez `PLUGINS_ORDER_SSL_CERTIFICATE` en cas de doute.
+- **Échec du challenge DNS-01** : vérifiez les identifiants du fournisseur DNS dans `ACME_DNS_CREDENTIAL_ITEM` et ajustez `ACME_DNS_PROPAGATION` si votre fournisseur est lent à propager les enregistrements.
+- **Certificat non renouvelé** : vérifiez `ACME_RENEWAL_DAYS` et les logs du scheduler. Le job `acme-renew` s'exécute quotidiennement et renouvelle les certificats qui se trouvent dans le seuil configuré.
+
+## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#wildcard-pro}
+
+Prise en charge STREAM :x:
+
+Le plugin **Wildcard** permet à un service BunkerWeb unique de répondre à :
+
+* son nom d'hôte exact
+* tout **sous-domaine direct** de ce nom d'hôte
+
+Lorsqu'il est activé, le plugin prend la **première entrée** de `SERVER_NAME` et ajoute un `server_name` wildcard à la configuration NGINX générée.
+
+Par exemple, si la première entrée est `example.com`, le plugin ajoute :
+
+```nginx
+server_name *.example.com;
+```
+
+Le service répond alors à :
+
+* `example.com`
+* `www.example.com`
+* `api.example.com`
+
+Il s'agit d'un plugin minimal, uniquement basé sur la configuration :
+
+* aucun job
+* aucun Lua
+* aucune UI
+
+---
+
+### Fonctionnement
+
+Le plugin dérive le nom d'hôte wildcard à partir de la **première valeur** de `SERVER_NAME` et injecte un nom de serveur wildcard NGINX standard lors de la génération de la configuration.
+
+Il ne modifie pas la logique de traitement des requêtes au-delà de la correspondance des noms d'hôte.
+
+!!! info "Les hôtes wildcard ne sont pas des certificats wildcard"
+    Ce plugin agit uniquement sur le **routage HTTP**. Il indique à NGINX quels noms d'hôte le service doit accepter.
+
+    Il ne provisionne **pas** de certificat TLS wildcard.
+
+    Pour servir `*.example.com` en HTTPS, vous avez toujours besoin d'un certificat wildcard correspondant, généralement avec l'une de ces options :
+
+    - `USE_LETS_ENCRYPT_WILDCARD=yes` avec le plugin Let's Encrypt intégré
+    - `ACME_WILDCARD=yes` avec le plugin [ACME PRO](#acme) en utilisant un challenge DNS-01
+
+---
+
+### Fonctionnalités
+
+* **Activation simple** : activez le routage wildcard avec `USE_WILDCARD=yes`
+* **Dérivation automatique** : l'hôte wildcard est construit à partir de la première entrée de `SERVER_NAME`
+* **Sémantique native NGINX** : la correspondance suit le comportement standard de `server_name`
+* **Compatible multisite** : chaque service peut activer ou désactiver le routage wildcard indépendamment
+
+---
+
+### Configuration
+
+| Paramètre      | Valeur par défaut | Contexte  | Multiple | Description                                                                                                       |
+| -------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `USE_WILDCARD` | `no`              | multisite | non      | Active un `server_name` wildcard pour le service en ajoutant `*.domain` pour la première entrée de `SERVER_NAME`. |
+
+---
+
+### Démarrage rapide
+
+1. Placez en premier dans `SERVER_NAME` le domaine que vous souhaitez utiliser en wildcard
+2. Définissez `USE_WILDCARD=yes`
+3. Faites pointer l'enregistrement DNS wildcard vers BunkerWeb, généralement avec un enregistrement wildcard `A` ou `AAAA`
+4. Si vous avez besoin de HTTPS, provisionnez séparément un certificat wildcard
+5. Rechargez ou redémarrez BunkerWeb
+
+---
+
+### Exemples
+
+#### Single-site
+
+```yaml
+SERVER_NAME: "example.com"
+USE_WILDCARD: "yes"
+```
+
+Ce service répondra à :
+
+* `example.com`
+* `www.example.com`
+* `api.example.com`
+* tout autre nom d'hôte `*.example.com` qui résout vers BunkerWeb
+
+#### Multisite
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "app.example.com docs.example.org"
+
+# Seul app.example.com obtient le routage wildcard
+app.example.com_USE_WILDCARD: "yes"
+```
+
+Dans cette configuration :
+
+* `app.example.com` et `*.app.example.com` vont vers le premier service
+* `docs.example.org` conserve uniquement la correspondance exacte
+
+---
+
+### Comportement important
+
+!!! warning "Seul le premier domaine devient wildcard"
+    Si `SERVER_NAME` vaut :
+
+    ```yaml
+    SERVER_NAME: "example.com example.org"
+    ```
+
+    seul `*.example.com` est ajouté.
+
+    Placez en premier le domaine que vous souhaitez utiliser en wildcard.
+
+!!! note "Les entrées wildcard existantes sont conservées"
+    Si le premier domaine commence déjà par `*.`, par exemple :
+
+    ```yaml
+    SERVER_NAME: "*.example.com"
+    ```
+
+    le plugin n'émet rien.
+
+!!! note "La correspondance wildcard ne couvre qu'un seul label"
+    `*.example.com` correspond à `foo.example.com`, mais pas à `a.b.example.com`.
+
+    Pour des sous-domaines plus profonds, utilisez une entrée `SERVER_NAME` explicite ou un service séparé.
+
+!!! note "Les correspondances exactes sont prioritaires"
+    Si un autre service définit explicitement `foo.example.com`, NGINX route d'abord ce nom d'hôte vers la correspondance exacte.
+
+---
+
+### Recommandé avec les certificats wildcard Let's Encrypt
+
+Si vous utilisez ce plugin avec `USE_LETS_ENCRYPT_WILDCARD=yes`, utilisez ce modèle :
+
+```yaml
+SERVER_NAME: "<root_domain> <any_app>.<root_domain>"
+```
+
+Le **domaine racine doit venir en premier**.
+
+Exemple :
+
+```yaml
+SERVER_NAME: "example.com app.example.com"
+USE_WILDCARD: "yes"
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+LETS_ENCRYPT_CHALLENGE: "dns"
+LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
+LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
+USE_LETS_ENCRYPT_WILDCARD: "yes"
+```
+
+!!! tip "Pourquoi ce modèle est important"
+    - **Seule la première entrée de `SERVER_NAME` devient wildcard**
+
+    Si `example.com` vient en premier, le plugin émet `*.example.com`.
+
+    Si `app.example.com` vient en premier, il émet `*.app.example.com`, ce qui correspond généralement au mauvais niveau de wildcard.
+
+    - **La deuxième entrée aide Let's Encrypt à détecter le bon domaine de base**
+      Avec seulement un domaine apex nu, la détection de certificat wildcard peut échouer sur certains domaines à suffixe public comme `example.co.uk`.
+
+    - **Le deuxième nom d'hôte n'a pas besoin de backend réel**
+      Utilisez n'importe quelle valeur stable comme `app.example.com` ou `www.example.com`.
+
+#### Multisite avec Let's Encrypt wildcard
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "example.com app.example.com"
+example.com_USE_WILDCARD: "yes"
+example.com_USE_LETS_ENCRYPT_WILDCARD: "yes"
+example.com_LETS_ENCRYPT_CHALLENGE: "dns"
+example.com_LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
+example.com_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
+```
+
+---
+
+### Conseils d'utilisation
+
+* **Planifiez le TLS séparément**
+  Le routage wildcard ne suffit pas pour HTTPS. Vous avez toujours besoin d'une couverture de certificat pour les sous-domaines.
+
+* **Gardez l'ordre de `SERVER_NAME` stable**
+  Réordonner les entrées change quel domaine devient la cible du wildcard.
+
+* **Fonctionne bien avec `REVERSE_PROXY_HOST`**
+  C'est utile lorsque de nombreux sous-domaines sont routés via un upstream partagé, comme un routeur de tenants.
+
+* **Soyez prudent avec les services qui se chevauchent**
+  NGINX privilégie toujours la correspondance `server_name` la plus spécifique.

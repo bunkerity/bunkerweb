@@ -18,7 +18,22 @@
   "aria": {
     "label": {
       "close": "إغلاق",
-      "raw_configuration": "التكوين الخام"
+      "copy": "نسخ السجلات",
+      "download_log": "تنزيل ملف السجل هذا",
+      "follow": "متابعة",
+      "select_file": "اختر ملفًا",
+      "select_page": "اختر صفحة",
+      "issue_count": "عدد الأخطاء والتحذيرات",
+      "level_filter": "تصفية أسطر السجل حسب المستوى",
+      "local_time": "عرض الطوابع الزمنية بالتوقيت المحلي",
+      "collapse_multiline": "طي الإدخالات متعددة الأسطر",
+      "next_issue": "الخطأ أو التحذير التالي",
+      "prev_issue": "الخطأ أو التحذير السابق",
+      "search_logs": "البحث في السجلات",
+      "toggle_wrap": "تبديل التفاف الأسطر",
+      "configs_dropzone": "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا",
+      "raw_configuration": "التكوين الخام",
+      "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا"
     }
   },
   "badge": {
@@ -42,6 +57,7 @@
     "bans": "الحظر",
     "cache": "الذاكرة المؤقتة",
     "configs": "التكوينات",
+    "crowdsec": "CrowdSec",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
     "home": "الرئيسية",
@@ -94,10 +110,8 @@
     "enable_totp": "تمكين TOTP",
     "entire_config": "التكوين الكامل",
     "export": "تصدير",
-    "export_csv_all": "CSV (الكل)",
-    "export_csv_visible": "CSV (مرئي)",
-    "export_excel_all": "Excel (الكل)",
-    "export_excel_visible": "Excel (مرئي)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "جلب الإعدادات العامة",
     "filters_suffix": " مرشحات",
     "follow": "متابعة",
@@ -107,6 +121,7 @@
     "go_back": "الرجوع",
     "hide": "إخفاء",
     "history": "السجل",
+    "import_configs": "استيراد التكوينات المخصصة",
     "import_services": "استيراد الخدمات",
     "login": "تسجيل الدخول",
     "multiple_add": "إضافة",
@@ -122,6 +137,7 @@
     "plugin_page": "صفحة الإضافة",
     "proceed": "متابعة",
     "refresh_recovery_codes": "تحديث رموز الاسترداد",
+    "refresh_ui_plugins": "تحديث إضافات الواجهة",
     "reload": "إعادة تحميل",
     "reset": "إعادة تعيين",
     "reset_columns": "إعادة تعيين الأعمدة",
@@ -130,6 +146,10 @@
     "run_selected_jobs": "تشغيل المهام المحددة",
     "save": "حفظ",
     "save_changes": "حفظ التغييرات",
+    "local_time": "التوقيت المحلي",
+    "collapse_multiline": "طي",
+    "search": "بحث",
+    "wrap": "التفاف",
     "select_file": "اختيار ملف",
     "select_page": "اختيار صفحة",
     "service": "خدمة",
@@ -148,7 +168,164 @@
     "upload_photo": "تحميل صورة جديدة",
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
-    "wipe_other_sessions": "مسح الجلسات الأخرى"
+    "wipe_other_sessions": "مسح الجلسات الأخرى",
+    "ban_all_filtered": "حظر جميع التقارير المطابقة",
+    "filtered_actions": "إجراءات مُصفّاة",
+    "unban_all_filtered": "رفع الحظر عن جميع الحظورات المطابقة",
+    "update_duration_all_filtered": "تحديث المدة لجميع الحظورات المطابقة",
+    "validate_certificate": "التحقق من الشهادة"
+  },
+  "crowdsec": {
+    "alert": {
+      "id": "Alert ID",
+      "load": "Load full evidence",
+      "started": "Started",
+      "stopped": "Stopped"
+    },
+    "captured_history": "Captured history",
+    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "connection": {
+      "appsec": "Last AppSec observation",
+      "choose": "Choose a connection",
+      "connected": "Connected",
+      "connection_error": "Connection error",
+      "configured": "Configured",
+      "global": "all services",
+      "help": "Each instance and service scope is a separate connection.",
+      "label": "CrowdSec connection",
+      "last_sync": "Last successful sync",
+      "local_api": "Local API",
+      "management": "Management",
+      "mode": "Mode",
+      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
+      "read_only": "Read only",
+      "required": "Choose a CrowdSec connection first.",
+      "sync": "Decision sync",
+      "sync_current": "Up to date",
+      "sync_not_synchronized": "Not synchronized yet",
+      "sync_stale": "Stale",
+      "selected": "الاتصال المحدد",
+      "scope_help": "يُستخدم الاتصال المحدد للقرارات وقوائم السماح وفحص عناوين IP أدناه."
+    },
+    "current_state": "Current state",
+    "current_state_help": "Current state may change after this observation.",
+    "decision": {
+      "duration": "Duration",
+      "expires": "Expires",
+      "id": "Decision ID",
+      "origin": "Origin",
+      "scenario": "Scenario",
+      "scope": "Scope",
+      "target": "Target",
+      "type": "Type"
+    },
+    "decisions": {
+      "count": "Showing {{start}}–{{end}} of {{total}}",
+      "help": "This is current state read directly from the selected CrowdSec engine.",
+      "none": "No active decisions match these filters.",
+      "pagination": "Decision pages",
+      "title": "Active decisions"
+    },
+    "error": {
+      "request": "The CrowdSec request failed."
+    },
+    "investigation": {
+      "alerts": "Available CrowdSec alert evidence",
+      "current_decisions": "Current CrowdSec decisions",
+      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
+      "ip": "IP address",
+      "local_bans": "Current local BunkerWeb bans",
+      "no_alerts": "No alert evidence is available.",
+      "no_bans": "No current local ban was found.",
+      "no_decisions": "No current CrowdSec decision was found.",
+      "no_reports": "No recent captured report was found.",
+      "placeholder": "192.0.2.10",
+      "reports": "Recent BunkerWeb reports",
+      "result": "Investigation for {{ip}}",
+      "submit": "Investigate",
+      "title": "Investigate an IP",
+      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
+      "unavailable": "Unavailable: {{error}}",
+      "summary": "Evidence found for this IP",
+      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
+      "summary_decisions": "CrowdSec decisions",
+      "summary_bans": "Local BunkerWeb bans",
+      "summary_alerts": "CrowdSec alert evidence",
+      "summary_reports": "BunkerWeb reports",
+      "summary_active": "{{total}} active",
+      "summary_available": "{{total}} available",
+      "summary_captured": "{{total}} captured",
+      "summary_none": "None found",
+      "summary_unreadable": "Could not be read"
+    },
+    "local_ban": {
+      "expires": "Expires",
+      "reason": "Reason",
+      "service": "Service"
+    },
+    "next": "Next",
+    "observed_at": "Observed {{time}}",
+    "previous": "Previous",
+    "refresh": "Refresh status",
+    "remove": {
+      "action": "Remove",
+      "confirm": "I understand and want to remove this decision.",
+      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
+      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "submit": "Remove decision",
+      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
+      "title": "Remove CrowdSec decision"
+    },
+    "report": {
+      "captured": "Captured at",
+      "date": "Report time",
+      "decisions": "Captured decisions",
+      "entry": "Security report",
+      "matched_target": "Matched target",
+      "metadata": "Decision metadata",
+      "metadata_complete": "Complete",
+      "metadata_incomplete": "Incomplete",
+      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
+      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
+      "reason": "Reason",
+      "remediation": "Captured remediation",
+      "scope": "Captured service scope",
+      "service": "Service",
+      "source": "Captured source",
+      "identifier": "Report identifier"
+    },
+    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
+    "title": "CrowdSec operator",
+    "unknown": "Unknown",
+    "allowlists": {
+      "title": "CrowdSec allowlists",
+      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
+      "refresh": "Refresh allowlists",
+      "pages": "Allowlist pages",
+      "empty": "No allowlists were found on this engine.",
+      "console": "Console managed",
+      "local": "Locally managed",
+      "no_entries": "No active entries.",
+      "never": "Never",
+      "comment": "Comment",
+      "unknown": "Allowlist status is unavailable.",
+      "not_allowed": "This IP does not match a CrowdSec allowlist.",
+      "allowed": "Allowlisted by CrowdSec",
+      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "guide": {
+        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
+        "title": "How to manage trusted IPs and networks",
+        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
+        "create": "Create a list once, or use an existing locally managed list.",
+        "add": "Add trusted IPs or CIDR networks.",
+        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
+        "inspect": "Inspect the list and its expiry dates.",
+        "remove": "Remove an exception when it is no longer needed.",
+        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
+        "console": "Edit Console-managed lists in the CrowdSec Console.",
+        "docs": "CrowdSec allowlist documentation"
+      }
+    }
   },
   "country": {
     "AD": "أندورا",
@@ -469,11 +646,16 @@
       "no_data": "لا يوجد بيانات"
     },
     "window": {
+      "all_time": "كل الأوقات",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "تحديد كل {{count}} {{entity}} المطابقة",
+    "bulk_select_all_done": "تم تحديد كل {{count}} {{entity}} المطابقة.",
+    "bulk_select_clear": "مسح التحديد",
+    "bulk_select_page": "تم تحديد كل {{count}} {{entity}} في هذه الصفحة.",
     "info_bans": "عرض {{start}} إلى {{end}} من أصل {{total}} حظر",
     "info_cache": "عرض {{start}} إلى {{end}} من أصل {{total}} ملفات ذاكرة مؤقتة",
     "info_configs": "عرض {{start}} إلى {{end}} من أصل {{total}} تكوينات مخصصة",
@@ -504,7 +686,6 @@
     "info_reports": "عرض {{start}} إلى {{end}} من أصل {{total}} تقارير",
     "info_services": "عرض {{start}} إلى {{end}} من أصل {{total}} خدمات",
     "info_templates": "عرض {{start}} إلى {{end}} من أصل {{total}} قوالب",
-    "last_run_state": "حالة آخر تشغيل",
     "length_all": "الكل",
     "length_menu_bans": "عرض _MENU_ حظر",
     "length_menu_cache": "عرض _MENU_ ملفات ذاكرة مؤقتة",
@@ -516,8 +697,6 @@
     "length_menu_reports": "عرض _MENU_ تقارير",
     "length_menu_services": "عرض _MENU_ خدمات",
     "length_menu_templates": "عرض _MENU_ قوالب",
-    "loading": "جار تحميل جداول البيانات...",
-    "one_or_more": "واحد أو أكثر",
     "paginate": {
       "first": "الأول",
       "last": "الأخير",
@@ -556,8 +735,6 @@
     "select_rows_templates_0": "لم يتم تحديد أي قوالب",
     "select_rows_templates_1": "تم تحديد 1 قالب",
     "select_rows_templates_plural": "تم تحديد %d قوالب",
-    "steps": "الخطوات",
-    "zero": "صفر",
     "zero_records_bans": "لم يتم العثور على حظر مطابق",
     "zero_records_cache": "لم يتم العثور على ملفات ذاكرة مؤقتة مطابقة",
     "zero_records_configs": "لم يتم العثور على تكوينات مخصصة مطابقة",
@@ -610,6 +787,8 @@
     "easter_egg": "إذا قرأت هذا، فهذا يعني أنك فضولي 👀",
     "error": "خطأ",
     "message": "معلومة",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "لديك خدمات أكثر مما يسمح به ترخيص PRO الخاص بك. قم بترقية ترخيصك أو حوّل بعض الخدمات إلى وضع المسودة لإلغاء قفل ترخيص PRO.",
     "time": {
       "just_now": "الآن"
     },
@@ -625,6 +804,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "تضمين التكوينات المخصصة المرفقة",
+      "overwrite_existing_configs": "استبدال تكوينات UI/API المخصصة الحالية",
       "remember_me": "تذكرني"
     },
     "help": {
@@ -697,11 +878,11 @@
       "use_real_ip": "استخدام IP الحقيقي",
       "username": "اسم المستخدم",
       "wildcard_certificates": "شهادات Wildcard",
-      "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_key": "مفتاح واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_retry": "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL",
-      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL"
+      "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
+      "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -760,11 +941,25 @@
     "upgrade": "ترقية؟"
   },
   "logs": {
-    "eventsource_failed": "فشل اتصال EventSource",
-    "parse_error": "فشل في تحليل بيانات التدفق: {{error}}",
-    "stream_error": "خطأ في التدفق: {{message}}",
-    "stream_init": "تم تهيئة التدفق، حجم الملف: {{size}}",
-    "stream_initialized": "تم تهيئة التدفق مع التحديث، حجم الملف: {{size}}",
+    "annotation_error": "خطأ",
+    "annotation_warning": "تحذير",
+    "filter_levels": "المستويات",
+    "letsencrypt_logs": "سجلات Let's Encrypt",
+    "main_logs": "السجلات الرئيسية",
+    "new_lines_sr": "{{count}} أسطر سجل جديدة",
+    "issue_summary": "{{errors}} خطأ، {{warnings}} تحذير",
+    "level_critical": "حرج",
+    "level_debug": "تصحيح",
+    "level_error": "خطأ",
+    "level_info": "معلومات",
+    "level_notice": "إشعار",
+    "level_warning": "تحذير",
+    "lines_all": "الكل",
+    "lines_label": "الأسطر",
+    "meta": "{{size}} · {{lines}} أسطر · تم التعديل {{when}}",
+    "new_lines": "أسطر جديدة",
+    "showing_all": "{{total}} أسطر",
+    "showing_some": "عرض {{shown}} من {{total}}",
     "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---"
   },
   "modal": {
@@ -794,6 +989,9 @@
       "fetch_global_settings_point_1": "يتم تحديث الإعدادات الموجودة في هذا القالب فقط.",
       "fetch_global_settings_point_2": "يتم تجاهل القيم المطابقة للقيم الافتراضية.",
       "fetch_global_settings_point_3": "لن يتم الكتابة فوق SERVER_NAME مطلقًا.",
+      "export_services_intro": "سيتم تصدير الخدمات المحددة. فعّل الخيار أدناه لتضمين التكوينات المخصصة المرفقة بها في أرشيف .zip.",
+      "import_configs_dropzone": "اسحب وأفلت ملف تصدير التكوينات المخصصة هنا أو انقر لتحديد ملف.",
+      "import_configs_warning": "يتم دائمًا الاحتفاظ بالتكوينات المخصصة التي أنشأها scheduler أو autoconf أو templates. يمكن فقط استبدال تكوينات UI/API.",
       "import_services_dropzone": "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف.",
       "import_services_warning": "سيؤدي استيراد الخدمات إلى إنشاء خدمات واجهة مستخدم جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة.",
       "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل.",
@@ -804,7 +1002,10 @@
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
-      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:"
+      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
+      "ban_filtered_confirmation": "هل تريد حظر عناوين IP من جميع التقارير المطابقة البالغ عددها {{count}}؟ سيتم تطبيق الأهداف المكررة مرة واحدة فقط.",
+      "unban_filtered_confirmation": "هل أنت متأكد أنك تريد رفع الحظر عن جميع الحظورات المطابقة البالغ عددها {{count}}؟",
+      "update_filtered_duration_alert": "حدد مدة جديدة لجميع الحظورات المطابقة البالغ عددها {{count}}:"
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -828,8 +1029,10 @@
       "delete_template": "حذف القوالب",
       "edit_template": "تعديل القالب: {{name}}",
       "fetch_global_settings": "تطبيق الإعدادات العامة؟",
+      "export_services": "تصدير الخدمات",
       "from_plugin": "من الإضافة",
       "full_url": "URL كامل",
+      "import_configs": "استيراد التكوينات المخصصة",
       "import_services": "استيراد الخدمات",
       "job_history": "آخر 10 عمليات تنفيذ للمهام",
       "job_history_count": "آخر {{count}} عمليات تنفيذ للمهمة",
@@ -861,6 +1064,7 @@
     "bans": "الحظر",
     "cache": "الذاكرة المؤقتة",
     "configs": "التكوينات",
+    "crowdsec": "CrowdSec",
     "extra_pages": "صفحات إضافية",
     "global_settings": "الإعدادات العامة",
     "home": "الرئيسية",
@@ -902,7 +1106,10 @@
       "status": {
         "deactivated": "الإضافة معطلة؛ لذلك، لا تتوفر معلومات.",
         "metrics_deactivated": "إضافة المقاييس غير مفعلة؛ لذلك، لا تتوفر معلومات.",
-        "not_available": "صفحة الإضافة غير متاحة بعد خلال مرحلة البيتا."
+        "not_available": "صفحة الإضافة غير متاحة بعد خلال مرحلة البيتا.",
+        "pre_render_error": "خطأ في العرض المسبق",
+        "no_content": "لا توفر هذه الإضافة صفحة مضمّنة.",
+        "dedicated_page_unavailable": "تتم إدارة هذه الإضافة في صفحة مخصصة لم يتم تحميلها بعد. أعد تشغيل واجهة الويب للوصول إليها."
       }
     },
     "type": {
@@ -999,6 +1206,19 @@
     }
   },
   "reports": {
+    "crowdsec": {
+      "source_lapi": "قرار واجهة API المحلية",
+      "source_appsec": "فحص AppSec",
+      "source_failure_policy": "سياسة فشل AppSec",
+      "appsec_help": "فحص AppSec هذا الطلب؛ قد لا يوجد قرار من واجهة API المحلية.",
+      "failure_policy_help": "تم تطبيق سياسة الفشل المهيأة بعد حدوث خطأ في AppSec.",
+      "no_decisions": "لم تُسجَّل تفاصيل قرارات لهذا الطلب.",
+      "technical_details": "تفاصيل تقنية",
+      "connection_id": "معرّف الاتصال",
+      "instance": "المثيل",
+      "appsec_action": "إجراء AppSec"
+    },
+    "retention_notice": "التقارير مخزَّنة في ذاكرة مؤقتة دائرية داخل الذاكرة: تُحذف أقدم الإدخالات عند بلوغ الحد المُهيَّأ. وما لم يكن Redis مفعَّلاً، تُمحى التقارير أيضاً عند إعادة تشغيل BunkerWeb.",
     "security_incident": "حادث أمني",
     "security_report_data": "بيانات تقرير الأمان"
   },
@@ -1034,7 +1254,6 @@
     "last_30d": "آخر 30 يومًا",
     "last_7d": "آخر 7 أيام",
     "last_run": "حالة التشغيل الأخير",
-    "last_run_state": "حالة التشغيل الأخير",
     "last_seen": "آخر مشاهدة",
     "last_update": "آخر تحديث",
     "loading": "جار التحميل...",
@@ -1102,9 +1321,9 @@
       "section": {
         "custom_certificate": "شهادة مخصصة",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "IP الحقيقي",
-        "reverse_proxy": "وكيل عكسي",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "وكيل عكسي"
       },
       "subtitle": "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب.",
       "title": "إعدادات واجهة المستخدم"
@@ -1333,8 +1552,8 @@
       "raw_configs_title": "استيراد التكوينات المخصصة",
       "raw_configs_upload": "تحميل ملفات التكوين (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "تعذر قراءة أحد الملفات المحددة.",
-      "raw_editor_aria": "محرر JSON للقالب الخام",
       "raw_editor_drop_hint": "أسقط ملف JSON قالب (.json فقط) لاستبدال المحتوى الحالي.",
+      "raw_editor_aria": "محرر JSON للقالب الخام",
       "raw_editor_help": "تعديل تعريف القالب الكامل بصيغة JSON. يؤدي التبديل مرة أخرى إلى الوضع السهل إلى التحقق من الصحة وإعادة تحميل المحرر المرئي.",
       "raw_editor_import_success": "تم استيراد JSON القالب بنجاح.",
       "raw_editor_override_body": "سيؤدي استيراد هذا الملف إلى استبدال JSON القالب الحالي بالكامل. سيتم فقدان التغييرات التي تم إجراؤها في المحرر. هل تريد المتابعة؟",
@@ -1468,6 +1687,7 @@
       "force_check": "جدولة تحقق؛ يتم التنزيل فقط إذا كانت هناك تحديثات.",
       "force_update": "يتجاوز عمليات التحقق ويفرض تنزيل إضافات PRO؛ يحافظ على الحالة الحالية عند الفشل.",
       "ping_instance": "اختبار اتصال المثيل {{hostname}}",
+      "refresh_ui_plugins": "يعيد تحميل إضافات PRO الموجودة بالفعل في واجهة الويب دون تنزيل أي شيء.",
       "reload_instance": "إعادة تحميل المثيل {{hostname}}",
       "reset_default": "إعادة التعيين إلى القيمة الافتراضية",
       "reset_global": "إعادة التعيين إلى القيمة العامة",
@@ -1522,8 +1742,8 @@
     "latest_version_installed": "أنت تستخدم أحدث إصدار.",
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "تعطيل طلبات الشهادات للنطاقات التي تطابق قائمة Public Suffix List (موصى به).",
-    "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
+    "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "license_key": "مفتاح ترخيص BunkerWeb PRO الخاص بك.",
     "link": {
       "access_plugin_page": "الوصول إلى صفحة {{name}}",
@@ -1535,6 +1755,7 @@
       "edit_config": "تحرير التكوين المخصص {{name}}",
       "edit_service": "تحرير الخدمة {{service}}",
       "edit_template": "تحرير القالب {{template}}",
+      "export_config": "تصدير التكوين المخصص {{name}}",
       "export_service": "تصدير تكوين الخدمة {{name}}",
       "view_config": "عرض التكوين المخصص {{name}}",
       "view_file": "عرض {{filename}}",
@@ -1562,6 +1783,16 @@
     "real_ip_recursive": "إجراء بحث متكرر في رأس حاوية عنوان IP.",
     "remove_ban_entry": "إزالة إدخال الحظر هذا من القائمة.",
     "reset_template_settings": "إعادة تعيين جميع الإعدادات في عرض القالب الحالي إلى قيمها الافتراضية.",
+    "download_log": "تنزيل ملف السجل هذا",
+    "issue_count": "الأخطاء والتحذيرات في هذا العرض",
+    "local_time": "عرض الطوابع الزمنية بتوقيتك المحلي",
+    "collapse_multiline": "طي الإدخالات متعددة الأسطر (تتبعات الأخطاء، الحمولات)",
+    "collapse_raw_values": "طي القيم متعددة الأسطر (الشهادات، المفاتيح)",
+    "next_issue": "الانتقال إلى الخطأ أو التحذير التالي",
+    "prev_issue": "الانتقال إلى الخطأ أو التحذير السابق",
+    "search_logs": "البحث في السجلات (Ctrl+F)",
+    "toggle_level": "إظهار / إخفاء أسطر {{level}}",
+    "toggle_wrap": "تبديل التفاف الأسطر",
     "select_file_to_follow": "اختر ملفًا لتمكين وضع المتابعة",
     "server_name": "اسم النطاق الأساسي أو اسم الخادم لهذه الخدمة.",
     "stream_support": {
@@ -1698,16 +1929,23 @@
     "view_full_url": "انقر لعرض URL الكامل",
     "wildcard_certificates": "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS.",
     "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS.",
-    "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_key": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot.",
-    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
-    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL."
+    "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
   },
   "validation": {
+    "certificate_checking": "جارٍ التحقق ...",
+    "certificate_expires_in": "تنتهي الصلاحية خلال {{days}} يومًا",
+    "certificate_failed": "فشل طلب التحقق.",
+    "certificate_file_mode": "يمكن التحقق هنا فقط من البيانات الملصقة أو المرفوعة. يقرأ المُجدوِل مسار الشهادة، وواجهة الويب لا تملك صلاحية الوصول إليه.",
+    "certificate_missing": "يرجى تقديم الشهادة والمفتاح أولاً.",
+    "certificate_subject": "الموضوع:",
+    "certificate_valid": "الشهادة والمفتاح متطابقان.",
     "default_field_name": "هذا الحقل",
     "invalid_date": "تاريخ غير صالح",
     "ip_global_duplicate": "عنوان IP هذا محظور عالميًا بالفعل.",

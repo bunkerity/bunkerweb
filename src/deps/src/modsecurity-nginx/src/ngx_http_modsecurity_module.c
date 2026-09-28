@@ -57,6 +57,9 @@ ngx_http_modsecurity_get_variable(ngx_http_request_t *r,
 {
     ngx_http_modsecurity_ctx_t *ctx;
     const char *var_name = (const char *)data;
+    size_t len = 0;
+    u_char *p;
+    int rc;
 
     ctx = ngx_http_modsecurity_get_module_ctx(r);
     if (ctx == NULL || ctx->modsec_transaction == NULL) {
@@ -64,20 +67,28 @@ ngx_http_modsecurity_get_variable(ngx_http_request_t *r,
         return NGX_OK;
     }
 
-    const char *value = msc_get_transaction_variable(ctx->modsec_transaction, var_name);
+    rc = msc_get_transaction_variable(ctx->modsec_transaction, var_name, NULL, &len);
 
-    if (value == NULL) {
+    if (rc == 0) {
         v->not_found = 1;
         return NGX_OK;
     }
 
-    size_t len = ngx_strlen(value);
-    u_char *p = ngx_pnalloc(r->pool, len);
+    if (rc < 0) {
+        return NGX_ERROR;
+    }
+
+    p = len == 0 ? (u_char *) "" : ngx_pnalloc(r->pool, len);
     if (p == NULL) {
         return NGX_ERROR;
     }
 
-    ngx_memcpy(p, value, len);
+    if (len > 0) {
+        rc = msc_get_transaction_variable(ctx->modsec_transaction, var_name, (char *) p, &len);
+        if (rc <= 0) {
+            return NGX_ERROR;
+        }
+    }
 
     v->data = p;
     v->len = len;

@@ -11,9 +11,9 @@
 
 请按照以下步骤启用和配置 Antibot 功能：
 
-1.  **选择一个挑战类型：** 决定使用哪种类型的 antibot 挑战（例如，[captcha](#__tabbed_3_3)、[hcaptcha](#__tabbed_3_5)、[javascript](#__tabbed_3_2)）。
+1.  **选择一个挑战类型：** 决定使用哪种类型的 antibot 挑战（例如，[captcha](#__tabbed_3_3)、[hcaptcha](#__tabbed_3_5)、[capjs](#__tabbed_3_8)、[javascript](#__tabbed_3_2)）。
 2.  **启用该功能：** 在您的 BunkerWeb 配置中将 `USE_ANTIBOT` 设置为您选择的挑战类型。
-3.  **配置设置：** 根据需要调整其他 `ANTIBOT_*` 设置。对于 reCAPTCHA、hCaptcha、Turnstile 和 mCaptcha，您必须在相应的服务上创建一个帐户并获取 API 密钥。
+3.  **配置设置：** 根据需要调整其他 `ANTIBOT_*` 设置。对于 reCAPTCHA、hCaptcha 和 Turnstile，请在相应的服务上创建账户并获取 API 密钥。对于 mCaptcha 和 Cap.js，您可以自行托管提供程序，或使用托管服务，然后配置所需的站点密钥和密钥。
 4.  **重要提示：** 确保 `ANTIBOT_URI` 是您网站上一个未被使用的唯一 URL。
 
 !!! important "关于 `ANTIBOT_URI` 设置"
@@ -29,38 +29,53 @@
 | 设置                   | 默认值       | 上下文    | 多个 | 描述                                                                                        |
 | ---------------------- | ------------ | --------- | ---- | ------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge` | multisite | 否   | **挑战 URL：** 用户将被重定向到以完成挑战的 URL。确保此 URL 未用于您网站上的任何其他内容。  |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。       |
-| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `ANTIBOT_TIME_VALID`   | `1d`         | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `ANTIBOT_SUCCESS_URI`  |              | multisite | 否   | **成功后重定向 URL：** 用户成功解决挑战后重定向到的固定 URL，而不是他们最初请求的页面。留空则将用户返回其原始目标页面。 |
 
 ### 从挑战中排除流量
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                  |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。                    |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                    |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                      |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。             |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                              |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。             |
-| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。         |
-| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。 |
+| 设置                            | 默认值   | 上下文       | 多个  | 描述                                                                 |
+| ----------------------------- | ----- | --------- | --- | ------------------------------------------------------------------ |
+| `ANTIBOT_IGNORE_URI`          |       | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_IP`           |       | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                         |
+| `ANTIBOT_IGNORE_RDNS`         |       | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                            |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes` | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                   |
+| `ANTIBOT_IGNORE_ASN`          |       | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                |
+| `ANTIBOT_IGNORE_USER_AGENT`   |       | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                            |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |       | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。  |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |       | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                     |
+| `ANTIBOT_IGNORE_COUNTRY`      |       | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                |
+| `ANTIBOT_ONLY_COUNTRY`        |       | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。            |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! note "国家设置的行为"
       - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。
       - 当设置了 `ANTIBOT_ONLY_COUNTRY` 且 IP 为私有或无法解析的地址时，由于无法确定国家代码，请求会绕过挑战。
+
+!!! tip "在子域之间共享挑战状态"
+    antibot 状态（包括 `turnstile`、`hcaptcha`、`recaptcha`、`mcaptcha`、`captcha`、`javascript` 和 `cookie`）会保存在 BunkerWeb 的[会话 Cookie](#sessions) 中。默认情况下，该 Cookie 仅作用于设置它的确切主机，因此用户如果在 `a.example.com` 上完成了挑战，在 `b.example.com` 上仍会再次被挑战。若要让同一可注册域名下的所有同级子域只需完成一次挑战，请为**每个相关服务器**将 [`SESSIONS_DOMAIN`](#sessions) 设置为父域名（例如 `example.com`）。`SESSIONS_DOMAIN` 是一项 multisite 设置，应按服务器分别配置，这样同一 BunkerWeb 实例上托管的无关租户就不会收到跨租户共享的 `Domain` 属性。
 
 **示例：**
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   这将从 antibot 挑战中排除所有以 `/api/`、`/webhook/` 或 `/assets/` 开头的 URI。
 
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  这将从 antibot 挑战中排除精确的 `/index.php?a=b&c=d` 请求。
+
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   这将从 antibot 挑战中排除内部网络 `192.168.1.0/24` 和特定 IP `10.0.0.1`。
 
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   这将从 antibot 挑战中排除来自反向 DNS 以 `googlebot.com` 或 `bingbot.com` 结尾的主机的请求。
+
+!!! info "正向确认的反向 DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS` 后缀会经过正向确认：将匹配的 PTR 主机名重新解析回一个 IP，只有当它与客户端 IP 匹配时才会绕过挑战。无法通过正向确认的 PTR 会被视为可能的伪造，此时挑战仍将被执行。这可以防止控制自己 PTR 记录的攻击者将其设置为被忽略的后缀（例如 `.googlebot.com`）来绕过挑战。
 
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   这将从 antibot 挑战中排除来自 ASN 15169 (Google) 和 ASN 8075 (Microsoft) 的请求。
@@ -92,6 +107,8 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | ------------- | ------ | --------- | ---- | ------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `cookie` 以启用 Cookie 挑战。 |
 
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
+
 === "JavaScript"
 
     JavaScript 挑战要求客户端使用 JavaScript 解决一个计算任务。这种机制确保客户端启用了 JavaScript 并且可以执行所需的代码，这通常超出了大多数机器人的能力。
@@ -107,11 +124,16 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     -   该挑战为每个客户端动态生成一个独特的任务。
     -   计算任务涉及具有特定条件的哈希（例如，找到具有某个前缀的哈希）。
 
+    挑战的成本由 `ANTIBOT_JAVASCRIPT_DIFFICULTY` 设置，单位是前导零比特数（16 到 28，默认 16）；每多一比特，平均求解时间翻倍。如果你使用 PRO 自定义 JavaScript 挑战页面，请在把此设置提高到默认值以上之前重新生成它们，否则它们仍会证明旧的、更低的难度，从而被拒绝。
+
     **配置设置：**
 
-    | 设置          | 默认值 | 上下文    | 多个 | 描述                                                            |
-    | ------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
+    | 设置                            | 默认值 | 上下文    | 多个 | 描述                                                            |
+    | ------------------------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
+    | `USE_ANTIBOT`                    | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`  | `16`   | multisite | no   | **JavaScript 难度：** 工作量证明难度，单位为前导零比特数（16 到 28）。 |
+
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
 
 === "Captcha"
 
@@ -146,6 +168,8 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`              | `no`                                                   | multisite | no   | **启用 Antibot：** 设置为 `captcha` 以启用 Captcha 挑战。                                                                                                            |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no   | **Captcha 字母表：** 用于生成 CAPTCHA 的字符字符串。支持的字符：所有字母 (a-z, A-Z)、数字 2-9（不包括 0 和 1）以及特殊字符：```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
+
 === "reCAPTCHA"
 
     启用后，reCAPTCHA 会在后台运行 (v3)，根据用户行为分配一个分数。低于配置阈值的分数将提示进一步验证或阻止请求。对于可见的挑战 (v2)，用户必须与 reCAPTCHA 小部件交互才能继续。
@@ -171,6 +195,8 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_RECAPTCHA_JA4`        |        | multisite | no   | 可选的 JA4 TLS 指纹，包含在企业评估中。                                  |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`  | multisite | no   | 通过所需的最低分数（适用于经典 v3 和新版本）。                           |
 
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
+
 === "hCaptcha"
 
     启用后，hCaptcha 提供了一个有效的 reCAPTCHA 替代方案，它通过验证用户交互而无需依赖评分机制。它用一个简单的交互式测试来挑战用户，以确认他们的合法性。
@@ -185,6 +211,8 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_HCAPTCHA_SITEKEY` |        | multisite | no   | **hCaptcha 站点密钥：** 您的 hCaptcha 站点密钥（从 hCaptcha 获取）。 |
     | `ANTIBOT_HCAPTCHA_SECRET`  |        | multisite | no   | **hCaptcha 密钥：** 您的 hCaptcha 密钥（从 hCaptcha 获取）。         |
 
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
+
 === "Turnstile"
 
     Turnstile 是一种现代、注重隐私的挑战机制，它利用 Cloudflare 的技术来检测和阻止自动化流量。它以一种无缝、后台的方式验证用户交互，为合法用户减少了摩擦，同时有效地阻止了机器人。
@@ -198,6 +226,8 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`               | `no`   | multisite | no   | **启用 Antibot：** 设置为 `turnstile` 以启用 Turnstile 挑战。            |
     | `ANTIBOT_TURNSTILE_SITEKEY` |        | multisite | no   | **Turnstile 站点密钥：** 您的 Turnstile 站点密钥（从 Cloudflare 获取）。 |
     | `ANTIBOT_TURNSTILE_SECRET`  |        | multisite | no   | **Turnstile 密钥：** 您的 Turnstile 密钥（从 Cloudflare 获取）。         |
+
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
 
 === "mCaptcha"
 
@@ -215,6 +245,33 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no   | **mCaptcha 站点密钥：** 您的 mCaptcha 站点密钥（从 mCaptcha 获取）。 |
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no   | **mCaptcha 密钥：** 您的 mCaptcha 密钥（从 mCaptcha 获取）。         |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no   | **mCaptcha 域：** 用于 mCaptcha 挑战的域。                           |
+
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
+
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) 是一种自托管、开源、注重隐私的工作量证明 CAPTCHA。它不把验证交给第三方服务，而是由您自己运行 Cap.js 服务器，BunkerWeb 会向该服务器验证令牌。
+
+    前端 URL 是浏览器可访问并用于加载小组件的端点。如果 BunkerWeb 可以通过内部地址访问 Cap.js 服务器，请将后端 URL 设置为该内部端点；否则保持为空，BunkerWeb 会使用前端 URL 进行 `/siteverify`。
+
+    **配置设置：**
+
+    | 设置                         | 默认值 | 上下文    | 多个 | 描述                                                                                                     |
+    | ---------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                | `no`   | multisite | no   | **启用 Antibot：** 设置为 `capjs` 以启用 Cap.js 挑战。                                                   |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |        | multisite | no   | **Cap.js 前端 URL：** 浏览器可访问的 Cap.js 服务器 URL，用于加载小组件。                                  |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |        | multisite | no   | **Cap.js 后端 URL：** BunkerWeb 用于 `/siteverify` 的可选内部 URL；如果为空，则回退到前端 URL。           |
+    | `ANTIBOT_CAPJS_SITEKEY`      |        | multisite | no   | **Cap.js 站点密钥：** Cap.js 挑战的站点密钥。                                                            |
+    | `ANTIBOT_CAPJS_SECRET`       |        | multisite | no   | **Cap.js 密钥：** BunkerWeb 用于验证 Cap.js 令牌的密钥。                                                  |
+
+    !!! note "运行要求"
+        - 在生产环境中为 `ANTIBOT_CAPJS_FRONTEND_URL` 使用 HTTPS。浏览器 worker 需要在安全上下文中使用 `crypto.subtle`，HTTPS 也能防止小组件加载过程中的 MITM 篡改。
+        - 在 Cap.js 站点密钥上配置 CORS，以允许受保护的来源。
+        - 将 `ANTIBOT_CAPJS_FRONTEND_URL` 和 `ANTIBOT_CAPJS_BACKEND_URL` 都设置为仅 origin：scheme、host 和可选端口，不包含路径。
+        - 请使用 Cap.js 小组件 **0.1.48 或更高版本**。BunkerWeb 下发严格的基于 nonce 的 CSP；较旧的小组件会破坏 instrumentation 挑战，因为隔离 `srcdoc` iframe 内注入的内联 `<script>` 不会传递 nonce。如果您自托管 `tiago2/cap`，请固定到较新的标签（如 `tiago2/cap:3.1.2` 或更高），或将 `WIDGET_VERSION` 设置为 `0.1.48` 或更高。
+        - Cap.js **instrumentation 挑战**（默认开启）通过 `eval` 执行服务器提供的 JavaScript，nonce 无法对其授权。BunkerWeb 在同源隔离 iframe 中运行小组件，由该 iframe 携带所需的 `'unsafe-eval'`，因此主挑战页面保持严格的、无 `eval` 的 CSP——无需任何配置。
+
+    有关其他配置选项，请参阅[通用设置](#通用设置)。
 
 ### 示例配置
 
@@ -323,6 +380,21 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
     ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Cap.js 挑战"
+
+    启用 Cap.js 挑战的示例配置：
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"

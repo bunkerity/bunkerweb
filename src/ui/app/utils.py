@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
 from os import _exit
 from os.path import sep
@@ -7,16 +8,17 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from time import sleep
-from typing import Dict, FrozenSet, Optional, Set, Union
+from typing import Any, Dict, FrozenSet, Optional, Set, Union
 from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
-from flask import flash as flask_flash, session
+from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
+from flask import current_app, flash as flask_flash, session
+from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
 from logger import getLogger  # type: ignore
-
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
@@ -25,8 +27,50 @@ LOGGER = getLogger("UI")
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
+# Static-asset URL prefixes served by Flask that never carry privilege (no auth/authz needed).
+# Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
+# authorization middleware, so the two never drift.
+STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+# Public paths that carry no privilege either, matched whole and never as a prefix: every consumer
+# below uses startswith, so listing a bare file name among the prefixes would also exempt
+# /favicon.icoX and /favicon.ico/anything from the host, authorization and revocation checks.
+STATIC_EXACT_PATHS = (
+    "/favicon.ico",
+    "/robots.txt",
+    "/security.txt",
+    "/.well-known/security.txt",
+    "/.well-known/change-password",
+)
+
+
+def is_static_path(path: str, *extra_prefixes: str) -> bool:
+    """True for the unprivileged static assets that skip the request pipeline."""
+    return path.startswith(STATIC_PATH_PREFIXES + extra_prefixes) or path in STATIC_EXACT_PATHS
+
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
+# Characters that could break out of a quoted string when a username is embedded in
+# Datalog/Biscuit source. Token construction binds usernames as parameters already; this is a
+# defense-in-depth gate applied at user creation/rename/import (and SSO provisioning).
+USER_NAME_UNSAFE_RX = re_compile(r'["\\\x00-\x1f\x7f]')
+BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
+RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
+MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
+MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
+
+
+def custom_config_data_matches(value: bytes, stored_value: bytes) -> bool:
+    return value == stored_value.replace(b"\r\n", b"\n").strip()
+
+
+def custom_config_needs_upsert(config: Dict[str, Any], original: Optional[Dict[str, Any]]) -> bool:
+    return original is None or any(config.get(field) != original.get(field) for field in ("data", "method", "is_draft"))
+
+
+# \Z, not $: a trailing newline would otherwise pass and become a directory name. The
+# ".bw-" prefix is the instance-side swap's own bookkeeping namespace: an entry carrying it
+# is exempt from the stale-entry sweep, so a plugin named that way survives its own deletion.
+PLUGIN_NAME_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".biscuit_private_key")
@@ -239,6 +283,14 @@ def is_ui_api_method(method: Optional[str]) -> bool:
     return method in UI_API_METHODS
 
 
+def can_delete_service(service: Dict[str, Any]) -> bool:
+    """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
+    method = service.get("method")
+    if is_ui_api_method(method):
+        return True
+    return method == "autoconf" and bool(service.get("is_draft"))
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():
@@ -264,12 +316,47 @@ def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
     return blacklisted_settings
 
 
+def _bcrypt_secret(password: str) -> bytes:
+    # bcrypt only ever consumes the first 72 bytes of a secret. bcrypt 4.x truncated
+    # longer input silently; bcrypt 5.x raises ValueError instead. Truncate explicitly
+    # so behaviour (and every already-stored hash) stays identical across both versions.
+    # Set-time flows reject >72 bytes up front (see password_exceeds_bcrypt_limit); this
+    # truncation only matters for verifying legacy hashes created before that cap existed.
+    return password.encode("utf-8")[:MAX_PASSWORD_BYTES]
+
+
+def password_exceeds_bcrypt_limit(password: str) -> bool:
+    """True if the password is longer than bcrypt's MAX_PASSWORD_BYTES-byte limit.
+
+    bcrypt 5.x raises a ValueError past 72 bytes (4.x silently truncated). Password
+    set/change flows reject overly long input with this check so nothing is silently
+    truncated going forward; verification still truncates so pre-cap hashes keep working.
+    """
+    return len(password.encode("utf-8")) > MAX_PASSWORD_BYTES
+
+
 def gen_password_hash(password: str) -> bytes:
-    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+    return hashpw(_bcrypt_secret(password), gensalt(rounds=13))
+
+
+def is_bcrypt_hash(value: str) -> bool:
+    """True if value is a well-formed bcrypt hash this build's bcrypt lib can verify."""
+    if not BCRYPT_HASH_RX.match(value):
+        return False
+    try:
+        checkpw(b"bunkerweb-bcrypt-probe", value.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False  # prefix/format the installed bcrypt lib cannot parse -> treat as plaintext
+    return True
+
+
+def bcrypt_cost(value: str) -> int:
+    """Cost factor of a bcrypt hash. Caller must ensure value passed is_bcrypt_hash() first."""
+    return int(value[4:6])
 
 
 def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(password.encode("utf-8"), hashed)
+    return checkpw(_bcrypt_secret(password), hashed)
 
 
 def get_printable_content(data: bytes) -> str:
@@ -301,9 +388,19 @@ def get_latest_stable_release():
     return latest_release
 
 
-def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+def flash(message: Union[str, Markup], category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
+    # Flash bodies are rendered as HTML. Everything that is not explicitly
+    # marked safe is escaped here, so a service name, an IP or a config name
+    # echoed back into a message can never carry markup. Callers that really
+    # mean to send markup wrap it in Markup(...).
+    message = message if isinstance(message, Markup) else escape(message)
     if i18n_key:
-        message = f'<span data-i18n="{i18n_key}">{message}</span>'
+        message = Markup('<span data-i18n="{}">{}</span>').format(i18n_key, message)
+
+    # The session serializer (msgspec, Redis backend) only encodes plain types, so the
+    # escaped body is stored as str. flash.html and sidebar-notifications.html render it
+    # with |safe: the escaping above is the only thing that ever produced that string.
+    message = str(message)
 
     if category != "success":
         flask_flash(message, category)
@@ -316,7 +413,16 @@ def flash(message: str, category: str = "success", i18n_key: Optional[str] = Non
 
 
 def human_readable_number(value: Union[str, int]) -> str:
-    value = int(value)
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        try:
+            value = int(float(value))
+        except (TypeError, ValueError, OverflowError):
+            # A counter can reach the template non-numeric (metric lost to a worker
+            # restart or an LRU eviction, stale value left in Redis). One unreadable
+            # card must not take the whole plugin page down with a 500.
+            return "N/A"
     if value >= 1_000_000:
         return f"{value/1_000_000:.1f}M"  # noqa: E226
     elif value >= 1_000:
@@ -341,23 +447,223 @@ def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:
 
 
 def _sanitize_internal_next(next_url, default):
-    """Return safe internal path; raise ValueError if invalid."""
+    """Return a safe same-origin internal path, else raise ValueError.
+
+    Hardened against open redirect (CWE-601). A value is accepted only if, in BOTH its
+    raw and its once-URL-decoded form, it is a single-slash-rooted path with:
+      * no protocol-relative prefix -- ``//host`` or ``/\\host`` (browsers fold ``\\`` to
+        ``/`` so ``/\\host`` becomes ``//host``);
+      * no scheme and no backslash anywhere (``scheme://`` / ``\\``);
+      * no control characters (defeats header/redirect splitting);
+      * no ``.`` or ``..`` path segment. The browser URL parser *normalizes* these rather
+        than rejecting them, and a leading collapse escapes the origin (``/..//host`` and
+        ``/.//host`` both normalize to the protocol-relative ``//host``). Rather than
+        replicate that normalization to isolate only the escaping subset, this rejects the
+        whole superset (so a harmless ``/a/../b`` is also refused) -- fail-closed, and the
+        app's own internal routes never carry dot segments, so the cost is nil. Only the
+        path portion is inspected, so dots inside a query string are preserved.
+
+    The browser URL parser decodes percent-encoding only once, so evaluating the raw and
+    the once-decoded forms matches its behavior: single-encoded escapes (``/%2f%2fhost``,
+    ``/%5chost``) are caught, while double-encoded payloads stay percent-encoded and remain
+    same-origin (and therefore harmless) when navigated.
+    """
     if next_url is None:
         return default
     if not isinstance(next_url, str):
         raise ValueError("next must be str")
     candidate = next_url.strip()
-    if not candidate.startswith("/"):
-        raise ValueError("must start with /")
-    if candidate.startswith("//"):
-        raise ValueError("protocol-relative not allowed")
-    if "://" in candidate:
-        raise ValueError("scheme not allowed")
-    if len(candidate) > 4096:  # temporary upper bound before decode to avoid abuse
+    if len(candidate) > 4096:  # bound before decode to avoid abuse
         raise ValueError("too long")
     decoded = unquote(candidate)[:4096]
-    if decoded.startswith("//") or "://" in decoded:
-        raise ValueError("encoded protocol-relative or scheme not allowed")
-    if any(ord(c) < 32 for c in decoded):
-        raise ValueError("control chars not allowed")
+    for value in (candidate, decoded):
+        if not value.startswith("/"):
+            raise ValueError("must start with /")
+        if value[1:2] in ("/", "\\"):
+            raise ValueError("protocol-relative not allowed")
+        if "\\" in value or "://" in value:
+            raise ValueError("scheme or backslash not allowed")
+        if any(ord(c) < 32 for c in value):
+            raise ValueError("control chars not allowed")
+        path_segments = value.split("?", 1)[0].split("#", 1)[0].split("/")
+        if "." in path_segments or ".." in path_segments:
+            raise ValueError("dot path segment not allowed")
     return decoded or default
+
+
+# Revoked UI session ids are kept in the same store that backs Flask-Session -- Redis when
+# USE_REDIS=yes, otherwise the SafeFileSystemCache under LIB_DIR -- so revocation gets exactly the
+# durability and the sharing of the sessions it guards. They used to live in DATA, which is
+# file-backed under /var/tmp (outside the container's persistent volume) and per-container, so a
+# container recreate forgot every revocation while the session entries under LIB_DIR survived, and
+# revocation never propagated across UI replicas.
+# The backend expires the keys itself, so there is no pruning to do here. A revoked id only needs
+# to be retained until the session it names can no longer exist, i.e. the maximum session lifetime.
+REVOKED_SESSION_TTL_FALLBACK_SECONDS = 30 * 24 * 3600  # used only if no lifetime is configured
+
+
+def _revoked_session_ttl_seconds():
+    """Longest a revoked session id must be retained = the max possible session lifetime."""
+    cfg = getattr(current_app, "config", {})
+    candidates = []
+    with suppress(Exception):
+        candidates.append(int(cfg.get("SESSION_ABSOLUTE_SECONDS", 0) or 0))
+    with suppress(Exception):
+        perm = cfg.get("PERMANENT_SESSION_LIFETIME")
+        if perm is not None:
+            candidates.append(int(perm.total_seconds()))
+    ttl = max(candidates) if candidates else 0
+    return ttl if ttl > 0 else REVOKED_SESSION_TTL_FALLBACK_SECONDS
+
+
+def _session_store_backend():
+    """``(redis_client, key_prefix)`` or ``(cachelib_cache, None)``, whichever backs Flask-Session.
+
+    ``(None, None)`` if the session interface exposes neither, which only happens if the
+    backend failed to initialise.
+    """
+    interface = getattr(current_app, "session_interface", None)
+    client = getattr(interface, "client", None)
+    if client is not None:
+        return client, getattr(interface, "key_prefix", "") or ""
+    return getattr(interface, "cache", None), None
+
+
+def _revoked_session_key(session_id, prefix) -> str:
+    return f"{prefix}revoked:{session_id}" if prefix is not None else f"revoked:{session_id}"
+
+
+def _session_store_fallback():
+    """The local cache the Redis session interface falls back to, or ``None`` outside that setup."""
+    return getattr(getattr(current_app, "session_interface", None), "fallback", None)
+
+
+def _session_store_redis_available() -> bool:
+    """False while the session interface is skipping a Redis it cannot reach."""
+    return getattr(getattr(current_app, "session_interface", None), "redis_available", True)
+
+
+def revoke_sessions(ids) -> str:
+    """Mark session ids revoked for as long as the sessions they name can still exist.
+
+    Returns "" on success or an error string, matching the Database method convention, so a
+    caller that must not silently half-revoke (wipe-other-sessions) can surface the failure.
+    """
+    ids = [sid for sid in ids if sid]
+    if not ids:
+        return ""
+
+    backend, prefix = _session_store_backend()
+    if backend is None:
+        return "No session backend available to record the revocation"
+
+    ttl = _revoked_session_ttl_seconds()
+
+    # Mirrored locally on every revocation, not only when Redis fails. The session it names can
+    # be served from the local store during any later outage, and the check consults that store
+    # too, so a marker held only by Redis would stop applying exactly when Redis goes away.
+    fallback = _session_store_fallback()
+    if fallback is not None:
+        try:
+            for sid in ids:
+                fallback.set(_revoked_session_key(sid, prefix), True, timeout=ttl)
+        except Exception:
+            LOGGER.exception("Couldn't record revoked session ids in the local session store")
+
+    try:
+        for sid in ids:
+            key = _revoked_session_key(sid, prefix)
+            if prefix is not None:
+                backend.setex(key, ttl, b"1")
+            else:
+                backend.set(key, True, timeout=ttl)
+    except BaseException as e:
+        # Still returned: it is what tells the caller the revocation did not reach the other replicas.
+        LOGGER.exception("Couldn't record revoked session ids")
+        return str(e)
+
+    return ""
+
+
+def is_session_revoked(session_id) -> bool:
+    """Whether this session id has been revoked. Checked on every authenticated request.
+
+    Both stores are consulted. A session served from the local fallback while Redis is
+    unavailable would otherwise outlive its own revocation, since the marker for it never
+    reached Redis either.
+    """
+    if not session_id:
+        return False
+
+    backend, prefix = _session_store_backend()
+    if backend is None:
+        return False
+
+    key = _revoked_session_key(session_id, prefix)
+    # Skipped while the interface has given up on Redis, since this runs on every authenticated
+    # request and would otherwise pay REDIS_TIMEOUT each time. Every revocation is mirrored
+    # locally, so the check below still sees it.
+    if _session_store_redis_available():
+        try:
+            if bool(backend.exists(key)) if prefix is not None else bool(backend.get(key)):
+                return True
+        except Exception:
+            LOGGER.exception(f"Couldn't check whether session {session_id} is revoked")
+
+    fallback = _session_store_fallback()
+    if fallback is None:
+        return False
+
+    try:
+        return bool(fallback.get(key))
+    except BaseException:
+        LOGGER.exception(f"Couldn't check whether session {session_id} is revoked in the local session store")
+        return False
+
+
+# OWASP lists \t (0x09) and \r (0x0D) as spreadsheet-injection leaders, but defusedcsv's
+# _escape only guards "@+-=|%". Prefix a quote for those two so Excel treats the cell as text.
+_CSV_INJECTION_LEADERS = ("\t", "\r")
+
+
+def _csv_escape(value: Any) -> Any:
+    """defusedcsv formula-injection escaping (CWE-1236) plus the \\t / \\r leaders it omits."""
+    escaped = _defusedcsv_escape(value)
+    if isinstance(escaped, str) and escaped[:1] in _CSV_INJECTION_LEADERS:
+        return "'" + escaped
+    return escaped
+
+
+class _CsvSafeWriter:
+    """Wrap a CSV writer so every cell is escaped via :func:`_csv_escape`.
+
+    Pre-escaping is idempotent: a value already prefixed with ``'`` is left untouched by
+    the underlying ``defusedcsv`` writer (its first char is no longer an injection leader).
+    """
+
+    def __init__(self, writer):
+        self._writer = writer
+
+    def writerow(self, row):
+        return self._writer.writerow([_csv_escape(cell) for cell in row])
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+
+def csv_writer(csvfile, *args, **kwargs):
+    """Return a CSV writer that escapes spreadsheet formula payloads (CWE-1236).
+
+    Wraps ``defusedcsv`` and additionally guards the tab/CR leaders defusedcsv omits.
+    Use this for all UI CSV exports instead of ``csv.writer``.
+    """
+    return _CsvSafeWriter(_defusedcsv_writer(csvfile, *args, **kwargs))
+
+
+def csv_safe(value: Any) -> Any:
+    """Escape one cell value with formula-injection protection (CWE-1236).
+
+    Use this for user-controlled values written through openpyxl.
+    """
+    return _csv_escape(value)

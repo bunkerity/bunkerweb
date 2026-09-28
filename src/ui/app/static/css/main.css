@@ -142,3 +142,39 @@
   text-align: center;
   margin-top: 1rem;
 }
+
+/*
+* CrowdSec branded action
+******************************************************************************/
+
+/* CrowdSec brand palette, taken from their logo: #4e4a99 purple, #3e3978 for
+   the pressed state, #f8ab13 amber. */
+.btn-outline-crowdsec {
+  --bs-btn-color: #4e4a99;
+  --bs-btn-border-color: #4e4a99;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #4e4a99;
+  --bs-btn-hover-border-color: #4e4a99;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #3e3978;
+  --bs-btn-active-border-color: #3e3978;
+  --bs-btn-disabled-color: #4e4a99;
+  --bs-btn-disabled-border-color: #4e4a99;
+  --bs-btn-focus-shadow-rgb: 78, 74, 153;
+}
+
+/* The logo keeps its own colours, so the outline is lightened instead of the
+   mark for readability on the dark theme. */
+[data-bs-theme="dark"] .btn-outline-crowdsec {
+  --bs-btn-color: #9b97d8;
+  --bs-btn-border-color: #9b97d8;
+  --bs-btn-hover-color: #1b1b28;
+  --bs-btn-hover-bg: #9b97d8;
+  --bs-btn-hover-border-color: #9b97d8;
+  --bs-btn-active-color: #1b1b28;
+  --bs-btn-active-bg: #b6b3e4;
+  --bs-btn-active-border-color: #b6b3e4;
+  --bs-btn-disabled-color: #9b97d8;
+  --bs-btn-disabled-border-color: #9b97d8;
+  --bs-btn-focus-shadow-rgb: 155, 151, 216;
+}

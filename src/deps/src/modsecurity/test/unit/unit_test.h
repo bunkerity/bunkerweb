@@ -16,9 +16,9 @@
 #include <yajl/yajl_tree.h>
 
 #include <iostream>
-#include <unordered_map>
 #include <vector>
 #include <string>
+#include <memory>
 
 #ifndef TEST_UNIT_UNIT_TEST_H_
 #define TEST_UNIT_UNIT_TEST_H_
@@ -27,13 +27,13 @@ namespace modsecurity_test {
 
 class UnitTestResult {
  public:
-    int ret;
+    int ret = 0;
     std::string output;
 };
 
 class UnitTest {
  public:
-    static UnitTest *from_yajl_node(const yajl_val &);
+    static std::unique_ptr<UnitTest> from_yajl_node(const yajl_val &node);
 
     std::string print() const;
 
@@ -44,8 +44,10 @@ class UnitTest {
     std::string type;
     std::string filename;
     std::string output;
-    int ret;
-    int skipped;
+    std::string libinjection_override;
+    int ret = 0;
+    int capture = 0;
+    int skipped = 0;
     UnitTestResult result;
 };
 

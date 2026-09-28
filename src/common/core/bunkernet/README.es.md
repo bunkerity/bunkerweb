@@ -73,7 +73,7 @@ Si aún no está familiarizado con la integración de la Consola de CrowdSec, [C
 
 A través de nuestra asociación con CrowdSec, puede inscribir sus instancias de BunkerWeb en su [Consola de CrowdSec](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). Esto significa que los ataques bloqueados por BunkerWeb serán visibles en su Consola de CrowdSec junto con los ataques bloqueados por los Motores de Seguridad de CrowdSec, brindándole una vista unificada de las amenazas.
 
-Es importante destacar que no es necesario instalar CrowdSec para esta integración (aunque recomendamos encarecidamente probarlo con el [complemento de CrowdSec para BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) para mejorar aún más la seguridad de sus servicios web). Además, puede inscribir sus Motores de Seguridad de CrowdSec en la misma cuenta de la Consola para una sinergia aún mayor.
+Es importante destacar que no es necesario instalar CrowdSec para esta integración (aunque recomendamos encarecidamente probarlo con el [complemento de CrowdSec para BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) para mejorar aún más la seguridad de sus servicios web). Además, puede inscribir sus Motores de Seguridad de CrowdSec en la misma cuenta de la Consola para una sinergia aún mayor.
 
 **Paso #1: Cree su cuenta en la Consola de CrowdSec**
 

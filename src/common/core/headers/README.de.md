@@ -1,4 +1,4 @@
-HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/de/docs/Web/HTTP/CSP) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
+HTTP-Header spielen eine entscheidende Rolle bei der Sicherheit. Das Headers-Plugin bietet eine robuste Verwaltung von Standard- und benutzerdefinierten HTTP-Headern und verbessert so Sicherheit und Funktionalität. Es wendet dynamisch Sicherheitsmaßnahmen an, wie [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (einschließlich eines reinen Berichtsmodus) und die Injektion benutzerdefinierter Header, während es gleichzeitig Informationslecks verhindert.
 
 **Wie es funktioniert**
 
@@ -18,7 +18,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
 3.  **Unerwünschte Header entfernen:** Verwenden Sie `REMOVE_HEADERS`, um sicherzustellen, dass Header, die Serverdetails preisgeben könnten, entfernt werden.
 4.  **Cookie-Sicherheit einstellen:** Aktivieren Sie eine robuste Cookie-Sicherheit, indem Sie `COOKIE_FLAGS` konfigurieren und `COOKIE_AUTO_SECURE_FLAG` auf `yes` setzen, damit das Secure-Flag bei HTTPS-Verbindungen automatisch hinzugefügt wird.
 5.  **Upstream-Header beibehalten:** Geben Sie mit `KEEP_UPSTREAM_HEADERS` an, welche Upstream-Header beibehalten werden sollen.
-6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
+6.  **Bedingte Header-Anwendung nutzen:** Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den [CSP Report-Only-Modus](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) über `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
 ### Konfigurationsleitfaden
 
@@ -43,13 +43,15 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
     | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | nein     | **X-Content-Type-Options:** Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen.                                   |
     | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | nein     | **X-DNS-Prefetch-Control:** Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern.                |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | nein     | **Referrer Policy:** Steuert die Menge der gesendeten Referrer-Informationen und schützt die Privatsphäre der Benutzer.                                         |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | nein     | **Header beibehalten:** Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält. |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | nein     | **Permissions Policy:** Beschränkt den Zugriff auf Browserfunktionen und reduziert potenzielle Angriffsvektoren.                                                |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | nein     | **Header beibehalten:** Behält ausgewählte Upstream-Header bei, was die Integration von Altsystemen erleichtert und gleichzeitig die Sicherheit aufrechterhält. |
 
     !!! tip "Bewährte Praktiken"
         - Überprüfen und aktualisieren Sie Ihre Sicherheits-Header regelmäßig, um sie an die sich entwickelnden Sicherheitsstandards anzupassen.
         - Verwenden Sie Tools wie das [Mozilla Observatory](https://observatory.mozilla.org/), um Ihre Header-Konfiguration zu validieren.
         - Testen Sie CSP im `Report-Only`-Modus, bevor Sie es erzwingen, um zu vermeiden, dass die Funktionalität beeinträchtigt wird.
+        - Im `Report-Only`-Modus wird ein vom Upstream gesendeter `Content-Security-Policy`- oder `Content-Security-Policy-Report-Only`-Header standardmäßig beibehalten (`KEEP_UPSTREAM_HEADERS`); entfernen Sie den Header-Namen aus dieser Einstellung, damit die eigene Richtlinie von BunkerWeb Vorrang hat.
+        - Die standardmäßige `PERMISSIONS_POLICY` blockiert auch Client Hints (`ch-*`-Direktiven); wenn ein Dienst auf `Accept-CH` angewiesen ist (zum Beispiel Client-Hint-basierte responsive Bilder oder die Dunkelmodus-Erkennung über `Sec-CH-Prefers-Color-Scheme`), passen Sie `PERMISSIONS_POLICY` an, um die benötigten `ch-*`-Funktionen wieder zuzulassen (zum Beispiel `ch-dpr=(self)`).
 
 === "Cookie-Einstellungen"
 

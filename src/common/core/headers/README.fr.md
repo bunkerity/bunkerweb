@@ -1,4 +1,4 @@
-Les en-têtes HTTP jouent un rôle crucial dans la sécurité. Le plugin Headers offre une gestion robuste des en-têtes HTTP standards et personnalisés, améliorant ainsi la sécurité et les fonctionnalités. Il applique dynamiquement des mesures de sécurité, telles que [HSTS](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy) (y compris un mode de rapport seul), et l'injection d'en-têtes personnalisés, tout en empêchant les fuites d'informations.
+Les en-têtes HTTP jouent un rôle crucial dans la sécurité. Le plugin Headers offre une gestion robuste des en-têtes HTTP standards et personnalisés, améliorant ainsi la sécurité et les fonctionnalités. Il applique dynamiquement des mesures de sécurité, telles que [HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security), [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (y compris un mode de rapport seul), et l'injection d'en-têtes personnalisés, tout en empêchant les fuites d'informations.
 
 **Comment ça marche**
 
@@ -18,7 +18,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
 3.  **Supprimer les en-têtes indésirables :** Utilisez `REMOVE_HEADERS` pour vous assurer que les en-têtes qui pourraient exposer des détails sur le serveur sont supprimés.
 4.  **Définir la sécurité des cookies :** Activez une sécurité robuste des cookies en configurant `COOKIE_FLAGS` et en réglant `COOKIE_AUTO_SECURE_FLAG` sur `yes` pour que l'attribut Secure soit automatiquement ajouté sur les connexions HTTPS.
 5.  **Préserver les en-têtes en amont :** Spécifiez les en-têtes en amont à conserver en utilisant `KEEP_UPSTREAM_HEADERS`.
-6.  **Tirer parti de l'application conditionnelle des en-têtes :** Si vous souhaitez tester des politiques sans interruption, activez le mode [CSP Report-Only](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) via `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
+6.  **Tirer parti de l'application conditionnelle des en-têtes :** Si vous souhaitez tester des politiques sans interruption, activez le mode [CSP Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) via `CONTENT_SECURITY_POLICY_REPORT_ONLY`.
 
 ### Guide de configuration
 
@@ -43,13 +43,15 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
     | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
 
     !!! tip "Bonnes pratiques"
         - Révisez et mettez à jour régulièrement vos en-têtes de sécurité pour vous conformer aux normes de sécurité en constante évolution.
         - Utilisez des outils comme [Mozilla Observatory](https://observatory.mozilla.org/) pour valider la configuration de vos en-têtes.
         - Testez la CSP en mode `Report-Only` avant de l'appliquer pour éviter de casser des fonctionnalités.
+        - En mode `Report-Only`, un en-tête `Content-Security-Policy` ou `Content-Security-Policy-Report-Only` fourni par l'amont est conservé par défaut (`KEEP_UPSTREAM_HEADERS`) ; retirez le nom de l'en-tête de ce paramètre pour que la politique de BunkerWeb prenne le dessus.
+        - La `PERMISSIONS_POLICY` par défaut bloque également les client hints (directives `ch-*`) ; si un service dépend d'`Accept-CH` (par exemple des images adaptatives basées sur les client hints ou la détection du mode sombre via `Sec-CH-Prefers-Color-Scheme`), personnalisez `PERMISSIONS_POLICY` pour réautoriser les fonctionnalités `ch-*` nécessaires (par exemple `ch-dpr=(self)`).
 
 === "Paramètres des cookies"
 

@@ -7,7 +7,7 @@ require "resty.openssl.include.hmac"
 require "resty.openssl.include.evp.md"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local _M = {}
 local mt = {__index = _M}
@@ -37,7 +37,7 @@ function _M.new(key, typ)
   return setmetatable({
     ctx = ctx,
     algo = algo,
-    buf = ctypes.uchar_array(OPENSSL_3X and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)),
+    buf = ctypes.uchar_array(OPENSSL_3_UP and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)),
   }, mt), nil
 end
 

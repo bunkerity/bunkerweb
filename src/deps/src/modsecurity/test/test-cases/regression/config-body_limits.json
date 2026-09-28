@@ -1,433 +1,465 @@
-[  
-  {  
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecResponseBodyLimitAction Reject",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecResponseBodyLimitAction Reject",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":403
+    "expected": {
+      "http_code": 403
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecResponseBodyLimitAction Reject",
       "SecResponseBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecResponseBodyLimitAction ProcessPartial",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecResponseBodyLimitAction ProcessPartial",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecResponseBodyLimitAction ProcessPartial",
       "SecResponseBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyLimitAction Reject",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyLimitAction Reject",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Type": "multipart/form-data; boundary=------------------------756b6d74fa1a8ee2",
+        "Content-Length": "523"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
-      "body":[  
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"name\"",
-        "",
-        "test",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is a very small test file..",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is another very small test file..",
-        "--------------------------756b6d74fa1a8ee2--"
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
+      "body": [
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":403
+    "expected": {
+      "http_code": 403
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyLimitAction Reject",
       "SecRequestBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyLimitAction Reject - Engine Disabled",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyLimitAction Reject - Engine Disabled",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Type": "multipart/form-data; boundary=------------------------756b6d74fa1a8ee2",
+        "Content-Length": "523"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
-      "body":[  
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"name\"",
-        "",
-        "test",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is a very small test file..",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is another very small test file..",
-        "--------------------------756b6d74fa1a8ee2--"
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
+      "body": [
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine Off",
       "SecRequestBodyLimitAction Reject",
       "SecRequestBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyLimitAction Reject - Engine Detection Only",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyLimitAction Reject - Engine Detection Only",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Type": "multipart/form-data; boundary=------------------------756b6d74fa1a8ee2",
+        "Content-Length": "523"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
-      "body":[  
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"name\"",
-        "",
-        "test",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is a very small test file..",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is another very small test file..",
-        "--------------------------756b6d74fa1a8ee2--"
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
+      "body": [
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine DetectionOnly",
       "SecRequestBodyLimitAction Reject",
       "SecRequestBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyLimitAction ProcessPartial",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyLimitAction ProcessPartial",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Content-Type": "multipart/form-data; boundary=------------------------756b6d74fa1a8ee2",
+        "Content-Length": "523"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
-      "body":[  
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"name\"",
-        "",
-        "test",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is a very small test file..",
-        "--------------------------756b6d74fa1a8ee2",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
-        "Content-Type: text/plain",
-        "",
-        "This is another very small test file..",
-        "--------------------------756b6d74fa1a8ee2--"
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
+      "body": [
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyLimitAction ProcessPartial",
       "SecRequestBodyLimit 5"
     ]
   },
-  {  
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecResponseBodyLimitAction Reject - Engine Disabled",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecResponseBodyLimitAction Reject - Engine Disabled",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine Off",
       "SecResponseBodyLimitAction Reject",
       "SecResponseBodyLimit 5"
     ]
   },
-  {  
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecResponseBodyLimitAction Reject - Engine Detection Only",
-    "client":{  
-      "ip":"200.249.12.31",
-      "port":123
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecResponseBodyLimitAction Reject - Engine Detection Only",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{  
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{  
-      "headers":{  
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{  
-      "headers":{  
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[  
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[  
+    "rules": [
       "SecRuleEngine DetectionOnly",
       "SecResponseBodyLimitAction Reject",
       "SecResponseBodyLimit 5"
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - urlencoded, limit exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - urlencoded, limit exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "41",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "41",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "param1=value1&param2=value2&param3=value3"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Request body excluding files is bigger than the maximum expected.",
-      "http_code":400
+    "expected": {
+      "debug_log": "Request body excluding files is bigger than the maximum expected.",
+      "http_code": 400
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 20",
@@ -435,45 +467,46 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - urlencoded, limit not exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - urlencoded, limit not exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "41",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "41",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "param1=value1&param2=value2&param3=value3"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 60",
@@ -481,46 +514,47 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - json, limit exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - json, limit exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "41",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "48",
         "Content-Type": "application/json"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "{\"param1\":{\"param2\":\"value2\",\"param3\":\"value3\"}}"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Request body excluding files is bigger than the maximum expected.",
-      "http_code":400
+    "expected": {
+      "debug_log": "Request body excluding files is bigger than the maximum expected.",
+      "http_code": 400
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 20",
@@ -529,45 +563,46 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - json, limit not exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - json, limit not exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "41",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "48",
         "Content-Type": "application/json"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "{\"param1\":{\"param2\":\"value2\",\"param3\":\"value3\"}}"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 80",
@@ -576,47 +611,48 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "resource":"libxml2",
-    "title":"SecRequestBodyNoFilesLimit - xml, limit exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - xml, limit exceeded",
+    "resource": "libxml2",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "77",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "77",
         "Content-Type": "application/xml"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?><aaa><bbb>ccc</bbb><ddd>eee</ddd></aaa>"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Request body excluding files is bigger than the maximum expected.",
-      "http_code":400
+    "expected": {
+      "debug_log": "Request body excluding files is bigger than the maximum expected.",
+      "http_code": 400
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 20",
@@ -625,46 +661,47 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "resource":"libxml2",
-    "title":"SecRequestBodyNoFilesLimit - xml, limit not exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - xml, limit not exceeded",
+    "resource": "libxml2",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "77",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "77",
         "Content-Type": "application/xml"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?><aaa><bbb>ccc</bbb><ddd>eee</ddd></aaa>"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 90",
@@ -673,54 +710,55 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - multipart, limit exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - multipart, limit exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "77",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "198",
         "Content-Type": "multipart/form-data; boundary=0000"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
-        "--0000",
-        "Content-Disposition: form-data; name=\"a\"",
-        "",
-        "1",
-        "--0000",
-        "Content-Disposition: form-data; name=\"b\"; filename=\"c.txt\"",
-        "",
-        "2222222222222222222222222222222222222222222222222222222222222222222222",
-        "--0000--"
+        "--0000\n",
+        "Content-Disposition: form-data; name=\"a\"\n",
+        "\n",
+        "1\n",
+        "--0000\n",
+        "Content-Disposition: form-data; name=\"b\"; filename=\"c.txt\"\n",
+        "\n",
+        "2222222222222222222222222222222222222222222222222222222222222222222222\n",
+        "--0000--\n"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Request body excluding files is bigger than the maximum expected.",
-      "http_code":400
+    "expected": {
+      "debug_log": "Request body excluding files is bigger than the maximum expected.",
+      "http_code": 400
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 80",
@@ -728,53 +766,54 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRequestBodyNoFilesLimit - multipart, limit not exceeded",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRequestBodyNoFilesLimit - multipart, limit not exceeded",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-	"Content-Length": "77",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "198",
         "Content-Type": "multipart/form-data; boundary=0000"
       },
-      "uri":"/",
-      "method":"POST",
+      "uri": "/",
+      "method": "POST",
       "body": [
-        "--0000",
-        "Content-Disposition: form-data; name=\"a\"",
-        "",
-        "1",
-        "--0000",
-        "Content-Disposition: form-data; name=\"b\"; filename=\"c.txt\"",
-        "",
-        "2222222222222222222222222222222222222222222222222222222222222222222222",
-        "--0000--"
+        "--0000\n",
+        "Content-Disposition: form-data; name=\"a\"\n",
+        "\n",
+        "1\n",
+        "--0000\n",
+        "Content-Disposition: form-data; name=\"b\"; filename=\"c.txt\"\n",
+        "\n",
+        "2222222222222222222222222222222222222222222222222222222222222222222222\n",
+        "--0000--\n"
       ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "http_code":200
+    "expected": {
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyAccess On",
       "SecRequestBodyNoFilesLimit 120",
@@ -782,4 +821,3 @@
     ]
   }
 ]
-

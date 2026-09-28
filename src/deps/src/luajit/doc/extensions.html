@@ -377,6 +377,7 @@ are allowed.</li>
 <li><tt>pairs()</tt> and <tt>ipairs()</tt> check for <tt>__pairs</tt> and
 <tt>__ipairs</tt>.</li>
 <li><tt>coroutine.running()</tt> returns two results.</li>
+<li><tt>string.find()</tt> returns <tt>nil</tt> for out-of-range position.</li>
 <li><tt>table.pack()</tt> and <tt>table.unpack()</tt>
 (same as <tt>unpack()</tt>).</li>
 <li><tt>io.write()</tt> and <tt>file:write()</tt> return file handle
@@ -385,7 +386,6 @@ instead of <tt>true</tt>.</li>
 exit status.</li>
 <li><tt>debug.setmetatable()</tt> returns object.</li>
 <li><tt>debug.getuservalue()</tt> and <tt>debug.setuservalue()</tt>.</li>
-<li>Remove <tt>math.mod()</tt>, <tt>string.gfind()</tt>.</li>
 <li><tt>package.searchers</tt>.</li>
 <li><tt>module()</tt> returns the module table.</li>
 </ul>
@@ -410,6 +410,34 @@ LuaJIT supports some extensions from Lua&nbsp;5.3:
 <tt>lua_isyieldable()</tt>
 </li>
 </ul>
+
+<h2 id="lj30_bp_syntax">Backported Syntax Extensions from LuaJIT 3.0</h2>
+<p>
+LuaJIT 2.1 supports some
+<a href="https://github.com/LuaJIT/LuaJIT/issues/1475#issuecomment-4769582883"><span class="ext">&raquo;</span>&nbsp;syntax extensions backported from LuaJIT&nbsp;3.0</a>:
+</p>
+<ul>
+  <li>Bit Operators: unary <tt>~</tt>, binary <tt>&amp; | ~ &lt;&lt; &gt;&gt; ~&gt;&gt;</tt></li>
+  <li>Customary Operators: <tt>! && || !=</tt></li>
+  <li>Ternary <tt>?:</tt> conditional operator</li>
+  <li>Safe Navigation Operator <tt>?.</tt></li>
+  <li>nil-Coalescing Operator <tt>??</tt></li>
+  <li>Compound Assignment Operators: <tt>+= -= *= /= %= &amp;= |= ~= &lt;&lt;= &gt;&gt;= ~&gt;&gt;= ..=</tt></li>
+  <li><tt>continue</tt> Statement</li>
+  <li><tt>const</tt> Declaration</li>
+  <li>Short Function Expression</li>
+  <li>Underscores in Number Literals</li>
+</ul>
+<p>
+Not backported are:
+bit operator metamethods,
+floor division operator <tt>//</tt>,
+compound assignment metamethods,
+named vararg parameter <tt>...name</tt>.
+</p>
+<p>
+Bytecode that uses a bit operator can only be loaded by LuaJIT 2.1.1784535649 or higher.
+</p>
 
 <h2 id="exceptions">C++ Exception Interoperability</h2>
 <p>

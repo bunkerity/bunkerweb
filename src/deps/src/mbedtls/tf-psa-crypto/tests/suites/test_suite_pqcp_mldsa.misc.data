@@ -1,0 +1,10 @@
+MLDSA-87 smoke test
+smoke_87:"54686973206973206120626f72696e672033322d6279746520736565642e2e2e"
+
+MLDSA-87 using its own SHAKE
+depends_on:TF_PSA_CRYPTO_PQCP_OWN_SHAKE
+shake_driver_calls:0
+
+MLDSA-87 calling the PSA SHAKE
+depends_on:!TF_PSA_CRYPTO_PQCP_OWN_SHAKE
+shake_driver_calls:1

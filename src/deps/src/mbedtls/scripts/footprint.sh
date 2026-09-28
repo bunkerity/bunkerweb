@@ -19,9 +19,17 @@
 set -eu
 
 CONFIG_H='include/mbedtls/mbedtls_config.h'
+CRYPTO_CONFIG_H='tf-psa-crypto/include/psa/crypto_config.h'
 
-if [ -r $CONFIG_H ]; then :; else
+if [ ! -r $CONFIG_H ]; then
     echo "$CONFIG_H not found" >&2
+    echo "This script needs to be run from the root of" >&2
+    echo "a git checkout or uncompressed tarball" >&2
+    exit 1
+fi
+
+if [ ! -r $CRYPTO_CONFIG_H ]; then
+    echo "$CRYPTO_CONFIG_H not found" >&2
     echo "This script needs to be run from the root of" >&2
     echo "a git checkout or uncompressed tarball" >&2
     exit 1
@@ -56,27 +64,38 @@ doit()
     log "$NAME ($FILE):"
 
     cp $CONFIG_H ${CONFIG_H}.bak
+    cp $CRYPTO_CONFIG_H ${CRYPTO_CONFIG_H}.bak
     if [ "$FILE" != $CONFIG_H ]; then
+        CRYPTO_FILE="${FILE%/*}/crypto-${FILE##*/}"
         cp "$FILE"  $CONFIG_H
+        cp "$CRYPTO_FILE"  $CRYPTO_CONFIG_H
     fi
 
     {
+        scripts/config.py unset MBEDTLS_HAVE_TIME || true
+        scripts/config.py unset MBEDTLS_HAVE_TIME_DATE || true
         scripts/config.py unset MBEDTLS_NET_C || true
         scripts/config.py unset MBEDTLS_TIMING_C || true
         scripts/config.py unset MBEDTLS_FS_IO || true
-        scripts/config.py --force set MBEDTLS_NO_PLATFORM_ENTROPY || true
+        scripts/config.py unset MBEDTLS_PSA_ITS_FILE_C || true
+        scripts/config.py unset MBEDTLS_PSA_CRYPTO_STORAGE_C || true
+        scripts/config.py unset MBEDTLS_PSA_BUILTIN_GET_ENTROPY || true
+        # Force the definition of MBEDTLS_PSA_DRIVER_GET_ENTROPY as it may
+        # not exist in custom configurations.
+        scripts/config.py --force -f ${CRYPTO_CONFIG_H} set MBEDTLS_PSA_DRIVER_GET_ENTROPY || true
     } >/dev/null 2>&1
 
-    make clean >/dev/null
+    make -f scripts/legacy.make clean >/dev/null
     CC=arm-none-eabi-gcc AR=arm-none-eabi-ar LD=arm-none-eabi-ld \
-        CFLAGS="$ARMGCC_FLAGS" make lib >/dev/null
+        CFLAGS="$ARMGCC_FLAGS" make -f scripts/legacy.make lib >/dev/null
 
     OUT="size-${NAME}.txt"
     arm-none-eabi-size -t library/libmbed*.a > "$OUT"
     log "$( head -n1 "$OUT" )"
     log "$( tail -n1 "$OUT" )"
 
-    cp ${CONFIG_H}.bak $CONFIG_H
+    mv ${CONFIG_H}.bak $CONFIG_H
+    mv ${CRYPTO_CONFIG_H}.bak $CRYPTO_CONFIG_H
 }
 
 # truncate the file just this time

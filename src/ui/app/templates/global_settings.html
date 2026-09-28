@@ -5,6 +5,9 @@
            id="selected-mode"
            name="selected_mode"
            value="{{ mode }}">
+    <input type="hidden"
+           id="validate-certificate-url"
+           value="{{ url_for("services") }}/validate-certificate">
     {% set blacklisted_settings = get_blacklisted_settings(true) %}
     {% set service_method = "ui" %}
     <div class="tab-content p-0 position-relative">
@@ -19,6 +22,13 @@
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <!-- Preload the active ACE theme so setTheme() resolves synchronously (no light flash). -->
+    <script src="{{ url_for('static', filename='libs/ace/src-min/theme-cloud9_' ~ ('night' if theme == 'dark' else 'day') ~ '.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/ace-mode-bunkerweb_settings.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"

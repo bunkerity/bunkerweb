@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision: str = "5201c88f004d"
 down_revision: Union[str, None] = "b4abd1acf9f1"
@@ -35,17 +34,13 @@ def upgrade() -> None:
     )
 
     # Handle foreign key constraints for bw_jobs_cache
-    fk_result = conn.execute(
-        sa.text(
-            """
+    fk_result = conn.execute(sa.text("""
             SELECT conname
             FROM pg_constraint
             WHERE conrelid = 'bw_jobs_cache'::regclass
               AND confrelid = 'bw_jobs'::regclass
               AND conname = 'fk_bw_jobs_cache_job_name'
-            """
-        )
-    ).fetchone()
+            """)).fetchone()
 
     if fk_result:
         op.drop_constraint("fk_bw_jobs_cache_job_name", "bw_jobs_cache", type_="foreignkey")
@@ -84,17 +79,13 @@ def downgrade() -> None:
     op.drop_column("bw_plugin_pages", "obfuscation_file")
 
     # Restore foreign key constraints for bw_jobs_cache
-    fk_result = conn.execute(
-        sa.text(
-            """
+    fk_result = conn.execute(sa.text("""
             SELECT conname
             FROM pg_constraint
             WHERE conrelid = 'bw_jobs_cache'::regclass
               AND confrelid = 'bw_jobs'::regclass
               AND conname IS NULL
-            """
-        )
-    ).fetchone()
+            """)).fetchone()
 
     if fk_result:
         op.drop_constraint(None, "bw_jobs_cache", type_="foreignkey")

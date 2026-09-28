@@ -12,23 +12,44 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
+from certbot_concurrency import ensure_accounts_for_orphans
 from letsencrypt_utils import (
     CERTBOT_BIN,
     DEPS_PATH,
+    LETSENCRYPT_CACHE_PATH as CACHE_PATH,
     LETSENCRYPT_DATA_PATH as DATA_PATH,
     LETSENCRYPT_LOGS_DIR as LOGS_DIR,
     LETSENCRYPT_WORK_DIR as WORK_DIR,
     ZEROSSL_BOT_SCRIPT,
+    account_id_for_cert,
+    attach_job_log_file,
     build_certbot_env,
+    certbot_log_backup_flags,
+    failed_renewal_cert,
+    is_stale_account_line,
     is_zerossl_used_in_env,
+    le_cache_write_lock,
+    letsencrypt_cache_consistent,
     prepare_logs_dir,
+    purge_stale_account,
+    purge_stale_account_by_uri,
     resolve_certbot_entrypoint,
+    sanitize_and_persist,
+    setup_route53_aws_config,
+    stale_account_uri,
+    stream_certbot,
 )
+
+LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
 
 LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
-CERTBOT_TIMEOUT = 900  # 900 seconds (15 minutes) max for a single certbot invocation
+
+# Same rationale as certbot-new: in Docker these lines otherwise only reach `docker logs`.
+attach_job_log_file(LOGGER, "certbot-renew.log", LOGS_DIR)
+
+CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 OCSP_REFRESH_TIMEOUT = 2100  # 35m parent wait; ocsp-refresh soft-stops at JOB_TIMEOUT_SECONDS=2040s
 status = 0
 
@@ -72,6 +93,26 @@ try:
     JOB = Job(LOGGER, __file__)
 
     cmd_env = build_certbot_env(JOB, DEPS_PATH)
+
+    # Register an account for any CA whose renewal confs are orphaned and that has none left, so
+    # the repoint inside sanitize_and_persist has somewhere to point. This job is the one that hits
+    # the problem, since a deployment where every certificate already exists never runs issuance
+    # and so never registers an account as a side effect of one.
+    ensure_accounts_for_orphans(DATA_PATH, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, WORK_DIR, LOGS_DIR, LOGGER)
+
+    # Quarantine broken renewal confs before `certbot renew` reads them: one lineage whose name
+    # disagrees with its filename makes the whole run fail to parse. Persists the cleaned tree so
+    # the break can't be restored from the DB cache blob on the next tick.
+    sanitized_lineages = sanitize_and_persist(JOB, DATA_PATH, LOGGER)
+
+    # route53 is the exception to certbot's persisted-credentials rule: certbot-dns-route53 has no
+    # --dns-route53-credentials flag and stores nothing in renewal/<cert>.conf — it reads AWS creds
+    # only from AWS_CONFIG_FILE. certbot-new.py sets that per-service at issuance, but `certbot renew`
+    # runs once for all certs, so re-derive the route53 credentials from the plugin settings and point
+    # AWS_CONFIG_FILE at them here. Without this, route53 certs issued with explicit access keys never
+    # auto-renew. Writes to CACHE_PATH (where issuance wrote them), not DATA_PATH.
+    setup_route53_aws_config(cmd_env, CACHE_PATH, LOGGER)
+
     acme_server = "zerossl" if is_zerossl_used_in_env() else "letsencrypt"
     certbot_entrypoint = resolve_certbot_entrypoint(
         acme_server,
@@ -97,6 +138,7 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
+            *certbot_log_backup_flags(cmd_env),
         ]
         + (["-v"] if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG" else []),
         stdin=DEVNULL,
@@ -105,40 +147,97 @@ try:
         universal_newlines=True,
         env=cmd_env,
     )
-    try:
-        stdout, stderr = process.communicate(timeout=CERTBOT_TIMEOUT)
-    except TimeoutExpired:
-        LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
-        process.kill()
-        stdout, stderr = process.communicate()
-        status = 2
+    # `certbot renew` covers every lineage in one run and pins no --account, so unlike issuance
+    # there is no local account id to blame when the CA rejects one. Two ways to identify it, both
+    # needed: the "not found" phrasing embeds the account URI, which certbot also stores in that
+    # account's regr.json, while the "deactivated" phrasing names no account at all and has to be
+    # resolved through the lineage certbot reports on the same line.
+    # Without this, a deployment whose certificates all exist never runs issuance, never detects
+    # the rejection, and every renewal fails forever with no recovery path.
+    stale_account_uris = set()
+    stale_account_certs = set()
     renewed_any = False
-    if stdout:
-        for line in stdout.splitlines():
-            line_str = line.strip()
-            if line_str:
-                LOGGER_CERTBOT.info(line_str)
-                if "(success)" in line_str or "Congratulations" in line_str:
-                    status = 1
-                    renewed_any = True
-    if stderr:
-        for line in stderr.splitlines():
-            LOGGER_CERTBOT.info(line.strip())
+
+    def watch_stale_account(line: str) -> None:
+        if not is_stale_account_line(line):
+            return
+        uri = stale_account_uri(line)
+        if uri:
+            stale_account_uris.add(uri)
+            return
+        cert_name = failed_renewal_cert(line)
+        if cert_name:
+            stale_account_certs.add(cert_name)
+        else:
+            LOGGER.error(f"The CA rejected the ACME account but named neither it nor a certificate, so it cannot be replaced automatically: {line}")
+
+    def watch_renew_line(line: str) -> None:
+        global renewed_any
+        watch_stale_account(line)
+        if "(success)" in line or "Congratulations" in line:
+            renewed_any = True
+
+    if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT, watch_renew_line):
+        LOGGER.error(f"certbot renew timed out after {CERTBOT_TIMEOUT}s, killing process.")
+        status = 2
 
     if process.returncode and process.returncode != 0:
         status = 2
         LOGGER.error("Certificates renewal failed")
 
-    # Save Let's Encrypt data to db cache (full directory)
-    if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
-        cached, err = JOB.cache_dir(DATA_PATH)
-        if not cached:
-            LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
-        else:
-            LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+    # Recover in this run, not the next one. The persist below refuses an inconsistent tree, so a
+    # purge left unrepaired would never reach the DB row, the dead account would be restored from
+    # it on the next tick, and the run would purge it again forever.
+    if stale_account_uris or stale_account_certs:
+        purged = False
+        for uri in sorted(stale_account_uris):
+            purged = purge_stale_account_by_uri(DATA_PATH, uri, LOGGER) or purged
+        for account_id in sorted({account_id_for_cert(DATA_PATH, cert_name) for cert_name in stale_account_certs} - {""}):
+            purged = purge_stale_account(DATA_PATH, account_id, LOGGER) or purged
+        if purged:
+            ensure_accounts_for_orphans(DATA_PATH, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, WORK_DIR, LOGS_DIR, LOGGER)
+            sanitized_lineages = sorted(set(sanitized_lineages) | set(sanitize_and_persist(JOB, DATA_PATH, LOGGER)))
 
-    # Trigger OCSP refresh after successful renewal (AFTER database save)
-    # OCSP job will compare new certs with cached ones and process differential updates
+    # Save Let's Encrypt data to db cache.
+    # Guards: only re-cache if the initial restore succeeded AND we actually have live
+    # certs on disk. Without these guards, a failed restore leaves DATA_PATH empty
+    # (rmtree runs before extraction in Job.restore_cache) and a blind cache_dir() call
+    # would overwrite the good DB row with the empty post-rmtree state, losing the certs
+    # from both disk and DB.
+    if not JOB.restore_ok:
+        LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
+        status = 2
+    elif not sanitized_lineages and (not DATA_PATH.is_dir() or not any(DATA_PATH.glob("live/*/fullchain.pem"))):
+        # Skip the "no live certs" persist only when nothing was sanitized; if a broken lineage was
+        # quarantined we must still write the cleaned tree back so it can't be restored again.
+        LOGGER.warning("Skipping db cache update: no live certificates found under DATA_PATH/live/*/fullchain.pem.")
+    else:
+        # Refuse to re-cache when renewal/ references account IDs that are missing from accounts/.
+        # That snapshot would self-propagate certbot AccountNotFound errors across every renew.
+        consistent, reason = letsencrypt_cache_consistent(DATA_PATH)
+        if not consistent:
+            LOGGER.error(
+                "Skipping db cache update to avoid persisting an inconsistent Let's Encrypt state "
+                f"({reason}). The DB cache row is left untouched. Renewals for the affected certificates fail until an "
+                "account exists for their CA; the next run repoints them automatically once one does."
+            )
+            # If certbot itself succeeded, the fresh certs are already on disk — signal a reload
+            # (ret=1) so nginx picks them up. Persistence failure is logged separately above; do
+            # not escalate to status=2 here, otherwise JobScheduler suppresses the reload and the
+            # newly-renewed certs sit unused until the next restart.
+            if status == 0:
+                status = 1
+        else:
+            # Serialize against the UI heal/delete flow, which writes the same DB cache row.
+            with le_cache_write_lock():
+                cached, err = JOB.cache_dir(DATA_PATH)
+            if not cached:
+                LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
+            else:
+                LOGGER.info("Successfully saved Let's Encrypt data to db cache")
+
+    # Trigger OCSP refresh after renewal when stapling is enabled.
+    # Runs after the cache attempt so a successful persist is visible to the OCSP job.
     if renewed_any and _ocsp_stapling_enabled_anywhere():
         LOGGER.info("🔄 OCSP triggering refresh for renewed certificates")
 

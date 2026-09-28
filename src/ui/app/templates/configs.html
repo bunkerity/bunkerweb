@@ -198,6 +198,19 @@
                                         <i class="bx bx-copy-alt bx-xs"></i>
                                     </a>
                                 </div>
+                                {% set row_selection = [{"service": service_id, "type": config['type'], "name": config['name']}] | tojson %}
+                                <a role="button"
+                                   class="btn btn-outline-secondary btn-sm me-1 export-config"
+                                   href="{{ url_for("configs") }}/export?configs={{ row_selection | urlencode }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="Export custom config {{ config['name'] }}"
+                                   data-i18n="tooltip.link.export_config"
+                                   data-i18n-options='{"name": "{{ config['name'] }}"}'
+                                   target="_blank"
+                                   rel="noreferrer">
+                                    <i class="bx bx-export bx-xs"></i>
+                                </a>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_edit_config else 'tooltip.button.delete_config')) %}
                                 {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if not can_edit_config and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
                                 <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
@@ -332,6 +345,79 @@
                             <button type="submit"
                                     class="btn btn-outline-danger me-2"
                                     data-i18n="button.delete">Delete</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal modal-xl fade"
+             id="modal-import-configs"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.import_configs">Import custom configurations</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("configs") }}/import"
+                          method="POST"
+                          enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <div role="button"
+                                 id="configs-drag-area"
+                                 tabindex="0"
+                                 aria-controls="configs-import-file"
+                                 aria-label="Select a custom configurations export file or drop one here"
+                                 data-i18n-aria-label="aria.label.configs_dropzone"
+                                 class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
+                                <div class="text-center">
+                                    <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
+                                    <p class="mt-3 fs-5" data-i18n="modal.body.import_configs_dropzone">
+                                        Drag and drop your custom configurations export file here or click to select a file.
+                                    </p>
+                                </div>
+                            </div>
+                            <input type="file"
+                                   id="configs-import-file"
+                                   name="configs_file"
+                                   accept=".json,application/json"
+                                   class="visually-hidden"
+                                   required />
+                            <div id="configs-import-file-list" class="mt-3"></div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="overwrite"
+                                       value="yes"
+                                       id="configs-import-overwrite" />
+                                <label class="form-check-label"
+                                       for="configs-import-overwrite"
+                                       data-i18n="form.checkbox.overwrite_existing_configs">
+                                    Overwrite existing UI/API custom configurations
+                                </label>
+                            </div>
+                            <div class="alert alert-warning text-center mt-3"
+                                 role="alert"
+                                 data-i18n="modal.body.import_configs_warning">
+                                Custom configurations created by the scheduler, autoconf, or templates are always preserved. Only UI/API configurations can be overwritten.
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-primary me-2"
+                                    data-i18n="button.import_configs">Import custom configurations</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"

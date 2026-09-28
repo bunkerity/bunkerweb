@@ -14,6 +14,8 @@ LJ_FUNC void LJ_FASTCALL lj_profile_interpreter(lua_State *L);
 #if !LJ_PROFILE_SIGPROF
 LJ_FUNC void LJ_FASTCALL lj_profile_hook_enter(global_State *g);
 LJ_FUNC void LJ_FASTCALL lj_profile_hook_leave(global_State *g);
+LJ_FUNC int lj_profile_lock(void);
+LJ_FUNC void lj_profile_unlock(void);
 #endif
 
 #endif

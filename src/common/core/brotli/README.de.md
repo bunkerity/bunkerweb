@@ -1,21 +1,22 @@
-Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung and beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.
+Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung und beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.
 
-Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien and einer schnelleren Bereitstellung führt.
+Im Vergleich zu Gzip erreicht Brotli in der Regel bessere Kompressionsraten, was zu kleineren Dateien und einer schnelleren Bereitstellung führt.
 
 So funktioniert's:
 
 1. Auf Anfrage eines Clients prüft BunkerWeb, ob der Browser Brotli unterstützt.
-2. Wenn ja, wird die Antwort auf dem konfigurierten Niveau (`BROTLI_COMP_LEVEL`) komprimiert.
+2. Wenn ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.
 3. Die entsprechenden Header zeigen die Brotli-Komprimierung an.
 4. Der Browser dekomprimiert vor der Anzeige.
-5. Bandbreite and Ladezeiten nehmen ab.
+5. Bandbreite und Ladezeiten nehmen ab.
 
 ### So wird's verwendet
 
-1. Aktivieren: `USE_BROTLI: yes` (standardmäßig deaktiviert).
+1. Aktivieren: Setzen Sie den Parameter `USE_BROTLI` auf `yes` (standardmäßig deaktiviert).
 2. MIME-Typen: Definieren Sie die zu komprimierenden Inhalte über `BROTLI_TYPES`.
 3. Mindestgröße: `BROTLI_MIN_LENGTH`, um die Komprimierung kleiner Antworten zu vermeiden.
-4. Komprimierungsstufe: `BROTLI_COMP_LEVEL` für das Gleichgewicht zwischen Geschwindigkeit and Verhältnis.
+4. Komprimierungsstufe: `BROTLI_COMP_LEVEL` für das Gleichgewicht zwischen Geschwindigkeit und Verhältnis.
+5. BunkerWeb den Rest erledigen lassen: Nach der Konfiguration wird die Komprimierung automatisch auf geeignete Antworten angewendet.
 
 ### Parameter
 
@@ -27,7 +28,10 @@ So funktioniert's:
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | Multisite | nein     | Stufe 0–11: höher = bessere Komprimierung, aber mehr CPU. |
 
 !!! tip "Komprimierungsstufe"
-    `6` bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
+    `6` bietet einen guten Kompromiss. Für statische Inhalte und verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
+
+!!! info "Browser-Unterstützung"
+    Brotli wird von allen modernen Browsern unterstützt. Clients ohne Brotli-Unterstützung erhalten unkomprimierte Antworten oder eine andere verfügbare Codierung.
 
 ### Beispiele
 

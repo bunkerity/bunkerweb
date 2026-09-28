@@ -28,11 +28,11 @@ function buildPackage() {
     if [ "$DISTRO" = "debian-trixie" ]; then
       sudo docker build -t linux-debian-trixie -f src/linux/Dockerfile-debian-trixie .
     fi
-    if [ "$DISTRO" = "fedora-42" ]; then
-      sudo docker build -t linux-fedora-42 -f src/linux/Dockerfile-fedora-42 .
-    fi
     if [ "$DISTRO" = "fedora-43" ]; then
       sudo docker build -t linux-fedora-43 -f src/linux/Dockerfile-fedora-43 .
+    fi
+    if [ "$DISTRO" = "fedora-44" ]; then
+      sudo docker build -t linux-fedora-44 -f src/linux/Dockerfile-fedora-44 .
     fi
     if [ "$DISTRO" = "rhel-8" ]; then
       sudo docker build -t linux-rhel-8 -f src/linux/Dockerfile-rhel-8 .
@@ -45,6 +45,9 @@ function buildPackage() {
     fi
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker build -t linux-ubuntu-jammy -f src/linux/Dockerfile-ubuntu-jammy .
+    fi
+    if [ "$DISTRO" = "ubuntu-noble" ]; then
+      sudo docker build -t linux-ubuntu-noble -f src/linux/Dockerfile-ubuntu-noble .
     fi
   fi
 }
@@ -62,11 +65,11 @@ function createContainer() {
     if [ "$DISTRO" = "debian-trixie" ]; then
       sudo docker run -v /tmp/debian-trixie:/data linux-debian-trixie
     fi
-    if [ "$DISTRO" = "fedora-42" ]; then
-      sudo docker run -v /tmp/fedora-42:/data linux-fedora-42
-    fi
     if [ "$DISTRO" = "fedora-43" ]; then
       sudo docker run -v /tmp/fedora-43:/data linux-fedora-43
+    fi
+    if [ "$DISTRO" = "fedora-44" ]; then
+      sudo docker run -v /tmp/fedora-44:/data linux-fedora-44
     fi
     if [ "$DISTRO" = "rhel-8" ]; then
       sudo docker run -v /tmp/rhel-8:/data linux-rhel-8
@@ -80,13 +83,16 @@ function createContainer() {
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker run -v /tmp/ubuntu-jammy:/data linux-ubuntu-jammy
     fi
+    if [ "$DISTRO" = "ubuntu-noble" ]; then
+      sudo docker run -v /tmp/ubuntu-noble:/data linux-ubuntu-noble
+    fi
   fi
 }
 
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian-bookworm, debian-trixie, fedora-42, fedora-43, rhel-8, rhel-9, rhel-10)"
+  echo "Which distro do you want to use? (ubuntu, ubuntu-noble, ubuntu-jammy, debian-bookworm, debian-trixie, fedora-43, fedora-44, rhel-8, rhel-9, rhel-10)"
   read -r DISTRO
 }
 

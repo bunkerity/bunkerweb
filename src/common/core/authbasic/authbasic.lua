@@ -337,7 +337,7 @@ function authbasic:matches_scope()
 	end
 
 	if matcher.kind == "regex" and matcher.value ~= "" then
-		return regex_match(uri, matcher.value, matcher.options) ~= nil
+		return regex_match(uri, matcher.value, matcher.options, "AUTH_BASIC_LOCATION") ~= nil
 	end
 
 	return false
@@ -349,7 +349,7 @@ function authbasic:validate_credentials()
 		return false, "missing credentials"
 	end
 
-	local headers = req_get_headers()
+	local headers = req_get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
 	local auth_header = headers["authorization"] or headers["Authorization"]
 	if not auth_header then
 		return false, "missing Authorization header"
@@ -422,19 +422,15 @@ function authbasic:access()
 			username = result,
 			success = true,
 		})
-		ngx.var.auth_user = result
-		ngx.var.remote_user = result
 		return self:ret(true, "authenticated user " .. result)
 	end
 
 	self:set_metric("counters", "failed_authbasic", 1)
-	self:set_metric("counters", "failed_ip_" .. remote_addr, 1)
 
-	-- Extract attempted username from result message if available
+	-- Extract attempted username from result message if available. It stays a field of the
+	-- event record below and never becomes part of a metric key : both the address and the
+	-- username come from the client, so keying on them mints one cache slot per attempt.
 	local attempted_user = result:match("unknown user (.+)$") or result:match("invalid password for user (.+)$")
-	if attempted_user then
-		self:set_metric("counters", "failed_user_" .. attempted_user, 1)
-	end
 
 	self:set_metric("tables", "authentications", {
 		date = time(date("!*t")),

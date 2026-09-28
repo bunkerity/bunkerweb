@@ -63,7 +63,7 @@ cppcheck:
 		--enable=warning,style,performance,portability,unusedFunction,missingInclude \
 		--inconclusive \
 		--template="warning: {file},{line},{severity},{id},{message}" \
-		-I headers -I . -I others -I src -I others/mbedtls/include \
+		-I headers -I . -I $(top_srcdir)/others -I $(top_srcdir)/src -I $(top_srcdir)/others/mbedtls/include -I $(top_srcdir)/others/mbedtls/tf-psa-crypto/include -I $(top_srcdir)/others/mbedtls/tf-psa-crypto/drivers/builtin/include \
 		--error-exitcode=1 \
 		-i "src/parser/seclang-parser.cc" -i "src/parser/seclang-scanner.cc" \
 		-i others \
@@ -99,4 +99,3 @@ pkgconfig_DATA = modsecurity.pc
 EXTRA_DIST = modsecurity.pc.in \
              modsecurity.conf-recommended \
              unicode.mapping
-

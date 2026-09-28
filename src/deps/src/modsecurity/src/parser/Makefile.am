@@ -25,6 +25,7 @@ libmodsec_parser_la_CPPFLAGS = \
 	$(YAJL_CFLAGS) \
 	$(LMDB_CFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(LIBXML2_CFLAGS)
 
 test.cc: seclang-parser.hh

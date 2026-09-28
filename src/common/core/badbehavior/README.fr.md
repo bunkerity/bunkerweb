@@ -10,6 +10,14 @@ Comment ça marche :
 4. Le bannissement peut être au niveau service (site) ou global (tous les sites).
 5. Les bans expirent après la durée configurée (ou sont permanents avec `0`).
 
+!!! success "Avantages clés"
+
+      1. **Protection automatique :** détecte et bloque les clients potentiellement malveillants sans intervention manuelle.
+      2. **Règles personnalisables :** adaptez ce qui constitue un « mauvais comportement » à vos besoins.
+      3. **Économie de ressources :** empêche les acteurs malveillants de consommer les ressources serveur avec des requêtes invalides répétées.
+      4. **Portée flexible :** choisissez si les bans s’appliquent seulement au service courant ou globalement à tous les services.
+      5. **Contrôle de durée :** configurez des bans temporaires qui expirent automatiquement ou des bans permanents jusqu’à suppression manuelle.
+
 ### Comment l’utiliser
 
 1. Activation : `USE_BAD_BEHAVIOR` (activé par défaut).
@@ -28,12 +36,15 @@ Comment ça marche :
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | non      | Activer la détection et le bannissement.                       |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | non      | Codes HTTP considérés « mauvais ».                             |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.            |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | non      | Fenêtre de comptage (secondes).                                |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | non      | Durée du ban en secondes (`0` = permanent).                    |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | non      | Fenêtre de comptage (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | non      | Durée du ban en secondes (`0` = permanent). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
+
+!!! tip "Ajuster votre configuration"
+    Commencez avec des paramètres prudents (seuil plus élevé, durée de ban plus courte), puis adaptez-les selon vos besoins et vos modèles de trafic. Surveillez vos journaux pour vérifier que les utilisateurs légitimes ne sont pas bannis par erreur.
 
 ### Exemples
 

@@ -4,7 +4,7 @@ local ffi_gc = ffi.gc
 
 require "resty.openssl.include.ossl_typ"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   OSSL_LIB_CTX *OSSL_LIB_CTX_new(void);
@@ -15,8 +15,8 @@ ffi.cdef [[
 local ossl_lib_ctx
 
 local function new(request_context_only, conf_file)
-  if not OPENSSL_3X then
-    return false, "ctx is only supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return false, "ctx is only supported on OpenSSL 3.0 or later"
   end
 
   local ctx = C.OSSL_LIB_CTX_new()
@@ -36,8 +36,8 @@ local function new(request_context_only, conf_file)
 end
 
 local function free(request_context_only)
-  if not OPENSSL_3X then
-    return false, "ctx is only supported from OpenSSL 3.0"
+  if not OPENSSL_3_UP then
+    return false, "ctx is only supported on OpenSSL 3.0 or later"
   end
 
   if request_context_only and ngx then

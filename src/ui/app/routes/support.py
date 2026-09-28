@@ -9,7 +9,6 @@ from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DB
 
-
 support = Blueprint("support", __name__)
 
 

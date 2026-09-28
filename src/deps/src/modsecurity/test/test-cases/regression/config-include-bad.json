@@ -1,51 +1,159 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Include - bad rule",
-    "expected":{
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include - bad rule",
+    "client": {
+      "ip": "",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200,
       "parser_error": "Rules error. File: test-cases/data/config_example3.txt. Line: 2. Column: 66. Expecting an action, got:  ops \"id:1000,pass,t:trim\""
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "Include test-cases/data/config_example3.txt",
       "SecRule ARGS \"@missing_operator test\" \"id:19,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Include - missing file",
-    "expected":{
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include - missing file",
+    "client": {
+      "ip": "",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200,
       "parser_error": "Rules error. File: config-include-bad.json. Line: 2. Column: 46. test-cases/data/config_example-ops.txt: Not able to open file."
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "Include test-cases/data/config_example-ops.txt",
       "SecRule ARGS \"@contains test\" \"id:19,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Include - missing at include",
-    "expected":{
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include - missing at include",
+    "client": {
+      "ip": "",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200,
       "parser_error": "Rules error. File: test-cases/data/config_example-ops-include.txt. Line: 1. Column: 52. test-cases/data/config_example-not-exist.txt: Not able to open file."
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "Include test-cases/data/config_example-ops-include.txt",
       "SecRule ARGS \"@contains test\" \"id:19,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Include - duplicate id",
-    "expected":{
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include - duplicate id",
+    "client": {
+      "ip": "",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200,
       "parser_error": "Rule id: 40 is duplicated"
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "Include test-cases/data/config_example.txt",
       "Include test-cases/data/config_example.txt",

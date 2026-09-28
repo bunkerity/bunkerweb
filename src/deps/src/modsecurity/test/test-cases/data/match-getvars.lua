@@ -2,8 +2,14 @@ function dump(o)
    if type(o) == 'table' then
       local s = '{ '
       for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
+         -- In Lua 5.5, generic-for loop variables (k and v) are read-only,
+         -- so we copy k into a local before formatting. This works in earlier
+         -- Lua versions too.
+         local key_str = k
+         if type(key_str) ~= 'number' then
+            key_str = '"'..key_str..'"'
+         end
+         s = s .. '['..key_str..'] = ' .. dump(v) .. ','
       end
       return s .. '} '
    else

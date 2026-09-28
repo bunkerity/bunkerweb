@@ -24,7 +24,7 @@ RUN C:\TEMP\InstallBuildTools.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --nor
     --installPath C:\BuildTools
 
 # download & install GIT
-ARG GIT_VERSION=2.44.0
+ARG GIT_VERSION=2.53.0
 ARG GIT_BINARY=Git-${GIT_VERSION}-64-bit.exe
 ARG GIT_URL=https://github.com/git-for-windows/git/releases/download/v${GIT_VERSION}.windows.1/${GIT_BINARY}
 
@@ -35,7 +35,7 @@ RUN %INSTALLER% /SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL `
     /NORESTART /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /LOADINF=git.inf
 
 # download & setup conan
-ARG CONAN_VERSION=2.10.2
+ARG CONAN_VERSION=2.27.1
 ARG CONAN_BINARY=conan-${CONAN_VERSION}-windows-x86_64-installer.exe
 ARG CONAN_URL=https://github.com/conan-io/conan/releases/download/${CONAN_VERSION}/${CONAN_BINARY}
 
@@ -87,7 +87,7 @@ RUN cmd.exe /C copy "C:\Program Files\GIT\usr\bin" \bin > NUL
 RUN cmd.exe /C copy "C:\Program Files\GIT\usr\bin\echo.exe" \bin\echo > NUL
 
 # disable tests that don't work on windows
-ARG JQ_VERSION=1.7.1
+ARG JQ_VERSION=1.8.1
 ARG JQ_BINARY=jq-windows-amd64.exe
 ARG JQ_URL=https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/${JQ_BINARY}
 

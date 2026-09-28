@@ -7,7 +7,7 @@ require "resty.openssl.include.evp.md"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local _M = {}
 local mt = {__index = _M}
@@ -27,7 +27,7 @@ function _M.new(typ, properties)
   if typ == "null" then
     algo = C.EVP_md_null()
   else
-    if OPENSSL_3X then
+    if OPENSSL_3_UP then
       algo = C.EVP_MD_fetch(ctx_lib.get_libctx(), typ or 'sha1', properties)
       ffi_gc(algo, C.EVP_MD_free)
     else
@@ -46,7 +46,7 @@ function _M.new(typ, properties)
   return setmetatable({
     ctx = ctx,
     algo = algo,
-    buf = ctypes.uchar_array(OPENSSL_3X and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)),
+    buf = ctypes.uchar_array(OPENSSL_3_UP and C.EVP_MD_get_size(algo) or C.EVP_MD_size(algo)),
   }, mt), nil
 end
 
@@ -55,7 +55,7 @@ function _M.istype(l)
 end
 
 function _M:get_provider_name()
-  if not OPENSSL_3X then
+  if not OPENSSL_3_UP then
     return false, "digest:get_provider_name is not supported"
   end
   local p = C.EVP_MD_get0_provider(self.algo)
@@ -65,7 +65,7 @@ function _M:get_provider_name()
   return ffi_str(C.OSSL_PROVIDER_get0_name(p))
 end
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   local param_lib = require "resty.openssl.param"
   _M.settable_params, _M.set_params, _M.gettable_params, _M.get_param = param_lib.get_params_func("EVP_MD_CTX")
 end

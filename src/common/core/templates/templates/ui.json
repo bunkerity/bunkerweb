@@ -10,13 +10,17 @@
     "CORS_ALLOW_ORIGIN": "self",
     "INTERCEPTED_ERROR_CODES": "404 405 413 429 500 501 502 503 504",
     "MAX_CLIENT_SIZE": "50m",
-    "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
+    "REVERSE_PROXY_KEEPALIVE": "yes",
     "REVERSE_PROXY_BUFFERING": "no",
-    "USE_ROBOTSTXT": "yes",
+    "REVERSE_PROXY_REQUEST_BUFFERING": "no",
+    "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Content-Security-Policy-Report-Only Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
     "LIMIT_REQ_RATE": "6r/s",
     "LIMIT_CONN_MAX_HTTP1": "25",
     "LIMIT_CONN_MAX_HTTP2": "200",
-    "LIMIT_CONN_MAX_HTTP3": "200"
+    "LIMIT_CONN_MAX_HTTP3": "200",
+    "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": "256k",
+    "WHITELIST_RDNS": "",
+    "WHITELIST_ASN": ""
   },
   "steps": [
     {
@@ -32,13 +36,17 @@
         "CORS_ALLOW_ORIGIN",
         "INTERCEPTED_ERROR_CODES",
         "MAX_CLIENT_SIZE",
-        "KEEP_UPSTREAM_HEADERS",
+        "REVERSE_PROXY_KEEPALIVE",
         "REVERSE_PROXY_BUFFERING",
-        "USE_ROBOTSTXT",
+        "REVERSE_PROXY_REQUEST_BUFFERING",
+        "KEEP_UPSTREAM_HEADERS",
         "LIMIT_REQ_RATE",
         "LIMIT_CONN_MAX_HTTP1",
         "LIMIT_CONN_MAX_HTTP2",
-        "LIMIT_CONN_MAX_HTTP3"
+        "LIMIT_CONN_MAX_HTTP3",
+        "MODSECURITY_REQ_BODY_NO_FILES_LIMIT",
+        "WHITELIST_RDNS",
+        "WHITELIST_ASN"
       ]
     }
   ]

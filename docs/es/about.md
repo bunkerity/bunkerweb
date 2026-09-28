@@ -7,7 +7,7 @@ BunkerWeb es mantenido por [Bunkerity](https://www.bunkerity.com/?utm_campaign=s
 ## ¿Tenéis una versión profesional?
 
 !!! tip "Prueba gratuita de BunkerWeb PRO"
-    ¿Quieres probar rápidamente BunkerWeb PRO durante un mes? Usa el código `freetrial` al realizar tu pedido en el [panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) o haciendo clic [aquí](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) para aplicar directamente el código de promoción (se hará efectivo al finalizar la compra).
+    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 Sí, ofrecemos una versión profesional de BunkerWeb llamada "BunkerWeb PRO" con características adicionales y soporte técnico (opcional).
 
@@ -32,7 +32,7 @@ También puedes [contactarnos](https://panel.bunkerweb.io/contact.php?utm_campai
 
 Para obtener soporte gratuito de la comunidad, puedes utilizar los siguientes medios:
 
-- El canal #help de BunkerWeb en el [servidor de Discord](https.discord.com/invite/fTf46FmtyD)
+- El canal #help de BunkerWeb en el [servidor de Discord](https://discord.com/invite/fTf46FmtyD)
 - La categoría de ayuda de las [discusiones de GitHub](https://github.com/bunkerity/bunkerweb/discussions)
 - El subreddit [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb)
 - Los foros de [Server Fault](https://serverfault.com/) y [Super User](https://superuser.com/)

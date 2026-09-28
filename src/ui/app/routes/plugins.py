@@ -14,11 +14,12 @@ from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
 from flask import Blueprint, Response, current_app, g, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from werkzeug.routing import BuildError
 from werkzeug.utils import secure_filename
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
@@ -43,6 +44,9 @@ def plugins_page():
 def delete_plugin():
     if DB.readonly:
         return Response("Database is in read-only mode", 403)
+
+    if not current_user.admin:
+        return Response("Plugin management is restricted to administrators", 403)
 
     verify_data_in_form(
         data={"plugins": None},
@@ -131,18 +135,15 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
                 tmp_dir.mkdir(parents=True, exist_ok=True)
 
                 with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                    # Validate all members before extracting any
+                    tmp_dir_resolved = tmp_dir.resolve()
                     for member in tar.getmembers():
-                        # Prevent absolute paths and paths with '..'
                         if member.name.startswith("/") or ".." in Path(member.name).parts:
                             return {"status": "ko", "code": 400, "message": "Invalid file path"}
-
-                        # Construct the target path and ensure it is within tmp_dir
-                        target_path = tmp_dir.joinpath(member.name).resolve()
-                        if not str(target_path).startswith(str(tmp_dir)):
+                        if not tmp_dir.joinpath(member.name).resolve().is_relative_to(tmp_dir_resolved):
                             return {"status": "ko", "code": 400, "message": "Invalid file path"}
 
-                        # Extract the file safely
-                        tar.extract(member, tmp_dir)
+                    safe_tar_extractall(tar, tmp_dir)
 
                 tmp_dir = tmp_dir.joinpath("ui")
             except BaseException as e:
@@ -152,6 +153,9 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
     try:
         action_file = tmp_dir.joinpath("actions.py")
         if not action_file.is_file():
+            if function_name == "pre_render":
+                # Mirror the missing pre_render method case: a plugin without an actions file is not a pre-render error
+                return {"status": "ok", "code": 200, "message": "The plugin does not have an action file"}
             return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
         sys_path.append(tmp_dir.as_posix())
@@ -218,6 +222,10 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 def plugins_refresh():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "plugins")
+
+    if not current_user.admin:
+        return handle_error("Plugin management is restricted to administrators", "plugins")
+
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
     verify_data_in_form(
@@ -255,7 +263,7 @@ def plugins_refresh():
                             zip_file.getinfo("plugin.json")
                         except KeyError:
                             is_dir = True
-                        zip_file.extractall(str(temp_folder_path))
+                        safe_zip_extractall(zip_file, str(temp_folder_path))
                 except BadZipFile:
                     errors += 1
                     message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
@@ -268,12 +276,7 @@ def plugins_refresh():
                             tar_file.getmember("plugin.json")
                         except KeyError:
                             is_dir = True
-                        try:
-                            # deepcode ignore TarSlip: We don't need to check for tar slip as we are checking the files when they are uploaded
-                            tar_file.extractall(str(temp_folder_path), filter="data")
-                        except TypeError:
-                            # deepcode ignore TarSlip: We don't need to check for tar slip as we are checking the files when they are uploaded
-                            tar_file.extractall(str(temp_folder_path))
+                        safe_tar_extractall(tar_file, str(temp_folder_path))
                 except ReadError:
                     errors += 1
                     message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
@@ -411,6 +414,9 @@ def upload_plugin():
     if DB.readonly:
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
+    if not current_user.admin:
+        return {"status": "ko", "message": "Plugin management is restricted to administrators"}, 403
+
     if not request.files:
         return {"status": "ko"}, 400
 
@@ -439,7 +445,7 @@ def upload_plugin():
                             if isabs(file) or ".." in file:
                                 return {"status": "ko"}, 422
 
-                        zip_file.extractall(str(tmp_ui_path) + "/")
+                        safe_zip_extractall(zip_file, str(tmp_ui_path) + "/")
             else:
                 with tar_open(fileobj=plugin_file) as tar_file:
                     for file in tar_file.getnames():
@@ -450,12 +456,7 @@ def upload_plugin():
                             if isabs(member.name) or ".." in member.name:
                                 return {"status": "ko"}, 422
 
-                        try:
-                            # deepcode ignore TarSlip: The files in the tar are being inspected before extraction
-                            tar_file.extractall(str(tmp_ui_path) + "/", filter="data")
-                        except TypeError:
-                            # deepcode ignore TarSlip: The files in the tar are being inspected before extraction
-                            tar_file.extractall(str(tmp_ui_path) + "/")
+                        safe_tar_extractall(tar_file, str(tmp_ui_path) + "/")
 
             if len(plugins) <= 1:
                 plugin_file.seek(0, 0)
@@ -486,6 +487,8 @@ def custom_plugin_page(plugin: str):
         return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
 
     if request.method == "POST":
+        if not current_user.admin:
+            return error_message("Plugin management is restricted to administrators"), 403
         action_result = run_action(plugin)
 
         if isinstance(action_result, Response):
@@ -560,21 +563,36 @@ def custom_plugin_page(plugin: str):
             tmp_page_dir.mkdir(parents=True, exist_ok=True)
 
             with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                # Validate all members before extracting any
+                tmp_page_dir_resolved = tmp_page_dir.resolve()
                 for member in tar.getmembers():
-                    # Prevent absolute paths and paths with '..'
                     if member.name.startswith("/") or ".." in Path(member.name).parts:
                         return {"status": "ko", "code": 400, "message": "Invalid file path"}
-
-                    # Construct the target path and ensure it is within tmp_dir
-                    target_path = tmp_page_dir.joinpath(member.name).resolve()
-                    if not str(target_path).startswith(str(tmp_page_dir)):
+                    if not tmp_page_dir.joinpath(member.name).resolve().is_relative_to(tmp_page_dir_resolved):
                         return {"status": "ko", "code": 400, "message": "the plugin page has an invalid file path"}
 
-                    # Extract the file safely
-                    tar.extract(member, tmp_page_dir)
+                safe_tar_extractall(tar, tmp_page_dir)
 
             tmp_page_dir = tmp_page_dir.joinpath("ui")
             LOGGER.debug(f"Plugin {plugin} page extracted from database successfully")
+
+        # Blueprint-only plugins have neither an actions file nor an embedded template:
+        # send the user to their dedicated page when it is registered instead of
+        # rendering an empty (previously misleading) embedded page
+        if not (tmp_page_dir / "template.html").is_file() and not (tmp_page_dir / "actions.py").is_file():
+            # Only ever delete DB-blob extractions, never a permanent plugin directory
+            if str(tmp_page_dir).startswith(str(TMP_DIR)):
+                rmtree(tmp_page_dir.parent, ignore_errors=True)
+
+            try:
+                return redirect(url_for(f"{plugin}.{plugin}_page"))
+            except BuildError:
+                try:
+                    return redirect(url_for(plugin))
+                except BuildError:
+                    return render_template(
+                        "plugin_page.html", plugin_page="", plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render={}, no_page=True
+                    )
 
         # Execute pre-render action if exists
         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)

@@ -1,5 +1,6 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local is_challenge_uri = require("bunkerweb.acme").is_challenge_uri
 
 local ssl = class("ssl", plugin)
 
@@ -22,6 +23,16 @@ function ssl:init_workers()
 end
 
 function ssl:access()
+	-- ssl runs before letsencrypt in the access chain, so its whitelist never gets the chance to
+	-- run and the challenge is answered with a 301. ACME servers follow it, which silently makes
+	-- an HTTP-01 validation depend on port 443 being reachable and on the TLS handshake working
+	-- for a name that has no certificate yet. The whole challenge path is exempted, not only the
+	-- tokens this instance wrote: PRO ACME and LETS_ENCRYPT_PASSTHROUGH=yes answer it too, and
+	-- both run after ssl.
+	if is_challenge_uri(self.ctx) then
+		return self:ret(true, "no redirect to HTTPS for the ACME challenge")
+	end
+
 	-- Check if we need to redirect to HTTPS
 	if
 		self.ctx.bw.scheme == "http"

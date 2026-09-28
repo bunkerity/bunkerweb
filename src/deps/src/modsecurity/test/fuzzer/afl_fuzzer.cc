@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
         read_bytes = read(STDIN_FILENO, buf, 128);
 
         std::string currentString = std::string(read_bytes, 128);
-        std::string s = currentString;
+        const std::string& s = currentString;
 #if 0
         std::string z = lastString;
 #endif

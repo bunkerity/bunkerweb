@@ -1,0 +1,117 @@
+# Interesting combinations of low-level crypto options
+
+Config: entropy: built-in only
+depends_on:MBEDTLS_PSA_BUILTIN_GET_ENTROPY:!MBEDTLS_PSA_DRIVER_GET_ENTROPY:!MBEDTLS_ENTROPY_NV_SEED
+pass:
+
+Config: entropy: driver only
+depends_on:!MBEDTLS_PSA_BUILTIN_GET_ENTROPY:MBEDTLS_PSA_DRIVER_GET_ENTROPY:!MBEDTLS_ENTROPY_NV_SEED
+pass:
+
+Config: entropy: NV seed only
+depends_on:!MBEDTLS_PSA_BUILTIN_GET_ENTROPY:!MBEDTLS_PSA_DRIVER_GET_ENTROPY:MBEDTLS_ENTROPY_NV_SEED
+pass:
+
+Config: entropy: built-in + NV seed
+depends_on:MBEDTLS_PSA_BUILTIN_GET_ENTROPY:!MBEDTLS_PSA_DRIVER_GET_ENTROPY:MBEDTLS_ENTROPY_NV_SEED
+pass:
+
+Config: some built-in hash
+depends_on:MBEDTLS_PSA_BUILTIN_HASH
+pass:
+
+Config: no built-in hash
+depends_on:!MBEDTLS_PSA_BUILTIN_HASH
+pass:
+
+Config: some built-in MAC
+depends_on:MBEDTLS_PSA_BUILTIN_MAC
+pass:
+
+Config: no built-in MAC
+depends_on:!MBEDTLS_PSA_BUILTIN_MAC
+pass:
+
+Config: some built-in cipher
+depends_on:MBEDTLS_PSA_BUILTIN_CIPHER
+pass:
+
+Config: no built-in cipher
+depends_on:!MBEDTLS_PSA_BUILTIN_CIPHER
+pass:
+
+Config: some built-in AEAD
+depends_on:MBEDTLS_PSA_BUILTIN_AEAD
+pass:
+
+Config: no built-in AEAD
+depends_on:!MBEDTLS_PSA_BUILTIN_AEAD
+pass:
+
+Config: some built-in multipart signature
+depends_on:MBEDTLS_PSA_BUILTIN_SIGNATURE_MULTIPART
+pass:
+
+Config: no built-in multipart signature
+depends_on:!MBEDTLS_PSA_BUILTIN_SIGNATURE_MULTIPART
+pass:
+
+Config: some built-in PAKE
+depends_on:MBEDTLS_PSA_BUILTIN_PAKE
+pass:
+
+Config: no built-in PAKE
+depends_on:!MBEDTLS_PSA_BUILTIN_PAKE
+pass:
+
+Config: some built-in XOF
+depends_on:MBEDTLS_PSA_BUILTIN_XOF
+pass:
+
+Config: no built-in XOF
+depends_on:!MBEDTLS_PSA_BUILTIN_XOF
+pass:
+
+Config: built-in SHA3: some hash
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_PSA_BUILTIN_ALG_SHA3_SOME_HASH
+pass:
+
+Config: built-in SHA3: no hash
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_PSA_BUILTIN_ALG_SHA3_SOME_HASH
+pass:
+
+Config: built-in SHA3: some SHAKE
+depends_on:MBEDTLS_SHA3_C:MBEDTLS_PSA_BUILTIN_ALG_SOME_SHAKE
+pass:
+
+Config: built-in SHA3: no SHAKE
+depends_on:MBEDTLS_SHA3_C:!MBEDTLS_PSA_BUILTIN_ALG_SOME_SHAKE
+pass:
+
+Config: ECC: Weierstrass curves only
+depends_on:MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED:!MBEDTLS_ECP_MONTGOMERY_ENABLED
+pass:
+
+Config: ECC: Montgomery curves only
+depends_on:!MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED:MBEDTLS_ECP_MONTGOMERY_ENABLED
+pass:
+
+Config: mldsa-native using our SHAKE, PSA SHAKE enabled
+depends_on:MBEDTLS_PSA_CRYPTO_C:TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED:!TF_PSA_CRYPTO_PQCP_OWN_SHAKE:PSA_WANT_ALG_SHAKE128:PSA_WANT_ALG_SHAKE256
+pass:
+
+Config: mldsa-native using its own SHAKE, PSA SHAKE enabled
+depends_on:MBEDTLS_PSA_CRYPTO_C:TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED:TF_PSA_CRYPTO_PQCP_OWN_SHAKE:PSA_WANT_ALG_SHAKE128:PSA_WANT_ALG_SHAKE256
+pass:
+
+Config: mldsa-native using its own SHAKE, PSA SHAKE disabled
+depends_on:MBEDTLS_PSA_CRYPTO_C:TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED:TF_PSA_CRYPTO_PQCP_OWN_SHAKE:!PSA_WANT_ALG_SHAKE128:!PSA_WANT_ALG_SHAKE256
+pass:
+
+Config: PK export keys on the stack (ECC is the only PK key type)
+depends_on:PK_EXPORT_KEYS_ON_THE_STACK
+pass:
+
+Config: PK export keys on the heap (ECC is not the only PK key type)
+depends_on:!PK_EXPORT_KEYS_ON_THE_STACK
+pass:

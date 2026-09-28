@@ -8,6 +8,7 @@ from sys import path as sys_path
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from starlette.middleware.gzip import GZipMiddleware
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
 
@@ -23,6 +24,7 @@ from .routers.core import router as core_router
 from .utils import LOGGER
 from .rate_limit import setup_rate_limiter, limiter_dep_dynamic
 from .config import api_config
+from .host_allowlist import invalid_host_patterns
 
 BUNKERWEB_VERSION = get_version()
 
@@ -87,6 +89,32 @@ def create_app() -> FastAPI:
             LOGGER.warning(f"Blocking API request from non-whitelisted IP {request.client.host if request.client else 'unknown'}")
             return JSONResponse(status_code=403, content={"status": "error", "message": "forbidden"})
 
+    # Optional Host header allowlist (defense-in-depth; disabled by default).
+    # Rejects requests whose Host header is not in the configured allowlist before
+    # any token issuance or route handling.
+    allowed_hosts = api_config.allowed_hosts
+    if allowed_hosts:
+        from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+        # Always permit the internal Host used by scheduler/Lua -> API calls (default "bwapi",
+        # or API_SERVER_NAME) so enabling the allowlist cannot brick the control plane.
+        internal_host = api_config.internal_api_host_header
+        if internal_host and internal_host not in allowed_hosts:
+            allowed_hosts = [*allowed_hosts, internal_host]
+        # Validate wildcards ourselves: Starlette's assert runs lazily on first request (a
+        # try/except around add_middleware can't catch it) and is stripped under -O.
+        bad_hosts = invalid_host_patterns(allowed_hosts)
+        if bad_hosts:
+            LOGGER.error(f"Invalid API_ALLOWED_HOSTS entries {bad_hosts!r} (wildcards must be like '*.example.com'); host allowlist NOT enabled")
+        else:
+            try:
+                app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+                LOGGER.info(f"API Host header allowlist enabled: {allowed_hosts}")
+            except Exception:
+                LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
+
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
+
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)
 
@@ -113,7 +141,12 @@ def create_app() -> FastAPI:
             with suppress(Exception):
                 LOGGER.debug(f"HTTPException 500: {exc}\n{format_exc()}")
         detail = exc.detail if isinstance(exc.detail, str) else "error"
-        return JSONResponse(status_code=exc.status_code, content={"status": "error", "message": detail})
+        # Inert today: nothing in this app raises a fastapi HTTPException carrying headers, and
+        # Starlette's own header-bearing 405 is a different class that never reaches this handler.
+        # Kept so that body normalization stays exactly that -- the handler it shadows forwards
+        # headers, and silently dropping them the day someone adds a WWW-Authenticate would be a
+        # bug found in production rather than here.
+        return JSONResponse(status_code=exc.status_code, content={"status": "error", "message": detail}, headers=exc.headers)
 
     # Log tracebacks for unexpected errors (500)
     @app.exception_handler(Exception)
@@ -134,8 +167,7 @@ def create_app() -> FastAPI:
     return app
 
 
-description = (
-    """# BunkerWeb API
+description = """# BunkerWeb API
 
 This API is the control plane for BunkerWeb. It manages configuration, instances, plugins, bans, and scheduler artefacts and should remain on a trusted network.
 
@@ -181,9 +213,7 @@ Settings can be provided via `/etc/bunkerweb/api.yml`, `/etc/bunkerweb/api.env`,
 - `API_RATE_LIMIT_*`: knobs to enable/shape rate limiting.
 - `API_BISCUIT_TTL_SECONDS`: lifetime of Biscuit tokens in seconds (0 disables expiry; default 3600).
 
-"""
-    + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."
-)  # noqa: E501
+""" + f"See the [BunkerWeb documentation](https://docs.bunkerweb.io/{BUNKERWEB_VERSION}/api/) for more details."  # noqa: E501
 
 tags_metadata = [
     {"name": "core", "description": "Health probes and global utility endpoints"},

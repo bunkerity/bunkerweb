@@ -38,9 +38,9 @@ class Rule_DictElement : public VariableDictElement { \
         : VariableDictElement(m_rule, dictElement) { }
 
     static void id(Transaction *t,
-        RuleWithActions *rule,
+        const RuleWithActions *rule,
         std::vector<const VariableValue *> *l) {
-        RuleWithActions *r = rule;
+        const RuleWithActions *r = rule;
 
         while (r && r->m_ruleId == 0) {
             r = r->m_chainedRuleParent;
@@ -72,9 +72,9 @@ class Rule_DictElement : public VariableDictElement { \
 
 
     static void severity(Transaction *t,
-        RuleWithActions *rule,
+        const RuleWithActions *rule,
         std::vector<const VariableValue *> *l) {
-        RuleWithActions *r = rule;
+        const RuleWithActions *r = rule;
 
         while (r && !r->hasSeverity()) {
             r = r->m_chainedRuleParent;

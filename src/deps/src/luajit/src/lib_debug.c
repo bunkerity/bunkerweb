@@ -283,7 +283,7 @@ LJLIB_CF(debug_setuservalue)
 
 /* ------------------------------------------------------------------------ */
 
-#define KEY_HOOK	(U64x(80000000,00000000)|'h')
+#define KEY_HOOK	(U64x(81000000,00000000)|'h')
 
 static void hookf(lua_State *L, lua_Debug *ar)
 {

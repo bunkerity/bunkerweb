@@ -1,0 +1,24 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This rule detects PHP I/O stream wrappers (php:// protocol).
+##! See http://php.net/manual/en/wrappers.php.php
+
+##!+ i
+
+##!^ php://
+
+##! Standard I/O streams
+stdin
+stdout
+stderr
+##! Read/write streams
+input
+output
+##! File descriptor access
+fd
+##! In-memory streams
+memory
+temp
+##! Stream filter
+filter

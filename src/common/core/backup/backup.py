@@ -9,7 +9,6 @@ from pathlib import Path
 from subprocess import PIPE, run
 from shutil import which
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
 from typing import Literal
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -19,7 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from sqlalchemy.engine.url import make_url
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from model import Base  # type: ignore
@@ -30,14 +29,44 @@ BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
 
-def acquire_db_lock():
-    """Acquire the database lock to prevent concurrent access to the database."""
-    current_time = datetime.now().astimezone()
-    while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
-        LOGGER.warning("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-        sleep(1)
-    DB_LOCK_FILE.unlink(missing_ok=True)
-    DB_LOCK_FILE.touch()
+def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bool]:
+    mariadb_command = "mariadb-dump" if operation == "dump" else "mariadb"
+    if which(mariadb_command):
+        return mariadb_command, True
+    return ("mysqldump" if operation == "dump" else "mysql"), False
+
+
+def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+    args = []
+    ssl = query_args.get("ssl")
+    if isinstance(ssl, tuple):
+        ssl = ssl[-1]
+    ssl = str(ssl).lower() if ssl is not None else None
+
+    if ssl == "true":
+        args.append("--ssl")
+    elif ssl == "false":
+        args.append("--skip-ssl")
+    elif mariadb_client:
+        # MariaDB clients verify opportunistic TLS by default. MySQL's generated
+        # certificate is self-signed, so keep encryption but skip verification
+        # unless DATABASE_URI explicitly requests SSL.
+        args.append("--skip-ssl-verify-server-cert")
+
+    charset = query_args.get("charset")
+    if isinstance(charset, tuple):
+        charset = charset[-1]
+    if charset:
+        args.extend(["--default-character-set", str(charset)])
+    return args
+
+
+def acquire_db_lock(timeout: float = 30.0) -> int:
+    """Acquire the database lock (fcntl.flock, real mutual exclusion) to prevent concurrent
+    access to the database. Returns a handle to pass to release_db_lock(). Raises
+    DatabaseLockBusy if the lock is still held by another process after `timeout` seconds.
+    """
+    return _acquire_db_lock(DB_LOCK_FILE, timeout=timeout)
 
 
 def update_cache_file(db: Database, backup_dir: Path) -> str:
@@ -97,7 +126,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
-                dump_bin = "mariadb-dump" if which("mariadb-dump") else "mysqldump"
+                dump_bin, mariadb_client = mysql_client_command("dump")
                 cmd = [
                     dump_bin,
                     "-h",
@@ -116,6 +145,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--routines",  # Include stored procedures and functions
                         "--triggers",  # Include triggers
                         "--events",  # Include events
+                        "--no-tablespaces",  # Avoid requiring the global PROCESS privilege
                         "--max_allowed_packet=2147483648",  # 2GB max packet size
                         "--quick",  # Retrieve rows one at a time
                         "--lock-tables=false",  # Don't lock tables
@@ -127,12 +157,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 
                 # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
 
-                # Apply additional arguments from query parameters
-                for key, value in db_query_args.items():
-                    if key == "ssl" and value == "true":
-                        cmd.append("--ssl")
-                    elif key == "charset":
-                        cmd.extend(["--default-character-set", value])
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
 
                 proc = run(
                     cmd,
@@ -225,7 +250,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         tmp_file = Path(sep, "var", "tmp", "bunkerweb", backup_file.with_suffix(".sql").name)
         with ZipFile(backup_file, "r") as zipf:
-            zipf.extractall(path=tmp_file.parent)
+            safe_zip_extractall(zipf, tmp_file.parent)
 
         proc = run(
             ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],
@@ -246,16 +271,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
-            cmd = ["mysql", "-h", db_host, "-u", db_user, db_database_name]
+            restore_bin, mariadb_client = mysql_client_command("restore")
+            cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            # Apply additional arguments from query parameters
-            for key, value in db_query_args.items():
-                if key == "ssl" and value == "true":
-                    cmd.append("--ssl")
-                elif key == "charset":
-                    cmd.extend(["--default-character-set", value])
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(

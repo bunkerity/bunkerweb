@@ -1,3 +1,7 @@
+# after Ignoring 1.e or 1.E https://github.com/libinjection/libinjection/pull/60, still not be SQLI
+Hi, 1.e be happy to assist
+FROM 10001.103EABC TO TAG CHRISTMAS
+
 #
 # List of various inputs that failed and caused a false positive
 #

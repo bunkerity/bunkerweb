@@ -70,7 +70,7 @@
 |.define SAVE_GPRS_P,	48(sp)  // Save area for r6-r15 (10*8 bytes) in prologue (before stack frame is allocated).
 |
 |// Argument save area.
-|.define SAVE_ERRF,	280(sp) // Argument 4, in r5.
+|.define SAVE_ERRF,	280(sp) // Argument 4, in r5. Size is 4-bytes.
 |.define SAVE_NRES,	272(sp)	// Argument 3, in r4. Size is 4-bytes.
 |.define SAVE_CFRAME,	264(sp)	// Argument 2, in r3.
 |.define SAVE_L,	256(sp)	// Argument 1, in r2.
@@ -407,14 +407,15 @@ static void build_subroutines(BuildCtx *ctx)
   |  j <3
   |
   |->vm_unwind_yield:
-  |  lghi CRET1, LUA_YIELD
+  |  lghi RB, LUA_YIELD
   |  j ->vm_unwind_c_eh
   |
   |->vm_unwind_c:			// Unwind C stack, return from vm_pcall.
   |  // (void *cframe, int errcode)
   |  lgr sp, CARG1
-  |  lgfr CARG2, CRET1			// Error return status for vm_pcall.
+  |  lgfr RB, CARG2			// Error return status for vm_pcall.
   |->vm_unwind_c_eh:			// Landing pad for external unwinder.
+  |  lgr CRET1, RB			// Move return status into ABI reg.
   |  lg L:RB, SAVE_L
   |  lg GL:RB, L:RB->glref
   |  lghi TMPR1, ~LJ_VMST_C
@@ -495,7 +496,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  stg RD, SAVE_PC			// Any value outside of bytecode is ok.
   |  stg RD, SAVE_CFRAME
   |  st RD, SAVE_NRES
-  |  stg RD, SAVE_ERRF
+  |  st RD, SAVE_ERRF
   |  stg KBASE, L:RB->cframe
   |  clm RD, 1, L:RB->status
   |  je >2				// Initial resume (like a call).
@@ -520,8 +521,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  // (lua_State *L, TValue *base, int nres1, ptrdiff_t ef)
   |  saveregs
   |  lghi PC, FRAME_CP
-  |  llgfr CARG4, CARG4
-  |  stg CARG4, SAVE_ERRF
+  |  st CARG4, SAVE_ERRF
   |  j >1
   |
   |->vm_call:				// Setup C frame and enter VM.
@@ -574,7 +574,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  sg KBASE, L:RB->top
   |   lg DISPATCH, L:RB->glref	// Setup pointer to dispatch table.
   |  lghi TMPR0, 0
-  |  stg TMPR0, SAVE_ERRF		// No error function.
+  |  st TMPR0, SAVE_ERRF		// No error function.
   |  st KBASE, SAVE_NRES		// Neg. delta means cframe w/o frame.
   |   aghi DISPATCH, GG_G2DISP
   |  // Handler may change cframe_nres(L->cframe) or cframe_errfunc(L->cframe).

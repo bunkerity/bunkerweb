@@ -1,5 +1,8 @@
 name: Create ARM node (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     outputs:
@@ -27,16 +30,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       id: ${{ steps.getinfo.outputs.id }}
       ip: ${{ steps.getinfo.outputs.ip }}
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }} # pin every job in a run to one commit
+          persist-credentials: false
       - name: Get ARM availabilities
         id: availabilities
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server-type get zone=fr-par-2
           export-config: true
@@ -46,14 +53,14 @@ jobs:
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Extract ARM type
         run: |
-          TYPE=$(echo "$JSON" | jq '.servers | with_entries(select(.key | contains("COPARM1-"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^COPARM1-[0-9]+C-[0-9]+G$"))' | sed 's/"//g' | cut -d '-' -f 2,3 | sort -g | tail -n 1 | xargs -I {} echo "COPARM1-{}")
+          TYPE=$(echo "$JSON" | jq -r '.servers | to_entries | map(select(.key | test("^BASIC2-A[0-9]+C-[0-9]+G$"))) | map(select(.value.availability != "shortage")) | map(. + {cores: (.key | capture("A(?<n>[0-9]+)C") | .n | tonumber), ram: (.key | capture("C-(?<n>[0-9]+)G") | .n | tonumber)}) | sort_by(.cores, .ram) | last.key')
           echo "Type is $TYPE"
           echo "TYPE=$TYPE" >> "$GITHUB_ENV"
         env:
           JSON: ${{ steps.availabilities.outputs.json }}
       - name: Create ARM VM
         id: scw
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:100GB
       - name: Get info
@@ -62,7 +69,7 @@ jobs:
           echo "id=${{ fromJson(steps.scw.outputs.json).id }}" >> "$GITHUB_OUTPUT"
           echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
@@ -93,6 +100,17 @@ jobs:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Install Docker
-        run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; chmod +x test-docker.sh ; sh test-docker.sh ; echo 'ClientAliveInterval 15' >> /etc/ssh/sshd_config ; echo 'ClientAliveCountMax 60' >> /etc/ssh/sshd_config ; echo 'MaxSessions 50' >> /etc/ssh/sshd_config ; echo 'MaxStartups 50:30:100' >> /etc/ssh/sshd_config ; systemctl restart ssh"
+        # Chaining with `;` returned the exit code of the last command, so a node without Docker
+        # still passed this step and every ARM build failed on `docker: command not found`
+        # instead. `docker version` is the assertion the builds actually depend on.
+        run: |
+          ssh root@$SSH_IP 'for attempt in 1 2 3; do
+            curl -fsSL https://test.docker.com -o test-docker.sh && sh test-docker.sh && break
+            echo "Docker install attempt $attempt failed, retrying" >&2
+            sleep 15
+          done
+          docker version &&
+          printf "%s\n" "ClientAliveInterval 15" "ClientAliveCountMax 60" "MaxSessions 50" "MaxStartups 50:30:100" >> /etc/ssh/sshd_config &&
+          systemctl restart ssh'
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}

@@ -27,7 +27,12 @@ namespace ctl {
 
 
 bool RuleRemoveById::init(std::string *error) {
-    std::string what(m_parser_payload, 15, m_parser_payload.size() - 15);
+    size_t pos = m_parser_payload.find("=");
+    if (pos == std::string::npos) {
+        error->assign(m_parser_payload + " is not a valid ID or range");
+        return false;
+    }
+    std::string what = m_parser_payload.substr(pos + 1);
     bool added = false;
     std::vector<std::string> toRemove = utils::string::ssplit(what, ' ');
     for (const std::string &a : toRemove) {

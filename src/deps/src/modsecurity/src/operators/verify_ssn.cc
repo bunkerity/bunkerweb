@@ -114,13 +114,12 @@ bool VerifySSN::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
     std::list<SMatch> matches;
     bool is_ssn = false;
-    int i;
 
     if (m_param.empty()) {
         return false;
     }
 
-    for (i = 0; i < input.size() - 1 && is_ssn == false; i++) {
+    for (size_t i = 0; i + 1 < input.size() && !is_ssn; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
         for (const auto & j : matches) {
             is_ssn = verify(j.str().c_str(), j.str().size());

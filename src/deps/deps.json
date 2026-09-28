@@ -10,16 +10,16 @@
   "git_repository": [
     {
       "id": "brotli",
-      "name": "Brotli v1.1.0",
+      "name": "Brotli v1.2.0",
       "url": "https://github.com/google/brotli.git",
-      "commit": "ed738e842d2fbdf2d6459e39267a633c4a9b2f5d",
+      "commit": "028fb5a23661f123017c060daa546b55cf4bde29",
       "post_install": "rm -r src/deps/src/brotli/tests"
     },
     {
       "id": "headers-more-nginx-module",
-      "name": "headers-more-nginx-module v0.37",
+      "name": "headers-more-nginx-module v0.40",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
-      "commit": "06dc0be56e5ec9f7fd814e881b066b5540a85bec",
+      "commit": "0bf283ff92017acd616814b0e5153e0ccf93e2c9",
       "post_install": "rm -r src/deps/src/headers-more-nginx-module/t"
     },
     {
@@ -31,22 +31,23 @@
     },
     {
       "id": "libinjection",
-      "name": "libinjection v3.10.0+",
+      "name": "libinjection v4.0.0",
       "url": "https://github.com/libinjection/libinjection.git",
-      "commit": "73268cfd85f9ee625e1d73ec2b37672bb2fd83f6",
+      "commit": "211782219663f889f471650150df12b623c5766e",
       "post_install": "rm -r src/deps/src/libinjection/tests"
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.13.3",
+      "name": "libmaxminddb v1.14.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3"
+      "commit": "0077fd76d00a1656b9cb3028d467736504794f41",
+      "post_install": "rm -rf src/deps/src/libmaxminddb/t/libtap src/deps/src/libmaxminddb/t/maxmind-db"
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.16",
+      "name": "lua-cjson v2.1.0.19",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "e6daf3cdfac61055af3f7d88d9886942ff0de6e6"
+      "commit": "5ce46a80b10ef9d380a45c9e6cff9ecffbe71ebb"
     },
     {
       "id": "lua-ffi-zlib",
@@ -63,16 +64,16 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.29",
+      "name": "lua-nginx-module v0.10.29R2",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "a1ec138e98801400832fee6030120777bf9bb435",
+      "commit": "16612cb0a2eb71273fc5b50a4d98e3c05559178a",
       "post_install": "rm -r src/deps/src/lua-nginx-module/t"
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.32",
+      "name": "lua-resty-core v0.1.32R1",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "768ce9631dd91f864ba454af9615a81847c3230c",
+      "commit": "3ad8ab4b01758c0a03b534026c31cbfa9fc203a5",
       "post_install": "rm -r src/deps/src/lua-resty-core/t"
     },
     {
@@ -90,9 +91,9 @@
     },
     {
       "id": "lua-resty-http",
-      "name": "lua-resty-http v0.17.2",
+      "name": "lua-resty-http v0.18.0",
       "url": "https://github.com/ledgetech/lua-resty-http.git",
-      "commit": "183310324026120ab7eaf5dd82b9be90ae63aadf",
+      "commit": "03995ff9a08194d48d446ed2fa099cd6de38fbef",
       "post_install": "rm -r src/deps/src/lua-resty-http/t"
     },
     {
@@ -121,13 +122,13 @@
       "name": "lua-resty-mlcache v2.7.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
       "commit": "b4d0aed5adf74b118238efdcd971224278ec7d26",
-      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t"
+      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-skip-evicted.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej"
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.7.1",
+      "name": "lua-resty-openssl v1.9.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "4c5c3eb70328468aaf14938b45b5e894184a6a77",
+      "commit": "4ebee84ec3d829ef610005db1978ae591ed77a31",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -148,27 +149,27 @@
       "name": "lua-resty-redis-connector v0.11.0",
       "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
       "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979",
-      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t"
+      "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.5",
+      "name": "lua-resty-session v4.2.0",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "505ff720957f61f2ecd2e6e9fe11c66530a42807",
+      "commit": "9c7e43735b62819b69927b3104c9e1f47696c30a",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
       "id": "lua-resty-signal",
-      "name": "lua-resty-signal v0.04",
+      "name": "lua-resty-signal v0.05",
       "url": "https://github.com/openresty/lua-resty-signal.git",
-      "commit": "737d8ccfaa59c08ad4d32a712611a856775a61c5",
+      "commit": "42319006723c104e47d6922db17459c95e4db224",
       "post_install": "rm -r src/deps/src/lua-resty-signal/t"
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.16",
+      "name": "lua-resty-string v0.19",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "7be2e1d907744f965af115819cca9e6580f2e760",
+      "commit": "282590f58d4c927226492e0211b974d72b759329",
       "post_install": "rm -r src/deps/src/lua-resty-string/t"
     },
     {
@@ -186,16 +187,16 @@
     },
     {
       "id": "lua-upstream-nginx-module",
-      "name": "lua-upstream-nginx-module v0.07",
+      "name": "lua-upstream-nginx-module v0.08",
       "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
-      "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
+      "commit": "ad49f606989f91a514a7568eb45deb2642dd3e86",
       "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t"
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260227",
+      "name": "LuaJIT v2.1-20260914",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "928290a470d35eb01324d5275b22fb86b13602a2",
+      "commit": "ae3d1eecfdbe70b54040779f7b4655e132b9d875",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -227,45 +228,32 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.5",
+      "name": "Mbed TLS v4.2.0",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "e185d7fd85499c8ce5ca2a54f5cf8fe7dbe3f8df",
-      "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
+      "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+      "submodules": true,
+      "post_install": "rm -rf src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs src/deps/src/mbedtls/framework"
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.14",
+      "name": "ModSecurity v3.0.16",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "a555e5a44573e50f04ad997b3b24c214c42f8e29",
-      "post_install": "rm src/deps/src/modsecurity/.gitmodules && rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
+      "commit": "7ea9fefbe0ba409d8733b4d682c8c4c059cd028d",
+      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls src/deps/src/modsecurity/bindings/python src/deps/src/modsecurity/test/test-cases/secrules-language-tests && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {
       "id": "modsecurity-nginx",
       "name": "ModSecurity-nginx v1.0.4",
       "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
       "commit": "3f4b57df10ce43b1f1c722141f7621dc64838be8",
-      "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx-log.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/modsecurity-nginx-common.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/modsecurity-nginx-module.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
+      "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx-log.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/modsecurity-nginx-common.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/modsecurity-nginx-module.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_rewrite.c src/deps/misc/modsecurity-nginx-http3.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_rewrite.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_rewrite.c.rej"
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.28.2",
+      "name": "Nginx v1.30.5",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "073ed33202286a975964c3a08f522bf01dc6fecf",
+      "commit": "4556c714d1cfa587f92c7c0365c09209d42d148b",
       "post_install": "rm -r src/deps/src/nginx/docs"
-    },
-    {
-      "id": "nginx-1.28.1",
-      "name": "Nginx v1.28.1",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "95078974cfe998ec4095ac2c504c5c92bbc9a326",
-      "post_install": "rm -r src/deps/src/nginx-1.28.1/docs"
-    },
-    {
-      "id": "nginx-1.28.0",
-      "name": "Nginx v1.28.0",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
-      "post_install": "rm -r src/deps/src/nginx-1.28.0/docs"
     },
     {
       "id": "nginx_cookie_flag_module",
@@ -289,10 +277,10 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.17",
+      "name": "stream-lua-nginx-module v0.0.17R4",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "86cf76e3b62a5dea50813b3a00ff87b628c41aa4",
-      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t && patch --forward src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c src/deps/misc/stream-lua-nginx-module.patch || rm src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.orig src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.rej"
+      "commit": "ba83956f27b38bc90f9aa843f8ca856ab6212151",
+      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
     },
     {
       "id": "zlib",

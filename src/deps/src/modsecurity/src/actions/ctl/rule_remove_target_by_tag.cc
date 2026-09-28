@@ -1,6 +1,7 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
  * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ *               2024 - 2026 OWASP (https://owasp.org)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,11 +31,16 @@ namespace ctl {
 
 
 bool RuleRemoveTargetByTag::init(std::string *error) {
-    std::string what(m_parser_payload, 22, m_parser_payload.size() - 22);
+    size_t pos = m_parser_payload.find("=");
+    if (pos == std::string::npos) {
+        error->assign(m_parser_payload + " is not a valid 'TAG;VARIABLE'");
+        return false;
+    }
+    std::string what = m_parser_payload.substr(pos + 1);
     std::vector<std::string> param = utils::string::split(what, ';');
 
     if (param.size() < 2) {
-        error->assign(what + " is not a valid `TAG;VARIABLE'");
+        error->assign(what + " is not a valid 'TAG;VARIABLE'");
         return false;
     }
 

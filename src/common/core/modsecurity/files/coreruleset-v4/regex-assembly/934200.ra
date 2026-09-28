@@ -1,0 +1,38 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detect Server-Side Template Injection (SSTI) attacks at PL1.
+##! Matches template delimiters only when they contain code execution
+##! indicators: arithmetic (*), dunder access (__), or function calls (().
+##! This is stricter than 934180 (PL2) which matches broad template syntax.
+
+##! Execution indicators: patterns that suggest code execution
+##! rather than simple variable interpolation.
+##!> define exec-indicators (?:\*|__|\()
+
+##! Jinja2/Twig: {{7*7}}, {{''.__class__}}, {{config.items()}}
+##!> assemble
+  \{\{[^}]*?
+  ##!=>
+  {{exec-indicators}}
+  ##!=>
+  [^}]*?\}\}
+##!<
+
+##! Expression Language: #{runtime.exec('id')}, #{7*7}
+##!> assemble
+  #\{[^}]*?
+  ##!=>
+  {{exec-indicators}}
+  ##!=>
+  [^}]*?\}
+##!<
+
+##! ERB/JSP: <%=7*7%>, <% system('id') %>
+##!> assemble
+  <%=?\s*[^%]*?
+  ##!=>
+  {{exec-indicators}}
+  ##!=>
+  [^%]*?%>
+##!<

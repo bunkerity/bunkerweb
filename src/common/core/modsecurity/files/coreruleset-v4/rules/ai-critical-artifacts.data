@@ -35,3 +35,21 @@
 .fabric/
 # n8n — workflows, credentials (when N8N_USER_FOLDER in project); encryption key, SQLite
 .n8n/
+# JetBrains Junie
+.junie/
+# Gemini CLI Config File (Critical)
+.gemini/
+# OpenClaw
+.openclaw/
+# ClawdBot
+.clawdbot/
+# TrustClaw (In most installations but not official)
+.trustclaw/
+# ZeroClaw
+.zeroclaw/
+# Warp Terminal
+.warp/
+# Qwen Code
+.qwen_code
+# Crush AI
+.crush

@@ -14,9 +14,96 @@ html {
   font-display: swap;
 }
 
+/* brand faces, self-hosted: the theme runs with font: false, no Google Fonts call */
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/PublicSans-Regular.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/PublicSans-Italic.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/PublicSans-SemiBold.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/PublicSans-Bold.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Courier Prime";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/CourierPrime-Regular.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Courier Prime";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/CourierPrime-Bold.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Don Jose";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/DonJose-Black.woff2) format("woff2");
+}
+
 :root {
-  --md-primary-fg-color: #125678;
-  --md-text-font: "Roboto";
+  /* same values as src/ui/app/static/css/overrides.css, so docs and Web UI stay in step */
+  --bw-primary: #0b354a;
+  --bw-secondary: #35728e;
+  --bw-blue: #0b5577;
+  --bw-green: #2eac68;
+  /* the brand green is a fill, 2.9:1 on white; this is its text-safe shade, 5.4:1 */
+  --bw-green-text: #1c7a4a;
+  --bw-warning-bg: #ffeecc;
+  --bw-warning-fg: #664400;
+  --bw-danger: #ff3e1d;
+  --bw-amber: #a06300;
+  --bw-danger-text: #c92a0e;
+  --bw-ink: #0d1b26;
+  --bw-body: #33454f;
+  --bw-muted: #5b6f7c;
+  --bw-rule: #edf1f4;
+  --bw-border: #dce4e9;
+  --bw-chip-bg: #eef3f6;
+  --bw-chip-border: #dfe8ed;
+  --bw-row-hover: #f6fafc;
+
+  --md-primary-fg-color: var(--bw-primary);
+  --md-text-font: "Public Sans";
+  --md-code-font: "Courier Prime";
+}
+
+/* Don Jose is the brand display face: page title only, never section headings */
+.md-typeset h1 {
+  font-family: "Don Jose", "Public Sans", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--bw-primary);
 }
 
 .md-header__inner {
@@ -29,12 +116,16 @@ html {
 }
 
 .md-footer {
-  background-color: #125678;
+  background-color: var(--bw-primary);
 }
 
-/* better link contrast */
+/* brand link color, 8.1:1 on white */
 article a {
-  color: #2388bb;
+  color: var(--bw-blue);
+}
+
+article a:hover {
+  color: var(--bw-green-text);
 }
 
 /* highlight content links */
@@ -52,6 +143,13 @@ article label > a {
 /* lighter base tab color */
 nav.md-tabs ul li a {
   opacity: 0.9;
+}
+
+/* Building from source is kept out of the top bar: thirteen tabs collide below
+   about 1400px. The page stays in the sidebar, the sitemap and the search. */
+nav.md-tabs .md-tabs__item:has(> a[href$="/building/"]),
+nav.md-tabs .md-tabs__item:has(> a[href$="/building/index.html"]) {
+  display: none;
 }
 
 /* Make top navigation span full width with centered content */
@@ -101,8 +199,9 @@ nav.md-tabs .md-grid {
 
 /* active desktop tabs nav */
 nav.md-tabs ul li.md-tabs__item--active a {
-  color: #36ce7a;
+  color: #fff;
   font-weight: bold;
+  box-shadow: inset 0 -3px 0 var(--bw-green);
 }
 
 nav.md-tabs ul li.md-tabs__item--active a:hover {
@@ -182,6 +281,499 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
 /* Apply hover color to non-active items and open dropdowns */
 .md-nav--secondary .md-nav__item .md-nav__link:not(.md-nav__link--active):hover,
 .toc-dropdown[open] > summary:not(.md-nav__link--active) {
-  color: #2388bb;
+  color: var(--bw-blue);
 }
 /* END: Custom styles for TOC dropdowns */
+
+/* never split an inline code token mid-word in tables: a setting name, value or URL
+   stays one selectable word, lines still wrap on spaces */
+.md-typeset table:not([class]) th code,
+.md-typeset table:not([class]) td code {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* ===========================================================================
+   Settings tables
+   Enhanced by the settings-table pass in extra.js, which tags every table
+   whose first column holds uppercase identifiers. Untagged tables (the DNS
+   provider list, the misc feature categories) keep the stock Material look.
+   =========================================================================== */
+
+.md-typeset .bw-settings {
+  display: table;
+  width: 100%;
+  border: 1px solid var(--bw-border);
+  border-radius: 0.7rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.md-typeset .bw-settings th,
+.md-typeset .bw-settings td {
+  border: 0;
+  border-bottom: 1px solid var(--bw-rule);
+  vertical-align: top;
+  padding: 0.7rem 0.8rem;
+  color: var(--bw-body);
+}
+
+.md-typeset .bw-settings tbody tr:last-child th,
+.md-typeset .bw-settings tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.md-typeset .bw-settings thead th {
+  background: #f7fafb;
+  text-align: left;
+  border-bottom: 1px solid var(--bw-border);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--bw-muted);
+  white-space: nowrap;
+}
+
+.md-typeset .bw-settings tbody tr:hover {
+  background: var(--bw-row-hover);
+}
+
+.md-typeset .bw-settings tbody tr:hover > td,
+.md-typeset .bw-settings tbody tr:hover > th {
+  background: transparent;
+}
+
+/* first and last column breathe a little wider */
+.md-typeset .bw-settings th:first-child,
+.md-typeset .bw-settings td:first-child,
+.md-typeset .bw-settings th:last-child,
+.md-typeset .bw-settings td:last-child {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* identifier chip: the name and its copy button stay on one line */
+.md-typeset .bw-settings .bw-col-setting {
+  white-space: nowrap;
+}
+
+.md-typeset .bw-settings .bw-col-setting code {
+  display: inline-block;
+  /* the longest setting name is 41 characters; capping the chip keeps the table
+     inside the content column, and that rare name scrolls inside its own chip
+     rather than breaking in two */
+  max-width: 14rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--bw-chip-border);
+  border-radius: 0.35rem;
+  background: var(--bw-chip-bg);
+  color: var(--bw-primary);
+  font-weight: 700;
+}
+
+/* a value cell is never broken mid-token; a long one scrolls in place */
+.md-typeset .bw-settings .bw-col-value code {
+  display: inline-block;
+  max-width: 10rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  vertical-align: bottom;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--bw-body);
+}
+
+.md-typeset .bw-settings .bw-col-setting code::-webkit-scrollbar {
+  display: none;
+}
+
+/* copy button, revealed on row hover and on keyboard focus */
+.md-typeset .bw-settings .bw-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.3rem;
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid var(--bw-chip-border);
+  border-radius: 0.35rem;
+  background: #fff;
+  color: var(--bw-blue);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.md-typeset .bw-settings tbody tr:hover .bw-copy,
+.md-typeset .bw-settings .bw-copy:focus-visible {
+  opacity: 1;
+}
+
+.md-typeset .bw-settings .bw-copy:hover {
+  border-color: var(--bw-blue);
+}
+
+.md-typeset .bw-settings .bw-copy svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.md-typeset .bw-settings .bw-copy--done {
+  opacity: 1;
+  border-color: #b9e3cc;
+  background: #e3f5eb;
+  color: #12603a;
+}
+
+/* context: a dot instead of a second word */
+.md-typeset .bw-settings .bw-col-context {
+  white-space: nowrap;
+}
+
+.md-typeset .bw-settings .bw-col-context::before {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.35rem;
+  vertical-align: 0.1rem;
+  border-radius: 50%;
+  background: var(--bw-secondary);
+}
+
+.md-typeset .bw-settings .bw-ctx-multisite::before {
+  background: var(--bw-blue);
+}
+
+.md-typeset .bw-settings .bw-ctx-global::before {
+  background: var(--bw-green);
+}
+
+/* multiple: the generated yes, chipped; no becomes a muted dash */
+.md-typeset .bw-settings .bw-col-multiple {
+  white-space: nowrap;
+  color: var(--bw-muted);
+}
+
+.md-typeset .bw-settings .bw-multiple-yes {
+  display: inline-flex;
+  align-items: center;
+  height: 1.1rem;
+  padding: 0 0.4rem;
+  border-radius: 0.3rem;
+  background: var(--bw-warning-bg);
+  color: var(--bw-warning-fg);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* an empty cell reads as an em dash rather than a hole */
+.md-typeset .bw-settings .bw-empty::after {
+  content: "—";
+  color: #6b7d88;
+}
+
+/* lead-in of each description, e.g. "Enable Auth Basic:" */
+.md-typeset .bw-settings strong {
+  color: var(--bw-ink);
+}
+
+/* plugin badges: the STREAM support line, restyled in place */
+.md-typeset .bw-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.md-typeset .bw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--bw-border);
+  border-radius: 0.4rem;
+  background: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--bw-body);
+}
+
+.md-typeset .bw-badge img.twemoji,
+.md-typeset .bw-badge span.twemoji {
+  width: 0.8rem;
+  height: 0.8rem;
+  vertical-align: -0.1rem;
+}
+
+/* the PRO "advanced usages" link, promoted to the one solid button of the section */
+.md-typeset a.bw-badge--cta {
+  background: var(--bw-primary);
+  border-color: var(--bw-primary);
+  color: #fff;
+  font-family: "Don Jose", "Public Sans", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.md-typeset a.bw-badge--cta:hover {
+  background: var(--bw-blue);
+  border-color: var(--bw-blue);
+  color: #fff;
+}
+
+.md-typeset a.bw-badge--cta svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* phone: the table becomes one card per setting */
+@media screen and (max-width: 44.9375em) {
+  .md-typeset .bw-settings,
+  .md-typeset .bw-settings tbody,
+  .md-typeset .bw-settings tr {
+    display: block;
+  }
+
+  .md-typeset .bw-settings thead {
+    display: none;
+  }
+
+  .md-typeset .bw-settings tbody tr {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--bw-rule);
+  }
+
+  .md-typeset .bw-settings tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .md-typeset .bw-settings th,
+  .md-typeset .bw-settings td {
+    display: block;
+    border-bottom: 0;
+    padding: 0.2rem 1rem;
+  }
+
+  .md-typeset .bw-settings td::before {
+    content: attr(data-bw-label) " ";
+    margin-right: 0.3rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--bw-muted);
+  }
+
+  .md-typeset .bw-settings .bw-col-context::before {
+    content: attr(data-bw-label) " ";
+    width: auto;
+    height: auto;
+    margin-right: 0.3rem;
+    border-radius: 0;
+    background: none;
+  }
+
+  /* always visible on touch: there is no hover to reveal it */
+  .md-typeset .bw-settings .bw-copy {
+    width: 1.8rem;
+    height: 1.8rem;
+    opacity: 1;
+  }
+}
+
+/* A tab block carrying hidden=until-found must not also be display:none, or the
+   browser's find cannot see it. content-visibility from the UA stylesheet does
+   the hiding instead, and the block collapses so the set keeps its height. */
+.md-typeset .tabbed-content > .tabbed-block[hidden="until-found"] {
+  display: block;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* The theme prints every block of a tab set, so the collapse above must not
+   survive into print: without this each inactive tab prints as a blank. */
+@media print {
+  .md-typeset .tabbed-content > .tabbed-block[hidden="until-found"] {
+    content-visibility: visible;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Page chrome: admonitions, code blocks, heading anchors, back-to-top.
+   These carry the pages that have no settings table: 565 warnings, 501 infos
+   and 473 tips across the five locales, all of them stock Material blue and
+   teal until now, sitting next to brand-coloured tables.
+
+   Everything here is scoped to article.md-typeset rather than .md-typeset:
+   that is the only .md-typeset root holding content, since the banner has one
+   too. The repeated [class] is a specificity bump, not a filter. The theme
+   colours each type at .md-typeset .admonition.warning, three classes, and a
+   container rule has to carry more than that to set the accent for all of
+   them at once.
+   --------------------------------------------------------------------------- */
+
+/* Every admonition and collapsible block reads one accent, so a new type needs
+   its colour and nothing else. */
+article.md-typeset .admonition[class][class],
+article.md-typeset details[class][class] {
+  border: 1px solid var(--bw-border);
+  border-left: 0.2rem solid var(--bw-accent, var(--bw-secondary));
+  border-radius: 0.3rem;
+  box-shadow: none;
+}
+
+article.md-typeset .admonition[class][class]:focus-within,
+article.md-typeset details[class][class]:focus-within {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bw-accent, var(--bw-secondary)) 20%, transparent);
+}
+
+article.md-typeset .admonition[class][class] > .admonition-title,
+article.md-typeset details[class][class] > summary {
+  background-color: color-mix(in srgb, var(--bw-accent, var(--bw-secondary)) 9%, transparent);
+  border-bottom: 1px solid var(--bw-rule);
+  font-weight: 600;
+}
+
+article.md-typeset .admonition[class][class] > .admonition-title::before,
+article.md-typeset details[class][class] > summary::before {
+  background-color: var(--bw-accent, var(--bw-secondary));
+}
+
+/* the disclosure chevron on a collapsible block is drawn with color, not with
+   a mask like the type icon */
+article.md-typeset details[class][class] > summary::after {
+  color: var(--bw-accent, var(--bw-secondary));
+}
+
+/* Type accents. Material aliases ride along with their base type: important
+   and hint are tip, check is success, caution is warning, error is danger. */
+article.md-typeset .note,
+article.md-typeset .abstract,
+article.md-typeset .summary,
+article.md-typeset .tldr {
+  --bw-accent: var(--bw-secondary);
+}
+
+article.md-typeset .info,
+article.md-typeset .todo,
+article.md-typeset .question,
+article.md-typeset .help,
+article.md-typeset .faq {
+  --bw-accent: var(--bw-blue);
+}
+
+article.md-typeset .tip,
+article.md-typeset .hint,
+article.md-typeset .important,
+article.md-typeset .success,
+article.md-typeset .check,
+article.md-typeset .done {
+  --bw-accent: var(--bw-green-text);
+}
+
+article.md-typeset .warning,
+article.md-typeset .caution,
+article.md-typeset .attention {
+  --bw-accent: var(--bw-amber);
+}
+
+article.md-typeset .danger,
+article.md-typeset .error,
+article.md-typeset .failure,
+article.md-typeset .fail,
+article.md-typeset .missing,
+article.md-typeset .bug {
+  --bw-accent: var(--bw-danger-text);
+}
+
+article.md-typeset .example {
+  --bw-accent: var(--bw-primary);
+}
+
+/* Code blocks get the same shell as the settings tables. */
+article.md-typeset .highlight > pre > code,
+article.md-typeset pre > code {
+  border: 1px solid var(--bw-border);
+  border-radius: 0.3rem;
+}
+
+article.md-typeset .highlight > .filename {
+  background-color: var(--bw-chip-bg);
+  border: 1px solid var(--bw-border);
+  border-bottom: 0;
+  border-radius: 0.3rem 0.3rem 0 0;
+  color: var(--bw-body);
+  font-weight: 600;
+}
+
+article.md-typeset .md-clipboard {
+  color: var(--bw-muted);
+}
+
+article.md-typeset .md-clipboard:hover,
+article.md-typeset .md-clipboard:focus {
+  color: var(--bw-blue);
+}
+
+/* Heading anchors. Until permalink was turned on no section of a 545 KB page
+   could be linked at all; the mark stays out of the way until the heading is
+   hovered or the anchor itself is focused. */
+article.md-typeset .headerlink {
+  color: var(--bw-chip-border);
+  margin-left: 0.3em;
+  transition: color 125ms;
+}
+
+article.md-typeset h1:hover .headerlink,
+article.md-typeset h2:hover .headerlink,
+article.md-typeset h3:hover .headerlink,
+article.md-typeset h4:hover .headerlink,
+article.md-typeset h5:hover .headerlink,
+article.md-typeset h6:hover .headerlink,
+article.md-typeset .headerlink:focus,
+article.md-typeset :target > .headerlink {
+  color: var(--bw-blue);
+}
+
+/* Back to top. */
+.md-top {
+  background-color: var(--bw-primary);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgb(11 53 74 / 25%);
+  color: #fff;
+  transition: background-color 125ms;
+}
+
+.md-top:hover,
+.md-top:focus {
+  background-color: var(--bw-blue);
+  color: #fff;
+}

@@ -6,7 +6,7 @@ Das CORS-Plugin ermöglicht Cross-Origin Resource Sharing (Ressourcenfreigabe zw
 2.  BunkerWeb prüft, ob der anfragende Ursprung basierend auf Ihrer Konfiguration zulässig ist.
 3.  Wenn dies der Fall ist, antwortet BunkerWeb mit den entsprechenden CORS-Headern, die definieren, was die anfragende Website tun darf.
 4.  Bei nicht zulässigen Ursprüngen kann die Anfrage entweder komplett verweigert oder ohne CORS-Header ausgeliefert werden.
-5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
+5.  Zusätzliche Cross-Origin-Richtlinien wie [COEP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy), [COOP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) und [CORP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy) können konfiguriert werden, um die Sicherheit weiter zu erhöhen.
 
 ### Wie man es benutzt
 
@@ -31,7 +31,7 @@ Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren un
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | nein     | **Cross-Origin-Opener-Policy:** Steuert die Kommunikation zwischen Browser-Kontexten.                                                     |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | nein     | **Cross-Origin-Embedder-Policy:** Steuert, ob ein Dokument Ressourcen von anderen Ursprüngen laden kann.                                  |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | nein     | **Cross-Origin-Resource-Policy:** Steuert, welche Websites Ihre Ressourcen einbetten dürfen.                                              |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | nein     | **Cache-Dauer für Preflight:** Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen.                            |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | nein     | **Cache-Dauer für Preflight:** Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | nein     | **Nicht autorisierte Ursprünge ablehnen:** Wenn `yes`, werden Anfragen von nicht autorisierten Ursprüngen mit einem Fehlercode abgelehnt. |
 
 !!! tip "Optimierung von Preflight-Anfragen"

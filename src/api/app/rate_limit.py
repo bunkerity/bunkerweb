@@ -15,6 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from yaml import safe_load
 
 from .config import api_config
+from common_utils import parse_duration  # type: ignore
 from os import getenv
 from .utils import LOGGER, get_db
 
@@ -408,7 +409,7 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         redis_ssl = str(_env_or_cfg("REDIS_SSL", "no") or "no").lower() == "yes"
         # timeouts are in ms; convert to seconds for redis client options
         try:
-            timeout_ms = float(str(_env_or_cfg("REDIS_TIMEOUT", "1000") or "1000"))
+            timeout_ms = float(parse_duration(str(_env_or_cfg("REDIS_TIMEOUT", "1000") or "1000"), "ms"))
         except Exception:
             timeout_ms = 1000.0
         try:

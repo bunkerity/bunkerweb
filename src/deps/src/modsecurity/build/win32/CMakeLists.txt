@@ -51,10 +51,32 @@ target_compile_definitions(libinjection PRIVATE LIBINJECTION_VERSION="${LIBINJEC
 project(mbedcrypto C)
 
 set(MBEDTLS_DIR ${BASE_DIR}/others/mbedtls)
+set(TF_PSA_CRYPTO_DIR ${MBEDTLS_DIR}/tf-psa-crypto)
 
-add_library(mbedcrypto STATIC ${MBEDTLS_DIR}/library/base64.c ${MBEDTLS_DIR}/library/sha1.c ${MBEDTLS_DIR}/library/md5.c ${MBEDTLS_DIR}/library/platform_util.c ${MBEDTLS_DIR}/library/constant_time.c)
+add_library(mbedcrypto STATIC
+  ${TF_PSA_CRYPTO_DIR}/utilities/base64.c
+  ${TF_PSA_CRYPTO_DIR}/utilities/constant_time.c
+  ${TF_PSA_CRYPTO_DIR}/platform/platform_util.c
+  ${TF_PSA_CRYPTO_DIR}/extras/md.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/md5.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/sha1.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/sha256.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/sha512.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/sha3.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/ripemd160.c
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src/psa_util_internal.c
+)
 
-target_include_directories(mbedcrypto PRIVATE ${MBEDTLS_DIR}/include)
+target_include_directories(mbedcrypto PRIVATE
+  ${MBEDTLS_DIR}/include
+  ${TF_PSA_CRYPTO_DIR}/include
+  ${TF_PSA_CRYPTO_DIR}/core
+  ${TF_PSA_CRYPTO_DIR}/extras
+  ${TF_PSA_CRYPTO_DIR}/library
+  ${TF_PSA_CRYPTO_DIR}/utilities
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/include
+  ${TF_PSA_CRYPTO_DIR}/drivers/builtin/src
+)
 
 # get mbedtls version with git describe
 execute_process(
@@ -72,7 +94,7 @@ message("-- Detecting Mbed TLS version - ${MBEDTLS_VERSION}")
 
 project(libModSecurity
     VERSION
-        3.0.12
+        3.0.14
     LANGUAGES
         CXX
 )
@@ -137,7 +159,7 @@ file(GLOB_RECURSE libModSecuritySources ${BASE_DIR}/src/*.cc)
 add_library(libModSecurity SHARED ${libModSecuritySources})
 
 target_compile_definitions(libModSecurity PRIVATE WITH_PCRE2)
-target_include_directories(libModSecurity PRIVATE ${BASE_DIR} ${BASE_DIR}/headers ${BASE_DIR}/others ${MBEDTLS_DIR}/include)
+target_include_directories(libModSecurity PRIVATE ${BASE_DIR} ${BASE_DIR}/headers ${BASE_DIR}/others ${MBEDTLS_DIR}/include ${TF_PSA_CRYPTO_DIR}/include ${TF_PSA_CRYPTO_DIR}/drivers/builtin/include)
 target_link_libraries(libModSecurity PRIVATE pcre2::pcre2 libinjection mbedcrypto Poco::Poco Iphlpapi.lib)
 
 macro(add_package_dependency project compile_definition link_library flag)
@@ -164,7 +186,7 @@ project(libModSecurityTests)
 
 function(setTestTargetProperties executable)
   target_compile_definitions(${executable} PRIVATE WITH_PCRE2)
-  target_include_directories(${executable} PRIVATE ${BASE_DIR} ${BASE_DIR}/headers)
+  target_include_directories(${executable} PRIVATE ${BASE_DIR} ${BASE_DIR}/headers ${BASE_DIR}/others)
   target_link_libraries(${executable} PRIVATE libModSecurity pcre2::pcre2 dirent::dirent)
   add_package_dependency(${executable} WITH_YAJL yajl::yajl HAVE_YAJL)
 endfunction()
@@ -239,7 +261,7 @@ setTestTargetProperties(rules_optimization)
 project(libModSecurityExamples)
 
 function(setExampleTargetProperties executable)
-  target_include_directories(${executable} PRIVATE ${BASE_DIR} ${BASE_DIR}/headers)
+  target_include_directories(${executable} PRIVATE ${BASE_DIR} ${BASE_DIR}/headers ${BASE_DIR}/others)
   target_link_libraries(${executable} PRIVATE libModSecurity)
 endfunction()
 

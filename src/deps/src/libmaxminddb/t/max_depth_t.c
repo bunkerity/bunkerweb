@@ -23,14 +23,14 @@ void test_deep_nesting_rejected(void) {
     if (result.found_entry) {
         /* Looking up non-existent key "z" forces skip_map_or_array to
          * recurse through all 600 nesting levels. With the depth limit,
-         * this should return MMDB_INVALID_DATA_ERROR instead of crashing. */
+         * this should return MMDB_DECODER_LIMIT_ERROR instead of crashing. */
         MMDB_entry_data_s entry_data;
         const char *lookup_path[] = {"z", NULL};
         status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         cmp_ok(status,
                "==",
-               MMDB_INVALID_DATA_ERROR,
-               "MMDB_aget_value returns MMDB_INVALID_DATA_ERROR for "
+               MMDB_DECODER_LIMIT_ERROR,
+               "MMDB_aget_value returns MMDB_DECODER_LIMIT_ERROR for "
                "deeply nested data exceeding max depth");
     }
 
@@ -98,8 +98,8 @@ void test_deep_array_nesting_rejected(void) {
         status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
         cmp_ok(status,
                "==",
-               MMDB_INVALID_DATA_ERROR,
-               "MMDB_get_entry_data_list returns MMDB_INVALID_DATA_ERROR "
+               MMDB_DECODER_LIMIT_ERROR,
+               "MMDB_get_entry_data_list returns MMDB_DECODER_LIMIT_ERROR "
                "for deeply nested arrays exceeding max depth");
         MMDB_free_entry_data_list(entry_data_list);
     }

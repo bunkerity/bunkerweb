@@ -10,6 +10,8 @@ elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     exit 1
 fi
 
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fixtures}"
+
 echo "🎛️ Building headers stack for integration \"$integration\" ..."
 
 # Starting stack
@@ -48,7 +50,6 @@ else
     echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_FRAME_OPTIONS=SAMEORIGIN" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_CONTENT_TYPE_OPTIONS=nosniff" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "X_XSS_PROTECTION=1; mode=block" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_DNS_PREFETCH_CONTROL=off" | sudo tee -a /etc/bunkerweb/variables.env
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
@@ -72,7 +73,6 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_DNS_PREFETCH_CONTROL: ".*"@X_DNS_PREFETCH_CONTROL: "off"@' {} \;
 
             if [[ $(sed '27!d' docker-compose.yml) = '      COOKIE_FLAGS_1: "bw_cookie SameSite=Lax"' ]] ; then
@@ -96,7 +96,6 @@ cleanup_stack () {
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_DNS_PREFETCH_CONTROL=.*$@X_DNS_PREFETCH_CONTROL=off@' /etc/bunkerweb/variables.env
             unset GENERATE_SELF_SIGNED_SSL
             unset CUSTOM_HEADER
@@ -111,7 +110,6 @@ cleanup_stack () {
             unset PERMISSIONS_POLICY
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
-            unset X_XSS_PROTECTION
             unset X_DNS_PREFETCH_CONTROL
 
             if [[ $(sudo tail -n 1 /etc/bunkerweb/variables.env) = 'COOKIE_FLAGS_1=bw_cookie SameSite=Lax' ]] ; then
@@ -159,7 +157,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "geolocation=(self), microphone=()"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "SAMEORIGIN"@X_FRAME_OPTIONS: "DENY"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: "nosniff"@X_CONTENT_TYPE_OPTIONS: ""@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "1; mode=block"@X_XSS_PROTECTION: "0"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_DNS_PREFETCH_CONTROL: "off"@X_DNS_PREFETCH_CONTROL: "on"@' {} \;
         else
             sudo sed -i 's@CUSTOM_HEADER=.*$@CUSTOM_HEADER=X-Test: test@' /etc/bunkerweb/variables.env
@@ -171,7 +168,6 @@ do
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=geolocation=(self), microphone=()@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=DENY@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=0@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_DNS_PREFETCH_CONTROL=.*$@X_DNS_PREFETCH_CONTROL=on@' /etc/bunkerweb/variables.env
             export CUSTOM_HEADER="X-Test: test"
             export REMOVE_HEADERS="X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
@@ -182,7 +178,6 @@ do
             export PERMISSIONS_POLICY="geolocation=(self), microphone=()"
             export X_FRAME_OPTIONS="DENY"
             export X_CONTENT_TYPE_OPTIONS=""
-            export X_XSS_PROTECTION="0"
             export X_DNS_PREFETCH_CONTROL="on"
         fi
     elif [ "$test" = "no_httponly_flag" ] ; then
@@ -200,7 +195,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_DNS_PREFETCH_CONTROL: "on"@X_DNS_PREFETCH_CONTROL: "off"@' {} \;
         else
             sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* SameSite=Lax@' /etc/bunkerweb/variables.env
@@ -215,7 +209,6 @@ do
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_DNS_PREFETCH_CONTROL=.*$@X_DNS_PREFETCH_CONTROL=off@' /etc/bunkerweb/variables.env
             export COOKIE_FLAGS="* SameSite=Lax"
             export KEEP_UPSTREAM_HEADERS="Content-Security-Policy Permission-Policy X-Frame-Options"
@@ -228,7 +221,6 @@ do
             unset PERMISSIONS_POLICY
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
-            unset X_XSS_PROTECTION
             unset X_DNS_PREFETCH_CONTROL
         fi
     elif [ "$test" = "multiple_no_httponly_flag" ] ; then
@@ -298,7 +290,7 @@ do
     i=0
     if [ "$integration" == "docker" ] ; then
         while [ $i -lt 120 ] ; do
-            containers=("headers-bw-1" "headers-bw-scheduler-1")
+            containers=("${COMPOSE_PROJECT_NAME}-bw-1" "${COMPOSE_PROJECT_NAME}-bw-scheduler-1")
             healthy="true"
             for container in "${containers[@]}" ; do
                 check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"

@@ -111,55 +111,12 @@ make check
 make clean
 make safedist
 
-if [ ! -d .gh-pages ]; then
-    echo "Checking out gh-pages in .gh-pages"
-    git clone -b gh-pages git@github.com:maxmind/libmaxminddb.git .gh-pages
-    pushd .gh-pages
-else
-    echo "Updating .gh-pages"
-    pushd .gh-pages
-    git pull
-fi
-
-if [ -n "$(git status --porcelain)" ]; then
-    echo ".gh-pages is not clean" >&2
-    exit 1
-fi
-
-index=index.md
-cat <<EOF >$index
----
-layout: default
-title: libmaxminddb - a library for working with MaxMind DB files
-version: $version
----
-EOF
-
-cat ../doc/libmaxminddb.md >>$index
-
-mmdblookup=mmdblookup.md
-cat <<EOF >$mmdblookup
----
-layout: default
-title: mmdblookup - a utility to look up an IP address in a MaxMind DB file
-version: $version
----
-EOF
-
-cat ../doc/mmdblookup.md >>$mmdblookup
-
-git commit -m "Updated for $version" -a
-
 read -r -e -p "Push to origin? (y/n) " should_push
 
 if [ "$should_push" != "y" ]; then
     echo "Aborting"
     exit 1
 fi
-
-git push
-
-popd
 
 git push
 

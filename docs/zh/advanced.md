@@ -1,8 +1,8 @@
 # 高级用法
 
-GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/examples) 文件夹中提供了许多真实世界的用例示例。
+GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) 文件夹中提供了许多真实世界的用例示例。
 
-我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations) 文件夹中找到。
+我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations) 文件夹中找到。
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
@@ -85,7 +85,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9
+            bunkerity/bunkerweb-all-in-one:1.6.16-rc2
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -96,7 +96,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.9
+            bunkerity/bunkerweb-all-in-one:1.6.16-rc2
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -260,7 +260,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.9
+          image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
         ```bash
         # 下载脚本及校验文件
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh.sha256
 
         # 校验完整性
         sha256sum -c install-bunkerweb.sh.sha256
@@ -499,16 +499,19 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
         !!! danger "安全提示"
             在执行脚本前务必通过提供的校验值验证其完整性。
 
-    2. **选择 2) Manager** 并按提示操作：
+    2. 在安装类型菜单中**选择 Manager**（使用 ↑/↓ 然后按回车），并按提示操作：
 
         | 提示                    | 操作                                                                      |
         | :---------------------- | :------------------------------------------------------------------------ |
         | **BunkerWeb 实例**      | 输入 Worker 节点 IP，空格分隔（例如 `192.168.10.11 192.168.10.12`）。     |
         | **Whitelist IP**        | 接受检测到的 IP，或输入网段（例如 `192.168.10.0/24`）以允许访问内部 API。 |
-        | **DNS 解析器**          | 按 `N` 使用默认值，或指定自定义解析器。                                   |
-        | **内部 API 启用 HTTPS** | **推荐：** 选择 `Y` 生成证书，保护 Manager-Worker 通信。                  |
-        | **Web UI 服务**         | 选择 `Y` 启用界面（强烈推荐）。                                           |
-        | **API 服务**            | 除非需要公共 REST API，否则选择 `N`。                                     |
+        | **DNS 解析器**          | 选择 **否** 以保留默认值，或指定自定义解析器。                            |
+        | **内部 API 启用 HTTPS** | **推荐：** 选择 **是** 自动生成证书，保护 Manager-Worker 通信。           |
+        | **Web UI 服务**         | 选择 **是** 启用界面（强烈推荐）。                                        |
+        | **API 服务**            | 除非需要公共 REST API，否则选择 **否**。                                  |
+
+        !!! note "提示交互界面"
+            安装器使用 [gum](https://github.com/charmbracelet/gum) TUI。首次交互运行时，会从 GitHub 发布页下载官方 `gum` 二进制（SHA256 已固定），从临时目录运行，并在脚本退出时删除该临时目录 —— 不会安装任何系统包。使用方向键 + 回车作答。若希望使用纯文本提示，请传入 `--no-tui`。
 
     #### 保护并暴露 UI
 
@@ -543,7 +546,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
         为了更好的隔离，可在单独节点安装 UI。
 
-        1. 运行安装器并选择 **5) Web UI Only**。
+        1. 运行安装器并选择 **Web UI Only** 安装类型。
         2. 编辑 `/etc/bunkerweb/ui.env` 指向 Manager 的数据库：
 
             ```ini
@@ -585,7 +588,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # 替换为 Worker IP
@@ -604,14 +607,16 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.16-rc2
         ports:
           - "7000:7000" # 暴露 UI 端口
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # 请使用更强密码
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 请使用更强密钥（见前提条件）
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
+        volumes:
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -637,7 +642,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -650,6 +655,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -687,7 +693,7 @@ Worker 负责处理进入的流量。
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -992,7 +998,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
 === "Docker"
@@ -1020,7 +1026,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1031,7 +1037,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1116,6 +1122,9 @@ systemctl status systemd-resolved
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "重新加载会重新读取该文件夹"
+        重新加载会重新读取 `/etc/bunkerweb/configs`：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。
+
 === "All-in-one"
 
     当使用 [All-in-one 镜像](integrations.md#all-in-one-aio-image)时，您有两种选择来添加自定义配置：
@@ -1145,7 +1154,7 @@ systemctl status systemd-resolved
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1185,7 +1194,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
 === "Docker"
@@ -1208,7 +1217,7 @@ systemctl status systemd-resolved
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1251,7 +1260,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1321,7 +1330,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1449,6 +1458,22 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 您需要在您的数据库服务器上增加 `max_allowed_packet` 的值。
 
+推荐值为 `67108864` 字节（64 MiB）。当数据库在容器中运行时，通过 `command:` 指令进行设置：
+
+```yaml
+bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    ...
+```
+
+对于本地安装或外部数据库，请改为将该设置添加到服务器配置中（例如，在 `/etc/mysql/mariadb.conf.d/` 或 `/etc/my.cnf.d/` 下的专用文件中）：
+
+```ini
+[mysqld]
+max_allowed_packet = 64M
+```
+
 ## 封禁和报告的持久化 {#persistence-of-bans-and-reports}
 
 默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务器。
@@ -1550,7 +1575,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1573,7 +1598,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1588,7 +1613,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1639,7 +1664,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1869,7 +1894,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - published: 80
@@ -1999,7 +2024,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -2043,7 +2068,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2058,7 +2083,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -2152,7 +2177,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2165,7 +2190,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -2180,7 +2205,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2420,7 +2445,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2519,7 +2544,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2553,10 +2578,10 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     systemctl status bunkerweb
     ```
 
-    如果它们已经在运行，我们可以重启它：
+    如果它们已经在运行，我们可以重启调度器，让它在启用 IPv6 的情况下重新生成 NGINX 配置：
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl restart bunkerweb-scheduler
     ```
 
     否则，我们需要启动它：
@@ -2578,17 +2603,20 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 
 服务日志由 `LOG_TYPES` 设置控制，支持以空格分隔的多个值（例如 `LOG_TYPES="stderr syslog"`）。
 
-| 值       | 描述                                                                     |
-| :------- | :----------------------------------------------------------------------- |
-| `file`   | 将日志写入文件。Web UI 的日志查看器需要此项。                            |
-| `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。 |
-| `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。    |
+| 值       | 描述                                                                                                                                                                                                                                          |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | 将日志写入普通文件。在 Linux 安装中，外部轮转由 `logrotate` 负责。在容器中，没有任何组件会为服务自己写入的文件做轮转：保留策略由运维方自行负责，请将该文件挂载到卷并自行轮转，或在容器中改用 `stderr`/`syslog`。Web UI 的日志查看器需要此项。 |
+| `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。                                                                                                                                                                      |
+| `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。                                                                                                                                                                         |
+
+使用 `file` 时，您还应该配置：
+
+- `LOG_FILE_PATH`：当 `LOG_TYPES` 包含 `file` 时，日志文件写入的路径。
 
 在使用 `syslog` 时，您还应该配置：
 
 - `LOG_SYSLOG_ADDRESS`：syslog 服务器地址（例如 `udp://bw-syslog:514` 或 `/dev/log`）。
 - `LOG_SYSLOG_TAG`：用于区分服务条目的唯一标签（例如 `bw-scheduler`）。
-- `LOG_FILE_PATH`：当 `LOG_TYPES` 包含 `file` 时用于文件输出的路径（例如 `/var/log/bunkerweb/scheduler.log`）。
 
 ### 访问与错误日志
 
@@ -2613,11 +2641,29 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### 日志文件保留策略 {#log-file-retention}
+
+只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：`logrotate`，配合 BunkerWeb 安装在 `/etc/logrotate.d/bunkerweb` 的策略文件。它会每天轮转任何匹配 `/var/log/bunkerweb/*.log` 的文件，若文件超过 100 MB 则提前轮转，保留十四个编号的历史版本（`modsec_audit.log.1`、`.2.gz` 等），并使用 `copytruncate`。
+
+- **Linux**：软件包依赖 `logrotate`，系统会按自身的定时器运行它，无需额外操作。
+- **All-in-one**：该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次，使用同一份策略文件。
+- **Docker、Autoconf、Swarm 和 Kubernetes**：没有需要轮转的内容。`src/bw/Dockerfile` 在构建时将 `access.log`、`error.log` 和 `modsec_audit.log` 替换为指向容器自身标准输出和标准错误的符号链接，因此保留策略由您的容器运行时的日志驱动负责（参见下文的 [Docker 日志最佳实践](#docker-logging-best-practices)）。
+
+`copytruncate` 正是让同一套策略适用于所有这些场景的关键。它会将文件复制到别处，然后原地清空原文件，而不是重命名它，因此从不重新打开日志的写入进程会继续写入正确的文件。ModSecurity 正是这样的写入进程：它在配置加载时打开一次审计日志，并一直持有该文件描述符。如果通过重命名来轮转，它就会永远写入归档文件，而实际使用的文件则始终为空。
+
+编辑 `/etc/logrotate.d/bunkerweb` 可以更改阈值、历史版本数量，或添加 `maxage`。在 All-in-one 上，可以将您自己的文件挂载到该路径上。
+
+其中有两条指令至关重要。`maxsize` 才能让 `daily` 生效：与之相似的 `size` 与所有时间间隔指令互斥，只会按大小轮转。而添加 `dateext` 会让每个归档以日期命名，于是同一日期上的第二次轮转会以 `destination ... already exists, skipping rotation` 失败，使正在写入的文件直到日期变化前都不会被轮转。
+
+审计日志的位置由 `MODSECURITY_SEC_AUDIT_LOG` 设置（multisite，默认 `/var/log/bunkerweb/modsec_audit.log`）；详见 [ModSecurity 设置](features.md#modsecurity)。如果将其指向 `/var/log/bunkerweb` 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。该设置只接受 `/var/log/bunkerweb` 下的路径，因此无法指向 `/data`：若要在重建容器后保留审计历史，请将卷挂载到 `/var/log/bunkerweb` 本身，这样保留的是整套日志，而不仅仅是审计日志。
+
+在 `MODSECURITY_SEC_AUDIT_LOG_PARTS` 的默认值 `BCFH` 下，部分 `C` 会把请求正文写入审计日志。在将该文件复制到其他地方之前，请将其视为敏感数据。
+
 ### 集成默认值与示例
 
 === "Linux"
 
-    **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。
+    **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。轮转由安装到 `/etc/logrotate.d/bunkerweb` 的系统 `logrotate` 配置负责（每日轮转或超过 100 MB 时轮转、保留十四个历史版本，并通过 `copytruncate` 压缩）。
 
     **示例**：保留本地文件（供 Web UI 使用），同时镜像到系统 syslog。
 
@@ -2639,6 +2685,8 @@ LOG_LEVEL_1=error
 
     **默认行为**：`LOG_TYPES="stderr"`。日志可通过 `docker logs` 查看。
 
+    这些镜像本来就没有由 BunkerWeb 管理、需要限制大小的日志文件：`src/bw/Dockerfile` 在构建时删除 `access.log`、`error.log` 和 `modsec_audit.log`，并将这三个文件全部替换为指向容器自身标准输出和标准错误的符号链接，因此 `ACCESS_LOG`、`ERROR_LOG` 和 `MODSECURITY_SEC_AUDIT_LOG` 默认都会直接进入容器的日志流。这里的保留策略由您的容器运行时负责，可以依赖日志驱动（参见下文的 [Docker 日志最佳实践](#docker-logging-best-practices)）或外部采集器；BunkerWeb 的镜像中不内置 `logrotate`。
+
     **示例（改编自快速入门指南）**：保留 `docker logs`（stderr），并发送到中央 syslog 容器（Web UI 和 CrowdSec 所需）。
 
     ```yaml
@@ -2658,7 +2706,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # 这将是用于在调度程序中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2671,7 +2719,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2688,11 +2736,12 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9
+        image: bunkerity/bunkerweb-ui:1.6.16-rc2
         environment:
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # 用于 Web UI 读取 syslog 日志
+          - bw-ui-data:/data # 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2718,7 +2767,7 @@ LOG_LEVEL_1=error
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -2749,6 +2798,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -2762,6 +2812,41 @@ LOG_LEVEL_1=error
       bw-db:
         name: bw-db
     ```
+
+=== "All-in-one"
+
+    **默认行为**：与 Docker 相同（`LOG_TYPES="stderr"`），但 All-in-one 镜像会将 `ACCESS_LOG`、`ERROR_LOG` 和 `MODSECURITY_SEC_AUDIT_LOG` 作为常规文件保留在 `/var/log/bunkerweb/` 下（与 Linux 上的默认值相同），因为内置的 CrowdSec 和 Web UI 的日志查看器都需要从磁盘上读取它们。
+
+    BunkerWeb 会在这里为您限制它们：该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次，使用与 Linux 软件包安装的相同策略（参见上文的[日志文件保留策略](#log-file-retention)）。由于轮转使用 `copytruncate`，这些文件会保留其 inode，因此 CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它们。
+
+=== "Kubernetes"
+
+    **默认行为**：日志写入 `stderr`，可通过 `kubectl logs` 查看。
+
+    **示例**：在 Helm chart 中启用内置的 syslog sidecar 以收集 Web UI 的日志（需要 BunkerWeb 1.6.7+）。
+
+    ```yaml
+    ui:
+      logs:
+        # 启用日志收集 sidecar
+        enabled: true
+
+        # 日志转发的 syslog 地址
+        # 如果为空，将自动设置为 Sidecar 服务
+        syslogAddress: ""
+
+        # 用于日志收集的 syslog-ng 容器
+        repository: docker.io/balabit/syslog-ng
+        pullPolicy: Always
+        tag: 4.8.0
+
+        # 日志的持久化存储
+        persistence:
+          size: 5Gi
+          storageClass: ""
+    ```
+
+    查看 [bunkerity/bunkerweb-helm 仓库](https://github.com/bunkerity/bunkerweb-helm) 中的完整 [logging.yaml 示例](https://github.com/bunkerity/bunkerweb-helm/blob/dev/examples/logging.yaml)。
 
 ### Syslog-ng 配置
 
@@ -2810,7 +2895,7 @@ log {
 };
 ```
 
-## Docker 日志记录最佳实践
+## Docker 日志记录最佳实践 {#docker-logging-best-practices}
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
 
@@ -2823,7 +2908,7 @@ log {
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     logging:
       driver: "json-file"
       options:
@@ -2932,7 +3017,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.9
+        bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     ```
 
     如果容器已存在，请重新创建以应用新的环境变量。
@@ -2943,7 +3028,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -2962,7 +3047,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3005,7 +3090,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.9
+      image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3035,10 +3120,11 @@ STREAM 支持 :x:
 
 **设置列表**
 
-| 设置                           | 默认  | 上下文 | 多个 | 描述                         |
-| ------------------------------ | ----- | ------ | ---- | ---------------------------- |
-| `USE_MONITORING`               | `yes` | 全局   | 否   | 启用 BunkerWeb 的监控。      |
-| `MONITORING_METRICS_DICT_SIZE` | `10M` | 全局   | 否   | 用于存储监控指标的字典大小。 |
+| 设置                           | 默认  | 上下文 | 多个 | 描述                                                                     |
+| ------------------------------ | ----- | ------ | ---- | ------------------------------------------------------------------------ |
+| `USE_MONITORING`               | `yes` | 全局   | 否   | 启用 BunkerWeb 的监控。                                                  |
+| `MONITORING_METRICS_DICT_SIZE` | `10M` | 全局   | 否   | 用于存储监控指标的字典大小。                                             |
+| `MONITORING_IGNORE_URLS`       |       | 全局   | 否   | 以空格分隔的 URL 路径列表，用于排除在监控之外（例如 `/health /ready`）。 |
 
 ### Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -3206,39 +3292,9 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
     docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
     ```
 
-!!! note "MariaDB/MySQL 的特别说明"
+!!! note "MariaDB/MySQL 客户端兼容性"
 
-    如果您正在使用 MariaDB/MySQL，在尝试备份数据库时可能会遇到以下错误：
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    要解决此问题，您可以执行以下命令将身份验证插件更改为 `mysql_native_password`：
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    如果您正在使用 Docker 集成，可以将以下命令添加到 `docker-compose.yml` 文件中，以自动更改身份验证插件：
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
+    BunkerWeb 的 Docker 镜像包含 MySQL `caching_sha2_password` 所需的 MariaDB Connector/C 身份验证插件。在 Linux 上，如果客户端报告无法加载 `caching_sha2_password`，请安装发行版提供的 MariaDB Connector/C 身份验证插件或兼容的 MySQL 客户端。不要将数据库帐户降级为 `mysql_native_password`，因为 MySQL `v9` 已不再提供该插件。
 
 #### 手动恢复
 
@@ -3288,7 +3344,136 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## MCP 服务器
+
+**BunkerWeb MCP 服务器**允许 **Claude Code** 和 **Claude Desktop** 等 AI 助手通过 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 管理您的 BunkerWeb 安装。
+
+!!! warning "前提条件"
+    MCP 服务器需要部署 **BunkerWeb 外部 API**（`bunkerity/bunkerweb-api`）。它专门通过此 API 与 BunkerWeb 通信。
+
+### 功能
+
+- **43 个工具**用于管理实例、服务、配置、封禁、插件、任务和缓存
+- **MCP 资源**用于只读访问（`@config://global`、`@bans://active` 等）
+- **多种传输方式**：Stdio、HTTP、WebSocket
+
+### Docker Compose 示例
+
+完整示例可在 [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples/mcp-stack) 中找到：
+
+```yaml
+services:
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.16-rc2
+    environment:
+      API_TOKEN: "my-bearer-token-for-mcp"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+      FORWARDED_ALLOW_IPS: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    networks:
+      - bw-universe
+      - bw-db
+      - bw-mcp
+
+  bw-mcp:
+    image: bunkerity/bunkerweb-mcp:0.2.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      BUNKERWEB_BASE_URL: "http://bw-api:8888"
+      BUNKERWEB_API_TOKEN: "my-bearer-token-for-mcp"
+      BUNKERWEB_LOG_LEVEL: INFO
+    networks:
+      - bw-mcp
+```
+
+### 在 Claude Code 中使用
+
+=== "项目配置"
+
+    在项目根目录添加 `.mcp.json` 文件（或在 `~/.claude/.mcp.json` 中进行全局配置）：
+
+    ```json
+    {
+      "mcpServers": {
+        "bunkerweb": {
+          "type": "http",
+          "url": "http://127.0.0.1:8080/mcp/"
+        }
+      }
+    }
+    ```
+
+查询示例：
+
+```
+> 列出所有 BunkerWeb 实例
+> 显示当前的封禁列表
+> 分析 @config://global 并建议安全改进
+```
+
+### Kubernetes 集成
+
+MCP 服务器可以使用官方 Helm chart 与 BunkerWeb 一起部署。完整示例可在 [`examples/mcp-integration.yaml`](https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml) 中找到。
+
+#### Helm 配置值
+
+```yaml
+mcp:
+  # 启用 MCP 服务器
+  enabled: true
+
+  # 容器镜像配置
+  repository: docker.io/bunkerity/bunkerweb-mcp
+  tag: 0.2.0
+
+  # MCP 服务器设置
+  config:
+    logLevel: "INFO"
+    enableDnsRebindingProtection: true
+    allowedHosts: "localhost,127.0.0.1,mcp.example.com"
+    cacheEnabled: true
+
+  # MCP 连接 BunkerWeb API 的认证凭据
+  secrets:
+    bunkerwebApiToken: "你的安全API令牌"
+
+  # Ingress 配置（可选）
+  ingress:
+    enabled: false
+    ingressClassName: "bunkerweb"
+    serverName: "mcp.example.com"
+    annotations:
+      bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+      bunkerweb.io/USE_REVERSE_PROXY: "yes"
+      bunkerweb.io/REVERSE_PROXY_URL: "/"
+      bunkerweb.io/REVERSE_PROXY_HOST: "http://mcp-bunkerweb.bunkerweb.svc.cluster.local:8080"
+      # 安全：仅限受信任的 IP 访问
+      bunkerweb.io/USE_WHITELIST: "yes"
+      bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 192.168.0.0/16"
+```
+
+#### 部署
+
+```bash
+# 部署启用 MCP 的 BunkerWeb
+helm install bunkerweb bunkerweb/bunkerweb -f mcp-integration.yaml
+
+# 通过 port-forward 本地访问 MCP（安全推荐）
+kubectl port-forward svc/mcp-bunkerweb 8080:8080
+
+# 使用 http://localhost:8080/mcp 配置 Claude Code
+```
+
+!!! warning "安全"
+    MCP 服务器的 `/mcp` 端点没有内置身份验证。请使用以下方式保护访问：
+
+    - 通过 BunkerWeb 注解配置 **IP 白名单**（`USE_WHITELIST`、`WHITELIST_IP`）
+    - 使用**网络策略**限制 Pod 间通信
+    - 使用 **port-forward** 而不是外部暴露（推荐用于开发环境）
+
+完整文档请访问 [BunkerWeb MCP 仓库](https://github.com/bunkerity/bunkerweb-mcp)。
+
+## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
 STREAM 支持 :white_check_mark:
 
@@ -3328,39 +3513,9 @@ STREAM 支持 :white_check_mark:
 
 此命令将创建您的数据库备份，并将其存储在命令中指定的备份目录中。
 
-!!! note "MariaDB/MySQL 的特别说明"
+!!! note "MariaDB/MySQL 客户端兼容性"
 
-    如果您正在使用 MariaDB/MySQL，在尝试备份数据库时可能会遇到以下错误：
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    要解决此问题，您可以执行以下命令将身份验证插件更改为 `mysql_native_password`：
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    如果您正在使用 Docker 集成，可以将以下命令添加到 `docker-compose.yml` 文件中，以自动更改身份验证插件：
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
+    BunkerWeb 的 Docker 镜像包含 MySQL `caching_sha2_password` 所需的 MariaDB Connector/C 身份验证插件。在 Linux 上，如果客户端报告无法加载 `caching_sha2_password`，请安装发行版提供的 MariaDB Connector/C 身份验证插件或兼容的 MySQL 客户端。不要将数据库帐户降级为 `mysql_native_password`，因为 MySQL `v9` 已不再提供该插件。
 
 ### 初始化迁移
 
@@ -3402,7 +3557,7 @@ STREAM 支持 :white_check_mark:
 
 此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。
 
-## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#anti-ddos-pro}
 
 STREAM 支持 :x:
 
@@ -3439,23 +3594,31 @@ STREAM 支持 :x:
 - **状态码审查：** 定期更新 `ANTIDDOS_STATUS_CODES` 以捕获新的或不断演变的可疑行为。
 - **监控：** 定期分析日志和指标以微调设置并提高整体保护。
 
-## 用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#user-manager-pro}
+
+STREAM 支持 :x:
 
 <p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。
+**用户管理器**插件提供了一个强大的界面，用于管理系统内的用户帐户。
 
 借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。
 
 ### 功能
 
-- **用户帐户操作：** 支持以 CSV/XSLX 格式导入，轻松创建、编辑和删除用户帐户。
+- **用户帐户操作：** 支持以 CSV/XLSX 格式导入，轻松创建、编辑和删除用户帐户。
 - **基于角色的访问控制：** 分配和修改用户角色以管理权限和访问级别。
 - **2FA 管理：** 根据管理决策禁用双因素身份验证。
 - **全面的用户洞察：** 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。
 - **审计日志记录：** 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。
+
+### 配置
+
+| 设置                | 默认 | 上下文 | 多个 | 描述                             |
+| ------------------- | ---- | ------ | ---- | -------------------------------- |
+| `USERS_REQUIRE_2FA` | `no` | 全局   | 否   | 要求所有用户启用双因素身份验证。 |
 
 <figure markdown>
   ![概述](assets/img/user-manager.png){ align=center }
@@ -3472,7 +3635,64 @@ STREAM 支持 :x:
   <figcaption>用户管理器 - 活动页面</figcaption>
 </figure>
 
-## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## UI 单点登录 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ui-single-sign-on-pro}
+
+STREAM 支持 :x:
+
+**UI 单点登录**插件通过读取放置在 Web UI 前方的外部认证代理（如 Authentik、Authelia、Keycloak 或 Traefik Forward Auth）设置的请求头，为 BunkerWeb Web 界面启用 SSO 认证。
+
+管理员无需为 BunkerWeb 单独管理凭据，可以将认证委托给现有的身份提供方。认证代理完成用户登录后，在将请求转发到 BunkerWeb Web UI 之前注入身份头信息。
+
+!!! danger "请求头伪造风险"
+    SSO 请求头可以被任何客户端轻松伪造。您**必须**将 `UI_SSO_TRUSTED_IPS` 限制为认证代理的 IP 地址。如果此设置配置不正确，任何客户端都可以发送伪造的请求头并获取未授权访问——包括管理员权限。
+
+    默认值 `127.0.0.1,::1` 仅信任本地回环地址。在 **Docker、Swarm 或 Kubernetes** 部署中，认证代理运行在具有独立 IP 的单独容器中。请将 `UI_SSO_TRUSTED_IPS` 设置为认证代理容器的实际 IP 或 CIDR（例如 `10.20.30.5` 或 `172.18.0.0/16`）。切勿设为 `0.0.0.0/0`。
+
+### 功能
+
+- **基于请求头的认证：** 从认证代理的请求头中读取用户名、邮箱、显示名称和分组信息。
+- **分组到角色的映射：** 将 IdP 的分组映射到 BunkerWeb 的角色（admin、writer、reader）。
+- **自动用户创建：** 首次 SSO 登录时自动创建本地帐户，可配置默认角色。
+- **帐户关联：** 通过用户名或邮箱将 SSO 用户与现有本地帐户匹配。
+- **可信 IP 强制执行：** 仅接受来自已配置 IP 地址或 CIDR 范围的 SSO 请求头。
+- **回退到普通登录：** 当 SSO 请求头不存在时，可选允许密码登录。
+- **登出重定向：** 本地登出后将用户重定向到 SSO 提供方的登出端点。
+
+### 配置
+
+| 设置                          | 默认                | 上下文 | 多个 | 描述                                                                        |
+| ----------------------------- | ------------------- | ------ | ---- | --------------------------------------------------------------------------- |
+| `USE_UI_SSO`                  | `no`                | 全局   | 否   | 启用或禁用 Web 界面的 UI 单点登录认证。                                     |
+| `UI_SSO_HEADER_USERNAME`      | `X-User`            | 全局   | 否   | 包含已认证用户名的 HTTP 请求头。                                            |
+| `UI_SSO_HEADER_EMAIL`         | `X-Email`           | 全局   | 否   | 包含用户邮箱地址的 HTTP 请求头。                                            |
+| `UI_SSO_HEADER_GROUPS`        | `X-Groups`          | 全局   | 否   | 包含用户分组的 HTTP 请求头（逗号或空格分隔）。                              |
+| `UI_SSO_HEADER_NAME`          | `X-Name`            | 全局   | 否   | 包含用户显示名称的 HTTP 请求头。                                            |
+| `UI_SSO_TRUSTED_IPS`          | `127.0.0.1,::1`     | 全局   | 否   | 逗号分隔的可信 IP 地址或 CIDR 范围列表，允许发送 SSO 请求头。               |
+| `UI_SSO_AUTO_CREATE_USERS`    | `yes`               | 全局   | 否   | 首次通过 SSO 认证时自动创建新用户。                                         |
+| `UI_SSO_DEFAULT_ROLE`         | `reader`            | 全局   | 否   | 当无分组映射匹配时，分配给新 SSO 用户的默认角色。                           |
+| `UI_SSO_GROUP_ADMIN`          |                     | 全局   | 否   | 授予 admin 角色的分组名称（最高优先级）。                                   |
+| `UI_SSO_GROUP_WRITER`         |                     | 全局   | 否   | 授予 writer 角色的分组名称。                                                |
+| `UI_SSO_GROUP_READER`         |                     | 全局   | 否   | 授予 reader 角色的分组名称。                                                |
+| `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | 全局   | 否   | 当 SSO 请求头不存在时，允许用户回退到普通登录。                             |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | 全局   | 否   | 每次登录时从 SSO 请求头更新用户信息（邮箱、角色）。                         |
+| `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | 全局   | 否   | 将 SSO 用户与本地帐户匹配的方式（`username_only` 或 `username_or_email`）。 |
+| `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | 全局   | 否   | 登出后重定向的 URL（例如 SSO 提供方的登出端点）。                           |
+
+### 快速开始
+
+1. 在 BunkerWeb Web UI 前放置认证代理（Authentik、Authelia、Keycloak 等）。
+2. 启用插件：`USE_UI_SSO=yes`。
+3. 确保认证代理设置了预期的请求头（`X-User`、`X-Email`、`X-Groups`、`X-Name`）——或通过 `UI_SSO_HEADER_*` 设置调整请求头名称。
+4. 限制可信来源：将 `UI_SSO_TRUSTED_IPS` 设置为认证代理的 IP 地址。
+5. 映射分组到角色：将 `UI_SSO_GROUP_ADMIN`、`UI_SSO_GROUP_WRITER` 和 `UI_SSO_GROUP_READER` 设置为与 IdP 分组名称匹配。
+
+### 使用提示
+
+- 在生产环境中设置 `UI_SSO_FALLBACK_TO_LOGIN=no` 以强制仅通过 SSO 访问。当保持默认值 `yes` 时，用户可以绕过 SSO 使用本地凭据登录，从而跳过身份提供方强制执行的 MFA 或会话策略。
+- 保持 `UI_SSO_UPDATE_USER_ON_LOGIN` 的默认值（`yes`），以确保角色与 IdP 分组变更保持同步。
+- 使用 `UI_SSO_ACCOUNT_LINKING=username_or_email` 时，首次 SSO 登录会自动关联用户名或邮箱匹配的现有本地帐户。如果您的 IdP 允许用户设置任意邮箱地址，请使用 `username_only` 以防止通过邮箱伪造接管帐户。
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#easy-resolve-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/45vX0WJqjxo" title="Easy Resolve" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -3493,7 +3713,7 @@ STREAM 支持 :x:
   <figcaption>报告页面 - 带有轻松解决功能</figcaption>
 </figure>
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#load-balancer-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -3555,13 +3775,15 @@ Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一�
 - 当指向可能通过 DNS 更改的主机名时启用 `LOADBALANCER_UPSTREAM_RESOLVE`。
 - 调整 keepalive 值以反映后端容量和连接重用目标。
 
-## Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#custom-pages-pro}
 
 Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默认服务器页面和反机器人挑战页面）替换为您自己的自定义 HTML 或 Lua 模板。这使您能够在 BunkerWeb 提供的所有面向用户的页面上保持一致的品牌形象。
 
+有关 Maintenance 行为和自定义的信息，请参阅[Maintenance 高级指南](advanced.md#maintenance-pro)。
+
 ### 功能
 
-- **每个服务的自定义错误页面**和**反机器人挑战页面**（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha）。
+- **每个服务的自定义错误页面**和**反机器人挑战页面**（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha、Cap.js）。
 - **全局自定义默认服务器页面**用于回退/默认虚拟主机。
 - **HTML 解析和 Lua 模板标签平衡检查**在接受模板之前。
 - **自动缓存**到 `/var/cache/bunkerweb/custom_pages`，带有变更检测以触发重新加载。
@@ -3578,6 +3800,7 @@ Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默�
 
 | 设置                             | 默认 | 上下文    | 描述                                           |
 | -------------------------------- | ---- | --------- | ---------------------------------------------- |
+| `CUSTOM_MAINTENANCE_PAGE`        |      | multisite | 自定义维护页面模板的绝对路径。                 |
 | `CUSTOM_ERROR_PAGE`              |      | multisite | 自定义错误页面模板的绝对路径。                 |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |      | global    | 自定义默认服务器页面模板的绝对路径。           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |      | multisite | 自定义反机器人验证码挑战页面的绝对路径。       |
@@ -3586,6 +3809,7 @@ Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默�
 | `CUSTOM_ANTIBOT_HCAPTCHA_PAGE`   |      | multisite | 自定义反机器人 hCaptcha 页面的绝对路径。       |
 | `CUSTOM_ANTIBOT_TURNSTILE_PAGE`  |      | multisite | 自定义反机器人 Turnstile 页面的绝对路径。      |
 | `CUSTOM_ANTIBOT_MCAPTCHA_PAGE`   |      | multisite | 自定义反机器人 mCaptcha 页面的绝对路径。       |
+| `CUSTOM_ANTIBOT_CAPJS_PAGE`      |      | multisite | 自定义反机器人 Cap.js 页面的绝对路径。         |
 
 ### 模板变量参考
 
@@ -3666,6 +3890,13 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
 | ------------------ | ------ | ---------------------- |
 | `mcaptcha_sitekey` | string | 您的 mCaptcha 站点密钥 |
 | `mcaptcha_url`     | string | 您的 mCaptcha URL      |
+
+**Cap.js（`CUSTOM_ANTIBOT_CAPJS_PAGE`）：**
+
+| 变量            | 类型   | 描述                     |
+| --------------- | ------ | ------------------------ |
+| `capjs_sitekey` | string | 您的 Cap.js 站点密钥     |
+| `capjs_url`     | string | 您的 Cap.js 前端基础 URL |
 
 ### 模板语法
 
@@ -3909,10 +4140,10 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
         CUSTOM_ANTIBOT_CAPTCHA_PAGE=/opt/bunkerweb/templates/captcha.html
         ```
 
-    3. 重新加载 BunkerWeb：
+    3. 重新加载 BunkerWeb 调度器，使其加载新的模板：
 
         ```bash
-        sudo systemctl reload bunkerweb
+        sudo systemctl reload bunkerweb-scheduler
         ```
 
 === "Docker"
@@ -3957,11 +4188,11 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.9
+            image: bunkerity/bunkerweb:1.6.16-rc2
             # ... 其他设置（自定义页面无需在此处设置环境变量）
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.9
+            image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4044,7 +4275,7 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.9
+                  image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -4074,7 +4305,65 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
 - **CSP 合规**：始终对内联脚本和样式使用 `nonce_script` 和 `nonce_style` 变量，以确保正确的内容安全策略处理。
 - **测试模板**：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。
 
-## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 维护 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#maintenance-pro}
+
+当应用程序不可用时，维护功能会将标准反向代理位置的响应替换为维护页面。它按服务选择启用，返回 `503 Service Unavailable`，并且永远不会到达上游。多站点设置的默认值为 `no`。
+
+### 启用并应用维护模式
+
+在使用标准反向代理的现有多站点服务上，将 `USE_MAINTENANCE` 设置为 `yes`。以下片段展示相关环境变量；请将其合并到调度器配置中，不要将其当作完整的 Compose 文件：
+
+```yaml
+# 单个反向代理服务的调度器环境片段
+environment:
+  app.example.com_USE_REVERSE_PROXY: "yes"
+  app.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+  app.example.com_USE_MAINTENANCE: "yes"
+```
+
+请通过常规 BunkerWeb 集成应用。调度器会生成服务配置并重新加载 worker。将 `app.example.com_USE_MAINTENANCE` 设置为 `no` 并再次应用，即可恢复代理。如果反向代理设置已经存在，则只需要这一项设置。
+
+Web UI 提供两个快速开关：服务页面 **Maintenance** 列中的扳手图标按钮，以及服务编辑页面上的浮动扳手按钮。两者都会更新服务设置，并在不重新加载页面的情况下应用。编辑表单会保持同步，包括 Easy/Advanced 模式和原始编辑器；无关的未保存编辑仍会保留。
+
+这些开关需要可写数据库和服务写入权限。对于只读用户、只读数据库以及 `USE_UI=yes` 服务，开关会被禁用，以便内置 UI 保持可用。开关不会覆盖由外部管理的 `USE_MAINTENANCE` 值；请通过其所有者进行更改。应用正在进行时，开关会被拒绝。
+
+### 请求行为和范围
+
+维护功能仅适用于由 BunkerWeb 标准反向代理配置生成的位置，包括 `REVERSE_PROXY_HOST` 及其编号变体。它不会添加代理位置、修改自定义位置，也不会接管手动 rewrite 处理程序。如果自定义配置替换了这些处理程序或后端变量，请自行集成维护响应。
+
+维护功能会保留现有 HTTPS 策略，因此启用的 HTTP 到 HTTPS 重定向会先发生。在实际的 HTTPS origin 上，它返回 `503`，并带有 `Cache-Control: no-store`、限制性 Content Security Policy 和 `X-Content-Type-Options: nosniff`。
+
+GET、POST、OPTIONS 和 WebSocket 握手会收到维护页面。BunkerWeb 会丢弃请求正文，因此 POST 正文不会被转发或重放。HEAD 会收到相同的状态和请求头，但不带正文。现有 WebSocket 不会被显式关闭；重新加载期间会执行正常的 worker 关闭。
+
+维护功能在身份验证、反机器人和其他访问检查之前运行，因此加入白名单的客户端和检测模式服务也会收到维护页面。本地 NGINX 位置、内部 API 和健康检查端点保持正常行为。`/.well-known/acme-challenge/` 以及已配置的 Let's Encrypt 透传也一样。维护功能保留此例外；它既不会签发证书，也不会创建 ACME 处理程序。
+
+### 自定义维护页面
+
+随附页面无需 Custom Pages 即可工作。要使用 Custom Pages 自定义它，请打开 Custom Pages 编辑器并选择 **Maintenance**。**Easy Mode** 可以编辑维护标题和消息、favicon、页脚徽标/文本以及 SVG 插图。标题会更新浏览器标题和页面标题；空标题或空插图会保留默认值。请保留 SVG 插图的 `maintenance-top` 和 `maintenance-tool` 类，以维持插图动画。
+
+在 **Advanced Mode** 中编辑完整的 HTML/Lua 模板。可用变量如下：
+
+| 变量           | 用途                                             |
+| -------------- | ------------------------------------------------ |
+| `title`        | `Site under maintenance`，由插件提供的页面标题。 |
+| `nonce_style`  | 用于内联 `<style>` 元素的每个响应 CSP nonce。    |
+| `nonce_script` | 用于内联 `<script>` 元素的每个响应 CSP nonce。   |
+
+在每个内联样式和脚本中使用 nonce 值，例如 `nonce="{* nonce_style *}"`。响应通过 `data:` URL 允许嵌入式图像、SVG 和字体，并阻止其他 origin。请将资源内联或作为数据 URL；应用资源 URL 也会收到维护页面，无法加载依赖项。
+
+对于文件管理的页面，将 `CUSTOM_MAINTENANCE_PAGE` 设置为调度器可读取的绝对路径。它优先于 UI 模板，并锁定编辑器中的该作用域。如果未设置，服务会使用自己的 UI 模板或继承全局模板。**Delete** 会删除服务覆盖并恢复继承。**Reset** 会删除 UI 模板并强制使用随附页面，即使存在全局自定义。保存新的服务覆盖会清除其重置标记。使用 `USE_MAINTENANCE` 单独启用或禁用维护功能。
+
+Custom Pages 作业会在缓存前验证 HTML，并防护已知的 Lua 模板编译风险。无效源文件会保留上一次接受的缓存。活动页面不可用或失败时，会回退到随附页面，然后回退到最小紧急页面。渲染失败绝不会恢复代理流量。
+
+### 维护故障排除
+
+- **开关被禁用或遭到拒绝：**检查写入权限、`USE_UI` 以及 `USE_MAINTENANCE` 的外部所有权；通过其所有者更改由外部管理的值。
+- **应用程序仍然响应：**确认标准反向代理位置同时具有 `USE_REVERSE_PROXY=yes` 和 `USE_MAINTENANCE=yes`。本地和 ACME 路径是例外。
+- **收到重定向而不是 `503`：**现有 HTTPS 策略会先重定向；请访问 HTTPS URL。
+- **显示的是随附页面：**检查调度器可读取的文件、模板验证和调度器日志；文件设置会锁定 UI 模板。
+- **内联资源或脚本缺失：**将其嵌入，并使用 `nonce_style` 或 `nonce_script`；应用 URL 不可用。
+
+## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openid-connect-pro}
 
 <p align="center">
   <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -4151,6 +4440,32 @@ sequenceDiagram
 - `OPENIDC_IAT_SLACK`（默认：`120`）：令牌校验允许的时钟偏差（秒）。
 - `OPENIDC_ACCEPT_UNSUPPORTED_ALG`（默认：`no`）：接受不支持算法签名的令牌（不推荐）。
 - `OPENIDC_FORCE_REAUTHORIZE`（默认：`no`）：每次请求都强制重新授权（仅调试）。
+
+#### 基于 claim 的访问控制（ACL）
+
+Claim 是 OIDC 令牌中描述用户属性的键值对（例如 `email`、`groups`、`sub`）。ACL 功能允许您根据特定的 claim 值限制访问。
+
+| 设置                      | 默认  | 上下文    | 多个 | 描述                                                                                                      |
+| ------------------------- | ----- | --------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `OPENIDC_USE_ACL`         | `no`  | multisite | 否   | 在 OIDC 认证后启用基于 claim 的访问控制。只有 claim 匹配配置规则的用户才能获得访问权限。                  |
+| `OPENIDC_ACL_MATCH_MODE`  | `all` | multisite | 否   | 多条 ACL 规则的评估方式。`all` = 所有规则必须通过（AND）。`any` = 至少一条规则通过即可（OR）。            |
+| `OPENIDC_ACL_DENIED_URL`  |       | multisite | 否   | ACL 拒绝访问时重定向的 URL。如果为空，返回 403 Forbidden 响应。                                           |
+| `OPENIDC_ACL_CLAIM`       |       | multisite | 是   | 要检查的 OIDC claim 名称（例如 `groups`、`email`、`sub`）。与 `OPENIDC_ACL_CLAIM_VALUE` 成对使用。        |
+| `OPENIDC_ACL_CLAIM_VALUE` |       | multisite | 是   | claim 的期望值。对于数组类型的 claim（如 `groups`），检查成员关系。对于字符串类型的 claim，检查严格相等。 |
+
+!!! tip "多条 ACL 规则"
+    使用数字后缀定义多条规则。每对 `OPENIDC_ACL_CLAIM` / `OPENIDC_ACL_CLAIM_VALUE` 构成一条规则：
+
+    ```yaml
+    OPENIDC_USE_ACL: "yes"
+    OPENIDC_ACL_MATCH_MODE: "any"
+    OPENIDC_ACL_CLAIM: "groups"
+    OPENIDC_ACL_CLAIM_VALUE: "engineering"
+    OPENIDC_ACL_CLAIM_1: "email"
+    OPENIDC_ACL_CLAIM_VALUE_1: "admin@example.com"
+    ```
+
+    当 `OPENIDC_ACL_MATCH_MODE=any` 时，用户属于 `engineering` 分组**或**邮箱为 `admin@example.com` 即可获得访问权限。当设为 `all` 时，两个条件必须同时满足。
 
 #### 会话/令牌生命周期
 
@@ -4260,7 +4575,301 @@ Discovery/JWKS 数据会缓存在 NGINX shared dict 中。如果您有很多租�
 - **未注入用户 header**：确认 `OPENIDC_USER_HEADER_CLAIM` 指定的 claim 在 ID token/userinfo 中存在。
 - **多实例部署**：启用 `USE_REDIS=yes` 并配置 `REDIS_HOST`（或 Sentinel）以共享会话。
 
-## OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#saml-pro}
+
+**SAML** 插件（PRO）使 BunkerWeb 成为用于浏览器 SSO 的 SAML 2.0 服务提供商（SP）。它接受断言由受信任签名覆盖的 IdP 响应，创建会话，并可将选定属性作为请求头暴露给受保护的上游。支持 BunkerWeb 1.6.14 及之后的 1.6.x 版本。
+
+### 前提条件和信任材料
+
+为每个受保护服务使用公开 HTTPS origin，例如 `https://app.example.com`，且不带尾部斜杠、路径或查询字符串。允许使用非标准 HTTPS 端口。SAML 需要三份 PEM 材料：
+
+- 用于 SP 的**未加密 RSA 私钥**；
+- 匹配的 SP PEM 格式证书；以及
+- IdP 的 PEM 签名证书，BunkerWeb 在验证断言时信任该证书。
+
+SP 密钥和证书必须匹配，并且必须是至少 2048 位的 RSA 密钥。IdP SSO URL 以及（如果提供）IdP SLO URL 必须使用 HTTPS。请保密私钥；BunkerWeb 使用它来签署身份验证和注销请求。
+
+### 在 UI 中配置 SAML
+
+为目标服务打开 **SAML** 并选择其作用域。表单将设置分为 IdP、SP、会话、身份请求头和 ACL 部分。按以下顺序操作：
+
+1. 为服务启用 `USE_SAML`。
+2. 输入公开 SP origin、SP entity ID、SP 证书以及未加密的 RSA 私钥。
+3. 输入 IdP entity ID、HTTPS SSO URL、受信任的 PEM 签名证书以及可选的 HTTPS SLO URL。SLO URL 为空时使用 SSO URL。
+4. 除非与现有路由冲突，否则保留默认本地路径。保存并应用配置。
+5. 使用 **Export metadata** 下载或显示 BunkerWeb 的 SP 元数据，然后向 IdP 注册这些元数据以及确切的 ACS/SLO URL。
+6. 配置身份属性和 ACL 规则，然后再次保存并应用。
+
+BunkerWeb 会导出 SP 元数据，但不会导入或自动刷新 IdP 元数据。请先配置 IdP 字段和证书，然后导出元数据，以避免循环配置。
+
+### 浏览器请求流程
+
+SP 发起的登录使用 SP 私钥对 AuthnRequest 签名，并通过 HTTP-Redirect 发送给 IdP。IdP 通过 HTTP-POST 将断言由其签名覆盖的响应返回给 ACS。在创建会话之前，BunkerWeb 会验证关联关系、目标、签发者、断言时间戳、签名和重放状态。原始请求正文不会被重放。
+
+```mermaid
+sequenceDiagram
+  participant B as 浏览器
+  participant BW as BunkerWeb (SAML SP)
+  participant IdP as 身份提供商
+  participant Up as 上游
+
+  B->>BW: GET /protected
+  BW-->>B: 302 已签名的 HTTP-Redirect AuthnRequest
+  B->>IdP: GET 带 SAMLRequest 的 SSO URL
+  IdP-->>B: 200/POST 带签名保护断言的 SAMLResponse
+  B->>BW: POST 带 SAMLResponse 的 ACS
+  BW->>BW: 验证签名、签发者、目标、过期时间和重放
+  BW-->>B: 带会话 Cookie 的 302 /protected
+  B->>BW: GET /protected
+  BW->>Up: 请求及已配置的身份请求头
+  Up-->>BW: 响应
+  BW-->>B: 响应
+```
+
+### 端点
+
+所有端点路径都是公开 SP origin 上的本地路径。默认值是多站点设置，在服务允许时可以更改。
+
+| 端点                  | 设置                 | 默认值           | 方法和用途                                                          |
+| --------------------- | -------------------- | ---------------- | ------------------------------------------------------------------- |
+| SP 元数据             | `SAML_METADATA_PATH` | `/saml/metadata` | `GET` 或 `HEAD`；发布 SP entity、ACS、SLO 和签名证书元数据。        |
+| 断言使用者服务（ACS） | `SAML_ACS_PATH`      | `/saml/acs`      | `POST`；接收断言由其签名覆盖的 IdP 响应。                           |
+| 本地注销              | `SAML_LOGOUT_PATH`   | `/saml/logout`   | 启动本地注销；经过身份验证的会话会触发发送给 IdP 的已签名注销请求。 |
+| 单点注销服务（SLS）   | `SAML_SLS_PATH`      | `/saml/sls`      | `GET` 或 `POST`；接收 IdP 的注销请求或响应。                        |
+
+`SAML_LOGOUT_REDIRECT`（默认值为 `/`）是注销后使用的本地路径。请保持四个端点路径互不相同，并且不包含查询字符串、片段、反斜杠、空白或路径遍历片段。
+
+### Keycloak 26.5.2 注册
+
+[Keycloak 26.5.2 SAML 客户端指南](https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc)使用客户端的 **Settings**、**Keys** 和 **Advanced** 选项卡。对于 BunkerWeb 的默认端点布局，请使用以下值。将 `https://app.example.com` 替换为准确的 `SAML_SP_BASE_URL`。
+
+使用这些注册值创建已启用的 SAML 客户端。在 Keycloak UI 中，**Enabled** 和 **Front channel logout** 已开启（`true`）；客户端协议为 `SAML`。
+
+| 客户端设置     | 值                                                                       |
+| -------------- | ------------------------------------------------------------------------ |
+| 客户端 ID      | `https://app.example.com/saml/metadata`                                  |
+| 协议           | `SAML`                                                                   |
+| 已启用         | `true`                                                                   |
+| 前端通道注销   | `true`                                                                   |
+| 有效重定向 URI | `https://app.example.com/saml/acs` 和 `https://app.example.com/saml/sls` |
+
+在客户端设置中，要求签名断言和文档、要求客户端签名、选择 **RSA_SHA256**，并启用 **Force POST Binding**。关闭 **Encrypt Assertions**：BunkerWeb 要求断言由受信任的 IdP 签名覆盖，可以是断言上的签名，也可以是整个响应上的签名，并且不接受加密断言。在 **Keys** 中启用 **Client Signature Required**。将 **Use metadata descriptor URL** 设置为 **OFF**，并手动提供 SP 证书，这样 Keycloak 就能验证 BunkerWeb 的已签名请求，而无需导入 IdP 元数据。在 **Advanced** 中，将 **Assertion Consumer Service POST Binding URL** 设置为公开 origin 上的 `/saml/acs`，并将 **Logout Service POST Binding URL** 和 **Logout Service Redirect Binding URL** 都设置为 `/saml/sls`。将 Name ID 格式设置为 `username`，并强制使用该格式。
+
+对应的客户端属性如下：
+
+```yaml
+saml.assertion.signature: "true"
+saml.server.signature: "true"
+saml.client.signature: "true"
+saml.encrypt: "false"
+saml.force.post.binding: "true"
+saml.authnstatement: "true"
+saml.signature.algorithm: "RSA_SHA256"
+saml_name_id_format: "username"
+saml_force_name_id_format: "true"
+saml.signing.certificate: "SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"
+saml_assertion_consumer_url_post: "https://app.example.com/saml/acs"
+saml_single_logout_service_url_post: "https://app.example.com/saml/sls"
+saml_single_logout_service_url_redirect: "https://app.example.com/saml/sls"
+```
+
+为 `email`、`groups` 和 `name` 添加协议映射器。对每个映射器，使用 `protocol: "saml"`、`protocolMapper: "saml-user-attribute-mapper"` 和 `consentRequired: false`；将 `config.user.attribute` 和 `config.attribute.name` 设置为同一属性，并将 `config.attribute.nameformat` 设置为 `Basic`。确保 IdP 用户确实具有这些属性；缺少声明时不会生成相应的上游请求头。
+
+### 设置（说明）
+
+以下默认值来自 SAML 插件设置。空默认值显示为 `empty`。
+
+#### 启用、信任和路径
+
+| 设置                   | 默认值           | 用途                                 |
+| ---------------------- | ---------------- | ------------------------------------ |
+| `USE_SAML`             | `no`             | 为服务启用 SAML。                    |
+| `SAML_SP_ENTITY_ID`    | `empty`          | SP 发行者和客户端标识符。            |
+| `SAML_SP_BASE_URL`     | `empty`          | 不带路径或查询的公开 HTTPS origin。  |
+| `SAML_IDP_ENTITY_ID`   | `empty`          | 受信任的 IdP 发行者。                |
+| `SAML_IDP_SSO_URL`     | `empty`          | HTTPS IdP 登录端点。                 |
+| `SAML_IDP_SLO_URL`     | `empty`          | HTTPS IdP 注销端点；为空时使用 SSO。 |
+| `SAML_SP_CERT`         | `empty`          | 匹配的 SP PEM 格式证书。             |
+| `SAML_SP_PRIVATE_KEY`  | `empty`          | 匹配且未加密的 RSA PEM 格式私钥。    |
+| `SAML_IDP_CERT`        | `empty`          | 受信任的 IdP PEM 格式签名证书。      |
+| `SAML_ACS_PATH`        | `/saml/acs`      | 本地 ACS 路径。                      |
+| `SAML_LOGOUT_PATH`     | `/saml/logout`   | 本地注销路径。                       |
+| `SAML_SLS_PATH`        | `/saml/sls`      | 本地 SLS 回调路径。                  |
+| `SAML_METADATA_PATH`   | `/saml/metadata` | 本地 SP 元数据路径。                 |
+| `SAML_LOGOUT_REDIRECT` | `/`              | 注销后的本地路径。                   |
+
+#### 会话和身份请求头
+
+| 设置                            | 默认值   | 用途                                          |
+| ------------------------------- | -------- | --------------------------------------------- |
+| `SAML_CLOCK_SKEW`               | `60`     | 允许的断言时钟偏差（秒）；有效范围为 0–300。  |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`    | 空闲会话生命周期（秒）；有效范围为 1–86400。  |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`   | 最大会话生命周期（秒）；有效范围为 1–86400。  |
+| `SAML_USER_HEADER`              | `X-User` | 用于用户值的上游请求头；为空时禁用。          |
+| `SAML_USER_ATTRIBUTE`           | `NameID` | 用户值对应的属性；`NameID` 表示主体标识符。   |
+| `SAML_EMAIL_HEADER`             | `empty`  | 用于电子邮件的上游请求头；为空时禁用。        |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`  | 电子邮件对应的属性；`NameID` 表示主体标识符。 |
+| `SAML_GROUPS_HEADER`            | `empty`  | 用于群组的上游请求头；为空时禁用。            |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups` | 群组对应的属性；`NameID` 表示主体标识符。     |
+| `SAML_NAME_HEADER`              | `empty`  | 用于显示名称的上游请求头；为空时禁用。        |
+| `SAML_NAME_ATTRIBUTE`           | `name`   | 显示名称对应的属性；`NameID` 表示主体标识符。 |
+| `SAML_GROUPS_SEPARATOR`         | `,`      | 在请求头中连接多个值。                        |
+
+在身份验证之前，BunkerWeb 会从传入请求中清除每个已配置的 SAML 身份请求头。只有在响应有效且映射属性存在时才添加请求头。请求头名称必须唯一、语法有效，且不能使用路由或安全敏感前缀，例如 `X-Forwarded-*`、`Proxy-*` 或 `Sec-*`。这些请求头会将身份传递给受保护的上游；它们不会让用户登录 BunkerWeb Web UI。
+
+#### 属性 ACL
+
+| 设置                  | 默认值  | 用途                                   |
+| --------------------- | ------- | -------------------------------------- |
+| `SAML_ACL_RULE_COUNT` | `empty` | 显式编号规则数；`0` 会清除列表。       |
+| `SAML_USE_ACL`        | `no`    | 在 SAML 验证后启用基于属性的访问控制。 |
+| `SAML_ACL_MATCH_MODE` | `all`   | 使用 `all` 或 `any` 组合规则。         |
+| `SAML_ACL_DENIED_URL` | `empty` | 被拒绝时重定向；为空时返回拒绝状态。   |
+| `SAML_ACL_ATTRIBUTE`  | `empty` | ACL 规则的属性名称。                   |
+| `SAML_ACL_VALUE`      | `empty` | ACL 规则所需的值。                     |
+
+例如，此服务要求同时属于 `engineering` 群组并具有管理员电子邮件：
+
+```yaml
+app.example.com_USE_SAML: "yes"
+app.example.com_SAML_USE_ACL: "yes"
+app.example.com_SAML_ACL_RULE_COUNT: "2"
+app.example.com_SAML_ACL_MATCH_MODE: "all"
+app.example.com_SAML_ACL_ATTRIBUTE_1: "groups"
+app.example.com_SAML_ACL_VALUE_1: "engineering"
+app.example.com_SAML_ACL_ATTRIBUTE_2: "email"
+app.example.com_SAML_ACL_VALUE_2: "admin@example.com"
+```
+
+第一对为 `_1`，第二对为 `_2`；UI 从 1 开始为规则编号。显式计数为 `2` 时，两对都必须存在；属性缺失会拒绝访问，而配置的值为空也会拒绝访问。使用 `all` 时每条规则都必须匹配；使用 `any` 时匹配一条规则即可。没有规则时，所有已认证用户都可以访问。在服务作用域中，UI 会继承全局规则列表，直到您选择服务规则列表；保存服务规则列表会替换继承的列表，即使替换列表被明确设置为空。将 `SAML_ACL_RULE_COUNT` 留空可发现前 100 个槽位中的编号规则。将其设置为 `0` 可清除所有规则。无效模式或格式错误的显式列表会默认拒绝。设置 `SAML_ACL_DENIED_URL` 时会进行重定向；否则 BunkerWeb 返回其拒绝状态。
+
+#### 重放防护
+
+| 设置                    | 默认值 | 上下文 | 用途                                   |
+| ----------------------- | ------ | ------ | -------------------------------------- |
+| `SAML_REPLAY_DICT_SIZE` | `10m`  | global | 单个实例上用于重放防护的共享内存容量。 |
+
+每个已接受的断言 ID 都会以原子方式加入重放存储，并保留到它仍可能被接受的时间结束。待处理 AuthnRequest ID 是单独的会话关联值。在单个实例上，如果共享字典太小，请增大 `SAML_REPLAY_DICT_SIZE`。对于副本，启用核心的 `USE_REDIS=yes` 会话模式，并让每个实例指向同一个 Redis 服务，以便重放密钥使用共享存储。同时让每个副本的核心 `SESSIONS_SECRET` 保持一致；否则一个 worker 创建的会话无法被另一个 worker 读取。默认情况下，会话使用安全且仅限主机的 Cookie，并带有 `HttpOnly`、`Secure` 和 `SameSite=None`。启用 Redis 后，会话数据会转移到带命名空间的 Redis 存储，而不是 Cookie。IdP 的 `SessionNotOnOrAfter` 可能会让会话早于配置的超时结束。如果后续回调步骤失败，已消费的断言仍会保持已消费状态。
+
+### 注销
+
+请求 `SAML_LOGOUT_PATH` 会清除已认证状态，保存待处理的注销关联值，并启动前端 SLO。BunkerWeb 会发送已签名的 Redirect-binding 注销请求。收到有效且已签名的 LogoutResponse 后，它会销毁本地会话，并将浏览器重定向到 `SAML_LOGOUT_REDIRECT`。IdP 发起的 LogoutRequest 可以到达 `SAML_SLS_PATH`；SLS 会验证签发者、目标、NameID、会话索引和重放状态，销毁本地会话，并向 IdP 返回已签名响应。如果不存在本地会话，注销路由会销毁空会话并在本地重定向。
+
+### 限制和故障排除
+
+SAML 目前支持 SP 发起的浏览器登录，使用已签名的 Redirect AuthnRequest 和 POST ACS 响应。它不支持 IdP 发起的登录、加密断言，也不支持自动导入和刷新 IdP 元数据。请让 IdP 配置为签署文档/断言，并使用 POST binding 发送响应。身份验证和注销 POST 正文限制为 256 KiB；超大请求会在处理前被拒绝。
+
+- **UI 不会启用 SAML：**检查 HTTPS origin、全部三个证书/密钥、匹配的 RSA 密钥和证书、IdP entity/SSO 值以及四个互不相同的本地路径。无效配置会被拒绝，且请求以 `503` 失败关闭；请求不会到达上游。
+- **IdP 拒绝 AuthnRequest：**比较 SP entity ID、准确的 ACS/SLS URL、SP 证书、RSA-SHA256 设置和客户端签名要求。在 Keycloak 中，检查 **Use metadata descriptor URL** 已关闭，并确认手动提供的 SP 证书是最新的。
+- **ACS 返回错误或 `503`：**检查 IdP 签名证书、断言签名覆盖范围、签发者、目标、时钟同步、响应 binding、待处理请求关联，以及断言 ID 是否已经被消费。确认 IdP 发送了映射的属性。
+- **用户完成身份验证但收到拒绝：**启用预期的 ACL 属性，确认编号对和 `SAML_ACL_RULE_COUNT`，并检查 `all` 与 `any`。属性值为空或声明缺失可能会按设计拒绝访问。
+- **负载均衡器后会话消失：**在每个副本上使用相同的 Redis 存储和核心会话密钥。当 `USE_REDIS=yes` 时 Redis 必须可用；重放防护和会话不会静默回退到每个 worker 的状态。
+
+## LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ldap-sso-pro}
+
+STREAM 支持 :x:
+
+**LDAP SSO** 插件为 BunkerWeb 服务添加基于 LDAP 的单点登录功能。它提供登录表单、通过 LDAP 目录认证用户、创建会话，并可选地通过可配置的请求头将已认证的用户名传递给上游。
+
+该插件支持两种认证模式：
+
+- **搜索后绑定模式**（推荐，也称为"企业搜索模式"）：服务帐户在目录中搜索用户，然后以找到的 DN 绑定以验证密码。当设置了 `LDAP_USER_SEARCH_BASE_DN` 时启用。
+- **直接绑定模式**：通过模板（`LDAP_USER_DN_TEMPLATE`）构造用户 DN 并直接绑定。当未配置搜索模式时作为回退使用。
+
+### 功能
+
+- **LDAP/LDAPS/STARTTLS：** 支持通过明文 LDAP、LDAPS（从连接开始即 TLS）或 STARTTLS 升级进行连接。
+- **搜索后绑定模式：** 服务帐户执行用户发现，支持可配置的搜索基础、过滤器、范围以及大小/时间限制。
+- **直接绑定回退：** 当不需要搜索模式时，基于 DN 模板进行认证。
+- **授权过滤器：** 可选的额外 LDAP 过滤器，用于在基本认证之外进一步限制访问。
+- **连接池：** 支持 keepalive，具有可配置的池大小和超时，减少 LDAP 往返。
+- **会话管理：** 可配置的 TTL，支持自动会话清理。
+- **用户头转发：** 通过可配置的请求头（默认：`X-User`）将已认证用户名传递给上游。
+- **登录/登出路径：** 专用的认证和会话终止端点。
+
+!!! danger "默认情况下凭据以明文传输"
+    使用默认设置（`LDAP_LDAPS=no`、`LDAP_STARTTLS=no`）时，用户密码会以明文传输到 LDAP 服务器。**在生产环境中务必启用 `LDAP_LDAPS=yes`（配合 `LDAP_PORT=636`）或 `LDAP_STARTTLS=yes`。** 保持 `LDAP_SSL_VERIFY=yes` 以防止 TLS 降级攻击。
+
+### 配置
+
+**核心设置**
+
+| 设置              | 默认    | 上下文    | 多个 | 描述                                                        |
+| ----------------- | ------- | --------- | ---- | ----------------------------------------------------------- |
+| `USE_LDAP`        | `no`    | multisite | 否   | 启用或禁用 LDAP SSO 认证。                                  |
+| `LDAP_HOST`       |         | multisite | 否   | LDAP 服务器主机名或 IP 地址。                               |
+| `LDAP_PORT`       | `389`   | multisite | 否   | LDAP 服务器端口（389 用于 LDAP/STARTTLS，636 用于 LDAPS）。 |
+| `LDAP_LDAPS`      | `no`    | multisite | 否   | 使用 LDAPS（从连接开始即 TLS）。                            |
+| `LDAP_STARTTLS`   | `no`    | multisite | 否   | 在 LDAP 连接上使用 STARTTLS 升级。                          |
+| `LDAP_SSL_VERIFY` | `yes`   | multisite | 否   | 验证服务器 TLS 证书。                                       |
+| `LDAP_TIMEOUT`    | `10000` | multisite | 否   | LDAP 套接字超时（毫秒）。                                   |
+
+**连接池**
+
+| 设置                       | 默认    | 上下文    | 多个 | 描述                                 |
+| -------------------------- | ------- | --------- | ---- | ------------------------------------ |
+| `LDAP_KEEPALIVE_TIMEOUT`   | `60000` | multisite | 否   | LDAP keepalive 超时（毫秒）。        |
+| `LDAP_KEEPALIVE_POOL_SIZE` | `10`    | multisite | 否   | LDAP keepalive 连接池大小。          |
+| `LDAP_KEEPALIVE_POOL_NAME` |         | multisite | 否   | 可选的自定义 LDAP keepalive 池名称。 |
+
+**企业搜索模式**
+
+| 设置                              | 默认                                                                                                                    | 上下文    | 多个 | 描述                                                                                                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
+| `LDAP_BIND_DN`                    |                                                                                                                         | multisite | 否   | 用于执行 LDAP 用户搜索的服务帐户 DN。                                                                 |
+| `LDAP_BIND_PASSWORD`              |                                                                                                                         | multisite | 否   | LDAP 绑定 DN 服务帐户的密码。                                                                         |
+| `LDAP_USER_SEARCH_BASE_DN`        |                                                                                                                         | multisite | 否   | 用户发现搜索的基础 DN（设置此项启用企业搜索模式）。                                                   |
+| `LDAP_USER_SEARCH_FILTER`         | `(&(objectClass=person)(\|(uid={username})(mail={username})(sAMAccountName={username})(userPrincipalName={username})))` | multisite | 否   | LDAP 用户搜索过滤器模板。使用 `{username}` 占位符。                                                   |
+| `LDAP_AUTHZ_FILTER`               |                                                                                                                         | multisite | 否   | 可选的额外 LDAP 授权过滤器（与用户搜索过滤器进行 AND 运算）。                                         |
+| `LDAP_USER_SEARCH_SCOPE`          | `subtree`                                                                                                               | multisite | 否   | LDAP 搜索范围：`base`、`onelevel` 或 `subtree`。                                                      |
+| `LDAP_USER_SEARCH_DEREF_ALIASES`  | `always`                                                                                                                | multisite | 否   | LDAP 别名解引用模式：`always`、`never`、`in_searching` 或 `finding_base`。                            |
+| `LDAP_USER_SEARCH_SIZE_LIMIT`     | `10`                                                                                                                    | multisite | 否   | 用户搜索返回的最大 LDAP 条目数。                                                                      |
+| `LDAP_USER_SEARCH_TIME_LIMIT`     | `10`                                                                                                                    | multisite | 否   | LDAP 用户搜索的最大时间（秒）。                                                                       |
+| `LDAP_USER_SEARCH_ATTRIBUTES`     | `dn`                                                                                                                    | multisite | 否   | 用户搜索期间请求的属性（空格分隔）。                                                                  |
+| `LDAP_USER_SEARCH_DN_FIELD`       | `object_name`                                                                                                           | multisite | 否   | 搜索响应中用于提取用户 DN 的字段名。默认的 `object_name` 是底层 LDAP 库返回的 DN 字段；通常无需更改。 |
+| `LDAP_USER_SEARCH_REQUIRE_UNIQUE` | `yes`                                                                                                                   | multisite | 否   | 认证用户前要求搜索结果恰好为一条。                                                                    |
+
+**直接绑定模式**
+
+| 设置                    | 默认                                         | 上下文    | 多个 | 描述                                                      |
+| ----------------------- | -------------------------------------------- | --------- | ---- | --------------------------------------------------------- |
+| `LDAP_USER_DN_TEMPLATE` | `uid={username},ou=people,dc=example,dc=com` | multisite | 否   | 直接绑定使用的用户 DN 模板。设置时必须包含 `{username}`。 |
+
+**会话和路径**
+
+| 设置                         | 默认                 | 上下文    | 多个 | 描述                                         |
+| ---------------------------- | -------------------- | --------- | ---- | -------------------------------------------- |
+| `LDAP_USERNAME_REGEX`        | `^[A-Za-z0-9@._-]+$` | multisite | 否   | 用于验证提交用户名的 PCRE 正则表达式。       |
+| `LDAP_LOGIN_PATH`            | `/ldap/login`        | multisite | 否   | LDAP 插件暴露的登录页面路径。                |
+| `LDAP_LOGOUT_PATH`           | `/ldap/logout`       | multisite | 否   | LDAP 插件暴露的登出路径。                    |
+| `LDAP_SESSION_TTL`           | `3600`               | multisite | 否   | LDAP 会话有效期（秒）。                      |
+| `LDAP_REALM`                 | `LDAP SSO`           | multisite | 否   | LDAP 登录表单上显示的认证领域。              |
+| `LDAP_USER_HEADER`           | `X-User`             | multisite | 否   | 传递已认证用户名到上游的请求头（空值禁用）。 |
+| `LDAP_REDIRECT_AFTER_LOGIN`  | `/`                  | multisite | 否   | 登录成功且无重定向目标时的回退相对路径。     |
+| `LDAP_REDIRECT_AFTER_LOGOUT` | `/`                  | multisite | 否   | 登出后重定向的相对路径。                     |
+
+### 快速开始
+
+1. 为每个受保护的服务设置最小值：
+    - `USE_LDAP=yes`
+    - `LDAP_HOST=ldap.example.com`
+2. 对于企业搜索模式（推荐），还需设置：
+    - `LDAP_BIND_DN=cn=readonly,dc=example,dc=com`
+    - `LDAP_BIND_PASSWORD=secret`（生产环境中请使用 [Docker secrets](integrations.md#docker)）
+    - `LDAP_USER_SEARCH_BASE_DN=ou=people,dc=example,dc=com`
+3. 对于直接绑定模式，请调整 `LDAP_USER_DN_TEMPLATE` 以匹配您的目录结构。
+4. 可选地使用 `LDAP_AUTHZ_FILTER` 限制访问（例如 `(memberOf=cn=allowed,ou=groups,dc=example,dc=com)`）。
+
+### 使用提示
+
+- 优先使用搜索后绑定模式而非直接绑定——它支持跨多个属性（uid、mail、sAMAccountName、UPN）的灵活用户查找。
+- 在生产环境中使用 LDAPS（`LDAP_LDAPS=yes`）或 STARTTLS（`LDAP_STARTTLS=yes`）以加密传输中的凭据。
+- 启用 LDAPS（`LDAP_LDAPS=yes`）时，请记得同时设置 `LDAP_PORT=636`。端口不会自动更改。
+- 除非使用自签名证书进行测试，否则保持 `LDAP_SSL_VERIFY=yes`。
+- 调整 `LDAP_KEEPALIVE_POOL_SIZE` 以匹配预期的并发用户量，减少 LDAP 连接开销。
+- 将 `LDAP_USER_HEADER` 设为空值可禁用向上游传递身份信息。
+
+## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openapi-validator-pro}
 
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -4315,7 +4924,7 @@ Discovery/JWKS 数据会缓存在 NGINX shared dict 中。如果您有很多租�
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
 
-## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#cache-pro}
 
 STREAM 支持 :x:
 
@@ -4393,3 +5002,393 @@ Cache PRO 插件使用 NGINX `proxy_cache*` 指令在反向代理层启用响应
     - 对于重复值，请使用数字后缀，例如 `CACHE_PATH_1`、`CACHE_PATH_2`、`CACHE_VALID_1` 和 `CACHE_VALID_2`。
     - 认证流量或用户特定流量通常不应进入缓存，除非 `CACHE_KEY` 明确根据该状态变化。
     - `CACHE_LOCK=yes` 和 `CACHE_BACKGROUND_UPDATE=yes` 有助于减少对源站的瞬时冲击。
+
+## ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#acme}
+
+STREAM 支持 :white_check_mark:
+
+**ACME** 插件通过 ACME 协议提供高级证书管理功能，支持自定义证书颁发机构（Step CA、Vault PKI、Sectigo、Google Trust Services 等）。它作为内置 Let's Encrypt 插件的补充，增加了自定义 CA 支持、DNS-01 和 TLS-ALPN-01 挑战、通配符证书、带过期告警的证书监控、证书透明度日志监控以及增强的 OCSP Stapling。
+
+!!! tip "何时使用 ACME 而非内置 Let's Encrypt 插件"
+    如果您只需要使用 HTTP-01 挑战的 Let's Encrypt 证书，内置的 Let's Encrypt 插件（`AUTO_LETS_ENCRYPT=yes`）即可满足需求。当您需要自定义 CA、DNS-01 或 TLS-ALPN-01 挑战、通配符证书，或需要带告警的证书监控时，请使用 ACME 插件。
+
+### 功能
+
+- **自定义 CA 支持：** 使用任何兼容 ACME 的证书颁发机构，不限于 Let's Encrypt。
+- **多种挑战类型：** HTTP-01、DNS-01（通配符必需）和 TLS-ALPN-01。
+- **DNS 提供商集成：** 内置支持 Cloudflare、Route53、DigitalOcean、OVH 等。
+- **外部帐户绑定（EAB）：** 适用于需要预注册密钥的 CA（Sectigo、Google Trust Services）。
+- **通配符证书：** 通过 DNS-01 挑战实现。
+- **证书监控：** 跟踪所有受管证书（包括 OSS Let's Encrypt）的过期时间，可配置告警阈值。
+- **过期告警：** 当证书即将到期时，通过 webhook 或邮件发送告警。
+- **证书透明度监控：** 查询 crt.sh 以检测对您域名的未授权证书签发。
+- **增强的 OCSP Stapling：** 主动获取和缓存 OCSP 响应。
+- **可配置的密钥类型：** ECDSA（256/384）或 RSA（2048/4096）。
+
+### 前提条件
+
+#### HTTP-01 挑战需要 `LETS_ENCRYPT_PASSTHROUGH=yes`
+
+当使用 `ACME_CHALLENGE=http`（默认值）时，您**必须**在同一服务上设置 `LETS_ENCRYPT_PASSTHROUGH=yes`。
+
+BunkerWeb 的核心 Let's Encrypt 插件包含一个 NGINX location 块和一个用于 `/.well-known/acme-challenge/` 的 Lua access 处理器。由于 NGINX location 块在任何 Lua 插件代码运行之前匹配，它会在 ACME PRO 能够处理之前拦截挑战请求。设置 `LETS_ENCRYPT_PASSTHROUGH=yes` 可以禁用这两个机制，使 ACME PRO 能够正确处理 HTTP-01 挑战令牌。
+
+此设置**仅在 HTTP-01 时需要**。DNS-01 和 TLS-ALPN-01 挑战不受影响。
+
+#### 上游 ACME 透传（`ACME_PASSTHROUGH`）
+
+如果 BunkerWeb 背后的上游服务器已经运行自己的 ACME 客户端，并应由其自行处理 HTTP-01 验证，请在该服务上设置 `ACME_PASSTHROUGH=yes`。此时 ACME PRO 将不再渲染 `/.well-known/acme-challenge/` location 块，也不会在 `access` 阶段将挑战路径加入白名单，从而让上游提供的验证文件原样到达 CA。
+
+当您希望 ACME PRO 自行签发和续期证书时，请将 `ACME_PASSTHROUGH` 保持为 `no`（默认值）。ACME PRO 管理服务的标准 HTTP-01 组合是：`LETS_ENCRYPT_PASSTHROUGH=yes`（让 OSS 核心 Let's Encrypt 插件让出其挑战 location 块），再配合 `ACME_PASSTHROUGH=no`。仅当上游完全拥有证书生命周期时才将 `ACME_PASSTHROUGH` 设为 `yes` —— 在该模式下 BunkerWeb 不会尝试为该服务签发证书。
+
+此设置与 OSS 核心的 `LETS_ENCRYPT_PASSTHROUGH` 行为一致，并且仅影响 HTTP-01；DNS-01 和 TLS-ALPN-01 挑战不受影响。
+
+#### 插件执行顺序
+
+ACME 插件会自动将自身重新排序，以在 `ssl_certificate` NGINX 阶段最先执行，确保 TLS-ALPN-01 挑战证书在其他证书提供插件（selfsigned、letsencrypt、customcert）短路循环之前被提供。
+
+当 ACME 与其他依赖有效 TLS 的 PRO 插件（如 OpenID Connect、UI SSO）一起使用时，建议在相关的阶段排序设置中，将 `acme` 明确放在 `customcert` 之后：
+
+```env
+PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
+PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbasic securitytxt robotstxt crowdsec dnsbl headers customcert acme letsencrypt selfsigned
+```
+
+未列在 `PLUGINS_ORDER_*` 设置中的外部/PRO 插件会按字母顺序追加到已明确排序的核心插件之后。
+
+!!! warning "不要在同一服务上同时启用 `USE_ACME` 和 `AUTO_LETS_ENCRYPT`"
+    ACME 插件和内置 Let's Encrypt 插件使用各自独立的存储和挑战路径，但在同一服务上同时启用二者会导致冲突。请对每个服务只使用其中之一。在多站点模式下，不同服务可以使用不同的插件——例如 `app1.example.com_USE_ACME=yes` 和 `app2.example.com_AUTO_LETS_ENCRYPT=yes`。
+
+### 配置
+
+**核心 ACME 设置**
+
+| 设置                   | 默认    | 上下文    | 多个 | 描述                                                              |
+| ---------------------- | ------- | --------- | ---- | ----------------------------------------------------------------- |
+| `USE_ACME`             | `no`    | multisite | 否   | 为此服务启用 ACME 证书管理。                                      |
+| `ACME_PASSTHROUGH`     | `no`    | multisite | 否   | 将 HTTP-01 挑战请求透传给上游服务器（上游自行运行 ACME 客户端）。 |
+| `ACME_DIRECTORY_URL`   |         | multisite | 否   | 证书颁发机构的 ACME 目录 URL。                                    |
+| `ACME_EMAIL`           |         | multisite | 否   | 用于 ACME 帐户注册和通知的邮箱地址。                              |
+| `ACME_CHALLENGE`       | `http`  | multisite | 否   | ACME 挑战类型：`http`、`dns` 或 `alpn`。                          |
+| `ACME_KEY_TYPE`        | `ecdsa` | multisite | 否   | 证书的密钥类型：`ecdsa` 或 `rsa`。                                |
+| `ACME_KEY_SIZE`        | `256`   | multisite | 否   | 密钥大小（位）。ECDSA：`256` 或 `384`。RSA：`2048` 或 `4096`。    |
+| `ACME_RENEWAL_DAYS`    | `30`    | multisite | 否   | 当证书距过期天数少于此值时进行续期。                              |
+| `ACME_SSL_VERIFY`      | `yes`   | multisite | 否   | 与 ACME 服务器通信时验证 SSL 证书。                               |
+| `ACME_WILDCARD`        | `no`    | multisite | 否   | 请求通配符证书（需要 DNS-01 挑战）。                              |
+| `ACME_MUST_STAPLE`     | `no`    | multisite | 否   | 在证书中请求 OCSP Must-Staple 扩展。                              |
+| `ACME_MAX_RETRIES`     | `3`     | multisite | 否   | 证书生成失败时的重试次数（0 禁用重试）。                          |
+| `ACME_PREFERRED_CHAIN` |         | multisite | 否   | 当 CA 提供多条证书链时，首选的证书链签发者 CN。                   |
+| `ACME_CA_CERT_PATH`    |         | multisite | 否   | 私有 ACME 服务器的根 CA 证书文件路径。                            |
+
+**外部帐户绑定（EAB）**
+
+| 设置                | 默认 | 上下文    | 多个 | 描述                                    |
+| ------------------- | ---- | --------- | ---- | --------------------------------------- |
+| `ACME_EAB_KID`      |      | multisite | 否   | 外部帐户绑定密钥 ID（某些 CA 要求）。   |
+| `ACME_EAB_HMAC_KEY` |      | multisite | 否   | 外部帐户绑定 HMAC 密钥（base64 编码）。 |
+
+**DNS-01 挑战**
+
+| 设置                                | 默认      | 上下文    | 多个 | 描述                                                                                                                                                            |
+| ----------------------------------- | --------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ACME_DNS_PROVIDER`                 |           | multisite | 否   | DNS-01 挑战使用的 DNS 提供商。                                                                                                                                  |
+| `ACME_DNS_CREDENTIAL_ITEM`          |           | multisite | 是   | DNS 提供商凭据，格式为 `key value`（例如 `cloudflare_api_token YOUR_TOKEN`）。多项时使用数字后缀（例如 `ACME_DNS_CREDENTIAL_ITEM_1`）。值可以进行 base64 编码。 |
+| `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | 是   | 自动解码 base64 编码的 DNS 提供商凭据。如果您的凭据是恰好为有效 base64 的明文，请禁用此选项。                                                                   |
+| `ACME_DNS_PROPAGATION`              | `default` | multisite | 否   | 等待 DNS 传播的时间（秒）（`default` 或数字）。                                                                                                                 |
+
+**证书监控**
+
+| 设置                  | 默认        | 上下文 | 多个 | 描述                                                   |
+| --------------------- | ----------- | ------ | ---- | ------------------------------------------------------ |
+| `USE_ACME_MONITORING` | `yes`       | 全局   | 否   | 启用所有受管证书（包括 OSS Let's Encrypt）的过期监控。 |
+| `ACME_ALERT_DAYS`     | `30 14 7 1` | 全局   | 否   | 以空格分隔的天数阈值列表，触发过期告警。               |
+
+**告警（webhook）**
+
+| 设置                      | 默认 | 上下文 | 多个 | 描述                                |
+| ------------------------- | ---- | ------ | ---- | ----------------------------------- |
+| `USE_ACME_ALERT_WEBHOOK`  | `no` | 全局   | 否   | 通过 webhook 发送证书告警。         |
+| `ACME_ALERT_WEBHOOK_URLS` |      | 全局   | 否   | 以空格分隔的告警 webhook URL 列表。 |
+
+**告警（邮件）**
+
+| 设置                            | 默认  | 上下文 | 多个 | 描述                             |
+| ------------------------------- | ----- | ------ | ---- | -------------------------------- |
+| `USE_ACME_ALERT_EMAIL`          | `no`  | 全局   | 否   | 通过邮件发送证书告警。           |
+| `ACME_ALERT_SMTP_EMAILS`        |       | 全局   | 否   | 以空格分隔的邮件收件人列表。     |
+| `ACME_ALERT_SMTP_HOST`          |       | 全局   | 否   | 证书告警邮件的 SMTP 主机。       |
+| `ACME_ALERT_SMTP_PORT`          | `465` | 全局   | 否   | SMTP 端口（SSL=465，TLS=587）。  |
+| `ACME_ALERT_SMTP_FROM_EMAIL`    |       | 全局   | 否   | 证书告警的发件人邮箱地址。       |
+| `ACME_ALERT_SMTP_FROM_USER`     |       | 全局   | 否   | SMTP 认证用户名。                |
+| `ACME_ALERT_SMTP_FROM_PASSWORD` |       | 全局   | 否   | SMTP 认证密码。                  |
+| `ACME_ALERT_SMTP_SSL`           | `SSL` | 全局   | 否   | 连接类型：`no`、`SSL` 或 `TLS`。 |
+
+**证书透明度监控**
+
+| 设置                        | 默认 | 上下文 | 多个 | 描述                                                   |
+| --------------------------- | ---- | ------ | ---- | ------------------------------------------------------ |
+| `USE_ACME_CT_MONITORING`    | `no` | 全局   | 否   | 启用通过 crt.sh 的 CT 日志监控，检测未授权的证书签发。 |
+| `ACME_CT_MONITORED_DOMAINS` |      | 全局   | 否   | 以空格分隔的要监控的域名列表。留空则自动检测。         |
+
+**OCSP Stapling**
+
+| 设置                     | 默认 | 上下文    | 多个 | 描述                                                 |
+| ------------------------ | ---- | --------- | ---- | ---------------------------------------------------- |
+| `USE_ACME_OCSP_STAPLING` | `no` | multisite | 否   | 启用增强的 OCSP Stapling，主动获取和缓存 OCSP 响应。 |
+| `ACME_OCSP_CACHE_SIZE`   | `1m` | 全局      | 否   | OCSP 响应缓存的共享字典大小。                        |
+
+### 快速开始
+
+1. 为每个受保护的服务设置最小值：
+    - `USE_ACME=yes`
+    - `ACME_DIRECTORY_URL=https://ca.example.com/acme/directory`
+    - `ACME_EMAIL=admin@example.com`
+2. 对于通配符证书，切换到 DNS-01 挑战：
+    - `ACME_CHALLENGE=dns`
+    - `ACME_DNS_PROVIDER=cloudflare`
+    - `ACME_DNS_CREDENTIAL_ITEM=cloudflare_api_token YOUR_TOKEN`（生产环境中请使用 [Docker secrets](integrations.md#docker)）
+    - `ACME_WILDCARD=yes`
+3. 对于需要外部帐户绑定的 CA：
+    - `ACME_EAB_KID=your-key-id`
+    - `ACME_EAB_HMAC_KEY=your-base64-hmac-key`（生产环境中请使用 [Docker secrets](integrations.md#docker)）
+4. 对于使用自签名根证书的私有 CA：
+    - `ACME_CA_CERT_PATH=/path/to/ca-root.pem`
+    - `ACME_SSL_VERIFY=yes`（提供 `ACME_CA_CERT_PATH` 可以让验证通过私有 CA 而无需禁用 SSL 验证）
+
+### 使用提示
+
+- 证书监控（`USE_ACME_MONITORING`）默认启用，也会跟踪 OSS Let's Encrypt 证书。配置 `ACME_ALERT_DAYS` 阈值并至少配置一个告警渠道（webhook 或邮件）以接收过期警告。
+- 启用 CT 监控（`USE_ACME_CT_MONITORING=yes`）可通过证书透明度日志检测为您域名未授权签发的证书。
+- 默认使用 ECDSA 密钥，证书更小、更快。仅在需要与旧版客户端兼容时才切换到 RSA。
+- 使用 DNS-01 挑战时，如果您的 DNS 提供商传播记录较慢，请调整 `ACME_DNS_PROPAGATION`。
+- 设置 `ACME_MAX_RETRIES=0` 可禁用自动重试，适合需要手动排查故障的场景。
+
+### 与内置 Let's Encrypt 共存
+
+ACME PRO 与 OSS Let's Encrypt 插件使用完全独立的存储、API 端点和缓存键。在多站点模式下，二者可以同时在不同服务上运行：
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "app1.example.com app2.example.com"
+
+# ACME PRO 用于 app1（私有 CA）
+app1.example.com_USE_ACME: "yes"
+app1.example.com_ACME_DIRECTORY_URL: "https://ca.internal:9000/acme/acme/directory"
+app1.example.com_ACME_CA_CERT_PATH: "/certs/step-ca-root.pem"
+app1.example.com_LETS_ENCRYPT_PASSTHROUGH: "yes"  # HTTP-01 所需
+
+# 内置 Let's Encrypt 用于 app2
+app2.example.com_AUTO_LETS_ENCRYPT: "yes"
+```
+
+### 故障排除
+
+- **HTTP-01 挑战失败**：确保设置了 `LETS_ENCRYPT_PASSTHROUGH=yes`——否则 BunkerWeb 的核心 location 块会在 ACME PRO 能够处理之前拦截挑战请求。同时确认 ACME 服务器可访问端口 80，且同一服务未同时启用 `AUTO_LETS_ENCRYPT`。
+- **TLS-ALPN-01 挑战失败**：确保 ACME 服务器可访问端口 443，且在 `ssl_certificate` 阶段没有其他插件在 ACME 之前提供证书。如有疑问，请检查 `PLUGINS_ORDER_SSL_CERTIFICATE`。
+- **DNS-01 挑战失败**：验证 `ACME_DNS_CREDENTIAL_ITEM` 中的 DNS 提供商凭据，如果您的提供商传播记录较慢，请调整 `ACME_DNS_PROPAGATION`。
+- **证书未续期**：检查 `ACME_RENEWAL_DAYS` 和调度器日志。`acme-renew` 作业每天运行，续期处于配置阈值内的证书。
+
+## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#wildcard-pro}
+
+STREAM 支持 :x:
+
+**Wildcard** 插件允许单个 BunkerWeb 服务响应：
+
+* 其精确主机名
+* 该主机名下任意**直接子域名**
+
+启用后，插件会从 `SERVER_NAME` 中取出**第一个条目**，并在生成的 NGINX 配置中添加一个通配符 `server_name`。
+
+例如，如果第一个条目是 `example.com`，插件会添加：
+
+```nginx
+server_name *.example.com;
+```
+
+这样该服务就会响应：
+
+* `example.com`
+* `www.example.com`
+* `api.example.com`
+
+这是一个最小化、纯配置型插件：
+
+* 无 jobs
+* 无 Lua
+* 无 UI
+
+---
+
+### 工作原理
+
+该插件从 `SERVER_NAME` 的**第一个值**推导出通配符主机名，并在生成配置时注入标准 NGINX 通配符服务器名。
+
+除主机名匹配外，它不会改变请求处理逻辑。
+
+!!! info "通配符主机并不等于通配符证书"
+    此插件只影响 **HTTP 路由**。它告诉 NGINX 服务应接受哪些主机名。
+
+    它**不会**签发通配符 TLS 证书。
+
+    如果要通过 HTTPS 提供 `*.example.com`，您仍然需要匹配的通配符证书，通常可以使用以下其中一种方式：
+
+    - 使用内置 Let's Encrypt 插件并设置 `USE_LETS_ENCRYPT_WILDCARD=yes`
+    - 使用 [ACME PRO](#acme) 插件并设置 `ACME_WILDCARD=yes`，同时使用 DNS-01 挑战
+
+---
+
+### 功能
+
+* **启用简单**：通过 `USE_WILDCARD=yes` 启用通配符路由
+* **自动推导**：通配符主机基于 `SERVER_NAME` 的第一个条目构建
+* **原生 NGINX 语义**：匹配遵循标准 `server_name` 行为
+* **支持多站点**：每个服务都可以独立启用或禁用通配符路由
+
+---
+
+### 配置
+
+| 参数           | 默认值 | 上下文    | 可重复 | 描述                                                                             |
+| -------------- | ------ | --------- | ------ | -------------------------------------------------------------------------------- |
+| `USE_WILDCARD` | `no`   | multisite | 否     | 为服务启用通配符 `server_name`，即为 `SERVER_NAME` 的第一个条目添加 `*.domain`。 |
+
+---
+
+### 快速开始
+
+1. 将您想要使用通配符的域名放在 `SERVER_NAME` 的**第一位**
+2. 设置 `USE_WILDCARD=yes`
+3. 将通配符 DNS 记录指向 BunkerWeb，通常是通配符 `A` 或 `AAAA` 记录
+4. 如果需要 HTTPS，请单独签发通配符证书
+5. 重新加载或重启 BunkerWeb
+
+---
+
+### 示例
+
+#### Single-site
+
+```yaml
+SERVER_NAME: "example.com"
+USE_WILDCARD: "yes"
+```
+
+该服务将响应：
+
+* `example.com`
+* `www.example.com`
+* `api.example.com`
+* 任何其他解析到 BunkerWeb 的 `*.example.com` 主机名
+
+#### Multisite
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "app.example.com docs.example.org"
+
+# 只有 app.example.com 会启用通配符路由
+app.example.com_USE_WILDCARD: "yes"
+```
+
+在此配置中：
+
+* `app.example.com` 和 `*.app.example.com` 会路由到第一个服务
+* `docs.example.org` 仍然只保留精确匹配
+
+---
+
+### 重要行为
+
+!!! warning "只有第一个域名会被通配"
+    如果 `SERVER_NAME` 是：
+
+    ```yaml
+    SERVER_NAME: "example.com example.org"
+    ```
+
+    则只会添加 `*.example.com`。
+
+    请将您想要使用通配符的域名放在第一位。
+
+!!! note "已有通配符条目会被保留"
+    如果第一个域名已经以 `*.` 开头，例如：
+
+    ```yaml
+    SERVER_NAME: "*.example.com"
+    ```
+
+    插件将不会输出任何内容。
+
+!!! note "通配符匹配仅支持单层标签"
+    `*.example.com` 可以匹配 `foo.example.com`，但不能匹配 `a.b.example.com`。
+
+    对于更深层的子域名，请使用显式的 `SERVER_NAME` 条目或单独的服务。
+
+!!! note "精确匹配优先"
+    如果另一个服务显式定义了 `foo.example.com`，NGINX 会优先将该主机名路由到精确匹配。
+
+---
+
+### 与 Let's Encrypt 通配符证书配合时的推荐方式
+
+如果您将此插件与 `USE_LETS_ENCRYPT_WILDCARD=yes` 一起使用，请采用以下模式：
+
+```yaml
+SERVER_NAME: "<root_domain> <any_app>.<root_domain>"
+```
+
+**根域名必须放在第一位**。
+
+示例：
+
+```yaml
+SERVER_NAME: "example.com app.example.com"
+USE_WILDCARD: "yes"
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+LETS_ENCRYPT_CHALLENGE: "dns"
+LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
+LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
+USE_LETS_ENCRYPT_WILDCARD: "yes"
+```
+
+!!! tip "为什么这个模式很重要"
+    - **只有 `SERVER_NAME` 的第一个条目会被通配**
+
+    如果 `example.com` 放在第一位，插件会生成 `*.example.com`。
+
+    如果 `app.example.com` 放在第一位，它会生成 `*.app.example.com`，这通常不是您想要的通配层级。
+
+    - **第二个条目有助于 Let's Encrypt 检测正确的基础域名**
+      如果只有裸 apex 域名，在某些公共后缀域名（例如 `example.co.uk`）上，通配符证书检测可能会失败。
+
+    - **第二个主机名不需要真实后端**
+      使用任何稳定的值即可，例如 `app.example.com` 或 `www.example.com`。
+
+#### Multisite with Let's Encrypt wildcard
+
+```yaml
+MULTISITE: "yes"
+SERVER_NAME: "example.com app.example.com"
+example.com_USE_WILDCARD: "yes"
+example.com_USE_LETS_ENCRYPT_WILDCARD: "yes"
+example.com_LETS_ENCRYPT_CHALLENGE: "dns"
+example.com_LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
+example.com_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
+```
+
+---
+
+### 使用提示
+
+* **请单独规划 TLS**
+  仅有通配符路由不足以支持 HTTPS。您仍然需要为子域名准备相应的证书覆盖。
+
+* **保持 `SERVER_NAME` 顺序稳定**
+  调整条目顺序会改变哪个域名成为通配目标。
+
+* **与 `REVERSE_PROXY_HOST` 配合良好**
+  当大量子域名通过共享上游（例如租户路由器）进行转发时，这会很有用。
+
+* **注意重叠服务**
+  NGINX 总是优先选择最具体的 `server_name` 匹配。

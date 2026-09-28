@@ -10,7 +10,10 @@ $(document).ready(function () {
   const fileInput = $("#file-input");
   const fileList = $("#file-list");
   const pluginNumber = parseInt($("#plugins_number").val());
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  // Plugin management (upload/refresh/delete/actions) is admin-only server-side; treat
+  // non-admins like read-only on this page so those controls are disabled, not just 403'd.
+  const isAdmin = ($("#is-admin").val() || "True").trim() === "True";
+  const isReadOnly = $("#is-read-only").val().trim() === "True" || !isAdmin;
   const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const setupDeletionModal = (plugins) => {
@@ -197,17 +200,9 @@ $(document).ready(function () {
   };
 
   if (pluginNumber > 10) {
-    const menu = [10];
-    if (pluginNumber > 25) {
-      menu.push(25);
-    }
-    if (pluginNumber > 50) {
-      menu.push(50);
-    }
-    if (pluginNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: "All", value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (pluginNumber > 100) menu.push(500);
+    if (pluginNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -319,12 +314,18 @@ $(document).ready(function () {
 
   const getSelectedPlugins = () => {
     const plugins = [];
-    $("tr.selected").each(function () {
-      const plugin = $(this).find("td:eq(2)").data("id");
-      if (plugin) {
-        plugins.push(plugin);
-      }
-    });
+    if (!$.fn.dataTable.isDataTable("#plugins")) return plugins;
+    $("#plugins")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const plugin = $(this).find("td:eq(2)").attr("data-id");
+        if (plugin) {
+          plugins.push(plugin);
+        }
+      });
     return plugins;
   };
 
@@ -513,7 +514,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {
@@ -565,7 +566,7 @@ $(document).ready(function () {
       return;
     }
     const $this = $(this);
-    setupDeletionModal([$this.data("plugin-id")]);
+    setupDeletionModal([$this.attr("data-plugin-id")]);
   });
 
   // Open file dialog on click

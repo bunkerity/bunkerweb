@@ -39,13 +39,11 @@ def upgrade() -> None:
     )
 
     # Copy data from old bw_services to bw_services_new
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_new (id, method, is_draft, creation_date, last_update)
         SELECT id, method, is_draft, creation_date, last_update
         FROM bw_services
-    """
-    )
+    """)
 
     # Drop old bw_services table now that foreign keys are removed
     op.drop_table("bw_services")
@@ -64,12 +62,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("service_id", "setting_id", "suffix"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_settings_new (service_id, setting_id, value, suffix, method)
         SELECT service_id, setting_id, value, suffix, method FROM bw_services_settings
-    """
-    )
+    """)
 
     op.drop_table("bw_services_settings")
     op.rename_table("bw_services_settings_new", "bw_services_settings")
@@ -104,13 +100,11 @@ def upgrade() -> None:
         sa.UniqueConstraint("service_id", "type", "name"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_new (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method
         FROM bw_custom_configs
-    """
-    )
+    """)
 
     op.drop_table("bw_custom_configs")
     op.rename_table("bw_custom_configs_new", "bw_custom_configs")
@@ -127,12 +121,10 @@ def upgrade() -> None:
         sa.Column("checksum", sa.String(128), nullable=True),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_jobs_cache_new (id, job_name, service_id, file_name, data, last_update, checksum)
         SELECT id, job_name, service_id, file_name, data, last_update, checksum FROM bw_jobs_cache
-    """
-    )
+    """)
 
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_new", "bw_jobs_cache")
@@ -168,8 +160,7 @@ def upgrade() -> None:
     op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=True))
 
     # Step 2: Populate default values
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_template_settings
         SET "order" = subquery.row_number
         FROM (
@@ -177,8 +168,7 @@ def upgrade() -> None:
             FROM bw_template_settings
         ) as subquery
         WHERE bw_template_settings.id = subquery.id
-    """
-    )
+    """)
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_template_settings", "order", nullable=False)
@@ -191,8 +181,7 @@ def upgrade() -> None:
     op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=True))
 
     # Step 2: Populate default values
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_template_custom_configs
         SET "order" = subquery.row_number
         FROM (
@@ -200,8 +189,7 @@ def upgrade() -> None:
             FROM bw_template_custom_configs
         ) as subquery
         WHERE bw_template_custom_configs.id = subquery.id
-    """
-    )
+    """)
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_template_custom_configs", "order", nullable=False)
@@ -210,8 +198,7 @@ def upgrade() -> None:
     op.create_unique_constraint(None, "bw_template_custom_configs", ["template_id", "order"])
 
     # First drop Identity properties
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE bw_plugin_pages ALTER COLUMN id DROP IDENTITY IF EXISTS;
         ALTER TABLE bw_jobs_cache ALTER COLUMN id DROP IDENTITY IF EXISTS;
         ALTER TABLE bw_jobs_runs ALTER COLUMN id DROP IDENTITY IF EXISTS;
@@ -222,12 +209,10 @@ def upgrade() -> None:
         ALTER TABLE bw_ui_user_recovery_codes ALTER COLUMN id DROP IDENTITY IF EXISTS;
         ALTER TABLE bw_ui_user_sessions ALTER COLUMN id DROP IDENTITY IF EXISTS;
         ALTER TABLE bw_ui_user_columns_preferences ALTER COLUMN id DROP IDENTITY IF EXISTS;
-    """
-    )
+    """)
 
     # Create sequences
-    op.execute(
-        """
+    op.execute("""
         CREATE SEQUENCE IF NOT EXISTS bw_plugin_pages_id_seq;
         CREATE SEQUENCE IF NOT EXISTS bw_jobs_cache_id_seq;
         CREATE SEQUENCE IF NOT EXISTS bw_jobs_runs_id_seq;
@@ -238,12 +223,10 @@ def upgrade() -> None:
         CREATE SEQUENCE IF NOT EXISTS bw_ui_user_recovery_codes_id_seq;
         CREATE SEQUENCE IF NOT EXISTS bw_ui_user_sessions_id_seq;
         CREATE SEQUENCE IF NOT EXISTS bw_ui_user_columns_preferences_id_seq;
-    """
-    )
+    """)
 
     # Set sequence values
-    op.execute(
-        """
+    op.execute("""
         SELECT setval('bw_plugin_pages_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_plugin_pages));
         SELECT setval('bw_jobs_cache_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_jobs_cache));
         SELECT setval('bw_jobs_runs_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_jobs_runs));
@@ -254,12 +237,10 @@ def upgrade() -> None:
         SELECT setval('bw_ui_user_recovery_codes_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_recovery_codes));
         SELECT setval('bw_ui_user_sessions_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_sessions));
         SELECT setval('bw_ui_user_columns_preferences_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM bw_ui_user_columns_preferences));
-    """
-    )
+    """)
 
     # Set column defaults
-    op.execute(
-        """
+    op.execute("""
         ALTER TABLE bw_plugin_pages ALTER COLUMN id SET DEFAULT nextval('bw_plugin_pages_id_seq');
         ALTER TABLE bw_jobs_cache ALTER COLUMN id SET DEFAULT nextval('bw_jobs_cache_id_seq');
         ALTER TABLE bw_jobs_runs ALTER COLUMN id SET DEFAULT nextval('bw_jobs_runs_id_seq');
@@ -270,8 +251,7 @@ def upgrade() -> None:
         ALTER TABLE bw_ui_user_recovery_codes ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_recovery_codes_id_seq');
         ALTER TABLE bw_ui_user_sessions ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_sessions_id_seq');
         ALTER TABLE bw_ui_user_columns_preferences ALTER COLUMN id SET DEFAULT nextval('bw_ui_user_columns_preferences_id_seq');
-    """
-    )
+    """)
 
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.0-rc1' WHERE id = 1")
@@ -300,12 +280,10 @@ def downgrade() -> None:
         sa.Column("checksum", sa.String(128), nullable=True),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_jobs_cache_old (id, job_name, service_id, file_name, data, last_update, checksum)
         SELECT id, job_name, service_id, file_name, data, last_update, checksum FROM bw_jobs_cache
-    """
-    )
+    """)
 
     op.drop_table("bw_jobs_cache")
     op.rename_table("bw_jobs_cache_old", "bw_jobs_cache")
@@ -344,12 +322,10 @@ def downgrade() -> None:
         sa.UniqueConstraint("service_id", "type", "name"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_custom_configs_old (id, service_id, type, name, data, checksum, method)
         SELECT id, service_id, type, name, data, checksum, method FROM bw_custom_configs
-    """
-    )
+    """)
 
     op.drop_table("bw_custom_configs")
     op.rename_table("bw_custom_configs_old", "bw_custom_configs")
@@ -369,12 +345,10 @@ def downgrade() -> None:
         sa.PrimaryKeyConstraint("service_id", "setting_id", "suffix"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_settings_old (service_id, setting_id, value, suffix, method)
         SELECT service_id, setting_id, value, suffix, method FROM bw_services_settings
-    """
-    )
+    """)
 
     op.drop_table("bw_services_settings")
     op.rename_table("bw_services_settings_old", "bw_services_settings")
@@ -389,12 +363,10 @@ def downgrade() -> None:
         sa.Column("last_update", sa.DateTime(timezone=True), nullable=False),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_services_old (id, method, is_draft, creation_date, last_update)
         SELECT id, method, is_draft, creation_date, last_update FROM bw_services
-    """
-    )
+    """)
 
     op.drop_table("bw_services")
     op.rename_table("bw_services_old", "bw_services")

@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 默认情况下，容器暴露：
@@ -1284,7 +1284,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.9
+    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1340,7 +1340,8 @@ volumes:
 - `AUTOCONF_MODE=no` (默认) - 启用自动配置服务
 - `USE_REDIS=yes` (默认) - 启用内置的 [Redis](#redis-integration) 实例
 - `USE_CROWDSEC=no` (默认) - [CrowdSec](#crowdsec-integration) 集成默认禁用
-- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。日志仍会写入 `/var/log/bunkerweb/<service>.log`。
+- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。
+- **日志**：一体化镜像会将每个服务的 stdout 和 stderr 输出到容器日志。请使用 `docker logs bunkerweb-aio`（或您偏好的容器日志驱动）来查看和轮转日志；该镜像不会为其 Python 服务写入磁盘日志文件。
 
 ### API 集成
 
@@ -1361,7 +1362,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 推荐（在 BunkerWeb 之后）— 不要发布 `8888`；而是反向代理它：
@@ -1369,7 +1370,7 @@ docker run -d \
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.9
+    image: bunkerity/bunkerweb-all-in-one:1.6.16-rc2
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1425,7 +1426,22 @@ BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化�
 - 它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。
 - 仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 `REDIS_HOST`，否则内置实例将不会启动。
 - 若要完全禁用 Redis，请设置 `USE_REDIS=no`。
+- **配置优先级（重要）：** 内置 Redis 从 `/var/lib/bunkerweb/redis-runtime.conf` 启动，该文件在启动时通过复制 `/etc/redis.conf` 并**仅为配置文件未指定的指令**追加环境变量驱动的默认值生成。因此挂载的自定义 `/etc/redis.conf` 始终优先；下列环境变量仅用于填补缺失。
+- **内存调优：** 默认值遵循 [Redis 最佳实践](features.md#redis-best-practices)——`maxmemory 256mb` 与 `maxmemory-policy volatile-lru`。当配置文件未固定这些值时，可通过 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。
+- **持久化覆盖：** `REDIS_APPENDONLY=yes|no` 切换 AOF（默认 `yes`）；RDB 快照通过 `REDIS_SAVE` 以及可选的 `REDIS_SAVE_0`、`REDIS_SAVE_1`、…… 配置，每个变量提供一对 `save <秒> <变更>`（例如 `REDIS_SAVE_0="900 1"`、`REDIS_SAVE_1="300 10"`）。一旦设置其中任意一个，就会替换内置的 `900 1 / 300 10 / 60 10000` 默认集；空值会写出 `save ""`，禁用 RDB。当配置文件自身已声明 `save` 时忽略。
+- **认证：** 当 `REDIS_PASSWORD` 被设置且配置文件尚未定义 `requirepass` 时，内置 Redis 将以 `requirepass` 启动，使 BunkerWeb 客户端和服务端保持一致。内置服务端仅支持默认用户——仅当连接启用 ACL 的外部 Redis 时才设置 `REDIS_USERNAME`。
 - Redis 日志在 Docker 日志和 `/var/log/bunkerweb/redis.log` 中以 `[REDIS]` 前缀出现。
+
+### 日志保留 {#aio-log-retention}
+
+与其他 Docker 镜像不同，一体化镜像会将 `access.log`、`error.log` 和 `modsec_audit.log` 保留为 `/var/log/bunkerweb/` 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 `HIDE_SERVICE_LOGS`，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。
+
+- 该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 `[LOGROTATE]` 前缀报告。
+- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件都会每天轮转，若超过 100 MB 则提前轮转，保留十四个编号的历史版本，并使用 `copytruncate` 进行轮转。
+- `copytruncate` 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。
+- 如需更改阈值或历史版本数量，请将您自己的文件挂载到 `/etc/logrotate.d/bunkerweb`。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 `/var/log/bunkerweb` 只会改变数据的存放位置，并不会阻止容器内运行的 `logrotate` 继续对其进行轮转。
+
+参见[日志文件保留策略](advanced.md#log-file-retention)，了解其他集成方式如何处理这一点。
 
 ### CrowdSec 集成 {#crowdsec-integration}
 
@@ -1441,14 +1457,19 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
+* **内置的 CrowdSec 代理仅在**容器设置了无前缀的环境变量 `USE_CROWDSEC=yes` 且 `CROWDSEC_API` 指向本地时才会启动。仅为单个服务启用 CrowdSec（`www.example.com_USE_CROWDSEC=yes`）不会启动它。
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
 
     1.  **注册**并**启动**本地 CrowdSec 代理（通过 `cscli`）。
     2.  **安装或升级**默认的集合和解析器。
     3.  **配置** `crowdsec-bunkerweb-bouncer/v1.6` 拦截器。
+
+!!! warning "注册会将您的实例接入 CrowdSec 中央 API"
+
+    第 1 步会将代理注册到 CrowdSec 的中央 API（CAPI），这是一个双向交换。您的实例会**接收**社区封禁列表，同时会为每一条由未修改的 Hub 场景触发的告警**发送**信号：场景名称、哈希与版本、决策时间戳、机器标识，以及攻击者 IP 地址和可用时的地理位置数据。自定义场景、被修改的场景和手动决策不会被发送。如需纯本地部署，请参阅[禁用中央 API](#禁用中央-api)。
 
 ---
 
@@ -1496,7 +1517,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 !!! info "内部工作原理"
@@ -1507,23 +1528,48 @@ docker run -d \
 
 #### 禁用特定解析器
 
-如果您想保留默认设置但明确禁用一个或多个解析器，请通过 `CROWDSEC_DISABLED_PARSERS` 提供一个以空格分隔的列表：
+如果您想保留默认设置但明确禁用一个或多个解析器，请通过 `CROWDSEC_DISABLE_PARSERS` 提供一个以空格分隔的列表：
 
 ```bash
 docker run -d \
   --name bunkerweb-aio \
   -v bw-storage:/data \
   -e USE_CROWDSEC=yes \
-  -e CROWDSEC_DISABLED_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
+  -e CROWDSEC_DISABLE_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 注意：
 - 该列表在安装/更新所需项目后应用；只有您列出的解析器会被移除。
 - 使用 `cscli parsers list` 显示的 hub slug（例如，`crowdsecurity/geoip-enrich`）。
+
+---
+
+#### 禁用中央 API
+
+若要选择退出 Central API 和 Console 注册（不发送任何信号，也不拉取社区黑名单），请将 `DISABLE_ONLINE_API` 设为 `true`。这不会停止 hub 更新：无论此设置如何，collection 和 parser 目录仍会从 CrowdSec hub 获取：
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e DISABLE_ONLINE_API=true \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
+```
+
+这与 CrowdSec 官方镜像使用的变量名相同，现有配置可以直接沿用。
+
+注意事项：
+- 您的实例将停止**发送**攻击信号，也不再**接收**社区封禁列表。本地检测与处置不受影响：已安装的场景照常运行并继续封禁。
+- 该设置在每次启动时读取，因此之后可以重新启用。如果实例此前已注册，禁用时会删除已存储的凭据，重新启用时会再次注册。
+- 仅在 CrowdSec 于容器内运行时生效。若 `CROWDSEC_API` 指向远程实例，则以该实例的中央 API 设置为准。
 
 ---
 
@@ -1554,7 +1600,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.9
+  bunkerity/bunkerweb-all-in-one:1.6.16-rc2
 ```
 
 *   当 `CROWDSEC_API` 不是 `127.0.0.1` 或 `localhost` 时，将跳过**本地注册**。
@@ -1588,13 +1634,13 @@ docker run -d \
 无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.9
+docker pull bunkerity/bunkerweb:1.6.16-rc2
 ```
 
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.9
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.16-rc2
 ```
 
 Docker 集成的关键概念包括：
@@ -1604,7 +1650,7 @@ Docker 集成的关键概念包括：
 - **网络**：Docker 网络在 BunkerWeb 的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游 Web 服务。通过公开端口，BunkerWeb 可以接受来自客户端的传入请求，允许他们访问受保护的 Web 服务。此外，通过连接到上游 Web 服务，BunkerWeb 可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
 ### 环境变量
 
@@ -1614,7 +1660,7 @@ Docker 集成的关键概念包括：
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1625,6 +1671,9 @@ services:
 
 !!! info "完整列表"
     有关环境变量的完整列表，请参阅文档的[设置部分](features.md)。
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes` 可在容器重启时保留之前生成的配置，而不是渲染加载配置。默认值为 `no`。
 
 ### 使用 Docker secrets
 
@@ -1655,7 +1704,7 @@ secrets:
 [调度器](concepts.md#scheduler) 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.9
+docker pull bunkerity/bunkerweb-scheduler:1.6.16-rc2
 ```
 
 !!! info "BunkerWeb 设置"
@@ -1676,7 +1725,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.9
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         environment:
           # 这将为 BunkerWeb 容器设置 API
           <<: *bw-api-env
@@ -1685,7 +1734,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.9
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
         environment:
           # 这将为调度器容器设置 API
           <<: *bw-api-env
@@ -1703,7 +1752,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.9
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1765,14 +1814,16 @@ volumes:
 
 ##### 运行时与安全
 
-| Setting                         | 描述                                             | 接受的值                                | 默认值                        |
-| ------------------------------- | ------------------------------------------------ | --------------------------------------- | ----------------------------- |
-| `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                         | 整秒                                    | `30`                          |
-| `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                   | 整秒                                    | `5`                           |
-| `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                               | `yes` 或 `no`                           | `no`                          |
-| `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                     | `yes` 或 `no`                           | `no`                          |
-| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）           | `yes` 或 `no`                           | `no`                          |
-| `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区 | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
+| Setting                         | 描述                                                                                                                                                                                   | 接受的值                                | 默认值                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
+| `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                                                                                                                                                               | 整秒                                    | `30`                          |
+| `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                                                                                                                                                         | 整秒                                    | `5`                           |
+| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。                                                                                          | 整秒                                    | `30`                          |
+| `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                     | `yes` 或 `no`                           | `no`                          |
+| `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                           | `yes` 或 `no`                           | `no`                          |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                 | `yes` 或 `no`                           | `no`                          |
+| `SCHEDULER_MAX_WORKERS`         | 调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`，启动时会输出警告。 | 正整数                                  | `min(8, max(2, cpu_count*2))` |
+| `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区                                                                                                                                       | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
 
 ##### 数据库
 
@@ -1783,14 +1834,14 @@ volumes:
 
 ##### 日志
 
-| Setting                         | 描述                                                             | 接受的值                                        | 默认值                                                                          |
-| ------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------- |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础/覆盖日志级别                                                | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                                          |
-| `LOG_TYPES`                     | 目标                                                             | 空格分隔 `stderr`/`file`/`syslog`               | `stderr`                                                                        |
-| `SCHEDULER_LOG_TO_FILE`         | 启用文件日志并设置默认路径                                       | `yes` 或 `no`                                   | `no`                                                                            |
-| `LOG_FILE_PATH`                 | 自定义日志路径（当 `LOG_TYPES` 包含 `file` 时使用）              | 文件路径                                        | `SCHEDULER_LOG_TO_FILE=yes` 时为 `/var/log/bunkerweb/scheduler.log`，否则 unset |
-| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514` 或 socket 路径） | Host:port、带协议前缀的主机或 socket            | unset                                                                           |
-| `LOG_SYSLOG_TAG`                | Syslog 标识/tag                                                  | 字符串                                          | `bw-scheduler`                                                                  |
+| Setting                         | 描述                                                                                                                                                          | 接受的值                                        | 默认值                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | 基础/覆盖日志级别                                                                                                                                             | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                                         |
+| `LOG_TYPES`                     | 目标                                                                                                                                                          | 空格分隔 `stderr`/`file`/`syslog`               | `stderr`                                                                       |
+| `SCHEDULER_LOG_TO_FILE`         | 兼容旧配置的便捷选项：设置后，如果 `LOG_TYPES` 包含 `file` 且您没有显式设置 `LOG_FILE_PATH`，则 `LOG_FILE_PATH` 默认使用 `/var/log/bunkerweb/scheduler.log`。 | `yes` 或 `no`                                   | `no`                                                                           |
+| `LOG_FILE_PATH`                 | 自定义日志路径（当 `LOG_TYPES` 包含 `file` 时使用）                                                                                                           | 文件路径                                        | 当 `LOG_TYPES` 包含 `file` 时为 `/var/log/bunkerweb/scheduler.log`，否则 unset |
+| `LOG_SYSLOG_ADDRESS`            | Syslog 目标（`udp://host:514`、`tcp://host:514` 或 socket 路径）                                                                                              | Host:port、带协议前缀的主机或 socket            | unset                                                                          |
+| `LOG_SYSLOG_TAG`                | Syslog 标识/tag                                                                                                                                               | 字符串                                          | `bw-scheduler`                                                                 |
 
 ### UI 容器设置
 
@@ -1849,7 +1900,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1862,7 +1913,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
@@ -1895,7 +1946,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1908,7 +1959,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     depends_on:
       - bunkerweb
     environment:
@@ -1961,8 +2012,9 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 42 和 43
-- Red Hat Enterprise Linux (RHEL) 8, 9 和 10
+- Ubuntu 26.04 "Resolute Raccoon"
+- Fedora 43 和 44
+- Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10
 
 ### 简易安装脚本
 
@@ -1974,8 +2026,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16-rc2/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2006,7 +2058,24 @@ sudo ./install-bunkerweb.sh
 
 #### 交互式安装
 
-当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。您将被要求做出以下选择：
+当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。交互流程采用由 [gum](https://github.com/charmbracelet/gum) 提供的内联 TUI —— 方向键菜单（带 `❯` 光标）、掩码密码字段。
+
+!!! info "首次交互运行时以临时方式获取 gum"
+    在首次需要交互提示时，安装器会下载 gum，并在脚本运行期间从临时目录执行 —— **不会进行任何系统级安装**：
+
+    - 通过 HTTPS（TLS 1.2+，拒绝 HTTP 重定向，连接超时 10 秒 / 总超时 30 秒）从 [GitHub 发布页](https://github.com/charmbracelet/gum/releases) 下载官方 `gum_${VERSION}_${ARCH}.tar.gz`。
+    - 使用**脚本中固定的 SHA256**（本地信任锚 —— 脚本本身的校验和与 gum 二进制必须同时匹配）校验该归档。
+    - 若已安装 `cosign`：还会针对 Charm 的 GitHub-Actions OIDC 身份（`https://github.com/charmbracelet/gum/...`）校验上游 `checksums.txt` 作为纵深防御，并交叉确认所固定的哈希与 Charm 为此归档发布的值一致。
+    - 将二进制解压到可执行的临时目录（默认 `/var/tmp/bw-gum.XXXXXX`；当 `/var/tmp` 被挂载为 `noexec` 时则使用 `/tmp`、`$XDG_RUNTIME_DIR` 或 `$HOME/.cache`）。
+    - 在脚本运行期间将该临时目录加入 `PATH`，并在脚本退出时通过 `EXIT` trap 删除（在 `set -e` 失败或信号中断时同样有效）。
+
+    **安装器退出后磁盘上保留的内容：** 没有。无 `/etc/apt/sources.list.d/charm.list`、`apt`/`rpm` 中没有 GPG 密钥、`/usr/bin`/`/usr/local/bin` 中没有 `gum` 二进制、没有包数据库记录。安装器从不注册任何第三方 apt 或 dnf 源。
+
+    若无法下载 gum —— 离线主机、网络故障、SHA256 不匹配 —— 安装器会使用系统中已经存在的 `whiptail`（在 Debian/Ubuntu 云镜像上通常通过 `newt` 包预装）。若 gum 与 whiptail 均不可用，则回退到**纯文本提示**。
+
+使用 `--no-tui`（或设置 `BW_INSTALL_TUI=no`）跳过所有 TUI 层级；使用 `--tui` 在无可用 TUI 时中止。**离线（air-gapped）安装**：组合 `--no-tui` 与 `--yes` 以及相应的 `--*` 标志 / `*_INPUT` 环境变量；TUI 层不会发起任何网络调用。
+
+您将被要求做出以下选择：
 
 1.  **安装类型**：选择您想要安装的组件。
     *   **完整堆栈（默认）**：一个一体化的安装，包括 BunkerWeb、调度器和 Web UI。
@@ -2026,24 +2095,39 @@ sudo ./install-bunkerweb.sh
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
 
+#### 使用 Docker Compose 收集 Web UI 本地日志
+
+对于**完整 Docker 安装**（标准模式或 `--autoconf`），安装程序可以在本地收集日志供 Web UI 使用。全新的交互式安装默认选择**是**；无人值守安装请通过 `--syslog` 或 `--no-syslog` 明确选择：
+
+```bash
+sudo ./install-bunkerweb.sh --docker --full --yes --syslog
+sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
+```
+
+启用后，生成的堆栈会在内部 `bw-universe` 网络上添加 `bw-syslog` 收集器，不会将其 syslog 端口发布到主机。日志保存在持久化 `bw-logs` 卷中并挂载到 `bw-ui`；`syslog-ng.conf` 会生成在 `docker-compose.yml` 旁边。BunkerWeb 组件仍会同时向标准错误输出日志，因此 `docker compose logs` 仍然可用。生成的配置使用固定文件名和有限轮转（每个文件约 100 MB，保留 7 次轮转）。
+
+该选择以 `BW_INSTALL_SYSLOG=yes|no` 保存到 `.env` 中，并在升级和重新运行时保留，除非显式覆盖。禁用时，只有安装程序管理的收集器会在更新后的堆栈就绪后被删除；`bw-logs` 历史记录和配置文件会保留。操作员编辑过的 Compose 和 syslog-ng 文件不会被静默替换。
+
 #### 命令行选项
 
 对于非交互式或自动化设置，可以使用命令行标志来控制脚本：
 
 **通用选项：**
 
-| 选项                    | 描述                                             |
-| ----------------------- | ------------------------------------------------ |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.9`）。    |
-| `-w, --enable-wizard`   | 启用设置向导。                                   |
-| `-n, --no-wizard`       | 禁用设置向导。                                   |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
-| `-q, --quiet`           | 静默安装（抑制输出）。                           |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
-| `--no-api`              | 明确禁用 API 服务。                              |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
+| 选项                    | 描述                                                            |
+| ----------------------- | --------------------------------------------------------------- |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.16~rc2`）。              |
+| `-w, --enable-wizard`   | 启用设置向导。                                                  |
+| `-n, --no-wizard`       | 禁用设置向导。                                                  |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。                      |
+| `--tui`                 | 强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。       |
+| `--no-tui`              | 禁用所有 TUI 层级并使用纯文本提示。等同于 `BW_INSTALL_TUI=no`。 |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。                |
+| `-q, --quiet`           | 静默安装（抑制输出）。                                          |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。                   |
+| `--no-api`              | 明确禁用 API 服务。                                             |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                                |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。                              |
 
 **安装类型：**
 
@@ -2054,7 +2138,7 @@ sudo ./install-bunkerweb.sh
 | `--worker`         | 仅安装 BunkerWeb 实例。                               |
 | `--scheduler-only` | 仅安装调度器组件。                                    |
 | `--ui-only`        | 仅安装 Web UI 组件。                                  |
-| `--api-only`       | 仅安装 API 服务（端口 8000）。                        |
+| `--api-only`       | 仅安装 API 服务（端口 8888）。                        |
 
 **安全集成：**
 
@@ -2099,7 +2183,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # 安装一个特定版本
-sudo ./install-bunkerweb.sh --version 1.6.9
+sudo ./install-bunkerweb.sh --version 1.6.16~rc2
 
 # 带有远程工作实例的管理器设置（需要 instances）
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2146,7 +2230,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **API 服务可用性：**
 
-    - 外部 API 服务（端口 8000）适用于 `--full` 和 `--manager` 安装类型
+    - 外部 API 服务（端口 8888）适用于 `--full` 和 `--manager` 安装类型
     - 它不适用于 `--worker`, `--scheduler-only` 或 `--ui-only` 安装
     - 使用 `--api-only` 进行专用的 API 服务安装
 
@@ -2207,7 +2291,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.28.2**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.5**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2222,11 +2306,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.28.2：
+    您现在应该能够安装 NGINX 1.30.5：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2243,12 +2327,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.9：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.9
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc2
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2270,11 +2354,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.28.2：
+    您现在应该能够安装 NGINX 1.30.5：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.28.2-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2291,12 +2375,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.9：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.9
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.16~rc2
     ```
 
     要防止在执行 `apt upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2314,10 +2398,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.28.2
+    Fedora 已经提供了我们支持的 NGINX 1.30.5
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.2
+    sudo dnf install -y --allowerasing nginx-1.30.5
     ```
 
     !!! example "禁用设置向导"
@@ -2327,12 +2411,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.9：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-  	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.9
+	sudo dnf makecache && \
+	sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc2
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2364,10 +2448,10 @@ sudo ./install-bunkerweb.sh --yes --api
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.28.2：
+    您现在应该能够安装 NGINX 1.30.5：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.28.2
+    sudo dnf install --allowerasing nginx-1.30.5
     ```
 
     !!! example "禁用设置向导"
@@ -2377,12 +2461,12 @@ sudo ./install-bunkerweb.sh --yes --api
         export UI_WIZARD=no
         ```
 
-    最后安装 BunkerWeb 1.6.9：
+    最后安装 BunkerWeb 1.6.16~rc2：
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.9
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.16~rc2
     ```
 
     要防止在执行 `dnf upgrade` 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：
@@ -2405,6 +2489,12 @@ MY_SETTING_2=value2
 安装后，BunkerWeb 带有三个服务 `bunkerweb`、`bunkerweb-scheduler` 和 `bunkerweb-ui`，您可以使用 `systemctl` 来管理它们。
 
 如果您手动编辑了 BunkerWeb 的配置（使用 `/etc/bunkerweb/variables.env`），重启 `bunkerweb-scheduler` 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 `bunkerweb` 服务。
+
+`bunkerweb` 服务的入口点还会在正常设置流程之外，直接读取以下变量：
+
+| 设置                        | 描述                                                                                          | 可选值        | 默认值 |
+| --------------------------- | --------------------------------------------------------------------------------------------- | ------------- | ------ |
+| `KEEP_CONFIG_ON_RESTART`   | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
 
 ### 高可用性
 
@@ -2475,7 +2565,7 @@ export SERVICE_UI=yes
     Docker 自动配置集成意味着使用**多站点模式**。有关更多信息，请参阅文档的[多站点部分](concepts.md#multisite-mode)。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
 要启用自动配置更新，请在堆栈中包含一个名为 `bw-autoconf` 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。
 
@@ -2489,7 +2579,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2504,7 +2594,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
@@ -2519,7 +2609,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.9
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2598,16 +2688,17 @@ networks:
 
 ##### 模式与运行时
 
-| Setting                   | 描述                                    | 接受的值                           | 默认值                        |
-| ------------------------- | --------------------------------------- | ---------------------------------- | ----------------------------- |
-| `AUTOCONF_MODE`           | 启用 autoconf 控制器                    | `yes` 或 `no`                      | `no`                          |
-| `SWARM_MODE`              | 监控 Swarm 服务而非 Docker 容器         | `yes` 或 `no`                      | `no`                          |
-| `KUBERNETES_MODE`         | 监控 Kubernetes ingress/pod 而非 Docker | `yes` 或 `no`                      | `no`                          |
-| `KUBERNETES_GATEWAY_MODE` | 启用 Kubernetes Gateway API 控制器      | `yes` 或 `no`                      | `no`                          |
-| `DOCKER_HOST`             | Docker 套接字 / 远程 API URL            | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
-| `WAIT_RETRY_INTERVAL`     | 实例就绪检查之间的秒数                  | 整秒                               | `5`                           |
-| `LOG_SYSLOG_TAG`          | Autoconf 日志的 syslog tag              | 字符串                             | `bw-autoconf`                 |
-| `TZ`                      | Autoconf 日志和时间戳使用的时区         | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
+| Setting                    | 描述                                                                                                                                   | 接受的值                           | 默认值                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------- |
+| `AUTOCONF_MODE`            | 启用 autoconf 控制器                                                                                                                   | `yes` 或 `no`                      | `no`                          |
+| `SWARM_MODE`               | 监控 Swarm 服务而非 Docker 容器                                                                                                        | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_MODE`          | 监控 Kubernetes ingress/pod 而非 Docker                                                                                                | `yes` 或 `no`                      | `no`                          |
+| `KUBERNETES_GATEWAY_MODE`  | 启用 Kubernetes Gateway API 控制器                                                                                                     | `yes` 或 `no`                      | `no`                          |
+| `DOCKER_HOST`              | Docker 套接字 / 远程 API URL                                                                                                           | 例如 `unix:///var/run/docker.sock` | `unix:///var/run/docker.sock` |
+| `WAIT_RETRY_INTERVAL`      | 实例就绪检查之间的秒数                                                                                                                 | 整秒                               | `5`                           |
+| `AUTOCONF_DISABLE_CLEANUP` | 设为 `yes` 时，从编排器中移除的服务及自定义配置将被转换为草稿（draft），而不是硬删除，因而可以在瞬时移除后保留，并可通过 Web UI 删除。 | `yes` 或 `no`                      | `no`                          |
+| `LOG_SYSLOG_TAG`           | Autoconf 日志的 syslog tag                                                                                                             | 字符串                             | `bw-autoconf`                 |
+| `TZ`                       | Autoconf 日志和时间戳使用的时区                                                                                                        | TZ 数据库名（如 `Europe/Paris`）   | unset（容器默认，通常为 UTC） |
 
 ##### 数据库与校验
 
@@ -2646,6 +2737,9 @@ networks:
 | `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
 | `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
 | `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | 为 `yes` 且未设置类过滤器时，跳过其 IngressClass 或 GatewayClass 属于其他控制器的 Ingress 和 Gateway。需要对 `ingressclasses` / `gatewayclasses` 的 get/list/watch 权限 | `yes` 或 `no`                                      | `no`            |
+| `KUBERNETES_INGRESS_CONTROLLER`         | 标记某个 IngressClass 属于 BunkerWeb 的控制器 id（`spec.controller`）      | 字符串                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | 标记某个 GatewayClass 属于 BunkerWeb 的控制器 id（`spec.controllerName`）  | 字符串                                             | `bunkerweb.io/gateway-controller` |
 | `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
@@ -2671,6 +2765,27 @@ networks:
   bw-services:
     external: true
     name: bw-services
+```
+
+#### 在移除时将服务保留为草稿 {#autoconf-disable-cleanup}
+
+默认情况下，当 autoconf 管理的容器、Swarm 服务或 Ingress 从编排器中消失时，其在 BunkerWeb 共享数据库中的服务条目（以及任何关联的自定义配置）会被立即删除。这种行为具有破坏性：操作者无法区分临时性移除和有意下线，恢复服务需要从零重新定义。
+
+在 `bw-autoconf` 容器上设置 `AUTOCONF_DISABLE_CLEANUP=yes` 后：
+
+- 从编排器中移除的服务不再被删除，而是被翻转为 `is_draft = true`。其 `services_settings` 记录、自定义配置和任务缓存都会被保留。
+- 草稿状态的服务会从生成的 NGINX 配置中排除（不会对外提供服务），因此移除编排对象仍然会让站点下线，只是状态被保留下来。
+- 若该服务之后被 autoconf 再次登记（相同的 server name / Ingress host），它会自动被重新置为在线并重新发布；已有的自定义配置会被复用。
+- 当服务处于此"由 autoconf 转为草稿"状态时，可以通过 Web UI 的 **Services** 页面将其删除——通常 autoconf 所属的服务在 UI 中不可删除，但对 autoconf 草稿服务的 **Delete** 按钮会启用，方便操作者清理失效条目。在线状态的 autoconf 服务仍然无法从 UI 中删除。
+
+```yaml
+services:
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
+    environment:
+      AUTOCONF_MODE: "yes"
+      AUTOCONF_DISABLE_CLEANUP: "yes" # 将被移除的服务保留为草稿
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
 ```
 
 ### 命名空间 {#namespaces}
@@ -2702,13 +2817,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
@@ -2758,8 +2873,26 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
 
+!!! info "Redis 设置应放在哪里（由 scheduler 驱动的配置）"
+    在 Kubernetes 上，由 **scheduler** 读取设置并生成配置，再推送到 BunkerWeb 实例；实例不会从自身的
+    Pod 环境读取 Redis 设置。使用 Helm chart 时，请在 `settings.redis` 下配置 Redis——包括通过
+    `settings.redis.redisSentinelHosts` 和 `settings.redis.redisSentinelMaster` 配置 Redis Sentinel
+    （chart ≥ v1.0.21）——或对没有专用键的任何设置使用 `scheduler.extraEnvs`。使用 Sentinel 时**无需**
+    `REDIS_HOST`（主节点通过 Sentinels 解析）。仅在 `bunkerweb.extraEnvs` 上设置它们将不起作用。
+
+    ```yaml
+    redis:
+      enabled: false        # 外部 Redis/Sentinel 集群
+    settings:
+      redis:
+        useRedis: "yes"
+        redisSentinelHosts: "redis-node-01.redis:26379 redis-node-02.redis:26379 redis-node-03.redis:26379"
+        redisSentinelMaster: "mymaster"
+        # 如主节点/哨兵需要鉴权，请设置 redisPassword / redisSentinelPassword
+    ```
+
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -2874,12 +3007,84 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.9"
+  tag: "1.6.16~rc2"
 ```
 
 2. For each sidecar, add:
    - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
    - **Environment variable**: `KUBERNETES_MODE: "yes"`
+
+!!! warning "Set `API_TOKEN` on Kubernetes"
+
+    The internal API on port 5000 is a privileged control plane: it serves `/ping`, `/reload`, `/confs` and `/stop`. Pod IPs are dynamic, so `API_WHITELIST_IP` has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set `API_TOKEN` on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.
+
+    Create the Secret in every namespace that runs a BunkerWeb pod, replacing `your-namespace` as needed:
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
+
+    白名单和令牌是每个集群都应具备的两层防护。在会强制执行 `NetworkPolicy` 的 CNI 上，还应将 5000 端口关闭给所有非调用方，同时保持服务端口开放。下面的 sidecar Pod 通过其 Deployment 的 `app: nginx-bw` 标签选择，而不是通过 `bunkerweb.io/INSTANCE` 注解选择；请根据您自己的 Deployment 标签调整选择器。仅允许 Scheduler 和 Web UI 作为调用方；如果您还部署了 API 服务，请补充其自身 Pod 所带的 `app` 标签，本示例并未定义该标签。9113 端口保持开放，因为上面的 sidecar 在该端口暴露指标。 该规则覆盖整个内部 API，包括插件注册的路由，因为它们共用 `bwapi` server，其 access 阶段会先校验令牌。5443 端口用于 `API_LISTEN_HTTPS`，同时 5000 端口保持开放：API 证书通过 HTTP API 的缓存推送到达 worker，NGINX 只有在该文件到达后才会启用 TLS 监听器。
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: bunkerweb-api
+      namespace: bunkerweb
+    spec:
+      podSelector:
+        matchLabels:
+          app: nginx-bw
+      policyTypes: [Ingress]
+      ingress:
+        - ports:
+            - protocol: TCP
+              port: 8080
+            - protocol: TCP
+              port: 8443
+            - protocol: TCP
+              port: 9113
+        - from:
+            - podSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: [bunkerweb-scheduler, bunkerweb-ui]
+          ports:
+            - protocol: TCP
+              port: 5000
+            - protocol: TCP
+              port: 5443
+    ```
 
   ```yaml
   apiVersion: apps/v1
@@ -2919,6 +3124,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -2967,7 +3177,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.9"
+  tag: "1.6.16~rc2"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -3011,7 +3221,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.9
+          image: bunkerity/bunkerweb:1.6.16-rc2
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3020,6 +3230,11 @@ spec:
               value: "yes"  # Enable Kubernetes mode
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: MULTISITE
               value: "yes"
             - name: USE_REVERSE_PROXY
@@ -3070,6 +3285,11 @@ spec:
           env:
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
 ```
 
 ###### Important Environment Variables
@@ -3078,7 +3298,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
+| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
 
 
 ##### Step 3: Creating Services
@@ -3282,7 +3503,11 @@ To add a new application protected by BunkerWeb:
 
 #### 完整的 YAML 文件
 
-除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+
+!!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
+
+    请将 `DNS_RESOLVERS` 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 `kube-dns.kube-system.svc.cluster.local`，即使其背后的实现是 CoreDNS 也是如此。
 
 ### Ingress 资源
 
@@ -3430,7 +3655,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.9
+              image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3485,6 +3710,8 @@ spec:
                   number: 8000
 ```
 
+未设置 `KUBERNETES_INGRESS_CLASS` 时，设置 `KUBERNETES_SKIP_FOREIGN_CLASSES=yes` 可让属于其他控制器的 Ingress 保持不变，而不是全部处理。以下情况会被处理：没有类；类指向不存在的 `IngressClass` 对象；或该对象的 `spec.controller` 与 `KUBERNETES_INGRESS_CONTROLLER` 相符。若该对象存在且指向其他控制器，则会被跳过。未设置 `ingressClassName` 时，旧版注解 `kubernetes.io/ingress.class` 按相同方式读取。此功能需要对 `ingressclasses` 的 `get`/`list`/`watch` 权限；若缺少该 RBAC，控制器只记录一条警告并处理所有 Ingress，效果等同于设为 `no`。开启此设置可能导致保留过期类的 Ingress 不再被处理（例如移除 ingress-nginx 后残留的 `nginx` `IngressClass`）：将其 `ingressClassName` 设为 `bunkerweb`，或删除过期的 `IngressClass`。
+
 ### Gateway 类 {#gateway-class}
 
 当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 `GatewayClass`：
@@ -3514,6 +3741,8 @@ spec:
       port: 80
       hostname: www.example.com
 ```
+
+相同的 `KUBERNETES_SKIP_FOREIGN_CLASSES` 规则也适用于 Gateway：未设置 `KUBERNETES_GATEWAY_CLASS` 时，若 Gateway 的 `gatewayClassName` 指向的 `GatewayClass` 的 `spec.controllerName` 不是 `KUBERNETES_GATEWAY_CONTROLLER`，该 Gateway 会被跳过。若缺少对 `gatewayclasses` 的 `get`/`list`/`watch` 权限，控制器只记录一条警告并处理所有 Gateway。
 
 ### 自定义域名
 
@@ -3587,7 +3816,8 @@ settings:
     # 替换为您的 DNS 解析器
     # 获取方法：在任意 pod 中执行 kubectl exec，然后 cat /etc/resolv.conf
     # 如果您的 nameserver 是一个 IP，则执行反向 DNS 查找：nslookup <IP>
-    # 大多数情况下是 coredns.kube-system.svc.cluster.local 或 kube-dns.kube-system.svc.cluster.local
+    # 大多数情况下是 kube-dns.kube-system.svc.cluster.local，在标准集群上
+    # CoreDNS 正是位于该 Service 之后
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # 我们只考虑带有 ingressClass bunkerweb 的 Ingress 资源，以避免与现有 ingress 控制器冲突
@@ -3604,11 +3834,11 @@ service:
 
 # BunkerWeb 设置
 bunkerweb:
-  tag: 1.6.9
+  tag: 1.6.16~rc2
 
 # 调度器设置
 scheduler:
-  tag: 1.6.9
+  tag: 1.6.16~rc2
   extraEnvs:
     # 启用 real IP 模块以获取客户端的真实 IP
     - name: USE_REAL_IP
@@ -3616,11 +3846,11 @@ scheduler:
 
 # 控制器设置
 controller:
-  tag: 1.6.9
+  tag: 1.6.16~rc2
 
 # UI 设置
 ui:
-  tag: 1.6.9
+  tag: 1.6.16~rc2
 ```
 
 使用自定义值安装 BunkerWeb：
@@ -4242,7 +4472,7 @@ kubectl delete ingress <old-ingress> -n <namespace>
 至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。
 
 !!! info "数据库后端"
-    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.9/misc/integrations)中的 docker-compose 文件。
+    请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 `DATABASE_URI` 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/misc/integrations)中的 docker-compose 文件。
 
     集群数据库后端的设置超出了本文档的范围。
 
@@ -4256,7 +4486,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.9
+    image: bunkerity/bunkerweb:1.6.16-rc2
     ports:
       - published: 80
         target: 8080
@@ -4285,7 +4515,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.9
+    image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -4306,7 +4536,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.9
+    image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
@@ -4455,7 +4685,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9
+        image: bunkerity/bunkerweb:1.6.16-rc2
         ...
         deploy:
           mode: global
@@ -4467,7 +4697,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # 为 BunkerWeb 实例设置命名空间
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9
+        image: bunkerity/bunkerweb-autoconf:1.6.16-rc2
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # 只监听这些命名空间
           ...

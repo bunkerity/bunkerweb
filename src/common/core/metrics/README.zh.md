@@ -90,22 +90,29 @@
 | 设置                                 | 默认值   | 上下文    | 多选 | 描述                                                                                             |
 | ------------------------------------ | -------- | --------- | ---- | ------------------------------------------------------------------------------------------------ |
 | `USE_METRICS`                        | `yes`    | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                             |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`16m`、`32m`）。                                        |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。                                    |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。                               |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
+| `METRICS_REDIS_TTL`                  | `30d`    | global    | 否   | **指标 Redis TTL：** Redis 指标键过期前的秒数（`0` = 永久）；每次同步都会刷新，因此活跃数据永不过期，而被遗弃的数据可在 `volatile-lru` 下被驱逐，从而让 Redis 从 maxmemory 压力中恢复。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
 
 !!! tip "调整内存分配大小"
-    应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
+    应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
 
 !!! info "Redis 集成"
-    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。
+    当 BunkerWeb 使用 [Redis](#redis) 时，指标插件会自动同步被阻止请求的报告。达到 `maxmemory` 后，被拒绝的报告会保留在工作进程的有限缓冲区中，等待重试。缓冲区溢出、LRU 驱逐或 Redis 数据丢失仍可能导致报告丢失。不完整的筛选计数会根据保留的请求列表重新构建。存储的报告若数据格式无效（时间戳或标识符不可用），将从报告表格及其总数中排除。
+
+    计数器会在同步前按需从 Redis 恢复总数，包括从本地 LRU 缓存中被驱逐后的情况。非活跃 Redis 计数器会保留到 `METRICS_REDIS_TTL` 到期；设置为 `0` 表示有意无限期保留。因此，使用包含大量不同键的指标时，请监控 Redis 内存。
 
 !!! warning "性能注意事项"
     为 `METRICS_MAX_BLOCKED_REQUESTS` 或 `METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。
 
 !!! note "工作进程特定存储"
     每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。
+
+!!! warning "报告保留"
+    被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 `METRICS_MAX_BLOCKED_REQUESTS` 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。
 
 ### 配置示例
 
@@ -116,8 +123,9 @@
     ```yaml
     USE_METRICS: "yes"
     METRICS_MEMORY_SIZE: "16m"
-    METRICS_MAX_BLOCKED_REQUESTS: "1000"
-    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_MAX_BLOCKED_REQUESTS: "1k"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10k"
+    MAX_LRU_HISTORY: "1k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 
@@ -130,6 +138,7 @@
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    MAX_LRU_HISTORY: "500"
     METRICS_SAVE_TO_REDIS: "no"
     ```
 
@@ -142,6 +151,7 @@
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    MAX_LRU_HISTORY: "5k"
     METRICS_SAVE_TO_REDIS: "yes"
     ```
 

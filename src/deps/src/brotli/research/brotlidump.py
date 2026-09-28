@@ -519,7 +519,7 @@ class Enumerator(WithExtra):
     extraTable is a class variable that contains
     the extraBits of the symbols from 0
     value0 contains the value of symbol 0
-    encodings is not neccessary, but allowed.
+    encodings is not necessary, but allowed.
     Note: place for FixedCode to make sure extraBits works
     """
     def __init__(self, name=None, **args):
@@ -592,7 +592,7 @@ class PrefixCodeHeader(WithExtra):
                 map(str, lengths[index:index+5]))
             )
 
-class TreeShapeAlhabet(BoolCode):
+class TreeShapeAlphabet(BoolCode):
     """The bit used to indicate if four word code is "deep" or "wide"
     """
     name = 'SHAPE'
@@ -1286,8 +1286,9 @@ class WordList:
         return word.encode('utf8')
 
 
-    #Super compact form of action table.
-    #_ means space, .U means UpperCaseAll, U(w) means UpperCaseFirst
+    # Super compact form of action table.
+    # _ means space, .U means UpperCaseAll, U(w) means UpperCaseFirst
+    # typo:off
     actionTable = r"""
         0:w        25:w+_for_     50:w+\n\t       75:w+. This_100:w+ize_
         1:w+_      26:w[3:]       51:w+:          76:w+,      101:w.U+.
@@ -1315,6 +1316,7 @@ class WordList:
        23:w[:-3]   48:w[:-7]                      98:_+w+=\'
        24:w+]      49:w[:-1]+ing_ 74:U(w)+\'      99:U(w)+,
         """
+    # typo:on
 
     def compileActions(self):
         """Build the action table from the text above
@@ -1452,7 +1454,7 @@ class Layout:
             del alphabet.mnemonic
             if numberOfSymbols==4:
                 #read tree shape to redefine lengths
-                lengths = self.verboseRead(TreeShapeAlhabet())
+                lengths = self.verboseRead(TreeShapeAlphabet())
             #construct the alphabet prefix code
             alphabet.setLength(dict(zip(table, lengths)))
         return alphabet
@@ -1722,7 +1724,7 @@ class Layout:
 
     def contextMap(self, kind):
         """Read context maps
-        Returns the number of differnt values on the context map
+        Returns the number of different values on the context map
         (In other words, the number of prefix trees)
         """
         NTREES = self.verboseRead(TypeCountAlphabet(
@@ -2240,7 +2242,7 @@ __test__ = {
 
 'file': """
     >>> try: Layout(BitStream(
-    ... open("H:/Downloads/brotli-master/tests/testdata/10x10y.compressed",'rb')
+    ... open("./tests/testdata/10x10y.compressed",'rb')
     ...     .read())).processStream()
     ... except NotImplementedError: pass
     addr  hex               binary context explanation

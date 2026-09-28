@@ -1,7 +1,8 @@
 from datetime import datetime
 from os import getenv
 
-from flask import Blueprint, current_app, flash as flask_flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from markupsafe import Markup
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
@@ -10,12 +11,19 @@ from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 
 login = Blueprint("login", __name__)
 
+# Reasons the app can redirect here with, mapped to what the user is told.
+LOGIN_NOTICES = {
+    "session_expired": "Your session ended before your change could be saved, so nothing was changed. Log in and try again.",
+}
+
 
 @login.route("/login", methods=["GET", "POST"])
 def login_page():
     admin_user = DB.get_ui_user()
     if not admin_user:
-        return redirect(url_for("setup.setup_page"))
+        # Looked up, never echoed: whatever is in the query string must not reach the page.
+        reason = request.args.get("reason", "")
+        return redirect(url_for("setup.setup_page", reason=reason) if reason in LOGIN_NOTICES else url_for("setup.setup_page"))
     elif current_user.is_authenticated:  # type: ignore
         return redirect(url_for("home.home_page"))
 
@@ -25,16 +33,18 @@ def login_page():
 
         ui_user = DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
-            # Regenerate the session to mitigate session fixation
-            session.clear()  # Clear the current session
-            current_app.session_interface.regenerate(session)  # Regenerate the session ID
-
-            # log the user in
+            # Rotate the session id to prevent session fixation (CWE-384). flask_session's
+            # regenerate() only rotates a *non-empty* session (it guards on `if session:`),
+            # so seed the new authenticated state first, then rotate -- otherwise clearing
+            # first leaves the session falsy and the rotation silently no-ops.
+            session.clear()  # drop any anonymous (attacker-plantable) session contents
             session["creation_date"] = datetime.now().astimezone()
             session["ip"] = request.remote_addr
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
             session["flash_messages"] = []
+            current_app.session_interface.regenerate(session)  # now non-empty -> sid actually rotates
+            session.modified = True
 
             ret = DB.mark_ui_user_login(ui_user.username, session["creation_date"], session["ip"], session["user_agent"])
             if isinstance(ret, str):
@@ -49,8 +59,10 @@ def login_page():
                     LOGGER.info("ALWAYS_REMEMBER is set to yes, so the sessions will always be remembered")
                 session.permanent = True
 
-            if not login_user(ui_user, remember=remember_me):
-                flask_flash("Couldn't log you in, please try again", "error")
+            # No remember= on purpose: the Flask-Login remember cookie is disabled (see main.py).
+            # "Remember me" is session.permanent above, i.e. a persistent server-side session.
+            if not login_user(ui_user):
+                flash("Couldn't log you in, please try again", "error", save=False)
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
             # Generate and add Biscuit token to session
@@ -65,13 +77,17 @@ def login_page():
             except Exception as e:
                 LOGGER.error(f"Failed to create Biscuit token: {e}")
 
+            # Persist the theme the user explicitly chose on the login page (or
+            # carried over from the setup wizard). Falls back to the saved value
+            # when absent or invalid, so an OS-resolved theme never clobbers it.
+            submitted_theme = request.form.get("theme", "")
             user_data = {
                 "username": current_user.get_id(),
                 "password": current_user.password.encode("utf-8"),
                 "email": current_user.email,
                 "totp_secret": current_user.totp_secret,
                 "method": current_user.method,
-                "theme": request.form.get("theme", "light"),
+                "theme": submitted_theme if submitted_theme in ("dark", "light") else current_user.theme,
                 "language": request.form.get("language", "en"),
             }
 
@@ -83,7 +99,9 @@ def login_page():
 
             if not ui_user.totp_secret:
                 flash(
-                    f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>',
+                    Markup('Please enable two-factor authentication to secure your account <a href="{}">here</a>').format(
+                        url_for("profile.profile_page", _anchor="security")
+                    ),
                     "warning",
                 )
 
@@ -95,16 +113,21 @@ def login_page():
 
             try:
                 safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-            except Exception:
+            except ValueError:
                 safe_next = url_for("home.home_page")
 
             return redirect(url_for("loading", next=safe_next))
         else:
-            flask_flash("Invalid username or password", "error")
+            flash("Invalid username or password", "error", save=False)
             fail = True
 
     kwargs = {
         "is_totp": bool(current_user.totp_secret),
     } | ({"error": "Invalid username or password"} if fail else {})
+
+    # Looked up, never echoed: whatever is in the query string must not reach the page.
+    notice = LOGIN_NOTICES.get(request.args.get("reason", ""))
+    if notice:
+        kwargs["notice"] = notice
 
     return render_template("login.html", **kwargs), 401 if fail else 200

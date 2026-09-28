@@ -96,20 +96,20 @@ static void process_request(modsecurity::ModSecurity *modsec, modsecurity::Rules
 
 class ReadingLogsViaRuleMessage {
  public:
-    ReadingLogsViaRuleMessage(char *request_header,
-        char *request_uri,
-        char *request_body,
-        char *response_headers,
-        char *response_body,
-        char *ip,
-        const std::string &rules) :
-            m_request_header(request_header),
-            m_request_uri(request_uri),
-            m_request_body(request_body),
-            m_response_headers(response_headers),
-            m_response_body(response_body),
-            m_ip(ip),
-            m_rules(rules)
+    ReadingLogsViaRuleMessage(char *arg_request_header,
+        char *arg_request_uri,
+        char *arg_request_body,
+        char *arg_response_headers,
+        char *arg_response_body,
+        char *arg_ip,
+        const std::string &arg_rules) :
+            m_request_header(arg_request_header),
+            m_request_uri(arg_request_uri),
+            m_request_body(arg_request_body),
+            m_response_headers(arg_response_headers),
+            m_response_body(arg_response_body),
+            m_ip(arg_ip),
+            m_rules(arg_rules)
         { }
 
     int process() const {

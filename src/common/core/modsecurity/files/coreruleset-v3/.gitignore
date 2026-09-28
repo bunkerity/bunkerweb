@@ -19,3 +19,4 @@ __pycache__/
 *$py.class
 
 .idea/
+tests/logs/

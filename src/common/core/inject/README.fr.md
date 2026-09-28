@@ -6,12 +6,14 @@ Comment ça marche :
 2. Si l’injection « body » est configurée, il insère votre HTML juste avant `</body>`.
 3. Si l’injection « head » est configurée, il insère votre HTML juste avant `</head>`.
 4. L’insertion s’applique automatiquement à toutes les pages HTML servies.
+5. Cela permet d’ajouter scripts, styles ou autres éléments sans modifier le code de votre application.
 
 ### Comment l’utiliser
 
 1. Préparez votre HTML personnalisé.
 2. Choisissez l’emplacement : `<head>`, `<body>`, ou les deux.
 3. Renseignez `INJECT_HEAD` et/ou `INJECT_BODY` avec votre code.
+4. Laissez BunkerWeb gérer le reste : une fois configuré, le HTML sera injecté automatiquement dans toutes les pages HTML servies.
 
 ### Paramètres
 
@@ -20,7 +22,17 @@ Comment ça marche :
 | `INJECT_HEAD` |        | multisite | non      | Code HTML injecté avant `</head>`. |
 | `INJECT_BODY` |        | multisite | non      | Code HTML injecté avant `</body>`. |
 
-!!! tip "Bonnes pratiques" - Placez de préférence les scripts JS en fin de body pour éviter de bloquer le rendu. - Mettez le CSS et le JS critique dans le head pour éviter le flash de contenu non stylé. - Attention au contenu injecté qui pourrait casser le site.
+!!! tip "Bonnes pratiques"
+    - Placez de préférence les scripts JS en fin de body pour éviter de bloquer le rendu.
+    - Mettez le CSS et le JS critique dans le head pour éviter le flash de contenu non stylé.
+    - Attention au contenu injecté qui pourrait casser le site.
+
+!!! info "Cas d’utilisation courants"
+    - Ajouter des scripts d’analytics comme Google Analytics ou Matomo.
+    - Intégrer des widgets de chat ou des outils de support client.
+    - Inclure des pixels de suivi pour des campagnes marketing.
+    - Ajouter des styles CSS personnalisés ou des fonctionnalités JavaScript.
+    - Inclure des bibliothèques tierces sans modifier le code de votre application.
 
 ### Exemples
 
