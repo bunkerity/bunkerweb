@@ -709,14 +709,15 @@ local function read_ocsp_json(fingerprint)
 	return nil
 end
 
--- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using wall-clock
--- published_unix (not job_run_id — pid.time_ns is not colony-comparable).
--- Must-Staple stays closed while local ocsp.json published_unix is below the floor.
-local function meta_published_unix(meta)
-	if type(meta) ~= "table" then
-		return 0
+-- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using CA-signed
+-- this_update_unix (not wall-clock published_unix — clocks drift across nodes).
+-- Legacy floors with only published_unix still compare published↔ published.
+-- Missing local timing is no opinion (do not treat as 0 vs a positive floor).
+local function meta_unix_field(meta, key)
+	if type(meta) ~= "table" or type(key) ~= "string" then
+		return nil
 	end
-	local u = meta.published_unix
+	local u = meta[key]
 	if type(u) == "number" and u > 0 then
 		return math.floor(u)
 	end
@@ -726,12 +727,13 @@ local function meta_published_unix(meta)
 			return math.floor(n)
 		end
 	end
-	return 0
+	return nil
 end
 
-local function parse_floor_published_unix(raw)
+local function parse_floor_rank(raw)
+	-- Returns kind ("this_update"|"published"), rank, or nil,nil when absent.
 	if type(raw) ~= "string" or raw == "" then
-		return 0
+		return nil, nil
 	end
 	local trimmed = raw:match("^%s*(.-)%s*$") or raw
 	if trimmed:sub(1, 1) == "{" then
@@ -739,12 +741,23 @@ local function parse_floor_published_unix(raw)
 			return require("cjson").decode(trimmed)
 		end)
 		if ok and type(decoded) == "table" then
-			return meta_published_unix(decoded)
+			local this_u = meta_unix_field(decoded, "this_update_unix")
+			if this_u then
+				return "this_update", this_u
+			end
+			local pub = meta_unix_field(decoded, "published_unix")
+			if pub then
+				return "published", pub
+			end
 		end
-		return 0
+		return nil, nil
 	end
 	local token = trimmed:match("^(%d+)")
-	return tonumber(token) or 0
+	local n = tonumber(token)
+	if n and n > 0 then
+		return "published", n
+	end
+	return nil, nil
 end
 
 local function cluster_floor_blocks(fingerprint, meta)
@@ -752,22 +765,29 @@ local function cluster_floor_blocks(fingerprint, meta)
 		return false
 	end
 	local raw = read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint)
-	local floor_pub = parse_floor_published_unix(raw)
-	if floor_pub <= 0 then
+	local kind, floor_rank = parse_floor_rank(raw)
+	if not kind or not floor_rank or floor_rank <= 0 then
 		return false
 	end
-	local local_pub = meta_published_unix(meta)
-	if local_pub >= floor_pub then
+	local local_key = (kind == "this_update") and "this_update_unix" or "published_unix"
+	local local_rank = meta_unix_field(meta, local_key)
+	-- Missing local timing: no opinion — never invent 0 vs a positive floor.
+	if not local_rank then
+		return false
+	end
+	if local_rank >= floor_rank then
 		return false
 	end
 	log(
 		ngx.ERR,
-		"OCSP cluster floor ahead of local published_unix; Must-Staple closed fp="
+		"OCSP cluster floor ahead of local "
+			.. local_key
+			.. "; Must-Staple closed fp="
 			.. fingerprint:sub(1, 16)
 			.. "... floor="
-			.. tostring(floor_pub)
+			.. tostring(floor_rank)
 			.. " local="
-			.. tostring(local_pub)
+			.. tostring(local_rank)
 	)
 	return true
 end
@@ -1527,23 +1547,6 @@ end
 -- Also enforces intrinsic signed-window policy when this_update_unix is present.
 -- Meta must carry a death clock (expires_unix and/or max_age/published). L1's
 -- cached expires may only shorten that clock — never keep a stripped-meta DER alive.
-local function meta_unix_field(meta, key)
-	if type(meta) ~= "table" then
-		return nil
-	end
-	local u = meta[key]
-	if type(u) == "number" and u > 0 then
-		return math.floor(u)
-	end
-	if type(u) == "string" then
-		local n = tonumber(u)
-		if n and n > 0 then
-			return math.floor(n)
-		end
-	end
-	return nil
-end
-
 local function intrinsic_timing_ok(meta)
 	local this_u = meta_unix_field(meta, "this_update_unix")
 	if not this_u then

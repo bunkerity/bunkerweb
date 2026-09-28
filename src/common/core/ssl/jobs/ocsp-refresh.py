@@ -4735,25 +4735,31 @@ def _ocsp_floor_relpath(fingerprint: str) -> Optional[str]:
 
 def _advance_ocsp_cluster_floor(
     fingerprint: str,
-    published_unix: Optional[int],
+    this_update_unix: Optional[int],
     job_run_id: Optional[str] = None,
     db: Optional[Any] = None,
+    published_unix: Optional[int] = None,
 ) -> bool:
     """
-    Raise the colony floor for this SPKI to published_unix when it is higher.
+    Raise the colony floor for this SPKI to this_update_unix when it is higher.
 
-    Must-Staple Lua refuses until local ocsp.json published_unix is at least this floor,
-    so a peer that already published/tombstoned cannot be undercut by a lagging node's
-    older GOOD body. Floor is max-only on wall-clock published_unix (colony-comparable).
-    job_run_id is forensic only — pid.time_ns is not a cluster vote.
+    Must-Staple Lua refuses until local ocsp.json this_update_unix is at least this
+    floor, so a peer that already published/tombstoned cannot be undercut by a
+    lagging node's older GOOD body. Floor is max-only on CA-signed thisUpdate
+    (colony-comparable without synchronized clocks). published_unix is forensic
+    only; never advance on wall clock alone. job_run_id is forensic only.
     """
     normalized = _normalize_fingerprint(fingerprint)
+    try:
+        new_this = int(this_update_unix) if this_update_unix is not None else 0
+    except (TypeError, ValueError):
+        new_this = 0
+    if not normalized or new_this <= 0:
+        return False
     try:
         new_pub = int(published_unix) if published_unix is not None else 0
     except (TypeError, ValueError):
         new_pub = 0
-    if not normalized or new_pub <= 0:
-        return False
 
     floor_dir = CONFIGS_SSL_BASE / "ocsp-floor"
     floor_path = floor_dir / normalized
@@ -4763,7 +4769,9 @@ def _advance_ocsp_cluster_floor(
         log_debug("⚠️ OCSP could not create floor dir: %s", e)
         return False
 
-    incoming = {"published_unix": new_pub}
+    incoming: Dict[str, Any] = {"this_update_unix": new_this}
+    if new_pub > 0:
+        incoming["published_unix"] = new_pub
     if isinstance(job_run_id, str) and job_run_id:
         incoming["job_run_id"] = job_run_id
     disk_floor = load_disk_ocsp_floor(CONFIGS_SSL_BASE, normalized)
@@ -4772,13 +4780,17 @@ def _advance_ocsp_cluster_floor(
         mirror = disk_floor if isinstance(disk_floor, dict) else incoming
     else:
         try:
-            payload = encode_ocsp_floor_payload(new_pub, job_run_id if isinstance(job_run_id, str) else None)
+            payload = encode_ocsp_floor_payload(
+                new_this,
+                job_run_id if isinstance(job_run_id, str) else None,
+                published_unix=new_pub if new_pub > 0 else None,
+            )
             _atomic_write_bytes(floor_path, payload, mode=0o640)
             mirror = incoming
             log_info(
-                "📈 OCSP cluster floor advanced fp=%s... published_unix=%s (was %s)",
+                "📈 OCSP cluster floor advanced fp=%s... this_update_unix=%s (was %s)",
                 normalized[:16],
-                new_pub,
+                new_this,
                 ocsp_floor_published_unix(disk_floor) or "none",
             )
         except Exception as e:
@@ -4789,10 +4801,23 @@ def _advance_ocsp_cluster_floor(
         rel = _ocsp_floor_relpath(normalized)
         if rel:
             try:
-                payload = encode_ocsp_floor_payload(
-                    ocsp_floor_published_unix(mirror),
-                    mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
-                )
+                mirror_this = int(mirror["this_update_unix"]) if mirror.get("this_update_unix") else 0
+                mirror_pub = int(mirror["published_unix"]) if mirror.get("published_unix") else 0
+                # Prefer writing CA-time floor; legacy disk may only have published_unix.
+                if mirror_this > 0:
+                    payload = encode_ocsp_floor_payload(
+                        mirror_this,
+                        mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
+                        published_unix=mirror_pub if mirror_pub > 0 else None,
+                    )
+                elif mirror_pub > 0:
+                    payload = encode_ocsp_floor_payload(
+                        None,
+                        mirror.get("job_run_id") if isinstance(mirror.get("job_run_id"), str) else None,
+                        published_unix=mirror_pub,
+                    )
+                else:
+                    return True
                 db.upsert_job_cache(
                     service_id=None,
                     file_name=rel,
@@ -4814,24 +4839,34 @@ def _restore_ocsp_cluster_floor_entry(file_name: str, data: bytes) -> bool:
     disk_floor = load_disk_ocsp_floor(CONFIGS_SSL_BASE, floor_fp)
     if should_keep_disk_ocsp_floor(disk_floor, incoming):
         log_info(
-            "⏭️ OCSP floor restore skip fp=%s... disk_pub=%s incoming_pub=%s",
+            "⏭️ OCSP floor restore skip fp=%s... disk_rank=%s incoming_rank=%s",
             floor_fp[:16],
             ocsp_floor_published_unix(disk_floor),
             ocsp_floor_published_unix(incoming),
         )
         return False
-    new_pub = ocsp_floor_published_unix(incoming)
-    if new_pub <= 0:
+    if not isinstance(incoming, dict) or ocsp_floor_published_unix(incoming) <= 0:
         return False
     floor_dir = CONFIGS_SSL_BASE / "ocsp-floor"
     floor_dir.mkdir(parents=True, exist_ok=True)
-    run_id = incoming.get("job_run_id") if isinstance(incoming, dict) else None
+    run_id = incoming.get("job_run_id") if isinstance(incoming.get("job_run_id"), str) else None
+    this_u = int(incoming["this_update_unix"]) if incoming.get("this_update_unix") else 0
+    pub_u = int(incoming["published_unix"]) if incoming.get("published_unix") else 0
     _atomic_write_bytes(
         floor_dir / floor_fp,
-        encode_ocsp_floor_payload(new_pub, run_id if isinstance(run_id, str) else None),
+        encode_ocsp_floor_payload(
+            this_u if this_u > 0 else None,
+            run_id,
+            published_unix=pub_u if pub_u > 0 else None,
+        ),
         mode=0o640,
     )
-    log_info("📈 OCSP floor restored fp=%s... published_unix=%s", floor_fp[:16], new_pub)
+    log_info(
+        "📈 OCSP floor restored fp=%s... this_update_unix=%s published_unix=%s",
+        floor_fp[:16],
+        this_u or "none",
+        pub_u or "none",
+    )
     return True
 
 
@@ -5067,7 +5102,13 @@ def _tombstone_ocsp_shard(
             return False
         _delete_ocsp_der_db_rows(db, normalized)
         _clear_ocsp_peer_refuse(normalized)
-        _advance_ocsp_cluster_floor(normalized, meta.get("published_unix"), meta.get("job_run_id"), db)
+        _advance_ocsp_cluster_floor(
+            normalized,
+            this_update_unix,
+            meta.get("job_run_id"),
+            db,
+            meta.get("published_unix"),
+        )
         log_error(
             "🧹 OCSP tombstoned shard for %s (fp=%s..., CertStatus=%s, serial=%s); previous GOOD staple removed",
             cert_name,
@@ -5458,7 +5499,13 @@ def _persist_ocsp_results_to_disk(
                     db=db,
                 )
                 published_fps.append(cert_fp)
-                _advance_ocsp_cluster_floor(cert_fp, meta.get("published_unix"), meta.get("job_run_id"), db)
+                _advance_ocsp_cluster_floor(
+                    cert_fp,
+                    meta.get("this_update_unix"),
+                    meta.get("job_run_id"),
+                    db,
+                    meta.get("published_unix"),
+                )
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
                     cert_name,

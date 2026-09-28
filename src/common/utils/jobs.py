@@ -272,10 +272,11 @@ def _ocsp_meta_unix(meta: Dict[str, Any], key: str) -> int:
 
 def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
     """
-    Parse an ocsp-floor file body into {published_unix, job_run_id?}.
+    Parse an ocsp-floor file body into {this_update_unix?, published_unix?, job_run_id?}.
 
-    Preferred body is compact JSON. Also accepts a plain decimal published_unix.
-    Legacy plain job_run_id (pid.time_ns) is ignored for colony ordering (no published_unix).
+    Preferred body is compact JSON with CA-signed ``this_update_unix`` as the colony
+    rank. Legacy bodies may have only ``published_unix`` (wall clock) or a plain
+    decimal published_unix. Plain job_run_id (pid.time_ns) is ignored for ordering.
     """
     if not data:
         return None
@@ -292,8 +293,11 @@ def parse_ocsp_floor_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
             return None
         if not isinstance(obj, dict):
             return None
-        published = _ocsp_meta_unix(obj, "published_unix")
         out: Dict[str, Any] = {}
+        this_u = _ocsp_meta_unix(obj, "this_update_unix")
+        if this_u > 0:
+            out["this_update_unix"] = this_u
+        published = _ocsp_meta_unix(obj, "published_unix")
         if published > 0:
             out["published_unix"] = published
         run_id = obj.get("job_run_id")
@@ -323,10 +327,33 @@ def load_disk_ocsp_floor(cache_root: Path, fingerprint: str) -> Optional[Dict[st
         return None
 
 
-def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
+def ocsp_floor_comparable(floor: Optional[Dict[str, Any]]) -> Tuple[str, int]:
+    """
+    Colony floor rank without mixing clocks.
+
+    Returns (kind, unix) where kind is ``this_update`` (preferred, CA-signed) or
+    ``published`` (legacy wall-clock). Empty kind means not comparable.
+    """
     if not isinstance(floor, dict):
-        return 0
-    return _ocsp_meta_unix(floor, "published_unix")
+        return "", 0
+    this_u = _ocsp_meta_unix(floor, "this_update_unix")
+    if this_u > 0:
+        return "this_update", this_u
+    published = _ocsp_meta_unix(floor, "published_unix")
+    if published > 0:
+        return "published", published
+    return "", 0
+
+
+def ocsp_floor_published_unix(floor: Optional[Dict[str, Any]]) -> int:
+    """Colony-comparable floor rank (prefer this_update_unix; legacy published_unix)."""
+    _kind, rank = ocsp_floor_comparable(floor)
+    return rank
+
+
+def ocsp_meta_floor_rank(meta: Optional[Dict[str, Any]]) -> Tuple[str, int]:
+    """Same kind preference as floor files, for shard ocsp.json / fence caps."""
+    return ocsp_floor_comparable(meta)
 
 
 def ensure_ocsp_refuse_dir(cache_root: Path, logger: Optional[Logger] = None) -> bool:
@@ -410,9 +437,34 @@ def publish_ocsp_restore_coherence(
         )
 
 
-def encode_ocsp_floor_payload(published_unix: int, job_run_id: Optional[str] = None) -> bytes:
-    """Serialize colony floor: wall-clock published_unix is the comparable field."""
-    payload: Dict[str, Any] = {"published_unix": int(published_unix)}
+def encode_ocsp_floor_payload(
+    this_update_unix: Optional[int] = None,
+    job_run_id: Optional[str] = None,
+    *,
+    published_unix: Optional[int] = None,
+) -> bytes:
+    """
+    Serialize colony floor.
+
+    Prefer CA-signed ``this_update_unix`` as the comparable field. ``published_unix``
+    may be stored forensically or alone for legacy restore rows — never invent
+    this_update from wall clock.
+    """
+    payload: Dict[str, Any] = {}
+    try:
+        this_u = int(this_update_unix) if this_update_unix is not None else 0
+    except (TypeError, ValueError):
+        this_u = 0
+    if this_u > 0:
+        payload["this_update_unix"] = this_u
+    try:
+        pub = int(published_unix) if published_unix is not None else 0
+    except (TypeError, ValueError):
+        pub = 0
+    if pub > 0:
+        payload["published_unix"] = pub
+    if not payload:
+        raise ValueError("ocsp floor requires this_update_unix or published_unix")
     if isinstance(job_run_id, str) and job_run_id:
         payload["job_run_id"] = job_run_id
     return (json_dumps(payload, separators=(",", ":")) + "\n").encode("utf-8")
@@ -425,13 +477,21 @@ def should_keep_disk_ocsp_floor(
     """
     True when the on-disk cluster floor must not be overwritten by restore.
 
-    Floor is max-only on published_unix (wall clock, colony-comparable).
-    Equal → keep disk. Missing disk published_unix → allow restore.
+    Max-only within the same clock kind. A this_update floor is never overwritten
+    by a legacy published-only row; a this_update incoming upgrades legacy disk.
+    Equal rank → keep disk. Missing disk rank → allow restore.
     """
-    disk_pub = ocsp_floor_published_unix(disk_floor)
-    if disk_pub <= 0:
+    disk_kind, disk_rank = ocsp_floor_comparable(disk_floor)
+    if disk_rank <= 0:
         return False
-    return disk_pub >= ocsp_floor_published_unix(incoming_floor)
+    inc_kind, inc_rank = ocsp_floor_comparable(incoming_floor)
+    if inc_rank <= 0:
+        return True
+    if disk_kind == "this_update" and inc_kind == "published":
+        return True
+    if disk_kind == "published" and inc_kind == "this_update":
+        return False
+    return disk_rank >= inc_rank
 
 
 def should_skip_ocsp_floor_restore(
@@ -448,13 +508,13 @@ def should_skip_ocsp_floor_restore(
     """
     if should_keep_disk_ocsp_floor(disk_floor, incoming_floor):
         return True, (
-            f"disk_floor_newer_or_equal disk_pub={ocsp_floor_published_unix(disk_floor)} "
-            f"incoming_pub={ocsp_floor_published_unix(incoming_floor)}"
+            f"disk_floor_newer_or_equal disk_rank={ocsp_floor_published_unix(disk_floor)} "
+            f"incoming_rank={ocsp_floor_published_unix(incoming_floor)}"
         )
     if isinstance(floor_cap, int) and floor_cap > 0:
-        incoming_pub = ocsp_floor_published_unix(incoming_floor)
-        if incoming_pub > floor_cap:
-            return True, f"floor_capped_to_fenced_shard cap={floor_cap} incoming_pub={incoming_pub}"
+        incoming_rank = ocsp_floor_published_unix(incoming_floor)
+        if incoming_rank > floor_cap:
+            return True, f"floor_capped_to_fenced_shard cap={floor_cap} incoming_rank={incoming_rank}"
     return False, ""
 
 
@@ -578,8 +638,8 @@ def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, st
 
     Returns:
       skip: fingerprint → reason for shards that must not be overwritten
-      floor_caps: fingerprint → max floor published_unix allowed when that shard
-        was fenced as a still-GOOD trio (prevents floor sitting ahead of kept files)
+      floor_caps: fingerprint → max floor rank allowed when that shard
+        was fenced as a still-GOOD trio (prefer this_update_unix; else published_unix)
     """
     by_fp: Dict[str, Dict[str, Any]] = {}
     incoming_floors: Dict[str, Optional[Dict[str, Any]]] = {}
@@ -614,14 +674,14 @@ def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, st
         # DER-only restore without meta: keep disk when it already has usable meta.
         if incoming_meta is None and bucket.get("has_der"):
             skip[fp] = "disk_meta_present_incoming_meta_missing"
-            disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
-            if disk_pub > 0 and disk_meta.get("tombstoned") is not True:
-                floor_caps[fp] = disk_pub
+            _disk_kind, disk_rank = ocsp_meta_floor_rank(disk_meta)
+            if disk_rank > 0 and disk_meta.get("tombstoned") is not True:
+                floor_caps[fp] = disk_rank
             continue
         if not should_keep_disk_ocsp_shard(disk_meta, incoming_meta):
             continue
 
-        disk_pub = _ocsp_meta_unix(disk_meta, "published_unix")
+        _disk_kind, disk_rank = ocsp_meta_floor_rank(disk_meta)
         # Effective floor after a naive max-only floor restore.
         effective_floor = max(
             ocsp_floor_published_unix(load_disk_ocsp_floor(root, fp)),
@@ -629,13 +689,14 @@ def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, st
         )
         # Prefer a DB generation that meets the floor over fencing a lagging GOOD
         # that would leave Must-Staple closed on healthy-looking files.
+        _inc_kind, inc_rank = ocsp_meta_floor_rank(incoming_meta if isinstance(incoming_meta, dict) else None)
         if (
             disk_meta.get("tombstoned") is not True
-            and disk_pub > 0
-            and effective_floor > disk_pub
+            and disk_rank > 0
+            and effective_floor > disk_rank
             and isinstance(incoming_meta, dict)
             and incoming_meta.get("tombstoned") is not True
-            and _ocsp_meta_unix(incoming_meta, "published_unix") >= effective_floor
+            and inc_rank >= effective_floor
             and bucket.get("has_der")
         ):
             continue
@@ -644,8 +705,8 @@ def ocsp_restore_plan(cache_files: list, cache_root: Path) -> Tuple[Dict[str, st
             f"disk_newer_or_equal expires_unix={_ocsp_meta_unix(disk_meta, 'expires_unix')} "
             f"job_run_id={disk_meta.get('job_run_id')}"
         )
-        if disk_meta.get("tombstoned") is not True and disk_pub > 0:
-            floor_caps[fp] = disk_pub
+        if disk_meta.get("tombstoned") is not True and disk_rank > 0:
+            floor_caps[fp] = disk_rank
     return skip, floor_caps
 
 
