@@ -418,12 +418,10 @@ end
 
 -- Shared with the HTTP ssl_certificate path: job bumps this file so both
 -- internalstore and internalstore_stream drop stale L1 without cross-dict APIs.
+-- Always re-read: a mid-handshake bump must not be masked by an ngx.ctx pin.
 local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
 
 local function current_ocsp_epoch()
-	if ngx.ctx.bw_ocsp_epoch ~= nil then
-		return ngx.ctx.bw_ocsp_epoch
-	end
 	local epoch = "0"
 	pcall(function()
 		local f = io.open(OCSP_EPOCH_PATH, "r")
@@ -436,7 +434,6 @@ local function current_ocsp_epoch()
 			epoch = raw:match("^%S+") or "0"
 		end
 	end)
-	ngx.ctx.bw_ocsp_epoch = epoch
 	return epoch
 end
 
@@ -2808,10 +2805,6 @@ function _M.warm_l1_from_disk(internalstore)
 	if not internalstore then
 		return 0
 	end
-	-- Drop cached epoch so we compare against the live .ocsp_epoch file.
-	if ngx.ctx then
-		ngx.ctx.bw_ocsp_epoch = nil
-	end
 	local warmed = 0
 	for _, fp in ipairs(list_ocsp_fingerprints()) do
 		local ok, did = pcall(warm_one_shard, internalstore, fp)
@@ -2847,9 +2840,6 @@ function _M.start_l1_warmer(internalstore)
 	local function tick(premature)
 		if premature then
 			return
-		end
-		if ngx.ctx then
-			ngx.ctx.bw_ocsp_epoch = nil
 		end
 		if claim_l1_warmer_lease(internalstore) then
 			local epoch = current_ocsp_epoch()
