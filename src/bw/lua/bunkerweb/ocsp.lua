@@ -1689,6 +1689,7 @@ local function normalize_fp_hint(cert_fp_hint)
 end
 
 local attach_ocsp_staple
+local issuer_path_intermediate_ready
 
 local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki, probe_only, meta, fingerprint, chain_blocks)
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
@@ -1698,6 +1699,11 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 	end
 	local function set_resp()
 		if probe_only then
+			-- Leaf shard ok is not enough: demote if this leaf's issuer path cannot staple.
+			local path_ok, path_detail = issuer_path_intermediate_ready(chain_blocks)
+			if not path_ok then
+				return false, path_detail or "unmet"
+			end
 			return true
 		end
 		local set_ok, set_err
@@ -2684,6 +2690,53 @@ function _M.issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	return issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 end
 
+-- Dual-cert / probe health: can this leaf's issuer-linked intermediates be stapled?
+-- Does not require a leaf OCSP body. Legal NULL slots (no intermediate Must-Staple) pass.
+-- Sticky defects demote the leaf: intermediate_must_staple_libssl, missing Must-Staple body.
+issuer_path_intermediate_ready = function(chain_pem_or_blocks)
+	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
+	if type(blocks) ~= "table" or #blocks < 2 then
+		return true
+	end
+	local ready = openssl_multi_staple_ready()
+	if not ready then
+		if chain_has_intermediate_must_staple(blocks) then
+			return false, "intermediate_must_staple_libssl"
+		end
+		return true
+	end
+	local leaf_pem = blocks[1]
+	for i = 2, #blocks do
+		local pem = blocks[i]
+		local self_signed = false
+		pcall(function()
+			local x509 = require("resty.openssl.x509")
+			local c = x509.new(pem)
+			if c and c.get_subject_name and c.get_issuer_name then
+				local s = tostring(c:get_subject_name() or "")
+				local iss = tostring(c:get_issuer_name() or "")
+				self_signed = (s ~= "" and s == iss)
+			end
+		end)
+		if self_signed then
+			break
+		end
+		local inter_must = has_must_staple(pem)
+		local der, fp = load_paged_intermediate_staple(pem, leaf_pem)
+		if not der and not inter_must and fp then
+			inter_must = ocsp_json_must_staple(read_ocsp_json(fp))
+		end
+		if not der and inter_must then
+			return false, "response_not_found"
+		end
+	end
+	return true
+end
+
+function _M.issuer_path_intermediate_ready(chain_pem_or_blocks)
+	return issuer_path_intermediate_ready(chain_pem_or_blocks)
+end
+
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
@@ -2758,6 +2811,28 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			end
 			if leaf_must and mode == "open" then
 				leaf_must = false
+			end
+		end
+		-- Bind staple health to this leaf's issuer-linked intermediates (not leaf shard alone).
+		-- Soft-fuse install (probe_must=false) skips demotion so the preferred leaf can load unstapled.
+		if probe_must and mode ~= "open" then
+			local path_ok, path_detail = issuer_path_intermediate_ready(chain_pem)
+			if not path_ok then
+				local detail = path_detail or "unmet"
+				if leaf.fp and mode == "normal" then
+					record_peer_refuse(leaf.fp, read_ocsp_json(leaf.fp), nil, detail)
+				end
+				log(
+					ngx.ERR,
+					format_staple_decision(detail, {
+						tag = "OCSP_MUST_STAPLE_REFUSE",
+						action = "skip_leaf",
+						mode = mode,
+						detail = "issuer_path_health",
+						fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+					})
+				)
+				return false, "must_staple", detail
 			end
 		end
 		if leaf_must and internalstore and mode ~= "open" then
@@ -3124,6 +3199,10 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 			end
 			if probe_only then
+				local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+				if not path_ok then
+					return false, "must_staple", path_detail or "unmet"
+				end
 				return true
 			end
 			local set_ok, set_err
@@ -3165,6 +3244,10 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					end
 				end
 				if probe_only then
+					local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+					if not path_ok then
+						return false, "must_staple", path_detail or "unmet"
+					end
 					return true
 				end
 				warm_cache(internalstore, fingerprint, cached, true, meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires))
@@ -3178,10 +3261,15 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 					end
 					return false
 				end
-				if result_detail == "intermediate_must_staple_libssl" or must_staple then
+				if
+					result_detail == "intermediate_must_staple_libssl"
+					or result_detail == "response_not_found"
+					or must_staple
+				then
 					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
+					-- Path demotion from probe_only also lands here (intermediate Must-Staple).
 					local detail = result_detail
-					if detail ~= "intermediate_must_staple_libssl" then
+					if detail ~= "intermediate_must_staple_libssl" and detail ~= "response_not_found" then
 						detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
 					end
 					return must_staple_refuse(fingerprint, meta, cached, detail, mode)
@@ -3218,6 +3306,10 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return must_staple_refuse(fingerprint, meta, nil, ligand_detail, mode)
 			end
 			if probe_only then
+				local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+				if not path_ok then
+					return false, "must_staple", path_detail or "unmet"
+				end
 				return true
 			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
@@ -3231,9 +3323,13 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				end
 				return false
 			end
-			if result_detail == "intermediate_must_staple_libssl" or must_staple then
+			if
+				result_detail == "intermediate_must_staple_libssl"
+				or result_detail == "response_not_found"
+				or must_staple
+			then
 				local detail = result_detail
-				if detail ~= "intermediate_must_staple_libssl" then
+				if detail ~= "intermediate_must_staple_libssl" and detail ~= "response_not_found" then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
 				end
 				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
@@ -3387,12 +3483,17 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	end
 	blocks = presentable_chain_blocks(blocks)
 	leaf_pem = blocks[1] or leaf_pem
+	-- Issuer-path readiness binds dual-cert health even when the leaf itself is not Must-Staple.
+	local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+	if not path_ok then
+		return finish(false, "must_staple", path_detail or "unmet")
+	end
 	local must_staple = has_must_staple(leaf_pem)
 	if not must_staple and fp_hint then
 		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
 	end
 	if not must_staple then
-		-- Optional stapling: leaf may load without a live probe.
+		-- Optional leaf stapling: path already scored; leaf may load without a live body.
 		return true
 	end
 	if not stapling_enabled(internalstore, server_name) then
