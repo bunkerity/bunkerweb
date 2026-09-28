@@ -553,65 +553,8 @@ local function drop_cache(internalstore, fingerprint)
 end
 
 -- True when this L1 body is still coherent with disk + .ocsp_epoch.
--- Requires epoch match and ocsp.json der_sha256 == sha256(L1 DER). Meta without
--- der_sha256 is invalid. If both meta and DER are missing while epoch still matches
--- (brief publish gap), keep L1 so Must-Staple does not abort mid-swap.
-local function l1_matches_disk(internalstore, fingerprint, resp, stored_epoch)
-	local binding = resp_binding(resp)
-	if not binding then
-		return false
-	end
-
-	-- Cross-zone coherence: job cannot delete the other lua_shared_dict; epoch is the bus.
-	if (stored_epoch or "") ~= current_ocsp_epoch() then
-		return false
-	end
-
-	local disk_sha = nil
-	local tombstoned = false
-	local meta_missing = false
-	pcall(function()
-		local meta_path = "/var/cache/bunkerweb/ssl/"
-			.. fingerprint:sub(1, 1)
-			.. "/"
-			.. fingerprint:sub(2, 2)
-			.. "/"
-			.. fingerprint
-			.. "/ocsp.json"
-		local f = io.open(meta_path, "r")
-		if not f then
-			meta_missing = true
-			return
-		end
-		local raw = f:read("*a")
-		f:close()
-		if type(raw) ~= "string" then
-			return
-		end
-		-- Mid-tombstone: meta can say tombstoned before DER unlink / epoch bump.
-		if raw:find('"tombstoned"%s*:%s*true') then
-			tombstoned = true
-			return
-		end
-		local sha = raw:match('"der_sha256"%s*:%s*"([0-9a-fA-F]+)"')
-		if sha and #sha == 64 then
-			disk_sha = sha:lower()
-		end
-	end)
-	if tombstoned then
-		return false
-	end
-
-	if disk_sha then
-		return disk_sha == binding
-	end
-	-- Meta without der_sha256 is invalid (job always writes it). Move-aside ENOENT:
-	-- both meta and DER gone while epoch still names the previous generation → keep L1.
-	if meta_missing and not read_file(ocsp_path(fingerprint)) then
-		return true
-	end
-	return false
-end
+-- Implemented after ligand_effective_sha (shared with HTTP); see l1_body_matches_disk.
+local l1_matches_disk
 
 local function issuer_candidates(blocks, leaf_pem, fingerprint)
 	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
@@ -1828,6 +1771,95 @@ function _M.ligand_effective_sha(shard_meta, fingerprint)
 		return eff.der_sha256:lower()
 	end
 	return nil
+end
+
+-- Shared HTTP↔stream L1↔disk coherence. Fail-closed like ligand_verdict:
+-- corrupt meta / paged+ligand ENOENT / require-path gaps drop L1. Publish-gap keep
+-- (meta+DER both gone, epoch still matches) only while ligand_effective_sha names
+-- the cached binding — never bare true. HTTP conf must call this export rather than
+-- inlining a second copy that can drift.
+local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
+	local binding = resp_binding(resp)
+	if not binding then
+		return false
+	end
+	if not fingerprint or not is_fp64(fingerprint) then
+		return false
+	end
+	if (stored_epoch or "") ~= current_ocsp_epoch() then
+		return false
+	end
+
+	local disk_sha = nil
+	local tombstoned = false
+	local meta_missing = false
+	local meta_corrupt = false
+	local shard_meta = nil
+	pcall(function()
+		local meta_path = "/var/cache/bunkerweb/ssl/"
+			.. fingerprint:sub(1, 1)
+			.. "/"
+			.. fingerprint:sub(2, 2)
+			.. "/"
+			.. fingerprint
+			.. "/ocsp.json"
+		local f = io.open(meta_path, "r")
+		if not f then
+			meta_missing = true
+			return
+		end
+		local raw = f:read("*a")
+		f:close()
+		if type(raw) ~= "string" or #raw == 0 then
+			meta_corrupt = true
+			return
+		end
+		local ok_decode, decoded = pcall(require("cjson").decode, raw)
+		if not ok_decode or type(decoded) ~= "table" then
+			meta_corrupt = true
+			return
+		end
+		shard_meta = decoded
+		if decoded.tombstoned == true then
+			tombstoned = true
+			return
+		end
+		if type(decoded.der_sha256) == "string" then
+			local sha = decoded.der_sha256:lower()
+			if #sha == 64 and sha:match("^[0-9a-f]+$") then
+				disk_sha = sha
+			end
+		end
+	end)
+	if tombstoned or meta_corrupt then
+		return false
+	end
+
+	local eff = _M.ligand_effective_sha(shard_meta, fingerprint)
+	if type(eff) == "string" and #eff == 64 then
+		disk_sha = eff
+	elseif type(shard_meta) == "table" and shard_meta.paged == true then
+		return false
+	elseif eff == nil and disk_sha == nil then
+		return false
+	end
+
+	if disk_sha then
+		return disk_sha == binding
+	end
+	if meta_missing and not read_file(ocsp_path(fingerprint)) then
+		local ligand_sha = _M.ligand_effective_sha(nil, fingerprint)
+		return type(ligand_sha) == "string" and #ligand_sha == 64 and ligand_sha == binding
+	end
+	return false
+end
+
+l1_matches_disk = function(internalstore, fingerprint, resp, stored_epoch)
+	return l1_body_matches_disk(fingerprint, resp, stored_epoch)
+end
+
+function _M.l1_body_matches_disk(fingerprint, resp, stored_epoch)
+	return l1_body_matches_disk(fingerprint, resp, stored_epoch)
 end
 
 -- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
