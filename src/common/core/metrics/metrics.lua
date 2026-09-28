@@ -35,6 +35,32 @@ local synced_counters = {}
 -- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
 local REDIS_BATCH = 500
 
+-- Redis keys carry the instance hostname next to the worker id, so instances sharing one Redis
+-- never write the same key. The UI keeps only what precedes the first ":" as the metric name.
+local instance_id
+local function get_instance_id()
+	if not instance_id then
+		local f = io.open("/proc/sys/kernel/hostname", "r")
+		local name = f and f:read("*l") or ""
+		if f then
+			f:close()
+		end
+		if name == "" then
+			name = "unknown"
+		elseif name:find("[^%w%.%-_]") then
+			-- Hashed rather than sanitised, and "~" never appears in a raw id: two distinct
+			-- hostnames can never share an id.
+			name = "~" .. ngx.md5(name)
+		end
+		instance_id = name
+	end
+	return instance_id
+end
+
+local function metric_redis_key(key, wid)
+	return "metrics:" .. key .. ":" .. wid .. "@" .. get_instance_id()
+end
+
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
 local prefilled_redis = false
@@ -45,6 +71,13 @@ local persisted_redis = false
 -- instead of spending one wasted round trip per worker every cycle forever.
 local MAX_PREFILL_ATTEMPTS = 12
 local prefill_attempts = 0
+-- Legacy counter TTL sweep: SCAN cursor kept across ticks, next sweep time, consecutive failures
+-- (backoff only, the sweep is never abandoned).
+local legacy_cursor = "0"
+local legacy_due = 0
+local legacy_failures = 0
+-- SCAN steps of 1000 keys one tick may spend on the sweep.
+local MAX_LEGACY_SCAN_STEPS = 10
 -- Consecutive cycles that found the reports list gone and refilled it from this worker's
 -- buffer. Reset by any cycle that finds the list still there.
 local MAX_RECLAIM_ATTEMPTS = 12
@@ -419,7 +452,7 @@ local function reap_evicted_redis_keys(self, wid, live_keys)
 		-- Numeric totals remain authoritative in Redis after local LRU eviction.
 		-- Their existing TTL bounds dormant retention; TTL=0 intentionally retains them.
 		if not live_keys[key] and not key:find("_counter_", 1, true) then
-			local ok, err = self:redis_call("del", "metrics:" .. key .. ":" .. wid)
+			local ok, err = self:redis_call("del", metric_redis_key(key, wid))
 			if not ok then
 				self:log_throttled(ERR, "reap_evicted", "Can't delete evicted metric " .. key .. " from Redis: " .. err)
 			end
@@ -437,11 +470,11 @@ local function check_synced_keys(self, wid)
 	for key, state in pairs(synced_tables) do
 		-- An empty table was only DEL'd: it has no key to find.
 		if state.len > 0 then
-			keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
+			keys[#keys + 1] = metric_redis_key(key, wid)
 		end
 	end
 	for key in pairs(synced_counters) do
-		keys[#keys + 1] = "metrics:" .. key .. ":" .. wid
+		keys[#keys + 1] = metric_redis_key(key, wid)
 	end
 	for i = 1, #keys, REDIS_BATCH do
 		local last = math.min(i + REDIS_BATCH - 1, #keys)
@@ -533,7 +566,7 @@ local function restore_counter(self, key, counter, wid)
 	if counter.restored then
 		return true
 	end
-	local stored, err = self:redis_call("get", "metrics:" .. key .. ":" .. wid)
+	local stored, err = self:redis_call("get", metric_redis_key(key, wid))
 	if stored == false or stored == nil then
 		self:log_throttled(
 			ERR,
@@ -570,11 +603,12 @@ end
 -- This optional prefill never establishes correctness for a later cache miss;
 -- restore_counter still protects every newly active counter independently.
 local function prefill_counters(self, wid)
+	local suffix = ":" .. wid .. "@" .. get_instance_id()
 	local cursor, scanned = "0", 0
 	local budget = lru:capacity() - #lru:get_keys()
 	while budget > 0 do
 		local page =
-			self:redis_call("scan", cursor, "MATCH", "metrics:*_counter_*:" .. wid, "COUNT", math.min(budget, 100))
+			self:redis_call("scan", cursor, "MATCH", "metrics:*_counter_*" .. suffix, "COUNT", math.min(budget, 100))
 		if type(page) ~= "table" or type(page[1]) ~= "string" or type(page[2]) ~= "table" then
 			return false
 		end
@@ -591,7 +625,7 @@ local function prefill_counters(self, wid)
 				if budget <= 0 then
 					break
 				end
-				local key = redis_key:sub(9, -(#wid + 2))
+				local key = redis_key:sub(9, -(#suffix + 1))
 				local value = values[i] ~= null and tonumber(values[i])
 				-- A log() during SCAN/MGET owns its live record; lazy restore will merge it.
 				if value and lru:get(key) == nil then
@@ -605,6 +639,38 @@ local function prefill_counters(self, wid)
 		end
 	end
 	return true
+end
+
+-- Counters from before per-instance keys (metrics:<key>:<wid>) are never written by an upgraded
+-- worker again: they hold the totals recorded before the upgrade, which the Web UI still adds to the
+-- per-instance keys, so nothing is moved (a still-old instance may keep writing its slot) and nothing
+-- is counted twice. Their TTL follows the live keys: a sweep every half TTL (once with TTL 0) keeps
+-- that history until every instance using this worker id has stopped. Returns true once a sweep
+-- reached the end of the keyspace, false while it is still walking or failed.
+local function refresh_legacy_counters(self, wid, ttl)
+	for _ = 1, MAX_LEGACY_SCAN_STEPS do
+		-- The last segment must be exactly this worker id: "...:<wid>@<instance>" never matches.
+		local page = self:redis_call("scan", legacy_cursor, "MATCH", "metrics:*_counter_*:" .. wid, "COUNT", 1000)
+		if type(page) ~= "table" or type(page[1]) ~= "string" or type(page[2]) ~= "table" then
+			return false, true
+		end
+		for _, redis_key in ipairs(page[2]) do
+			local ok
+			if ttl > 0 then
+				ok = self:redis_call("expire", redis_key, ttl)
+			else
+				ok = self:redis_call("persist", redis_key)
+			end
+			if not ok then
+				return false, true
+			end
+		end
+		legacy_cursor = page[1]
+		if legacy_cursor == "0" then
+			return true
+		end
+	end
+	return false
 end
 
 -- METRICS_REDIS_TTL=0 is documented as keeping the keys permanent. Only refreshing the
@@ -650,7 +716,7 @@ local function refresh_request_ttls(self, ttl, wid)
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" then
-				touch("metrics:" .. key .. ":" .. wid, key)
+				touch(metric_redis_key(key, wid), key)
 			end
 		end
 	end
@@ -916,6 +982,19 @@ function metrics:timer()
 				prefill_attempts = prefill_attempts + 1
 				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
 			end
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
+				local legacy_ttl = ttl or 0
+				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
+				if done then
+					legacy_failures = 0
+					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
+				elseif failed then
+					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
+					legacy_failures = legacy_failures + 1
+					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
+					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
+				end
+			end
 			self_heal_request_facets(self)
 			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
 			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
@@ -1007,7 +1086,7 @@ function metrics:timer()
 					lru:set("requests", value)
 				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 					-- Sync other metrics (counters and tables) to Redis with optimized data structures
-					local redis_key = "metrics:" .. key .. ":" .. wid
+					local redis_key = metric_redis_key(key, wid)
 					local ok
 					if type(value) == "table" then
 						-- Use Redis list for table values

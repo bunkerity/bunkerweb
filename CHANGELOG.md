@@ -4,6 +4,7 @@
 
 - [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
 - [BUGFIX] `ui`: for signed-in users, a single form field larger than 500 kB, such as an Easy Resolve request for a report with a large matched body, is accepted up to `MAX_CONTENT_LENGTH` instead of failing with 413. The login form keeps the 500 kB cap.
+- [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics: Redis keys now carry the instance hostname next to the worker id, so give each instance a distinct hostname. Keys written by older versions are kept as history, still counted in the Web UI and renewed with `METRICS_REDIS_TTL` while the instance runs.
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
 ## v1.6.16~rc2 - 2026/09/25
