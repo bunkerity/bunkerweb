@@ -1091,6 +1091,58 @@ local function decode_allow_pin(raw)
 	return obj
 end
 
+local function read_allow_pin(fingerprint)
+	if not is_fp64(fingerprint) then
+		return nil
+	end
+	return decode_allow_pin(read_file(ocsp_allow_path(fingerprint)))
+end
+
+-- True when the pin names exactly this generation (der_sha256, soft_recall_gen).
+local function allow_pin_matches(pin, want_sha, want_g)
+	return type(pin) == "table" and pin.der_sha256 == want_sha and (tonumber(pin.soft_recall_gen) or 0) == want_g
+end
+
+local function path_exists(path)
+	local f = io.open(path, "rb")
+	if f then
+		f:close()
+		return true
+	end
+	return false
+end
+
+-- Claim files match the job's stale-temp sweep (**/.ocsp_*.tmp, >5 min) so a
+-- worker that dies mid-revoke cannot leave litter behind indefinitely.
+local revoke_claim_seq = 0
+local function allow_pin_claim_path(fingerprint)
+	revoke_claim_seq = revoke_claim_seq + 1
+	local pid = (ngx.worker and ngx.worker.pid and ngx.worker.pid()) or 0
+	return "/var/cache/bunkerweb/ssl/ocsp-allow/.ocsp_revoke."
+		.. fingerprint
+		.. "."
+		.. tostring(pid)
+		.. "."
+		.. tostring(revoke_claim_seq)
+		.. ".tmp"
+end
+
+-- Put a claimed pin back at `path` without clobbering a newer one the job may have
+-- published meanwhile. Hard link fails with EEXIST when path is occupied; without
+-- lfs.link, rename only into an empty slot. Returns true when the pin was restored.
+local function restore_claimed_pin(claim, path)
+	local ok_lfs, lfs = pcall(require, "lfs")
+	if ok_lfs and type(lfs) == "table" and lfs.link and lfs.link(claim, path) then
+		os.remove(claim)
+		return true
+	end
+	if not path_exists(path) and os.rename(claim, path) then
+		return true
+	end
+	os.remove(claim)
+	return false
+end
+
 -- Unconditional drop (job / admin / soft-recall cleanup that already knows the
 -- generation is gone). Handshake refuse paths must use revoke_allow_pin instead.
 -- Checks os.remove's nil,err return — pcall alone never sees EACCES.
@@ -1113,6 +1165,13 @@ end
 -- (or any DROP cause) would erase the gen N+1 pin the canary just wrote — the
 -- consensus ADHD finding across five frames. Soft-recall unpaged cleanup also
 -- uses this so "same DER, older gen" cannot wipe a re-canaried pin.
+--
+-- Atomicity: the job restamps pins via tmp+rename from another process, so a plain
+-- read-then-unlink could delete a pin written between the two calls. Instead the
+-- pin is renamed to a private claim file (atomic), re-verified there, and only then
+-- unlinked; a claim that no longer matches is restored with restore_claimed_pin.
+-- Readers may see the pin missing for the microseconds between claim and restore
+-- (a local allow_pin_missing refuse, KEEP) — never a persistent fleet-wide loss.
 -- Returns outcome: "allow_dropped" | "allow_kept_gen_moved" | "allow_absent"
 --   | "allow_drop_eacces" | "allow_drop_failed"
 local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, quiet)
@@ -1123,11 +1182,12 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 		return "allow_drop_failed"
 	end
 	local want_g = tonumber(want_gen) or 0
+	-- Read-only fast path: most mismatches never touch the directory.
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
 		return "allow_absent"
 	end
-	if pin.der_sha256 ~= want_sha or (tonumber(pin.soft_recall_gen) or 0) ~= want_g then
+	if not allow_pin_matches(pin, want_sha, want_g) then
 		if not quiet then
 			log(
 				ngx.NOTICE,
@@ -1144,7 +1204,8 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 		return "allow_kept_gen_moved"
 	end
 	local path = ocsp_allow_path(fingerprint)
-	local ok, err = os.remove(path)
+	local claim = allow_pin_claim_path(fingerprint)
+	local ok, err = os.rename(path, claim)
 	if not ok then
 		if err and not tostring(err):find("No such file", 1, true) then
 			if not quiet then
@@ -1163,6 +1224,26 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 		end
 		return "allow_absent"
 	end
+	-- We now exclusively own what was at `path` at rename time. If the job restamped
+	-- between the read above and the rename, this is the newer pin: put it back.
+	if not allow_pin_matches(decode_allow_pin(read_file(claim)), want_sha, want_g) then
+		local restored = restore_claimed_pin(claim, path)
+		if not quiet then
+			log(
+				ngx.NOTICE,
+				format_staple_decision("peer_refuse_bus", {
+					tag = "OCSP_PEER_REFUSE_BUS",
+					action = "allow_kept_gen_moved",
+					refuse_cause = tostring(refuse_cause or ""),
+					fp = fingerprint:sub(1, 16) .. "...",
+					der_sha256 = want_sha:sub(1, 16) .. "...",
+					detail = restored and "race_restored" or "race_newer_present",
+				})
+			)
+		end
+		return "allow_kept_gen_moved"
+	end
+	os.remove(claim)
 	if not quiet then
 		log(
 			ngx.NOTICE,
