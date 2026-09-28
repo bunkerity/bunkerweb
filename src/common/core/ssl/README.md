@@ -79,11 +79,12 @@ When the scheduler canary has stamped `paged=true` for the exact DER (`der_sha25
 !!! warning "Dual-certificate (RSA + ECDSA): one leaf per handshake"
     NGINX / OpenSSL present **one** end-entity certificate per handshake. BunkerWeb installs **only the leaf this ClientHello will use**, then staples that leaf’s OCSP response (RFC 9846 §4.5.1.1: `status_request` on the matching `CertificateEntry`).
 
-    Selection walks ClientHello `signature_algorithms` in preference order and picks the first scheme an available leaf can sign with (curve-aware: `ecdsa_secp256r1_sha256` does not select a P-384 leaf). If nothing matches, prefer ECDSA, else the only leaf.
+    Selection walks ClientHello `signature_algorithms` in preference order and builds the list of leaves this client can verify (curve-aware: `ecdsa_secp256r1_sha256` does not select a P-384 leaf). Must-Staple probe runs in that order: if the preferred leaf’s shard is poisoned/`not_paged`/refused, the next ClientHello-compatible leaf is tried (`OCSP_STAPLE_HEALTH_FALLBACK`). A leaf the client did not advertise (e.g. ECDSA when the ClientHello is RSA-only) is never installed — that would break `CertificateVerify`. If nothing matches, prefer ECDSA, else the only leaf.
 
     Consequences:
 
-    - The sibling key type is **not** offered on that connection (logged as `staple_decision=skip_slot`).
+    - The sibling key type is **not** offered on that connection once a leaf is chosen (logged as `staple_decision=skip_slot`).
+    - A ClientHello that lists both RSA and ECDSA schemes cannot be forced into a Must-Staple outage solely by poisoning the first-preference shard while the other remains staplable.
     - Must-Staple is evaluated for the presented leaf, and for any intermediate that itself carries Must-Staple (multi-staple API present: missing body fails closed; API absent: `intermediate_must_staple_libssl`).
     - Stream still defers stapling until SNI has bound the handshake leaf (`await_sni` / `skip_slot detail=await_sni`).
 

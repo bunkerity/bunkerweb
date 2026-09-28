@@ -2307,16 +2307,19 @@ local function log_ocsp_staple_skip(kind, fp, reason, server_name)
 	)
 end
 
--- Pick the single leaf this handshake will present. Walk ClientHello
--- signature_algorithms in preference order; first scheme a leaf can sign with wins.
--- Curve-aware (P-256 scheme does not select a P-384 leaf). Fallback: prefer_kind,
--- then ECDSA, then first leaf. Sibling 9846 CertificateEntry status must match this leaf.
-local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
+-- Leaves this ClientHello can accept, in preference order (each once).
+-- When signature_algorithms is present, only leaves that match an advertised
+-- scheme are included — installing any other leaf would break CertificateVerify.
+-- Callers try Must-Staple probe in this order so a poisoned first match can fall
+-- back to another ClientHello-compatible leaf (not a leaf the client cannot use).
+local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
+	local ordered = {}
 	if type(leaves) ~= "table" or #leaves == 0 then
-		return nil
+		return ordered
 	end
 	if #leaves == 1 then
-		return leaves[1]
+		ordered[1] = leaves[1]
+		return ordered
 	end
 
 	local profiles = {}
@@ -2328,6 +2331,15 @@ local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 		profiles[i] = cert_sig_profile(pem)
 	end
 
+	local seen = {}
+	local function add(li)
+		if seen[li] then
+			return
+		end
+		seen[li] = true
+		ordered[#ordered + 1] = leaves[li]
+	end
+
 	if type(sigalgs_ext) == "string" and #sigalgs_ext >= 2 then
 		local len = sigalgs_ext:byte(1) * 256 + sigalgs_ext:byte(2)
 		if len >= 2 then
@@ -2336,34 +2348,51 @@ local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 			if end_i > #sigalgs_ext then
 				end_i = #sigalgs_ext
 			end
+			local matched = false
 			while i + 1 <= end_i do
 				local scheme = sigalgs_ext:byte(i) * 256 + sigalgs_ext:byte(i + 1)
-				for li, leaf in ipairs(leaves) do
+				for li = 1, #leaves do
 					if leaf_matches_scheme(profiles[li], scheme) then
-						return leaf
+						matched = true
+						add(li)
 					end
 				end
 				i = i + 2
 			end
-		end
-	end
-
-	-- Coarse prefer_kind fallback (no usable sigalgs list).
-	if prefer_kind == "rsa" or prefer_kind == "ec" or prefer_kind == "ed" then
-		for li, leaf in ipairs(leaves) do
-			if profiles[li].kind == prefer_kind then
-				return leaf
+			if matched then
+				return ordered
 			end
 		end
 	end
 
-	-- Typical OpenSSL dual-cert default: ECDSA before RSA.
-	for li, leaf in ipairs(leaves) do
-		if profiles[li].kind == "ec" or profiles[li].kind == "ed" then
-			return leaf
+	-- Coarse prefer_kind fallback (no usable sigalgs match).
+	if prefer_kind == "rsa" or prefer_kind == "ec" or prefer_kind == "ed" then
+		for li = 1, #leaves do
+			if profiles[li].kind == prefer_kind then
+				add(li)
+			end
+		end
+		if #ordered > 0 then
+			return ordered
 		end
 	end
-	return leaves[1]
+
+	-- Typical OpenSSL dual-cert default: ECDSA before RSA.
+	for li = 1, #leaves do
+		if profiles[li].kind == "ec" or profiles[li].kind == "ed" then
+			add(li)
+		end
+	end
+	for li = 1, #leaves do
+		add(li)
+	end
+	return ordered
+end
+
+-- First of ordered_leaves_for_handshake (legacy single-pick API).
+local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
+	local ordered = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
+	return ordered[1]
 end
 
 local function leaf_pem_of(leaf)
@@ -2536,11 +2565,10 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	end
 
 	local sigalgs_ext = ngx.ctx and ngx.ctx.bw_ocsp_sigalgs_ext or nil
-	local chosen = select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
-	if not chosen then
+	local candidates = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
+	if #candidates == 0 then
 		return false, "no leaf selected"
 	end
-	log_skipped_sibling_leaves(leaves, chosen, server_name)
 
 	local mode = "normal"
 	if internalstore then
@@ -2597,31 +2625,59 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		return true, leaf.pem, leaf.fp
 	end
 
-	local ok_inst, a, b = install_one(chosen, true)
-	if ok_inst then
-		return true, a, b
+	-- Try ClientHello-compatible leaves in preference order. A poisoned Must-Staple
+	-- shard on the first match must not fail-close when a later match can staple.
+	local last_err, last_detail
+	local preferred = candidates[1]
+	for ci, leaf in ipairs(candidates) do
+		local ok_inst, a, b = install_one(leaf, true)
+		if ok_inst then
+			if ci > 1 then
+				log(
+					ngx.NOTICE,
+					format_staple_decision("skip_slot", {
+						tag = "OCSP_STAPLE_HEALTH_FALLBACK",
+						detail = "staple_health_fallback",
+						fp = tostring(leaf.fp and leaf.fp:sub(1, 16) or "nil") .. "...",
+						server_name = server_name or "nil",
+					})
+				)
+			end
+			log_skipped_sibling_leaves(leaves, leaf, server_name)
+			return true, a, b
+		end
+		last_err, last_detail = a, b
+		if a ~= "must_staple" then
+			-- Parse / set_cert failure: do not keep trying siblings for that error class.
+			break
+		end
 	end
-	if a == "must_staple" and (mode == "staple_only" or mode == "open") then
-		-- Soft fuse: present the chosen site leaf unstapled (not the sibling).
+	if last_err == "must_staple" and (mode == "staple_only" or mode == "open") then
+		-- Soft fuse: present the preferred site leaf unstapled (not a random sibling).
 		log(
 			ngx.ERR,
-			format_staple_decision(b or "probe_failed", {
+			format_staple_decision(last_detail or "probe_failed", {
 				tag = "OCSP_MUST_STAPLE_REFUSE",
 				action = "continue_install",
 				mode = mode,
 			})
 		)
-		local ok_soft, soft_pem, soft_fp = install_one(chosen, false)
+		local ok_soft, soft_pem, soft_fp = install_one(preferred, false)
 		if ok_soft then
+			log_skipped_sibling_leaves(leaves, preferred, server_name)
 			return true, soft_pem, soft_fp
 		end
-		return false, soft_pem or "must_staple", soft_fp or b
+		return false, soft_pem or "must_staple", soft_fp or last_detail
 	end
-	return false, a, b
+	return false, last_err, last_detail
 end
 
 function _M.select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	return select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
+end
+
+function _M.ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
+	return ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 end
 
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
