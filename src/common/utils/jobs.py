@@ -278,6 +278,28 @@ def parse_ocsp_meta_bytes(data: Optional[bytes]) -> Optional[Dict[str, Any]]:
     return meta if isinstance(meta, dict) else None
 
 
+def normalize_restored_ocsp_json_bytes(data: Optional[bytes]) -> Optional[bytes]:
+    """
+    Restored ocsp.json must not imply canary page when ``paged`` is missing.
+
+    Handshake requires explicit ``paged=true``. Legacy/DB rows without the field
+    used to staple as if already canary-paged; stamp false so refresh must re-page.
+    """
+    if not data:
+        return data
+    meta = parse_ocsp_meta_bytes(data)
+    if not isinstance(meta, dict):
+        return data
+    if meta.get("paged") is True:
+        return data
+    meta = dict(meta)
+    meta["paged"] = False
+    try:
+        return json_dumps(meta, separators=(",", ":")).encode("utf-8")
+    except Exception:
+        return data
+
+
 def load_disk_ocsp_meta(shard_dir: Path) -> Optional[Dict[str, Any]]:
     meta_path = shard_dir / "ocsp.json"
     if not meta_path.is_file():
@@ -581,7 +603,10 @@ class Job:
                         self.logger.info(f"OCSP floor restore skip fp={floor_fp[:16]}... reason={floor_reason}")
                         ignored_dirs.add(cache_path.parent)
                         continue
-                _write_atomic(checked_cache_path(self.job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"]), job_cache_file["data"])
+                write_data = job_cache_file["data"]
+                if parsed and parsed[1] == "ocsp.json":
+                    write_data = normalize_restored_ocsp_json_bytes(write_data)
+                _write_atomic(checked_cache_path(self.job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"]), write_data)
                 ignored_dirs.add(cache_path.parent)
                 if parsed:
                     restored_ocsp_fps.add(parsed[0])

@@ -4738,8 +4738,11 @@ def _persist_ocsp_results_to_db(
                         disk_meta_obj = loaded
             except Exception:
                 disk_meta_obj = None
-            if isinstance(disk_meta_obj, dict) and disk_meta_obj.get("paged") is False:
-                log_debug("⏭️ OCSP skipping DB mirror for %s: disk meta still unpaged", cert_name)
+            if not isinstance(disk_meta_obj, dict) or disk_meta_obj.get("paged") is not True:
+                log_debug(
+                    "⏭️ OCSP skipping DB mirror for %s: disk meta not explicitly canary-paged",
+                    cert_name,
+                )
                 continue
 
             cache_key = _ocsp_cache_relpath(cert_fp, "ocsp.der")
@@ -4788,23 +4791,8 @@ def _persist_ocsp_results_to_db(
                         pass
                     try:
                         # Prefer the paged on-disk meta (includes paged_unix / canary_reason).
-                        if isinstance(disk_meta_obj, dict):
-                            meta = dict(disk_meta_obj)
-                        else:
-                            meta = _extract_cert_metadata(pem_data, cert_name)
-                            meta["fingerprint"] = cert_fp
-                            meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                            meta["certid"] = certid_pin
-                            meta["serial"] = certid_pin["serial"]
-                            meta["aia_ocsp_uri"] = aia_pin
-                            meta["ocsp_url"] = aia_pin
-                            meta.update(_ocsp_signed_timing_meta(ocsp_der))
-                            meta.update(_ocsp_expiry_meta(ttl))
-                            if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
-                                meta["expires_unix"] = meta["next_update_unix"]
-                            meta.update(_provenance_meta())
-                            meta["paged"] = True
-                            meta["paged_unix"] = int(datetime.now(timezone.utc).timestamp())
+                        # Disk is already verified paged=true above; never invent paged without canary.
+                        meta = dict(disk_meta_obj)
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
                             service_id=None,

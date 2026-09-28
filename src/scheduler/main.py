@@ -52,6 +52,7 @@ from jobs import (  # type: ignore
     Job,
     _write_atomic,
     load_disk_ocsp_floor,
+    normalize_restored_ocsp_json_bytes,
     ocsp_restore_plan,
     parse_ocsp_floor_bytes,
     parse_ocsp_floor_cache_name,
@@ -712,7 +713,14 @@ def generate_caches() -> Set[str]:
                         LOGGER.info(f"OCSP floor generate_caches skip fp={floor_fp[:16]}... reason={floor_reason}")
                         continue
             checked_path = checked_cache_path(job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"])
-            _write_atomic(checked_path, data)
+            write_data = data
+            if job_cache_file.get("plugin_id") == "ssl":
+                written_leaf = parse_ocsp_shard_cache_name(job_cache_file.get("file_name") or "")
+                if written_leaf and written_leaf[1] == "ocsp.json":
+                    write_data = normalize_restored_ocsp_json_bytes(
+                        data if isinstance(data, (bytes, bytearray)) else None
+                    )
+            _write_atomic(checked_path, write_data)
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
             if checked_path.stat().st_mode & 0o777 != desired_perms:
                 checked_path.chmod(desired_perms)

@@ -773,12 +773,13 @@ local function cluster_floor_blocks(fingerprint, meta)
 end
 
 -- Live shard must be scheduler-paged (canary handshake) before stapling.
--- Legacy meta without the field is treated as already paged.
+-- Require explicit paged=true. Missing/legacy field is not canary proof
+-- (restore/pre-canary meta used to skip this gate and staple never-canary'd DER).
 local function shard_not_paged(meta)
 	if type(meta) ~= "table" then
-		return false
+		return true
 	end
-	return meta.paged == false
+	return meta.paged ~= true
 end
 
 -- Job tombstone writes "tombstoned": true before DER unlink / epoch bump.
