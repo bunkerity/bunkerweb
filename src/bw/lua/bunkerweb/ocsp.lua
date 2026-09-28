@@ -2564,10 +2564,131 @@ local function cert_spki_fingerprint(cert_pem)
 	return fingerprint
 end
 
+-- Subject / issuer DN strings for issuer-path linking (empty on parse failure).
+local function cert_subject_issuer_dns(pem)
+	local subject, issuer = nil, nil
+	pcall(function()
+		local x509 = require("resty.openssl.x509")
+		local c = x509.new(pem)
+		if c and c.get_subject_name and c.get_issuer_name then
+			subject = tostring(c:get_subject_name() or "")
+			issuer = tostring(c:get_issuer_name() or "")
+		end
+	end)
+	return subject, issuer
+end
+
+-- Ordered Certificate message for one leaf: leaf + issuer-linked intermediates only.
+-- Drops off-path bag members (cross-signs, unused extras) so their Must-Staple cannot
+-- fail-close a healthy leaf→issuer path. If the leaf's issuer cannot be resolved in
+-- the bag, falls back to the legacy full bag so quirky PEMs still install.
+local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
+	if type(leaf_pem) ~= "string" or leaf_pem == "" then
+		return {}
+	end
+	local blocks = { leaf_pem }
+	if type(intermediate_pems) ~= "table" or #intermediate_pems == 0 then
+		return blocks, true
+	end
+	local by_subject = {}
+	for _, pem in ipairs(intermediate_pems) do
+		if type(pem) == "string" and pem ~= "" then
+			local subj, iss = cert_subject_issuer_dns(pem)
+			if subj and subj ~= "" then
+				local list = by_subject[subj]
+				if not list then
+					list = {}
+					by_subject[subj] = list
+				end
+				list[#list + 1] = { pem = pem, issuer = iss }
+			end
+		end
+	end
+	local _, current_issuer = cert_subject_issuer_dns(leaf_pem)
+	local seen = {}
+	local linked = 0
+	for _ = 1, 8 do
+		if not current_issuer or current_issuer == "" then
+			break
+		end
+		local cands = by_subject[current_issuer]
+		if not cands or #cands == 0 then
+			break
+		end
+		local pick = cands[1]
+		local pick_subj, pick_iss = cert_subject_issuer_dns(pick.pem)
+		-- Trust anchor: stop; do not present the root as a stapled CertificateEntry.
+		if pick_subj and pick_iss and pick_subj == pick_iss then
+			break
+		end
+		local fp = spki_fingerprint(pick.pem)
+		if fp and seen[fp] then
+			break
+		end
+		if fp then
+			seen[fp] = true
+		end
+		blocks[#blocks + 1] = pick.pem
+		linked = linked + 1
+		current_issuer = pick.issuer or pick_iss
+	end
+	if linked == 0 then
+		-- Unresolved issuer DN: legacy bag concat (name encoding / unordered dumps).
+		for _, pem in ipairs(intermediate_pems) do
+			if type(pem) == "string" and pem ~= "" then
+				blocks[#blocks + 1] = pem
+			end
+		end
+		return blocks, false
+	end
+	local dropped = #intermediate_pems - linked
+	if dropped > 0 then
+		log(
+			ngx.DEBUG,
+			"OCSP issuer-linked chain dropped "
+				.. tostring(dropped)
+				.. " off-path bag PEM(s); presented_entries="
+				.. tostring(#blocks)
+		)
+	end
+	return blocks, true
+end
+
+local function issuer_linked_chain_pem(leaf_pem, intermediate_pems)
+	local blocks = issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
+	return table.concat(blocks, "\n")
+end
+
+-- Narrow a PEM bag or block list to the leaf's issuer-linked presentation.
+local function presentable_chain_blocks(cert_pem_or_blocks)
+	local blocks = cert_pem_or_blocks
+	if type(blocks) == "string" then
+		blocks = pem_blocks(blocks)
+	end
+	if type(blocks) ~= "table" or #blocks <= 1 then
+		return blocks
+	end
+	local leaf = blocks[1]
+	local inters = {}
+	for i = 2, #blocks do
+		inters[#inters + 1] = blocks[i]
+	end
+	return issuer_linked_chain_blocks(leaf, inters)
+end
+
+function _M.issuer_linked_chain_pem(leaf_pem, intermediate_pems)
+	return issuer_linked_chain_pem(leaf_pem, intermediate_pems)
+end
+
+function _M.issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
+	return issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
+end
+
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
--- Returns: true, leaf_pem, leaf_fp  OR  false, err_msg [, detail]
+-- Returns: true, chain_pem, leaf_fp  OR  false, err_msg [, detail]
+-- chain_pem is the issuer-linked presentation (leaf + path intermediates) for staple attach.
 function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
 		return false, "cert_pem and key_pem strings are required"
@@ -2627,10 +2748,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	end
 
 	local function install_one(leaf, probe_must)
-		local chain_pem = leaf.pem
-		for _, intermediate in ipairs(intermediates) do
-			chain_pem = chain_pem .. "\n" .. intermediate
-		end
+		-- Present only the issuer-linked path for this leaf — not every bag PEM.
+		local chain_pem = issuer_linked_chain_pem(leaf.pem, intermediates)
 		local leaf_must = false
 		if probe_must then
 			leaf_must = has_must_staple(leaf.pem)
@@ -2673,7 +2792,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		if not ok_key then
 			return false, "set_priv_key failed: " .. tostring(err_key)
 		end
-		return true, leaf.pem, leaf.fp
+		-- Return issuer-linked chain so staple/attach see the same CertificateEntrys.
+		return true, chain_pem, leaf.fp
 	end
 
 	-- Try ClientHello-compatible leaves in preference order. A poisoned Must-Staple
@@ -3157,6 +3277,9 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if not leaf_pem then
 		return false
 	end
+	-- Drop off-path bag PEMs (sibling dual-cert leaf, cross-signs) before Must-Staple scan.
+	blocks = presentable_chain_blocks(blocks)
+	leaf_pem = blocks[1] or leaf_pem
 	local must_staple = has_must_staple(leaf_pem)
 	-- When resty cannot see TLS Feature, honor Must-Staple from job-written ocsp.json.
 	if not must_staple and fp_hint then
@@ -3262,6 +3385,8 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	if not leaf_pem then
 		return false
 	end
+	blocks = presentable_chain_blocks(blocks)
+	leaf_pem = blocks[1] or leaf_pem
 	local must_staple = has_must_staple(leaf_pem)
 	if not must_staple and fp_hint then
 		must_staple = ocsp_json_must_staple(read_ocsp_json(fp_hint))
@@ -3673,10 +3798,7 @@ function _M.attach_ocsp_staple(leaf_resp, chain_pem_or_blocks)
 	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
 		return nil, "ngx_ocsp_unavailable"
 	end
-	local blocks = chain_pem_or_blocks
-	if type(blocks) == "string" then
-		blocks = pem_blocks(blocks)
-	end
+	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
 	return attach_ocsp_staple(ocsp, leaf_resp, blocks)
 end
 
