@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import ctypes
+import errno
 import fcntl
 import hashlib
 import io
@@ -2127,6 +2129,94 @@ def _fsync_directory(path: Path) -> None:
         pass
 
 
+def _renameat2_exchange(path_a: Path, path_b: Path) -> bool:
+    """
+    Atomically exchange two directory entries via Linux renameat2(RENAME_EXCHANGE).
+
+    Returns True on success. False when the syscall/flag is unavailable or the
+    filesystem rejects it — caller must fall back.
+    """
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+    except Exception:
+        return False
+    if not hasattr(libc, "renameat2"):
+        return False
+    # AT_FDCWD / RENAME_EXCHANGE from linux/fcntl.h
+    at_fdcwd = -100
+    rename_exchange = 2
+    a_b = os.fsencode(path_a)
+    b_b = os.fsencode(path_b)
+    try:
+        libc.renameat2.argtypes = [
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_uint,
+        ]
+        libc.renameat2.restype = ctypes.c_int
+        if libc.renameat2(at_fdcwd, a_b, at_fdcwd, b_b, rename_exchange) == 0:
+            return True
+    except Exception:
+        return False
+    err = ctypes.get_errno()
+    if err not in (0, errno.EINVAL, errno.ENOSYS, getattr(errno, "ENOTSUP", errno.EOPNOTSUPP)):
+        log_debug(
+            "⚠️ OCSP renameat2(RENAME_EXCHANGE) failed (%s): %s",
+            err,
+            os.strerror(err),
+        )
+    return False
+
+
+def _page_shard_directory_into_place(staging: Path, final_dir: Path, stale: Path) -> bool:
+    """
+    Replace the live shard directory with the staged tree.
+
+    Prefer renameat2(RENAME_EXCHANGE) so Must-Staple readers never see ENOENT
+    between move-aside and stage-in. Returns True when the previous live tree
+    was moved aside via the non-atomic fallback (caller may need to restore it
+    on later failure); False when exchange succeeded or there was no prior live.
+    """
+    live_present = final_dir.exists() or final_dir.is_symlink()
+    if not live_present:
+        staging.rename(final_dir)
+        return False
+
+    if _renameat2_exchange(staging, final_dir):
+        # staging now holds the previous live tree — drop it.
+        if staging.exists() or staging.is_symlink():
+            if staging.is_symlink() or staging.is_file():
+                staging.unlink(missing_ok=True)
+            else:
+                shutil.rmtree(staging, ignore_errors=True)
+        log_debug("✓ OCSP paged shard via renameat2(RENAME_EXCHANGE) (no reader gap)")
+        return False
+
+    # Fallback: two renames — brief ENOENT window for concurrent handshakes.
+    log_debug("⚡ OCSP page swap falling back to move-aside+rename (brief reader gap)")
+    final_dir.rename(stale)
+    try:
+        staging.rename(final_dir)
+    except Exception:
+        if stale.exists() and not final_dir.exists() and not final_dir.is_symlink():
+            try:
+                stale.rename(final_dir)
+            except Exception as restore_err:
+                log_error(
+                    "❌ OCSP failed to restore shard after page-rename error: %s",
+                    restore_err,
+                )
+        raise
+    if stale.exists() or stale.is_symlink():
+        if stale.is_symlink() or stale.is_file():
+            stale.unlink(missing_ok=True)
+        else:
+            shutil.rmtree(stale, ignore_errors=True)
+    return True
+
+
 def _copy_ocsp_shard_sidecars(live_dir: Path, staging_dir: Path) -> None:
     """Carry quarantine/blacklist markers into a new shard tree before rename."""
     if not live_dir.is_dir():
@@ -2284,16 +2374,16 @@ def _publish_ocsp_shard(
     db: Optional[Any] = None,
 ) -> Path:
     """
-    Page issuer.pem + ocsp.der + ocsp.json as one directory rename — only after
+    Page issuer.pem + ocsp.der + ocsp.json as one directory swap — only after
     a scheduler canary handshake against the staged trio succeeds.
 
     Stage under ``.{fp}.pub-*``. Canary runs while the previous live shard (if
     any) is still in place. On canary failure the stage is discarded and live
-    is untouched. On success, stamp ``paged`` / ``paged_unix``, move live aside
-    to ``.{fp}.old-*``, then rename the stage into place. Readers see either the
-    previous complete shard or the new paged shard — never a mix of old DER and
-    new JSON. Sidecars are carried into the new tree. On rename failure the
-    previous live directory is restored.
+    is untouched. On success, stamp ``paged`` / ``paged_unix``, then swap the
+    stage into the live path via renameat2(RENAME_EXCHANGE) when available so
+    readers never see ENOENT; otherwise fall back to move-aside + rename.
+    Sidecars are carried into the new tree. On rename failure the previous live
+    directory is restored when the non-atomic fallback had moved it aside.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -2362,16 +2452,11 @@ def _publish_ocsp_shard(
         )
         _fsync_directory(staging)
 
-        # Page: swap staged (canary-ok) tree into the live path.
-        if final_dir.exists() or final_dir.is_symlink():
-            final_dir.rename(stale)
-            live_moved_aside = True
-        staging.rename(final_dir)
+        # Page: swap staged (canary-ok) tree into the live path (prefer atomic exchange).
+        live_moved_aside = _page_shard_directory_into_place(staging, final_dir, stale)
         published = True
         staging_created = False
 
-        if stale.exists():
-            shutil.rmtree(stale, ignore_errors=True)
         _fsync_directory(parent)
 
         # Keep caller meta in sync with what was paged (floor / DB use published_unix).
