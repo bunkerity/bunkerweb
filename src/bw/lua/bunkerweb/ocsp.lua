@@ -3458,32 +3458,43 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		if linked == 0 then
 			for _, pem in ipairs(intermediate_pems) do
 				if type(pem) == "string" and pem ~= "" then
+					-- Skip self-signed trust anchors first (not CertificateEntry staple targets).
+					local subj, iss = cert_subject_issuer_dns(pem)
+					if subj and iss and subj == iss then
+						-- Root certificates are never presented in TLS Certificate messages,
+						-- so they cannot be stapled regardless of Must-Staple. Skip them.
+						goto next_pem
+					end
 					local must = cert_must_staple_bool(pem, true)
 					if must then
 						dropped_must = dropped_must + 1
 					else
-						-- Skip self-signed trust anchors (not CertificateEntry staple targets).
-						local subj, iss = cert_subject_issuer_dns(pem)
-						if subj and iss and subj == iss then
-							-- drop root
-						else
-							blocks[#blocks + 1] = pem
-						end
+						blocks[#blocks + 1] = pem
 					end
+					::next_pem::
 				end
 			end
 		else
 			-- Partial link then an ambiguous hop: count Must-Staple PEMs that
-			-- were not already placed on the chain.
+			-- were not already placed on the chain. Skip self-signed roots since
+			-- they are never presented in TLS Certificate messages.
 			local placed = {}
 			for i = 2, #blocks do
 				placed[blocks[i]] = true
 			end
 			for _, pem in ipairs(intermediate_pems) do
 				if type(pem) == "string" and pem ~= "" and not placed[pem] then
+					-- Root certificates (subj == issuer) are never CertificateEntry
+					-- staple targets and should not count as unresolved Must-Staple.
+					local subj, iss = cert_subject_issuer_dns(pem)
+					if subj and iss and subj == iss then
+						-- Skip self-signed root
+						goto next_unplaced
+					end
 					if cert_must_staple_bool(pem, true) then
 						dropped_must = dropped_must + 1
 					end
+					::next_unplaced::
 				end
 			end
 		end
