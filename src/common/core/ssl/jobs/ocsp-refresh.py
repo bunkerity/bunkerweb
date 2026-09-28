@@ -1695,12 +1695,94 @@ def _cert_has_ocsp_aia(cert: x509.Certificate) -> bool:
     return False
 
 
+def _cert_spki_hex(cert: x509.Certificate) -> Optional[str]:
+    """SHA-256 of SPKI for loop detection (same notion as shard fingerprint)."""
+    try:
+        pubkey_der = cert.public_key().public_bytes(
+            encoding=Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        return hashlib.sha256(pubkey_der).hexdigest().lower()
+    except Exception:
+        return None
+
+
+def _handshake_intermediate_path(
+    certs: List[x509.Certificate],
+    cert_name: str,
+) -> List[x509.Certificate]:
+    """
+    Issuer-linked intermediates from the leaf to (but not including) the trust anchor.
+
+    Matches what TLS presents after the leaf: follow subject==issuer DN links from
+    certs[0], skipping sibling leaves and other PEM extras that are not on that path.
+    """
+    if not certs:
+        return []
+    leaf = certs[0]
+    by_subject: Dict[Any, List[x509.Certificate]] = {}
+    for c in certs[1:]:
+        by_subject.setdefault(c.subject, []).append(c)
+
+    path: List[x509.Certificate] = []
+    current = leaf
+    seen: set = set()
+    max_depth = 8
+    for _ in range(max_depth):
+        if current.subject == current.issuer:
+            break
+        issuer: Optional[x509.Certificate] = None
+        for candidate in by_subject.get(current.issuer, []):
+            if candidate.subject == candidate.issuer:
+                # Trust anchor — path complete; do not staple the root.
+                return path
+            issuer = candidate
+            break
+        if issuer is None:
+            # PEM omitted the next issuer; AIA caIssuers may still complete the path.
+            try:
+                fetched = _fetch_issuer_from_aia(current, f"{cert_name}__path_aia{len(path)}")
+            except Exception:
+                fetched = None
+            if fetched is None:
+                break
+            if fetched.subject == fetched.issuer:
+                break
+            issuer = fetched
+        fp = _cert_spki_hex(issuer)
+        if fp and fp in seen:
+            log_debug("⚠️ OCSP intermediate path loop for %s at fp=%s...", cert_name, fp[:16])
+            break
+        if fp:
+            seen.add(fp)
+        path.append(issuer)
+        current = issuer
+    return path
+
+
+def _cert_has_must_staple(cert: x509.Certificate) -> bool:
+    try:
+        tls_feature_ext = cert.extensions.get_extension_for_oid(ExtensionOID.TLS_FEATURE)
+        tls_features = cast(TLSFeature, tls_feature_ext.value)
+        for feature in tls_features:
+            if feature == TLSFeatureType.status_request:
+                return True
+    except x509.ExtensionNotFound:
+        return False
+    except Exception:
+        return False
+    return False
+
+
 def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[str, bytes]]:
     """
-    Non-root intermediates in the fullchain that advertise an OCSP AIA URI.
-    Each target is a mini-chain PEM (intermediate + its issuer) so _process_cert
-    can fetch/page a shard keyed by that intermediate's SPKI — for TLS 1.3
-    CertificateEntry multi-staple when workers export SSL_set0_tlsext_status_ocsp_resp_ex.
+    Intermediates handshakes actually staple: issuer-linked path from the leaf, plus
+    any other non-root PEM member that carries Must-Staple (still sent in the
+    Certificate message when present in the bundle).
+
+    Skips sibling dual-cert leaves and unused cross-signs that are not on the path
+    and do not require a staple. Each target is a mini-chain PEM (intermediate +
+    its issuer) for SPKI-keyed fetch/page.
     """
     out: List[Tuple[str, bytes]] = []
     try:
@@ -1710,17 +1792,54 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
         return out
     if len(certs) < 2:
         return out
-    for i in range(1, len(certs)):
-        cert = certs[i]
-        # Trust anchors / self-signed: no OCSP staple for the root.
-        if cert.subject == cert.issuer:
+
+    path = _handshake_intermediate_path(certs, cert_name)
+    path_fps = {fp for fp in (_cert_spki_hex(c) for c in path) if fp}
+    # Must-Staple extras still appear as CertificateEntry when left in the bundle.
+    extras: List[x509.Certificate] = []
+    for c in certs[1:]:
+        if c.subject == c.issuer:
             continue
+        fp = _cert_spki_hex(c)
+        if fp and fp in path_fps:
+            continue
+        if _cert_has_must_staple(c) and _cert_has_ocsp_aia(c):
+            extras.append(c)
+            if fp:
+                path_fps.add(fp)
+
+    targets = list(path) + extras
+    if not targets:
+        log_debug(
+            "ℹ️ OCSP no handshake intermediate targets for %s (leaf-only or unresolved issuer)",
+            cert_name,
+        )
+        return out
+
+    by_subject: Dict[Any, List[x509.Certificate]] = {}
+    for c in certs[1:]:
+        by_subject.setdefault(c.subject, []).append(c)
+
+    queued_fps: set = set()
+    for i, cert in enumerate(targets, start=1):
         if not _cert_has_ocsp_aia(cert):
             continue
+        fp = _cert_spki_hex(cert)
+        if fp and fp in queued_fps:
+            continue
         issuer_pem = b""
-        if i + 1 < len(certs):
-            issuer_pem = certs[i + 1].public_bytes(Encoding.PEM)
-        else:
+        # Next hop on the issuer path when this cert is on that path.
+        try:
+            path_idx = path.index(cert)
+        except ValueError:
+            path_idx = -1
+        if path_idx >= 0 and path_idx + 1 < len(path):
+            issuer_pem = path[path_idx + 1].public_bytes(Encoding.PEM)
+        if not issuer_pem:
+            for candidate in by_subject.get(cert.issuer, []):
+                issuer_pem = candidate.public_bytes(Encoding.PEM)
+                break
+        if not issuer_pem:
             try:
                 fetched = _fetch_issuer_from_aia(cert, f"{cert_name}__ocsp_inter{i}")
                 if fetched is not None:
@@ -1729,19 +1848,21 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
                 issuer_pem = b""
         if not issuer_pem:
             log_debug(
-                "ℹ️ OCSP skipping intermediate index %d for %s: no issuer PEM for OCSP request",
+                "ℹ️ OCSP skipping handshake intermediate index %d for %s: no issuer PEM for OCSP request",
                 i,
                 cert_name,
             )
             continue
         mini = cert.public_bytes(Encoding.PEM) + issuer_pem
-        # Marker regex allows [A-Za-z0-9_.*-]; keep the leaf name prefix for ops.
         iname = f"{cert_name}__ocsp_inter{i}"
         out.append((iname, mini))
+        if fp:
+            queued_fps.add(fp)
         log_debug(
-            "🔗 OCSP queued intermediate staple target %s (index=%d) for leaf %s",
+            "🔗 OCSP queued handshake intermediate staple target %s (path_index=%d must_staple_extra=%s) for leaf %s",
             iname,
             i,
+            path_idx < 0,
             cert_name,
         )
     return out
