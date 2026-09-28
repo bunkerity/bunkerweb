@@ -660,6 +660,15 @@ local function cluster_floor_blocks(fingerprint, meta)
 	return true
 end
 
+-- Live shard must be scheduler-paged (canary handshake) before stapling.
+-- Legacy meta without the field is treated as already paged.
+local function shard_not_paged(meta)
+	if type(meta) ~= "table" then
+		return false
+	end
+	return meta.paged == false
+end
+
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
 -- A different serial (reissue on the same key) is allowed. Unreadable serial
 -- while the file exists fails closed.
@@ -1574,6 +1583,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	if must_staple and cluster_floor_blocks(fingerprint, meta) then
 		return false, "must_staple", "cluster_floor"
 	end
+	if shard_not_paged(meta) then
+		if must_staple then
+			return false, "must_staple", "not_paged"
+		end
+		return false
+	end
 
 	local aia_ok, aia_why = aia_uri_pin_ok(nil, meta, must_staple)
 	if not aia_ok then
@@ -1731,6 +1746,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 	local meta = read_ocsp_json(fingerprint)
 	if must_staple and cluster_floor_blocks(fingerprint, meta) then
 		return false, "must_staple", "cluster_floor"
+	end
+	if shard_not_paged(meta) then
+		if must_staple then
+			return false, "must_staple", "not_paged"
+		end
+		return false
 	end
 	local aia_ok, aia_why = aia_uri_pin_ok(leaf_pem, meta, must_staple)
 	if not aia_ok then

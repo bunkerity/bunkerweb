@@ -2155,28 +2155,167 @@ def _copy_ocsp_shard_sidecars(live_dir: Path, staging_dir: Path) -> None:
             log_debug("⚠️ OCSP could not copy sidecar %s into staging: %s", name, e)
 
 
+def _canary_ocsp_handshake(
+    *,
+    leaf_pem: bytes,
+    issuer_pem: bytes,
+    ocsp_der: bytes,
+    meta: Dict[str, Any],
+    cert_name: str = "",
+) -> Tuple[bool, str]:
+    """
+    Scheduler canary before paging a staged shard live.
+
+    Re-runs the handshake acceptance path against the staged trio (openssl
+    verify, issuer SPKI pin, single CertID, CertStatus=GOOD, intrinsic timing,
+    der_sha256 / CertID / AIA meta ligands). Does not touch the live shard or
+    bump ``.ocsp_epoch``. Private key is not required; this is the same crypto
+    gate ``ssl_certificate`` uses before ``set_ocsp_status_resp``.
+    """
+    label = cert_name or "canary"
+    if not leaf_pem or not issuer_pem or not ocsp_der:
+        return False, "canary_missing_inputs"
+    if not isinstance(meta, dict):
+        return False, "canary_meta_invalid"
+
+    expected_der = meta.get("der_sha256")
+    if not isinstance(expected_der, str) or len(expected_der) != 64:
+        return False, "canary_der_sha256_missing"
+    if hashlib.sha256(ocsp_der).hexdigest().lower() != expected_der.lower():
+        return False, "canary_der_sha256_mismatch"
+
+    try:
+        leaf = x509.load_pem_x509_certificate(leaf_pem)
+        issuer = x509.load_pem_x509_certificate(issuer_pem)
+        ocsp_response = x509_ocsp.load_der_ocsp_response(ocsp_der)
+    except Exception as e:
+        log_error("❌ OCSP canary parse failed for %s: %s", label, e)
+        return False, "canary_parse_failed"
+
+    if ocsp_response.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
+        return False, "canary_response_status"
+
+    if not Path(OPENSSL_BIN).is_file():
+        log_error("❌ OCSP canary requires openssl at %s", OPENSSL_BIN)
+        return False, "canary_openssl_missing"
+
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".der", delete=True) as f_der, tempfile.NamedTemporaryFile(
+            suffix=".pem", mode="w", delete=True
+        ) as f_issuer, tempfile.NamedTemporaryFile(suffix=".pem", mode="w", delete=True) as f_leaf:
+            os.chmod(f_der.name, 0o600)
+            os.chmod(f_issuer.name, 0o600)
+            os.chmod(f_leaf.name, 0o600)
+            f_der.write(ocsp_der)
+            f_der.flush()
+            f_issuer.write(
+                issuer_pem.decode("utf-8")
+                if isinstance(issuer_pem, (bytes, bytearray))
+                else str(issuer_pem)
+            )
+            f_issuer.flush()
+            # Prefer the leaf PEM the job will staple against (fullchain first block ok).
+            if isinstance(leaf_pem, (bytes, bytearray)):
+                leaf_text = leaf_pem.decode("utf-8", errors="ignore")
+            else:
+                leaf_text = str(leaf_pem)
+            if "BEGIN CERTIFICATE" not in leaf_text:
+                leaf_text = leaf.public_bytes(Encoding.PEM).decode("utf-8")
+            f_leaf.write(leaf_text)
+            f_leaf.flush()
+            cmd = [
+                OPENSSL_BIN,
+                "ocsp",
+                "-respin",
+                f_der.name,
+                "-issuer",
+                f_issuer.name,
+                "-cert",
+                f_leaf.name,
+                "-CAfile",
+                f_issuer.name,
+                "-partial_chain",
+            ]
+            try:
+                p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+            except subprocess.TimeoutExpired:
+                return False, "canary_openssl_timeout"
+            if p.returncode != 0:
+                log_error(
+                    "❌ OCSP canary openssl verify failed for %s: %s",
+                    label,
+                    (p.stderr or p.stdout or "").strip(),
+                )
+                return False, "canary_openssl_verify"
+    except Exception as e:
+        log_error("❌ OCSP canary openssl exception for %s: %s", label, e)
+        return False, "canary_openssl_exception"
+
+    if not _ocsp_signer_ends_on_issuer_spki(ocsp_der, issuer):
+        return False, "canary_signer_spki"
+
+    certid_pin = _pin_single_certid(ocsp_response, leaf, issuer, label)
+    if not certid_pin:
+        return False, "canary_certid"
+    meta_certid = meta.get("certid")
+    if not isinstance(meta_certid, dict):
+        return False, "canary_certid_meta_missing"
+    for key in ("serial", "issuer_name_hash", "issuer_key_hash"):
+        if str(meta_certid.get(key) or "").lower() != str(certid_pin.get(key) or "").lower():
+            return False, "canary_certid_mismatch"
+
+    try:
+        cert_status = ocsp_response.certificate_status
+    except (ValueError, AttributeError):
+        return False, "canary_cert_status_unreadable"
+    if cert_status != x509_ocsp.OCSPCertStatus.GOOD:
+        return False, "canary_cert_status_not_good"
+
+    policy_reason = _ocsp_intrinsic_policy_reason(ocsp_response, label)
+    if policy_reason:
+        return False, f"canary_{policy_reason}"
+
+    aia_pin = meta.get("aia_ocsp_uri") or meta.get("ocsp_url")
+    if not isinstance(aia_pin, str) or not aia_pin.strip():
+        return False, "canary_aia_unpinned"
+    try:
+        if not _pin_aia_ocsp_uri(leaf_pem, aia_pin, label):
+            return False, "canary_aia_mismatch"
+    except Exception:
+        return False, "canary_aia_check_failed"
+
+    return True, "ok"
+
+
 def _publish_ocsp_shard(
     fingerprint: str,
     *,
     issuer_pem: bytes,
     ocsp_der: bytes,
     meta: Dict[str, Any],
+    leaf_pem: Optional[bytes] = None,
+    cert_name: str = "",
     db: Optional[Any] = None,
 ) -> Path:
     """
-    Publish issuer.pem + ocsp.der + ocsp.json as one directory rename.
+    Page issuer.pem + ocsp.der + ocsp.json as one directory rename — only after
+    a scheduler canary handshake against the staged trio succeeds.
 
-    Stage under ``.{fp}.pub-*``, move the live shard aside to ``.{fp}.old-*``,
-    then rename the stage into place. Readers see either the previous complete
-    shard or the new complete shard — never a mix of old DER and new JSON (or a
-    missing issuer). Sidecars (nongood.json, serial-blacklist.json) are carried
-    into the new tree. On failure the previous live directory is restored.
+    Stage under ``.{fp}.pub-*``. Canary runs while the previous live shard (if
+    any) is still in place. On canary failure the stage is discarded and live
+    is untouched. On success, stamp ``paged`` / ``paged_unix``, move live aside
+    to ``.{fp}.old-*``, then rename the stage into place. Readers see either the
+    previous complete shard or the new paged shard — never a mix of old DER and
+    new JSON. Sidecars are carried into the new tree. On rename failure the
+    previous live directory is restored.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
         raise ValueError("empty fingerprint")
     if not issuer_pem or not ocsp_der:
         raise ValueError("issuer_pem and ocsp_der are required")
+    if not leaf_pem:
+        raise ValueError("leaf_pem is required for canary-before-page")
 
     final_dir = _resolved_sharded_ocsp_path(normalized)
     parent = final_dir.parent
@@ -2189,6 +2328,7 @@ def _publish_ocsp_shard(
     staging_created = False
     live_moved_aside = False
     published = False
+    page_meta = dict(meta) if isinstance(meta, dict) else {}
 
     try:
         if staging.exists():
@@ -2202,10 +2342,40 @@ def _publish_ocsp_shard(
         _copy_ocsp_shard_sidecars(final_dir, staging)
         _write_bytes_inplace(staging / "issuer.pem", issuer_pem)
         _write_bytes_inplace(staging / "ocsp.der", ocsp_der)
-        meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
-        _write_bytes_inplace(staging / "ocsp.json", meta_bytes)
+        # Unpaged marker while canary runs (never exposed as the live tree).
+        page_meta["paged"] = False
+        _write_bytes_inplace(
+            staging / "ocsp.json",
+            json.dumps(page_meta, separators=(",", ":")).encode("utf-8"),
+        )
         _fsync_directory(staging)
 
+        canary_ok, canary_reason = _canary_ocsp_handshake(
+            leaf_pem=leaf_pem,
+            issuer_pem=issuer_pem,
+            ocsp_der=ocsp_der,
+            meta=page_meta,
+            cert_name=cert_name or normalized[:16],
+        )
+        if not canary_ok:
+            log_error(
+                "❌ OCSP canary refused page for %s (fp=%s...): %s — live shard unchanged",
+                cert_name or normalized[:16],
+                normalized[:16],
+                canary_reason,
+            )
+            raise RuntimeError(f"canary refused page: {canary_reason}")
+
+        page_meta["paged"] = True
+        page_meta["paged_unix"] = int(datetime.now(timezone.utc).timestamp())
+        page_meta["canary_reason"] = canary_reason
+        _write_bytes_inplace(
+            staging / "ocsp.json",
+            json.dumps(page_meta, separators=(",", ":")).encode("utf-8"),
+        )
+        _fsync_directory(staging)
+
+        # Page: swap staged (canary-ok) tree into the live path.
         if final_dir.exists() or final_dir.is_symlink():
             final_dir.rename(stale)
             live_moved_aside = True
@@ -2216,6 +2386,18 @@ def _publish_ocsp_shard(
         if stale.exists():
             shutil.rmtree(stale, ignore_errors=True)
         _fsync_directory(parent)
+
+        # Keep caller meta in sync with what was paged (floor / DB use published_unix).
+        if isinstance(meta, dict):
+            meta.clear()
+            meta.update(page_meta)
+
+        log_info(
+            "✓ OCSP canary paged shard for %s (fp=%s..., paged_unix=%s)",
+            cert_name or normalized[:16],
+            normalized[:16],
+            page_meta.get("paged_unix"),
+        )
 
         # DB issuer mirror after the live tree is visible (der/json batched elsewhere).
         if db is not None:
@@ -4530,6 +4712,33 @@ def _persist_ocsp_results_to_db(
 
         # 1. Update OCSP response if we have a new one (using fingerprint-based key)
         if ocsp_der and ttl > 0:
+            # Only mirror bodies the scheduler canary already paged onto disk.
+            # DB must not become a back-channel that restores an unpaged generation.
+            disk_shard = _get_sharded_ocsp_path(cert_fp)
+            disk_der_path = disk_shard / "ocsp.der"
+            disk_meta_path = disk_shard / "ocsp.json"
+            try:
+                disk_der = disk_der_path.read_bytes() if disk_der_path.is_file() else b""
+            except Exception:
+                disk_der = b""
+            if not disk_der or hashlib.sha256(disk_der).digest() != hashlib.sha256(ocsp_der).digest():
+                log_debug(
+                    "⏭️ OCSP skipping DB mirror for %s: disk not paged to this DER (canary-before-page)",
+                    cert_name,
+                )
+                continue
+            disk_meta_obj: Optional[Dict[str, Any]] = None
+            try:
+                if disk_meta_path.is_file():
+                    loaded = json.loads(disk_meta_path.read_text(encoding="utf-8"))
+                    if isinstance(loaded, dict):
+                        disk_meta_obj = loaded
+            except Exception:
+                disk_meta_obj = None
+            if isinstance(disk_meta_obj, dict) and disk_meta_obj.get("paged") is False:
+                log_debug("⏭️ OCSP skipping DB mirror for %s: disk meta still unpaged", cert_name)
+                continue
+
             cache_key = _ocsp_cache_relpath(cert_fp, "ocsp.der")
             try:
                 # Pin CertID before mirroring DER — refuse multi-response / mismatch blobs.
@@ -4575,18 +4784,24 @@ def _persist_ocsp_results_to_db(
                     except Exception:
                         pass
                     try:
-                        meta = _extract_cert_metadata(pem_data, cert_name)
-                        meta["fingerprint"] = cert_fp
-                        meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
-                        meta["certid"] = certid_pin
-                        meta["serial"] = certid_pin["serial"]
-                        meta["aia_ocsp_uri"] = aia_pin
-                        meta["ocsp_url"] = aia_pin
-                        meta.update(_ocsp_signed_timing_meta(ocsp_der))
-                        meta.update(_ocsp_expiry_meta(ttl))
-                        if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
-                            meta["expires_unix"] = meta["next_update_unix"]
-                        meta.update(_provenance_meta())
+                        # Prefer the paged on-disk meta (includes paged_unix / canary_reason).
+                        if isinstance(disk_meta_obj, dict):
+                            meta = dict(disk_meta_obj)
+                        else:
+                            meta = _extract_cert_metadata(pem_data, cert_name)
+                            meta["fingerprint"] = cert_fp
+                            meta["der_sha256"] = hashlib.sha256(ocsp_der).hexdigest().lower()
+                            meta["certid"] = certid_pin
+                            meta["serial"] = certid_pin["serial"]
+                            meta["aia_ocsp_uri"] = aia_pin
+                            meta["ocsp_url"] = aia_pin
+                            meta.update(_ocsp_signed_timing_meta(ocsp_der))
+                            meta.update(_ocsp_expiry_meta(ttl))
+                            if isinstance(meta.get("next_update_unix"), int) and meta["next_update_unix"] > 0:
+                                meta["expires_unix"] = meta["next_update_unix"]
+                            meta.update(_provenance_meta())
+                            meta["paged"] = True
+                            meta["paged_unix"] = int(datetime.now(timezone.utc).timestamp())
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
                         db.upsert_job_cache(
                             service_id=None,
@@ -5121,11 +5336,12 @@ def _persist_ocsp_results_to_disk(
     db: Optional[Any] = None,
 ) -> None:
     """
-    Write OCSP cache as one locked directory rename per fingerprint:
-    stage issuer.pem + ocsp.der + ocsp.json, then swap the shard into place.
+    Write OCSP cache as one locked directory rename per fingerprint after a
+    scheduler canary handshake: stage issuer.pem + ocsp.der + ocsp.json, canary,
+    then page the shard into place.
 
     Holding the cert lock across the publish avoids concurrent writers racing
-    the rename. The previous shard stays intact if staging or rename fails.
+    the rename. The previous shard stays intact if staging, canary, or rename fails.
     Called at normal completion and on timeout.
     """
     if not all_ocsp_results:
@@ -5227,6 +5443,8 @@ def _persist_ocsp_results_to_disk(
                     issuer_pem=issuer_pem,
                     ocsp_der=ocsp_der,
                     meta=meta,
+                    leaf_pem=cleaned_pem,
+                    cert_name=cert_name,
                     db=db,
                 )
                 published_any = True
@@ -5656,8 +5874,8 @@ def main() -> int:
         # === Check if timeout has been reached and save partial results ===
         if check_job_timeout("after processing phase"):
             log_warning("⏱️ OCSP job timeout during processing. Saving partial results (%d cert(s)) to database and disk.", len(all_ocsp_results))
-            _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
             _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
+            _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
             # Still prune orphans on soft timeout: deleted services must not keep growing
             # sharded cache just because the fetch phase ran long.
             try:
@@ -5674,9 +5892,9 @@ def main() -> int:
             )
             return 1 if status == 0 else status
 
-        # === Persist all OCSP responses to database and disk ===
-        _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
+        # === Persist: canary-page disk first, then DB mirrors only paged shards ===
         _persist_ocsp_results_to_disk(all_ocsp_results, stats, db=db)
+        _persist_ocsp_results_to_db(db, all_ocsp_results, stats)
 
         # Prune orphans after persist even near the soft deadline — deleted services
         # must not keep sharded cache forever on chronically slow fleets.
