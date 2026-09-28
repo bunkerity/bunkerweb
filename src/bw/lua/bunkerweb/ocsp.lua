@@ -123,6 +123,9 @@ local STAPLE_DECISION = {
 	peer_refuse_bus = true,
 	await_sni = true,
 	intermediate_must_staple_libssl = true,
+	-- Soft ngx.ocsp.validate budget aborted during leaf issuer tries; multi-staple
+	-- stack was never attached (not ok_partial — that name is NULL-slot attach only).
+	validate_budget = true,
 	unmet = true,
 }
 
@@ -1058,7 +1061,9 @@ end
 local function must_staple_refuse(fingerprint, meta, resp, detail, mode)
 	if mode ~= "staple_only" and mode ~= "open" then
 		local d = detail or "unmet"
+		-- Timing / local soft-abort: sibling must not inherit a handshake timeout.
 		local skip_bus = d == "not_paged"
+			or d == "validate_budget"
 			or (
 				(d == "set_staple_failed" or d == "set_staple_exception")
 				and type(meta) == "table"
@@ -1696,9 +1701,20 @@ local function try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
 			over_budget = (ngx.now() - t0) > OCSP_VALIDATE_BUDGET_S
 		end
 		if over_budget then
-			local fp_short = (type(fingerprint) == "string" and #fingerprint >= 16) and (fingerprint:sub(1, 16) .. "...") or "?"
-			log(ngx.ERR, "OCSP validate budget exceeded fp=" .. fp_short .. " after " .. tostring(i - 1) .. " issuer attempt(s)")
-			break
+			local fp_s = (type(fingerprint) == "string" and #fingerprint == 64) and fingerprint or nil
+			local fp_short = fp_s and (fp_s:sub(1, 16) .. "...") or "?"
+			log(
+				ngx.ERR,
+				format_staple_decision("validate_budget", {
+					tag = "OCSP_VALIDATE_BUDGET",
+					fp = fp_s or fp_short,
+					detail = "leaf_issuers_only",
+					issuer_attempts = i - 1,
+				})
+			)
+			-- Named abort: stack never reached attach_ocsp_staple / intermediates.
+			-- Do not collapse to nil (looks like unmet/skip) or ok_partial (attach-only).
+			return false, "validate_budget"
 		end
 		if validate(ocsp, ssl, resp, leaf_pem, issuers[i], shard_issuer_spki) then
 			return set_resp()
@@ -3001,6 +3017,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 				return true
 			end
 			if result == false then
+				if result_detail == "validate_budget" then
+					if must_staple then
+						return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+					end
+					return false
+				end
 				if result_detail == "intermediate_must_staple_libssl" or must_staple then
 					-- CertID fails before canary; false + canary ligand ⇒ set_ocsp_status_resp miss.
 					local detail = result_detail
@@ -3048,6 +3070,12 @@ local function staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, finge
 			return true
 		end
 		if result == false then
+			if result_detail == "validate_budget" then
+				if must_staple then
+					return must_staple_refuse(fingerprint, meta, resp, "validate_budget", mode)
+				end
+				return false
+			end
 			if result_detail == "intermediate_must_staple_libssl" or must_staple then
 				local detail = result_detail
 				if detail ~= "intermediate_must_staple_libssl" then
