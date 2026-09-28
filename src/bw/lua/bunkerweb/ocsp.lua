@@ -98,6 +98,7 @@ local STAPLE_DECISION = {
 	aia_uri_mismatch = true,
 	aia_uri_unpinned = true,
 	aia_uri_missing_on_leaf = true,
+	aia_uri_leaf_unavailable = true,
 	ssl_use_ocsp_stapling_no = true,
 	ngx_ocsp_unavailable = true,
 	response_not_found = true,
@@ -357,6 +358,7 @@ local PEER_REFUSE_STICKY = {
 	aia_uri_mismatch = true,
 	aia_uri_unpinned = true,
 	aia_uri_missing_on_leaf = true,
+	aia_uri_leaf_unavailable = true,
 	tombstoned = true,
 	serial_blacklisted = true,
 	cluster_floor = true,
@@ -1336,8 +1338,13 @@ local function aia_uri_pin_ok(leaf_pem, meta, must_staple)
 		end
 		return true, nil
 	end
-	-- Fingerprint-only path: cannot re-check live AIA; pin + ligand still bind the body.
+	-- Must-Staple requires a live AIA re-check against the presented leaf.
+	-- Fingerprint-only (no PEM) cannot do that — fail closed rather than trust the pin alone.
 	if type(leaf_pem) ~= "string" or leaf_pem == "" then
+		if must_staple then
+			return false, "aia_uri_leaf_unavailable"
+		end
+		-- Optional staple: pin + ligand still bind the body when PEM is absent.
 		return true, nil
 	end
 	local leaf_uris = leaf_aia_ocsp_uris(leaf_pem)
