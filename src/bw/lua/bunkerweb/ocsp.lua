@@ -16,6 +16,13 @@ local SPKI_VALIDATION_PROVISIONAL = "provisional"  -- SPKI matched, awaiting ful
 local SPKI_VALIDATION_CONFIRMED = "confirmed"      -- SPKI matched & issuer cert validated
 local SPKI_VALIDATION_FAILED = "failed_spki"       -- SPKI mismatch or issuer unavailable
 
+-- Versioned OCSP responses: prevent stale cache after cert rotation.
+-- Each response version tagged with generation/epoch so stale cached responses
+-- are automatically invalidated when certificates change or new OCSP issued.
+-- Scheduler updates global version on cert rotation; TLS path checks match before using cache.
+local OCSP_VERSION_KEY = "OCSP:RESPONSE_VERSION"   -- Global response version (incremented on rotation)
+local OCSP_RESPONSE_VERSION_PREFIX = "OCSP:VERSION:"  -- Per-fingerprint: version at time of validation
+
 local common = require("bunkerweb.ocsp_common").internal
 local OCSP_CLOCK_SKEW_SECONDS = common.OCSP_CLOCK_SKEW_SECONDS
 local OCSP_VALIDATE_BUDGET_NS = common.OCSP_VALIDATE_BUDGET_NS
@@ -247,6 +254,82 @@ local function set_spki_validation_status(issuer_fingerprint, status, ttl)
 		ngx_shared.bw_ocsp_validations:set(spki_status_key, status, ttl_val)
 	end)
 end
+
+-- Versioned OCSP Responses: Track response versions to auto-invalidate stale cached responses.
+-- When certificates rotate or new OCSP responses are issued, increment global version.
+-- TLS path checks: if cached_version ~= current_version, cache is stale (re-validate).
+local function get_ocsp_response_version()
+	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return 0
+	end
+	local version
+	pcall(function()
+		version = ngx.shared.bw_ocsp_validations:get(OCSP_VERSION_KEY)
+	end)
+	return tonumber(version) or 0
+end
+
+local function set_ocsp_response_version(version)
+	if not version or version <= 0 then
+		return
+	end
+	local ngx_shared = ngx and ngx.shared
+	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+		return
+	end
+	pcall(function()
+		ngx_shared.bw_ocsp_validations:set(OCSP_VERSION_KEY, tostring(version), 86400)
+	end)
+end
+
+local function increment_ocsp_response_version()
+	local current = get_ocsp_response_version()
+	local next_version = current + 1
+	set_ocsp_response_version(next_version)
+	return next_version
+end
+
+local function get_cached_response_version(fingerprint)
+	if not fingerprint or fingerprint == "" then
+		return 0
+	end
+	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return 0
+	end
+	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
+	local version
+	pcall(function()
+		version = ngx.shared.bw_ocsp_validations:get(version_key)
+	end)
+	return tonumber(version) or 0
+end
+
+local function set_cached_response_version(fingerprint, version)
+	if not fingerprint or not version then
+		return
+	end
+	local ngx_shared = ngx and ngx.shared
+	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+		return
+	end
+	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
+	pcall(function()
+		ngx_shared.bw_ocsp_validations:set(version_key, tostring(version), 86400)
+	end)
+end
+
+local function is_response_version_current(fingerprint)
+	if not fingerprint or fingerprint == "" then
+		return false
+	end
+	local cached_version = get_cached_response_version(fingerprint)
+	local current_version = get_ocsp_response_version()
+	if cached_version == 0 or current_version == 0 then
+		return true
+	end
+	return cached_version == current_version
+end
+
 local issuer_path_intermediate_ready = chain.issuer_path_intermediate_ready
 local issuer_path_null_slots = chain.issuer_path_null_slots
 local note_connection_staple = chain.note_connection_staple
@@ -674,10 +757,16 @@ local function try_staple(
 	-- Async validation: defer validation to background job if already queued.
 	-- If async validation already completed, skip (response already validated).
 	-- Allows handshake to skip expensive crypto validation.
+	-- Versioned responses: check if cached version matches current (not stale after cert rotation).
 	local async_status = get_async_validation_status(fingerprint)
 	if async_status == ASYNC_VALIDATION_DONE then
-		log(ngx.DEBUG, "OCSP async validation already complete: skipping validation, attaching")
-		return set_resp()
+		-- Check if cached response version is current (not stale after cert rotation)
+		if is_response_version_current(fingerprint) then
+			log(ngx.DEBUG, "OCSP async validation already complete: skipping validation, attaching")
+			return set_resp()
+		else
+			log(ngx.DEBUG, "OCSP response version stale: re-validating after cert rotation")
+		end
 	end
 	if async_status == ASYNC_VALIDATION_FAILED then
 		log(ngx.DEBUG, "OCSP async validation failed: response invalid, aborting")

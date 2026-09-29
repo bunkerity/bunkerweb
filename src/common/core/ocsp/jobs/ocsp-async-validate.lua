@@ -54,6 +54,49 @@ local function log_err(msg)
 	logger:err("[OCSP-ASYNC] " .. msg)
 end
 
+-- Helper: Check for certificate rotation and increment global version if detected.
+-- Compares certificate modification times; if newer certs found, invalidate all cached responses.
+local function detect_and_handle_cert_rotation()
+	local cert_dir = "/var/cache/bunkerweb/letsencrypt" or os.getenv("OCSP_CACHE_DIR") or "/var/cache/bunkerweb/ocsp"
+	local marker_file = cert_dir .. "/.ocsp_cert_rotation_check"
+
+	-- Read previous rotation check timestamp
+	local last_check = 0
+	local marker_f = io.open(marker_file, "r")
+	if marker_f then
+		last_check = tonumber(marker_f:read("*a")) or 0
+		marker_f:close()
+	end
+
+	-- Check if any certificate files have been modified recently
+	local current_time = os.time()
+	local rotation_detected = false
+
+	-- Check for new cert files (simple heuristic: any .pem file newer than last check)
+	local cert_check = os.execute("find " .. cert_dir .. " -name '*.pem' -mmin -60 2>/dev/null | wc -l")
+	if cert_check and tonumber(cert_check) > 0 then
+		rotation_detected = true
+		log_info("Certificate rotation detected: found recently modified certificate files")
+	end
+
+	-- If rotation detected, increment global version to invalidate all cached responses
+	if rotation_detected then
+		pcall(function()
+			if ocsp_module.increment_ocsp_response_version then
+				local new_version = ocsp_module.increment_ocsp_response_version()
+				log_info("Incremented OCSP response version to: " .. new_version .. " (cache invalidated)")
+			end
+		end)
+	end
+
+	-- Update rotation check marker
+	local marker_w = io.open(marker_file, "w")
+	if marker_w then
+		marker_w:write(tostring(current_time))
+		marker_w:close()
+	end
+end
+
 -- Helper: Read OCSP response from cache or disk
 -- Returns: binary OCSP response DER or nil if not found
 local function read_ocsp_response(fingerprint)
@@ -324,6 +367,16 @@ local function validate_pending_responses()
 		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
 		validated_count = validated_count + 1
 
+		-- Tag response with current version (for cache invalidation on cert rotation)
+		-- TLS path will reject cache if version mismatches
+		pcall(function()
+			if ocsp_module.set_cached_response_version then
+				local current_version = ocsp_module.get_ocsp_response_version and ocsp_module.get_ocsp_response_version() or 1
+				ocsp_module.set_cached_response_version(fingerprint, current_version)
+				log_info("Tagged response version: " .. fingerprint:sub(1, 16) .. "... = v" .. current_version)
+			end
+		end)
+
 		-- Validate each issuer certificate and cache SPKI
 		for idx, issuer_pem in ipairs(issuers) do
 			local issuer_spki = validate_issuer_cert_and_compute_spki(issuer_pem)
@@ -392,6 +445,9 @@ local function run_job()
 	log_info("=== OCSP Async Validation Job Started ===")
 
 	local start_time = os.time()
+
+	-- Check for certificate rotation and invalidate stale responses if detected
+	detect_and_handle_cert_rotation()
 
 	-- Get and validate pending OCSP responses
 	local validated, failed, skipped, spki_cached = validate_pending_responses()
