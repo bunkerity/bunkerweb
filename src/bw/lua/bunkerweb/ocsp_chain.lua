@@ -925,6 +925,8 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	end
 
 	local function count_unplaced_must()
+		-- Optimized counting: build placed set only once (optimization #6)
+		-- Early exit for depth_capped case: just need to know if ANY dropped has Must-Staple
 		local placed = {}
 		for i = 2, #blocks do
 			placed[blocks[i]] = true
@@ -932,10 +934,20 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		local dropped_must = 0
 		for _, pem in ipairs(intermediate_pems) do
 			if type(pem) == "string" and pem ~= "" and not placed[pem] then
+				-- Skip self-signed trust anchors early (optimization #6)
 				local subj, iss = cert_subject_issuer_dns(pem)
-				if not (subj and iss and subj == iss) and cert_must_staple_bool(pem, true) then
-					dropped_must = dropped_must + 1
+				if subj and iss and subj == iss then
+					-- Self-signed: skip (trust anchor or root)
+					goto continue
 				end
+				if cert_must_staple_bool(pem, true) then
+					dropped_must = dropped_must + 1
+					-- Early exit for depth_capped: only need to know if ANY dropped has MS
+					if depth_capped and dropped_must >= 1 then
+						break
+					end
+				end
+				::continue::
 			end
 		end
 		return dropped_must
@@ -952,6 +964,19 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		end
 		if dropped_must > 0 then
 			blocks.unresolved_must_staple = dropped_must
+			-- Telemetry for depth-capped chains (optimization #6)
+			if depth_capped then
+				log(
+					ngx.WARN,
+					"OCSP depth cap: chain exceeded hop_cap="
+						.. tostring(hop_cap)
+						.. " linked="
+						.. tostring(linked)
+						.. " dropped_must="
+						.. tostring(dropped_must)
+						.. " — rare case, explicit depth cap by design"
+				)
+			end
 			log(
 				ngx.ERR,
 				"OCSP unresolved issuer path: omitted "
