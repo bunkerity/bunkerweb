@@ -141,7 +141,7 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "without_ssl" "no_httponly_flag" "multiple_no_httponly_flag" "with_ssl" "no_cookie_auto_secure_flag"
+for test in "without_ssl" "no_httponly_flag" "multiple_no_httponly_flag" "with_ssl" "no_cookie_auto_secure_flag" "samesite_none"
 do
     if [ "$test" = "without_ssl" ] ; then
         echo "🎛️ Running tests without ssl and with tweaked settings ..."
@@ -255,6 +255,18 @@ do
         else
             sudo sed -i 's@COOKIE_AUTO_SECURE_FLAG=.*$@COOKIE_AUTO_SECURE_FLAG=no@' /etc/bunkerweb/variables.env
             export COOKIE_AUTO_SECURE_FLAG="no"
+        fi
+    elif [ "$test" = "samesite_none" ] ; then
+        echo "🎛️ Running tests with SameSite=None flag for cookies ..."
+        echo "ℹ️ Keeping the generated self-signed SSL certificate"
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_FLAGS: ".*"$@COOKIE_FLAGS: "* HttpOnly SameSite=None"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_AUTO_SECURE_FLAG: "no"@COOKIE_AUTO_SECURE_FLAG: "yes"@' {} \;
+        else
+            sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* HttpOnly SameSite=None@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@COOKIE_AUTO_SECURE_FLAG=.*$@COOKIE_AUTO_SECURE_FLAG=yes@' /etc/bunkerweb/variables.env
+            export COOKIE_FLAGS="* HttpOnly SameSite=None"
+            export COOKIE_AUTO_SECURE_FLAG="yes"
         fi
     fi
 

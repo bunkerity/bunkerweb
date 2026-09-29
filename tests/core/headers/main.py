@@ -170,18 +170,24 @@ try:
         )
         exit(1)
 
-    # Check the SameSite value (Lax, Strict or None) when the global flags request one
+    # Check the SameSite value (Lax, Strict or None) or the value-less SameSite flag when the global flags request one
     if not cookie_flags_1:
-        expected_samesite = next(
-            (flag.split("=", 1)[1] for flag in cookie_flags.split() if flag.lower().startswith("samesite=")),
-            None,
-        )
-        actual_samesite = cookie.get_nonstandard_attr("SameSite")
-        if expected_samesite and (actual_samesite or "").lower() != expected_samesite.lower():
-            print(
-                f"❌ Cookie {cookie.name} has SameSite = {actual_samesite} but {expected_samesite} was expected, exiting ...",
-            )
-            exit(1)
+        samesite_flag = next((flag for flag in cookie_flags.split() if flag.lower().split("=", 1)[0] == "samesite"), None)
+        if samesite_flag is not None:
+            expected_samesite = samesite_flag.split("=", 1)[1] if "=" in samesite_flag else None
+            actual_samesite = cookie.get_nonstandard_attr("SameSite")
+            if not cookie.has_nonstandard_attr("SameSite"):
+                print(
+                    f"❌ Cookie {cookie.name} doesn't have the SameSite flag even though it's set in the env, exiting ...",
+                    flush=True,
+                )
+                exit(1)
+            elif expected_samesite and (actual_samesite or "").lower() != expected_samesite.lower():
+                print(
+                    f"❌ Cookie {cookie.name} has SameSite = {actual_samesite} but {expected_samesite} was expected, exiting ...",
+                    flush=True,
+                )
+                exit(1)
 
     print("✅ Headers are working as expected ...", flush=True)
 except SystemExit:
