@@ -151,6 +151,81 @@ end
 -- validate: one ngx.ocsp.validate_ocsp_response against leaf+issuer DER.
 -- Enforces shard issuer SPKI pin when shard_issuer_spki is set, then death-time
 -- (nextUpdate − skew). Returns boolean only; budget / multi-issuer walk lives in try_staple.
+-- Cross-handshake validation state sharing (thundering-herd protection).
+-- Multiple concurrent handshakes for the same cert can share validation results.
+-- First handshake validates (5-20ms); others read cached result (0.1ms each).
+-- Uses shared dict with spin-lock pattern: in_flight → result → done.
+local function get_shared_validation_state_key(fingerprint)
+	if not fingerprint or fingerprint == "" then
+		return nil
+	end
+	return "OCSP:VALIDATE:" .. fingerprint
+end
+
+local function set_shared_validation_result(fingerprint, result)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return
+	end
+	local key = get_shared_validation_state_key(fingerprint)
+	if not key then
+		return
+	end
+	pcall(function()
+		-- Mark as "done" with result (pass/fail). TTL: 60s to allow cross-handshake sharing
+		-- but invalidate stale results. Handshakes within 60s can reuse.
+		ngx.shared.bw_ocsp_validations:set(key, result and "pass" or "fail", 60)
+	end)
+end
+
+local function get_shared_validation_result(fingerprint, max_wait_ms)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return nil
+	end
+	local key = get_shared_validation_state_key(fingerprint)
+	if not key then
+		return nil
+	end
+	-- Spin-wait for validation to complete (with timeout).
+	-- If another handshake is validating, wait up to max_wait_ms for result.
+	local t0 = ngx.now() * 1000  -- Convert to milliseconds
+	local max_wait = max_wait_ms or 100  -- Default: 100ms timeout
+	while true do
+		local result
+		pcall(function()
+			result = ngx.shared.bw_ocsp_validations:get(key)
+		end)
+		if result then
+			-- Validation complete (result is "pass" or "fail")
+			return result == "pass"
+		end
+		-- Not ready yet; check timeout
+		local elapsed = ngx.now() * 1000 - t0
+		if elapsed > max_wait then
+			-- Timeout: other handshake is slow or validation failed to store
+			return nil
+		end
+		-- Brief sleep to avoid busy-spin (yield to other workers)
+		ngx.sleep(0.001)  -- 1ms sleep
+	end
+end
+
+local function set_shared_validation_in_flight(fingerprint)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return false
+	end
+	local key = get_shared_validation_state_key(fingerprint)
+	if not key then
+		return false
+	end
+	-- Try to atomically set a flag indicating this handshake is validating.
+	-- If another handshake already set it, we'll wait for their result.
+	local ok
+	pcall(function()
+		ok = ngx.shared.bw_ocsp_validations:add(key, "in_flight", 60)
+	end)
+	return ok or false
+end
+
 -- Bounded cache manager: prevents der_cache from growing unbounded.
 -- Keeps track of cache size; evicts oldest entry when limit exceeded.
 local function bounded_cache_set(cache, key, value, max_entries)
@@ -421,6 +496,27 @@ local function try_staple(
 			issuers[i], issuers[j] = issuers[j], issuers[i]
 		end
 	end
+	-- Cross-handshake validation state sharing (thundering-herd protection).
+	-- If another concurrent handshake is already validating this fingerprint,
+	-- wait for their result instead of re-validating (saves 5-20ms per duplicate).
+	-- Timeout: 100ms (prevent infinite hangs if validation is stuck).
+	if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
+		local shared_result = get_shared_validation_result(fingerprint, 100)
+		if shared_result ~= nil then
+			if shared_result then
+				log(ngx.DEBUG, "OCSP validation result reused from concurrent handshake (hit)")
+				return set_resp()
+			else
+				log(ngx.DEBUG, "OCSP validation result reused from concurrent handshake (fail)")
+				return false, "validate_exhausted"
+			end
+		end
+		-- No concurrent validation in progress; try to claim the lock for this handshake.
+		-- If we succeed, we'll validate and store the result for other handshakes.
+		if set_shared_validation_in_flight(fingerprint) then
+			log(ngx.DEBUG, "OCSP validation lock acquired for this handshake (will validate)")
+		end
+	end
 	local n = #issuers
 	if n > OCSP_VALIDATE_MAX_ISSUERS then
 		n = OCSP_VALIDATE_MAX_ISSUERS
@@ -456,16 +552,25 @@ local function try_staple(
 			)
 			-- Named abort: stack never reached attach_ocsp_staple / intermediates.
 			-- Do not collapse to nil (looks like unmet/skip) or ok_partial (attach-only).
+			-- Do NOT store result in shared state (budget abort is transient).
 			return false, "validate_budget"
 		end
 		-- Early-exit optimization: stop on first successful validation (don't test all 4 issuers).
 		-- This is load-bearing for latency: validate() is 5-20ms per issuer, so early-exit
 		-- can save 10-60ms in common dual-issuer scenarios.
 		if validate(ocsp, ssl, resp, leaf_pem, issuers[i], shard_issuer_spki) then
+			-- Validation succeeded: store result for other concurrent handshakes.
+			if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
+				set_shared_validation_result(fingerprint, true)
+			end
 			return set_resp()
 		end
 	end
 	-- Body present; every issuer candidate failed crypto validate (not missing DER).
+	-- Store failure result for other concurrent handshakes.
+	if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
+		set_shared_validation_result(fingerprint, false)
+	end
 	return false, "validate_exhausted"
 end
 
