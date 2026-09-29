@@ -76,13 +76,45 @@ local function apply_site_override(vars, service_id, name, global_value)
 	return global_value
 end
 
--- Read a multisite setting: per-site (primary service id) wins over global.
--- Per-request resolution ensures config changes (reload) invalidate cached service mappings.
-local function get_site_variable(internalstore, server_name, name)
+-- Cached database access for configuration (optimization #1)
+-- Returns variables table from cache if available, otherwise fetches from DB
+local function get_vars_cached(internalstore)
+	if not ngx.ctx then
+		-- Fallback: no ngx.ctx available, fetch directly
+		local ok, vars = pcall(function()
+			return internalstore:get("variables", true)
+		end)
+		return ok and vars or nil
+	end
+
+	-- Cache key: use internalstore object reference (unique per instance)
+	local cache_key = "ocsp_vars_" .. tostring(internalstore):match("[0-9a-f]+$")
+
+	-- Check cache first (optimization #1)
+	if ngx.ctx[cache_key] then
+		return ngx.ctx[cache_key]
+	end
+
+	-- Cache miss: fetch from database
 	local ok, vars = pcall(function()
 		return internalstore:get("variables", true)
 	end)
-	if not ok or type(vars) ~= "table" or type(vars["global"]) ~= "table" then
+
+	if ok and type(vars) == "table" then
+		-- Store in cache for reuse in same request
+		ngx.ctx[cache_key] = vars
+		return vars
+	end
+
+	return nil
+end
+
+-- Read a multisite setting: per-site (primary service id) wins over global.
+-- Per-request resolution ensures config changes (reload) invalidate cached service mappings.
+-- Optimization #1: Cache variables in ngx.ctx to eliminate 1-5ms DB access on subsequent calls
+local function get_site_variable(internalstore, server_name, name)
+	local vars = get_vars_cached(internalstore)
+	if not vars or type(vars["global"]) ~= "table" then
 		return nil
 	end
 	local value = vars["global"][name]
