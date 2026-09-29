@@ -609,6 +609,43 @@ end
 -- On success the second value is the issuer-linked blocks table (array of PEMs plus
 -- optional unresolved_must_staple). Callers may pass it to staple/probe/attach;
 -- table.concat is only for set_cert. Named fields survive — PEM round-trip does not.
+-- Compute Must-Staple once per leaf during parsing phase.
+-- Avoids re-parsing PEM + re-reading ocsp.json for same cert multiple times.
+local function annotate_leaves_must_staple(leaves)
+	if type(leaves) ~= "table" then
+		return
+	end
+	for leaf_idx, leaf in ipairs(leaves) do
+		if type(leaf) == "table" then
+			local pem = leaf.pem or leaf.ocsp_cert or leaf.cert_pem
+			local fp = leaf.fp or leaf.ocsp_fp_hint
+			if pem or fp then
+				leaf.must_staple = resolve_leaf_must_staple(pem, fp)
+			end
+		end
+	end
+end
+
+-- Request-scoped memoization of Must-Staple resolution via ngx.ctx.
+-- Avoids re-resolving the same cert during staple(), probe(), and requires_must_staple().
+local function get_must_staple_with_ctx_cache(cert_pem, cert_fp)
+	local ctx = ngx.ctx
+	if not ctx then
+		-- No context (should not happen in TLS handshake); resolve directly
+		return resolve_leaf_must_staple(cert_pem, cert_fp)
+	end
+	if not ctx.bw_ocsp_ms_cache then
+		ctx.bw_ocsp_ms_cache = {}
+	end
+	local key = cert_fp or ("pem_" .. (cert_pem and cert_pem:sub(1, 32) or "unknown"))
+	if ctx.bw_ocsp_ms_cache[key] ~= nil then
+		return ctx.bw_ocsp_ms_cache[key]
+	end
+	local result = resolve_leaf_must_staple(cert_pem, cert_fp)
+	ctx.bw_ocsp_ms_cache[key] = result
+	return result
+end
+
 function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
 	maybe_rearm_l1_warmer()
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
@@ -657,6 +694,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		return false, "no certificate matched any private key"
 	end
 
+	-- Compute Must-Staple once per leaf upfront; reuse throughout selection phase.
+	annotate_leaves_must_staple(leaves)
+
 	local sigalgs_ext = ngx.ctx and ngx.ctx.bw_ocsp_sigalgs_ext or nil
 	local candidates = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	if #candidates == 0 then
@@ -680,8 +720,9 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		local chain_pem = chain_pem_from_blocks(blocks)
 		local leaf_must = false
 		if probe_must then
+			-- Use pre-computed Must-Staple from leaf annotation phase.
 			-- Fail closed: unknown (nil) enforces Must-Staple like staple()/probe().
-			leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) ~= false
+			leaf_must = (leaf.must_staple ~= false)
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -790,7 +831,8 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			last_err, last_detail = "must_staple", path_detail or "unmet"
 		else
 			path_ready[#path_ready + 1] = leaf
-			local leaf_must = resolve_leaf_must_staple(leaf.pem, leaf.fp) ~= false
+			-- Use pre-computed Must-Staple from leaf annotation phase.
+			local leaf_must = (leaf.must_staple ~= false)
 			if leaf_must and mode == "open" then
 				leaf_must = false
 			end
@@ -1830,7 +1872,8 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	-- No SPKI from PEM: fingerprint-only path (no sibling borrow possible without a second leaf).
 	local fingerprint = leaf_fp or fp_hint
 
-	local must_tri = resolve_leaf_must_staple(leaf_pem, fingerprint)
+	-- Use request-scoped cache to avoid re-resolving same cert multiple times.
+	local must_tri = get_must_staple_with_ctx_cache(leaf_pem, fingerprint)
 	-- Fail closed: unknown (nil) enforces Must-Staple; proven false does not.
 	local must_staple = must_tri ~= false
 
@@ -1942,8 +1985,9 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 		fp_hint = nil
 	end
 	local fingerprint = leaf_fp or fp_hint
+	-- Use request-scoped cache to avoid re-resolving same cert multiple times.
 	-- Fail closed: unknown enforces Must-Staple; proven false may load unstapled.
-	if resolve_leaf_must_staple(leaf_pem, fingerprint) == false then
+	if get_must_staple_with_ctx_cache(leaf_pem, fingerprint) == false then
 		-- Optional leaf stapling: path already scored; leaf may load without a live body.
 		return true
 	end
@@ -1979,7 +2023,8 @@ function _M.requires_must_staple(cert_pem, cert_fp_hint)
 		leaf_pem = blocks[1]
 	end
 	local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem) or nil
-	return resolve_leaf_must_staple(leaf_pem, leaf_fp or fp_hint) ~= false
+	-- Use request-scoped cache.
+	return get_must_staple_with_ctx_cache(leaf_pem, leaf_fp or fp_hint) ~= false
 end
 
 -- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", "ed", or nil.
