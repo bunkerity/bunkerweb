@@ -331,10 +331,23 @@ end
 local function validate_from_redis_queue()
 	local validated_count = 0
 	local failed_count = 0
+	local skipped_count = 0
 	local spki_cached_count = 0
-	local max_batch = 100  -- Process up to 100 per run
 
-	for batch = 1, max_batch do
+	-- Read batch size from environment (respects startup throttling)
+	local batch_size = tonumber(os.getenv("OCSP_BATCH_SIZE") or "10")
+	local request_rate_limit = tonumber(os.getenv("OCSP_REQUEST_RATE_LIMIT") or "50")
+	local rate_limit_jitter = tonumber(os.getenv("OCSP_RATE_LIMIT_JITTER") or "20")
+
+	-- Calculate delay between requests (with jitter)
+	local base_delay_ms = 1000 / request_rate_limit
+	local jitter_pct = (math.random(100 - rate_limit_jitter, 100 + rate_limit_jitter) / 100)
+	local request_delay_ms = base_delay_ms * jitter_pct
+
+	log_info("Batch config: size=" .. batch_size .. ", rate=" .. request_rate_limit ..
+		" req/s, jitter=" .. rate_limit_jitter .. "%, delay=" .. string.format("%.1f", request_delay_ms) .. "ms")
+
+	for batch = 1, batch_size do
 		local fingerprint = queue.get_next_pending()
 		if not fingerprint then
 			break  -- No more pending
@@ -366,21 +379,83 @@ local function validate_from_redis_queue()
 			goto continue_redis
 		end
 
+		-- Extract responder URL from issuers (first issuer's OCSP URL)
+		local responder_url = "ocsp:unknown"  -- Default placeholder
+		if issuers and #issuers > 0 then
+			-- Extract OCSP URL from issuer certificate (would need openssl parsing)
+			-- For now, use a generic identifier based on issuer fingerprint
+			responder_url = "ocsp:" .. issuers[1]:sub(1, 16) .. "..."
+		end
+
+		-- Check responder health before validating
+		local is_healthy, wait_seconds = queue.is_responder_healthy(responder_url)
+		if not is_healthy then
+			log_warn("Responder unhealthy (backoff " .. wait_seconds .. "s): " .. responder_url)
+			log_info("Skipping validation, keeping existing staple for: " .. fingerprint:sub(1, 16) .. "...")
+			skipped_count = skipped_count + 1
+			-- Don't fail the entry—keep it queued for later
+			-- Just move to next and come back when responder recovers
+			goto continue_redis
+		end
+
+		-- Rate limiting: add delay between requests to prevent responder overload
+		if batch > 1 then
+			local delay_seconds = request_delay_ms / 1000
+			log_info("Rate limiting: wait " .. string.format("%.1f", request_delay_ms) .. "ms before next request")
+			-- Simple delay using os.execute (not ideal for production, but works in scheduler context)
+			-- Better approach: use ngx.sleep if available
+			if ngx and ngx.sleep then
+				ngx.sleep(delay_seconds)
+			else
+				-- Fallback: busy-wait or skip (responder rate limit handles it)
+				log_info("Rate limiting not supported in this context (no ngx.sleep)")
+			end
+		end
+
 		-- Validate OCSP response
-		local ok
+		local ok, http_code, error_msg
 		local success = pcall(function()
-			ok = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
+			ok, http_code, error_msg = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
 		end)
 
 		if not success then
 			log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_responder_failed(responder_url, "validation_crash")
 			queue.mark_failed(fingerprint, "validation_crash")
 			failed_count = failed_count + 1
 			goto continue_redis
 		end
 
+		-- Handle HTTP response codes
+		if http_code == 429 then
+			-- Rate limited: parse Retry-After header and respect it
+			log_warn("Responder rate limited (429) for: " .. responder_url)
+			local retry_after_seconds = queue.parse_retry_after(error_msg)
+			queue.mark_responder_failed(responder_url, "rate_limited_429", retry_after_seconds or 300)
+			-- Keep existing staple, don't mark as failed
+			log_info("Keeping existing staple, will retry after " .. (retry_after_seconds or 300) .. "s")
+			goto continue_redis
+
+		elseif http_code and http_code >= 500 then
+			-- Server error: responder is having issues
+			log_warn("Responder error (" .. http_code .. ") for: " .. responder_url)
+			queue.mark_responder_failed(responder_url, "http_" .. http_code)
+			queue.mark_failed(fingerprint, "responder_error_" .. http_code)
+			failed_count = failed_count + 1
+			goto continue_redis
+
+		elseif http_code and http_code >= 400 then
+			-- Client error (except 429): cert/request issue
+			log_warn("Client error (" .. http_code .. ") for: " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "http_" .. http_code)
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
 		if not ok then
-			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "...")
+			-- Validation logic error (not HTTP error)
+			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "... (" .. (error_msg or "unknown") .. ")")
+			queue.mark_responder_failed(responder_url, "validation_failed")
 			queue.mark_failed(fingerprint, "ocsp_invalid")
 			failed_count = failed_count + 1
 			goto continue_redis
@@ -389,6 +464,9 @@ local function validate_from_redis_queue()
 		-- OCSP validation succeeded, mark as complete
 		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
 		validated_count = validated_count + 1
+
+		-- Mark responder as healthy (reset backoff counter)
+		queue.mark_responder_healthy(responder_url)
 
 		-- Mark in persistent queue
 		queue.mark_validated(fingerprint)
@@ -420,7 +498,10 @@ local function validate_from_redis_queue()
 		::continue_redis::
 	end
 
-	return validated_count, failed_count, spki_cached_count
+	log_info("Batch complete: validated=" .. validated_count .. ", failed=" .. failed_count ..
+		", skipped=" .. skipped_count .. ", spki_cached=" .. spki_cached_count)
+
+	return validated_count, failed_count, skipped_count, spki_cached_count
 end
 
 -- Fallback: Validate from disk scan (for compatibility)
@@ -648,16 +729,15 @@ local function run_job()
 	-- Cleanup stale processing entries (stuck from previous crashes)
 	queue.cleanup_stale_processing()
 
-	-- Validate from persistent Redis queue (with fallback to disk scan)
-	local validated, failed, spki_cached = validate_from_redis_queue()
-	local skipped = 0
+	-- Validate from persistent Redis queue (with rate limiting and batch throttling)
+	local validated, failed, skipped, spki_cached = validate_from_redis_queue()
 
 	local elapsed = os.time() - start_time
 
 	-- Report results
 	log_info("=== OCSP Async Validation Job Complete ===")
 	log_info("Summary: " .. validated .. " validated, " .. failed .. " failed, " ..
-		skipped .. " skipped, " .. spki_cached .. " SPKI cached in " .. elapsed .. "s")
+		skipped .. " skipped (backoff), " .. spki_cached .. " SPKI cached in " .. elapsed .. "s")
 
 	-- Report metrics (optional)
 	report_metrics(validated, failed, skipped, spki_cached, elapsed)
