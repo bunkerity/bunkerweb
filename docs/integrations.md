@@ -1657,7 +1657,7 @@ docker pull ghcr.io/bunkerity/bunkerweb:1.6.16-rc2
 
 Key concepts for Docker integration include:
 
-- **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behavior, such as network settings, security options, and other parameters.
+- **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behaviour, such as network settings, security options, and other parameters.
 - **Scheduler container**: Manage configuration and execute jobs using a dedicated container called the [scheduler](concepts.md#scheduler).
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
@@ -2886,7 +2886,7 @@ networks:
 
 By default, when a container, Swarm service, or Ingress managed by autoconf disappears from the orchestrator, its BunkerWeb service row (and any associated custom configs) is immediately deleted from the shared database. This is destructive: an operator cannot distinguish a genuine teardown from a transient glitch, and recovering requires recreating the service definition from scratch.
 
-Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes this behavior:
+Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes this behaviour:
 
 - Services removed from the orchestrator are flipped to `is_draft = true` instead of being deleted. Their `services_settings` rows, custom configs, and job caches are preserved.
 - Draft services are excluded from the rendered NGINX configuration (they are not served), so removing the orchestration object still takes the site offline — it just keeps the state around.
@@ -2924,7 +2924,7 @@ networks:
     name: bw-services
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
@@ -3757,7 +3757,7 @@ metadata:
 ...
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment:
 
@@ -4293,7 +4293,7 @@ REST API with rate limiting, CORS, HTTPS redirection, and timeout configuration.
 
         # Additional security (BunkerWeb bonus)
         bunkerweb.io/USE_MODSECURITY: "yes"
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
     spec:
       ingressClassName: bunkerweb
       tls:
@@ -4325,7 +4325,7 @@ REST API with rate limiting, CORS, HTTPS redirection, and timeout configuration.
 | Timeouts       | `proxy-*-timeout: "60"`               | `REVERSE_PROXY_*_TIMEOUT: "60s"`                                                  |
 | Body Size      | `proxy-body-size: "20m"`              | `MAX_CLIENT_SIZE: "20m"`                                                          |
 | Custom Headers | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"` (multiple annotations for multiple headers) |
-| Security       | N/A                                   | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"`                              |
+| Security       | N/A                                   | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOUR: "yes"`                             |
 
 ---
 
@@ -4441,7 +4441,7 @@ Application with custom NGINX rules via `configuration-snippet`: complex rewrite
         bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
 
         # User-Agent blocking (native BunkerWeb)
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
         bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # Or PCRE regex
 
         # Cache (native BunkerWeb)
@@ -4501,7 +4501,7 @@ Application with custom NGINX rules via `configuration-snippet`: complex rewrite
 
         bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
 
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
 
         bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # Or PCRE regex
     spec:
@@ -4807,7 +4807,7 @@ networks:
     name: bw-services
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
@@ -5143,7 +5143,7 @@ You can access the setup wizard by browsing the `https://your-ip-address/setup` 
 
 ## Building from source
 
-This guide explains how to build BunkerWeb artifacts from source.
+This guide explains how to build BunkerWeb artefacts from source.
 
 ### Scope
 
@@ -5160,16 +5160,16 @@ FreeBSD users: BunkerWeb is available as an official port, see <https://www.fres
 
 - Build from a clean, up-to-date working tree.
 - Use the version from `src/VERSION` (packaging scripts read it automatically).
-- Keep artifacts reproducible by using the provided scripts and Dockerfiles.
+- Keep artefacts reproducible by using the provided scripts and Dockerfiles.
 
 ### Prerequisites
 
 - For containers and Linux packages:
 - Docker (Buildx recommended)
 
-### Artifact Matrix
+### Artefact Matrix
 
-| Artifact                     | Build path                                        | Main command                              |
+| Artefact                     | Build path                                        | Main command                              |
 | ---------------------------- | ------------------------------------------------- | ----------------------------------------- |
 | Community container images   | `src/*/Dockerfile`                                | `docker build -f <Dockerfile> -t <tag> .` |
 | Linux packages (`deb`/`rpm`) | `src/linux/Dockerfile-*` + `src/linux/package.sh` | `./src/linux/package.sh <linux> <arch>`   |
@@ -5196,6 +5196,8 @@ docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
 #### Build all community images
 
 ```sh
+set -e
+
 for image in bunkerweb scheduler autoconf ui api all-in-one; do
   case "$image" in
     bunkerweb) dockerfile="src/bw/Dockerfile" ;;
@@ -5212,7 +5214,7 @@ done
 #### Development-only build argument (not for production)
 
 Use this only for local iteration on images that support minification args (`bw`, `ui`, `all-in-one`).
-It reduces build time by skipping asset minification, but it does not produce production-grade artifacts.
+It reduces build time by skipping asset minification, but it does not produce production-grade artefacts.
 
 ```sh
 docker build -f src/all-in-one/Dockerfile \
@@ -5284,11 +5286,11 @@ Linux package generation can be done directly with Docker in 2 steps:
     - `FPM_DEBUG=yes` (`docker run -e`): enables verbose FPM/debug logs during package creation.
     - `FPM_SKIP_COMPRESSION=yes` (`docker run -e`): disables package compression to speed up packaging and simplify inspection; output packages are larger.
 
-    Do not use these flags for release artifacts intended for users.
+    Do not use these flags for release artefacts intended for users.
 
     !!! example "Development / troubleshooting example"
 
-        Use this only when debugging package generation (verbose FPM logs, no compression). You can still choose any host directory mounted to `/data`, and artifacts will be written there.
+        Use this only when debugging package generation (verbose FPM logs, no compression). You can still choose any host directory mounted to `/data`, and artefacts will be written there.
 
         ```sh
         docker build --build-arg SKIP_MINIFY=yes \
@@ -5320,7 +5322,7 @@ Linux package generation can be done directly with Docker in 2 steps:
     ./src/linux/package.sh ubuntu amd64
     ```
 
-    Artifacts are written to `package-<linux>/`.
+    Artefacts are written to `package-<linux>/`.
 
     Examples:
 
@@ -5345,12 +5347,12 @@ Linux package generation can be done directly with Docker in 2 steps:
 
 ### CI Parity (Reference)
 
-If you want local builds to match CI behavior, use these workflow references:
+If you want local builds to match CI behaviour, use these workflow references:
 
 - Container builds: `.github/workflows/container-build.yml`
 - Linux package builds: `.github/workflows/linux-build.yml`
 
-### Publish Artifacts
+### Publish Artefacts
 
 Security baseline:
 
@@ -5441,7 +5443,7 @@ package_cloud push "$PACKAGECLOUD_REPO/el/9" package-rhel-9/*.rpm
 !!! abstract "Notes"
 
     - Use the correct distribution path expected by your Packagecloud repository.
-    - Upload only release artifacts; avoid development flags (`SKIP_MINIFY`, `FPM_DEBUG`, `FPM_SKIP_COMPRESSION`) for publish builds.
+    - Upload only release artefacts; avoid development flags (`SKIP_MINIFY`, `FPM_DEBUG`, `FPM_SKIP_COMPRESSION`) for publish builds.
     - Verify repository retention, metadata, and signing policy before publishing.
     - Run `unset PACKAGECLOUD_TOKEN` once uploads are complete.
 

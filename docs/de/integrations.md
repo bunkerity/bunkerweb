@@ -5072,6 +5072,8 @@ docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
 #### Alle Community-Images bauen
 
 ```sh
+set -e
+
 for image in bunkerweb scheduler autoconf ui api all-in-one; do
   case "$image" in
     bunkerweb) dockerfile="src/bw/Dockerfile" ;;

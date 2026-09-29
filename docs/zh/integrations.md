@@ -5066,6 +5066,8 @@ docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
 #### 构建所有社区镜像
 
 ```sh
+set -e
+
 for image in bunkerweb scheduler autoconf ui api all-in-one; do
   case "$image" in
     bunkerweb) dockerfile="src/bw/Dockerfile" ;;
@@ -5081,8 +5083,8 @@ done
 
 #### 仅用于开发的构建参数（不要用于生产环境）
 
-仅在本地迭代支持压缩参数的镜像（`bw`、`ui`、`all-in-one`）时使用此选项。
-它通过跳过静态资源压缩来缩短构建时间，但不会生成适用于生产环境的构建产物。
+仅在本地迭代支持最小化参数的镜像（`bw`、`ui`、`all-in-one`）时使用此选项。
+它通过跳过静态资源最小化来缩短构建时间，但不会生成适用于生产环境的构建产物。
 
 ```sh
 docker build -f src/all-in-one/Dockerfile \
@@ -5150,7 +5152,7 @@ docker build -f src/all-in-one/Dockerfile \
 
     仅将这些选项用于本地开发和故障排查：
 
-    - `SKIP_MINIFY=yes`（`docker build --build-arg`）：跳过静态资源压缩以加快构建速度；输出的优化程度较低。
+    - `SKIP_MINIFY=yes`（`docker build --build-arg`）：跳过静态资源最小化以加快构建速度；输出的优化程度较低。
     - `FPM_DEBUG=yes`（`docker run -e`）：在创建软件包时启用详细的 FPM/调试日志。
     - `FPM_SKIP_COMPRESSION=yes`（`docker run -e`）：禁用软件包压缩以加快打包并简化检查；生成的软件包会更大。
 
