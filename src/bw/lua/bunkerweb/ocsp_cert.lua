@@ -43,96 +43,121 @@ end
 -- Per-worker memo of pure PEM-derived facts (SPKI, DNs, Must-Staple bit, serial, key
 -- kind). One handshake used to re-parse the same PEM ~20 times. Keyed by the exact
 -- PEM bytes, so a rewrapped PEM is only a miss, never a wrong answer.
--- Uses LRU eviction: when full, removes least recently used entry instead of wiping all.
--- Main-chunk locals are capped at 200 by LuaJIT, so memo state lives in this block
--- and the uncached computations in one table.
-local pem_memo_fetch
+-- Stores one full profile per PEM (single x509 pass); accessors read fields from it.
+-- Eviction: touch-counter LRU — O(1) hits, O(n) only when the cache is full.
+-- Main-chunk locals are capped at 200 by LuaJIT, so memo state lives in this block.
+local pem_profile_get
 local pem_profile_batched
 local ocsp_der_memo_fetch
-local uncached = {}
 do
 	local PEM_MEMO_MAX = 512
 	local OCSP_DER_MEMO_MAX = 256
 	local MEMO_NIL = {}
 	local pem_memo = {}
 	local pem_memo_count = 0
-	local pem_memo_lru = {}  -- Track access order: {pem1, pem2, ...}
+	local pem_memo_touch = {} -- pem → monotonic touch for LRU
+	local pem_touch_gen = 0
 	local ocsp_der_memo = {}
 	local ocsp_der_memo_count = 0
 
-	-- Find and remove least recently used (oldest) entry from memo.
-	-- Returns the removed PEM key or nil if memo empty.
+	local function touch_pem(pem)
+		pem_touch_gen = pem_touch_gen + 1
+		pem_memo_touch[pem] = pem_touch_gen
+	end
+
+	-- Evict least-recently-touched PEM. Returns true if an entry was removed.
 	local function evict_lru()
-		if #pem_memo_lru == 0 then
-			return nil
-		end
-		local oldest = pem_memo_lru[1]
-		table.remove(pem_memo_lru, 1)
-		pem_memo[oldest] = nil
-		return oldest
-	end
-
-	-- Move PEM key to end of LRU queue (mark as recently used).
-	local function mark_accessed(pem)
-		for i, key in ipairs(pem_memo_lru) do
-			if key == pem then
-				table.remove(pem_memo_lru, i)
-				break
+		local oldest_pem, oldest_touch = nil, nil
+		for pem, t in pairs(pem_memo_touch) do
+			if oldest_touch == nil or t < oldest_touch then
+				oldest_touch = t
+				oldest_pem = pem
 			end
 		end
-		pem_memo_lru[#pem_memo_lru + 1] = pem
+		if not oldest_pem then
+			return false
+		end
+		pem_memo[oldest_pem] = nil
+		pem_memo_touch[oldest_pem] = nil
+		pem_memo_count = pem_memo_count - 1
+		return true
 	end
 
-	pem_memo_fetch = function(kind, pem, compute)
+	-- One batched profile per PEM. Shared table is read-only for callers.
+	pem_profile_get = function(pem)
 		if type(pem) ~= "string" or pem == "" then
-			return compute(pem)
+			return pem_profile_batched(pem)
 		end
-		local entry = pem_memo[pem]
-		if entry then
-			-- Cache hit: mark as recently used and return cached value
-			mark_accessed(pem)
-			local v = entry[kind]
-			if v == MEMO_NIL then
-				return nil
-			end
-			if v ~= nil then
-				return v
-			end
-		else
-			-- Cache miss: evict LRU if at capacity, then create new entry
-			if pem_memo_count >= PEM_MEMO_MAX then
-				evict_lru()
-				pem_memo_count = pem_memo_count - 1
-			end
-			entry = {}
-			pem_memo[pem] = entry
-			pem_memo_lru[#pem_memo_lru + 1] = pem
-			pem_memo_count = pem_memo_count + 1
+		local profile = pem_memo[pem]
+		if profile then
+			touch_pem(pem)
+			return profile
 		end
-		-- Compute and cache the requested fact
-		local v = compute(pem)
-		if v == nil then
-			entry[kind] = MEMO_NIL
-		else
-			entry[kind] = v
+		if pem_memo_count >= PEM_MEMO_MAX then
+			if not evict_lru() then
+				-- Invariant broken; wipe rather than grow unbounded.
+				pem_memo = {}
+				pem_memo_touch = {}
+				pem_memo_count = 0
+			end
 		end
-		return v
+		profile = pem_profile_batched(pem)
+		-- Do not memoize empty/incomplete profiles (transient FFI glitch or BN miss).
+		-- Missing serial/SPKI would strand CertID / pin paths until LRU.
+		if
+			type(profile) ~= "table"
+			or next(profile) == nil
+			or profile.serial == nil
+			or not is_fp64(profile.spki_fingerprint)
+		then
+			return profile or {}
+		end
+		pem_memo[pem] = profile
+		touch_pem(pem)
+		pem_memo_count = pem_memo_count + 1
+		return profile
 	end
 
-	-- Separate cache for OCSP DER responses (binary data, not PEM).
-	-- Caches serial extraction result to avoid re-walking same response.
-	-- Uses first 32 bytes of response as cache key (collision risk: ~1 in 16^32).
+	-- SHA256 hex of the full OCSP DER — never a prefix. Same-responder bodies share
+	-- structural prefixes; a 32-byte key caused CertID / blacklist wrong answers.
+	local function der_body_key(ocsp_der)
+		local ok, hex = pcall(function()
+			local digest_lib = require("resty.openssl.digest")
+			local digest_ctx = digest_lib.new("sha256")
+			digest_ctx:update(ocsp_der)
+			return to_hex(digest_ctx:final())
+		end)
+		if ok and type(hex) == "string" and #hex == 64 then
+			return hex
+		end
+		-- Fail closed to correct (if heavy) keying rather than a colliding prefix.
+		return ocsp_der
+	end
+
+	-- Separate cache for OCSP DER serial walks (binary bodies, not PEM).
+	-- Returned tables are always fresh copies so callers cannot poison the memo.
+	local function clone_str_list(t)
+		if type(t) ~= "table" then
+			return t
+		end
+		local out = {}
+		for i = 1, #t do
+			out[i] = t[i]
+		end
+		return out
+	end
+
 	ocsp_der_memo_fetch = function(ocsp_der, compute)
 		if type(ocsp_der) ~= "string" or #ocsp_der < 2 then
 			return compute(ocsp_der)
 		end
-		local key = ocsp_der:sub(1, math.min(32, #ocsp_der))
+		local key = der_body_key(ocsp_der)
 		local result = ocsp_der_memo[key]
 		if result == MEMO_NIL then
 			return nil
 		end
 		if result ~= nil then
-			return result
+			return clone_str_list(result)
 		end
 		if ocsp_der_memo_count >= OCSP_DER_MEMO_MAX then
 			ocsp_der_memo = {}
@@ -141,16 +166,18 @@ do
 		result = compute(ocsp_der)
 		if result == nil then
 			ocsp_der_memo[key] = MEMO_NIL
-		else
-			ocsp_der_memo[key] = result
+			ocsp_der_memo_count = ocsp_der_memo_count + 1
+			return nil
 		end
+		ocsp_der_memo[key] = clone_str_list(result)
 		ocsp_der_memo_count = ocsp_der_memo_count + 1
-		return result
+		return clone_str_list(ocsp_der_memo[key])
 	end
 end
 
 -- True when TLS Feature text asserts status_request (Must-Staple / feature id 5).
--- Do not substring-match "5": that false-positives on OIDs and other digits.
+-- Named forms first. Digit "5" only when the whole text is a feature-id list
+-- ("5", "5, 17") — never gmatch %d+ over OID arcs or openssl dumps.
 local function tls_feature_is_must_staple(text)
 	if type(text) ~= "string" or text == "" then
 		return false
@@ -165,11 +192,14 @@ local function tls_feature_is_must_staple(text)
 	if text:find("statusRequest%f[^%w]") or text:match("%.?statusRequest%s*$") then
 		return true
 	end
-	-- Feature id 5 as a whole decimal token (e.g. "5", "5, 17") — callers must pass
-	-- extension text only (never a full openssl dump).
-	for token in text:gmatch("%d+") do
-		if token == "5" then
-			return true
+	local trimmed = text:match("^%s*(.-)%s*$") or ""
+	-- Bare feature-id list only (digits, commas, whitespace) — rejects OID text.
+	if trimmed:match("^[%d%s,]+$") then
+		for token in trimmed:gmatch("%d+") do
+			-- Accept zero-padded forms ("05") — OpenSSL digit dumps occasionally pad.
+			if tonumber(token) == 5 then
+				return true
+			end
 		end
 	end
 	return false
@@ -182,13 +212,19 @@ local function canonical_serial_hex(serial)
 	if serial == nil then
 		return nil
 	end
-	if type(serial) == "table" then
+	-- resty BN may be userdata or a table with to_hex / to_number.
+	local st = type(serial)
+	if st == "table" or st == "userdata" then
 		if serial.to_hex then
 			local ok_hex, hex = pcall(function()
 				return serial:to_hex()
 			end)
 			if ok_hex and type(hex) == "string" and #hex > 0 then
-				hex = hex:upper():gsub("^0+", "")
+				hex = hex:upper():gsub("[%s:]+", ""):gsub("^0X", "")
+				if hex == "" or not hex:match("^[0-9A-F]+$") then
+					return nil
+				end
+				hex = hex:gsub("^0+", "")
 				return hex == "" and "0" or hex
 			end
 		end
@@ -224,24 +260,14 @@ end
 -- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
 -- Never key anything by ngx.md5(cert_pem) as a stand-in for the SPKI: PEM rewrap
 -- changes that hash while the SPKI is identical (path skew vs the job).
--- Uses batched profile extraction to reuse x509 object (saves 1-3ms per cert).
-function uncached.spki_fingerprint(cert_pem)
-	local fingerprint = nil
-	local ok_fp, err = pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		fingerprint = profile.spki_fingerprint
-	end)
-	if not ok_fp then
-		log(ngx.DEBUG, "OCSP SPKI fingerprint failed: " .. tostring(err))
-	end
+-- Profile is memoized once per PEM (single x509 pass for all facts).
+local function spki_fingerprint(cert_pem)
+	local profile = pem_profile_get(cert_pem)
+	local fingerprint = profile and profile.spki_fingerprint
 	if is_fp64(fingerprint) then
 		return fingerprint
 	end
 	return nil
-end
-
-local function spki_fingerprint(cert_pem)
-	return pem_memo_fetch("spki", cert_pem, uncached.spki_fingerprint)
 end
 
 -- Helper: batch extract SPKI for issuers already grouped by DN.
@@ -259,12 +285,15 @@ local function batch_spki_fingerprints_filtered(dn_grouped_issuers)
 	return result
 end
 
--- Canonical AIA OCSP URI for comparison (scheme+host lowercased; path preserved).
+-- Canonical AIA OCSP URI for comparison — must match ocsp-refresh._normalize_ocsp_aia_uri:
+-- http(s) only, lowercase scheme/host, drop userinfo, omit default :80/:443, keep path/query/fragment.
 local function normalize_ocsp_aia_uri(url)
 	if type(url) ~= "string" then
 		return nil
 	end
 	url = url:match("^%s*(.-)%s*$") or ""
+	-- Trim trailing punctuation often left by text dumps ("URI:http://x,").
+	url = url:gsub("[,;%.]+$", "")
 	if url == "" then
 		return nil
 	end
@@ -273,11 +302,41 @@ local function normalize_ocsp_aia_uri(url)
 		return nil
 	end
 	scheme = scheme:lower()
-	local hostport, pathquery = rest:match("^([^/?#]+)(.*)$")
-	if not hostport or hostport == "" then
+	local authority, pathquery = rest:match("^([^/?#]*)(.*)$")
+	if type(authority) ~= "string" or authority == "" then
 		return nil
 	end
-	return scheme .. "://" .. hostport:lower() .. (pathquery or "")
+	-- Drop userinfo (user:pass@host).
+	local at = authority:match("^.*@(.-)$")
+	if at then
+		authority = at
+	end
+	local host, port
+	if authority:sub(1, 1) == "[" then
+		-- IPv6 literal [::1] or [::1]:8443
+		host, port = authority:match("^(%[[%x:]+%]):(%d+)$")
+		if not host then
+			host = authority:match("^(%[[%x:]+%])$")
+		end
+	else
+		host, port = authority:match("^([^:]+):(%d+)$")
+		if not host then
+			host = authority
+		end
+	end
+	if type(host) ~= "string" or host == "" then
+		return nil
+	end
+	host = host:lower()
+	local netloc = host
+	if port then
+		local pnum = tonumber(port)
+		local default = (scheme == "http") and 80 or 443
+		if pnum and pnum ~= default then
+			netloc = host .. ":" .. port
+		end
+	end
+	return scheme .. "://" .. netloc .. (pathquery or "")
 end
 
 -- Batch extract all certificate profile facts in single x509 object pass
@@ -296,10 +355,24 @@ pem_profile_batched = function(pem)
 			return
 		end
 
-		-- Must-Staple: Extract TLS Feature extension (checked after definition)
+		-- Must-Staple: TLS Feature extension. Tri-state for has_must_staple:
+		-- true = positive MS, false = proven absent/non-MS, nil = extension present
+		-- but text unrecognized (never invent false — that fail-opens vs ocsp.json).
 		local tls_feature_ext = cert_obj:get_extension("tlsfeature")
 		if tls_feature_ext then
-			profile.must_staple = tls_feature_is_must_staple(tls_feature_ext:text() or "")
+			local text = tls_feature_ext:text() or ""
+			if tls_feature_is_must_staple(text) then
+				profile.must_staple = true
+			else
+				local trimmed = text:match("^%s*(.-)%s*$") or ""
+				-- Bare feature-id list without 5 → proven not Must-Staple (e.g. "17").
+				if trimmed ~= "" and trimmed:match("^[%d%s,]+$") then
+					profile.must_staple = false
+				else
+					-- Empty / ASN.1 dump / unrecognized named form → unknown.
+					profile.must_staple = nil
+				end
+			end
 		else
 			profile.must_staple = false
 		end
@@ -351,7 +424,7 @@ pem_profile_batched = function(pem)
 			local aia_text = aia_ext:text() or ""
 			local uris = {}
 			local seen = {}
-			for uri in aia_text:gmatch("1%.3%.6%.1%.5%.5%.7%.48%.1%s*=%s*URI:([%w%p]+)") do
+			for uri in aia_text:gmatch("1%.3%.6%.1%.5%.5%.7%.48%.1%s*[-=]%s*URI:([%w%p]+)") do
 				local n = normalize_ocsp_aia_uri(uri)
 				if n and not seen[n] then
 					seen[n] = true
@@ -359,7 +432,7 @@ pem_profile_batched = function(pem)
 				end
 			end
 			if #uris == 0 then
-				for uri in aia_text:gmatch("OCSP%s*%-?%s*URI:([%w%p]+)") do
+				for uri in aia_text:gmatch("OCSP%s*[-=]?%s*URI:([%w%p]+)") do
 					local n = normalize_ocsp_aia_uri(uri)
 					if n and not seen[n] then
 						seen[n] = true
@@ -385,6 +458,9 @@ pem_profile_batched = function(pem)
 	end)
 	if not ok then
 		log(ngx.DEBUG, "OCSP certificate profile batch extraction failed")
+		-- Discard partial facts — caching a half-filled profile fail-opens Must-Staple
+		-- (false) or strands serial/AIA until LRU.
+		return {}
 	end
 	return profile
 end
@@ -394,44 +470,27 @@ end
 -- that decide whether Must-Staple enforcement applies (never invent false on throw).
 -- Callers also consult ocsp.json (written by ocsp-refresh) when resty cannot see
 -- Must-Staple — see resolve_leaf_must_staple.
--- Uses batched profile extraction to reuse x509 object (saves 1-2ms per cert).
-function uncached.has_must_staple(cert_pem)
+-- Profile is memoized once per PEM (single x509 pass for all facts).
+local function has_must_staple(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
-	local must = nil
-	local ok = pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		must = profile.must_staple
-	end)
-	if not ok or must == nil then
+	local profile = pem_profile_get(cert_pem)
+	local must = profile and profile.must_staple
+	if must == nil then
 		return nil
 	end
 	return must
 end
 
-local function has_must_staple(cert_pem)
-	return pem_memo_fetch("must", cert_pem, uncached.has_must_staple)
-end
-
 -- { subject_dn, issuer_dn } strings (either may be nil on parse failure).
--- Uses batched profile extraction to reuse x509 object (saves 1-2ms per cert).
-function uncached.pem_names(pem)
-	local names = {}
-	pcall(function()
-		local profile = pem_profile_batched(pem)
-		names[1] = profile.subject_dn or ""
-		names[2] = profile.issuer_dn or ""
-	end)
-	return names
-end
-
+-- Profile is memoized once per PEM (single x509 pass for all facts).
 local function pem_names(pem)
-	local names = pem_memo_fetch("names", pem, uncached.pem_names)
-	if type(names) ~= "table" then
+	local profile = pem_profile_get(pem)
+	if type(profile) ~= "table" then
 		return nil, nil
 	end
-	return names[1], names[2]
+	return profile.subject_dn, profile.issuer_dn
 end
 
 -- Trust anchor (subject == issuer): never a stapled CertificateEntry.
@@ -473,15 +532,15 @@ local OID_OCSP_BASIC = "\43\6\1\5\5\7\48\1\1"
 
 -- Canonical uppercase hex serial of every SingleResponse CertID (RFC 6960 4.2.1),
 -- in response order. nil when the DER is not a successful basic OCSP response.
--- Cached to avoid re-walking same response on multi-issuer handshakes (saves 1-2ms).
-function uncached.ocsp_der_serials(der)
+-- Memoized by full-body SHA256 (see ocsp_der_memo_fetch).
+local function ocsp_der_serials(der)
 	if type(der) ~= "string" or #der < 2 then
 		return nil
 	end
 	local n = #der
 	local t, s, e, nx
-	-- DER sequence tag check (extract all values but only use t)
-	t, s, e, nx = der_read(der, 1, n)
+	-- DER sequence tag check
+	t, s, e = der_read(der, 1, n)
 	if t ~= 0x30 then
 		return nil
 	end
@@ -520,16 +579,15 @@ function uncached.ocsp_der_serials(der)
 	end
 	local rd_end = e
 	-- [0] version (optional), responderID [1]|[2], producedAt, responses
-	-- Extract tag (t) and next position (nx), skip start/end positions (s, e)
-	t, s, e, nx = der_read(der, s, rd_end)
+	local _
+	t, _, _, nx = der_read(der, s, rd_end)
 	if t == 0xA0 then
-		t, s, e, nx = der_read(der, nx, rd_end)
+		t, _, _, nx = der_read(der, nx, rd_end)
 	end
 	if t ~= 0xA1 and t ~= 0xA2 then
 		return nil
 	end
-	-- Extract tag and next position only
-	t, s, e, nx = der_read(der, nx, rd_end)
+	t, _, _, nx = der_read(der, nx, rd_end)
 	if t ~= 0x18 then
 		return nil
 	end
@@ -570,14 +628,16 @@ function uncached.ocsp_der_serials(der)
 	return serials
 end
 
--- Memoized wrapper around ocsp_der_serials to cache results per response.
--- Avoids re-walking same OCSP DER on multi-issuer handshakes.
+-- Memoized wrapper around ocsp_der_serials to cache results per response body hash.
 local function ocsp_der_serials_memoized(ocsp_der)
-	return ocsp_der_memo_fetch(ocsp_der, uncached.ocsp_der_serials)
+	return ocsp_der_memo_fetch(ocsp_der, ocsp_der_serials)
 end
 
--- Serial of the SingleResponse naming want_hex when present, else the first one.
--- Callers compare the result with want_hex, so this is a "response covers it" test.
+-- Serial of the SingleResponse naming want_hex when present.
+-- When want_hex is set and no SingleResponse names it → nil (not serials[1]).
+-- When want_hex is nil/omitted → first serial (callers that only need "any").
+-- Callers that compare with want_hex must treat nil as miss or unreadable;
+-- use a second call without want_hex to distinguish unreadable DER.
 local function ocsp_resp_serial_hex(ocsp_der, want_hex)
 	local serials = ocsp_der_serials_memoized(ocsp_der)
 	if not serials then
@@ -589,6 +649,7 @@ local function ocsp_resp_serial_hex(ocsp_der, want_hex)
 				return serial
 			end
 		end
+		return nil
 	end
 	return serials[1]
 end
@@ -597,20 +658,12 @@ function _M.ocsp_resp_serial_hex(ocsp_der, want_hex)
 	return ocsp_resp_serial_hex(ocsp_der, want_hex)
 end
 
-function uncached.leaf_serial_hex(cert_pem)
+local function leaf_serial_hex(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
-	local hex = nil
-	pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		hex = profile.serial
-	end)
-	return hex
-end
-
-local function leaf_serial_hex(cert_pem)
-	return pem_memo_fetch("serial", cert_pem, uncached.leaf_serial_hex)
+	local profile = pem_profile_get(cert_pem)
+	return profile and profile.serial or nil
 end
 
 local function pem_dn_str(cert_pem, which)
@@ -651,11 +704,11 @@ end
 
 -- Pre-filter issuers by SPKI fingerprint to detect true duplicates early.
 -- Groups issuers by (DN, SPKI) pair: if all matching DN have same SPKI, early exit.
--- Returns: {distinct_spki_count, spki_map} to avoid redundant SPKI extractions.
--- Saves: 3-6ms by early detection of identical cross-signed certs (same DN + same SPKI).
+-- Returns: distinct_spki_count, spki_map, unreadable_count.
+-- unreadable_count > 0 means at least one DN match lacked a readable SPKI.
 local function prefilter_issuers_by_spki(issuer_pems, target_dn)
 	if type(issuer_pems) ~= "table" or type(target_dn) ~= "string" then
-		return 0, {}
+		return 0, {}, 0
 	end
 	local dn_to_issuers = {}
 	local distinct_spki = {}
@@ -675,16 +728,21 @@ local function prefilter_issuers_by_spki(issuer_pems, target_dn)
 	-- Extract SPKI for DN-matching issuers only (pre-filtered list is usually small)
 	local spki_map = batch_spki_fingerprints_filtered(dn_to_issuers)
 
-	-- Count distinct SPKIs: if 1 unique SPKI, all issuers are truly identical
+	-- Count distinct readable SPKIs. Any nil fingerprint among DN matches is
+	-- reported separately — never treat {A, nil} as a single unambiguous SPKI.
 	local seen_spki = {}
-	for _, fp in pairs(spki_map) do
-		if fp and not seen_spki[fp] then
+	local unreadable = 0
+	for iss, _ in pairs(dn_to_issuers) do
+		local fp = spki_map[iss]
+		if not fp then
+			unreadable = unreadable + 1
+		elseif not seen_spki[fp] then
 			seen_spki[fp] = true
 			distinct_spki[#distinct_spki + 1] = fp
 		end
 	end
 
-	return #distinct_spki, spki_map
+	return #distinct_spki, spki_map, unreadable
 end
 
 -- CertID must name this handshake leaf: serial match + issuer DN binds to a candidate
@@ -701,11 +759,14 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 		return false, "missing_leaf_or_resp"
 	end
 	local leaf_serial = leaf_serial_hex(leaf_pem)
-	local resp_serial = ocsp_resp_serial_hex(ocsp_der, leaf_serial)
-	if not leaf_serial or not resp_serial then
+	if not leaf_serial then
 		return false, "serial_unreadable"
 	end
-	if leaf_serial ~= resp_serial then
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der, leaf_serial)
+	if resp_serial ~= leaf_serial then
+		if not ocsp_resp_serial_hex(ocsp_der) then
+			return false, "serial_unreadable"
+		end
 		return false, "serial_mismatch"
 	end
 	local leaf_issuer = pem_dn_str(leaf_pem, "issuer")
@@ -729,10 +790,13 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 	end
 
 	-- Pre-filter issuers by SPKI to detect true duplicates early.
-	-- Groups by DN (already done above), then by SPKI fingerprint.
-	-- If all matching issuers have same SPKI, they're truly identical (early exit optimization).
-	-- Saves 3-6ms by avoiding redundant SPKI extraction for cross-signed certs.
-	local distinct_spki_count, _ = prefilter_issuers_by_spki(matches, leaf_issuer)
+	-- Accept only when every DN match has a readable SPKI and they all agree.
+	-- {A, nil} must not collapse to distinct_count==1 (cross-sign fail-open).
+	local distinct_spki_count, _, unreadable = prefilter_issuers_by_spki(matches, leaf_issuer)
+
+	if unreadable > 0 then
+		return false, "issuer_spki_unreadable"
+	end
 
 	-- Optimization: If only 1 distinct SPKI, all issuers are identical, accept immediately.
 	if distinct_spki_count == 1 then
@@ -740,17 +804,12 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 	end
 
 	-- Multiple distinct SPKIs: ambiguous DN (different CAs, cross-signs, etc.)
-	-- Validate each issuer has matching SPKI (all-or-nothing policy).
 	if distinct_spki_count > 1 then
 		return false, "issuer_ambiguous"
 	end
 
-	-- Fallback (shouldn't reach here, but safety check)
-	if distinct_spki_count == 0 then
-		return false, "issuer_spki_unreadable"
-	end
-
-	return true, nil
+	-- No readable SPKI among DN matches (unreadable already handled above).
+	return false, "issuer_spki_unreadable"
 end
 
 -- Fingerprint-only path has no handshake leaf PEM: require response CertID serial
@@ -771,37 +830,32 @@ local function certid_consistent_with_meta(meta, ocsp_der)
 	else
 		meta_serial = canonical_serial_hex(meta.serial)
 	end
-	local resp_serial = ocsp_resp_serial_hex(ocsp_der, meta_serial)
-	if not meta_serial or not resp_serial then
+	if not meta_serial then
 		return false, "serial_unreadable"
 	end
-	if meta_serial ~= resp_serial then
-		return false, "serial_mismatch"
+	local resp_serial = ocsp_resp_serial_hex(ocsp_der, meta_serial)
+	if resp_serial == meta_serial then
+		return true, nil
 	end
-	return true, nil
+	if not ocsp_resp_serial_hex(ocsp_der) then
+		return false, "serial_unreadable"
+	end
+	return false, "serial_mismatch"
 end
 
 -- All OCSP URIs from leaf AIA (authorityInfoAccess), normalized.
--- Uses batched profile extraction to reuse x509 object (saves 1-2ms per cert).
-function uncached.leaf_aia_ocsp_uris(cert_pem)
-	local out = {}
-	if type(cert_pem) ~= "string" or cert_pem == "" then
-		return out
-	end
-	pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		if type(profile.aia_uris) == "table" then
-			for _, uri in ipairs(profile.aia_uris) do
-				out[#out + 1] = uri
-			end
-		end
-	end)
-	return out
-end
-
--- Memoized list is shared: callers must treat it as read-only.
+-- Profile is memoized once per PEM; returned list is a fresh copy (safe to mutate).
 local function leaf_aia_ocsp_uris(cert_pem)
-	return pem_memo_fetch("aia", cert_pem, uncached.leaf_aia_ocsp_uris)
+	local profile = pem_profile_get(cert_pem)
+	local uris = profile and profile.aia_uris
+	if type(uris) ~= "table" then
+		return {}
+	end
+	local out = {}
+	for i = 1, #uris do
+		out[i] = uris[i]
+	end
+	return out
 end
 
 -- Published staple must name the leaf AIA OCSP URI the job fetched.
@@ -848,41 +902,24 @@ function _M.aia_uri_pin_ok(leaf_pem, meta, must_staple)
 end
 
 -- Classify leaf PEM as "ec", "rsa", "ed", or nil (for dual-cert staple selection).
--- Uses batched profile extraction to reuse x509 object (saves 1-2ms per cert).
-function uncached.cert_pubkey_kind(cert_pem)
+-- Profile is memoized once per PEM (single x509 pass for all facts).
+local function cert_pubkey_kind(cert_pem)
 	if type(cert_pem) ~= "string" or cert_pem == "" then
 		return nil
 	end
-	local kind = nil
-	pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		kind = profile.pubkey_kind
-	end)
-	return kind
-end
-
-local function cert_pubkey_kind(cert_pem)
-	return pem_memo_fetch("kind", cert_pem, uncached.cert_pubkey_kind)
+	local profile = pem_profile_get(cert_pem)
+	return profile and profile.pubkey_kind or nil
 end
 
 -- kind + curve_nid for matching ClientHello signature_algorithms schemes.
--- The returned table is memoized and shared: callers must treat it as read-only.
--- Uses batched profile extraction to reuse x509 object (saves 1-2ms per cert).
-function uncached.cert_sig_profile(cert_pem)
-	local profile = { kind = nil, curve_nid = nil }
-	if type(cert_pem) ~= "string" or cert_pem == "" then
-		return profile
-	end
-	pcall(function()
-		local batched = pem_profile_batched(cert_pem)
-		profile.kind = batched.pubkey_kind
-		profile.curve_nid = batched.curve_nid
-	end)
-	return profile
-end
-
+-- Fresh table each call so callers cannot poison the PEM memo via field writes.
+-- Profile is memoized once per PEM; this is a thin view of the cache entry.
 local function cert_sig_profile(cert_pem)
-	return pem_memo_fetch("sigprof", cert_pem, uncached.cert_sig_profile)
+	local profile = pem_profile_get(cert_pem)
+	if type(profile) ~= "table" then
+		return { kind = nil, curve_nid = nil }
+	end
+	return { kind = profile.pubkey_kind, curve_nid = profile.curve_nid }
 end
 
 -- True when this leaf can produce a CertificateVerify for the TLS SignatureScheme.
@@ -993,6 +1030,11 @@ _M.internal = {
 	parse_pem_keys = parse_pem_keys,
 	pem_blocks = pem_blocks,
 	spki_fingerprint = spki_fingerprint,
+	-- Pure helpers exported for unit tests (no disk / no ngx.ocsp).
+	tls_feature_is_must_staple = tls_feature_is_must_staple,
+	ocsp_der_serials = ocsp_der_serials,
+	normalize_ocsp_aia_uri = normalize_ocsp_aia_uri,
+	canonical_serial_hex = canonical_serial_hex,
 }
 
 return _M
