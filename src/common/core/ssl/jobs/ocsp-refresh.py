@@ -2190,6 +2190,14 @@ PREVIOUS_GOOD_MAX_AGE_SECONDS = 24 * 3600
 # considers dead. Stored meta keeps the true absolute time; serve until absolute - skew.
 OCSP_CLOCK_SKEW_SECONDS = 300
 
+# Priority queue and adaptive rate limiting (Tier 1 optimization)
+# Rate limiting delays to avoid overwhelming OCSP responders
+OCSP_RATE_LIMIT_SUCCESS = 1  # Normal delay after successful fetch (seconds)
+OCSP_RATE_LIMIT_TEMP_ERROR = 2  # Temporary error delay (responder slow/overloaded)
+OCSP_RATE_LIMIT_TOO_MANY_REQUESTS = 30  # Delay when 429 (Too Many Requests) received
+OCSP_RATE_LIMIT_NETWORK_ERROR_BASE = 2  # Base delay for network errors (backoff applied)
+OCSP_RATE_LIMIT_NETWORK_ERROR_MAX = 30  # Max backoff delay for network errors
+
 # Signed-window policy (intrinsic to the OCSP response — not retention / skew death).
 # Must match handshake Lua. A CA-stretched GOOD cannot outlive these ceilings.
 OCSP_MAX_INTRINSIC_LIFETIME_SECONDS = 7 * 24 * 3600  # nextUpdate − thisUpdate
@@ -3336,6 +3344,99 @@ def _get_http_error_backoff_remaining(
         return 0
 
 
+def _cert_priority_score(cert_name: str, pem_data: bytes, cached_ttl: Optional[int] = None, total_lifetime: Optional[int] = None) -> tuple:
+    """
+    Compute priority score for certificate processing (for priority queue).
+
+    Priority factors (descending importance):
+    1. Must-Staple status (highest priority)
+    2. TTL urgency (expiring soon = higher priority)
+    3. Freshness (older cached response = higher priority)
+
+    Returns tuple (priority_int, ttl_urgency, age) for sorting.
+    Higher values = higher priority.
+    """
+    # Check if cert has Must-Staple
+    has_must_staple = False
+    try:
+        cert = x509.load_pem_x509_certificate(_clean_pem(pem_data))
+        has_must_staple = _cert_has_must_staple(cert)
+    except Exception:
+        pass
+
+    # Priority 1: Must-Staple certs (100 = highest)
+    must_staple_priority = 100 if has_must_staple else 0
+
+    # Priority 2: TTL urgency (0-99)
+    # Expiring in < 1 hour = 99, < 6 hours = 75, < 24 hours = 50, < 7 days = 25, > 7 days = 0
+    ttl_priority = 0
+    if cached_ttl is not None:
+        if cached_ttl < 3600:  # < 1 hour
+            ttl_priority = 99
+        elif cached_ttl < 21600:  # < 6 hours
+            ttl_priority = 75
+        elif cached_ttl < 86400:  # < 24 hours
+            ttl_priority = 50
+        elif cached_ttl < 604800:  # < 7 days
+            ttl_priority = 25
+
+    # Priority 3: Freshness (tiebreaker, 0-24)
+    # Older cached responses = higher priority for refresh
+    age_priority = 0
+    if total_lifetime is not None and total_lifetime > 0 and cached_ttl is not None:
+        age_ratio = (total_lifetime - cached_ttl) / total_lifetime
+        age_priority = min(24, int(age_ratio * 24))
+
+    return (must_staple_priority + ttl_priority, -ttl_priority if cached_ttl else 0, age_priority)
+
+
+def _adaptive_rate_limit(
+    last_result: Optional[str],
+    consecutive_errors: int = 0,
+    http_error_code: Optional[int] = None,
+) -> float:
+    """
+    Compute adaptive rate limiting delay based on previous result.
+
+    Delays:
+    - Success: 1s (normal operation)
+    - 429 Too Many Requests: 30s (responder rate limit reached)
+    - Temporary errors (5xx): 2s (responder overloaded)
+    - Network errors: exponential backoff (2s → 30s)
+    - Permanent errors (4xx except 429): handled by backoff marker, no delay here
+
+    Args:
+        last_result: "success", "http_error", "network_error", or None
+        consecutive_errors: number of consecutive failures (for exponential backoff)
+        http_error_code: HTTP error code if last_result is "http_error"
+
+    Returns:
+        Delay in seconds
+    """
+    if last_result == "success":
+        return OCSP_RATE_LIMIT_SUCCESS
+
+    if last_result == "http_error":
+        # 429 Too Many Requests: 30 second delay (responder rate limit reached)
+        if http_error_code == 429:
+            return OCSP_RATE_LIMIT_TOO_MANY_REQUESTS
+        # Temporary errors (5xx): 2 second delay
+        if http_error_code and 500 <= http_error_code < 600:
+            return OCSP_RATE_LIMIT_TEMP_ERROR
+        # Permanent errors (4xx except 429): handled by backoff marker
+        return OCSP_RATE_LIMIT_SUCCESS
+
+    if last_result == "network_error":
+        # Exponential backoff: 2s, 4s, 8s, 16s, 30s (capped)
+        delay = min(
+            OCSP_RATE_LIMIT_NETWORK_ERROR_MAX,
+            OCSP_RATE_LIMIT_NETWORK_ERROR_BASE * (2 ** min(consecutive_errors, 3))
+        )
+        return float(delay)
+
+    return OCSP_RATE_LIMIT_SUCCESS
+
+
 def _write_issuer_pem(
     fingerprint: Optional[str],
     issuer_pem: bytes,
@@ -3660,9 +3761,11 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         else:
             ttl = 86400  # RFC standard fallback
 
-        # Delay after successful fetch to prevent rate limiting
-        log_debug("⏸️ OCSP delaying 2 seconds after fetch for %s to prevent rate limiting", cert_name)
-        time.sleep(2)
+        # Adaptive rate limiting after successful fetch to prevent responder overload
+        delay = _adaptive_rate_limit("success")
+        if delay > 0:
+            log_debug("⏸️ OCSP rate limiting: %.1fs delay after successful fetch for %s", delay, cert_name)
+            time.sleep(delay)
 
         return ocsp_der, ttl, issuer.public_bytes(Encoding.PEM)
     except _VerifiedNonGood:
@@ -3681,6 +3784,13 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         elif e.code >= 500:
             error_desc += f" (Server Error - {e.reason})"
         log_error("❌ OCSP %s from responder for %s at %s", error_desc, cert_name, ocsp_url)
+
+        # Adaptive rate limiting for temporary errors (5xx) and 429 Too Many Requests
+        if e.code == 429 or (500 <= e.code < 600):
+            delay = _adaptive_rate_limit("http_error", http_error_code=e.code)
+            if delay > 0:
+                log_debug("⏸️ OCSP rate limiting: %.1fs delay after HTTP error %d for %s", delay, e.code, cert_name)
+                time.sleep(delay)
 
         # For HTTP 400/500, write a short backoff marker into ocsp.json so the job
         # doesn't immediately retry the same failing CertID/responder.
@@ -3703,6 +3813,11 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
     except URLError as e:
         # Network error — DNS, connection refused, timeout, SSL error, etc.
         log_error("❌ OCSP network error fetching response for %s from %s: %s", cert_name, ocsp_url, e)
+        # Adaptive rate limiting for network errors (exponential backoff)
+        delay = _adaptive_rate_limit("network_error", consecutive_errors=0)
+        if delay > 0:
+            log_debug("⏸️ OCSP rate limiting: %.1fs delay after network error for %s", delay, cert_name)
+            time.sleep(delay)
         return None, 0, None
     except Exception as e:
         log_error("❌ OCSP failed to fetch response for %s: %s", cert_name, e)
@@ -7197,8 +7312,14 @@ def main() -> int:
 
             stats["le_certs_processed"] = len(le_certs)
 
-            # 1. Process newly issued certs (force refresh)
-            for cert_name, pem_data in sorted(new_le_certs.items()):
+            # 1. Process newly issued certs (force refresh) — priority: Must-Staple first
+            new_with_priority = []
+            for cert_name, pem_data in new_le_certs.items():
+                priority_score = _cert_priority_score(cert_name, pem_data)
+                new_with_priority.append((cert_name, pem_data, priority_score))
+            new_with_priority.sort(key=lambda x: x[2], reverse=True)
+
+            for cert_name, pem_data, _ in new_with_priority:
                 if check_job_timeout(f"new LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
                 chain_res = _process_cert_chain(cert_name, pem_data, db, stats, force_fetch=True)
@@ -7209,6 +7330,7 @@ def main() -> int:
 
             # 2. Process changed certs (robustness: skip force-fetch if valid OCSP cached on disk)
             # This handles cases where checksums are missing but OCSP responses exist with fresh TTL
+            # Priority: Must-Staple + expiring soon first
             recategorized_changed = {}
             for cert_name, pem_data in list(changed_le_certs.items()):
                 # Clean PEM before fingerprinting (custom certs may have private keys/noise)
@@ -7234,8 +7356,14 @@ def main() -> int:
                     all_ocsp_results.append((cert_name, None, 0, pem_checksum, pem_data, None, False))
                     log_debug("✓ OCSP added recategorized cert %s to database persist list (checksum=%s)", cert_name, pem_checksum[:8])
 
-            # Process remaining changed certs with force refresh
-            for cert_name, pem_data in sorted(changed_le_certs.items()):
+            # Process remaining changed certs with force refresh — priority: Must-Staple first
+            changed_with_priority = []
+            for cert_name, pem_data in changed_le_certs.items():
+                priority_score = _cert_priority_score(cert_name, pem_data)
+                changed_with_priority.append((cert_name, pem_data, priority_score))
+            changed_with_priority.sort(key=lambda x: x[2], reverse=True)
+
+            for cert_name, pem_data, _ in changed_with_priority:
                 if check_job_timeout(f"changed LE cert {cert_name}"): break
                 refresh_job_lock(cert_name)
                 chain_res = _process_cert_chain(cert_name, pem_data, db, stats, force_fetch=True)
@@ -7245,11 +7373,29 @@ def main() -> int:
                     stashed_failures.append((cert_name, pem_data))
 
             # 3. Process unchanged certs (TTL check only or force-fetch if requested)
+            # Priority queue: Must-Staple first, then by TTL urgency, then by age
             if not skip_unchanged_ttl_checks:
-                for cert_name, pem_data in sorted(unchanged_le_certs.items()):
+                # Compute priority scores for all unchanged certs
+                unchanged_with_priority = []
+                for cert_name, pem_data in unchanged_le_certs.items():
+                    # Get cached TTL to compute priority
+                    fingerprint = _get_cert_pubkey_fingerprint(_clean_pem(pem_data))
+                    cached_ttl, total_lifetime = None, None
+                    if fingerprint:
+                        cached_ttl, total_lifetime = get_cached_ocsp_ttl(cert_name, pem_data, fingerprint)
+
+                    priority_score = _cert_priority_score(cert_name, pem_data, cached_ttl, total_lifetime)
+                    unchanged_with_priority.append((cert_name, pem_data, priority_score))
+
+                # Sort by priority (descending: highest priority first)
+                unchanged_with_priority.sort(key=lambda x: x[2], reverse=True)
+
+                # Process in priority order
+                for cert_name, pem_data, _ in unchanged_with_priority:
                     if check_job_timeout(f"unchanged LE cert {cert_name}"): break
                     refresh_job_lock(cert_name)
                     all_ocsp_results.extend(_process_cert_chain(cert_name, pem_data, db, stats, force_fetch=force_fetch))
+                    res = all_ocsp_results[-1] if all_ocsp_results else (cert_name, None, 0, "", pem_data, None, False)
                     if res[1] is None and res[5] and res[6]:
                         stashed_failures.append((cert_name, pem_data))
 
