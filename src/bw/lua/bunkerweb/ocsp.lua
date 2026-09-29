@@ -1,7 +1,6 @@
 local _M = {}
 
 local ngx = ngx
-local cjson = require("cjson")
 
 -- ============================================================================
 -- OCSP Validation Architecture Overview
@@ -28,9 +27,9 @@ local cjson = require("cjson")
 -- - "validated" = scheduler confirmed valid (skip TLS-path FFI)
 -- - "failed" = scheduler found invalid (abort, don't staple)
 
-local ASYNC_VALIDATION_PENDING = "pending"  -- Validation queued, not yet done
-local ASYNC_VALIDATION_DONE = "validated"   -- Validation complete, result stored
-local ASYNC_VALIDATION_FAILED = "failed"    -- Validation failed, response invalid
+local ASYNC_VALIDATION_PENDING = "pending" -- Validation queued, not yet done
+local ASYNC_VALIDATION_DONE = "validated" -- Validation complete, result stored
+local ASYNC_VALIDATION_FAILED = "failed" -- Validation failed, response invalid
 
 -- SPKI-only provisional trust: validate against issuer key fingerprint without full cert.
 -- Reduces cert parsing & chain traversal from TLS critical path (~15ms → ~1ms).
@@ -100,7 +99,6 @@ local meta_effective_expires_unix = store.meta_effective_expires_unix
 local meta_tombstoned = store.meta_tombstoned
 local must_staple_binds_shared_ligand = store.must_staple_binds_shared_ligand
 local ocsp_json_authorizes_resp = store.ocsp_json_authorizes_resp
-local ocsp_json_must_staple = store.ocsp_json_must_staple
 local read_ocsp_json = store.read_ocsp_json
 local resp_still_fresh = store.resp_still_fresh
 local serial_blacklist_blocks = store.serial_blacklist_blocks
@@ -121,26 +119,32 @@ local chain_pem_from_blocks = chain.chain_pem_from_blocks
 local clear_connection_staple = chain.clear_connection_staple
 local issuer_linked_chain_blocks = chain.issuer_linked_chain_blocks
 
--- Lazy-loaded must-staple module (only loaded when needed)
+-- Lazy-loaded must-staple module. Always load when required: mode is per-site
+-- (open vs normal), so a worker-global "skip load because open" memo was wrong
+-- and ocsp_staple_mode() without internalstore+SNI always returned "open".
 local must_staple_module = nil
 local function get_must_staple_module()
 	if must_staple_module ~= nil then
-		return must_staple_module  -- Already loaded (or marked as not needed)
+		if must_staple_module == false then
+			return nil
+		end
+		return must_staple_module
 	end
-	local mode = ocsp_staple_mode()
-	if mode == "open" then
-		must_staple_module = false  -- Mark as not needed
-		return nil
+	local ok, mod = pcall(require, "bunkerweb.ocsp_must_staple")
+	if ok and type(mod) == "table" then
+		must_staple_module = mod
+		return mod
 	end
-	-- Load module only for normal/staple_only modes
-	must_staple_module = require("bunkerweb.ocsp_must_staple")
-	return must_staple_module
+	must_staple_module = false
+	return nil
 end
 
 -- Async validation state management (off-path validation)
 -- Defers OCSP validation to background job, reduces TLS critical path latency.
 
--- Returns the key where async validation status is stored for a fingerprint.
+-- Async status is fingerprint-keyed but value-bound to body generation:
+--   "pending|sha|gen" | "validated|sha|gen" | "failed|sha|gen"
+-- Soft-recall / re-page of a new body must not inherit a prior FAILED for 3600s.
 local function async_validation_key(fingerprint)
 	if not fingerprint or fingerprint == "" then
 		return nil
@@ -148,42 +152,82 @@ local function async_validation_key(fingerprint)
 	return "OCSP:ASYNC_VALIDATE:" .. fingerprint
 end
 
+local function async_status_payload(status, meta, resp, fingerprint)
+	if not status then
+		return nil
+	end
+	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
+	if type(sha) ~= "string" or #sha ~= 64 or type(gen) ~= "number" then
+		return nil
+	end
+	return status .. "|" .. sha .. "|" .. tostring(gen)
+end
+
+local function parse_async_status_payload(raw)
+	if type(raw) ~= "string" or raw == "" then
+		return nil
+	end
+	-- Legacy bare status (no gen) — treat as unknown so soft-recall is not blocked.
+	if raw == ASYNC_VALIDATION_PENDING or raw == ASYNC_VALIDATION_DONE or raw == ASYNC_VALIDATION_FAILED then
+		return nil
+	end
+	local a, b, c = raw:match("^([^|]+)|([^|]+)|([^|]+)$")
+	if not a or not b or not c then
+		return nil
+	end
+	local gen = tonumber(c)
+	if type(b) ~= "string" or #b ~= 64 or not gen then
+		return nil
+	end
+	return a, b, gen
+end
+
 -- Mark response as pending async validation (queued to background job).
--- Allows handshakes to speculatively attach response while validation runs async.
-local function mark_async_validation_pending(fingerprint)
+local function mark_async_validation_pending(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return
 	end
 	local key = async_validation_key(fingerprint)
-	if not key then
+	local payload = async_status_payload(ASYNC_VALIDATION_PENDING, meta, resp, fingerprint)
+	if not key or not payload then
 		return
 	end
 	pcall(function()
-		-- Mark as "pending" with 120s TTL (enough time for async job to complete)
-		ngx.shared.bw_ocsp_validations:set(key, ASYNC_VALIDATION_PENDING, 120)
+		ngx.shared.bw_ocsp_validations:set(key, payload, 120)
 	end)
 end
 
--- Mark response as validated (async validation job completed successfully).
--- Future handshakes skip validation and use this cached result.
-local function mark_async_validation_done(fingerprint)
+-- Mark response as validated (async job succeeded for this generation).
+local function mark_async_validation_done(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return
 	end
 	local key = async_validation_key(fingerprint)
-	if not key then
+	local payload = async_status_payload(ASYNC_VALIDATION_DONE, meta, resp, fingerprint)
+	if not key or not payload then
 		return
 	end
 	pcall(function()
-		-- Mark as "validated" with 3600s TTL (1 hour, until next OCSP refresh)
-		ngx.shared.bw_ocsp_validations:set(key, ASYNC_VALIDATION_DONE, 3600)
+		ngx.shared.bw_ocsp_validations:set(key, payload, 3600)
 	end)
 end
 
--- Check if response is already validated by async job (or mark as pending if not).
--- Returns: "validated" (safe, skip validation), "pending" (async in progress),
---          "failed" (validation failed), or nil (not yet queued).
-local function get_async_validation_status(fingerprint)
+local function mark_async_validation_failed(fingerprint, meta, resp)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
+		return
+	end
+	local key = async_validation_key(fingerprint)
+	local payload = async_status_payload(ASYNC_VALIDATION_FAILED, meta, resp, fingerprint)
+	if not key or not payload then
+		return
+	end
+	pcall(function()
+		ngx.shared.bw_ocsp_validations:set(key, payload, 3600)
+	end)
+end
+
+-- Returns status only when the stored generation matches this body; else nil.
+local function get_async_validation_status(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return nil
 	end
@@ -191,10 +235,21 @@ local function get_async_validation_status(fingerprint)
 	if not key then
 		return nil
 	end
-	local status
+	local raw
 	pcall(function()
-		status = ngx.shared.bw_ocsp_validations:get(key)
+		raw = ngx.shared.bw_ocsp_validations:get(key)
 	end)
+	local status, stored_sha, stored_gen = parse_async_status_payload(raw)
+	if not status then
+		return nil
+	end
+	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
+	if type(sha) ~= "string" or #sha ~= 64 or type(gen) ~= "number" then
+		return nil
+	end
+	if sha ~= stored_sha or gen ~= stored_gen then
+		return nil
+	end
 	return status
 end
 
@@ -484,6 +539,13 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 		end
 	end
 	local want_spki = stored and spki_fingerprint(stored) or nil
+	if stored and not want_spki then
+		-- issuer.pem present but unparsable: do NOT fail-open to unpinned chain
+		-- issuers (that would weaken the shard pin). Empty list → issuer_unavailable.
+		local fp_str = fingerprint and fingerprint:sub(1, 16) or "nil"
+		log(ngx.ERR, "OCSP issuer.pem unreadable SPKI for fp " .. fp_str .. "; refusing chain fallthrough")
+		return {}
+	end
 	if issuer_absent and not want_spki then
 		local fp_str = fingerprint and fingerprint:sub(1, 16) or "nil"
 		log(ngx.DEBUG, "OCSP issuer.pem absent for fp " .. fp_str .. "; accepting chain issuers without SPKI pin")
@@ -526,76 +588,122 @@ end
 -- Cross-handshake validation state sharing (thundering-herd protection).
 -- Multiple concurrent handshakes for the same cert can share validation results.
 -- First handshake validates (5-20ms); others read cached result (0.1ms each).
--- Uses shared dict with spin-lock pattern: in_flight → result → done.
-local function get_shared_validation_state_key(fingerprint)
+-- Uses shared dict: cold miss validates locally; in_flight waits briefly; pass reused (not fail).
+-- Bind shared validate state to body generation so a "pass" for DER₁ cannot
+-- attach DER₂ after soft-recall / re-page within the 60s TTL.
+local function get_shared_validation_state_key(fingerprint, meta, resp)
 	if not fingerprint or fingerprint == "" then
 		return nil
 	end
-	return "OCSP:VALIDATE:" .. fingerprint
+	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
+	if type(sha) ~= "string" or #sha ~= 64 or type(gen) ~= "number" then
+		-- No generation → no cross-handshake share (fail closed to local validate).
+		return nil
+	end
+	return "OCSP:VALIDATE:" .. fingerprint .. ":" .. sha .. "|" .. tostring(gen)
 end
 
-local function set_shared_validation_result(fingerprint, result)
+local function set_shared_validation_result(fingerprint, meta, resp, result)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return
 	end
-	local key = get_shared_validation_state_key(fingerprint)
+	local key = get_shared_validation_state_key(fingerprint, meta, resp)
 	if not key then
+		return
+	end
+	if not result then
+		-- Do not share "fail": a thin issuer bag must not block a later fuller
+		-- chain for 60s. Release in_flight so peers are not stuck waiting.
+		pcall(function()
+			local cur = ngx.shared.bw_ocsp_validations:get(key)
+			if cur == "in_flight" then
+				ngx.shared.bw_ocsp_validations:delete(key)
+			end
+		end)
 		return
 	end
 	pcall(function()
-		-- Mark as "done" with result (pass/fail). TTL: 60s to allow cross-handshake sharing
-		-- but invalidate stale results. Handshakes within 60s can reuse.
-		ngx.shared.bw_ocsp_validations:set(key, result and "pass" or "fail", 60)
+		ngx.shared.bw_ocsp_validations:set(key, "pass", 60)
 	end)
 end
 
-local function get_shared_validation_result(fingerprint, max_wait_ms)
+local function get_shared_validation_result(fingerprint, meta, resp, max_wait_ms)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return nil
 	end
-	local key = get_shared_validation_state_key(fingerprint)
+	local key = get_shared_validation_state_key(fingerprint, meta, resp)
 	if not key then
 		return nil
 	end
-	-- Spin-wait for validation to complete (with timeout).
-	-- If another handshake is validating, wait up to max_wait_ms for result.
-	local t0 = ngx.now() * 1000  -- Convert to milliseconds
-	local max_wait = max_wait_ms or 100  -- Default: 100ms timeout
+	local result
+	pcall(function()
+		result = ngx.shared.bw_ocsp_validations:get(key)
+	end)
+	-- Cold path: no concurrent validator — do not spin 100ms.
+	if result == nil or result == false then
+		return nil
+	end
+	if result == "pass" then
+		return true
+	end
+	-- Legacy "fail" entries (pre pass-only writers): treat as cold miss so a
+	-- rolling upgrade cannot validate_exhausted for 60s after soft-recall.
+	if result == "fail" then
+		return nil
+	end
+	if result ~= "in_flight" then
+		return nil
+	end
+	-- Another handshake owns the lock — wait briefly for pass only.
+	local t0 = ngx.now() * 1000
+	local max_wait = max_wait_ms or 100
 	while true do
-		local result
 		pcall(function()
 			result = ngx.shared.bw_ocsp_validations:get(key)
 		end)
-		if result then
-			-- Validation complete (result is "pass" or "fail")
-			return result == "pass"
+		if result == "pass" then
+			return true
 		end
-		-- Not ready yet; check timeout
-		local elapsed = ngx.now() * 1000 - t0
-		if elapsed > max_wait then
-			-- Timeout: other handshake is slow or validation failed to store
+		if result == "fail" or result ~= "in_flight" then
 			return nil
 		end
-		-- Brief sleep to avoid busy-spin (yield to other workers)
-		ngx.sleep(0.001)  -- 1ms sleep
+		if (ngx.now() * 1000 - t0) > max_wait then
+			return nil
+		end
+		ngx.sleep(0.001)
 	end
 end
 
-local function set_shared_validation_in_flight(fingerprint)
+local function set_shared_validation_in_flight(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return false
 	end
-	local key = get_shared_validation_state_key(fingerprint)
+	local key = get_shared_validation_state_key(fingerprint, meta, resp)
 	if not key then
 		return false
 	end
-	-- Try to atomically set a flag indicating this handshake is validating.
-	-- If another handshake already set it, we'll wait for their result.
 	local ok
 	pcall(function()
 		ok = ngx.shared.bw_ocsp_validations:add(key, "in_flight", 60)
 	end)
 	return ok or false
+end
+
+-- Drop a stuck in_flight lock (validate_budget / early abort). Never delete pass/fail.
+local function clear_shared_validation_in_flight(fingerprint, meta, resp)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
+		return
+	end
+	local key = get_shared_validation_state_key(fingerprint, meta, resp)
+	if not key then
+		return
+	end
+	pcall(function()
+		local cur = ngx.shared.bw_ocsp_validations:get(key)
+		if cur == "in_flight" then
+			ngx.shared.bw_ocsp_validations:delete(key)
+		end
+	end)
 end
 
 -- Bounded cache manager: prevents der_cache from growing unbounded.
@@ -651,15 +759,18 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 
 	local der_chain, err
 	local current_gen = current_ocsp_epoch()
-	local der_cache_key = (leaf_pem and leaf_pem:sub(1, 32) or "leaf") ..
-		"|" .. (issuer_pem and issuer_pem:sub(1, 32) or "issuer")
-	local persistent_cache_key = "OCSP:DER_CACHE:" .. der_cache_key
+	-- Key by SPKI fingerprints — never use "leaf|issuer" sentinels (collision when
+	-- spki_fingerprint fails). Missing SPKI → skip both cache tiers.
+	local leaf_spki = (type(leaf_pem) == "string" and leaf_pem ~= "") and spki_fingerprint(leaf_pem) or nil
+	local issuer_spki = (type(issuer_pem) == "string" and issuer_pem ~= "") and spki_fingerprint(issuer_pem) or nil
+	local der_cache_key = (leaf_spki and issuer_spki) and (leaf_spki .. "|" .. issuer_spki) or nil
+	local persistent_cache_key = der_cache_key and ("OCSP:DER_CACHE:" .. der_cache_key) or nil
 
 	-- ────────────────────────────────────────────────────────────────────
 	-- Tier 1: Per-Request Cache (Handshake-scoped)
 	-- ────────────────────────────────────────────────────────────────────
 	local ctx = ngx.ctx
-	if ctx then
+	if der_cache_key and ctx then
 		if not ctx.bw_ocsp_der_cache then
 			ctx.bw_ocsp_der_cache = {}
 		end
@@ -678,8 +789,8 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	-- ────────────────────────────────────────────────────────────────────
 	-- Tier 2: Persistent Cache (Shared Dict, across handshakes)
 	-- ────────────────────────────────────────────────────────────────────
-	-- Only try if Tier 1 missed
-	if not der_chain and ngx.shared and ngx.shared.bw_ocsp_validations then
+	-- Only try if Tier 1 missed and we have a real SPKI key
+	if not der_chain and persistent_cache_key and ngx.shared and ngx.shared.bw_ocsp_validations then
 		local cached_str = nil
 		pcall(function()
 			cached_str = ngx.shared.bw_ocsp_validations:get(persistent_cache_key)
@@ -698,9 +809,10 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 			end
 			if gen_pos then
 				local cached_der = cached_str:sub(1, gen_pos - 1)
-				local cached_gen = tonumber(cached_str:sub(gen_pos + 1))
+				-- current_ocsp_epoch() returns a string; tonumber() would never == it.
+				local cached_gen = cached_str:sub(gen_pos + 1)
 
-				if cached_gen == current_gen then
+				if cached_gen ~= "" and cached_gen == tostring(current_gen) then
 					-- Tier 2 HIT: Reuse from persistent cache [<0.1ms]
 					der_chain = cached_der
 					if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
@@ -733,22 +845,25 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 			end
 		end
 
-		if der_chain then
+		if der_chain and der_cache_key then
 			-- Store in Tier 1 cache (per-request)
 			if ctx then
 				if not ctx.bw_ocsp_der_cache then
 					ctx.bw_ocsp_der_cache = {}
 				end
 				pcall(function()
-					bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key,
-						{ chain = der_chain, err = err, gen = current_gen }, 16)
+					bounded_cache_set(
+						ctx.bw_ocsp_der_cache,
+						der_cache_key,
+						{ chain = der_chain, err = err, gen = current_gen },
+						16
+					)
 				end)
 			end
 
 			-- Store in Tier 2 cache (persistent, across handshakes)
-			if ngx.shared and ngx.shared.bw_ocsp_validations then
+			if persistent_cache_key and ngx.shared and ngx.shared.bw_ocsp_validations then
 				pcall(function()
-					-- Format: "der_bytes|generation" (separator is rare in binary)
 					local cache_value = der_chain .. "|" .. current_gen
 					ngx.shared.bw_ocsp_validations:set(persistent_cache_key, cache_value, 3600)
 				end)
@@ -765,10 +880,9 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	-- This is the critical path bottleneck. Deferred to async job in production.
 	-- TLS path uses cached result or skips if async status = "validated".
 	--
-	-- Optimization: Per-request FFI validation cache + early exit on identity.
-	-- - Early exit: If issuer SPKI matches last validation, reuse result [<0.1ms]
-	-- - Cache hit: If (response, issuer) pair in cache, reuse result [<0.1ms]
-	-- - FFI call: Only on first validation of this (response, issuer) pair [10-20ms]
+	-- Optimization: Per-request FFI validation cache keyed by body SHA + issuer SPKI.
+	-- - Cache hit: Same (response, issuer) pair in this handshake [<0.1ms]
+	-- - FFI call: First validation of this (response, issuer) pair [10-20ms]
 	--
 	-- OpenSSL FFI via ngx.ocsp.validate_ocsp_response:
 	-- - Verifies OCSP response signature against issuer public key
@@ -785,48 +899,49 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 		ngx.ctx.bw_ffi_cache_misses = 0
 	end
 
-	-- Early exit optimization: Same issuer as last validation?
-	-- Extract issuer SPKI from der_chain for identity check
-	local issuer_spki = nil
-	if ngx.ctx and der_chain then
-		pcall(function()
-			local x509 = require("resty.openssl.x509")
-			local chain_der_table = {}
-			for block in der_chain:gmatch("[^\0]+") do
-				chain_der_table[#chain_der_table + 1] = block
+	-- Death-time gate shared by live FFI and cache hits (validate returns boolean).
+	local function death_time_ok(next_update)
+		if type(next_update) == "number" and next_update > 0 then
+			local death_time = next_update - OCSP_CLOCK_SKEW_SECONDS
+			if ngx.time() >= death_time then
+				log(
+					ngx.DEBUG,
+					"OCSP validate rejected: past death time "
+						.. "(nextUpdate="
+						.. next_update
+						.. ", now="
+						.. ngx.time()
+						.. ", skew="
+						.. OCSP_CLOCK_SKEW_SECONDS
+						.. "s)"
+				)
+				return false
 			end
-			if #chain_der_table > 0 then
-				local issuer_cert = x509.new(chain_der_table[1])
-				local pub = issuer_cert and issuer_cert:get_pubkey()
-				if pub then
-					issuer_spki = pub:tostring("public", "DER")
-				end
-			end
-		end)
+			return true
+		elseif next_update ~= nil then
+			log(ngx.ERR, "OCSP validate refuse: nextUpdate unusable (type=" .. type(next_update) .. ")")
+			return false
+		end
+		-- Legacy OpenResty: boolean-only FFI — outer meta expires must gate attach.
+		log(ngx.WARN, "OCSP response missing nextUpdate (legacy OpenResty); relying on meta expires")
+		return true
 	end
 
-	-- Check for cached result: Same issuer as last call?
-	if ngx.ctx and issuer_spki and ngx.ctx.bw_last_issuer_spki == issuer_spki then
-		if ngx.ctx.bw_ffi_cache_hits then
-			ngx.ctx.bw_ffi_cache_hits = ngx.ctx.bw_ffi_cache_hits + 1
-		end
-		local cached_result = ngx.ctx.bw_last_ffi_validation_result
-		if type(cached_result) == "table" then
-			return cached_result.ok_call, cached_result.validate_ok, cached_result.next_update
-		end
-	end
-
-	-- Check for cached result: This (response, issuer) pair?
+	-- Per-request (response, issuer) cache only — keyed by full body SHA-256 +
+	-- issuer SPKI hex. Do NOT reuse on "same leaf as last call": probe→staple can
+	-- swap bodies mid-handshake; der_chain[1] is the leaf, not the issuer.
 	local ffi_cache_key = nil
-	if ngx.ctx and ocsp_der and issuer_spki then
-		-- Use first 32 bytes of response + issuer SPKI hash as cache key
-		ffi_cache_key = ocsp_der:sub(1, math.min(32, #ocsp_der)) .. ":" .. (issuer_spki:sub(1, 16) or "")
+	local body_sha = (type(ocsp_der) == "string" and ocsp_der ~= "") and resp_binding(ocsp_der) or nil
+	-- issuer_spki already computed above for DER cache key (hex); reuse it.
+	if ngx.ctx and body_sha and issuer_spki then
+		ffi_cache_key = body_sha .. ":" .. issuer_spki
 		local cached = ngx.ctx.bw_ffi_validation_cache[ffi_cache_key]
 		if cached then
 			if ngx.ctx.bw_ffi_cache_hits then
 				ngx.ctx.bw_ffi_cache_hits = ngx.ctx.bw_ffi_cache_hits + 1
 			end
-			return cached.ok_call, cached.validate_ok, cached.next_update
+			-- Re-check death time; never return pcall's ok_call as the boolean result.
+			return death_time_ok(cached.next_update)
 		end
 	end
 
@@ -876,72 +991,18 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	end
 
 	-- ========================================================================
-	-- FFI Validation Cache Storage (Multi-Tier Optimization)
-	-- ========================================================================
-	-- Cache successful FFI validation result for reuse in multi-issuer handshakes.
-	-- Saves 10-20ms per duplicate (response, issuer) pair in same handshake.
-	--
-	-- Tier 1: Per-request cache (this handshake)
-	--   Key: {response_prefix}:{issuer_spki_hash}
-	--   TTL: Request duration (~100-500ms)
-	--   Hit rate: ~90% on multi-issuer handshakes
-	--
-	-- Tier 2: Last issuer identity (early exit optimization)
-	--   Tracks: Last issuer SPKI that passed validation
-	--   Reuse: If next issuer is identical, return cached result immediately
-
-	if ngx.ctx then
-		-- Store in per-request cache
-		if ffi_cache_key and type(ngx.ctx.bw_ffi_validation_cache) == "table" then
-			ngx.ctx.bw_ffi_validation_cache[ffi_cache_key] = {
-				ok_call = ok_call,
-				validate_ok = validate_ok,
-				next_update = next_update
-			}
-		end
-
-		-- Store for early exit on identity
-		if issuer_spki then
-			ngx.ctx.bw_last_issuer_spki = issuer_spki
-			ngx.ctx.bw_last_ffi_validation_result = {
-				ok_call = ok_call,
-				validate_ok = validate_ok,
-				next_update = next_update
-			}
-		end
-	end
-
-	-- ========================================================================
 	-- Death Time Validation (Time Bound Check)
 	-- ========================================================================
 	-- Reject responses that are within OCSP_CLOCK_SKEW_SECONDS of expiry.
-	-- This prevents using an OCSP response that's about to expire mid-handshake.
 	-- Formula: nextUpdate - clock_skew <= now → REJECT
-	--
-	-- Example: nextUpdate=2026-09-30 10:00:00, now=2026-09-30 09:59:40, skew=30s
-	--   → Death time = 10:00:00 - 30s = 09:59:30
-	--   → now (09:59:40) > death_time (09:59:30) → REJECT ✓
-
-	if type(next_update) == "number" and next_update > 0 then
-		local death_time = next_update - OCSP_CLOCK_SKEW_SECONDS
-		local now = ngx.time()
-
-		if now >= death_time then
-			log(ngx.DEBUG, "OCSP validate rejected: past death time " ..
-				"(nextUpdate=" .. next_update .. ", now=" .. now .. ", skew=" .. OCSP_CLOCK_SKEW_SECONDS .. "s)")
-			return false
-		end
-	else
-		-- No nextUpdate in response (shouldn't happen, but handle gracefully)
-		log(ngx.WARN, "OCSP response missing nextUpdate (type=" .. type(next_update) .. ")")
-		-- Treat as valid but log for investigation
+	if not death_time_ok(next_update) then
+		return false
 	end
 
-	-- ========================================================================
-	-- Validation Success
-	-- ========================================================================
-	-- Response is valid: signature verified, time bounds OK, not expired.
-	-- Safe to attach to TLS handshake.
+	-- Cache only after signature + death-time pass (boolean validate result).
+	if ngx.ctx and ffi_cache_key and type(ngx.ctx.bw_ffi_validation_cache) == "table" then
+		ngx.ctx.bw_ffi_validation_cache[ffi_cache_key] = { next_update = next_update }
+	end
 
 	return true
 end
@@ -950,35 +1011,32 @@ end
 -- When validate_budget aborts mid-issuer walk we KEEP the fleet allow-pin (so
 -- canary trust still exists) but demote local L1 and stamp this key so the next
 -- handshake cannot canary-skip attach an unfinished body.
--- Value is "der_sha256|soft_recall_gen|hmac_tag": soft-recall / re-page
--- flips gen → is_ffi_needed clears the stale latch. All latches require HMAC tag.
+-- Value is "der_sha256|soft_recall_gen|hmac_tag" (or "budget|hmac_tag"): soft-recall /
+-- re-page flips gen → is_ffi_needed clears the stale latch. Readers split on LAST '|'.
+-- All latches require an integrity tag.
 -- Wall-clock TTL is only a safety cap (86400s); generation match is the real death clock.
 -- mark on budget abort; clear on successful FFI/attach (incl. verified-L1 restock);
 -- is_ffi_needed is also consulted on the verified-L1 shortcut so a warmer
--- re-verify cannot bypass the latch. HMAC tag prevents tampering via shared state.
+-- re-verify cannot bypass the latch. Tag is fingerprint-salted (not epoch — see latch_token_tag).
 local function ffi_needed_key(fingerprint)
 	return "TLS:SSL:ocsp_ffi_needed:" .. fingerprint
 end
 
--- Fast integrity tag for latch tokens (prevents forgery via poisoned shared state).
--- Uses rolling hash + epoch salt (not crypto-grade, but sufficient to detect
--- tampering while avoiding HMAC-SHA256 overhead). Generation binding already
--- provides timing protection; this adds integrity against external writes.
+-- Lightweight latch tag (not crypto / not HMAC). Salt is fingerprint-only:
+-- global .ocsp_epoch must NOT be mixed in — an unrelated cert publish would
+-- flip the tag, clear the latch, and re-open canary-skip after validate_budget.
+-- Generation mismatch (stored token ≠ live sha|gen) is the intentional death clock.
 local function latch_token_tag(token, fingerprint)
 	if not token or not fingerprint then
 		return nil
 	end
-	-- Mix token with fingerprint + epoch for tamper detection.
-	-- Attacker cannot forge valid tags without knowing the epoch.
-	local salt = (fingerprint or ""):sub(1, 8) .. tostring(current_ocsp_epoch() or 0)
-	local combined = token .. "|" .. salt
-	-- Simple rolling hash: XOR each byte with position (O(n), not crypto).
+	local combined = token .. "|" .. fingerprint
 	local tag = 0
 	for i = 1, #combined do
 		local byte_val = combined:byte(i)
-		tag = (tag * 31 + byte_val) % 0xFFFFFFFF  -- 32-bit rolling hash
+		tag = (tag * 31 + byte_val) % 0xFFFFFFFF
 	end
-	return string.format("%08x", tag)  -- Hex-encoded tag (8 chars)
+	return string.format("%08x", tag)
 end
 
 -- Compact generation identity for the latch value. nil when sha/gen incomplete
@@ -993,40 +1051,67 @@ end
 
 -- Stamp force_ffi after validate_budget. meta+resp bind the latch to this body gen.
 -- Token is now signed with a fast integrity tag to prevent forgery via shared state.
--- All latches require valid HMAC tag (no legacy bypass).
+-- All latches require a valid integrity tag (no legacy bypass).
 local function mark_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return
 	end
-	local token = ffi_needed_token(meta, resp, fingerprint)
-	if not token then
-		-- Cannot create valid latch without generation identity. Do not fall back to "1".
-		return
-	end
+	-- Prefer gen-bound token; if soft_recall_gen type-drifts, still stamp a budget
+	-- sentinel so canary-skip cannot resume after validate_budget (KEEP pin).
+	local token = ffi_needed_token(meta, resp, fingerprint) or "budget"
 	local tag = latch_token_tag(token, fingerprint)
 	if not tag then
-		-- Cannot compute tag; do not store invalid latch.
 		return
 	end
 	pcall(function()
-		-- Long TTL: generation match is the real death clock; 300s let canary-skip resume early.
-		-- Latch value: "token|tag" (both required, no legacy "1" bypass).
+		-- Latch value: "token|tag" where token may contain '|' (sha|gen).
+		-- Readers MUST split on the LAST '|'.
 		internalstore:set(ffi_needed_key(fingerprint), token .. "|" .. tag, 86400)
 	end)
 end
 
--- Drop the latch after a successful validate+attach (or when gen no longer matches).
-local function clear_ffi_needed(internalstore, fingerprint)
+-- Drop the latch after a successful validate+attach for THIS body generation.
+-- CAS-delete only: never wipe a concurrent mark_ffi_needed for a newer gen.
+-- meta+resp required to form the expected token; without them this is a no-op
+-- (blind delete reopens the TOCTOU that gen-mismatch CAS fixed).
+local function clear_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return
 	end
+	local expected = ffi_needed_token(meta, resp, fingerprint)
 	pcall(function()
-		internalstore:delete(ffi_needed_key(fingerprint))
+		local key = ffi_needed_key(fingerprint)
+		local cur = internalstore:get(key)
+		if type(cur) ~= "string" or cur == "" then
+			return
+		end
+		local pipe_pos = nil
+		for i = #cur, 1, -1 do
+			if cur:sub(i, i) == "|" then
+				pipe_pos = i
+				break
+			end
+		end
+		if not pipe_pos or pipe_pos == 1 then
+			return
+		end
+		local stored_token = cur:sub(1, pipe_pos - 1)
+		-- Match this handshake's gen, or gen-less budget after a completed FFI walk.
+		if expected then
+			if stored_token ~= expected and stored_token ~= "budget" then
+				return
+			end
+		else
+			return
+		end
+		if internalstore:get(key) == cur then
+			internalstore:delete(key)
+		end
 	end)
 end
 
 -- True when this worker must run ngx.ocsp.validate despite canary trust.
--- All latches require HMAC tag; legacy untagged latches rejected for security.
+-- Untagged / tag-mismatch latches fail closed to FFI (do not clear).
 local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return false
@@ -1038,33 +1123,50 @@ local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 	if v == nil or v == false then
 		return false
 	end
-	local token = ffi_needed_token(meta, resp, fingerprint)
-	if not token then
-		-- No generation identity: honor any latch (incl. legacy "1").
-		return true
-	end
-	-- HMAC-signed latch: all latches MUST have valid tag (no legacy bypass).
-	-- Format: "token|tag" (both required).
-	local pipe_pos = v:find("|", 1, true)
-	if not pipe_pos then
-		-- Legacy untagged latch: reject (all latches must be signed).
-		log(ngx.NOTICE, "OCSP latch rejected: legacy untagged format (requires HMAC tag)")
-		clear_ffi_needed(internalstore, fingerprint)
+	-- Format: "token|tag" where token is "sha|gen" or "budget". Split on LAST '|'.
+	if type(v) ~= "string" or #v == 0 then
 		return false
+	end
+	local pipe_pos = nil
+	for i = #v, 1, -1 do
+		if v:sub(i, i) == "|" then
+			pipe_pos = i
+			break
+		end
+	end
+	if not pipe_pos or pipe_pos == 1 or pipe_pos == #v then
+		-- Corrupt / legacy untagged: fail closed to FFI (do not clear — TTL / clear_ffi).
+		log(ngx.NOTICE, "OCSP latch untagged/corrupt: forcing FFI (fail closed)")
+		return true
 	end
 	local stored_token = v:sub(1, pipe_pos - 1)
 	local stored_tag = v:sub(pipe_pos + 1)
-	-- Verify token matches expected (generation-bound check).
-	if stored_token ~= token then
-		-- Soft-recall / new page: stale latch dies with the old generation.
-		clear_ffi_needed(internalstore, fingerprint)
-		return false
-	end
-	-- Verify tag (tamper detection). If tag invalid, latch was poisoned.
-	local expected_tag = latch_token_tag(token, fingerprint)
+	local expected_tag = latch_token_tag(stored_token, fingerprint)
 	if stored_tag ~= expected_tag then
-		log(ngx.WARN, "OCSP latch tag mismatch (possible tampering): clearing latch")
-		clear_ffi_needed(internalstore, fingerprint)
+		-- Do not clear: epoch-era tags or partial writes must not reopen canary-skip.
+		log(ngx.WARN, "OCSP latch tag mismatch: forcing FFI (fail closed)")
+		return true
+	end
+	if stored_token == "budget" then
+		-- Gen-less budget abort: honor until clear_ffi / soft-recall clears key.
+		return true
+	end
+	local token = ffi_needed_token(meta, resp, fingerprint)
+	if not token then
+		-- Live latch but this handshake cannot form gen — honor (fail closed to FFI).
+		return true
+	end
+	if stored_token ~= token then
+		-- Soft-recall / new page: this handshake does not need FFI for the new gen.
+		-- CAS-delete only the value we read — never wipe a newer mark_ffi_needed
+		-- that raced in between get and clear (would reopen canary-skip).
+		pcall(function()
+			local key = ffi_needed_key(fingerprint)
+			local cur = internalstore:get(key)
+			if cur == v then
+				internalstore:delete(key)
+			end
+		end)
 		return false
 	end
 	return true
@@ -1074,13 +1176,31 @@ end
 -- probe_only: path health only (no set_ocsp_status_resp). force_ffi: ignore canary
 -- skip for one walk after validate_budget.
 -- Returns:
---   true                         — probe ok or staple attached
---   false, "certid_mismatch"     — DROP_ALLOW when Must-Staple + body present
+--   true [, nil, did_ffi]        — probe ok or staple attached; did_ffi clears force_ffi
+--   false, "certid_mismatch"     — DROP_ALLOW (serial/issuer poison only)
+--   false, "certid_unreadable"   — KEEP (parse / missing leaf-or-resp)
+--   false, "issuer_ambiguous"    — KEEP (multi SPKI under same DN)
 --   false, "validate_budget"     — soft budget; caller demotes L1 + marks force_ffi
---   false, "issuer_unavailable"  — body present but zero accepted issuer PEMs
+--   false, "issuer_unavailable"  — body present but zero accepted issuer PEMs (KEEP)
 --   false, "validate_exhausted"  — every issuer candidate failed validate (body present)
 --   false, <attach detail>       — intermediate MS / multi attach codes
 --   false                        — generic attach/validate miss (optional stapling)
+
+-- Map certid_matches_handshake_leaf why → refuse dialect.
+-- Only serial_mismatch / issuer_mismatch DROP the allow-pin.
+local function certid_handshake_refuse_dialect(why)
+	if why == "serial_mismatch" or why == "issuer_mismatch" then
+		return "certid_mismatch"
+	end
+	if why == "no_issuer_candidates" then
+		return "issuer_unavailable"
+	end
+	if why == "issuer_ambiguous" then
+		return "issuer_ambiguous"
+	end
+	return "certid_unreadable"
+end
+
 local function try_staple(
 	ocsp,
 	ssl,
@@ -1092,13 +1212,19 @@ local function try_staple(
 	meta,
 	fingerprint,
 	chain_blocks,
-	force_ffi
+	force_ffi,
+	mode
 )
+	-- Empty issuers before CertID: no_issuer_candidates used to collapse to
+	-- certid_mismatch (DROP). issuer_unavailable is KEEP.
+	if type(issuers) ~= "table" or #issuers == 0 then
+		return false, "issuer_unavailable", false
+	end
 	local ok_id, why = certid_matches_handshake_leaf(leaf_pem, resp, issuers)
 	if not ok_id then
-		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why))
-		-- Must be certid_mismatch (DROP_ALLOW), not bare false → set_staple_failed/unmet KEEP.
-		return false, "certid_mismatch"
+		local dialect = certid_handshake_refuse_dialect(why)
+		log(ngx.ERR, "OCSP CertID refuse staple reason=" .. tostring(why) .. " dialect=" .. dialect)
+		return false, dialect, false
 	end
 	local function set_resp()
 		if probe_only then
@@ -1129,19 +1255,23 @@ local function try_staple(
 		end
 		return false
 	end
+	-- Third return: did_ffi — true only when crypto was proven this walk (local
+	-- validate or shared pass). Callers clear force_ffi latch only when did_ffi.
+	local function finish_attach(did_ffi)
+		local ok, detail = set_resp()
+		if ok then
+			return true, nil, did_ffi and true or false
+		end
+		return false, detail, false
+	end
 	-- Trust scheduler canary (openssl CLI) for crypto verify when paged+ligand
 	-- match AND live allow-pin names this generation (soft-fuse / pin revoke
 	-- must not keep skip-validate alive on ligand bits alone).
-	-- Empty issuers before canary: CertID usually already failed, but probe_only
-	-- must not greenlight a body that force_ffi attach would name issuer_unavailable.
-	if type(issuers) ~= "table" or #issuers == 0 then
-		return false, "issuer_unavailable"
-	end
 	-- Async validation: defer validation to background job if already queued.
 	-- If async validation already completed, skip (response already validated).
 	-- Allows handshake to skip expensive crypto validation.
 	-- Versioned responses: check if cached version matches current (not stale after cert rotation).
-	local async_status = get_async_validation_status(fingerprint)
+	local async_status = get_async_validation_status(fingerprint, meta, resp)
 	-- if async_status == ASYNC_VALIDATION_DONE then
 	-- 	-- Check if cached response version is current (not stale after cert rotation)
 	-- 	if is_response_version_current(fingerprint) then
@@ -1151,9 +1281,11 @@ local function try_staple(
 	-- 		log(ngx.DEBUG, "OCSP response version stale: re-validating after cert rotation")
 	-- 	end
 	-- end
+	-- Async FAILED is advisory: job issuer set can be thinner than handshake
+	-- issuer_candidates. Fall through to local FFI (do not hard-abort for 3600s).
 	if async_status == ASYNC_VALIDATION_FAILED then
-		log(ngx.DEBUG, "OCSP async validation failed: response invalid, aborting")
-		return false, "async_validation_failed"
+		log(ngx.NOTICE, "OCSP async validation failed for this gen; forcing local FFI")
+		force_ffi = true
 	end
 
 	-- SPKI-only provisional trust: validate against issuer key fingerprint alone (1ms).
@@ -1181,29 +1313,31 @@ local function try_staple(
 	-- 	end
 	-- end
 
-	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
-	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
-	-- require cryptographic validation. We can attach the response blindly.
+	-- force_ffi: prior validate_budget demoted L1 but KEEP pin — finish one FFI walk.
+	-- Must run before should_skip_validation / canary so mode=open cannot bypass the latch.
+	if force_ffi and canary_paged_body_ok(meta, fingerprint, resp) then
+		log(ngx.NOTICE, "OCSP force FFI after validate_budget; ignoring canary/skip once")
+	end
+	-- Skip ngx.ocsp.validate when mode=open, or when Must-Staple is proven false.
+	-- Unknown (nil) and true must still validate (fail closed). Pass mode from
+	-- staple_one_leaf — never call ocsp_staple_mode() without store+SNI here.
+	-- If the module failed to load, do not skip (fail closed → validate).
 	local ms_module = get_must_staple_module()
-	if not ms_module or ms_module.should_skip_validation(leaf_pem, fingerprint) then
+	if not force_ffi and ms_module and ms_module.should_skip_validation(leaf_pem, fingerprint, mode) then
 		log(ngx.DEBUG, "OCSP: skipping validation, attaching speculatively")
 		-- Queue async validation for future handshakes (even though this one doesn't need it)
 		if not async_status then
-			mark_async_validation_pending(fingerprint)
+			mark_async_validation_pending(fingerprint, meta, resp)
 		end
-		return set_resp()
+		return finish_attach(false)
 	end
-	-- force_ffi: prior validate_budget demoted L1 but KEEP pin — finish one FFI walk.
 	if canary_paged_body_ok(meta, fingerprint, resp) and not force_ffi then
 		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
 		-- Queue async validation to confirm canary was correct
 		if not async_status then
-			mark_async_validation_pending(fingerprint)
+			mark_async_validation_pending(fingerprint, meta, resp)
 		end
-		return set_resp()
-	end
-	if force_ffi and canary_paged_body_ok(meta, fingerprint, resp) then
-		log(ngx.NOTICE, "OCSP force FFI after validate_budget; ignoring canary skip once")
+		return finish_attach(false)
 	end
 	-- Deduplicate issuers by SPKI to avoid redundant validate() calls on duplicate certs.
 	-- Malformed cert bundles may include the same issuer multiple times; skip them.
@@ -1220,36 +1354,51 @@ local function try_staple(
 	end
 	-- Replace issuers with deduplicated list
 	issuers = unique_issuers
-	-- Probabilistic issuer reordering: shuffle candidates using deterministic seed
-	-- (fingerprint + epoch) to prevent attackers from controlling validation order.
-	-- Seed is constant per request but varies across requests.
+	if #issuers == 0 then
+		return false, "issuer_unavailable", false
+	end
+	-- Deterministic issuer shuffle via local LCG — never math.randomseed (global PRNG).
 	if #issuers > 1 and fingerprint and type(fingerprint) == "string" then
-		local seed = fingerprint:sub(1, 8) .. tostring(current_ocsp_epoch() or 0)
-		math.randomseed(tonumber(seed:sub(1, 12), 16) or ngx.time() * 1000)
-		-- Fisher-Yates shuffle with deterministic seed
+		local state = tonumber(fingerprint:sub(1, 8), 16) or 1
+		state = (state + (tonumber(current_ocsp_epoch()) or 0)) % 2147483647
+		if state == 0 then
+			state = 1
+		end
+		local function lcg_next()
+			state = (state * 1103515245 + 12345) % 2147483648
+			return state
+		end
 		for i = #issuers, 2, -1 do
-			local j = math.random(1, i)
+			local j = (lcg_next() % i) + 1
 			issuers[i], issuers[j] = issuers[j], issuers[i]
 		end
 	end
 	-- Cross-handshake validation state sharing (thundering-herd protection).
-	-- If another concurrent handshake is already validating this fingerprint,
-	-- wait for their result instead of re-validating (saves 5-20ms per duplicate).
-	-- Timeout: 100ms (prevent infinite hangs if validation is stuck).
+	-- Keyed by fingerprint + body generation so soft-recall cannot reuse a stale pass.
+	-- Cold path returns immediately; only in_flight waits (max 100ms).
+	local owned_shared_lock = false
 	if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
-		local shared_result = get_shared_validation_result(fingerprint, 100)
+		local shared_result = get_shared_validation_result(fingerprint, meta, resp, 100)
 		if shared_result ~= nil then
 			if shared_result then
 				log(ngx.DEBUG, "OCSP validation result reused from concurrent handshake (hit)")
-				return set_resp()
+				return finish_attach(true)
 			else
 				log(ngx.DEBUG, "OCSP validation result reused from concurrent handshake (fail)")
-				return false, "validate_exhausted"
+				return false, "validate_exhausted", false
 			end
 		end
-		-- No concurrent validation in progress; try to claim the lock for this handshake.
-		-- If we succeed, we'll validate and store the result for other handshakes.
-		if set_shared_validation_in_flight(fingerprint) then
+		-- Claim lock; if another worker won the race, wait once more for their result.
+		if not set_shared_validation_in_flight(fingerprint, meta, resp) then
+			shared_result = get_shared_validation_result(fingerprint, meta, resp, 100)
+			if shared_result ~= nil then
+				if shared_result then
+					return finish_attach(true)
+				end
+				return false, "validate_exhausted", false
+			end
+		else
+			owned_shared_lock = true
 			log(ngx.DEBUG, "OCSP validation lock acquired for this handshake (will validate)")
 		end
 	end
@@ -1288,26 +1437,39 @@ local function try_staple(
 			)
 			-- Named abort: stack never reached attach_ocsp_staple / intermediates.
 			-- Do not collapse to nil (looks like unmet/skip) or ok_partial (attach-only).
-			-- Do NOT store result in shared state (budget abort is transient).
-			return false, "validate_budget"
+			-- Do NOT store pass/fail (budget is transient) — but release in_flight so
+			-- peers are not stuck waiting/spinning for up to 60s.
+			if owned_shared_lock then
+				clear_shared_validation_in_flight(fingerprint, meta, resp)
+			end
+			return false, "validate_budget", false
 		end
 		-- Early-exit optimization: stop on first successful validation (don't test all 4 issuers).
 		-- This is load-bearing for latency: validate() is 5-20ms per issuer, so early-exit
 		-- can save 10-60ms in common dual-issuer scenarios.
 		if validate(ocsp, ssl, resp, leaf_pem, issuers[i], shard_issuer_spki) then
-			-- Validation succeeded: store result for other concurrent handshakes.
-			if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
-				set_shared_validation_result(fingerprint, true)
+			-- Attach/path gate first — do not publish shared "pass" if set_resp fails.
+			local ok_resp, resp_detail = set_resp()
+			if ok_resp then
+				if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
+					set_shared_validation_result(fingerprint, meta, resp, true)
+					mark_async_validation_done(fingerprint, meta, resp)
+				end
+				return true, nil, true
 			end
-			return set_resp()
+			if owned_shared_lock then
+				clear_shared_validation_in_flight(fingerprint, meta, resp)
+			end
+			return ok_resp, resp_detail, false
 		end
 	end
 	-- Body present; every issuer candidate failed crypto validate (not missing DER).
-	-- Store failure result for other concurrent handshakes.
-	if fingerprint and type(fingerprint) == "string" and #fingerprint == 64 then
-		set_shared_validation_result(fingerprint, false)
+	-- Do not share "fail"; only the lock owner may clear in_flight (non-owners
+	-- must not yank a peer's lock after wait timeout).
+	if owned_shared_lock then
+		set_shared_validation_result(fingerprint, meta, resp, false)
 	end
-	return false, "validate_exhausted"
+	return false, "validate_exhausted", false
 end
 
 -- Audit which leaf was stapled — kind + SPKI + der_sha256 + epoch this node served.
@@ -1393,7 +1555,7 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 				profiles[i] = leaf.sig_profile
 			else
 				profiles[i] = cert_sig_profile(pem)
-				leaf.sig_profile = profiles[i]  -- Cache on leaf for future calls
+				leaf.sig_profile = profiles[i] -- Cache on leaf for future calls
 			end
 		else
 			profiles[i] = cert_sig_profile(pem)
@@ -1886,8 +2048,25 @@ end
 -- clears it. Empty disk DER returns response_empty (not response_not_found).
 local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only, mode, chain_blocks)
 	mode = mode or "normal"
+	-- probe_only: score health without touching the allow-pin bus (dual-cert rank).
+	local function refuse(fp, m, r, detail)
+		if probe_only then
+			return false, "must_staple", detail
+		end
+		return must_staple_refuse(fp, m, r, detail, mode)
+	end
 	local meta = read_ocsp_json(fingerprint)
-	local must_staple = ocsp_json_must_staple(meta)
+	-- Fail closed like PEM staple / resolve_leaf_must_staple(nil, fp):
+	-- no PEM → cannot prove non-MS; missing/false ocsp.json flag is not proven-false.
+	-- Do not use ocsp_json_must_staple alone (that fail-opens optional stapling).
+	local ms_module = get_must_staple_module()
+	local must_tri
+	if ms_module then
+		must_tri = ms_module.get_must_staple(nil, fingerprint)
+	else
+		must_tri = store.resolve_leaf_must_staple(nil, fingerprint)
+	end
+	local must_staple = must_tri ~= false
 	-- open (incl. stapling off): no enforcement, same as the PEM leaf path in _M.staple.
 	-- Gates below still skip a bad body; they just return false instead of refusing.
 	if must_staple and mode == "open" then
@@ -1896,15 +2075,12 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	-- Fingerprint-only: intermediate Must-Staple is unprovable without PEM chain.
 	-- Must-Staple leaves refuse with fingerprint_chain_unavailable (see attach_fp).
 	if must_staple and (type(chain_blocks) ~= "table" or #chain_blocks < 1) then
-		if not probe_only then
-			return must_staple_refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable", mode)
-		end
-		return false, "must_staple", "fingerprint_chain_unavailable"
+		return refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable")
 	end
-	if meta_tombstoned(meta) then
+	if meta_tombstoned(meta, fingerprint) then
 		drop_cache(internalstore, fingerprint)
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "tombstoned", mode)
+			return refuse(fingerprint, meta, nil, "tombstoned")
 		end
 		return false
 	end
@@ -1917,31 +2093,38 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			return false
 		end
 	end
-	if must_staple then
+	if must_tri == true then
 		log(ngx.INFO, "OCSP-Must-Staple from ocsp.json for fp=" .. fingerprint:sub(1, 16) .. "...")
+	elseif must_staple then
+		log(ngx.INFO, "OCSP-Must-Staple (fail-closed fingerprint-only) fp=" .. fingerprint:sub(1, 16) .. "...")
 	end
 
 	if must_staple and cluster_floor_blocks(fingerprint, meta) then
-		return must_staple_refuse(fingerprint, meta, nil, "cluster_floor", mode)
+		return refuse(fingerprint, meta, nil, "cluster_floor")
 	end
-	if shard_not_paged(meta) then
+	if shard_not_paged(meta, fingerprint) then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "not_paged", mode)
+			return refuse(fingerprint, meta, nil, "not_paged")
 		end
 		return false
 	end
 
-	local aia_ok, aia_why = aia_uri_pin_ok(nil, meta, must_staple)
+	-- Prefer leaf PEM from optional chain_blocks so AIA pin can run when wired.
+	local leaf_for_aia = nil
+	if type(chain_blocks) == "table" and type(chain_blocks[1]) == "string" and chain_blocks[1] ~= "" then
+		leaf_for_aia = chain_blocks[1]
+	end
+	local aia_ok, aia_why = aia_uri_pin_ok(leaf_for_aia, meta, must_staple)
 	if not aia_ok then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, aia_why or "aia_uri_mismatch", mode)
+			return refuse(fingerprint, meta, nil, aia_why or "aia_uri_mismatch")
 		end
 		return false
 	end
 
 	if not stapling_enabled(internalstore, server_name) then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "ssl_use_ocsp_stapling_no", mode)
+			return refuse(fingerprint, meta, nil, "ssl_use_ocsp_stapling_no")
 		end
 		log_stapling_off("ssl_use_ocsp_stapling_no")
 		return false
@@ -1950,7 +2133,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	local ok_ocsp, ocsp = pcall(require, "ngx.ocsp")
 	if not ok_ocsp or not ocsp or not ocsp.set_ocsp_status_resp then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "ngx_ocsp_unavailable", mode)
+			return refuse(fingerprint, meta, nil, "ngx_ocsp_unavailable")
 		end
 		log(
 			ngx.DEBUG,
@@ -1972,7 +2155,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		if probe_only then
 			return false, "must_staple", "fingerprint_chain_unavailable"
 		end
-		return must_staple_refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable", mode)
+		return refuse(fingerprint, meta, nil, "fingerprint_chain_unavailable")
 	end
 
 	-- Refuse attach while a PEM-path validate_budget latch is live (no leaf PEM here).
@@ -1984,7 +2167,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			if probe_only then
 				return false, "must_staple", "force_ffi_pending"
 			end
-			return must_staple_refuse(fingerprint, meta, resp_body, "force_ffi_pending", mode)
+			return refuse(fingerprint, meta, resp_body, "force_ffi_pending")
 		end
 		return false
 	end
@@ -2002,13 +2185,13 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				)
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+					return refuse(fingerprint, meta, nil, fresh_why or "response_stale")
 				end
 			else
 				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+						return refuse(fingerprint, meta, nil, "serial_blacklisted")
 					end
 					return false
 				end
@@ -2025,21 +2208,24 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
 					if must_staple and not ligand_ok then
 						drop_cache(internalstore, fingerprint)
-						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
+						return refuse(fingerprint, meta, cached, ligand_detail)
 					end
 					local ok_id, why = certid_consistent_with_meta(meta or read_ocsp_json(fingerprint), cached)
 					if not ok_id then
+						local dialect = (why == "serial_mismatch") and "certid_mismatch" or "certid_unreadable"
 						log(
 							ngx.ERR,
 							"OCSP CertID refuse fingerprint staple reason="
 								.. tostring(why)
+								.. " dialect="
+								.. dialect
 								.. " fp="
 								.. fingerprint:sub(1, 16)
 								.. "..."
 						)
 						drop_cache(internalstore, fingerprint)
 						if must_staple then
-							return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+							return refuse(fingerprint, meta, cached, dialect)
 						end
 						return false
 					end
@@ -2084,7 +2270,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 						or detail == "intermediate_must_staple_libssl"
 						or detail == "intermediate_must_staple_colony"
 					then
-						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+						return refuse(fingerprint, meta, cached, detail)
 					end
 				end
 			end
@@ -2097,7 +2283,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 			if probe_only then
 				return false, "must_staple", "response_empty"
 			end
-			return must_staple_refuse(fingerprint, meta, nil, "response_empty", mode)
+			return refuse(fingerprint, meta, nil, "response_empty")
 		end
 		return false
 	end
@@ -2109,7 +2295,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				"OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "..."
 			)
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+				return refuse(fingerprint, meta, nil, fresh_why or "response_stale")
 			end
 			return false
 		end
@@ -2118,7 +2304,7 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		local _, disk_verified, _, _, disk_gen = get_l1(internalstore, fingerprint)
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+				return refuse(fingerprint, meta, nil, "serial_blacklisted")
 			end
 			return false
 		end
@@ -2131,20 +2317,23 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 		if verified or authorized then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if must_staple and not ligand_ok then
-				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
+				return refuse(fingerprint, meta, resp, ligand_detail)
 			end
 			local ok_id, why = certid_consistent_with_meta(meta, resp)
 			if not ok_id then
+				local dialect = (why == "serial_mismatch") and "certid_mismatch" or "certid_unreadable"
 				log(
 					ngx.ERR,
 					"OCSP CertID refuse fingerprint staple reason="
 						.. tostring(why)
+						.. " dialect="
+						.. dialect
 						.. " fp="
 						.. fingerprint:sub(1, 16)
 						.. "..."
 				)
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, resp, "certid_mismatch", mode)
+					return refuse(fingerprint, meta, resp, dialect)
 				end
 				return false
 			end
@@ -2181,14 +2370,14 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 				or detail == "intermediate_must_staple_libssl"
 				or detail == "intermediate_must_staple_colony"
 			then
-				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
+				return refuse(fingerprint, meta, resp, detail)
 			end
 			return false
 		end
 	end
 
 	if must_staple then
-		return must_staple_refuse(fingerprint, meta, nil, "response_not_found", mode)
+		return refuse(fingerprint, meta, nil, "response_not_found")
 	end
 	return false
 end
@@ -2199,12 +2388,12 @@ end
 -- Verified L1: restocks warm_cache TTL on hit; if is_ffi_needed, forces try_staple
 -- instead of the attach shortcut so validate_budget unfinished bodies still FFI once.
 -- Unverified L1 / disk: try_staple with force_ffi from the gen-bound latch; budget
--- abort demotes L1 + mark_ffi_needed; success (incl. probe_only) clear_ffi_needed.
+-- abort demotes L1 + mark_ffi_needed (install only); clear_ffi only when did_ffi.
 -- try_staple dialect: issuer_unavailable (zero PEMs), validate_exhausted (all failed),
 -- validate_budget (soft ceiling). Empty disk DER → response_empty (not response_not_found).
 -- Disk fallthrough rebuilds issuer_candidates when L1 left a truthy empty table
 -- (Lua `issuers or …` would keep {}).
--- probe_only: never writes the allow-pin bus; returns true or false,"must_staple",detail.
+-- probe_only: never writes the allow-pin bus (local refuse wrapper); returns true or false,"must_staple",detail.
 -- Returns true | false [, reason [, detail]] | nil (no usable body).
 local function staple_one_leaf(
 	internalstore,
@@ -2222,6 +2411,13 @@ local function staple_one_leaf(
 	if not fingerprint then
 		return nil
 	end
+	-- probe_only: never DROP/KEEP the fleet pin — return soft must_staple only.
+	local function refuse(fp, m, r, detail)
+		if probe_only then
+			return false, "must_staple", detail
+		end
+		return must_staple_refuse(fp, m, r, detail, mode)
+	end
 	-- ========================================================================
 	-- Disk I/O Optimization: Cache Issuer SPKI & Metadata
 	-- ========================================================================
@@ -2229,99 +2425,60 @@ local function staple_one_leaf(
 	-- to avoid re-reading from disk on next L1 miss.
 	--
 	-- Shared Dict Keys:
-	--   "OCSP:ISSUER_SPKI:{fingerprint}" → 64-byte hex SPKI
-	--   "OCSP:META:{fingerprint}"        → JSON string
-	-- TTL: 3600s (1 hour, or when cert rotates)
-	--
-	-- Savings:
-	--   - Issuer SPKI cache: 2-5ms per miss
-	--   - Metadata cache: 1-2ms per miss
-	--   - Cost: ~28 KB DRAM for 50 active certs (negligible)
+	--   "OCSP:ISSUER_SPKI:{fingerprint}:{epoch}" → write-through SPKI (pin always from PEM)
+	-- Refuse gates (tombstoned / paged) always read ocsp.json fresh — job writes
+	-- tombstoned before epoch bump, so META shm must not serve those fields.
 
 	local issuers = nil
 
 	-- ────────────────────────────────────────────────────────────────────
-	-- Issuer SPKI Caching (File #1: issuer.pem)
+	-- Issuer.pem (always read) + SPKI cache (epoch-bound)
 	-- ────────────────────────────────────────────────────────────────────
-	-- Try to get from cache first (fast path, <0.1ms)
-	local issuer_spki_cache_key = "OCSP:ISSUER_SPKI:" .. fingerprint
+	-- Always read issuer.pem for issuer_candidates. A SPKI-only cache hit must
+	-- NOT map to stored_pem=false ("confirmed absent") — that skips disk and
+	-- leaves leaf-only bags with empty candidates → issuer_unavailable.
+	-- Always derive SPKI from the PEM we read — never trust shm alone (issuer replace
+	-- without epoch bump must not pin validate() to a stale SPKI).
+	local issuer_spki_cache_key = "OCSP:ISSUER_SPKI:" .. fingerprint .. ":" .. tostring(current_ocsp_epoch() or "0")
+
+	local t_issuer_start = ngx.hrtime and ngx.hrtime() or nil
+	local shard_issuer_pem = read_file(issuer_path(fingerprint))
+	if t_issuer_start and ngx.ctx then
+		local elapsed_ns = ngx.hrtime() - t_issuer_start
+		if not ngx.ctx.bw_ocsp_disk_io then
+			ngx.ctx.bw_ocsp_disk_io = {}
+		end
+		ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns = elapsed_ns
+	end
+
+	-- Three-state for issuer_candidates: string PEM | false = absent | never nil here.
+	local issuer_stored = shard_issuer_pem or false
 	local shard_issuer_spki = nil
-
-	if ngx.shared and ngx.shared.bw_ocsp_validations then
-		pcall(function()
-			shard_issuer_spki = ngx.shared.bw_ocsp_validations:get(issuer_spki_cache_key)
-		end)
-	end
-
-	-- If not in cache, read from disk and cache
-	local shard_issuer_pem = nil
-	if not shard_issuer_spki then
-		-- DISK I/O #1: Read issuer.pem [2-5ms]
-		local t_issuer_start = ngx.hrtime and ngx.hrtime() or nil
-		shard_issuer_pem = read_file(issuer_path(fingerprint))
-		if t_issuer_start and ngx.ctx then
-			local elapsed_ns = ngx.hrtime() - t_issuer_start
-			if not ngx.ctx.bw_ocsp_disk_io then
-				ngx.ctx.bw_ocsp_disk_io = {}
-			end
-			ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns = elapsed_ns
-		end
-
-		-- Extract and cache SPKI
-		if shard_issuer_pem then
-			shard_issuer_spki = spki_fingerprint(shard_issuer_pem)
-
-			-- Cache SPKI for next time [SAVES 2-5ms on next miss]
-			if shard_issuer_spki and ngx.shared and ngx.shared.bw_ocsp_validations then
-				pcall(function()
-					ngx.shared.bw_ocsp_validations:set(issuer_spki_cache_key, shard_issuer_spki, 3600)
-				end)
-			end
-		end
-	end
-
-	-- ────────────────────────────────────────────────────────────────────
-	-- Metadata Caching (File #2: ocsp.json)
-	-- ────────────────────────────────────────────────────────────────────
-	-- Try to get from cache first (fast path, <0.1ms)
-	local meta_cache_key = "OCSP:META:" .. fingerprint
-	local meta = nil
-
-	if ngx.shared and ngx.shared.bw_ocsp_validations then
-		pcall(function()
-			local cached_meta_str = ngx.shared.bw_ocsp_validations:get(meta_cache_key)
-			if cached_meta_str then
-				-- Deserialize from JSON string
-				meta = cjson.decode(cached_meta_str)
-			end
-		end)
-	end
-
-	-- If not in cache, read from disk and cache
-	if not meta then
-		-- DISK I/O #2: Read ocsp.json [1-2ms]
-		local t_meta_start = ngx.hrtime and ngx.hrtime() or nil
-		meta = read_ocsp_json(fingerprint)
-		if t_meta_start and ngx.ctx then
-			local elapsed_ns = ngx.hrtime() - t_meta_start
-			if not ngx.ctx.bw_ocsp_disk_io then
-				ngx.ctx.bw_ocsp_disk_io = {}
-			end
-			ngx.ctx.bw_ocsp_disk_io.meta_json_ns = elapsed_ns
-		end
-
-		-- Cache metadata for next time [SAVES 1-2ms on next miss]
-		if meta and ngx.shared and ngx.shared.bw_ocsp_validations then
+	if shard_issuer_pem then
+		shard_issuer_spki = spki_fingerprint(shard_issuer_pem)
+		if shard_issuer_spki and ngx.shared and ngx.shared.bw_ocsp_validations then
 			pcall(function()
-				local meta_str = cjson.encode(meta)
-				ngx.shared.bw_ocsp_validations:set(meta_cache_key, meta_str, 3600)
+				ngx.shared.bw_ocsp_validations:set(issuer_spki_cache_key, shard_issuer_spki, 300)
 			end)
 		end
 	end
-	if meta_tombstoned(meta) then
+
+	-- ────────────────────────────────────────────────────────────────────
+	-- Metadata: always fresh disk read for refuse gates
+	-- ────────────────────────────────────────────────────────────────────
+	local t_meta_start = ngx.hrtime and ngx.hrtime() or nil
+	local meta = read_ocsp_json(fingerprint)
+	if t_meta_start and ngx.ctx then
+		local elapsed_ns = ngx.hrtime() - t_meta_start
+		if not ngx.ctx.bw_ocsp_disk_io then
+			ngx.ctx.bw_ocsp_disk_io = {}
+		end
+		ngx.ctx.bw_ocsp_disk_io.meta_json_ns = elapsed_ns
+	end
+	if meta_tombstoned(meta, fingerprint) then
 		drop_cache(internalstore, fingerprint)
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "tombstoned", mode)
+			return refuse(fingerprint, meta, nil, "tombstoned")
 		end
 		return false
 	end
@@ -2335,18 +2492,18 @@ local function staple_one_leaf(
 		end
 	end
 	if must_staple and cluster_floor_blocks(fingerprint, meta) then
-		return must_staple_refuse(fingerprint, meta, nil, "cluster_floor", mode)
+		return refuse(fingerprint, meta, nil, "cluster_floor")
 	end
-	if shard_not_paged(meta) then
+	if shard_not_paged(meta, fingerprint) then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, "not_paged", mode)
+			return refuse(fingerprint, meta, nil, "not_paged")
 		end
 		return false
 	end
 	local aia_ok, aia_why = aia_uri_pin_ok(leaf_pem, meta, must_staple)
 	if not aia_ok then
 		if must_staple then
-			return must_staple_refuse(fingerprint, meta, nil, aia_why or "aia_uri_mismatch", mode)
+			return refuse(fingerprint, meta, nil, aia_why or "aia_uri_mismatch")
 		end
 		return false
 	end
@@ -2384,7 +2541,7 @@ local function staple_one_leaf(
 				)
 				drop_cache(internalstore, fingerprint)
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+					return refuse(fingerprint, meta, nil, fresh_why or "response_stale")
 				end
 			elseif
 				entry_verified(
@@ -2397,24 +2554,27 @@ local function staple_one_leaf(
 				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+						return refuse(fingerprint, meta, nil, "serial_blacklisted")
 					end
 					return false
 				end
-				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, issuer_stored)
 				local ok_id, why = certid_matches_handshake_leaf(leaf_pem, cached, issuers)
 				if not ok_id then
+					local dialect = certid_handshake_refuse_dialect(why)
 					log(
 						ngx.ERR,
 						"OCSP CertID refuse L1 staple reason="
 							.. tostring(why)
+							.. " dialect="
+							.. dialect
 							.. " fp="
 							.. fingerprint:sub(1, 16)
 							.. "..."
 					)
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+						return refuse(fingerprint, meta, cached, dialect)
 					end
 				-- Fall through to disk / re-validate with the current leaf.
 				else
@@ -2424,14 +2584,14 @@ local function staple_one_leaf(
 						local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
 						if not ligand_ok then
 							drop_cache(internalstore, fingerprint)
-							return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
+							return refuse(fingerprint, meta, cached, ligand_detail)
 						end
 					end
 					-- force_ffi: prior validate_budget — do not attach via verified shortcut.
 					local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, cached)
 					if force_ffi then
-						issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
-						local result, result_detail = try_staple(
+						issuers = issuer_candidates(blocks, leaf_pem, fingerprint, issuer_stored)
+						local result, result_detail, did_ffi = try_staple(
 							ocsp,
 							ssl,
 							cached,
@@ -2442,13 +2602,18 @@ local function staple_one_leaf(
 							meta,
 							fingerprint,
 							blocks,
-							true
+							true,
+							mode
 						)
 						if result == true then
 							if probe_only then
 								local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 								if not path_ok then
 									return false, "must_staple", path_detail or "unmet"
+								end
+								-- Clear latch only when this walk proved crypto (did_ffi).
+								if did_ffi then
+									clear_ffi_needed(internalstore, fingerprint, meta, cached)
 								end
 								return true
 							end
@@ -2461,37 +2626,47 @@ local function staple_one_leaf(
 								cached_epoch,
 								soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 							)
-							clear_ffi_needed(internalstore, fingerprint)
+							if did_ffi then
+								clear_ffi_needed(internalstore, fingerprint, meta, cached)
+							end
 							log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 							return true
 						end
 						if result == false then
 							if result_detail == "validate_budget" then
-								warm_cache(
-									internalstore,
-									fingerprint,
-									cached,
-									false,
-									meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
-									cached_epoch,
-									soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
-								)
-								mark_ffi_needed(internalstore, fingerprint, meta, cached)
+								-- probe_only must not demote L1 or stamp force_ffi (HTTP parity).
+								if not probe_only then
+									warm_cache(
+										internalstore,
+										fingerprint,
+										cached,
+										false,
+										meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+										cached_epoch,
+										soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+									)
+									mark_ffi_needed(internalstore, fingerprint, meta, cached)
+								end
 								if must_staple then
-									return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+									return refuse(fingerprint, meta, cached, "validate_budget")
 								end
 								return false
 							end
-							if result_detail == "issuer_unavailable" or result_detail == "validate_exhausted" then
+							if
+								result_detail == "issuer_unavailable"
+								or result_detail == "validate_exhausted"
+								or result_detail == "certid_unreadable"
+								or result_detail == "issuer_ambiguous"
+							then
 								if must_staple then
-									return must_staple_refuse(fingerprint, meta, cached, result_detail, mode)
+									return refuse(fingerprint, meta, cached, result_detail)
 								end
 								return false
 							end
 							if result_detail == "certid_mismatch" then
 								if must_staple then
 									drop_cache(internalstore, fingerprint)
-									return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+									return refuse(fingerprint, meta, cached, "certid_mismatch")
 								end
 							elseif
 								result_detail == "intermediate_must_staple_libssl"
@@ -2512,12 +2687,17 @@ local function staple_one_leaf(
 									and detail ~= "response_not_found"
 									and detail ~= "issuer_unavailable"
 									and detail ~= "validate_exhausted"
+									and detail ~= "certid_unreadable"
+									and detail ~= "issuer_ambiguous"
+									and detail ~= "unmet"
+									and detail ~= "validate_budget"
+									and detail ~= "set_staple_failed"
 								then
 									detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed"
 										or "unmet"
 								end
 								pcall(clear_connection_staple)
-								return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+								return refuse(fingerprint, meta, cached, detail)
 							end
 							if result_detail ~= "certid_mismatch" then
 								return false
@@ -2531,7 +2711,7 @@ local function staple_one_leaf(
 						if not path_ok then
 							return false, "must_staple", path_detail or "unmet"
 						end
-						clear_ffi_needed(internalstore, fingerprint)
+						-- Verified shortcut: no FFI this walk — do not clear force_ffi latch.
 						return true
 					else
 						local set_ok, set_err
@@ -2549,7 +2729,7 @@ local function staple_one_leaf(
 								cached_epoch,
 								soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 							)
-							clear_ffi_needed(internalstore, fingerprint)
+							-- Verified shortcut: no FFI — leave force_ffi latch intact.
 							log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 							return true
 						end
@@ -2574,7 +2754,7 @@ local function staple_one_leaf(
 							then
 								detail = "set_staple_failed"
 							end
-							return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+							return refuse(fingerprint, meta, cached, detail)
 						end
 					end
 				end
@@ -2582,11 +2762,11 @@ local function staple_one_leaf(
 				if serial_blacklist_blocks(fingerprint, cached) then
 					drop_cache(internalstore, fingerprint)
 					if must_staple then
-						return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+						return refuse(fingerprint, meta, nil, "serial_blacklisted")
 					end
 					return false
 				end
-				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+				issuers = issuer_candidates(blocks, leaf_pem, fingerprint, issuer_stored)
 				-- Ligand before attach: try_staple attaches on success. Soft fuse must not
 				-- leave a mismatched DER on the SSL object. Pass body for DROP_ALLOW CAS.
 				if must_staple then
@@ -2594,11 +2774,11 @@ local function staple_one_leaf(
 					local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, cached)
 					if not ligand_ok then
 						drop_cache(internalstore, fingerprint)
-						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
+						return refuse(fingerprint, meta, cached, ligand_detail)
 					end
 				end
 				local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, cached)
-				local result, result_detail = try_staple(
+				local result, result_detail, did_ffi = try_staple(
 					ocsp,
 					ssl,
 					cached,
@@ -2609,7 +2789,8 @@ local function staple_one_leaf(
 					meta,
 					fingerprint,
 					blocks,
-					force_ffi
+					force_ffi,
+					mode
 				)
 				if result == true then
 					if probe_only then
@@ -2617,7 +2798,9 @@ local function staple_one_leaf(
 						if not path_ok then
 							return false, "must_staple", path_detail or "unmet"
 						end
-						clear_ffi_needed(internalstore, fingerprint)
+						if did_ffi then
+							clear_ffi_needed(internalstore, fingerprint, meta, cached)
+						end
 						return true
 					end
 					warm_cache(
@@ -2629,33 +2812,40 @@ local function staple_one_leaf(
 						cached_epoch,
 						soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 					)
-					clear_ffi_needed(internalstore, fingerprint)
+					if did_ffi then
+						clear_ffi_needed(internalstore, fingerprint, meta, cached)
+					end
 					log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
 					return true
 				end
 				if result == false then
 					if result_detail == "validate_budget" then
-						-- Demote local bw3 verified→unverified so the next handshake
-						-- cannot skip FFI on a body this budget never finished proving.
-						-- KEEP fleet allow-pin (validate_budget is KEEP_ALLOW); mark force_ffi.
-						warm_cache(
-							internalstore,
-							fingerprint,
-							cached,
-							false,
-							meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
-							cached_epoch,
-							soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
-						)
-						mark_ffi_needed(internalstore, fingerprint, meta, cached)
+						-- Demote L1 + mark force_ffi only on install (not probe_only rank).
+						if not probe_only then
+							warm_cache(
+								internalstore,
+								fingerprint,
+								cached,
+								false,
+								meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+								cached_epoch,
+								soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+							)
+							mark_ffi_needed(internalstore, fingerprint, meta, cached)
+						end
 						if must_staple then
-							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+							return refuse(fingerprint, meta, cached, "validate_budget")
 						end
 						return false
 					end
-					if result_detail == "issuer_unavailable" or result_detail == "validate_exhausted" then
+					if
+						result_detail == "issuer_unavailable"
+						or result_detail == "validate_exhausted"
+						or result_detail == "certid_unreadable"
+						or result_detail == "issuer_ambiguous"
+					then
 						if must_staple then
-							return must_staple_refuse(fingerprint, meta, cached, result_detail, mode)
+							return refuse(fingerprint, meta, cached, result_detail)
 						end
 						return false
 					end
@@ -2664,7 +2854,7 @@ local function staple_one_leaf(
 					if result_detail == "certid_mismatch" then
 						if must_staple then
 							drop_cache(internalstore, fingerprint)
-							return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+							return refuse(fingerprint, meta, cached, "certid_mismatch")
 						end
 						-- Fall through to disk path for optional stapling re-validation
 					end
@@ -2689,12 +2879,17 @@ local function staple_one_leaf(
 							and detail ~= "response_not_found"
 							and detail ~= "issuer_unavailable"
 							and detail ~= "validate_exhausted"
+							and detail ~= "certid_unreadable"
+							and detail ~= "issuer_ambiguous"
+							and detail ~= "unmet"
+							and detail ~= "validate_budget"
+							and detail ~= "set_staple_failed"
 						then
 							detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
 						end
 						-- Attach already ran for some path demotions; clear leftover staple.
 						pcall(clear_connection_staple)
-						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+						return refuse(fingerprint, meta, cached, detail)
 					end
 					return false
 				end
@@ -2710,7 +2905,7 @@ local function staple_one_leaf(
 			if probe_only then
 				return false, "must_staple", "response_empty"
 			end
-			return must_staple_refuse(fingerprint, meta, nil, "response_empty", mode)
+			return refuse(fingerprint, meta, nil, "response_empty")
 		end
 		return false
 	end
@@ -2723,17 +2918,17 @@ local function staple_one_leaf(
 				"OCSP disk response past nextUpdate/expires; refusing staple fp=" .. fingerprint:sub(1, 16) .. "..."
 			)
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, fresh_why or "response_stale", mode)
+				return refuse(fingerprint, meta, nil, fresh_why or "response_stale")
 			end
 			return false
 		end
 		-- Rebuild when L1 left a truthy empty table (issuers or … would keep {}).
 		if type(issuers) ~= "table" or #issuers == 0 then
-			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, issuer_stored)
 		end
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then
-				return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
+				return refuse(fingerprint, meta, nil, "serial_blacklisted")
 			end
 			return false
 		end
@@ -2741,11 +2936,11 @@ local function staple_one_leaf(
 		if must_staple then
 			local ligand_ok, ligand_detail = must_staple_binds_shared_ligand(meta, fingerprint, resp)
 			if not ligand_ok then
-				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
+				return refuse(fingerprint, meta, resp, ligand_detail)
 			end
 		end
 		local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, resp)
-		local result, result_detail = try_staple(
+		local result, result_detail, did_ffi = try_staple(
 			ocsp,
 			ssl,
 			resp,
@@ -2756,7 +2951,8 @@ local function staple_one_leaf(
 			meta,
 			fingerprint,
 			blocks,
-			force_ffi
+			force_ffi,
+			mode
 		)
 		if result == true then
 			if probe_only then
@@ -2764,33 +2960,43 @@ local function staple_one_leaf(
 				if not path_ok then
 					return false, "must_staple", path_detail or "unmet"
 				end
-				clear_ffi_needed(internalstore, fingerprint)
+				if did_ffi then
+					clear_ffi_needed(internalstore, fingerprint, meta, resp)
+				end
 				return true
 			end
 			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
-			clear_ffi_needed(internalstore, fingerprint)
+			if did_ffi then
+				clear_ffi_needed(internalstore, fingerprint, meta, resp)
+			end
 			log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, resp)
 			return true
 		end
 		if result == false then
 			if result_detail == "validate_budget" then
-				-- Demote local L1 verified (KEEP pin) — same contract as L1 path.
-				warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
-				mark_ffi_needed(internalstore, fingerprint, meta, resp)
+				if not probe_only then
+					warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
+					mark_ffi_needed(internalstore, fingerprint, meta, resp)
+				end
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, resp, "validate_budget", mode)
+					return refuse(fingerprint, meta, resp, "validate_budget")
 				end
 				return false
 			end
-			if result_detail == "issuer_unavailable" or result_detail == "validate_exhausted" then
+			if
+				result_detail == "issuer_unavailable"
+				or result_detail == "validate_exhausted"
+				or result_detail == "certid_unreadable"
+				or result_detail == "issuer_ambiguous"
+			then
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, resp, result_detail, mode)
+					return refuse(fingerprint, meta, resp, result_detail)
 				end
 				return false
 			end
 			if result_detail == "certid_mismatch" then
 				if must_staple then
-					return must_staple_refuse(fingerprint, meta, resp, "certid_mismatch", mode)
+					return refuse(fingerprint, meta, resp, "certid_mismatch")
 				end
 				return false
 			end
@@ -2813,11 +3019,16 @@ local function staple_one_leaf(
 					and detail ~= "response_not_found"
 					and detail ~= "issuer_unavailable"
 					and detail ~= "validate_exhausted"
+					and detail ~= "certid_unreadable"
+					and detail ~= "issuer_ambiguous"
+					and detail ~= "unmet"
+					and detail ~= "validate_budget"
+					and detail ~= "set_staple_failed"
 				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
 				end
 				pcall(clear_connection_staple)
-				return must_staple_refuse(fingerprint, meta, resp, detail, mode)
+				return refuse(fingerprint, meta, resp, detail)
 			end
 			return false
 		end
@@ -2893,8 +3104,12 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	local fingerprint = leaf_fp or fp_hint
 
 	-- Use request-scoped cache to avoid re-resolving same cert multiple times.
+	-- Do not use `and … or nil`: a proven-false result would collapse to nil.
 	local ms_module = get_must_staple_module()
-	local must_tri = ms_module and ms_module.get_must_staple(leaf_pem, fingerprint) or nil
+	local must_tri = nil
+	if ms_module then
+		must_tri = ms_module.get_must_staple(leaf_pem, fingerprint)
+	end
 	-- Fail closed: unknown (nil) enforces Must-Staple; proven false does not.
 	local must_staple = must_tri ~= false
 
@@ -2984,11 +3199,12 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 			local ok, reason, detail = staple_from_fingerprint(internalstore, server_name, fp_hint, true, mode)
 			return finish(ok, reason, detail)
 		end
-		return true
+		-- No PEM and no fingerprint: fail closed (Must-Staple harden / dual-cert probe).
+		return finish(false, "must_staple", "probe_no_material")
 	end
 	local leaf_pem = blocks[1]
 	if not leaf_pem then
-		return false
+		return finish(false, "must_staple", "probe_no_material")
 	end
 	-- Sealed blocks from set_certs already issuer-linked — skip re-presentable.
 	if not blocks.ocsp_path_sealed then
@@ -3151,43 +3367,33 @@ end
 --
 -- Returns: true if validation succeeded, false otherwise.
 
-function _M.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
+function _M.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem, meta)
 	if not fingerprint or not ocsp_der or not issuers or not leaf_pem then
 		log(ngx.WARN, "OCSP async_validate_response: missing parameters")
-		mark_async_validation_done(fingerprint)  -- Mark as done (won't retry)
+		-- Do not mark DONE — that would skip validate if DONE short-circuit is re-enabled.
 		return false
 	end
 
-	-- Use validate() function to cryptographically validate response
-	-- This runs in background job context, not TLS critical path
 	local ocsp = require("ngx.ocsp")
 	if not ocsp or not ocsp.validate_ocsp_response then
 		log(ngx.WARN, "OCSP async_validate_response: ngx.ocsp not available")
-		mark_async_validation_done(fingerprint)
 		return false
 	end
 
-	-- Try each issuer candidate (same logic as try_staple, but no budget pressure)
 	local ssl = require("ngx.ssl")
-	local shard_issuer_spki = nil  -- No shard pin in async job
+	local shard_issuer_spki = nil -- No shard pin in async job
+	meta = meta or read_ocsp_json(fingerprint)
 
 	for _, issuer_pem in ipairs(issuers) do
 		if validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki) then
-			-- Validation succeeded: mark response as validated for all future handshakes
 			log(ngx.DEBUG, "OCSP async validation succeeded: marking response as validated")
-			mark_async_validation_done(fingerprint)
+			mark_async_validation_done(fingerprint, meta, ocsp_der)
 			return true
 		end
 	end
 
-	-- All issuers failed: mark response as invalid
 	log(ngx.WARN, "OCSP async validation failed: response signature invalid")
-	if ngx.shared and ngx.shared.bw_ocsp_validations then
-		pcall(function()
-			ngx.shared.bw_ocsp_validations:set(async_validation_key(fingerprint),
-				ASYNC_VALIDATION_FAILED, 3600)
-		end)
-	end
+	mark_async_validation_failed(fingerprint, meta, ocsp_der)
 	return false
 end
 
@@ -3216,8 +3422,13 @@ _M.l1_body_matches_disk = store_api.l1_body_matches_disk
 _M.ligand_effective_sha = store_api.ligand_effective_sha
 _M.ligand_matches = store_api.ligand_matches
 _M.ligand_verdict = store_api.ligand_verdict
+_M.live_soft_recall_gen = store_api.live_soft_recall_gen
 _M.meta_expires_unix = store_api.meta_expires_unix
+_M.meta_tombstoned = store_api.meta_tombstoned
+_M.cluster_floor_blocks = store_api.cluster_floor_blocks
 _M.resolve_leaf_must_staple = store_api.resolve_leaf_must_staple
+_M.resp_still_fresh = store_api.resp_still_fresh
+_M.serial_blacklist_blocks = store_api.serial_blacklist_blocks
 local pin_api = require("bunkerweb.ocsp_pin")
 -- Skip-validate = ligand+paged + live allow-pin (sha, gen). Store keeps ligand-only.
 _M.canary_paged_body_ok = pin_api.canary_paged_body_ok
@@ -3229,12 +3440,18 @@ _M.peer_refuse_blocks = pin_api.peer_refuse_blocks
 _M.record_peer_refuse = pin_api.record_peer_refuse
 _M.should_skip_peer_bus = pin_api.should_skip_peer_bus
 _M.write_allow_pin = pin_api.write_allow_pin
+-- Shared CertID / force_ffi latch (HTTP must not diverge from stream).
+_M.certid_matches_handshake_leaf = certid_matches_handshake_leaf
+_M.mark_ffi_needed = mark_ffi_needed
+_M.is_ffi_needed = is_ffi_needed
+_M.clear_ffi_needed = clear_ffi_needed
 local chain_api = require("bunkerweb.ocsp_chain")
 _M.attach_ocsp_staple = chain_api.attach_ocsp_staple
 _M.issuer_linked_chain_blocks = chain_api.issuer_linked_chain_blocks
 _M.issuer_linked_chain_pem = chain_api.issuer_linked_chain_pem
 _M.issuer_path_intermediate_ready = chain_api.issuer_path_intermediate_ready
 _M.issuer_path_null_slots = chain_api.issuer_path_null_slots
+_M.chain_has_intermediate_must_staple = chain_api.chain_has_intermediate_must_staple
 _M.on_ssl_context_swap = chain_api.on_ssl_context_swap
 local warmer_api = require("bunkerweb.ocsp_warmer")
 _M.start_l1_warmer = warmer_api.start_l1_warmer
@@ -3273,10 +3490,11 @@ end
 function _M.get_disk_io_latencies()
 	if ngx.ctx and ngx.ctx.bw_ocsp_disk_io then
 		return {
-			issuer_pem_ms = ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns and ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns / 1e6 or nil,
+			issuer_pem_ms = ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns and ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns / 1e6
+				or nil,
 			meta_json_ms = ngx.ctx.bw_ocsp_disk_io.meta_json_ns and ngx.ctx.bw_ocsp_disk_io.meta_json_ns / 1e6 or nil,
 			ocsp_der_ms = ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns and ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns / 1e6 or nil,
-			cert_parse_ms = ngx.ctx.bw_ocsp_disk_io.cert_parse_ms or nil
+			cert_parse_ms = ngx.ctx.bw_ocsp_disk_io.cert_parse_ms or nil,
 		}
 	end
 	return {}
@@ -3289,10 +3507,10 @@ function _M.get_der_cache_status()
 	if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
 		return {
 			tier1_hit = ngx.ctx.bw_ocsp_metrics.der_cache_tier1_hit or false,
-			tier2_hit = ngx.ctx.bw_ocsp_metrics.der_cache_tier2_hit or false
+			tier2_hit = ngx.ctx.bw_ocsp_metrics.der_cache_tier2_hit or false,
 		}
 	end
-	return {tier1_hit = false, tier2_hit = false}
+	return { tier1_hit = false, tier2_hit = false }
 end
 
 -- Get all OCSP metrics from current request
@@ -3337,7 +3555,7 @@ end
 -- Used to monitor multi-issuer handshake cache effectiveness.
 function _M.get_ffi_cache_stats()
 	if not ngx.ctx then
-		return {hits = 0, misses = 0, hit_rate = 0}
+		return { hits = 0, misses = 0, hit_rate = 0 }
 	end
 
 	local hits = ngx.ctx.bw_ffi_cache_hits or 0
@@ -3353,7 +3571,7 @@ function _M.get_ffi_cache_stats()
 		hits = hits,
 		misses = misses,
 		total = total,
-		hit_rate = hit_rate
+		hit_rate = hit_rate,
 	}
 end
 
