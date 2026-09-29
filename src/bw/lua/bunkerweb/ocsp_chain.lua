@@ -1354,6 +1354,11 @@ end
 
 function _M.chain_has_intermediate_must_staple(chain_pem_or_blocks)
 	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
+	-- Omitted Must-Staple PEMs leave a depleted list that chain_has would miss;
+	-- unresolved_must_staple must still count as intermediate Must-Staple present.
+	if type(blocks) == "table" and (tonumber(blocks.unresolved_must_staple) or 0) > 0 then
+		return true
+	end
 	return chain_has_intermediate_must_staple(blocks)
 end
 
