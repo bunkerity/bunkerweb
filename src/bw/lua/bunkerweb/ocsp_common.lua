@@ -34,32 +34,74 @@ end
 -- Tier 3: SERVER_NAME token search (exact match then case-insensitive)
 -- Returns: primary service id (key in vars) or nil. Ensures consistent resolution order.
 -- Includes SNI domain whitelist validation to prevent routing to unintended services.
+-- Build SNI resolution index for O(1) lookup (optimization #2)
+-- Pre-indexes services by lowercase name and cached domain tables at initialization
+local function build_sni_index(vars)
+	if not vars or type(vars) ~= "table" then
+		return {}
+	end
+
+	local index = {
+		primary_lower = {},      -- Map: lowercase_name -> original_name
+		domains = {}             -- Map: primary_name -> {domain_table}
+	}
+
+	for primary, site_vars in pairs(vars) do
+		if primary ~= "global" and type(primary) == "string" and type(site_vars) == "table" then
+			-- Tier 2 optimization: cache lowercase primary name
+			local primary_lower = primary:lower()
+			index.primary_lower[primary_lower] = primary
+
+			-- Tier 3 optimization: cache domain lists as tables for fast lookup
+			if type(site_vars["SERVER_NAME"]) == "string" then
+				local domain_table = {}
+				for domain in site_vars["SERVER_NAME"]:gmatch("%S+") do
+					domain_table[domain] = true
+					domain_table[domain:lower()] = true
+				end
+				index.domains[primary] = domain_table
+			end
+		end
+	end
+
+	return index
+end
+
+-- Resolve SNI to service ID using pre-built index (optimization #2)
+-- Converts O(n) linear search to O(1) table lookups for Tier 2 and Tier 3
 local function resolve_multisite_service_id_from_vars(vars, sni)
 	if not sni or type(vars) ~= "table" then
 		return nil
 	end
+
 	-- Tier 1: exact match on primary service id (bypass whitelist; FQDN as service name)
 	if type(vars[sni]) == "table" then
 		return sni
 	end
+
+	-- Build index on first use (optimization #2)
+	local sni_index = vars._sni_index
+	if not sni_index then
+		sni_index = build_sni_index(vars)
+		vars._sni_index = sni_index
+	end
+
 	local sni_lower = tostring(sni):lower()
-	-- Tier 2: case-insensitive match on primary service id
-	for primary, site_vars in pairs(vars) do
-		if primary ~= "global" and type(primary) == "string" and type(site_vars) == "table" then
-			if primary:lower() == sni_lower then
-				return primary
-			end
+
+	-- Tier 2: case-insensitive match via pre-indexed lowercase names (optimization #2)
+	local primary_from_lower = sni_index.primary_lower[sni_lower]
+	if primary_from_lower then
+		return primary_from_lower
+	end
+
+	-- Tier 3: domain search via cached domain tables (optimization #2)
+	-- Instead of regex gmatch on every domain, use pre-built table lookup
+	for primary, domain_table in pairs(sni_index.domains) do
+		if domain_table[sni] or domain_table[sni_lower] then
+			return primary
 		end
 	end
-	-- Tier 3: SERVER_NAME token search with domain whitelist validation.
-	-- Tier 3a: exact token match with whitelist check
-	for primary, site_vars in pairs(vars) do
-		if primary ~= "global" and type(site_vars) == "table" then
-			if sni_in_service_domains(site_vars, sni) then
-				return primary
-			end
-		end
-	end
+
 	return nil
 end
 
