@@ -216,10 +216,32 @@ local l1_matches_disk
 -- Job-written shard metadata ({fp[1]}/{fp[2]}/{fp}/ocsp.json), or nil when absent/invalid.
 -- Must stay above resolve_leaf_must_staple / cert_must_staple_bool: a local
 -- referenced before its definition compiles to a nil global in LuaJIT.
+-- Read ocsp.json with per-request dedup cache (ngx.ctx)
+-- Avoids re-reading the same file within a single handshake
 local function read_ocsp_json(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
 	end
+
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_json_cache then
+		ctx.bw_ocsp_json_cache = {}
+	end
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_json_cache then
+		local cached = ctx.bw_ocsp_json_cache[fingerprint]
+		if cached ~= nil then
+			-- Distinguish between "file not found" (false) and "found" (table)
+			if cached == false then
+				return nil
+			end
+			return cached
+		end
+	end
+
+	-- Cache miss: read from disk
 	local raw = read_file(
 		"/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
@@ -230,13 +252,25 @@ local function read_ocsp_json(fingerprint)
 			.. "/ocsp.json"
 	)
 	if not raw then
+		-- Cache the "not found" result to prevent re-reading
+		if ctx and ctx.bw_ocsp_json_cache then
+			ctx.bw_ocsp_json_cache[fingerprint] = false
+		end
 		return nil
 	end
 	local ok, decoded = pcall(function()
 		return require("cjson").decode(raw)
 	end)
 	if ok and type(decoded) == "table" then
+		-- Cache successful decode
+		if ctx and ctx.bw_ocsp_json_cache then
+			ctx.bw_ocsp_json_cache[fingerprint] = decoded
+		end
 		return decoded
+	end
+	-- Cache decode failure to prevent re-reading
+	if ctx and ctx.bw_ocsp_json_cache then
+		ctx.bw_ocsp_json_cache[fingerprint] = false
 	end
 	return nil
 end
