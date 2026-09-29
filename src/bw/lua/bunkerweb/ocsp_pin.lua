@@ -543,6 +543,7 @@ local function should_skip_peer_bus(detail, meta, fingerprint)
 		or d == "fingerprint_chain_unavailable"
 		or d == "multi_staple_attach_failed"
 		or d == "issuer_unresolved_must_staple"
+		or d == "issuer_unavailable"
 		or d == "peer_refuse_unavailable"
 		or (type(eff) == "table" and eff.paged ~= true)
 		or ((d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true)

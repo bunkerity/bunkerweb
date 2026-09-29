@@ -35,7 +35,19 @@ local spki_fingerprint = cert.spki_fingerprint
 
 local store = require("bunkerweb.ocsp_store").internal
 local cluster_floor_blocks = store.cluster_floor_blocks
-local drop_cache = store.drop_cache
+local store_drop_cache = store.drop_cache
+-- drop_cache: thin wrapper around store.drop_cache.
+-- Dual-cert ranking probes every ClientHello-compatible Must-Staple sibling before
+-- set_cert. Those probes must not clear L1 for a fingerprint that a later handshake
+-- (or a sibling leaf still under consideration) may still need. Callers set
+-- ngx.ctx.bw_ocsp_skip_l1_drop = true around rank-time _M.probe only; install-time
+-- re-probe and real refuse paths leave it unset so poison still evicts DRAM.
+local function drop_cache(internalstore, fingerprint)
+	if ngx.ctx and ngx.ctx.bw_ocsp_skip_l1_drop then
+		return
+	end
+	return store_drop_cache(internalstore, fingerprint)
+end
 local entry_verified = store.entry_verified
 local get_l1 = store.get_l1
 local l1_matches_disk = store.l1_matches_disk
@@ -51,6 +63,7 @@ local resp_still_fresh = store.resp_still_fresh
 local serial_blacklist_blocks = store.serial_blacklist_blocks
 local shard_not_paged = store.shard_not_paged
 local soft_recall_gen_of = store.soft_recall_gen_of
+local generation_tuple = store.generation_tuple
 local warm_cache = store.warm_cache
 
 local pin = require("bunkerweb.ocsp_pin").internal
@@ -72,8 +85,14 @@ local presentable_chain_blocks = chain.presentable_chain_blocks
 local warmer = require("bunkerweb.ocsp_warmer").internal
 local maybe_rearm_l1_warmer = warmer.maybe_rearm_l1_warmer
 
--- stored_pem: the shard issuer.pem the caller already read (false = known absent),
--- or nil to read it here.
+-- issuer_candidates: PEMs ngx.ocsp.validate may try for this leaf body.
+-- Prefer shard issuer.pem SPKI when present; otherwise accept chain issuers
+-- (issuer.pem absent is fail-open by design — not fail-closed).
+-- stored_pem: caller-supplied issuer.pem (string), false = known absent, nil = read here.
+-- Returns an ordered list deduped by SPKI (not PEM bytes) so re-encodings of the
+-- same key cannot burn the soft validate_budget as distinct candidates.
+-- Empty list is a real outcome (no pin + no chain issuer) → try_staple returns
+-- issuer_unavailable, not a hollow response_not_found.
 local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
 	-- re-encoding from the chain). Do not let validate succeed against a different CA.
@@ -99,18 +118,24 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	end
 
 	local issuers = {}
+	-- Dedupe by SPKI (not PEM bytes): re-encodings of the same key must not
+	-- multiply ngx.ocsp.validate attempts into validate_budget.
 	local seen = {}
 	local function add(pem)
-		if type(pem) ~= "string" or pem == "" or seen[pem] then
+		if type(pem) ~= "string" or pem == "" then
 			return
 		end
+		local got = spki_fingerprint(pem)
 		if want_spki then
-			local got = spki_fingerprint(pem)
 			if not got or got ~= want_spki then
 				return
 			end
 		end
-		seen[pem] = true
+		local key = got or pem
+		if seen[key] then
+			return
+		end
+		seen[key] = true
 		issuers[#issuers + 1] = pem
 	end
 
@@ -123,6 +148,9 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	return issuers
 end
 
+-- validate: one ngx.ocsp.validate_ocsp_response against leaf+issuer DER.
+-- Enforces shard issuer SPKI pin when shard_issuer_spki is set, then death-time
+-- (nextUpdate − skew). Returns boolean only; budget / multi-issuer walk lives in try_staple.
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki)
 	if not issuer_pem or issuer_pem == "" or not ssl.cert_pem_to_der then
 		return false
@@ -156,21 +184,43 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	return true
 end
 
--- Local DRAM flag: validate_budget aborted mid-issuer walk. KEEP fleet allow-pin
--- but force one ngx.ocsp.validate pass so canary-skip cannot re-attach an unfinished body.
+-- force_ffi latch (per internalstore / subsystem):
+-- When validate_budget aborts mid-issuer walk we KEEP the fleet allow-pin (so
+-- canary trust still exists) but demote local L1 and stamp this key so the next
+-- handshake cannot canary-skip attach an unfinished body.
+-- Value is "der_sha256|soft_recall_gen" (or legacy "1"): soft-recall / re-page
+-- flips gen → is_ffi_needed clears the stale latch. Wall-clock TTL is only a
+-- safety cap (86400s); generation match is the real death clock.
+-- mark on budget abort; clear on successful FFI/attach (incl. verified-L1 restock);
+-- is_ffi_needed is also consulted on the verified-L1 shortcut so a warmer
+-- re-verify cannot bypass the latch.
 local function ffi_needed_key(fingerprint)
 	return "TLS:SSL:ocsp_ffi_needed:" .. fingerprint
 end
 
-local function mark_ffi_needed(internalstore, fingerprint)
+-- Compact generation identity for the latch value. nil when sha/gen incomplete
+-- (type drift / missing body) — callers treat that as "honor any latch".
+local function ffi_needed_token(meta, resp, fingerprint)
+	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
+	if type(sha) ~= "string" or #sha ~= 64 or type(gen) ~= "number" then
+		return nil
+	end
+	return sha .. "|" .. tostring(gen)
+end
+
+-- Stamp force_ffi after validate_budget. meta+resp bind the latch to this body gen.
+local function mark_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return
 	end
+	local token = ffi_needed_token(meta, resp, fingerprint) or "1"
 	pcall(function()
-		internalstore:set(ffi_needed_key(fingerprint), "1", 300)
+		-- Long TTL: generation match is the real death clock; 300s let canary-skip resume early.
+		internalstore:set(ffi_needed_key(fingerprint), token, 86400)
 	end)
 end
 
+-- Drop the latch after a successful validate+attach (or when gen no longer matches).
 local function clear_ffi_needed(internalstore, fingerprint)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return
@@ -180,7 +230,9 @@ local function clear_ffi_needed(internalstore, fingerprint)
 	end)
 end
 
-local function is_ffi_needed(internalstore, fingerprint)
+-- True when this worker must run ngx.ocsp.validate despite canary trust.
+-- Mismatched generation (soft-recall) auto-clears; legacy "1"/true still forces.
+local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return false
 	end
@@ -188,9 +240,36 @@ local function is_ffi_needed(internalstore, fingerprint)
 	pcall(function()
 		v = internalstore:get(ffi_needed_key(fingerprint))
 	end)
-	return v == "1" or v == true
+	if v == nil or v == false then
+		return false
+	end
+	local token = ffi_needed_token(meta, resp, fingerprint)
+	if not token then
+		-- No generation identity: honor any latch (incl. legacy "1").
+		return true
+	end
+	if v == "1" or v == true then
+		return true
+	end
+	if v ~= token then
+		-- Soft-recall / new page: stale latch dies with the old generation.
+		clear_ffi_needed(internalstore, fingerprint)
+		return false
+	end
+	return true
 end
 
+-- try_staple: CertID → (optional canary skip) → issuer validate loop → attach.
+-- probe_only: path health only (no set_ocsp_status_resp). force_ffi: ignore canary
+-- skip for one walk after validate_budget.
+-- Returns:
+--   true                         — probe ok or staple attached
+--   false, "certid_mismatch"     — DROP_ALLOW when Must-Staple + body present
+--   false, "validate_budget"     — soft budget; caller demotes L1 + marks force_ffi
+--   false, "issuer_unavailable"  — body present but zero accepted issuer PEMs
+--   false, <attach detail>       — intermediate MS / multi attach codes
+--   false                        — generic attach/validate miss (optional stapling)
+--   nil                          — exhausted issuers without a named refuse (rare)
 local function try_staple(
 	ocsp,
 	ssl,
@@ -251,7 +330,9 @@ local function try_staple(
 		log(ngx.DEBUG, "OCSP force FFI after validate_budget; ignoring canary skip once")
 	end
 	if type(issuers) ~= "table" or #issuers == 0 then
-		return nil
+		-- Named: body may exist but no accepted issuer PEM/SPKI for validate.
+		-- Do not collapse to nil → outer response_not_found.
+		return false, "issuer_unavailable"
 	end
 	local n = #issuers
 	if n > OCSP_VALIDATE_MAX_ISSUERS then
@@ -505,7 +586,21 @@ end
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
--- Returns: true, chain_blocks_or_pem, leaf_fp  OR  false, err_msg [, detail]
+--
+-- Selection:
+--   1) Build ClientHello-ordered candidates (curve-aware sigalgs).
+--   2) Probe path health + Must-Staple for each (rank probes skip L1 drop).
+--   3) Rank survivors by fewest issuer_path_null_slots, then ClientHello order.
+--   4) install_one with re-probe (TOCTOU); try next sibling before soft fuse.
+-- Soft fuse (OCSP_STAPLE_MODE=open|staple_only): install ranked survivor unstapled
+-- when every healthy leaf fails Must-Staple — never revoke the allow-pin here.
+--
+-- install_one: clears connection staple before set_cert; on set_priv_key fail runs
+-- clear_certs so a torn CertificateEntry cannot linger for soft-fuse/sibling retry.
+-- Success seals blocks.ocsp_path_sealed so staple/probe skip re-presentable (keeps
+-- unresolved_must_staple). Rearms the L1 warmer on entry.
+--
+-- Returns: true, chain_blocks, leaf_fp  OR  false, err_msg [, detail]
 -- On success the second value is the issuer-linked blocks table (array of PEMs plus
 -- optional unresolved_must_staple). Callers may pass it to staple/probe/attach;
 -- table.concat is only for set_cert. Named fields survive — PEM round-trip does not.
@@ -569,6 +664,10 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	end
 
 	local function install_one(leaf, probe_must)
+		-- Parse + set_cert/set_priv_key for one dual-cert leaf.
+		-- probe_must=true (normal/staple_only install): issuer_path + live probe first;
+		--   skip-leaf demotion must NOT write the peer-refuse bus.
+		-- probe_must=false (soft fuse / open): load unstapled without demotion.
 		-- Issuer-linked blocks keep unresolved_must_staple; PEM concat alone would drop it.
 		local blocks = issuer_linked_chain_blocks(leaf.pem, intermediates)
 		local chain_pem = chain_pem_from_blocks(blocks)
@@ -632,6 +731,14 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		end
 		local ok_key, err_key = ssl.set_priv_key(parsed_key)
 		if not ok_key then
+			-- Tear down the half-written CertificateEntry so soft-fuse / sibling
+			-- install does not inherit a cert without a matching privkey.
+			pcall(function()
+				if ssl.clear_certs then
+					ssl.clear_certs()
+				end
+			end)
+			pcall(clear_connection_staple)
 			return false, "set_priv_key failed: " .. tostring(err_key)
 		end
 		-- Seal so staple/probe skip presentable re-link (keeps unresolved_must_staple).
@@ -674,8 +781,16 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			local leaf_ok = true
 			local leaf_detail = nil
 			if leaf_must and internalstore and mode ~= "open" then
+				-- Rank probes must not drop_cache sibling L1 (leaf may still be needed later).
+				local prev_skip = ngx.ctx and ngx.ctx.bw_ocsp_skip_l1_drop
+				if ngx.ctx then
+					ngx.ctx.bw_ocsp_skip_l1_drop = true
+				end
 				local probe_ok, probe_reason, probe_detail =
 					_M.probe(internalstore, server_name, blocks, leaf.fp, false)
+				if ngx.ctx then
+					ngx.ctx.bw_ocsp_skip_l1_drop = prev_skip
+				end
 				if not probe_ok then
 					leaf_ok = false
 					-- Skip-leaf demotion never writes the peer bus (see install_one).
@@ -770,6 +885,8 @@ end
 -- Staple using only a precomputed SPKI fingerprint (plugin status[5]) when PEM is unavailable.
 -- Acceptance: prior crypto-verified L1 binding, or job meta that binds fingerprint + der_sha256
 -- to the exact DER bytes. Never promote fingerprint-only accepts to ocsp_verified.
+-- chain_blocks (optional): when present, probe_only runs the same issuer_path_intermediate_ready
+-- gate as the PEM path; Must-Staple without chain → fingerprint_chain_unavailable.
 local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only, mode, chain_blocks)
 	mode = mode or "normal"
 	local meta = read_ocsp_json(fingerprint)
@@ -1044,6 +1161,17 @@ local function staple_from_fingerprint(internalstore, server_name, fingerprint, 
 	return false
 end
 
+-- staple_one_leaf: L1 then disk staple/probe for one leaf SPKI.
+-- Gates: tombstone, peer refuse, cluster floor, not_paged, AIA, serial blacklist,
+-- shared ligand (Must-Staple), CertID, then try_staple / attach.
+-- Verified L1: restocks warm_cache TTL on hit; if is_ffi_needed, forces try_staple
+-- instead of the attach shortcut so validate_budget unfinished bodies still FFI once.
+-- Unverified L1 / disk: try_staple with force_ffi from the gen-bound latch; budget
+-- abort demotes L1 + mark_ffi_needed; success clear_ffi_needed.
+-- Disk fallthrough rebuilds issuer_candidates when L1 left a truthy empty table
+-- (Lua `issuers or …` would keep {}).
+-- probe_only: never writes the allow-pin bus; returns true or false,"must_staple",detail.
+-- Returns true | false [, reason [, detail]] | nil (no usable body).
 local function staple_one_leaf(
 	internalstore,
 	ocsp,
@@ -1152,43 +1280,153 @@ local function staple_one_leaf(
 							return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
 						end
 					end
-					if probe_only then
+					-- force_ffi: prior validate_budget — do not attach via verified shortcut.
+					local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, cached)
+					if force_ffi then
+						issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+						local result, result_detail = try_staple(
+							ocsp,
+							ssl,
+							cached,
+							leaf_pem,
+							issuers,
+							shard_issuer_spki,
+							probe_only,
+							meta,
+							fingerprint,
+							blocks,
+							true
+						)
+						if result == true then
+							if probe_only then
+								local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
+								if not path_ok then
+									return false, "must_staple", path_detail or "unmet"
+								end
+								return true
+							end
+							warm_cache(
+								internalstore,
+								fingerprint,
+								cached,
+								true,
+								meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+								cached_epoch,
+								soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+							)
+							clear_ffi_needed(internalstore, fingerprint)
+							log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
+							return true
+						end
+						if result == false then
+							if result_detail == "validate_budget" then
+								warm_cache(
+									internalstore,
+									fingerprint,
+									cached,
+									false,
+									meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+									cached_epoch,
+									soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+								)
+								mark_ffi_needed(internalstore, fingerprint, meta, cached)
+								if must_staple then
+									return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+								end
+								return false
+							end
+							if result_detail == "issuer_unavailable" then
+								if must_staple then
+									return must_staple_refuse(fingerprint, meta, cached, "issuer_unavailable", mode)
+								end
+								return false
+							end
+							if result_detail == "certid_mismatch" then
+								if must_staple then
+									drop_cache(internalstore, fingerprint)
+									return must_staple_refuse(fingerprint, meta, cached, "certid_mismatch", mode)
+								end
+							elseif
+								result_detail == "intermediate_must_staple_libssl"
+								or result_detail == "intermediate_must_staple_colony"
+								or result_detail == "multi_staple_attach_failed"
+								or result_detail == "fingerprint_chain_unavailable"
+								or result_detail == "issuer_unresolved_must_staple"
+								or result_detail == "response_not_found"
+								or must_staple
+							then
+								local detail = result_detail
+								if
+									detail ~= "intermediate_must_staple_libssl"
+									and detail ~= "intermediate_must_staple_colony"
+									and detail ~= "multi_staple_attach_failed"
+									and detail ~= "fingerprint_chain_unavailable"
+									and detail ~= "issuer_unresolved_must_staple"
+									and detail ~= "response_not_found"
+									and detail ~= "issuer_unavailable"
+								then
+									detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed"
+										or "unmet"
+								end
+								pcall(clear_connection_staple)
+								return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+							end
+							if result_detail ~= "certid_mismatch" then
+								return false
+							end
+							-- certid optional: fall through to disk
+						else
+							drop_cache(internalstore, fingerprint)
+						end
+					elseif probe_only then
 						local path_ok, path_detail = issuer_path_intermediate_ready(blocks)
 						if not path_ok then
 							return false, "must_staple", path_detail or "unmet"
 						end
 						return true
-					end
-					local set_ok, set_err
-					local ok_set = pcall(function()
-						set_ok, set_err = attach_ocsp_staple(ocsp, cached, blocks)
-					end)
-					if ok_set and set_ok then
-						log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
-						return true
-					end
-					local attach_detail = tostring(set_err or set_ok)
-					log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
-					drop_cache(internalstore, fingerprint)
-					if
-						attach_detail == "intermediate_must_staple_libssl"
-						or attach_detail == "intermediate_must_staple_colony"
-						or attach_detail == "multi_staple_attach_failed"
-						or attach_detail == "fingerprint_chain_unavailable"
-						or attach_detail == "issuer_unresolved_must_staple"
-						or must_staple
-					then
-						local detail = attach_detail
-						if
-							detail ~= "intermediate_must_staple_libssl"
-							and detail ~= "intermediate_must_staple_colony"
-							and detail ~= "multi_staple_attach_failed"
-							and detail ~= "fingerprint_chain_unavailable"
-							and detail ~= "issuer_unresolved_must_staple"
-						then
-							detail = "set_staple_failed"
+					else
+						local set_ok, set_err
+						local ok_set = pcall(function()
+							set_ok, set_err = attach_ocsp_staple(ocsp, cached, blocks)
+						end)
+						if ok_set and set_ok then
+							-- Restock L1 TTL on hot verified hits (was only on cold/FFI paths).
+							warm_cache(
+								internalstore,
+								fingerprint,
+								cached,
+								true,
+								meta_effective_expires_unix(meta or read_ocsp_json(fingerprint), cached_expires),
+								cached_epoch,
+								soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
+							)
+							clear_ffi_needed(internalstore, fingerprint)
+							log_ocsp_stapled(server_name, cert_pubkey_kind(leaf_pem), fingerprint, cached)
+							return true
 						end
-						return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+						local attach_detail = tostring(set_err or set_ok)
+						log(ngx.ERR, "OCSP failed to set stapling from L1: " .. attach_detail)
+						drop_cache(internalstore, fingerprint)
+						if
+							attach_detail == "intermediate_must_staple_libssl"
+							or attach_detail == "intermediate_must_staple_colony"
+							or attach_detail == "multi_staple_attach_failed"
+							or attach_detail == "fingerprint_chain_unavailable"
+							or attach_detail == "issuer_unresolved_must_staple"
+							or must_staple
+						then
+							local detail = attach_detail
+							if
+								detail ~= "intermediate_must_staple_libssl"
+								and detail ~= "intermediate_must_staple_colony"
+								and detail ~= "multi_staple_attach_failed"
+								and detail ~= "fingerprint_chain_unavailable"
+								and detail ~= "issuer_unresolved_must_staple"
+							then
+								detail = "set_staple_failed"
+							end
+							return must_staple_refuse(fingerprint, meta, cached, detail, mode)
+						end
 					end
 				end
 			else
@@ -1210,7 +1448,7 @@ local function staple_one_leaf(
 						return must_staple_refuse(fingerprint, meta, cached, ligand_detail, mode)
 					end
 				end
-				local force_ffi = is_ffi_needed(internalstore, fingerprint)
+				local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, cached)
 				local result, result_detail = try_staple(
 					ocsp,
 					ssl,
@@ -1259,9 +1497,15 @@ local function staple_one_leaf(
 							cached_epoch,
 							soft_recall_gen_of(ligand_or_meta(meta, fingerprint))
 						)
-						mark_ffi_needed(internalstore, fingerprint)
+						mark_ffi_needed(internalstore, fingerprint, meta, cached)
 						if must_staple then
 							return must_staple_refuse(fingerprint, meta, cached, "validate_budget", mode)
+						end
+						return false
+					end
+					if result_detail == "issuer_unavailable" then
+						if must_staple then
+							return must_staple_refuse(fingerprint, meta, cached, "issuer_unavailable", mode)
 						end
 						return false
 					end
@@ -1293,6 +1537,7 @@ local function staple_one_leaf(
 							and detail ~= "fingerprint_chain_unavailable"
 							and detail ~= "issuer_unresolved_must_staple"
 							and detail ~= "response_not_found"
+							and detail ~= "issuer_unavailable"
 						then
 							detail = canary_paged_body_ok(meta, fingerprint, cached) and "set_staple_failed" or "unmet"
 						end
@@ -1321,7 +1566,10 @@ local function staple_one_leaf(
 			end
 			return false
 		end
-		issuers = issuers or issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+		-- Rebuild when L1 left a truthy empty table (issuers or … would keep {}).
+		if type(issuers) ~= "table" or #issuers == 0 then
+			issuers = issuer_candidates(blocks, leaf_pem, fingerprint, shard_issuer_pem or false)
+		end
 		if serial_blacklist_blocks(fingerprint, resp) then
 			if must_staple then
 				return must_staple_refuse(fingerprint, meta, nil, "serial_blacklisted", mode)
@@ -1335,7 +1583,7 @@ local function staple_one_leaf(
 				return must_staple_refuse(fingerprint, meta, resp, ligand_detail, mode)
 			end
 		end
-		local force_ffi = is_ffi_needed(internalstore, fingerprint)
+		local force_ffi = is_ffi_needed(internalstore, fingerprint, meta, resp)
 		local result, result_detail = try_staple(
 			ocsp,
 			ssl,
@@ -1366,9 +1614,15 @@ local function staple_one_leaf(
 			if result_detail == "validate_budget" then
 				-- Demote local L1 verified (KEEP pin) — same contract as L1 path.
 				warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
-				mark_ffi_needed(internalstore, fingerprint)
+				mark_ffi_needed(internalstore, fingerprint, meta, resp)
 				if must_staple then
 					return must_staple_refuse(fingerprint, meta, resp, "validate_budget", mode)
+				end
+				return false
+			end
+			if result_detail == "issuer_unavailable" then
+				if must_staple then
+					return must_staple_refuse(fingerprint, meta, resp, "issuer_unavailable", mode)
 				end
 				return false
 			end
@@ -1395,6 +1649,7 @@ local function staple_one_leaf(
 					and detail ~= "fingerprint_chain_unavailable"
 					and detail ~= "issuer_unresolved_must_staple"
 					and detail ~= "response_not_found"
+					and detail ~= "issuer_unavailable"
 				then
 					detail = canary_paged_body_ok(meta, fingerprint, resp) and "set_staple_failed" or "unmet"
 				end
@@ -1416,6 +1671,10 @@ end
 -- HTTP's L1 entry); stream-private crypto-verified L1 alone is refused.
 -- Optional cert_fp_hint (plugin status[5]) enforces Must-Staple via ocsp.json when PEM is absent.
 -- Dual-cert PEMs staple the ECDSA leaf only (one ngx.ocsp status slot).
+-- Accepts PEM string or issuer-linked blocks; blocks.ocsp_path_sealed (from set_certs_from_pem)
+-- skips presentable_chain_blocks re-link so unresolved_must_staple is preserved.
+-- Fingerprint-only path unpacks staple_from_fingerprint into locals before soften_must_staple.
+-- Rearms the L1 warmer on entry.
 -- Returns: true on success; false, "must_staple" when Must-Staple is unmet; false otherwise.
 function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	if not internalstore then
@@ -1523,6 +1782,8 @@ end
 -- only affect handshake abort after install fails entirely — not the skip-leaf gate.
 -- Pass apply_soften=false for skip-leaf callers that log their own action
 -- (e.g. set_certs_from_pem). open mode short-circuits to true (Must-Staple off).
+-- Honors blocks.ocsp_path_sealed (skip re-presentable) and ngx.ctx.bw_ocsp_skip_l1_drop
+-- (rank probes must not drop sibling L1). Rearms the L1 warmer on entry.
 -- Returns true, or false, "must_staple", detail (abort), or false (soft continue without abort tag).
 function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soften)
 	if not internalstore then
@@ -1662,7 +1923,9 @@ function _M.prefer_kind_from_sigalgs(ext)
 end
 
 -- Capture SNI + preferred leaf kind during ssl_client_hello (HTTP and stream).
--- Stores on ngx.ctx for the later ssl_certificate leaf pick / staple.
+-- Stores on ngx.ctx for the later ssl_certificate leaf pick / staple:
+--   bw_ocsp_sni, bw_ocsp_sigalgs_ext (raw ext 13), bw_ocsp_prefer_kind (coarse).
+-- Also rearms the L1 warmer early so a failed timer.at can recover before set_certs/staple.
 function _M.capture_client_hello()
 	maybe_rearm_l1_warmer()
 	local ctx = ngx.ctx

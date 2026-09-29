@@ -187,6 +187,8 @@ local STAPLE_DECISION = {
 	-- Soft ngx.ocsp.validate budget aborted during leaf issuer tries; multi-staple
 	-- stack was never attached (not ok_partial — that name is NULL-slot attach only).
 	validate_budget = true,
+	-- Body present but no accepted issuer PEM/SPKI for ngx.ocsp.validate (not a missing DER).
+	issuer_unavailable = true,
 	unmet = true,
 }
 
@@ -237,6 +239,7 @@ local KEEP_ALLOW_ON_REFUSE = {
 	fingerprint_chain_unavailable = true,
 	multi_staple_attach_failed = true,
 	issuer_unresolved_must_staple = true,
+	issuer_unavailable = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
