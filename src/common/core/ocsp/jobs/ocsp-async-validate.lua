@@ -34,6 +34,25 @@ local ocsp_module = require "bunkerweb.ocsp"
 local queue = require "ocsp_redis_queue"
 
 -- ============================================================================
+-- Queue Storage Tiers (from ocsp_redis_queue module):
+-- ============================================================================
+-- The queue module uses three-tier fallback for durability:
+--
+--   Tier 1: Redis (if configured and available)
+--   Tier 2: File Storage (/var/lib/bunkerweb/ocsp-queue/)
+--   Tier 3: In-Memory fallback (volatile)
+--
+-- All queue operations automatically use the best available tier:
+--   queue.queue_pending()    → Tries Redis → File → Memory
+--   queue.get_next_pending() → Tries Redis → File → Memory
+--   queue.mark_validated()   → Tries Redis → File → Memory
+--   queue.mark_failed()      → Tries Redis → File → Memory
+--
+-- Must-staple prioritization works with all tiers because it scans
+-- via get_next_pending() repeatedly, which always works regardless
+-- of underlying storage mechanism.
+
+-- ============================================================================
 -- Logging Helpers
 -- ============================================================================
 -- All logs are prefixed with [OCSP-ASYNC] for easy filtering and debugging
