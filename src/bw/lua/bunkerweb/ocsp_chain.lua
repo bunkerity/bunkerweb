@@ -797,7 +797,7 @@ end
 -- Drop the connection staple (often set from L1) when clear_certs swaps the SSL context.
 -- HTTP/2 coalescing / plugin re-entry must not leave leaf A's staple on leaf B.
 -- Does not delete the process-wide L1 shared-dict entry (other connections still need it).
-function _M.on_ssl_context_swap(internalstore)
+function _M.on_ssl_context_swap()
 	return clear_connection_staple()
 end
 

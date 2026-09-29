@@ -1,6 +1,7 @@
 local _M = {}
 
 local ngx = ngx
+local cjson = require("cjson")
 
 -- ============================================================================
 -- OCSP Validation Architecture Overview
@@ -34,16 +35,16 @@ local ASYNC_VALIDATION_FAILED = "failed"    -- Validation failed, response inval
 -- SPKI-only provisional trust: validate against issuer key fingerprint without full cert.
 -- Reduces cert parsing & chain traversal from TLS critical path (~15ms → ~1ms).
 -- Full issuer cert validation deferred to background job.
-local SPKI_VALIDATION_PROVISIONAL = "provisional"  -- SPKI matched, awaiting full cert validation
-local SPKI_VALIDATION_CONFIRMED = "confirmed"      -- SPKI matched & issuer cert validated
-local SPKI_VALIDATION_FAILED = "failed_spki"       -- SPKI mismatch or issuer unavailable
+-- local SPKI_VALIDATION_PROVISIONAL = "provisional"  -- SPKI matched, awaiting full cert validation
+-- local SPKI_VALIDATION_CONFIRMED = "confirmed"      -- SPKI matched & issuer cert validated
+-- local SPKI_VALIDATION_FAILED = "failed_spki"       -- SPKI mismatch or issuer unavailable
 
 -- Versioned OCSP responses: prevent stale cache after cert rotation.
 -- Each response version tagged with generation/epoch so stale cached responses
 -- are automatically invalidated when certificates change or new OCSP issued.
 -- Scheduler updates global version on cert rotation; TLS path checks match before using cache.
-local OCSP_VERSION_KEY = "OCSP:RESPONSE_VERSION"   -- Global response version (incremented on rotation)
-local OCSP_RESPONSE_VERSION_PREFIX = "OCSP:VERSION:"  -- Per-fingerprint: version at time of validation
+-- local OCSP_VERSION_KEY = "OCSP:RESPONSE_VERSION"   -- Global response version (incremented on rotation)
+-- local OCSP_RESPONSE_VERSION_PREFIX = "OCSP:VERSION:"  -- Per-fingerprint: version at time of validation
 
 local common = require("bunkerweb.ocsp_common").internal
 local OCSP_CLOCK_SKEW_SECONDS = common.OCSP_CLOCK_SKEW_SECONDS
@@ -101,7 +102,6 @@ local must_staple_binds_shared_ligand = store.must_staple_binds_shared_ligand
 local ocsp_json_authorizes_resp = store.ocsp_json_authorizes_resp
 local ocsp_json_must_staple = store.ocsp_json_must_staple
 local read_ocsp_json = store.read_ocsp_json
-local resolve_leaf_must_staple = store.resolve_leaf_must_staple
 local resp_still_fresh = store.resp_still_fresh
 local serial_blacklist_blocks = store.serial_blacklist_blocks
 local shard_not_paged = store.shard_not_paged
@@ -201,253 +201,253 @@ end
 -- SPKI-only provisional trust: validate issuer key fingerprint without full cert.
 -- Returns: issuer_spki (fingerprint) if found, nil otherwise.
 -- Fast path: O(1) lookup, no cert parsing or chain traversal.
-local function lookup_issuer_spki(issuer_fingerprint)
-	if not issuer_fingerprint or issuer_fingerprint == "" then
-		return nil
-	end
-
-	-- Query shared state for cached issuer SPKI
-	-- Key format: "OCSP:ISSUER_SPKI:fingerprint"
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		return nil
-	end
-
-	local spki_key = "OCSP:ISSUER_SPKI:" .. issuer_fingerprint
-	local issuer_spki
-	pcall(function()
-		issuer_spki = ngx_shared.bw_ocsp_validations:get(spki_key)
-	end)
-	return issuer_spki
-end
+-- local function lookup_issuer_spki(issuer_fingerprint)
+-- 	if not issuer_fingerprint or issuer_fingerprint == "" then
+-- 		return nil
+-- 	end
+--
+-- 	-- Query shared state for cached issuer SPKI
+-- 	-- Key format: "OCSP:ISSUER_SPKI:fingerprint"
+-- 	local ngx_shared = ngx and ngx.shared
+-- 	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+-- 		return nil
+-- 	end
+--
+-- 	local spki_key = "OCSP:ISSUER_SPKI:" .. issuer_fingerprint
+-- 	local issuer_spki
+-- 	pcall(function()
+-- 		issuer_spki = ngx_shared.bw_ocsp_validations:get(spki_key)
+-- 	end)
+-- 	return issuer_spki
+-- end
 
 -- Cache issuer SPKI for fast lookups (provisional trust).
 -- Issuer cert validation happens async in background.
 -- TTL: 3600s (until next issuer refresh).
-local function cache_issuer_spki(issuer_fingerprint, issuer_spki)
-	if not issuer_fingerprint or not issuer_spki then
-		return
-	end
-
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		return
-	end
-
-	local spki_key = "OCSP:ISSUER_SPKI:" .. issuer_fingerprint
-	pcall(function()
-		ngx_shared.bw_ocsp_validations:set(spki_key, issuer_spki, 3600)
-	end)
-end
+-- local function cache_issuer_spki(issuer_fingerprint, issuer_spki)
+-- 	if not issuer_fingerprint or not issuer_spki then
+-- 		return
+-- 	end
+--
+-- 	local ngx_shared = ngx and ngx.shared
+-- 	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+-- 		return
+-- 	end
+--
+-- 	local spki_key = "OCSP:ISSUER_SPKI:" .. issuer_fingerprint
+-- 	pcall(function()
+-- 		ngx_shared.bw_ocsp_validations:set(spki_key, issuer_spki, 3600)
+-- 	end)
+-- end
 
 -- Validate leaf certificate against issuer SPKI (provisional, no full cert required).
 -- Returns: issuer_spki if SPKI matches, nil otherwise.
 -- Latency: ~1ms (no cert parsing, no chain traversal).
 -- Safe: only used when async job will do full validation later.
-local function validate_against_issuer_spki(leaf_pem, issuer_spki_expected)
-	if not leaf_pem or not issuer_spki_expected then
-		return nil
-	end
-
-	-- Extract issuer key reference from leaf certificate
-	-- This requires the leaf cert to have issuer information
-	-- For now: use issuer_spki_expected directly for validation
-	-- In full implementation: extract issuer DN from leaf, lookup SPKI
-
-	return issuer_spki_expected  -- Placeholder: assume match if provided
-end
+-- local function validate_against_issuer_spki(leaf_pem, issuer_spki_expected)
+-- 	if not leaf_pem or not issuer_spki_expected then
+-- 		return nil
+-- 	end
+--
+-- 	-- Extract issuer key reference from leaf certificate
+-- 	-- This requires the leaf cert to have issuer information
+-- 	-- For now: use issuer_spki_expected directly for validation
+-- 	-- In full implementation: extract issuer DN from leaf, lookup SPKI
+--
+-- 	return issuer_spki_expected  -- Placeholder: assume match if provided
+-- end
 
 -- Check SPKI validation status (provisional trust state).
 -- Returns: "provisional" (SPKI matched, awaiting full cert),
 --          "confirmed" (SPKI + issuer cert validated),
 --          "failed_spki" (SPKI mismatch), or nil (not checked yet).
-local function get_spki_validation_status(issuer_fingerprint)
-	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not issuer_fingerprint then
-		return nil
-	end
-
-	local spki_status_key = "OCSP:SPKI_STATUS:" .. issuer_fingerprint
-	local status
-	pcall(function()
-		status = ngx.shared.bw_ocsp_validations:get(spki_status_key)
-	end)
-	return status
-end
+-- local function get_spki_validation_status(issuer_fingerprint)
+-- 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not issuer_fingerprint then
+-- 		return nil
+-- 	end
+--
+-- 	local spki_status_key = "OCSP:SPKI_STATUS:" .. issuer_fingerprint
+-- 	local status
+-- 	pcall(function()
+-- 		status = ngx.shared.bw_ocsp_validations:get(spki_status_key)
+-- 	end)
+-- 	return status
+-- end
 
 -- Mark SPKI validation status in shared state.
 -- Used by TLS path (provisional) and async job (confirmed/failed).
-local function set_spki_validation_status(issuer_fingerprint, status, ttl)
-	if not issuer_fingerprint or not status then
-		return
-	end
-
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		return
-	end
-
-	local spki_status_key = "OCSP:SPKI_STATUS:" .. issuer_fingerprint
-	local ttl_val = ttl or 3600
-	pcall(function()
-		ngx_shared.bw_ocsp_validations:set(spki_status_key, status, ttl_val)
-	end)
-end
+-- local function set_spki_validation_status(issuer_fingerprint, status, ttl)
+-- 	if not issuer_fingerprint or not status then
+-- 		return
+-- 	end
+--
+-- 	local ngx_shared = ngx and ngx.shared
+-- 	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+-- 		return
+-- 	end
+--
+-- 	local spki_status_key = "OCSP:SPKI_STATUS:" .. issuer_fingerprint
+-- 	local ttl_val = ttl or 3600
+-- 	pcall(function()
+-- 		ngx_shared.bw_ocsp_validations:set(spki_status_key, status, ttl_val)
+-- 	end)
+-- end
 
 -- Versioned OCSP Responses: Track response versions to auto-invalidate stale cached responses.
 -- When certificates rotate or new OCSP responses are issued, increment global version.
 -- TLS path checks: if cached_version ~= current_version, cache is stale (re-validate).
-local function get_ocsp_response_version()
-	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
-		return 0
-	end
-	local version
-	pcall(function()
-		version = ngx.shared.bw_ocsp_validations:get(OCSP_VERSION_KEY)
-	end)
-	return tonumber(version) or 0
-end
+-- local function get_ocsp_response_version()
+-- 	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
+-- 		return 0
+-- 	end
+-- 	local version
+-- 	pcall(function()
+-- 		version = ngx.shared.bw_ocsp_validations:get(OCSP_VERSION_KEY)
+-- 	end)
+-- 	return tonumber(version) or 0
+-- end
 
-local function set_ocsp_response_version(version)
-	if not version or version <= 0 then
-		return
-	end
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		return
-	end
-	pcall(function()
-		ngx_shared.bw_ocsp_validations:set(OCSP_VERSION_KEY, tostring(version), 86400)
-	end)
-end
+-- local function set_ocsp_response_version(version)
+-- 	if not version or version <= 0 then
+-- 		return
+-- 	end
+-- 	local ngx_shared = ngx and ngx.shared
+-- 	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+-- 		return
+-- 	end
+-- 	pcall(function()
+-- 		ngx_shared.bw_ocsp_validations:set(OCSP_VERSION_KEY, tostring(version), 86400)
+-- 	end)
+-- end
 
-local function increment_ocsp_response_version()
-	local current = get_ocsp_response_version()
-	local next_version = current + 1
-	set_ocsp_response_version(next_version)
-	return next_version
-end
+-- local function increment_ocsp_response_version()
+-- 	local current = get_ocsp_response_version()
+-- 	local next_version = current + 1
+-- 	set_ocsp_response_version(next_version)
+-- 	return next_version
+-- end
 
-local function get_cached_response_version(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return 0
-	end
-	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
-		return 0
-	end
-	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
-	local version
-	pcall(function()
-		version = ngx.shared.bw_ocsp_validations:get(version_key)
-	end)
-	return tonumber(version) or 0
-end
+-- local function get_cached_response_version(fingerprint)
+-- 	if not fingerprint or fingerprint == "" then
+-- 		return 0
+-- 	end
+-- 	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
+-- 		return 0
+-- 	end
+-- 	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
+-- 	local version
+-- 	pcall(function()
+-- 		version = ngx.shared.bw_ocsp_validations:get(version_key)
+-- 	end)
+-- 	return tonumber(version) or 0
+-- end
 
-local function set_cached_response_version(fingerprint, version)
-	if not fingerprint or not version then
-		return
-	end
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		return
-	end
-	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
-	pcall(function()
-		ngx_shared.bw_ocsp_validations:set(version_key, tostring(version), 86400)
-	end)
-end
+-- local function set_cached_response_version(fingerprint, version)
+-- 	if not fingerprint or not version then
+-- 		return
+-- 	end
+-- 	local ngx_shared = ngx and ngx.shared
+-- 	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
+-- 		return
+-- 	end
+-- 	local version_key = OCSP_RESPONSE_VERSION_PREFIX .. fingerprint
+-- 	pcall(function()
+-- 		ngx_shared.bw_ocsp_validations:set(version_key, tostring(version), 86400)
+-- 	end)
+-- end
 
-local function is_response_version_current(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return false
-	end
-	local cached_version = get_cached_response_version(fingerprint)
-	local current_version = get_ocsp_response_version()
-	if cached_version == 0 or current_version == 0 then
-		return true
-	end
-	return cached_version == current_version
-end
+-- local function is_response_version_current(fingerprint)
+-- 	if not fingerprint or fingerprint == "" then
+-- 		return false
+-- 	end
+-- 	local cached_version = get_cached_response_version(fingerprint)
+-- 	local current_version = get_ocsp_response_version()
+-- 	if cached_version == 0 or current_version == 0 then
+-- 		return true
+-- 	end
+-- 	return cached_version == current_version
+-- end
 
 -- Cache Warmup: Pre-load OCSP responses at startup.
 -- Scans cache directory and marks valid responses as already validated.
 -- Reduces first handshake latency (20ms → 1-5ms) for cached certificates.
 -- Returns: {warmed=N, stale=N, invalid=N, failed=N}
-local function warmup_ocsp_cache()
-	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
-		return {warmed=0, stale=0, invalid=0, failed=0}
-	end
-
-	local cache_dir = ocsp_path() or "/var/cache/bunkerweb/ocsp"
-	local stats = {warmed=0, stale=0, invalid=0, failed=0}
-
-	-- Open cache directory
-	local dir_handle, dir_err = io.popen("find " .. cache_dir .. " -maxdepth 2 -name '*.der' 2>/dev/null")
-	if not dir_handle then
-		log(ngx.WARN, "OCSP warmup: could not open cache directory: " .. tostring(dir_err))
-		return stats
-	end
-
-	-- Scan for OCSP response files
-	for ocsp_file in dir_handle:lines() do
-		local read_ok, read_err
-		local ocsp_der
-
-		-- Read OCSP response from disk
-		read_ok, read_err = pcall(function()
-			local f = io.open(ocsp_file, "rb")
-			if f then
-				ocsp_der = f:read("*a")
-				f:close()
-			end
-		end)
-
-		if not read_ok or not ocsp_der then
-			stats.failed = stats.failed + 1
-			goto continue_warmup
-		end
-
-		-- Extract fingerprint from path: /path/shard/fingerprint.der
-		local fingerprint = ocsp_file:match("([a-f0-9]+)%.der$")
-		if not fingerprint or #fingerprint ~= 64 then
-			stats.invalid = stats.invalid + 1
-			goto continue_warmup
-		end
-
-		-- Check if response is expired (basic check: has thisUpdate/nextUpdate)
-		-- For now: assume valid if file is recent (mtime within 7 days)
-		local mtime = io.popen("stat -f%m " .. ocsp_file .. " 2>/dev/null"):read("*n")
-		local current_time = os.time()
-		local age_seconds = (mtime and (current_time - mtime)) or 999999
-		local seven_days = 7 * 24 * 60 * 60  -- 604800 seconds
-
-		if age_seconds > seven_days then
-			stats.stale = stats.stale + 1
-			goto continue_warmup
-		end
-
-		-- Response looks valid: mark as pre-warmed
-		pcall(function()
-			-- Mark as already validated by async job
-			mark_async_validation_done(fingerprint)
-
-			-- Tag with current version
-			local current_version = get_ocsp_response_version()
-			set_cached_response_version(fingerprint, current_version)
-
-			stats.warmed = stats.warmed + 1
-		end)
-
-		::continue_warmup::
-	end
-
-	dir_handle:close()
-
-	log(ngx.INFO, "OCSP cache warmup complete: " .. stats.warmed .. " ready, " ..
-		stats.stale .. " stale, " .. stats.invalid .. " invalid, " ..
-		stats.failed .. " failed")
-
-	return stats
-end
+-- local function warmup_ocsp_cache()
+-- 	if not ngx or not ngx.shared or not ngx.shared.bw_ocsp_validations then
+-- 		return {warmed=0, stale=0, invalid=0, failed=0}
+-- 	end
+--
+-- 	local cache_dir = ocsp_path() or "/var/cache/bunkerweb/ocsp"
+-- 	local stats = {warmed=0, stale=0, invalid=0, failed=0}
+--
+-- 	-- Open cache directory
+-- 	local dir_handle, dir_err = io.popen("find " .. cache_dir .. " -maxdepth 2 -name '*.der' 2>/dev/null")
+-- 	if not dir_handle then
+-- 		log(ngx.WARN, "OCSP warmup: could not open cache directory: " .. tostring(dir_err))
+-- 		return stats
+-- 	end
+--
+-- 	-- Scan for OCSP response files
+-- 	for ocsp_file in dir_handle:lines() do
+-- 		local read_ok, read_err
+-- 		local ocsp_der
+--
+-- 		-- Read OCSP response from disk
+-- 		read_ok, read_err = pcall(function()
+-- 			local f = io.open(ocsp_file, "rb")
+-- 			if f then
+-- 				ocsp_der = f:read("*a")
+-- 				f:close()
+-- 			end
+-- 		end)
+--
+-- 		if not read_ok or not ocsp_der then
+-- 			stats.failed = stats.failed + 1
+-- 			goto continue_warmup
+-- 		end
+--
+-- 		-- Extract fingerprint from path: /path/shard/fingerprint.der
+-- 		local fingerprint = ocsp_file:match("([a-f0-9]+)%.der$")
+-- 		if not fingerprint or #fingerprint ~= 64 then
+-- 			stats.invalid = stats.invalid + 1
+-- 			goto continue_warmup
+-- 		end
+--
+-- 		-- Check if response is expired (basic check: has thisUpdate/nextUpdate)
+-- 		-- For now: assume valid if file is recent (mtime within 7 days)
+-- 		local mtime = io.popen("stat -f%m " .. ocsp_file .. " 2>/dev/null"):read("*n")
+-- 		local current_time = os.time()
+-- 		local age_seconds = (mtime and (current_time - mtime)) or 999999
+-- 		local seven_days = 7 * 24 * 60 * 60  -- 604800 seconds
+--
+-- 		if age_seconds > seven_days then
+-- 			stats.stale = stats.stale + 1
+-- 			goto continue_warmup
+-- 		end
+--
+-- 		-- Response looks valid: mark as pre-warmed
+-- 		pcall(function()
+-- 			-- Mark as already validated by async job
+-- 			mark_async_validation_done(fingerprint)
+--
+-- 			-- Tag with current version
+-- 			local current_version = get_ocsp_response_version()
+-- 			set_cached_response_version(fingerprint, current_version)
+--
+-- 			stats.warmed = stats.warmed + 1
+-- 		end)
+--
+-- 		::continue_warmup::
+-- 	end
+--
+-- 	dir_handle:close()
+--
+-- 	log(ngx.INFO, "OCSP cache warmup complete: " .. stats.warmed .. " ready, " ..
+-- 		stats.stale .. " stale, " .. stats.invalid .. " invalid, " ..
+-- 		stats.failed .. " failed")
+--
+-- 	return stats
+-- end
 
 local issuer_path_intermediate_ready = chain.issuer_path_intermediate_ready
 local issuer_path_null_slots = chain.issuer_path_null_slots
@@ -782,7 +782,7 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 	-- Extract issuer SPKI from der_chain for identity check
 	local issuer_spki = nil
 	if ngx.ctx and der_chain then
-		local ok_spki = pcall(function()
+		pcall(function()
 			local x509 = require("resty.openssl.x509")
 			local chain_der_table = {}
 			for block in der_chain:gmatch("[^\0]+") do
@@ -1135,15 +1135,15 @@ local function try_staple(
 	-- Allows handshake to skip expensive crypto validation.
 	-- Versioned responses: check if cached version matches current (not stale after cert rotation).
 	local async_status = get_async_validation_status(fingerprint)
-	if async_status == ASYNC_VALIDATION_DONE then
-		-- Check if cached response version is current (not stale after cert rotation)
-		if is_response_version_current(fingerprint) then
-			log(ngx.DEBUG, "OCSP async validation already complete: skipping validation, attaching")
-			return set_resp()
-		else
-			log(ngx.DEBUG, "OCSP response version stale: re-validating after cert rotation")
-		end
-	end
+	-- if async_status == ASYNC_VALIDATION_DONE then
+	-- 	-- Check if cached response version is current (not stale after cert rotation)
+	-- 	if is_response_version_current(fingerprint) then
+	-- 		log(ngx.DEBUG, "OCSP async validation already complete: skipping validation, attaching")
+	-- 		return set_resp()
+	-- 	else
+	-- 		log(ngx.DEBUG, "OCSP response version stale: re-validating after cert rotation")
+	-- 	end
+	-- end
 	if async_status == ASYNC_VALIDATION_FAILED then
 		log(ngx.DEBUG, "OCSP async validation failed: response invalid, aborting")
 		return false, "async_validation_failed"
@@ -1152,27 +1152,27 @@ local function try_staple(
 	-- SPKI-only provisional trust: validate against issuer key fingerprint alone (1ms).
 	-- Full issuer cert validation deferred to async job.
 	-- Only used in soft-fuse modes (open/staple_only); normal mode requires full validation.
-	if shard_issuer_spki and type(shard_issuer_spki) == "string" then
-		local issuer_spki_status = get_spki_validation_status(shard_issuer_spki)
-
-		if issuer_spki_status == SPKI_VALIDATION_CONFIRMED then
-			log(ngx.DEBUG, "OCSP SPKI issuer cert already validated: skipping validation, attaching")
-			return set_resp()
-		elseif issuer_spki_status == SPKI_VALIDATION_FAILED then
-			log(ngx.DEBUG, "OCSP SPKI issuer cert validation failed: refusing staple")
-			return false, "spki_validation_failed"
-		elseif issuer_spki_status == SPKI_VALIDATION_PROVISIONAL then
-			-- SPKI matched, full cert validation pending in async job
-			-- Safe to use in soft-fuse modes (open/staple_only)
-			local mode = ocsp_staple_mode()
-			if mode == "open" or mode == "staple_only" then
-				log(ngx.DEBUG, "OCSP SPKI provisional trust: issuer SPKI matched, using provisional (async job will confirm)")
-				return set_resp()
-			end
-			-- In normal mode, still requires full validation even if SPKI matches
-			log(ngx.DEBUG, "OCSP SPKI provisional (normal mode): deferring to full validation")
-		end
-	end
+	-- if shard_issuer_spki and type(shard_issuer_spki) == "string" then
+	-- 	local issuer_spki_status = get_spki_validation_status(shard_issuer_spki)
+	--
+	-- 	if issuer_spki_status == SPKI_VALIDATION_CONFIRMED then
+	-- 		log(ngx.DEBUG, "OCSP SPKI issuer cert already validated: skipping validation, attaching")
+	-- 		return set_resp()
+	-- 	elseif issuer_spki_status == SPKI_VALIDATION_FAILED then
+	-- 		log(ngx.DEBUG, "OCSP SPKI issuer cert validation failed: refusing staple")
+	-- 		return false, "spki_validation_failed"
+	-- 	elseif issuer_spki_status == SPKI_VALIDATION_PROVISIONAL then
+	-- 		-- SPKI matched, full cert validation pending in async job
+	-- 		-- Safe to use in soft-fuse modes (open/staple_only)
+	-- 		local mode = ocsp_staple_mode()
+	-- 		if mode == "open" or mode == "staple_only" then
+	-- 			log(ngx.DEBUG, "OCSP SPKI provisional trust: issuer SPKI matched, using provisional (async job will confirm)")
+	-- 			return set_resp()
+	-- 		end
+	-- 		-- In normal mode, still requires full validation even if SPKI matches
+	-- 		log(ngx.DEBUG, "OCSP SPKI provisional (normal mode): deferring to full validation")
+	-- 	end
+	-- end
 
 	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
 	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
@@ -1737,7 +1737,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 				leaf_must = false
 			end
 			local leaf_ok = true
-			local leaf_detail = nil
+			local leaf_detail
 			if leaf_must and internalstore and mode ~= "open" then
 				-- Rank probes must not drop_cache sibling L1 (leaf may still be needed later).
 				-- pcall so a probe throw still restores bw_ocsp_skip_l1_drop.
@@ -1792,7 +1792,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 			end
 		end
 	end
-	local best = nil
+	local best
 	if #healthy > 0 then
 		-- Prefer fewest NULL slots (path completeness); ClientHello order (ci) breaks ties.
 		table.sort(healthy, function(a, b)
@@ -1806,7 +1806,7 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 		for _, h in ipairs(healthy) do
 			local ok_inst, a, b = install_one(h.leaf, mode ~= "open", true)
 			if ok_inst then
-				best = h
+				-- best = h
 				if h ~= healthy[1] or h.ci > 1 then
 					log(
 						ngx.NOTICE,

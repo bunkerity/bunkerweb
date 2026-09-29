@@ -679,7 +679,7 @@ local function serial_blacklist_blocks(fingerprint, resp)
 			.. fingerprint
 			.. "/serial-blacklist.json"
 	)
-	local blocked = false
+	local blocked
 	if not raw or raw == "" then
 		-- No blacklist file: this response is allowed
 		blocked = false
@@ -932,7 +932,7 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	return false
 end
 
-l1_matches_disk = function(internalstore, fingerprint, resp, stored_epoch)
+l1_matches_disk = function(_internalstore, fingerprint, resp, stored_epoch)
 	return l1_body_matches_disk(fingerprint, resp, stored_epoch)
 end
 

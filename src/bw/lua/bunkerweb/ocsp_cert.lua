@@ -9,6 +9,26 @@ local is_fp64 = common.is_fp64
 local log = common.log
 local to_hex = common.to_hex
 
+-- OpenSSL NIDs for TLS 1.3 CertificateVerify EC/Ed schemes
+local NID_P256, NID_P384, NID_P521, NID_ED25519, NID_ED448 = 415, 715, 716, 1087, 1088
+do
+	local ok_obj, objects = pcall(require, "resty.openssl.objects")
+	if ok_obj and objects and objects.txtnid2nid then
+		local function resolve(name, fallback)
+			local n = objects.txtnid2nid(name)
+			if type(n) == "number" and n > 0 then
+				return n
+			end
+			return fallback
+		end
+		NID_P256 = resolve("prime256v1", NID_P256)
+		NID_P384 = resolve("secp384r1", NID_P384)
+		NID_P521 = resolve("secp521r1", NID_P521)
+		NID_ED25519 = resolve("ED25519", NID_ED25519)
+		NID_ED448 = resolve("ED448", NID_ED448)
+	end
+end
+
 local function pem_blocks(cert_pem)
 	local blocks = {}
 	for block in cert_pem:gmatch("(%-%-%-%-%-BEGIN CERTIFICATE%-%-%-%-%-.-%-%-%-%-%-END CERTIFICATE%-%-%-%-%-)") do
@@ -129,6 +149,137 @@ do
 	end
 end
 
+-- True when TLS Feature text asserts status_request (Must-Staple / feature id 5).
+-- Do not substring-match "5": that false-positives on OIDs and other digits.
+local function tls_feature_is_must_staple(text)
+	if type(text) ~= "string" or text == "" then
+		return false
+	end
+	if text:find("OCSP status request", 1, true) then
+		return true
+	end
+	-- Named forms; exclude status_request_v2 / statusRequestV2
+	if text:find("status_request%f[^%w_]") or text:match("status_request%s*$") then
+		return true
+	end
+	if text:find("statusRequest%f[^%w]") or text:match("%.?statusRequest%s*$") then
+		return true
+	end
+	-- Feature id 5 as a whole decimal token (e.g. "5", "5, 17") — callers must pass
+	-- extension text only (never a full openssl dump).
+	for token in text:gmatch("%d+") do
+		if token == "5" then
+			return true
+		end
+	end
+	return false
+end
+
+-- Canonical uppercase hex serial without leading zeros. Strings are always hex:
+-- ocsp-refresh.py writes format(serial, "X"), and an all-digit hex serial such as
+-- "1000" (0x1000) must not be reinterpreted as decimal.
+local function canonical_serial_hex(serial)
+	if serial == nil then
+		return nil
+	end
+	if type(serial) == "table" then
+		if serial.to_hex then
+			local ok_hex, hex = pcall(function()
+				return serial:to_hex()
+			end)
+			if ok_hex and type(hex) == "string" and #hex > 0 then
+				hex = hex:upper():gsub("^0+", "")
+				return hex == "" and "0" or hex
+			end
+		end
+		if serial.to_number then
+			local ok_n, n = pcall(function()
+				return serial:to_number()
+			end)
+			if ok_n and type(n) == "number" then
+				serial = n
+			end
+		end
+	end
+	if type(serial) == "number" then
+		-- Doubles are exact only below 2^53; larger serials must arrive as hex strings.
+		if serial < 0 or serial >= 2 ^ 53 or serial % 1 ~= 0 then
+			return nil
+		end
+		local hex = string.format("%X", serial)
+		hex = hex:gsub("^0+", "")
+		return hex == "" and "0" or hex
+	end
+	if type(serial) ~= "string" then
+		return nil
+	end
+	serial = serial:upper():gsub("[%s:]+", ""):gsub("^0X", "")
+	if serial == "" or not serial:match("^[0-9A-F]+$") then
+		return nil
+	end
+	serial = serial:gsub("^0+", "")
+	return serial == "" and "0" or serial
+end
+
+-- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
+-- Never key anything by ngx.md5(cert_pem) as a stand-in for the SPKI: PEM rewrap
+-- changes that hash while the SPKI is identical (path skew vs the job).
+-- Uses batched profile extraction to reuse x509 object (saves 1-3ms per cert).
+function uncached.spki_fingerprint(cert_pem)
+	local fingerprint = nil
+	local ok_fp, err = pcall(function()
+		local profile = pem_profile_batched(cert_pem)
+		fingerprint = profile.spki_fingerprint
+	end)
+	if not ok_fp then
+		log(ngx.DEBUG, "OCSP SPKI fingerprint failed: " .. tostring(err))
+	end
+	if is_fp64(fingerprint) then
+		return fingerprint
+	end
+	return nil
+end
+
+local function spki_fingerprint(cert_pem)
+	return pem_memo_fetch("spki", cert_pem, uncached.spki_fingerprint)
+end
+
+-- Helper: batch extract SPKI for issuers already grouped by DN.
+-- Optimized for pre-filtered list (smaller than full issuer list).
+local function batch_spki_fingerprints_filtered(dn_grouped_issuers)
+	local result = {}
+	if type(dn_grouped_issuers) ~= "table" then
+		return result
+	end
+	for iss, _ in pairs(dn_grouped_issuers) do
+		if type(iss) == "string" and iss ~= "" then
+			result[iss] = spki_fingerprint(iss)
+		end
+	end
+	return result
+end
+
+-- Canonical AIA OCSP URI for comparison (scheme+host lowercased; path preserved).
+local function normalize_ocsp_aia_uri(url)
+	if type(url) ~= "string" then
+		return nil
+	end
+	url = url:match("^%s*(.-)%s*$") or ""
+	if url == "" then
+		return nil
+	end
+	local scheme, rest = url:match("^([Hh][Tt][Tt][Pp][Ss]?)://(.+)$")
+	if not scheme or not rest then
+		return nil
+	end
+	scheme = scheme:lower()
+	local hostport, pathquery = rest:match("^([^/?#]+)(.*)$")
+	if not hostport or hostport == "" then
+		return nil
+	end
+	return scheme .. "://" .. hostport:lower() .. (pathquery or "")
+end
+
 -- Batch extract all certificate profile facts in single x509 object pass
 -- Reuses cert_obj instead of creating 5 separate instances per PEM
 -- Saves: 5-8ms per certificate (single FFI call vs 5 separate ones)
@@ -238,55 +389,6 @@ pem_profile_batched = function(pem)
 	return profile
 end
 
--- SHA256 of SubjectPublicKeyInfo DER, matching ocsp-refresh.py.
--- Never key anything by ngx.md5(cert_pem) as a stand-in for the SPKI: PEM rewrap
--- changes that hash while the SPKI is identical (path skew vs the job).
--- Uses batched profile extraction to reuse x509 object (saves 1-3ms per cert).
-function uncached.spki_fingerprint(cert_pem)
-	local fingerprint = nil
-	local ok_fp, err = pcall(function()
-		local profile = pem_profile_batched(cert_pem)
-		fingerprint = profile.spki_fingerprint
-	end)
-	if not ok_fp then
-		log(ngx.DEBUG, "OCSP SPKI fingerprint failed: " .. tostring(err))
-	end
-	if is_fp64(fingerprint) then
-		return fingerprint
-	end
-	return nil
-end
-
-local function spki_fingerprint(cert_pem)
-	return pem_memo_fetch("spki", cert_pem, uncached.spki_fingerprint)
-end
-
--- True when TLS Feature text asserts status_request (Must-Staple / feature id 5).
--- Do not substring-match "5": that false-positives on OIDs and other digits.
-local function tls_feature_is_must_staple(text)
-	if type(text) ~= "string" or text == "" then
-		return false
-	end
-	if text:find("OCSP status request", 1, true) then
-		return true
-	end
-	-- Named forms; exclude status_request_v2 / statusRequestV2
-	if text:find("status_request%f[^%w_]") or text:match("status_request%s*$") then
-		return true
-	end
-	if text:find("statusRequest%f[^%w]") or text:match("%.?statusRequest%s*$") then
-		return true
-	end
-	-- Feature id 5 as a whole decimal token (e.g. "5", "5, 17") — callers must pass
-	-- extension text only (never a full openssl dump).
-	for token in text:gmatch("%d+") do
-		if token == "5" then
-			return true
-		end
-	end
-	return false
-end
-
 -- Handshake path: resty.openssl only — no /tmp + openssl CLI.
 -- Returns true | false | nil (unknown). Unknown must stay fail-closed at call sites
 -- that decide whether Must-Staple enforcement applies (never invent false on throw).
@@ -377,7 +479,9 @@ function uncached.ocsp_der_serials(der)
 		return nil
 	end
 	local n = #der
-	local t, s, e, nx = der_read(der, 1, n)
+	local t, s, e, nx
+	-- DER sequence tag check (extract all values but only use t)
+	t, s, e, nx = der_read(der, 1, n)
 	if t ~= 0x30 then
 		return nil
 	end
@@ -416,6 +520,7 @@ function uncached.ocsp_der_serials(der)
 	end
 	local rd_end = e
 	-- [0] version (optional), responderID [1]|[2], producedAt, responses
+	-- Extract tag (t) and next position (nx), skip start/end positions (s, e)
 	t, s, e, nx = der_read(der, s, rd_end)
 	if t == 0xA0 then
 		t, s, e, nx = der_read(der, nx, rd_end)
@@ -423,6 +528,7 @@ function uncached.ocsp_der_serials(der)
 	if t ~= 0xA1 and t ~= 0xA2 then
 		return nil
 	end
+	-- Extract tag and next position only
 	t, s, e, nx = der_read(der, nx, rd_end)
 	if t ~= 0x18 then
 		return nil
@@ -489,52 +595,6 @@ end
 
 function _M.ocsp_resp_serial_hex(ocsp_der, want_hex)
 	return ocsp_resp_serial_hex(ocsp_der, want_hex)
-end
-
--- Canonical uppercase hex serial without leading zeros. Strings are always hex:
--- ocsp-refresh.py writes format(serial, "X"), and an all-digit hex serial such as
--- "1000" (0x1000) must not be reinterpreted as decimal.
-local function canonical_serial_hex(serial)
-	if serial == nil then
-		return nil
-	end
-	if type(serial) == "table" then
-		if serial.to_hex then
-			local ok_hex, hex = pcall(function()
-				return serial:to_hex()
-			end)
-			if ok_hex and type(hex) == "string" and #hex > 0 then
-				hex = hex:upper():gsub("^0+", "")
-				return hex == "" and "0" or hex
-			end
-		end
-		if serial.to_number then
-			local ok_n, n = pcall(function()
-				return serial:to_number()
-			end)
-			if ok_n and type(n) == "number" then
-				serial = n
-			end
-		end
-	end
-	if type(serial) == "number" then
-		-- Doubles are exact only below 2^53; larger serials must arrive as hex strings.
-		if serial < 0 or serial >= 2 ^ 53 or serial % 1 ~= 0 then
-			return nil
-		end
-		local hex = string.format("%X", serial)
-		hex = hex:gsub("^0+", "")
-		return hex == "" and "0" or hex
-	end
-	if type(serial) ~= "string" then
-		return nil
-	end
-	serial = serial:upper():gsub("[%s:]+", ""):gsub("^0X", "")
-	if serial == "" or not serial:match("^[0-9A-F]+$") then
-		return nil
-	end
-	serial = serial:gsub("^0+", "")
-	return serial == "" and "0" or serial
 end
 
 function uncached.leaf_serial_hex(cert_pem)
@@ -627,21 +687,6 @@ local function prefilter_issuers_by_spki(issuer_pems, target_dn)
 	return #distinct_spki, spki_map
 end
 
--- Helper: batch extract SPKI for issuers already grouped by DN.
--- Optimized for pre-filtered list (smaller than full issuer list).
-local function batch_spki_fingerprints_filtered(dn_grouped_issuers)
-	local result = {}
-	if type(dn_grouped_issuers) ~= "table" then
-		return result
-	end
-	for iss, _ in pairs(dn_grouped_issuers) do
-		if type(iss) == "string" and iss ~= "" then
-			result[iss] = spki_fingerprint(iss)
-		end
-	end
-	return result
-end
-
 -- CertID must name this handshake leaf: serial match + issuer DN binds to a candidate
 -- issuer PEM (subject == leaf.issuer). Fail closed when either side is unreadable.
 -- Several PEMs can share one subject DN (cross-signs). Accept that DN only when
@@ -687,7 +732,7 @@ local function certid_matches_handshake_leaf(leaf_pem, ocsp_der, issuer_pems)
 	-- Groups by DN (already done above), then by SPKI fingerprint.
 	-- If all matching issuers have same SPKI, they're truly identical (early exit optimization).
 	-- Saves 3-6ms by avoiding redundant SPKI extraction for cross-signed certs.
-	local distinct_spki_count, spki_map = prefilter_issuers_by_spki(matches, leaf_issuer)
+	local distinct_spki_count, _ = prefilter_issuers_by_spki(matches, leaf_issuer)
 
 	-- Optimization: If only 1 distinct SPKI, all issuers are identical, accept immediately.
 	if distinct_spki_count == 1 then
@@ -717,7 +762,7 @@ local function certid_consistent_with_meta(meta, ocsp_der)
 		return false, "no_meta"
 	end
 	local pin = meta.certid
-	local meta_serial = nil
+	local meta_serial
 	if type(pin) == "table" then
 		meta_serial = canonical_serial_hex(pin.serial)
 		if not meta_serial then
@@ -734,27 +779,6 @@ local function certid_consistent_with_meta(meta, ocsp_der)
 		return false, "serial_mismatch"
 	end
 	return true, nil
-end
-
--- Canonical AIA OCSP URI for comparison (scheme+host lowercased; path preserved).
-local function normalize_ocsp_aia_uri(url)
-	if type(url) ~= "string" then
-		return nil
-	end
-	url = url:match("^%s*(.-)%s*$") or ""
-	if url == "" then
-		return nil
-	end
-	local scheme, rest = url:match("^([Hh][Tt][Tt][Pp][Ss]?)://(.+)$")
-	if not scheme or not rest then
-		return nil
-	end
-	scheme = scheme:lower()
-	local hostport, pathquery = rest:match("^([^/?#]+)(.*)$")
-	if not hostport or hostport == "" then
-		return nil
-	end
-	return scheme .. "://" .. hostport:lower() .. (pathquery or "")
 end
 
 -- All OCSP URIs from leaf AIA (authorityInfoAccess), normalized.
@@ -839,26 +863,6 @@ end
 
 local function cert_pubkey_kind(cert_pem)
 	return pem_memo_fetch("kind", cert_pem, uncached.cert_pubkey_kind)
-end
-
--- OpenSSL NIDs for TLS 1.3 CertificateVerify EC/Ed schemes (OBJ_sn2nid when available).
-local NID_P256, NID_P384, NID_P521, NID_ED25519, NID_ED448 = 415, 715, 716, 1087, 1088
-do
-	local ok_obj, objects = pcall(require, "resty.openssl.objects")
-	if ok_obj and objects and objects.txtnid2nid then
-		local function resolve(name, fallback)
-			local n = objects.txtnid2nid(name)
-			if type(n) == "number" and n > 0 then
-				return n
-			end
-			return fallback
-		end
-		NID_P256 = resolve("prime256v1", NID_P256)
-		NID_P384 = resolve("secp384r1", NID_P384)
-		NID_P521 = resolve("secp521r1", NID_P521)
-		NID_ED25519 = resolve("ED25519", NID_ED25519)
-		NID_ED448 = resolve("ED448", NID_ED448)
-	end
 end
 
 -- kind + curve_nid for matching ClientHello signature_algorithms schemes.

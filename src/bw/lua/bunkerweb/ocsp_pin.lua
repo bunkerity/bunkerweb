@@ -817,11 +817,6 @@ local function canary_trust_ok(meta, fingerprint, resp)
 	return true
 end
 
--- Keep old name for warmer compatibility.
-local function ocsp_refuse_path(fingerprint)
-	return ocsp_allow_path(fingerprint)
-end
-
 -- Cross-subsystem allow-pin bus (HTTP ↔ stream). Missing pin refuses Must-Staple.
 -- meta must carry der_sha256 (+ soft_recall_gen); string-only generation ids are gone.
 function _M.peer_refuse_blocks(fingerprint, meta, resp)

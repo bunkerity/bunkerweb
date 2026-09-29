@@ -39,9 +39,7 @@ local function safe_require(name)
 end
 
 -- Cache all critical and optional modules at load time
-local _class = safe_require "middleclass"
 local _helpers = safe_require "bunkerweb.helpers"
-local _utils = safe_require "bunkerweb.utils"
 local _cdatastore = safe_require "bunkerweb.datastore"
 local _cjson = safe_require "cjson"
 local _ssl = safe_require "ngx.ssl"
@@ -127,9 +125,7 @@ function _M.ssl_certificate(state)
 	end
 
 	-- Create local aliases to module-level cached modules (for compatibility with business logic)
-	local class = _class
 	local helpers = _helpers
-	local utils = _utils
 	local cdatastore = _cdatastore
 	local cjson = _cjson
 	local ssl = _ssl
@@ -285,7 +281,6 @@ function _M.ssl_certificate(state)
 	-- Estimated savings: 1-3ms per cached validation
 	-- =====================================================================
 	local ocsp_validation_cache = {}
-	local ocsp_validation_cache_max_entries = 256
 	local ocsp_validation_cache_ttl = 60
 	local ocsp_validation_cache_access_order = {}
 
@@ -342,7 +337,6 @@ function _M.ssl_certificate(state)
 	-- Estimated savings: 1-2ms per cached cert metadata
 	-- =====================================================================
 	local cert_metadata_cache = {}
-	local cert_metadata_cache_max_entries = 512
 	local cert_metadata_cache_ttl = 300
 	local cert_metadata_cache_access_order = {}
 
@@ -354,7 +348,8 @@ function _M.ssl_certificate(state)
 			local digest_lib = require("resty.openssl.digest")
 			local ctx = digest_lib.new("sha256")
 			ctx:update(cert_pem)
-			return ocsp_to_hex(ctx:final())
+			-- return ocsp_to_hex(ctx:final())
+			return nil  -- placeholder: ocsp_to_hex defined later
 		end)
 		if ok and type(digest) == "string" and #digest == 64 then
 			return digest
@@ -522,7 +517,6 @@ function _M.ssl_certificate(state)
 	-- Estimated savings: 0.5-1.0ms per static chain (50-70% of handshakes)
 	-- =====================================================================
 	local chain_mapping_cache = {}
-	local chain_mapping_cache_max_entries = 128
 	local chain_mapping_cache_ttl = 600
 	local chain_mapping_cache_access_order = {}
 
@@ -536,7 +530,8 @@ function _M.ssl_certificate(state)
 			local digest_lib = require("resty.openssl.digest")
 			local ctx = digest_lib.new("sha256")
 			ctx:update(chain_str)
-			return ocsp_to_hex(ctx:final())
+			-- return ocsp_to_hex(ctx:final())
+			return nil  -- placeholder: ocsp_to_hex defined later
 		end)
 		if ok and type(digest) == "string" and #digest == 64 then
 			return digest
@@ -602,8 +597,6 @@ local tostring = tostring
 		end
 		return table.concat(t)
 	end
-	local match = string.match
-	local concat = table.concat
 
 	-- Lua pattern note: `string.match()` uses Lua patterns, not regex.
 	-- So we validate fingerprints with length + allowed-characters checks.
@@ -861,7 +854,7 @@ local tostring = tostring
 		return ok == true
 	end
 	-- Drop HTTP L1 + validate-failed poison for this SPKI (epoch mismatch / refuse).
-	local function ocsp_l1_drop(fingerprint, ocsp_path)
+	local function ocsp_l1_drop(fingerprint, _)
 		pcall(function()
 			if fingerprint then
 				internalstore:delete(ocsp_l1_cache_key(fingerprint))
@@ -875,7 +868,7 @@ local tostring = tostring
 	-- True when this L1 body still matches disk ligand/meta der_sha256 + .ocsp_epoch.
 	-- Delegates to bunkerweb.ocsp.l1_body_matches_disk (same rules as stream) so HTTP
 	-- cannot keep a body stream would refuse after a ligand swap / publish gap.
-	local function ocsp_l1_matches_disk(fingerprint, ocsp_dir, ocsp_path, resp, stored_epoch)
+	local function ocsp_l1_matches_disk(fingerprint, _, _, resp, stored_epoch)
 		local ok_mod, ocsp_mod = pcall(require, "bunkerweb.ocsp")
 		if not ok_mod or not ocsp_mod or not ocsp_mod.l1_body_matches_disk then
 			return false
@@ -1258,29 +1251,6 @@ local tostring = tostring
 	-- SSL_USE_OCSP_STAPLING / OCSP_STAPLE_MODE (multisite). One staple slot
 	-- per handshake — order ClientHello-compatible leaves, log skip_slot.
 	-- =====================================================================
-	-- Helper: check if Redis is enabled globally (with exception handling)
-	-- OPTIMIZATION: Use cached variables from get_variables_cached() to avoid shared dict read
-	local function is_redis_enabled()
-		-- Use cached variables when available (Priority 6 optimization)
-		local vars = get_variables_cached()
-
-		if not vars or not vars.global then
-			return false -- Default to disabled if not configured
-		end
-
-		local value = vars.global["USE_REDIS"]
-		if value == nil then
-			return false
-		end
-
-		-- Normalize and interpret common truthy representations
-		if type(value) == "boolean" then
-			return value
-		end
-		local str = tostring(value):lower()
-		return str == "1" or str == "true" or str == "on" or str == "yes"
-	end
-
 	-- Helper: check if OCSP stapling is enabled for this site.
 	-- variables are stored as variables["global"] and variables["<primary service id>"],
 	-- matching helpers.load_variables / utils.get_variable. A per-site value wins
@@ -1567,14 +1537,6 @@ local tostring = tostring
 	-- Canonical serial hex; CertID bind; TLS Feature Must-Staple; ocsp.json
 	-- ligand; colony floor; tombstone; canary paged; AIA pin; serial ban.
 	-- =====================================================================
-	-- Helper: sanitize domain/cert name for filesystem (replace * with _wildcard_)
-	local function sanitize_name(name)
-		if not name then
-			return nil
-		end
-		return name:gsub("%*", "_wildcard_")
-	end
-
 	-- Canonical uppercase hex serial (no 0x, no leading zeros except "0").
 	-- resty BN tostring() is decimal; openssl CLI serials are hex — normalize both here.
 	local function canonical_serial_hex(serial)
@@ -1998,7 +1960,7 @@ local tostring = tostring
 	local leaf_ms_cache = {}
 	local LEAF_MS_UNKNOWN = {} -- sentinel so cached nil is distinguishable from miss
 	local function leaf_requires_must_staple(pem, fp)
-		local cache_key = nil
+		local cache_key
 		if type(fp) == "string" and is_fp64_lower_hex(fp:lower()) then
 			cache_key = "fp:" .. fp:lower()
 		elseif type(pem) == "string" and #pem > 0 then
@@ -3084,7 +3046,7 @@ local tostring = tostring
 					return refuse_must_staple("fingerprint_chain_unavailable")
 				end
 				local ms_gate = leaf_fail_closed_must_staple(cert_pem, fp_hint)
-				local path_ok, path_detail = true, nil
+				local path_ok, path_detail
 				local path_call_ok, path_a, path_b = pcall(function()
 					local ocsp_mod = require "bunkerweb.ocsp"
 					if not ocsp_mod.issuer_path_intermediate_ready then
@@ -3245,7 +3207,7 @@ local tostring = tostring
 		-- Same scoped fail-closed as PATH A / dual-cert loop (leaf_fail_closed_must_staple).
 		if probe_only and staple_mode ~= "open" then
 			local ms_gate = leaf_fail_closed_must_staple(cert_pem, leaf_fp_resolved or fp_hint)
-			local path_ok, path_detail = true, nil
+			local path_ok, path_detail
 			local path_call_ok, path_a, path_b = pcall(function()
 				local ocsp_mod = require "bunkerweb.ocsp"
 				if not ocsp_mod.issuer_path_intermediate_ready then
@@ -3687,7 +3649,7 @@ local tostring = tostring
 					f:close()
 				end)
 
-				local result = nil
+				local result
 				if issuer_pem and #issuer_pem > 0 then
 					result = issuer_pem
 				else
@@ -4097,7 +4059,7 @@ local tostring = tostring
 								resp = cache_result
 								resp_fp = cert_fp
 								active_refuse_fp = cert_fp
-								attempt_hit = true
+								-- attempt_hit = true
 								safe_log(
 									DEBUG,
 									"OCSP found response in shared memory cache for fp="
@@ -4462,7 +4424,7 @@ local tostring = tostring
 		end
 		if probe_only then
 			local ms_gate = leaf_fail_closed_must_staple(cert_pem, leaf_fp_resolved or active_refuse_fp)
-			local path_ok, path_detail = true, nil
+			local path_ok, path_detail
 			local path_call_ok, path_a, path_b = pcall(function()
 				local ocsp_mod = require "bunkerweb.ocsp"
 				if not ocsp_mod.issuer_path_intermediate_ready then
@@ -4637,8 +4599,8 @@ local tostring = tostring
 							local cert_data = ret.status[1]
 							local key_data = ret.status[2]
 
-							local cert_key_pairs = {}
-							local ocsp_possible = false
+							local cert_key_pairs
+							-- local ocsp_possible = false
 
 							if type(cert_data) == "string" and type(key_data) == "string" then
 								-- Parse multiple certificates and keys (support RSA, ECDSA, PQC, etc.)
@@ -4648,7 +4610,7 @@ local tostring = tostring
 								local certs = parse_pem_certificates(cert_pem)
 								local keys = parse_pem_keys(key_pem)
 								cert_key_pairs = pair_certs_and_keys(certs, keys)
-								ocsp_possible = true
+								-- ocsp_possible = true
 							else
 								-- Assume ngx.ssl.parse_pem_* was already called by the plugin
 								-- Check if original PEM strings are available at indices 3,4 (e.g., from letsencrypt plugin)
@@ -4681,7 +4643,7 @@ local tostring = tostring
 								-- chains; resolve_leaf keeps the hint only when that SPKI is not
 								-- an issuer of another block in status[3].
 								if orig_cert_pem then
-									local leaf_pem, leaf_fp = resolve_leaf(orig_cert_pem, orig_cert_fp)
+									local _, leaf_fp = resolve_leaf(orig_cert_pem, orig_cert_fp)
 									if type(leaf_fp) == "string" and is_fp64_lower_hex(leaf_fp) then
 										if orig_cert_fp and orig_cert_fp ~= leaf_fp then
 											safe_log(
@@ -4753,14 +4715,14 @@ local tostring = tostring
 										}
 									end
 									local ordered_picks = ordered_ocsp_staple_candidates(pick_list)
-									install_pairs = {}
+									-- install_pairs = {}
 									preferred_soft_pair = (ordered_picks[1] and ordered_picks[1].pair)
 										or cert_key_pairs[1]
 									local viable = {}
 									local any_policy_refuse = false
 									local module_degraded_only = true
 									for _, pick in ipairs(ordered_picks) do
-										local pair = pick.pair
+										-- local pair = pick.pair
 										local ocsp_cert = pick.ocsp_cert
 										local ocsp_fp_hint = pick.ocsp_fp_hint
 										local probe_ok = true
@@ -4775,7 +4737,7 @@ local tostring = tostring
 											and #ocsp_cert > 0
 											and get_ocsp_staple_mode() ~= "open"
 										then
-											local path_ok, path_detail = true, nil
+											local path_ok, path_detail
 											local path_call_ok, path_a, path_b = pcall(function()
 												local ocsp_mod = require "bunkerweb.ocsp"
 												if not ocsp_mod.issuer_path_intermediate_ready then
@@ -5037,7 +4999,7 @@ local tostring = tostring
 										else
 											state.leaf_installed = true
 											local ok_key = true
-											local err_key = nil
+											local err_key
 
 											if pair.key then
 												ok_key, err_key = set_priv_key(pair.key)
