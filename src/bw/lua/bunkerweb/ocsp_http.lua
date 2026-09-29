@@ -3931,16 +3931,16 @@ function _M.ssl_certificate(state)
 			-- Try to validate against multiple possible issuer certificates.
 			-- ngx.ocsp.validate_ocsp_response() verifies the OCSP signature and binds it to the
 			-- certificate via OCSP CertID, so we can safely try issuers in any order.
+			-- OPTIMIZATION: Table Operations in Candidate Filtering (Priority 13)
+			-- Inline SPKI caching + efficient table truncation
 			local issuer_pems_to_try = {}
+			local seen_issuer = {}
 			if issuer_name then
 				local issuer_pem = chain_subject_to_pem and chain_subject_to_pem[issuer_name] or nil
 				if issuer_pem then
-					issuer_pems_to_try[#issuer_pems_to_try + 1] = issuer_pem
+					issuer_pems_to_try[1] = issuer_pem
+					seen_issuer[issuer_pem] = true
 				end
-			end
-			local seen_issuer = {}
-			for _, p in ipairs(issuer_pems_to_try) do
-				seen_issuer[p] = true
 			end
 			if chain_certs then
 				for _, cert_block_pem in ipairs(chain_certs) do
@@ -3959,13 +3959,21 @@ function _M.ssl_certificate(state)
 			local stored_issuer = read_stored_issuer_pem(cert_fp)
 			if stored_issuer and #stored_issuer > 0 then
 				local want_spki = get_ocsp_pubkey_fingerprint(stored_issuer)
+				-- OPTIMIZATION: Inline SPKI cache during filtering loop (Priority 13)
+				-- Cache SPKI fingerprints to avoid re-computing for same PEM multiple times
+				local spki_cache = { [stored_issuer] = want_spki }
 				local compacted = {}
 				compacted[1] = stored_issuer
 				local seen = { [stored_issuer] = true }
 				if want_spki then
 					for _, pem in ipairs(issuer_pems_to_try) do
 						if pem and not seen[pem] then
-							local got = get_ocsp_pubkey_fingerprint(pem)
+							local got = spki_cache[pem]
+							if not got then
+								-- Compute and cache SPKI only once per PEM
+								got = get_ocsp_pubkey_fingerprint(pem)
+								spki_cache[pem] = got
+							end
 							if got and got == want_spki then
 								seen[pem] = true
 								compacted[#compacted + 1] = pem
@@ -3981,10 +3989,15 @@ function _M.ssl_certificate(state)
 			if #issuer_pems_to_try == 0 then
 				return finish(false)
 			end
+			-- OPTIMIZATION: Efficient table truncation instead of unpack() (Priority 13)
+			-- Truncate in-place without creating a new table via destructuring
 			if #issuer_pems_to_try > ocsp_validate_max_issuer_candidates then
 				-- Keep the most likely issuer candidates to avoid excessive parsing.
 				-- Index 1 is the job issuer when present, so the cap cannot drop it.
-				issuer_pems_to_try = { unpack(issuer_pems_to_try, 1, ocsp_validate_max_issuer_candidates) }
+				-- Truncate by removing tail elements instead of unpack+rebuild
+				for i = ocsp_validate_max_issuer_candidates + 1, #issuer_pems_to_try do
+					issuer_pems_to_try[i] = nil
+				end
 			end
 
 			-- OPTIMIZATION: Check issuer validation cache to skip re-looping if already validated (Priority 12)
