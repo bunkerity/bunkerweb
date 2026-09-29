@@ -435,14 +435,22 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             # Auth and TLS go through options: limits passes them to RedisCluster, which
             # avoids URL-encoding credentials into the URI.
             startup_nodes = []
-            for item in cluster_nodes.split():
-                if item.startswith("[") and "]:" in item:
-                    host, _, port = item[1:].partition("]:")
-                elif item.count(":") == 1:
-                    host, _, port = item.partition(":")
-                else:
-                    host, port = item, "6379"
-                startup_nodes.append(ClusterNode(host, int(port or "6379")))
+            try:
+                for item in cluster_nodes.split():
+                    if item.startswith("[") and "]:" in item:
+                        host, _, port = item[1:].partition("]:")
+                    elif item.count(":") == 1:
+                        host, _, port = item.partition(":")
+                    else:
+                        host, port = item, "6379"
+                    if not host or not port:
+                        raise ValueError(f"invalid node {item}")
+                    startup_nodes.append(ClusterNode(host, int(port)))
+                if not startup_nodes:
+                    raise ValueError("no cluster nodes")
+            except ValueError as exc:
+                LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                return "memory://", storage_options
             # Only the first node needs to parse in the URI: urlsplit rejects a bracketed
             # IPv6 literal that is not the first token in a comma-joined netloc. limits
             # merges storage_options over the URI-derived node list, so startup_nodes below

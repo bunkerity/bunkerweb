@@ -128,7 +128,7 @@
       "help": "Redis Cluster seed nodes with format host[:port] separated with spaces ([ipv6]:port for IPv6). Enables Redis Cluster mode; cannot be combined with Sentinel or a non-zero database.",
       "id": "redis-cluster-nodes",
       "label": "Redis Cluster nodes",
-      "regex": "^.*$",
+      "regex": "^ *(?:(?:[^\\s:\\[\\]]+|\\[[0-9A-Fa-f:.%]*:[0-9A-Fa-f:.%]+\\])(?::[0-9]{1,5})?(?: +(?:[^\\s:\\[\\]]+|\\[[0-9A-Fa-f:.%]*:[0-9A-Fa-f:.%]+\\])(?::[0-9]{1,5})?)*)? *$",
       "type": "multivalue"
     },
     "REDIS_KEEPALIVE_IDLE": {

@@ -328,6 +328,7 @@ end
 
 -- Cluster only: up to limit keys matching pattern, from every primary. SCAN walks a single node,
 -- so each primary gets its own connection. The walk per primary is bounded like a plain SCAN loop.
+-- limit caps keys globally and scan work per primary; total scan work can reach limit times primary count.
 function clusterstore:scan_primaries(pattern, limit)
 	if not self.cluster_mode or not self.redis_client then
 		return nil, "not connected to a cluster"

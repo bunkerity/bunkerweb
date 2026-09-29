@@ -19,11 +19,11 @@ def is_cluster(client) -> bool:
 
 
 def escape(key: str) -> str:
-    return key.replace("{", "%7B").replace("}", "%7D")
+    return key.replace("%", "%25").replace("{", "%7B").replace("}", "%7D")
 
 
 def unescape(text: str) -> str:
-    return text.replace("%7B", "{").replace("%7D", "}")
+    return text.replace("%7B", "{").replace("%7D", "}").replace("%25", "%")
 
 
 def ban_key(local_key: str, cluster: bool) -> str:

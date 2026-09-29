@@ -9,7 +9,7 @@ local tonumber = tonumber
 
 local rediskeys = {}
 
-local ESCAPES = { ["{"] = "%7B", ["}"] = "%7D" }
+local ESCAPES = { ["{"] = "%7B", ["}"] = "%7D", ["%"] = "%25" }
 
 -- A value that is nil, empty, or whitespace-only means "no nodes configured".
 function rediskeys.nodes_value(value)
@@ -27,7 +27,7 @@ end
 
 -- Untrusted text (URI, user agent, rDNS, service names) must not choose a hash slot.
 function rediskeys.escape(key)
-	return (gsub(key, "[{}]", ESCAPES))
+	return (gsub(key, "[{}%%]", ESCAPES))
 end
 
 function rediskeys.ban(local_key, cluster)

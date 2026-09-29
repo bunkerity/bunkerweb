@@ -120,13 +120,16 @@ end
 local function report_eval(self, script, ...)
 	local keys = report_keys()
 	local args = { script, #keys }
+	local n = 2
 	for i = 1, #keys do
-		args[#args + 1] = keys[i]
+		n = n + 1
+		args[n] = keys[i]
 	end
 	for i = 1, select("#", ...) do
-		args[#args + 1] = select(i, ...)
+		n = n + 1
+		args[n] = select(i, ...)
 	end
-	return self:redis_call("eval", unpack(args))
+	return self:redis_call("eval", unpack(args, 1, n))
 end
 
 -- The list is authoritative. Facet failures invalidate its derived cache without
