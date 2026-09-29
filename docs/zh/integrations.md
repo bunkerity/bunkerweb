@@ -1814,16 +1814,16 @@ volumes:
 
 ##### 运行时与安全
 
-| Setting                         | 描述                                                                                                                                                                                   | 接受的值                                | 默认值                        |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
-| `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                                                                                                                                                               | 整秒                                    | `30`                          |
-| `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                                                                                                                                                         | 整秒                                    | `5`                           |
-| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。                                                                                          | 整秒                                    | `30`                          |
-| `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                     | `yes` 或 `no`                           | `no`                          |
-| `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                           | `yes` 或 `no`                           | `no`                          |
-| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                 | `yes` 或 `no`                           | `no`                          |
-| `SCHEDULER_MAX_WORKERS`         | 调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`，启动时会输出警告。 | 正整数                                  | `min(8, max(2, cpu_count*2))` |
-| `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区                                                                                                                                       | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
+| Setting                         | 描述                                                                                                                                                                                           | 接受的值                                | 默认值                        |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
+| `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                                                                                                                                                                       | 整秒                                    | `30`                          |
+| `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                                                                                                                                                                 | 整秒                                    | `5`                           |
+| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。 | 整秒                                    | `30`                          |
+| `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                             | `yes` 或 `no`                           | `no`                          |
+| `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                                   | `yes` 或 `no`                           | `no`                          |
+| `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                         | `yes` 或 `no`                           | `no`                          |
+| `SCHEDULER_MAX_WORKERS`         | 调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`，启动时会输出警告。         | 正整数                                  | `min(8, max(2, cpu_count*2))` |
+| `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区                                                                                                                                               | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
 
 ##### 数据库
 
@@ -2492,9 +2492,9 @@ MY_SETTING_2=value2
 
 `bunkerweb` 服务的入口点还会在正常设置流程之外，直接读取以下变量：
 
-| 设置                        | 描述                                                                                          | 可选值        | 默认值 |
-| --------------------------- | --------------------------------------------------------------------------------------------- | ------------- | ------ |
-| `KEEP_CONFIG_ON_RESTART`   | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
+| 设置                     | 描述                                                                                                                                    | 可选值        | 默认值 |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------ |
+| `KEEP_CONFIG_ON_RESTART` | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
 
 ### 高可用性
 
@@ -2729,23 +2729,23 @@ networks:
 
 ##### 仅 Kubernetes
 
-| Setting                                 | 描述                                                                        | 接受的值                                           | 默认值          |
-| --------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
-| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                  | `yes` 或 `no`                                      | `yes`           |
-| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                        | 文件路径                                           | unset           |
-| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                 | `yes` 或 `no`                                      | `yes`           |
-| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
-| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
-| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
-| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | 为 `yes` 且未设置类过滤器时，跳过其 IngressClass 或 GatewayClass 属于其他控制器的 Ingress 和 Gateway。需要对 `ingressclasses` / `gatewayclasses` 的 get/list/watch 权限 | `yes` 或 `no`                                      | `no`            |
-| `KUBERNETES_INGRESS_CONTROLLER`         | 标记某个 IngressClass 属于 BunkerWeb 的控制器 id（`spec.controller`）      | 字符串                                             | `bunkerweb.io/ingress-controller` |
-| `KUBERNETES_GATEWAY_CONTROLLER`         | 标记某个 GatewayClass 属于 BunkerWeb 的控制器 id（`spec.controllerName`）  | 字符串                                             | `bunkerweb.io/gateway-controller` |
-| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
-| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
-| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
-| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                            | 字符串                                             | `bunkerweb`     |
-| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                       | 字符串                                             | `bunkerweb`     |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引 | 整数 (>=0)                                         | `1`             |
+| Setting                                 | 描述                                                                                                                                                                    | 接受的值                                           | 默认值                            |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------------------------- |
+| `KUBERNETES_VERIFY_SSL`                 | 校验 Kubernetes API 的 TLS                                                                                                                                              | `yes` 或 `no`                                      | `yes`                             |
+| `KUBERNETES_SSL_CA_CERT`                | Kubernetes API 自定义 CA bundle 路径                                                                                                                                    | 文件路径                                           | unset                             |
+| `USE_KUBERNETES_FQDN`                   | 使用 `<pod>.<ns>.pod.<domain>` 而不是 Pod IP 作为实例主机名                                                                                                             | `yes` 或 `no`                                      | `yes`                             |
+| `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                                                                                                                    | 字符串                                             | unset（全部）                     |
+| `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                                                                                                                     | `yes` 或 `no`                                      | `no`                              |
+| `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                                                                                                                    | 字符串                                             | unset（全部）                     |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | 为 `yes` 且未设置类过滤器时，跳过其 IngressClass 或 GatewayClass 属于其他控制器的 Ingress 和 Gateway。需要对 `ingressclasses` / `gatewayclasses` 的 get/list/watch 权限 | `yes` 或 `no`                                      | `no`                              |
+| `KUBERNETES_INGRESS_CONTROLLER`         | 标记某个 IngressClass 属于 BunkerWeb 的控制器 id（`spec.controller`）                                                                                                   | 字符串                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | 标记某个 GatewayClass 属于 BunkerWeb 的控制器 id（`spec.controllerName`）                                                                                               | 字符串                                             | `bunkerweb.io/gateway-controller` |
+| `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                                                                                                               | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`                              |
+| `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                                                                                                                        | 字符串                                             | `cluster.local`                   |
+| `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                                                                                                            | `http` 或 `https`                                  | `http`                            |
+| `BUNKERWEB_SERVICE_NAME`                | 在补丁 Ingress/Gateway 状态时读取的 Service 名称                                                                                                                        | 字符串                                             | `bunkerweb`                       |
+| `BUNKERWEB_NAMESPACE`                   | 该 Service 的命名空间                                                                                                                                                   | 字符串                                             | `bunkerweb`                       |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | 多路径 ingress 生成 `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` 的起始索引                                                                                             | 整数 (>=0)                                         | `1`                               |
 
 ### 自动配置服务
 
@@ -3294,12 +3294,12 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable                  | Value                                                 | Description                                              |
-| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| Variable                  | Value                                                 | Description                                                                                                                                                                 |
+| ------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller                                                                                                                    |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                                                                                                                                        |
 | `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
-| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
+| `API_TOKEN`               | *(from a Secret)*                                     | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed                        |
 
 
 ##### Step 3: Creating Services
@@ -5010,3 +5010,317 @@ output "api_service_id" {
     您也可以通过 [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}。
 
 您可以通过浏览虚拟机的 `https://your-ip-address/setup` URI 来访问设置向导。
+
+## 从源码构建
+
+本指南介绍如何从源码构建 BunkerWeb 构建产物。
+
+### 范围
+
+本节涵盖：
+
+- 社区容器镜像（`bunkerweb`、`scheduler`、`autoconf`、`ui`、`api`、`all-in-one`）
+- Linux 软件包（`.deb`、`.rpm`）
+
+所有命令均应在仓库根目录中执行。
+
+FreeBSD 用户：BunkerWeb 已作为官方 port 提供，参见 <https://www.freshports.org/www/bunkerweb/>。
+
+### 构建标准
+
+- 请从干净且最新的工作树进行构建。
+- 使用 `src/VERSION` 中的版本号（打包脚本会自动读取）。
+- 使用提供的脚本和 Dockerfile，确保构建产物可复现。
+
+### 前置条件
+
+- 对于容器和 Linux 软件包：
+- Docker（推荐使用 Buildx）
+
+### 构建产物矩阵
+
+| 构建产物                    | 构建路径                                          | 主要命令                                  |
+| --------------------------- | ------------------------------------------------- | ----------------------------------------- |
+| 社区容器镜像                | `src/*/Dockerfile`                                | `docker build -f <Dockerfile> -t <tag> .` |
+| Linux 软件包（`deb`/`rpm`） | `src/linux/Dockerfile-*` + `src/linux/package.sh` | `./src/linux/package.sh <linux> <arch>`   |
+
+### 构建社区容器镜像
+
+#### 镜像目标
+
+| 镜像         | Dockerfile                  |
+| ------------ | --------------------------- |
+| `bunkerweb`  | `src/bw/Dockerfile`         |
+| `scheduler`  | `src/scheduler/Dockerfile`  |
+| `autoconf`   | `src/autoconf/Dockerfile`   |
+| `ui`         | `src/ui/Dockerfile`         |
+| `api`        | `src/api/Dockerfile`        |
+| `all-in-one` | `src/all-in-one/Dockerfile` |
+
+#### 构建单个镜像
+
+```sh
+docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
+```
+
+#### 构建所有社区镜像
+
+```sh
+for image in bunkerweb scheduler autoconf ui api all-in-one; do
+  case "$image" in
+    bunkerweb) dockerfile="src/bw/Dockerfile" ;;
+    scheduler) dockerfile="src/scheduler/Dockerfile" ;;
+    autoconf) dockerfile="src/autoconf/Dockerfile" ;;
+    ui) dockerfile="src/ui/Dockerfile" ;;
+    api) dockerfile="src/api/Dockerfile" ;;
+    all-in-one) dockerfile="src/all-in-one/Dockerfile" ;;
+  esac
+  docker build -f "$dockerfile" -t "local/$image:dev" .
+done
+```
+
+#### 仅用于开发的构建参数（不要用于生产环境）
+
+仅在本地迭代支持压缩参数的镜像（`bw`、`ui`、`all-in-one`）时使用此选项。
+它通过跳过静态资源压缩来缩短构建时间，但不会生成适用于生产环境的构建产物。
+
+```sh
+docker build -f src/all-in-one/Dockerfile \
+  --build-arg SKIP_MINIFY=yes \
+  -t local/all-in-one:dev .
+```
+
+### 构建 Linux 软件包（`.deb` / `.rpm`）
+
+可以直接使用 Docker 分两步生成 Linux 软件包：
+
+1. 为你的发行版构建软件包构建器镜像。
+2. 运行该镜像，并将主机输出目录挂载到 `/data`。
+
+#### 支持的发行版标识符
+
+- `ubuntu`
+- `ubuntu-noble`
+- `ubuntu-jammy`
+- `debian-bookworm`
+- `debian-trixie`
+- `fedora-43`
+- `fedora-44`
+- `rhel-8`
+- `rhel-9`
+- `rhel-10`
+
+=== "快速本地方法（推荐）"
+
+    这是本地构建软件包最简单的社区工作流。
+    在 `-v <host-dir>:/data` 中，你可以选择任意主机目录。
+    生成的软件包文件会由容器导出到同一个主机目录。
+
+    === "构建 `.deb`（Ubuntu 示例）"
+
+        ```sh
+        docker build \
+          -t bunkerweb_ubuntu \
+          -f src/linux/Dockerfile-ubuntu . && \
+        docker run --rm \
+          -v "$(pwd)/out/deb:/data" \
+          bunkerweb_ubuntu
+        ```
+
+        输出：
+
+        - `<your-chosen-host-dir>/bunkerweb.deb`（对于上面的示例：`$(pwd)/out/deb/bunkerweb.deb`）
+
+    === "构建 `.rpm`（Fedora 示例）"
+
+        ```sh
+        docker build \
+          -t bunkerweb_fedora43 \
+          -f src/linux/Dockerfile-fedora-43 . && \
+        docker run --rm \
+          -v "$(pwd)/out/rpm:/data" \
+          bunkerweb_fedora43
+        ```
+
+        输出：
+
+        - `<your-chosen-host-dir>/bunkerweb.rpm`（对于上面的示例：`$(pwd)/out/rpm/bunkerweb.rpm`）
+
+    ##### 开发选项（不要用于生产环境）
+
+    仅将这些选项用于本地开发和故障排查：
+
+    - `SKIP_MINIFY=yes`（`docker build --build-arg`）：跳过静态资源压缩以加快构建速度；输出的优化程度较低。
+    - `FPM_DEBUG=yes`（`docker run -e`）：在创建软件包时启用详细的 FPM/调试日志。
+    - `FPM_SKIP_COMPRESSION=yes`（`docker run -e`）：禁用软件包压缩以加快打包并简化检查；生成的软件包会更大。
+
+    不要对面向用户的发布构建产物使用这些选项。
+    !!! example "开发 / 故障排查示例"
+
+        仅在调试软件包生成时使用此配置（详细 FPM 日志、不压缩）。你仍可选择任意挂载到 `/data` 的主机目录，构建产物将写入该目录。
+
+        ```sh
+        docker build --build-arg SKIP_MINIFY=yes \
+          -t bunkerweb_ubuntu \
+          -f src/linux/Dockerfile-ubuntu . && \
+        docker run --rm \
+          -e FPM_DEBUG=yes \
+          -e FPM_SKIP_COMPRESSION=yes \
+          -v "$(pwd)/out/deb:/data" \
+          bunkerweb_ubuntu
+        ```
+
+=== "脚本方式（`package.sh`）"
+
+    如果你希望在 `package-<linux>/` 中使用仓库的命名约定，请使用此方法。
+
+    #### 第 1 步：构建构建器镜像
+
+    示例（`ubuntu`）：
+
+    ```sh
+    docker build -f src/linux/Dockerfile-ubuntu -t local/bunkerweb-ubuntu:latest .
+    ```
+
+    #### 第 2 步：构建软件包
+
+    ```sh
+    chmod +x src/linux/package.sh
+    ./src/linux/package.sh ubuntu amd64
+    ```
+
+    构建产物会写入 `package-<linux>/`。
+
+    示例：
+
+    ```sh
+    # Debian/Ubuntu package
+    docker build -f src/linux/Dockerfile-debian-bookworm -t local/bunkerweb-debian-bookworm:latest .
+    ./src/linux/package.sh debian-bookworm amd64
+
+    # RPM package
+    docker build -f src/linux/Dockerfile-fedora-43 -t local/bunkerweb-fedora-43:latest .
+    ./src/linux/package.sh fedora-43 x86_64
+    ```
+
+    !!! abstract "注意事项"
+
+        - 对于 RPM，请使用 Linux 架构命名（`x86_64`、`aarch64` 等）。
+        - 对于 DEB，请使用 Debian 架构命名（`amd64`、`arm64` 等）。
+        - `curl` 是 scheduler ACME 集成的运行时依赖（尤其是 ZeroSSL/EAB 流程）。
+        - Linux 软件包构建器的 Dockerfile 已预配置对应的软件包类型：
+          - Debian/Ubuntu Dockerfile 运行 `fpm.sh deb`
+          - Fedora/RHEL Dockerfile 运行 `fpm.sh rpm`
+
+### 与 CI 保持一致（参考）
+
+如果希望本地构建与 CI 的行为一致，请参考以下工作流：
+
+- 容器构建：`.github/workflows/container-build.yml`
+- Linux 软件包构建：`.github/workflows/linux-build.yml`
+
+### 发布构建产物
+
+安全基线：
+
+- 切勿直接在命令行或 shell 历史记录中粘贴真实的令牌/密码。
+- 本地/手动发布时，优先使用交互式登录提示。
+- 使用权限范围最小的短期令牌。
+- 自动化流程应使用 CI 密钥存储。
+- 发布完成后取消设置敏感环境变量。
+
+#### 发布 Docker 镜像（`docker.io` 和 `ghcr.io`）
+
+设置镜像元数据：
+
+```sh
+export VERSION="$(cat src/VERSION)"
+export DOCKERHUB_ORG="<dockerhub-org-or-user>"
+export GHCR_ORG="<github-org-or-user>"
+```
+
+登录镜像仓库：
+
+```sh
+docker login docker.io
+docker login ghcr.io -u "<github-user>"
+```
+
+!!! abstract "注意事项"
+
+    - 上述 `docker login` 命令会以安全方式提示输入凭据（输入内容隐藏）。
+    - 对于自动化流水线，请从 CI 密钥中读取凭据，避免使用硬编码值。
+
+为一个镜像添加标签并推送（示例：`all-in-one`）：
+
+```sh
+docker tag local/all-in-one:dev docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:$VERSION
+docker tag local/all-in-one:dev ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:$VERSION
+
+docker push docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:$VERSION
+docker push ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:$VERSION
+```
+
+可选的滚动标签（`latest`），仅用于稳定版本：
+
+```sh
+docker tag local/all-in-one:dev docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:latest
+docker tag local/all-in-one:dev ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:latest
+
+docker push docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:latest
+docker push ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:latest
+```
+
+#### 将 Linux 软件包发布到 Packagecloud
+
+安装并认证 `package_cloud` CLI，然后上传生成的软件包。
+
+首先安装 CLI：
+
+```sh
+# Debian/Ubuntu
+sudo apt-get update
+sudo apt-get install -y ruby-full build-essential
+sudo gem install package_cloud
+
+# Fedora/RHEL
+sudo dnf install -y ruby rubygems gcc make
+sudo gem install package_cloud
+```
+
+```sh
+export PACKAGECLOUD_REPO="<owner>/<repo>"
+read -r -s -p "Packagecloud token: " PACKAGECLOUD_TOKEN
+echo
+export PACKAGECLOUD_TOKEN
+```
+
+示例：
+
+```sh
+# Ubuntu/Debian
+package_cloud push "$PACKAGECLOUD_REPO/ubuntu/jammy" package-ubuntu/*.deb
+package_cloud push "$PACKAGECLOUD_REPO/debian/bookworm" package-debian-bookworm/*.deb
+
+# Fedora/RHEL
+package_cloud push "$PACKAGECLOUD_REPO/fedora/43" package-fedora-43/*.rpm
+package_cloud push "$PACKAGECLOUD_REPO/el/9" package-rhel-9/*.rpm
+```
+
+!!! abstract "注意事项"
+
+    - 使用 Packagecloud 仓库所要求的正确发行版路径。
+    - 仅上传发布构建产物；用于发布的构建应避免使用开发选项（`SKIP_MINIFY`、`FPM_DEBUG`、`FPM_SKIP_COMPRESSION`）。
+    - 发布前请检查仓库的保留策略、元数据和签名策略。
+    - 上传完成后运行 `unset PACKAGECLOUD_TOKEN`。
+
+!!! tip "快速验证"
+
+    ```sh
+    # Check generated package files
+    ls -lh package-*/*.{deb,rpm} 2>/dev/null || true
+    ls -lh bunkerweb-*.pkg 2>/dev/null || true
+
+    # Check local images
+    docker image ls | grep -E 'local/(bunkerweb|scheduler|autoconf|ui|api|all-in-one)'
+    ```
