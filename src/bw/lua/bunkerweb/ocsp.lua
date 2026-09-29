@@ -721,8 +721,8 @@ local function bounded_cache_set(cache, key, value, max_entries)
 		end
 		count = count + 1
 	end
-	-- If at limit, evict oldest (first key in iteration order)
-	if count >= max_entries and first_key then
+	-- If at limit, evict oldest (first key in iteration order) only when adding new entries
+	if count >= max_entries and first_key and not cache[key] then
 		cache[first_key] = nil
 	end
 	cache[key] = value
@@ -2965,7 +2965,7 @@ local function staple_one_leaf(
 				end
 				return true
 			end
-			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta))
+			warm_cache(internalstore, fingerprint, resp, true, meta_effective_expires_unix(meta), nil, soft_recall_gen_of(ligand_or_meta(meta, fingerprint)))
 			if did_ffi then
 				clear_ffi_needed(internalstore, fingerprint, meta, resp)
 			end
@@ -2975,7 +2975,7 @@ local function staple_one_leaf(
 		if result == false then
 			if result_detail == "validate_budget" then
 				if not probe_only then
-					warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta))
+					warm_cache(internalstore, fingerprint, resp, false, meta_effective_expires_unix(meta), nil, soft_recall_gen_of(ligand_or_meta(meta, fingerprint)))
 					mark_ffi_needed(internalstore, fingerprint, meta, resp)
 				end
 				if must_staple then
