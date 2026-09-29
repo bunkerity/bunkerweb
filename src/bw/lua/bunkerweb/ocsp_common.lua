@@ -10,9 +10,36 @@ end
 
 -- Validate SNI against service's declared domains (security hardening).
 -- Returns: true if SNI is in the service's SERVER_NAME list, false otherwise.
--- Prevents attacker-controlled SNI from routing to unintended services.
--- Memoize domain parsing for fast SNI validation (optimization #3)
--- Cache domain lists in site_vars object to avoid repeated gmatch parsing
+-- Domain tables live in a weak map keyed by site_vars — never write onto the
+-- shared worker-LRU variables table (that object is also GET /variables / pairs()).
+-- Entry stores the SERVER_NAME string used to build so in-place string updates
+-- (if any) rebuild instead of serving a stale token set.
+local domains_by_site_vars = setmetatable({}, { __mode = "k" })
+-- Full SNI index keyed by the vars table identity (same pollution concern).
+-- Index stores primary names only; domain tables always come from get_or_build.
+local sni_index_by_vars = setmetatable({}, { __mode = "k" })
+
+local function get_or_build_domain_table(site_vars)
+	if type(site_vars) ~= "table" then
+		return {}
+	end
+	local names = site_vars["SERVER_NAME"]
+	local source = type(names) == "string" and names or ""
+	local entry = domains_by_site_vars[site_vars]
+	if entry and entry.source == source then
+		return entry.domains
+	end
+	local domain_table = {}
+	if source ~= "" then
+		for domain in source:gmatch("%S+") do
+			domain_table[domain] = true
+			domain_table[domain:lower()] = true
+		end
+	end
+	domains_by_site_vars[site_vars] = { source = source, domains = domain_table }
+	return domain_table
+end
+
 local function sni_in_service_domains(site_vars, sni)
 	if not site_vars or not sni or type(site_vars) ~= "table" then
 		return false
@@ -21,68 +48,45 @@ local function sni_in_service_domains(site_vars, sni)
 	if type(names) ~= "string" or names == "" then
 		return false
 	end
-
-	-- Optimization #3: Use cached domain table if available (set by index builder)
-	local domain_table = site_vars._cached_domains
-	if domain_table then
-		-- Fast path: table lookup (<0.1ms, was <0.1ms but eliminates regex cost)
-		return domain_table[sni] or domain_table[tostring(sni):lower()]
-	end
-
-	-- Slow path: parse domains via gmatch and cache the result (optimization #3)
-	-- This handles cases where domain table wasn't pre-built by index
-	domain_table = {}
 	local sni_lower = tostring(sni):lower()
-	local found = false
-
-	for name in names:gmatch("%S+") do
-		domain_table[name] = true
-		domain_table[name:lower()] = true
-
-		-- Early exit on match (saves regex parsing on other domains)
-		if (name == sni or name:lower() == sni_lower) and not found then
-			found = true
-		end
-	end
-
-	-- Cache for reuse (optimization #3)
-	site_vars._cached_domains = domain_table
-
-	return found
+	local domain_table = get_or_build_domain_table(site_vars)
+	return domain_table[sni] or domain_table[sni_lower] or false
 end
 
 -- Resolve SNI to primary service id with explicit precision tiers (highest to lowest).
 -- Tier 1: exact match on primary service id (key in vars table)
 -- Tier 2: case-insensitive match on primary service id
 -- Tier 3: SERVER_NAME token search (exact match then case-insensitive)
--- Returns: primary service id (key in vars) or nil. Ensures consistent resolution order.
--- Includes SNI domain whitelist validation to prevent routing to unintended services.
+-- Returns: primary service id (key in vars) or nil.
 -- Build SNI resolution index for O(1) lookup (optimization #2)
--- Pre-indexes services by lowercase name and cached domain tables at initialization
 local function build_sni_index(vars)
 	if not vars or type(vars) ~= "table" then
 		return {}
 	end
 
 	local index = {
-		primary_lower = {},      -- Map: lowercase_name -> original_name
-		domains = {}             -- Map: primary_name -> {domain_table}
+		primary_lower = {}, -- Map: lowercase_name -> original_name
+		domain_primaries = {}, -- Set: primary_name → true (has SERVER_NAME)
 	}
 
 	for primary, site_vars in pairs(vars) do
-		if primary ~= "global" and type(primary) == "string" and type(site_vars) == "table" then
-			-- Tier 2 optimization: cache lowercase primary name
+		-- Skip global + underscore meta keys (never treat as services).
+		if
+			primary ~= "global"
+			and type(primary) == "string"
+			and primary:sub(1, 1) ~= "_"
+			and type(site_vars) == "table"
+		then
 			local primary_lower = primary:lower()
-			index.primary_lower[primary_lower] = primary
+			-- First wins when two primaries lower to the same string.
+			if not index.primary_lower[primary_lower] then
+				index.primary_lower[primary_lower] = primary
+			end
 
-			-- Tier 3 optimization: cache domain lists as tables for fast lookup
-			if type(site_vars["SERVER_NAME"]) == "string" then
-				local domain_table = {}
-				for domain in site_vars["SERVER_NAME"]:gmatch("%S+") do
-					domain_table[domain] = true
-					domain_table[domain:lower()] = true
-				end
-				index.domains[primary] = domain_table
+			if type(site_vars["SERVER_NAME"]) == "string" and site_vars["SERVER_NAME"] ~= "" then
+				index.domain_primaries[primary] = true
+				-- Warm domain cache (source-validated); Tier 3 re-fetches via get_or_build.
+				get_or_build_domain_table(site_vars)
 			end
 		end
 	end
@@ -91,45 +95,48 @@ local function build_sni_index(vars)
 end
 
 -- Resolve SNI to service ID using pre-built index (optimization #2)
--- Converts O(n) linear search to O(1) table lookups for Tier 2 and Tier 3
 local function resolve_multisite_service_id_from_vars(vars, sni)
 	if not sni or type(vars) ~= "table" then
 		return nil
 	end
 
-	-- Tier 1: exact match on primary service id (bypass whitelist; FQDN as service name)
-	if type(vars[sni]) == "table" then
+	-- Tier 1: exact match on primary service id (FQDN as service name).
+	-- Skip "global" (settings bag, not a service) and underscore meta keys.
+	if type(vars[sni]) == "table" and sni ~= "global" and tostring(sni):sub(1, 1) ~= "_" then
 		return sni
 	end
 
-	-- Build index on first use (optimization #2)
-	local sni_index = vars._sni_index
+	local sni_index = sni_index_by_vars[vars]
 	if not sni_index then
 		sni_index = build_sni_index(vars)
-		vars._sni_index = sni_index
+		sni_index_by_vars[vars] = sni_index
 	end
 
 	local sni_lower = tostring(sni):lower()
 
-	-- Tier 2: case-insensitive match via pre-indexed lowercase names (optimization #2)
+	-- Tier 2: case-insensitive match via pre-indexed lowercase names
 	local primary_from_lower = sni_index.primary_lower[sni_lower]
 	if primary_from_lower then
 		return primary_from_lower
 	end
 
-	-- Tier 3: domain search via cached domain tables (optimization #2)
-	-- Instead of regex gmatch on every domain, use pre-built table lookup
-	for primary, domain_table in pairs(sni_index.domains) do
+	-- Tier 3: domain search — lexicographic primary wins when tokens overlap
+	-- (pairs() order is nondeterministic across workers / LuaJIT).
+	-- Domain tables always via get_or_build (rebuilds if SERVER_NAME string changed).
+	local best = nil
+	for primary in pairs(sni_index.domain_primaries) do
+		local domain_table = get_or_build_domain_table(vars[primary])
 		if domain_table[sni] or domain_table[sni_lower] then
-			return primary
+			if not best or primary < best then
+				best = primary
+			end
 		end
 	end
 
-	return nil
+	return best
 end
 
 -- Apply per-site setting override: check site-specific value, fall back to global.
--- Separate phase from SNI resolution for clarity and testability.
 local function apply_site_override(vars, service_id, name, global_value)
 	if not service_id or type(vars[service_id]) ~= "table" then
 		return global_value
@@ -141,69 +148,32 @@ local function apply_site_override(vars, service_id, name, global_value)
 	return global_value
 end
 
--- Per-worker lazy-loaded config cache (optimization #4)
--- Caches vars across multiple requests to avoid repeated DB access
--- Invalidates on config version change (reload detection)
-local _worker_vars_cache = {}  -- {[internalstore_id] = {vars, version}}
-
--- Cached database access for configuration (optimization #1 + #4)
--- Tier 1: Per-worker cache (across requests, optimization #4)
--- Tier 2: Per-request cache (optimization #1)
--- Tier 3: Database (fallback)
--- Returns variables table from cache if available, otherwise fetches from DB
+-- Cached variables access (optimization #1).
+-- Per-request: ngx.ctx. Cross-request: datastore worker LRU (get(..., true)).
+-- A prior per-module "_worker_vars_cache" compared cached.version to the same
+-- cached table's _config_version (always equal when set; always unequal when
+-- missing — _config_version is never written). That either never invalidated
+-- or never hit; datastore LRU is the real per-worker store.
 local function get_vars_cached(internalstore)
 	if not internalstore then
 		return nil
 	end
 
-	local internalstore_id = tostring(internalstore):match("[0-9a-f]+$")
+	local internalstore_id = tostring(internalstore):match("[0-9a-f]+$") or tostring(internalstore)
+	local req_cache_key = "ocsp_vars_" .. internalstore_id
 
-	-- Tier 1: Check per-worker cache (optimization #4)
-	-- Reuses config across multiple requests until reload detected
-	local worker_cache = _worker_vars_cache[internalstore_id]
-	if worker_cache and worker_cache.vars then
-		-- Validate cache version (detect config reload)
-		if worker_cache.version == (worker_cache.vars["_config_version"] or "unknown") then
-			-- Warm cache: return cached vars
-			if ngx.ctx then
-				local req_cache_key = "ocsp_vars_" .. internalstore_id
-				ngx.ctx[req_cache_key] = worker_cache.vars
-			end
-			return worker_cache.vars
-		end
-		-- Cache invalidated (config reloaded): clear stale cache
-		_worker_vars_cache[internalstore_id] = nil
+	if ngx.ctx and ngx.ctx[req_cache_key] then
+		return ngx.ctx[req_cache_key]
 	end
 
-	-- Tier 2: Check per-request cache (optimization #1)
-	if ngx.ctx then
-		local req_cache_key = "ocsp_vars_" .. internalstore_id
-		if ngx.ctx[req_cache_key] then
-			return ngx.ctx[req_cache_key]
-		end
-	end
-
-	-- Tier 3: Cache miss - fetch from database
 	local ok, vars = pcall(function()
 		return internalstore:get("variables", true)
 	end)
 
 	if ok and type(vars) == "table" then
-		-- Store version for reload detection (optimization #4)
-		local config_version = vars["_config_version"] or os.time()
-
-		-- Store in per-worker cache (optimization #4)
-		_worker_vars_cache[internalstore_id] = {
-			vars = vars,
-			version = config_version
-		}
-
-		-- Also store in per-request cache (optimization #1)
 		if ngx.ctx then
-			local req_cache_key = "ocsp_vars_" .. internalstore_id
 			ngx.ctx[req_cache_key] = vars
 		end
-
 		return vars
 	end
 
@@ -211,8 +181,9 @@ local function get_vars_cached(internalstore)
 end
 
 -- Read a multisite setting: per-site (primary service id) wins over global.
--- Per-request resolution ensures config changes (reload) invalidate cached service mappings.
--- Optimization #1: Cache variables in ngx.ctx to eliminate 1-5ms DB access on subsequent calls
+-- SNI→service index is keyed by vars-table identity (weak map), not written onto
+-- the shared variables object; reload replaces that table and forces a rebuild.
+-- Per-request ngx.ctx still caches the vars pointer (optimization #1).
 local function get_site_variable(internalstore, server_name, name)
 	local vars = get_vars_cached(internalstore)
 	if not vars or type(vars["global"]) ~= "table" then
@@ -284,11 +255,14 @@ local STAPLE_DECISION = {
 	tombstoned = true,
 	shared_ligand = true,
 	certid_mismatch = true,
+	certid_unreadable = true,
+	issuer_ambiguous = true,
 	set_staple_failed = true,
 	set_staple_exception = true,
 	fingerprint_unavailable = true,
 	wrong_key_type_staple = true,
 	probe_failed = true,
+	probe_no_material = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
@@ -382,11 +356,30 @@ local KEEP_ALLOW_ON_REFUSE = {
 	validate_exhausted = true,
 	response_empty = true,
 	force_ffi_pending = true,
+	-- CertID parse/ambiguity glitches (not serial/issuer poison) — do not DROP pin.
+	certid_unreadable = true,
+	issuer_ambiguous = true,
+	probe_no_material = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
 	lifetime_too_long = true,
 	thisUpdate_unreadable = true,
+	-- Local policy / capability / missing material — never fleet pin or peer bus.
+	ssl_use_ocsp_stapling_no = true,
+	ngx_ocsp_unavailable = true,
+	fingerprint_unavailable = true,
+	wrong_key_type_staple = true,
+	stapling_off = true,
+	skip_slot = true,
+	unmet = true,
+	peer_refuse = true,
+	peer_refuse_bus = true,
+	-- Pre-alias raws that normalize to KEEP targets (exact-match for should_skip_peer_bus).
+	variables_unavailable = true,
+	wrong_key_type_hint = true,
+	single_slot_ecdsa_prefer = true,
+	single_slot_rsa_prefer = true,
 }
 
 -- DROP causes that may revoke using meta.der_sha256 when resp is nil.
@@ -607,45 +600,49 @@ local function read_file(path)
 end
 
 -- First two hex chars of the SPKI fingerprint → 16×16 directory layout.
+-- Requires a full fp64 hex string; never invents a shared 0/0 sink.
 local function fingerprint_shard(fingerprint)
-	if not fingerprint or #fingerprint < 2 then
-		return "0", "0"
+	if type(fingerprint) ~= "string" or not is_fp64(fingerprint) then
+		return nil, nil
 	end
-	return fingerprint:sub(1, 1), fingerprint:sub(2, 2)
+	local fp = fingerprint:lower()
+	return fp:sub(1, 1), fp:sub(2, 2)
 end
 
--- Build OCSP response path from fingerprint. Nil fingerprint / empty string → nil
+-- Build OCSP response path from fingerprint. Non-fp64 / empty → nil
 -- (never the shared 0/0/unknown sink — that was a last-writer-wins collision hole).
 -- Optional collision_index appends .N for rare SPKI-dir collisions.
 local function ocsp_path(fingerprint, collision_index)
-	if type(fingerprint) ~= "string" or fingerprint == "" then
+	local h, l = fingerprint_shard(fingerprint)
+	if not h then
 		return nil
 	end
-	local h, l = fingerprint_shard(fingerprint)
-	local base = "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/ocsp.der"
+	local fp = fingerprint:lower()
+	local base = "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fp .. "/ocsp.der"
 	if collision_index and collision_index > 0 then
 		return base .. "." .. tostring(collision_index)
 	end
 	return base
 end
 
--- Build issuer PEM path from fingerprint. Empty/nil → nil (no shared unknown sink).
+-- Build issuer PEM path from fingerprint. Non-fp64 / empty → nil (no shared unknown sink).
 local function issuer_path(fingerprint)
-	if type(fingerprint) ~= "string" or fingerprint == "" then
+	local h, l = fingerprint_shard(fingerprint)
+	if not h then
 		return nil
 	end
-	local h, l = fingerprint_shard(fingerprint)
-	return "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fingerprint .. "/issuer.pem"
+	local fp = fingerprint:lower()
+	return "/var/cache/bunkerweb/ssl/" .. h .. "/" .. l .. "/" .. fp .. "/issuer.pem"
 end
 
 -- Cache key includes fingerprint to auto-invalidate on certificate rotation.
 -- Same fingerprint = same cert; new cert = new fingerprint = new cache entry.
--- This prevents stale OCSP decisions from applying to rotated certificates.
+-- Non-fp64 / empty → nil (never the shared "unknown" sink — last-writer-wins collision).
 local function cache_key(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return "TLS:SSL:ocsp:unknown"
+	if type(fingerprint) ~= "string" or not is_fp64(fingerprint) then
+		return nil
 	end
-	return "TLS:SSL:ocsp:" .. fingerprint
+	return "TLS:SSL:ocsp:" .. fingerprint:lower()
 end
 
 -- Bind verified flag to OCSP DER bytes (not SPKI alone). Same-key renewals keep the fingerprint.
@@ -683,8 +680,9 @@ local OCSP_MAX_THIS_UPDATE_AGE_SECONDS = 7 * 24 * 3600
 local OCSP_EPOCH_PATH = "/var/cache/bunkerweb/ssl/.ocsp_epoch"
 
 -- Read .ocsp_epoch (job coherence bus). HTTP and stream L1 must match this string.
--- First non-space token on the first line — never require the whole file to be a
--- single token (extra lines / comments must not desync HTTP vs stream readers).
+-- First non-space token on the first line (leading whitespace allowed) — never
+-- require the whole file to be a single token (extra lines / comments must not
+-- desync HTTP vs stream readers).
 --
 -- Why one parser: a prior HTTP-only reader used ^%s*(%S+)%s*$ over the whole file
 -- and rejected multi-line epochs that stream accepted → HTTP L1 miss / stream hit
@@ -699,7 +697,8 @@ local function current_ocsp_epoch()
 		local raw = f:read("*l")
 		f:close()
 		if type(raw) == "string" and #raw > 0 then
-			epoch = raw:match("^%S+") or "0"
+			-- Allow leading whitespace on the first line (same as prior HTTP reader).
+			epoch = raw:match("^%s*(%S+)") or "0"
 		end
 	end)
 	return epoch
