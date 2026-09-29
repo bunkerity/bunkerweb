@@ -128,24 +128,6 @@ function _M.ssl_certificate(state)
 	local resty_openssl_x509 = _resty_openssl_x509
 	local cwd = _cwd
 
-	-- OPTIMIZATION: Cache attach_ocsp_staple detection at handshake start (Priority 14)
-	-- Pre-compute whether ocsp_mod.attach_ocsp_staple exists to avoid repeated require() calls
-	-- Reduces per-set_ocsp_status_resp overhead in hot path
-	local ocsp_mod_attach_cached = nil
-	local ocsp_mod_attach_checked = false
-	local function get_ocsp_attach_staple()
-		if not ocsp_mod_attach_checked then
-			local ok_mod, mod = pcall(function()
-				return require "bunkerweb.ocsp"
-			end)
-			if ok_mod and mod and mod.attach_ocsp_staple then
-				ocsp_mod_attach_cached = mod.attach_ocsp_staple
-			end
-			ocsp_mod_attach_checked = true
-		end
-		return ocsp_mod_attach_cached
-	end
-
 	safe_log(ngx.DEBUG, "bunkerweb.logger loaded successfully")
 	safe_log(ngx.DEBUG, "All critical modules available")
 
@@ -3240,13 +3222,12 @@ function _M.ssl_certificate(state)
 				return true
 			end
 			local ok_set, set_ok, set_err
-			-- OPTIMIZATION: Use cached attach_ocsp_staple to avoid require() (Priority 14)
-			-- Pre-computed at handshake start to reduce per-call overhead
 			ok_set = pcall(function()
-				local attach_fn = get_ocsp_attach_staple()
-				if attach_fn then
+				-- Missing module must take the exception path (Must-Staple refuse), not plain attach.
+				local ocsp_mod = assert(cwd, "bunkerweb.ocsp unavailable")
+				if ocsp_mod.attach_ocsp_staple then
 					-- Fingerprint-only: no fullchain → cannot scan intermediate Must-Staple.
-					set_ok, set_err = attach_fn(resp, nil)
+					set_ok, set_err = ocsp_mod.attach_ocsp_staple(resp, nil)
 				else
 					set_ok, set_err = ocsp.set_ocsp_status_resp(resp)
 				end
@@ -3826,8 +3807,6 @@ function _M.ssl_certificate(state)
 			-- Try to validate against multiple possible issuer certificates.
 			-- ngx.ocsp.validate_ocsp_response() verifies the OCSP signature and binds it to the
 			-- certificate via OCSP CertID, so we can safely try issuers in any order.
-			-- OPTIMIZATION: Table Operations in Candidate Filtering (Priority 13)
-			-- Inline SPKI caching + efficient table truncation
 			local issuer_pems_to_try = {}
 			local seen_issuer = {}
 			if issuer_name then
@@ -3854,21 +3833,13 @@ function _M.ssl_certificate(state)
 			local stored_issuer = read_stored_issuer_pem(cert_fp)
 			if stored_issuer and #stored_issuer > 0 then
 				local want_spki = get_ocsp_pubkey_fingerprint(stored_issuer)
-				-- OPTIMIZATION: Inline SPKI cache during filtering loop (Priority 13)
-				-- Cache SPKI fingerprints to avoid re-computing for same PEM multiple times
-				local spki_cache = { [stored_issuer] = want_spki }
 				local compacted = {}
 				compacted[1] = stored_issuer
 				local seen = { [stored_issuer] = true }
 				if want_spki then
 					for _, pem in ipairs(issuer_pems_to_try) do
 						if pem and not seen[pem] then
-							local got = spki_cache[pem]
-							if not got then
-								-- Compute and cache SPKI only once per PEM
-								got = get_ocsp_pubkey_fingerprint(pem)
-								spki_cache[pem] = got
-							end
+							local got = get_ocsp_pubkey_fingerprint(pem)
 							if got and got == want_spki then
 								seen[pem] = true
 								compacted[#compacted + 1] = pem
@@ -3884,12 +3855,9 @@ function _M.ssl_certificate(state)
 			if #issuer_pems_to_try == 0 then
 				return finish(false)
 			end
-			-- OPTIMIZATION: Efficient table truncation instead of unpack() (Priority 13)
-			-- Truncate in-place without creating a new table via destructuring
 			if #issuer_pems_to_try > ocsp_validate_max_issuer_candidates then
 				-- Keep the most likely issuer candidates to avoid excessive parsing.
 				-- Index 1 is the job issuer when present, so the cap cannot drop it.
-				-- Truncate by removing tail elements instead of unpack+rebuild
 				for i = ocsp_validate_max_issuer_candidates + 1, #issuer_pems_to_try do
 					issuer_pems_to_try[i] = nil
 				end
@@ -4674,13 +4642,12 @@ function _M.ssl_certificate(state)
 			return true
 		end
 		local ok_pcall, ok_set, oerr
-		-- OPTIMIZATION: Use cached attach_ocsp_staple to avoid require() (Priority 14)
-		-- Pre-computed at handshake start to reduce per-call overhead
 		ok_pcall = pcall(function()
-			local attach_fn = get_ocsp_attach_staple()
-			if attach_fn then
+			-- Missing module must take the exception path (Must-Staple refuse), not plain attach.
+			local ocsp_mod = assert(cwd, "bunkerweb.ocsp unavailable")
+			if ocsp_mod.attach_ocsp_staple then
 				-- Pass fullchain so leaf-only libssl can refuse intermediate Must-Staple honestly.
-				ok_set, oerr = attach_fn(resp, cert_pem)
+				ok_set, oerr = ocsp_mod.attach_ocsp_staple(resp, cert_pem)
 			else
 				ok_set, oerr = ocsp.set_ocsp_status_resp(resp)
 			end
