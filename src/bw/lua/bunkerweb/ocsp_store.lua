@@ -481,33 +481,78 @@ end
 -- Load ocsp-ligand/{fp}. Prefer this over in-shard ocsp.json for der_sha256 binding.
 -- Reject when ligand.fingerprint disagrees with the path fingerprint (a self-asserted
 -- fingerprint inside the file must not bless a different SPKI directory).
+-- Per-request cache: avoids re-reading same ligand multiple times in one handshake
 local function read_ocsp_ligand(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
 	end
+
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_ligand_cache then
+		ctx.bw_ocsp_ligand_cache = {}
+	end
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_ligand_cache then
+		local cached = ctx.bw_ocsp_ligand_cache[fingerprint]
+		if cached ~= nil then
+			-- Distinguish between "file not found" (false) and "found" (table)
+			if cached == false then
+				return nil
+			end
+			return cached
+		end
+	end
+
+	-- Cache miss: read from disk
 	local raw = read_file(ocsp_ligand_path(fingerprint))
 	if not raw or raw == "" then
+		-- Cache the "not found" result to prevent re-reading
+		if ctx and ctx.bw_ocsp_ligand_cache then
+			ctx.bw_ocsp_ligand_cache[fingerprint] = false
+		end
 		return nil
 	end
 	local ok, obj = pcall(function()
 		return require("cjson").decode(raw)
 	end)
 	if not ok or type(obj) ~= "table" then
+		-- Cache decode failure to prevent re-reading
+		if ctx and ctx.bw_ocsp_ligand_cache then
+			ctx.bw_ocsp_ligand_cache[fingerprint] = false
+		end
 		return nil
 	end
 	local sha = obj.der_sha256
 	if type(sha) ~= "string" then
+		-- Cache validation failure to prevent re-reading
+		if ctx and ctx.bw_ocsp_ligand_cache then
+			ctx.bw_ocsp_ligand_cache[fingerprint] = false
+		end
 		return nil
 	end
 	sha = sha:lower()
 	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
+		-- Cache validation failure to prevent re-reading
+		if ctx and ctx.bw_ocsp_ligand_cache then
+			ctx.bw_ocsp_ligand_cache[fingerprint] = false
+		end
 		return nil
 	end
 	if type(obj.fingerprint) == "string" and obj.fingerprint:lower() ~= fingerprint then
+		-- Cache validation failure to prevent re-reading
+		if ctx and ctx.bw_ocsp_ligand_cache then
+			ctx.bw_ocsp_ligand_cache[fingerprint] = false
+		end
 		return nil
 	end
 	obj.der_sha256 = sha
 	obj.soft_recall_gen = soft_recall_gen_of(obj)
+	-- Cache successful decode
+	if ctx and ctx.bw_ocsp_ligand_cache then
+		ctx.bw_ocsp_ligand_cache[fingerprint] = obj
+	end
 	return obj
 end
 
@@ -598,10 +643,33 @@ end
 -- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
 -- A different serial (reissue on the same key) is allowed. Unreadable /
 -- ambiguous JSON while the file exists fails closed.
+-- Per-request cache: avoids re-reading and re-validating the serial blacklist per cert
 local function serial_blacklist_blocks(fingerprint, resp)
 	if not is_fp64(fingerprint) or type(resp) ~= "string" or resp == "" then
 		return false
 	end
+
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_serial_cache then
+		ctx.bw_ocsp_serial_cache = {}
+	end
+
+	-- Create cache key from fingerprint and response binding to uniquely identify this check
+	-- (same fingerprint with different responses should each be checked)
+	local binding = resp_binding(resp)
+	local serial_cache_key = fingerprint .. "|" .. (binding or "")
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_serial_cache then
+		local cached = ctx.bw_ocsp_serial_cache[serial_cache_key]
+		if cached ~= nil then
+			-- Cached value is boolean (true = blocked, false = allowed)
+			return cached == true
+		end
+	end
+
+	-- Cache miss: read and validate from disk
 	local raw = read_file(
 		"/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
@@ -611,52 +679,64 @@ local function serial_blacklist_blocks(fingerprint, resp)
 			.. fingerprint
 			.. "/serial-blacklist.json"
 	)
+	local blocked = false
 	if not raw or raw == "" then
-		return false
+		-- No blacklist file: this response is allowed
+		blocked = false
+	else
+		local ok_decode, obj = pcall(require("cjson").decode, raw)
+		if not ok_decode or type(obj) ~= "table" then
+			log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			blocked = true
+		else
+			local banned = obj.serial_hex
+			if type(banned) ~= "string" or banned == "" or not banned:match("^[0-9A-Fa-f]+$") then
+				log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+				blocked = true
+			else
+				-- Reject duplicate / conflicting serial_hex keys disguised via JSON oddities:
+				-- cjson gives one value; also refuse if a second distinct match exists in raw.
+				local first = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
+				local rest = first and raw:match('"serial_hex"%s*:%s*"[0-9A-Fa-f]+".-("serial_hex"%s*:%s*"[0-9A-Fa-f]+")')
+				if rest then
+					log(ngx.ERR, "OCSP serial blacklist ambiguous; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+					blocked = true
+				else
+					local banned_hex = banned:upper():gsub("^0+", "")
+					if banned_hex == "" then
+						banned_hex = "0"
+					end
+					local got_hex = ocsp_resp_serial_hex(resp, banned_hex)
+					if not got_hex then
+						log(
+							ngx.ERR,
+							"OCSP serial blacklist present but response serial unreadable; refusing staple fp="
+								.. fingerprint:sub(1, 16)
+								.. "..."
+						)
+						blocked = true
+					elseif got_hex == banned_hex then
+						log(
+							ngx.ERR,
+							"OCSP serial blacklist refuse staple fp="
+								.. fingerprint:sub(1, 16)
+								.. "... serial_hex="
+								.. banned_hex:sub(1, 16)
+						)
+						blocked = true
+					else
+						blocked = false
+					end
+				end
+			end
+		end
 	end
-	local ok_decode, obj = pcall(require("cjson").decode, raw)
-	if not ok_decode or type(obj) ~= "table" then
-		log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
-		return true
+
+	-- Cache result: store boolean (true = blocked, false = allowed)
+	if ctx and ctx.bw_ocsp_serial_cache then
+		ctx.bw_ocsp_serial_cache[serial_cache_key] = blocked
 	end
-	local banned = obj.serial_hex
-	if type(banned) ~= "string" or banned == "" or not banned:match("^[0-9A-Fa-f]+$") then
-		log(ngx.ERR, "OCSP serial blacklist unreadable; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
-		return true
-	end
-	-- Reject duplicate / conflicting serial_hex keys disguised via JSON oddities:
-	-- cjson gives one value; also refuse if a second distinct match exists in raw.
-	local first = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
-	local rest = first and raw:match('"serial_hex"%s*:%s*"[0-9A-Fa-f]+".-("serial_hex"%s*:%s*"[0-9A-Fa-f]+")')
-	if rest then
-		log(ngx.ERR, "OCSP serial blacklist ambiguous; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
-		return true
-	end
-	local banned_hex = banned:upper():gsub("^0+", "")
-	if banned_hex == "" then
-		banned_hex = "0"
-	end
-	local got_hex = ocsp_resp_serial_hex(resp, banned_hex)
-	if not got_hex then
-		log(
-			ngx.ERR,
-			"OCSP serial blacklist present but response serial unreadable; refusing staple fp="
-				.. fingerprint:sub(1, 16)
-				.. "..."
-		)
-		return true
-	end
-	if got_hex == banned_hex then
-		log(
-			ngx.ERR,
-			"OCSP serial blacklist refuse staple fp="
-				.. fingerprint:sub(1, 16)
-				.. "... serial_hex="
-				.. banned_hex:sub(1, 16)
-		)
-		return true
-	end
-	return false
+	return blocked
 end
 
 -- Shared ligand verdict: one ligand read, hardened merge, body binding.
