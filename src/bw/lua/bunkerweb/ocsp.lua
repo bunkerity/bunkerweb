@@ -2,9 +2,31 @@ local _M = {}
 
 local ngx = ngx
 
--- Async validation: defer OCSP validation to background job, allow speculative attachment.
--- Reduces TLS critical path latency by moving crypto validation off-path.
--- Key concept: attach OCSP speculatively, validate async, mark as validated when done.
+-- ============================================================================
+-- OCSP Validation Architecture Overview
+-- ============================================================================
+--
+-- Two-tier validation strategy to minimize TLS handshake latency:
+--
+-- TIER 1: TLS Critical Path (must complete in <100ms)
+--   - L1 cache lookup [~0.1ms] ← most handshakes hit here
+--   - Metadata validation [<1ms] ← tombstone, peer-refuse, cluster checks
+--   - SPKI provisional trust [~1ms] ← defer full cert validation
+--   - Async result check [~0.1ms] ← if scheduler already validated, skip FFI
+--   - Attach response [~0.5-1ms] ← ngx.ocsp.set_ocsp_status_resp FFI
+--
+-- TIER 2: Background Job (async/scheduler, off-path)
+--   - Full FFI validation [10-20ms] ← ngx.ocsp.validate_ocsp_response
+--   - Certificate chain validation [~5ms] ← parse + verify issuer
+--   - Result cached for TLS path [~0.1ms] ← shared dict, 3600s TTL
+--
+-- Key insight: TLS path uses cached result if available; validates only if needed.
+--
+-- Async validation status tracking (off-path):
+-- - "pending" = validation queued, not yet done (attach speculatively)
+-- - "validated" = scheduler confirmed valid (skip TLS-path FFI)
+-- - "failed" = scheduler found invalid (abort, don't staple)
+
 local ASYNC_VALIDATION_PENDING = "pending"  -- Validation queued, not yet done
 local ASYNC_VALIDATION_DONE = "validated"   -- Validation complete, result stored
 local ASYNC_VALIDATION_FAILED = "failed"    -- Validation failed, response invalid
@@ -644,19 +666,92 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 		log(ngx.DEBUG, "OCSP cert_pem_to_der failed: " .. tostring(err))
 		return false
 	end
+	-- ========================================================================
+	-- OCSP Response FFI Validation (Most Expensive Operation: 10-20ms)
+	-- ========================================================================
+	-- This is the critical path bottleneck. Deferred to async job in production.
+	-- TLS path uses cached result or skips if async status = "validated".
+	--
+	-- OpenSSL FFI via ngx.ocsp.validate_ocsp_response:
+	-- - Verifies OCSP response signature against issuer public key
+	-- - Validates time bounds (thisUpdate <= now <= nextUpdate)
+	-- - Returns: ok_call (whether FFI executed), validate_ok (signature valid), next_update (unix timestamp)
+	--
+	-- Latency: ~10-20ms (crypto-heavy: ECDSA/RSA signature verification)
+	-- This is why async validation defers it off-path (handshakes use cached result).
+
+	local t_ffi_start = nil
+	if ngx.hrtime then
+		t_ffi_start = ngx.hrtime()
+	end
+
 	-- Newer OpenResty returns true, next_update; older returns true only.
 	-- Some builds already reject past nextUpdate inside the FFI call.
+	-- Wrap in pcall to catch unexpected FFI crashes.
 	local ok_call, validate_ok, next_update = pcall(function()
 		return ocsp.validate_ocsp_response(ocsp_der, der_chain)
 	end)
-	if not ok_call or validate_ok ~= true then
+
+	-- Record FFI latency for telemetry
+	if t_ffi_start and ngx.ctx then
+		local elapsed_ns = ngx.hrtime() - t_ffi_start
+		local elapsed_ms = elapsed_ns / 1e6
+		if not ngx.ctx.bw_ocsp_metrics then
+			ngx.ctx.bw_ocsp_metrics = {}
+		end
+		ngx.ctx.bw_ocsp_metrics.ffi_validate_ms = elapsed_ms
+
+		-- Log slow FFI calls (>20ms indicates issue or heavy load)
+		if elapsed_ms > 20 then
+			log(ngx.WARN, "OCSP FFI validation slow: " .. string.format("%.1f", elapsed_ms) .. "ms")
+		end
+	end
+
+	-- Handle FFI crash or signature verification failure
+	if not ok_call then
+		log(ngx.ERR, "OCSP FFI crash: ngx.ocsp.validate_ocsp_response raised exception")
 		return false
 	end
-	-- Death time = nextUpdate - skew.
-	if type(next_update) == "number" and next_update > 0 and next_update - OCSP_CLOCK_SKEW_SECONDS <= ngx.time() then
-		log(ngx.DEBUG, "OCSP validate rejected: past death time (nextUpdate - skew)")
+
+	if validate_ok ~= true then
+		-- Signature verification failed or OpenSSL error
+		-- This is expected for revoked or tampered responses
+		log(ngx.DEBUG, "OCSP signature validation failed: response_invalid")
 		return false
 	end
+
+	-- ========================================================================
+	-- Death Time Validation (Time Bound Check)
+	-- ========================================================================
+	-- Reject responses that are within OCSP_CLOCK_SKEW_SECONDS of expiry.
+	-- This prevents using an OCSP response that's about to expire mid-handshake.
+	-- Formula: nextUpdate - clock_skew <= now → REJECT
+	--
+	-- Example: nextUpdate=2026-09-30 10:00:00, now=2026-09-30 09:59:40, skew=30s
+	--   → Death time = 10:00:00 - 30s = 09:59:30
+	--   → now (09:59:40) > death_time (09:59:30) → REJECT ✓
+
+	if type(next_update) == "number" and next_update > 0 then
+		local death_time = next_update - OCSP_CLOCK_SKEW_SECONDS
+		local now = ngx.time()
+
+		if now >= death_time then
+			log(ngx.DEBUG, "OCSP validate rejected: past death time " ..
+				"(nextUpdate=" .. next_update .. ", now=" .. now .. ", skew=" .. OCSP_CLOCK_SKEW_SECONDS .. "s)")
+			return false
+		end
+	else
+		-- No nextUpdate in response (shouldn't happen, but handle gracefully)
+		log(ngx.WARN, "OCSP response missing nextUpdate (type=" .. type(next_update) .. ")")
+		-- Treat as valid but log for investigation
+	end
+
+	-- ========================================================================
+	-- Validation Success
+	-- ========================================================================
+	-- Response is valid: signature verified, time bounds OK, not expired.
+	-- Safe to attach to TLS handshake.
+
 	return true
 end
 
@@ -2840,5 +2935,51 @@ _M.on_ssl_context_swap = chain_api.on_ssl_context_swap
 local warmer_api = require("bunkerweb.ocsp_warmer")
 _M.start_l1_warmer = warmer_api.start_l1_warmer
 _M.warm_l1_from_disk = warmer_api.warm_l1_from_disk
+
+-- ============================================================================
+-- FFI Validation Telemetry & Observability
+-- ============================================================================
+-- Public API for monitoring OCSP FFI performance and cache effectiveness
+
+-- Get FFI validation latency from current request
+-- Returns: latency in milliseconds, or nil if not measured
+function _M.get_ffi_validation_latency()
+	if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
+		return ngx.ctx.bw_ocsp_metrics.ffi_validate_ms
+	end
+	return nil
+end
+
+-- Get all OCSP metrics from current request
+-- Returns: table with metrics {ffi_validate_ms, async_hit, l1_hit, etc.}
+-- Used for logging/monitoring handshake performance
+function _M.get_ocsp_metrics()
+	if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
+		return ngx.ctx.bw_ocsp_metrics
+	end
+	return {}
+end
+
+-- Mark FFI validation as async (deferred off-path)
+-- Called by TLS path when async result available
+function _M.mark_ffi_async_deferred()
+	if ngx.ctx then
+		if not ngx.ctx.bw_ocsp_metrics then
+			ngx.ctx.bw_ocsp_metrics = {}
+		end
+		ngx.ctx.bw_ocsp_metrics.async_deferred = true
+	end
+end
+
+-- Mark FFI validation as L1 cache hit
+-- Called by TLS path when L1 cache has verified response
+function _M.mark_l1_cache_hit()
+	if ngx.ctx then
+		if not ngx.ctx.bw_ocsp_metrics then
+			ngx.ctx.bw_ocsp_metrics = {}
+		end
+		ngx.ctx.bw_ocsp_metrics.l1_cache_hit = true
+	end
+end
 
 return _M
