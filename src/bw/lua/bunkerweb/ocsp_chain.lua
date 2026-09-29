@@ -775,7 +775,8 @@ local function pick_issuer_candidate(cands, _leaf_pem)
 	local seen_fp = nil
 	local unique = true
 	for _, cand in ipairs(cands) do
-		local fp = cand and spki_fingerprint(cand.pem) or nil
+		-- Use pre-computed SPKI if available, otherwise extract (SPKI-based optimization #1)
+		local fp = (cand.fp ~= nil and cand.fp) or (cand and spki_fingerprint(cand.pem) or nil)
 		if not fp then
 			unique = false
 			break
@@ -822,7 +823,9 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 					list = {}
 					by_subject[subj] = list
 				end
-				list[#list + 1] = { pem = pem, issuer = iss }
+				-- Pre-compute SPKI upfront (SPKI-based optimization #1)
+				local fp = spki_fingerprint(pem)
+				list[#list + 1] = { pem = pem, issuer = iss, fp = fp }
 			end
 		end
 	end
@@ -856,7 +859,8 @@ local function issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 		if pick_subj and pick_iss and pick_subj == pick_iss then
 			break
 		end
-		local fp = spki_fingerprint(pick.pem)
+		-- Use pre-computed SPKI (SPKI-based optimization #1)
+		local fp = pick.fp or spki_fingerprint(pick.pem)
 		if fp and seen[fp] then
 			break
 		end
