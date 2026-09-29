@@ -487,6 +487,7 @@ function _M.ssl_certificate(state)
 			fingerprint = metadata.fingerprint,
 			serial = metadata.serial,
 			kind = metadata.kind,
+			issuer_name = metadata.issuer_name,  -- OPTIMIZATION: Cache issuer DN (Priority 10)
 			expires = expires,
 		}
 		table.insert(cert_metadata_cache_access_order, key)
@@ -1932,11 +1933,13 @@ function _M.ssl_certificate(state)
 	-- ocsp.json (ocsp-refresh) when resty cannot see Must-Staple.
 	-- AIA OCSP URI pin checks go through bunkerweb.ocsp.aia_uri_pin_ok (same as stream).
 	-- Input: cert_pem - certificate in PEM format (passed from plugin, NOT read via ssl.cert_pem())
-	-- Returns: { cert_parsed = resty cert object or nil, must_staple = bool }
+	-- Returns: { cert_parsed = resty cert object or nil, must_staple = bool, issuer_name = string or nil }
+	-- OPTIMIZATION: Extract issuer DN for later cache (Priority 10) to avoid re-parsing in validation
 	local function read_certificate_metadata(cert_pem)
 		local result = {
 			cert_parsed = nil,
 			must_staple = false,
+			issuer_name = nil,
 		}
 
 		if not cert_pem or #cert_pem == 0 then
@@ -1957,6 +1960,15 @@ function _M.ssl_certificate(state)
 						safe_log(DEBUG, "OCSP-Must-Staple extension found (OID 1.3.6.1.5.5.7.1.24)")
 					end
 				end
+
+				-- OPTIMIZATION: Extract issuer DN (Priority 10) to cache for validation loop
+				-- This prevents re-parsing the same cert in ocsp_validate_response_for_fp()
+				pcall(function()
+					local issuer_name_obj = cert:get_issuer_name()
+					if issuer_name_obj then
+						result.issuer_name = tostring(issuer_name_obj)
+					end
+				end)
 
 				return result
 			else
@@ -3275,6 +3287,10 @@ function _M.ssl_certificate(state)
 			if has_must_staple then
 				safe_log(INFO, "OCSP-Must-Staple extension detected in certificate for " .. (server_name or "unknown"))
 			end
+			-- OPTIMIZATION: Cache issuer DN in ngx.ctx (Priority 10) to avoid re-parsing in validation
+			if cert_meta.issuer_name and ngx.ctx then
+				ngx.ctx.bw_ocsp_issuer_name = cert_meta.issuer_name
+			end
 		end
 		-- When resty cannot see TLS Feature, honor Must-Staple from job-written ocsp.json.
 		if not has_must_staple and type(leaf_fp_resolved) == "string" and is_fp64_lower_hex(leaf_fp_resolved) then
@@ -3710,8 +3726,14 @@ function _M.ssl_certificate(state)
 			local ocsp_validate_budget = hrtime and ocsp_validate_timeout_total_ns or ocsp_validate_timeout_total_s
 			local t_val_total_start = ocsp_validate_clock()
 			local issuer_name = nil
-			if has_resty_ssl and resty_x509 and resty_x509.new then
-				-- Optional fast-path: use resty.openssl to derive issuer DN.
+
+			-- OPTIMIZATION: Use cached issuer DN from read_certificate_metadata (Priority 10)
+			-- to avoid re-parsing the same certificate in the validation loop
+			if ngx.ctx and ngx.ctx.bw_ocsp_issuer_name then
+				issuer_name = ngx.ctx.bw_ocsp_issuer_name
+				safe_log(DEBUG, "OCSP using cached issuer DN (Priority 10 optimization)")
+			elseif has_resty_ssl and resty_x509 and resty_x509.new then
+				-- Fallback: Optional fast-path: use resty.openssl to derive issuer DN.
 				local leaf_cert_obj = resty_x509.new(cert_for_fp_pem)
 				if leaf_cert_obj then
 					local issuer_name_obj = leaf_cert_obj:get_issuer_name()
