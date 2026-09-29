@@ -440,11 +440,109 @@ local function report_metrics(validated, failed, skipped, spki_cached, elapsed)
 	end
 end
 
+-- Warmup: Pre-load cached OCSP responses at job startup (first run).
+-- Marks valid responses as already validated, reducing first handshake latency.
+local function warmup_on_startup()
+	-- Check if we've already warmed up (use marker file, not ngx dict in scheduler context)
+	local marker_file = "/var/cache/bunkerweb/ocsp/.warmup_done"
+	local marker_check = io.open(marker_file, "r")
+	if marker_check then
+		marker_check:close()
+		return  -- Already warmed up, skip
+	end
+
+	log_info("=== OCSP Cache Warmup Starting ===")
+	local start_time = os.time()
+
+	local cache_dir = "/var/cache/bunkerweb/ocsp"
+	local warmed = 0
+	local stale = 0
+	local invalid = 0
+	local failed = 0
+
+	-- Scan cache directory for OCSP responses
+	local dir_cmd = "find " .. cache_dir .. " -maxdepth 2 -name '*.der' 2>/dev/null"
+	local dir_handle, dir_err = io.popen(dir_cmd)
+
+	if not dir_handle then
+		log_warn("Warmup: could not open cache directory: " .. tostring(dir_err))
+		return
+	end
+
+	-- Process each cached OCSP response
+	for ocsp_file in dir_handle:lines() do
+		-- Extract fingerprint from path
+		local fingerprint = ocsp_file:match("([a-f0-9]+)%.der$")
+		if not fingerprint or #fingerprint ~= 64 then
+			invalid = invalid + 1
+			goto continue_warmup_scan
+		end
+
+		-- Check file age (assume valid if <7 days old)
+		local stat_cmd = "stat -f%m " .. ocsp_file .. " 2>/dev/null"
+		local stat_handle = io.popen(stat_cmd)
+		local mtime_str = stat_handle:read("*a")
+		stat_handle:close()
+
+		local mtime = tonumber(mtime_str)
+		if not mtime then
+			failed = failed + 1
+			goto continue_warmup_scan
+		end
+
+		local current_time = os.time()
+		local age_days = (current_time - mtime) / (24 * 60 * 60)
+
+		if age_days > 7 then
+			stale = stale + 1
+			goto continue_warmup_scan
+		end
+
+		-- Mark response as pre-warmed
+		pcall(function()
+			-- Tag with current version (for versioned cache)
+			if ocsp_module.set_cached_response_version then
+				local current_version = ocsp_module.get_ocsp_response_version and
+					ocsp_module.get_ocsp_response_version() or 1
+				ocsp_module.set_cached_response_version(fingerprint, current_version)
+			end
+
+			-- Mark as already validated (skip async job)
+			local ngx_shared_warmup = ngx and ngx.shared
+			if ngx_shared_warmup and ngx_shared_warmup.bw_ocsp_validations then
+				local async_key = "OCSP:ASYNC_VALIDATE:" .. fingerprint
+				ngx_shared_warmup.bw_ocsp_validations:set(async_key, "validated", 86400)
+			end
+
+			warmed = warmed + 1
+		end)
+
+		::continue_warmup_scan::
+	end
+
+	dir_handle:close()
+
+	local elapsed = os.time() - start_time
+	log_info("OCSP warmup complete in " .. elapsed .. "s: " .. warmed .. " ready, " ..
+		stale .. " stale, " .. invalid .. " invalid, " .. failed .. " failed")
+
+	-- Mark warmup as done (create marker file so we don't repeat)
+	local marker_file = "/var/cache/bunkerweb/ocsp/.warmup_done"
+	local marker_w = io.open(marker_file, "w")
+	if marker_w then
+		marker_w:write(tostring(os.time()))
+		marker_w:close()
+	end
+end
+
 -- Main job entry point (called by scheduler)
 local function run_job()
 	log_info("=== OCSP Async Validation Job Started ===")
 
 	local start_time = os.time()
+
+	-- Warmup: pre-load cached responses on first job run
+	warmup_on_startup()
 
 	-- Check for certificate rotation and invalidate stale responses if detected
 	detect_and_handle_cert_rotation()
