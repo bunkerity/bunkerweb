@@ -54,6 +54,15 @@ local _cwd = safe_require "bunkerweb.ocsp"
 -- a parallel /data/bw/ocsp tree here — handshake gates go through _cwd.
 
 -- =====================================================================
+-- MODULE-LEVEL CACHES: Immutable data, survive across handshakes
+-- Keyed on immutable inputs (cert PEM, chain hash, cert_fp+der_binding)
+-- =====================================================================
+local _lrucache_ok, _lrucache = pcall(require, "resty.lrucache")
+local _module_ocsp_validation_cache = _lrucache_ok and _lrucache.new(256) or nil
+local _module_cert_metadata_cache = _lrucache_ok and _lrucache.new(512) or nil
+local _module_chain_mapping_cache = _lrucache_ok and _lrucache.new(128) or nil
+
+-- =====================================================================
 -- HANDSHAKE FUNCTION: ssl_certificate(state)
 -- Uses module-level cached modules and helpers
 -- =====================================================================
@@ -292,6 +301,14 @@ function _M.ssl_certificate(state)
 		if not key then
 			return nil
 		end
+		-- Try module-level LRU cache first (survives across handshakes)
+		if _module_ocsp_validation_cache then
+			local cached = _module_ocsp_validation_cache:get(key)
+			if cached ~= nil then
+				return cached
+			end
+		end
+		-- Fallback to handshake-level cache (single request only)
 		local cached = ocsp_validation_cache[key]
 		if cached and cached.expires and cached.expires > ngx.time() then
 			table.insert(ocsp_validation_cache_access_order, key)
@@ -308,16 +325,14 @@ function _M.ssl_certificate(state)
 		if not key then
 			return
 		end
+		-- Store in module-level LRU cache (survives across handshakes)
+		if _module_ocsp_validation_cache then
+			_module_ocsp_validation_cache:set(key, result, 60)
+		end
+		-- Also store in handshake cache for compatibility
 		local expires = ngx.time() + ocsp_validation_cache_ttl
 		ocsp_validation_cache[key] = { result = result, expires = expires }
 		table.insert(ocsp_validation_cache_access_order, key)
-
-		if #ocsp_validation_cache > ocsp_validation_cache_max_entries then
-			local evict_key = table.remove(ocsp_validation_cache_access_order, 1)
-			if evict_key then
-				ocsp_validation_cache[evict_key] = nil
-			end
-		end
 	end
 
 	-- =====================================================================
@@ -352,6 +367,14 @@ function _M.ssl_certificate(state)
 		if not key then
 			return nil
 		end
+		-- Try module-level LRU cache first (survives across handshakes)
+		if _module_cert_metadata_cache then
+			local cached = _module_cert_metadata_cache:get(key)
+			if cached ~= nil then
+				return cached
+			end
+		end
+		-- Fallback to handshake-level cache
 		local cached = cert_metadata_cache[key]
 		if cached and cached.expires and cached.expires > ngx.time() then
 			table.insert(cert_metadata_cache_access_order, key)
@@ -368,22 +391,21 @@ function _M.ssl_certificate(state)
 		if not key or not metadata then
 			return
 		end
-		local expires = ngx.time() + cert_metadata_cache_ttl
-		cert_metadata_cache[key] = {
+		local data = {
 			fingerprint = metadata.fingerprint,
 			serial = metadata.serial,
 			kind = metadata.kind,
-			issuer_name = metadata.issuer_name,  -- OPTIMIZATION: Cache issuer DN (Priority 10)
-			expires = expires,
+			issuer_name = metadata.issuer_name,
 		}
-		table.insert(cert_metadata_cache_access_order, key)
-
-		if #cert_metadata_cache > cert_metadata_cache_max_entries then
-			local evict_key = table.remove(cert_metadata_cache_access_order, 1)
-			if evict_key then
-				cert_metadata_cache[evict_key] = nil
-			end
+		-- Store in module-level LRU cache (survives across handshakes)
+		if _module_cert_metadata_cache then
+			_module_cert_metadata_cache:set(key, data, 300)
 		end
+		-- Also store in handshake cache for compatibility
+		local expires = ngx.time() + cert_metadata_cache_ttl
+		data.expires = expires
+		cert_metadata_cache[key] = data
+		table.insert(cert_metadata_cache_access_order, key)
 	end
 
 	-- =====================================================================
@@ -527,6 +549,14 @@ function _M.ssl_certificate(state)
 		if not key then
 			return nil
 		end
+		-- Try module-level LRU cache first (survives across handshakes)
+		if _module_chain_mapping_cache then
+			local cached = _module_chain_mapping_cache:get(key)
+			if cached ~= nil then
+				return cached.subject_to_pem, cached.issuer_subjects
+			end
+		end
+		-- Fallback to handshake-level cache
 		local cached = chain_mapping_cache[key]
 		if cached and cached.expires and cached.expires > ngx.time() then
 			table.insert(chain_mapping_cache_access_order, key)
@@ -543,20 +573,19 @@ function _M.ssl_certificate(state)
 		if not key then
 			return
 		end
-		local expires = ngx.time() + chain_mapping_cache_ttl
-		chain_mapping_cache[key] = {
+		local data = {
 			subject_to_pem = subject_to_pem,
 			issuer_subjects = issuer_subjects,
-			expires = expires,
 		}
-		table.insert(chain_mapping_cache_access_order, key)
-
-		if #chain_mapping_cache > chain_mapping_cache_max_entries then
-			local evict_key = table.remove(chain_mapping_cache_access_order, 1)
-			if evict_key then
-				chain_mapping_cache[evict_key] = nil
-			end
+		-- Store in module-level LRU cache (survives across handshakes)
+		if _module_chain_mapping_cache then
+			_module_chain_mapping_cache:set(key, data, 600)
 		end
+		-- Also store in handshake cache for compatibility
+		local expires = ngx.time() + chain_mapping_cache_ttl
+		data.expires = expires
+		chain_mapping_cache[key] = data
+		table.insert(chain_mapping_cache_access_order, key)
 	end
 
 local tostring = tostring
