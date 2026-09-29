@@ -1,57 +1,88 @@
 -- OCSP Must-Staple Module
--- Detects, caches, and enforces must-staple requirements
--- Only loaded when needed (normal or staple_only mode)
+-- Detects, caches, and enforces must-staple requirements.
+-- Tri-state from resolve_leaf_must_staple: true | false | nil (unknown).
+-- Fail-closed gate everywhere: unknown ~= false → enforce / do not skip validate.
 
 local _M = {}
 
 local common = require("bunkerweb.ocsp_common").internal
 local store = require("bunkerweb.ocsp_store").internal
 
+local is_fp64 = common.is_fp64
+local resp_binding = common.resp_binding
 local resolve_leaf_must_staple = store.resolve_leaf_must_staple
 
--- Internal: Request-scoped memoization of must-staple resolution via ngx.ctx
--- Avoids re-resolving the same cert during staple(), probe(), and decision paths
+-- Stable request-cache key. Never use a PEM prefix: "-----BEGIN CERTIFICATE-----"
+-- is ~27 bytes, so sub(1, 32) collides across every leaf in a dual-cert handshake.
+-- When both fp and PEM are present, bind them together so an early fp-only miss
+-- cannot sticky-cache false across a later real MS PEM (HTTP leaf_ms_cache parity).
+local function ms_cache_key(cert_pem, cert_fp)
+	local fp_part = nil
+	if is_fp64(cert_fp) then
+		fp_part = cert_fp:lower()
+	end
+	local pem_part = nil
+	if type(cert_pem) == "string" and cert_pem ~= "" then
+		local dig = resp_binding(cert_pem)
+		if dig then
+			pem_part = dig
+		end
+	end
+	if fp_part and pem_part then
+		return "fp:" .. fp_part .. ":pem:" .. pem_part
+	end
+	if fp_part then
+		return "fp:" .. fp_part
+	end
+	if pem_part then
+		return "pem:" .. pem_part
+	end
+	return nil
+end
+
+-- Request-scoped memoization via ngx.ctx (staple / probe / decision share one answer).
 local function resolve_leaf_must_staple_with_cache(cert_pem, cert_fp)
 	local ctx = ngx.ctx
 	if not ctx then
-		-- No context (should not happen in TLS handshake); resolve directly
 		return resolve_leaf_must_staple(cert_pem, cert_fp)
 	end
 
-	-- Initialize cache on first use
+	local key = ms_cache_key(cert_pem, cert_fp)
+	if not key then
+		return resolve_leaf_must_staple(cert_pem, cert_fp)
+	end
+
 	if not ctx.bw_ocsp_ms_cache then
 		ctx.bw_ocsp_ms_cache = {}
 	end
 
-	-- Generate cache key from fingerprint or PEM hash
-	local key = cert_fp or ("pem_" .. (cert_pem and cert_pem:sub(1, 32) or "unknown"))
-
-	-- Return cached result if available
-	if ctx.bw_ocsp_ms_cache[key] ~= nil then
-		return ctx.bw_ocsp_ms_cache[key]
+	local cached = ctx.bw_ocsp_ms_cache[key]
+	-- Box every result (incl. nil): raw t[k]=nil would delete the entry.
+	if type(cached) == "table" and cached._boxed then
+		return cached._ms
 	end
 
-	-- Resolve and cache for this request
 	local result = resolve_leaf_must_staple(cert_pem, cert_fp)
-	ctx.bw_ocsp_ms_cache[key] = result
+	ctx.bw_ocsp_ms_cache[key] = { _boxed = true, _ms = result }
 	return result
 end
 
--- Check if must-staple enforcement is enabled in current config
--- Returns: true if mode is "normal" or "staple_only", false if "open"
+-- True when Must-Staple enforcement applies for this mode.
+-- Never call ocsp_staple_mode() without internalstore+SNI (that always yields "open").
+-- Omitted mode → assume enforcement on (fail closed).
 function _M.check_enabled(mode)
-	mode = mode or common.ocsp_staple_mode()
-	return mode ~= "open"
+	if mode == nil or mode == "" then
+		return true
+	end
+	return tostring(mode):lower() ~= "open"
 end
 
--- Get must-staple requirement for cert with request-scoped caching
--- Returns: true if cert has must-staple extension, false otherwise
+-- Tri-state Must-Staple for this leaf (true / false / nil), request-cached.
 function _M.get_must_staple(cert_pem, cert_fp)
 	return resolve_leaf_must_staple_with_cache(cert_pem, cert_fp)
 end
 
--- Annotate cert list with must-staple requirement
--- Modifies leaves table in-place, adding must_staple field to each leaf
+-- Annotate leaves in-place with tri-state must_staple (fail-closed callers use ~= false).
 function _M.annotate_leaves(leaves)
 	if type(leaves) ~= "table" then
 		return
@@ -67,27 +98,16 @@ function _M.annotate_leaves(leaves)
 	end
 end
 
--- Decide if we can skip OCSP validation for this cert
--- In open mode: skip all validation (optional stapling)
--- In normal/staple_only mode: skip only non-must-staple certs
--- Returns: true if validation can be skipped, false if required
+-- Whether ngx.ocsp.validate may be skipped for this leaf.
+-- mode == "open" → always skip (optional stapling).
+-- Otherwise skip only when Must-Staple is proven false.
+-- Omitted mode → do not open-skip (callers that lack mode still fail closed).
+-- Unknown (nil) → do not skip.
 function _M.should_skip_validation(leaf_pem, fingerprint, mode)
-	mode = mode or common.ocsp_staple_mode()
-
-	-- Open mode: skip validation for all (optional stapling)
-	if mode == "open" then
+	if mode ~= nil and tostring(mode):lower() == "open" then
 		return true
 	end
-
-	-- Normal/staple_only mode: check if must-staple
-	local is_must_staple = resolve_leaf_must_staple_with_cache(leaf_pem, fingerprint)
-	if is_must_staple then
-		-- Must-staple: cannot skip validation
-		return false
-	end
-
-	-- Optional stapling: can skip, but async validation will queue for security
-	return true
+	return resolve_leaf_must_staple_with_cache(leaf_pem, fingerprint) == false
 end
 
 return _M
