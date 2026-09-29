@@ -451,6 +451,52 @@ def main() -> int:
         soft_recall_clear_ok(soft_recall=False, good_unix=None),
     )
 
+    # Soft-recall must write paged=false before clearing allow (restamp otherwise
+    # re-opens Must-Staple on a still-paged=true shard).
+    def soft_recall_clear_allow_after_meta(*, meta_unpaged_ok: bool) -> bool:
+        return meta_unpaged_ok
+
+    check(
+        "soft-recall: meta unpage ok → clear allow",
+        soft_recall_clear_allow_after_meta(meta_unpaged_ok=True),
+    )
+    check(
+        "soft-recall: meta unpage fail → leave allow",
+        not soft_recall_clear_allow_after_meta(meta_unpaged_ok=False),
+    )
+
+    # Demote restamp block must survive across job runs (durable marker).
+    def restamp_blocked(*, mem: bool, marker_file: bool) -> bool:
+        return mem or marker_file
+
+    check(
+        "restamp: durable marker blocks next run",
+        restamp_blocked(mem=False, marker_file=True),
+    )
+    check(
+        "restamp: neither mem nor marker → allow",
+        not restamp_blocked(mem=False, marker_file=False),
+    )
+
+    # Sidecar ban copy must fail closed before renameat2 exchange.
+    def sidecar_copy_allows_page(*, live_has_ban: bool, copy_ok: bool) -> bool:
+        if live_has_ban and not copy_ok:
+            return False
+        return True
+
+    check(
+        "sidecar: ban copy fail → refuse page",
+        not sidecar_copy_allows_page(live_has_ban=True, copy_ok=False),
+    )
+    check(
+        "sidecar: ban copy ok → allow page",
+        sidecar_copy_allows_page(live_has_ban=True, copy_ok=True),
+    )
+    check(
+        "sidecar: no live ban → allow page",
+        sidecar_copy_allows_page(live_has_ban=False, copy_ok=False),
+    )
+
     # Persist post-publish: clear allow only on explicit unpaged, never on read miss.
     def post_publish_clear_allow(*, meta_ok: bool, paged: bool) -> bool:
         if meta_ok and paged:
