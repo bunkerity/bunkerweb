@@ -31,10 +31,39 @@ local L1_MAGIC_V2 = "bw2\0"
 -- Cap DRAM residence; never longer than remaining OCSP life when known.
 local L1_MAX_TTL = 300
 
+-- Disk paths and pin bus use lowercase hex (job + ocsp_pin). is_fp64 allows
+-- A-F; normalize before path join / cache key / fingerprint equality checks.
+local function fp64_or_nil(fingerprint)
+	if not is_fp64(fingerprint) then
+		return nil
+	end
+	return fingerprint:lower()
+end
+
+-- Harden unix timestamps: digit-only strings / finite positive numbers
+-- (no tonumber("1e20") / "inf" surprises). Shared by expires, thisUpdate, max_age.
+local function positive_unix(v)
+	if type(v) == "number" then
+		if v ~= v or v == math.huge or v == -math.huge or v <= 0 then
+			return nil
+		end
+		return math.floor(v)
+	end
+	if type(v) == "string" and v:match("^%d+$") then
+		local n = tonumber(v)
+		if n and n > 0 then
+			return n
+		end
+	end
+	return nil
+end
+
 -- Forward decls: warm_cache tightens expires / gen against live ligand (defined below).
 local ligand_or_meta
 local soft_recall_gen_of
 local meta_effective_expires_unix
+local read_ocsp_json
+local read_ocsp_ligand
 
 local function l1_shm_ttl(expires_unix)
 	-- Never park an undated body in L1 (would outlive stripped meta).
@@ -112,12 +141,20 @@ end
 
 -- Returns der, verified_binding, epoch, expires_unix, soft_recall_gen (or nil).
 local function get_l1(internalstore, fingerprint)
-	if not internalstore or not fingerprint then
+	if not internalstore then
+		return nil
+	end
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
+		return nil
+	end
+	local key = cache_key(fingerprint)
+	if not key then
 		return nil
 	end
 	local ok, blob = pcall(function()
 		-- Shared dict (not per-worker LRU): one warmer refill serves every worker.
-		return internalstore:get(cache_key(fingerprint))
+		return internalstore:get(key)
 	end)
 	if not ok or type(blob) ~= "string" or #blob == 0 then
 		return nil
@@ -159,20 +196,36 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	if type(resp) ~= "string" or #resp == 0 then
 		return
 	end
+	fingerprint = fp64_or_nil(fingerprint)
 	-- Live merged death clock wins: never mark verified under a looser expires than
 	-- ligand/shard min (L1 TTL and resp_still_fresh would disagree across workers).
+	-- Must merge shard ocsp.json too — ligand-only merge drops a tighter shard
+	-- expires / soft_recall_gen when the ligand omits or is looser.
 	local live_meta = nil
 	if fingerprint then
 		live_meta = ligand_or_meta(nil, fingerprint)
-		local tight = meta_effective_expires_unix(live_meta, nil)
-		if type(tight) == "number" and tight > 0 then
-			if type(expires_unix) ~= "number" or expires_unix <= 0 or expires_unix > tight then
-				if mark_verified then
-					mark_verified = false
-				end
-				expires_unix = tight
-			end
+		-- Never re-warm a tombstoned generation (ligand may tombstone before shard).
+		if type(live_meta) == "table" and live_meta.tombstoned == true then
+			return
 		end
+		local tight = meta_effective_expires_unix(live_meta, nil)
+		if type(tight) ~= "number" or tight <= 0 then
+			-- Stripped meta+ligand: never park from caller/L1 expires alone.
+			return
+		end
+		if type(expires_unix) ~= "number" or expires_unix <= 0 then
+			-- Adopt live death clock. Caller had no clock to disagree with —
+			-- do not demote verified (post-validate parks often pass shard-only
+			-- meta_effective which is nil when only the ligand carries expires).
+			expires_unix = tight
+		elseif expires_unix > tight then
+			-- Caller/L1 claimed a looser deadline than live merge — demote.
+			if mark_verified then
+				mark_verified = false
+			end
+			expires_unix = tight
+		end
+		-- expires_unix <= tight: keep caller's tighter clock and verified bit.
 	end
 	local ttl = l1_shm_ttl(expires_unix)
 	if not ttl then
@@ -184,7 +237,25 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 		binding = resp_binding(resp)
 	end
 	local gen = soft_recall_gen
-	if type(gen) ~= "number" then
+	-- When live meta/ligand is present, its gen wins (caller can lag a soft-recall bump).
+	-- soft_recall_gen_of(nil) is upgrade-grace 0 — do not treat that as live authority.
+	if type(live_meta) == "table" then
+		local live_gen = soft_recall_gen_of(live_meta)
+		if type(live_gen) == "number" then
+			if type(gen) == "number" and gen ~= live_gen and mark_verified then
+				-- Gen drift: park DER for reuse but do not claim verified trust.
+				binding = nil
+				mark_verified = false
+			end
+			gen = live_gen
+		else
+			-- Live type-drift (false sentinel / invalid): never park a gen that
+			-- soft_recall_gen_of would refuse to match — clear gen + verified.
+			binding = nil
+			mark_verified = false
+			gen = nil
+		end
+	elseif type(gen) ~= "number" then
 		gen = soft_recall_gen_of(live_meta)
 	end
 	-- Verified without a concrete gen cannot survive soft-recall — demote.
@@ -195,17 +266,26 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	if type(epoch) ~= "string" or #epoch == 0 then
 		epoch = current_ocsp_epoch()
 	end
+	local key = fingerprint and cache_key(fingerprint) or nil
+	if not key then
+		return
+	end
 	pcall(function()
-		internalstore:set(cache_key(fingerprint), pack_l1(epoch, binding, resp, expires_unix, gen), ttl)
-		-- Also clear the zone-scoped key so a prior put without the zone flag cannot linger.
-		internalstore:delete(cache_key(fingerprint), true)
+		internalstore:set(key, pack_l1(epoch, binding, resp, expires_unix, gen), ttl)
+		-- Clear per-worker LRU so a prior worker-scoped put cannot shadow shared dict.
+		internalstore:delete(key, true)
 	end)
 end
 
 local function drop_cache(internalstore, fingerprint)
+	fingerprint = fp64_or_nil(fingerprint)
+	local key = fingerprint and cache_key(fingerprint) or nil
+	if not key then
+		return
+	end
 	pcall(function()
-		internalstore:delete(cache_key(fingerprint))
-		internalstore:delete(cache_key(fingerprint), true)
+		internalstore:delete(key)
+		internalstore:delete(key, true)
 	end)
 end
 
@@ -218,8 +298,9 @@ local l1_matches_disk
 -- referenced before its definition compiles to a nil global in LuaJIT.
 -- Read ocsp.json with per-request dedup cache (ngx.ctx)
 -- Avoids re-reading the same file within a single handshake
-local function read_ocsp_json(fingerprint)
-	if not is_fp64(fingerprint) then
+read_ocsp_json = function(fingerprint)
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
 		return nil
 	end
 
@@ -252,7 +333,8 @@ local function read_ocsp_json(fingerprint)
 			.. "/ocsp.json"
 	)
 	if not raw then
-		-- Cache the "not found" result to prevent re-reading
+		-- missing or empty (truncate): both cache as absent for this request.
+		-- l1_body_matches_disk distinguishes empty via read_file's second return.
 		if ctx and ctx.bw_ocsp_json_cache then
 			ctx.bw_ocsp_json_cache[fingerprint] = false
 		end
@@ -280,8 +362,10 @@ local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
 end
 
--- Tri-state leaf Must-Staple: TLS Feature, then ocsp.json, then unknown→nil.
+-- Tri-state leaf Must-Staple: TLS Feature, then ocsp.json positive, then unknown→nil.
 -- Fail-closed gate: resolve_leaf_must_staple(...) ~= false.
+-- meta without must_staple=true must NOT invent false when TLS Feature is unknown
+-- (parse miss / unrecognized text) — aligns with HTTP leaf_requires tls_known rule.
 local function resolve_leaf_must_staple(cert_pem, fingerprint)
 	local tls = has_must_staple(cert_pem)
 	if tls == true then
@@ -300,17 +384,16 @@ local function resolve_leaf_must_staple(cert_pem, fingerprint)
 		return true
 	end
 	if tls == false then
+		-- Resty positively parsed: no Must-Staple (extension absent or non-MS features).
 		return false
 	end
-	if meta ~= nil then
-		-- Job wrote meta without must_staple=true → not Must-Staple.
-		return false
-	end
+	-- tls == nil: unknown — do not trust "meta present without must_staple=true" as
+	-- proven-false (job may omit the flag; resty may have failed).
 	return nil
 end
 
 -- Boolean Must-Staple for a PEM block (leaf or intermediate).
--- fail_closed_unknown=true → treat resty miss + no ocsp.json as Must-Staple
+-- fail_closed_unknown=true → treat resty miss + no positive json as Must-Staple
 -- (intermediate path / bag filtering). false → unknown returns false (rare).
 local function cert_must_staple_bool(pem, fail_closed_unknown)
 	local tls = has_must_staple(pem)
@@ -322,9 +405,10 @@ local function cert_must_staple_bool(pem, fail_closed_unknown)
 	if ocsp_json_must_staple(meta) then
 		return true
 	end
-	if tls == false or meta ~= nil then
+	if tls == false then
 		return false
 	end
+	-- tls == nil: same as resolve_leaf — meta-without-flag is not proven-false.
 	return fail_closed_unknown == true
 end
 
@@ -335,17 +419,7 @@ local function meta_unix_field(meta, key)
 	if type(meta) ~= "table" or type(key) ~= "string" then
 		return nil
 	end
-	local u = meta[key]
-	if type(u) == "number" and u > 0 then
-		return math.floor(u)
-	end
-	if type(u) == "string" then
-		local n = tonumber(u)
-		if n and n > 0 then
-			return math.floor(n)
-		end
-	end
-	return nil
+	return positive_unix(meta[key])
 end
 
 -- Parse ocsp-floor/{fp} JSON to CA-signed this_update_unix (colony rank), or nil.
@@ -368,16 +442,20 @@ end
 
 -- True when colony floor this_update_unix is ahead of local ocsp.json — Must-Staple closed.
 -- Missing local this_update_unix is no opinion (never invent 0 vs a positive floor).
-local function cluster_floor_blocks(fingerprint, meta)
-	if not is_fp64(fingerprint) then
+-- Always sample live shard timing; caller meta can claim a higher this_update than
+-- disk and fail-open colony floor during a lagging publish.
+local function cluster_floor_blocks(fingerprint, _meta)
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
 		return false
 	end
 	local floor_rank = parse_floor_rank(read_file("/var/cache/bunkerweb/ssl/ocsp-floor/" .. fingerprint))
 	if not floor_rank or floor_rank <= 0 then
 		return false
 	end
-	local local_rank = meta_unix_field(meta, "this_update_unix")
-	-- Missing local timing: no opinion — never invent 0 vs a positive floor.
+	local local_rank = meta_unix_field(read_ocsp_json(fingerprint), "this_update_unix")
+	-- Missing live timing: no opinion — never invent 0 vs a positive floor,
+	-- and never trust caller meta over a retracted/lagging shard.
 	if not local_rank then
 		return false
 	end
@@ -396,10 +474,20 @@ local function cluster_floor_blocks(fingerprint, meta)
 	return true
 end
 
--- Live shard must be scheduler-paged (canary handshake) before stapling.
+-- Live view must be scheduler-paged (canary handshake) before stapling.
 -- Require explicit paged=true. Missing field is not canary proof
 -- (restore stamps paged=false until canary succeeds).
-local function shard_not_paged(meta)
+-- When fingerprint is provided, sample live ligand_or_meta so shard-only
+-- caller meta cannot claim paged=true while the ligand is still unpaged/missing
+-- (merge requires both sides — see merge_ligand).
+local function shard_not_paged(meta, fingerprint)
+	if fingerprint then
+		local live = ligand_or_meta(nil, fingerprint)
+		if type(live) ~= "table" then
+			return true
+		end
+		meta = live
+	end
 	if type(meta) ~= "table" then
 		return true
 	end
@@ -409,8 +497,19 @@ end
 -- Job tombstone writes "tombstoned": true before DER unlink / epoch bump.
 -- Handshake must sample this flag (not only .ocsp_epoch), or L1 can keep
 -- stapling the last GOOD while the multi-step write is mid-flight.
-local function meta_tombstoned(meta)
-	return type(meta) == "table" and meta.tombstoned == true
+-- Optional fingerprint samples live shard + outside ligand via ligand_or_meta
+-- (caller meta can lag a shard tombstone written before the ligand flips).
+local function meta_tombstoned(meta, fingerprint)
+	if type(meta) == "table" and meta.tombstoned == true then
+		return true
+	end
+	if fingerprint then
+		local live = ligand_or_meta(nil, fingerprint)
+		if type(live) == "table" and live.tombstoned == true then
+			return true
+		end
+	end
+	return false
 end
 
 -- =============================================================================
@@ -443,8 +542,10 @@ end
 -- Death clocks: pin / L1 / freshness all die at expires_unix − OCSP_CLOCK_SKEW.
 -- =============================================================================
 
+-- Disk paths and pin bus use lowercase hex (job + ocsp_pin). is_fp64 allows
+-- A-F; normalize before path join / cache key / fingerprint equality checks.
 local function ocsp_ligand_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/ocsp-ligand/" .. fingerprint
+	return "/var/cache/bunkerweb/ssl/ocsp-ligand/" .. fingerprint:lower()
 end
 
 -- Integer soft_recall_gen from ligand / ocsp.json / allow-pin.
@@ -453,6 +554,12 @@ end
 -- so generation_tuple / allow-pin match fail closed (KEEP pin; no CAS revoke).
 -- Job-minted counter: bumps on soft-recall so peer-refuse / allow identity
 -- (der_sha256, soft_recall_gen) cannot re-match a leftover pin after re-page.
+--
+-- Callers that must distinguish omit from explicit 0 (publish-gap keep) must
+-- inspect the raw ligand field before soft_recall_gen_of — read_ocsp_ligand
+-- leaves soft_recall_gen=nil when the JSON key was absent, and stores false
+-- when the key was present but non-integer (so a later call here cannot
+-- mistake invalid for omit→0).
 soft_recall_gen_of = function(meta)
 	if type(meta) ~= "table" then
 		return 0
@@ -475,6 +582,7 @@ soft_recall_gen_of = function(meta)
 		end
 		return tonumber(raw)
 	end
+	-- false sentinel (read_ocsp_ligand) and any other non-number → type drift.
 	return nil
 end
 
@@ -482,8 +590,9 @@ end
 -- Reject when ligand.fingerprint disagrees with the path fingerprint (a self-asserted
 -- fingerprint inside the file must not bless a different SPKI directory).
 -- Per-request cache: avoids re-reading same ligand multiple times in one handshake
-local function read_ocsp_ligand(fingerprint)
-	if not is_fp64(fingerprint) then
+read_ocsp_ligand = function(fingerprint)
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
 		return nil
 	end
 
@@ -548,7 +657,25 @@ local function read_ocsp_ligand(fingerprint)
 		return nil
 	end
 	obj.der_sha256 = sha
-	obj.soft_recall_gen = soft_recall_gen_of(obj)
+	-- Preserve key presence. soft_recall_gen_of maps omitted→0 for allow-pin
+	-- upgrade grace, but publish-gap keep requires an *explicit* key on the
+	-- ligand object (nil here means omitted — see l1_body_matches_disk).
+	-- Assigning soft_recall_gen_of(obj) unconditionally turned every omit into
+	-- 0 and made the publish-gap nil-check dead (fail-open mid-promote).
+	-- Present-but-invalid must NOT become nil: a later soft_recall_gen_of would
+	-- treat that as omit→0 (upgrade grace) and rematch leftover gen-0 pins.
+	-- Sentinel false → soft_recall_gen_of returns nil (type-drift / fail closed).
+	local raw_gen = obj.soft_recall_gen
+	if raw_gen == nil then
+		obj.soft_recall_gen = nil
+	else
+		local normalized = soft_recall_gen_of(obj)
+		if type(normalized) == "number" then
+			obj.soft_recall_gen = normalized
+		else
+			obj.soft_recall_gen = false
+		end
+	end
 	-- Cache successful decode
 	if ctx and ctx.bw_ocsp_ligand_cache then
 		ctx.bw_ocsp_ligand_cache[fingerprint] = obj
@@ -556,9 +683,13 @@ local function read_ocsp_ligand(fingerprint)
 	return obj
 end
 
+-- Harden expires_unix the same way as soft_recall_gen / thisUpdate (positive_unix).
+local positive_expires_unix = positive_unix
+
 -- Merge already-read ligand with shard meta (caller reads ligand once per decision).
 -- Rules (load-bearing — HTTP and stream must agree):
---   * ligand wins der_sha256 + soft_recall_gen
+--   * ligand wins der_sha256; soft_recall_gen only when ligand key is present
+--     (omit must not clobber shard gen→upgrade-grace 0 and rematch leftover pins)
 --   * tombstone from EITHER side forces tombstoned + paged=false
 --   * paged=true only when shard meta exists AND both sides say paged
 --     (missing shard meta never grants canary trust)
@@ -567,7 +698,19 @@ end
 --   * fingerprint is the path fp (never trust a self-assert alone)
 local function merge_ligand(shard_meta, ligand, fingerprint)
 	if not ligand then
-		return shard_meta
+		-- Shallow copy: read_ocsp_json caches the shard table in ngx.ctx; returning
+		-- it by reference lets a caller mutate poison the rest of the request.
+		if type(shard_meta) ~= "table" then
+			return shard_meta
+		end
+		local copy = {}
+		for k, v in pairs(shard_meta) do
+			copy[k] = v
+		end
+		if type(fingerprint) == "string" then
+			copy.fingerprint = fingerprint:lower()
+		end
+		return copy
 	end
 	local merged = {}
 	if type(shard_meta) == "table" then
@@ -576,7 +719,12 @@ local function merge_ligand(shard_meta, ligand, fingerprint)
 		end
 	end
 	merged.der_sha256 = ligand.der_sha256
-	merged.soft_recall_gen = ligand.soft_recall_gen
+	-- Present ligand gen (number / false sentinel) wins. Omitted key leaves shard
+	-- gen intact — unconditional nil assign turned soft-recall shard gen=N into
+	-- omit→0 and rematched leftover gen-0 pins while ligand lagged the bump.
+	if ligand.soft_recall_gen ~= nil then
+		merged.soft_recall_gen = ligand.soft_recall_gen
+	end
 	local shard_tomb = type(shard_meta) == "table" and shard_meta.tombstoned == true
 	local ligand_tomb = ligand.tombstoned == true
 	if shard_tomb or ligand_tomb then
@@ -592,26 +740,48 @@ local function merge_ligand(shard_meta, ligand, fingerprint)
 	else
 		merged.paged = false
 	end
-	local shard_exp = type(shard_meta) == "table" and tonumber(shard_meta.expires_unix) or nil
-	local ligand_exp = tonumber(ligand.expires_unix)
-	if shard_exp and shard_exp > 0 and ligand_exp and ligand_exp > 0 then
-		merged.expires_unix = math.min(math.floor(shard_exp), math.floor(ligand_exp))
-	elseif ligand_exp and ligand_exp > 0 then
-		merged.expires_unix = math.floor(ligand_exp)
-	elseif shard_exp and shard_exp > 0 then
-		merged.expires_unix = math.floor(shard_exp)
+	local shard_exp = type(shard_meta) == "table" and positive_expires_unix(shard_meta.expires_unix) or nil
+	local ligand_exp = positive_expires_unix(ligand.expires_unix)
+	if shard_exp and ligand_exp then
+		merged.expires_unix = math.min(shard_exp, ligand_exp)
+	elseif ligand_exp then
+		merged.expires_unix = ligand_exp
+	elseif shard_exp then
+		merged.expires_unix = shard_exp
 	end
 	if type(fingerprint) == "string" then
-		merged.fingerprint = fingerprint
+		-- Path fp wins; lowercase so ligand_verdict equality is case-stable.
+		merged.fingerprint = fingerprint:lower()
 	elseif type(ligand.fingerprint) == "string" then
-		merged.fingerprint = ligand.fingerprint
+		merged.fingerprint = ligand.fingerprint:lower()
 	end
 	return merged
 end
 
 -- Effective generation meta: read ligand once then merge.
-ligand_or_meta = function(meta, fingerprint)
-	return merge_ligand(meta, read_ocsp_ligand(fingerprint), fingerprint)
+-- Always sample live shard via read_ocsp_json (per-request cached). Caller meta
+-- can lag a shard-first tombstone / soft_recall_gen bump / expires tighten;
+-- preferring it fail-opened freshness, tombstone, generation, and floor checks.
+-- Disk absent/unreadable → nil shard (do not resurrect caller over a retract).
+ligand_or_meta = function(_meta, fingerprint)
+	return merge_ligand(read_ocsp_json(fingerprint), read_ocsp_ligand(fingerprint), fingerprint)
+end
+
+-- Live soft_recall_gen after ligand↔shard merge. HTTP and stream must share this:
+-- ligand-only soft_recall_gen_of rematches leftover gen-0 pins when the ligand
+-- omits the key while the shard already holds a bumped gen (same class as
+-- merge_ligand omit-keeps-shard). Missing meta+ligand → upgrade-grace 0.
+-- Type-drift (false sentinel / invalid) → nil (fail closed).
+local function live_soft_recall_gen(fingerprint)
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
+		return nil
+	end
+	local live = ligand_or_meta(nil, fingerprint)
+	if type(live) ~= "table" then
+		return 0
+	end
+	return soft_recall_gen_of(live)
 end
 
 -- Peer-refuse / allow generation: (der_sha256, soft_recall_gen).
@@ -645,7 +815,8 @@ end
 -- ambiguous JSON while the file exists fails closed.
 -- Per-request cache: avoids re-reading and re-validating the serial blacklist per cert
 local function serial_blacklist_blocks(fingerprint, resp)
-	if not is_fp64(fingerprint) or type(resp) ~= "string" or resp == "" then
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint or type(resp) ~= "string" or resp == "" then
 		return false
 	end
 
@@ -655,13 +826,17 @@ local function serial_blacklist_blocks(fingerprint, resp)
 		ctx.bw_ocsp_serial_cache = {}
 	end
 
-	-- Create cache key from fingerprint and response binding to uniquely identify this check
-	-- (same fingerprint with different responses should each be checked)
+	-- Cache key needs a stable body id. When resp_binding fails, do NOT key as
+	-- "fp|" — distinct unreadable DERs would collide and a prior "allowed"
+	-- (no blacklist file) could fail-open a later banned body.
 	local binding = resp_binding(resp)
-	local serial_cache_key = fingerprint .. "|" .. (binding or "")
+	local serial_cache_key = nil
+	if binding then
+		serial_cache_key = fingerprint .. "|" .. binding
+	end
 
 	-- Check per-request cache first
-	if ctx and ctx.bw_ocsp_serial_cache then
+	if serial_cache_key and ctx and ctx.bw_ocsp_serial_cache then
 		local cached = ctx.bw_ocsp_serial_cache[serial_cache_key]
 		if cached ~= nil then
 			-- Cached value is boolean (true = blocked, false = allowed)
@@ -670,7 +845,7 @@ local function serial_blacklist_blocks(fingerprint, resp)
 	end
 
 	-- Cache miss: read and validate from disk
-	local raw = read_file(
+	local raw, why = read_file(
 		"/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
 			.. "/"
@@ -680,9 +855,14 @@ local function serial_blacklist_blocks(fingerprint, resp)
 			.. "/serial-blacklist.json"
 	)
 	local blocked
-	if not raw or raw == "" then
-		-- No blacklist file: this response is allowed
-		blocked = false
+	if not raw then
+		-- Missing file: no ban. Empty (truncate race) = present-but-unreadable → refuse.
+		if why == "empty" then
+			log(ngx.ERR, "OCSP serial blacklist empty; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+			blocked = true
+		else
+			blocked = false
+		end
 	else
 		local ok_decode, obj = pcall(require("cjson").decode, raw)
 		if not ok_decode or type(obj) ~= "table" then
@@ -697,31 +877,37 @@ local function serial_blacklist_blocks(fingerprint, resp)
 				-- Reject duplicate / conflicting serial_hex keys disguised via JSON oddities:
 				-- cjson gives one value; also refuse if a second distinct match exists in raw.
 				local first = raw:match('"serial_hex"%s*:%s*"([0-9A-Fa-f]+)"')
-				local rest = first and raw:match('"serial_hex"%s*:%s*"[0-9A-Fa-f]+".-("serial_hex"%s*:%s*"[0-9A-Fa-f]+")')
+				local rest = first
+					and raw:match('"serial_hex"%s*:%s*"[0-9A-Fa-f]+".-("serial_hex"%s*:%s*"[0-9A-Fa-f]+")')
 				if rest then
-					log(ngx.ERR, "OCSP serial blacklist ambiguous; refusing staple fp=" .. fingerprint:sub(1, 16) .. "...")
+					log(
+						ngx.ERR,
+						"OCSP serial blacklist ambiguous; refusing staple fp=" .. fingerprint:sub(1, 16) .. "..."
+					)
 					blocked = true
 				else
 					local banned_hex = banned:upper():gsub("^0+", "")
 					if banned_hex == "" then
 						banned_hex = "0"
 					end
+					-- want_hex hit → banned. want miss + parseable body → not banned.
+					-- Unreadable DER (no serials at all) → refuse (fail closed).
 					local got_hex = ocsp_resp_serial_hex(resp, banned_hex)
-					if not got_hex then
-						log(
-							ngx.ERR,
-							"OCSP serial blacklist present but response serial unreadable; refusing staple fp="
-								.. fingerprint:sub(1, 16)
-								.. "..."
-						)
-						blocked = true
-					elseif got_hex == banned_hex then
+					if got_hex == banned_hex then
 						log(
 							ngx.ERR,
 							"OCSP serial blacklist refuse staple fp="
 								.. fingerprint:sub(1, 16)
 								.. "... serial_hex="
 								.. banned_hex:sub(1, 16)
+						)
+						blocked = true
+					elseif not ocsp_resp_serial_hex(resp) then
+						log(
+							ngx.ERR,
+							"OCSP serial blacklist present but response serial unreadable; refusing staple fp="
+								.. fingerprint:sub(1, 16)
+								.. "..."
 						)
 						blocked = true
 					else
@@ -732,8 +918,9 @@ local function serial_blacklist_blocks(fingerprint, resp)
 		end
 	end
 
-	-- Cache result: store boolean (true = blocked, false = allowed)
-	if ctx and ctx.bw_ocsp_serial_cache then
+	-- Cache result: store boolean (true = blocked, false = allowed).
+	-- Skip when binding is nil (no stable key — see above).
+	if serial_cache_key and ctx and ctx.bw_ocsp_serial_cache then
 		ctx.bw_ocsp_serial_cache[serial_cache_key] = blocked
 	end
 	return blocked
@@ -747,17 +934,25 @@ end
 -- Paged shards fail closed on ligand ENOENT (promote tear / missing publish).
 -- Unpaged / soft-recall may still bind via in-shard der_sha256 (cutover).
 local function ligand_verdict(shard_meta, fingerprint, resp)
-	if not fingerprint or not is_fp64(fingerprint) then
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
 		return false, "fingerprint_mismatch_or_missing_meta", nil, nil, shard_meta
 	end
+	-- Live shard wins over caller meta (stale caller can miss a shard-first tombstone).
+	local live_shard = read_ocsp_json(fingerprint)
 	local ligand = read_ocsp_ligand(fingerprint)
-	local meta = merge_ligand(shard_meta, ligand, fingerprint)
+	local meta = merge_ligand(live_shard, ligand, fingerprint)
 	-- Canary-paged generations require the outside-shard ligand.
 	if not ligand then
-		local paged = type(shard_meta) == "table" and shard_meta.paged == true
+		local paged = type(live_shard) == "table" and live_shard.paged == true
 		if paged then
 			return false, "ligand_missing", nil, nil, meta
 		end
+	end
+	-- Tombstone from either side (merge forces tombstoned=true). Callers often
+	-- only sample shard ocsp.json before this — ligand-first tombstone must refuse.
+	if type(meta) == "table" and meta.tombstoned == true then
+		return false, "tombstoned", nil, nil, meta
 	end
 	if type(meta) ~= "table" or type(meta.fingerprint) ~= "string" or meta.fingerprint:lower() ~= fingerprint then
 		return false, "fingerprint_mismatch_or_missing_meta", nil, nil, meta
@@ -817,20 +1012,25 @@ end
 -- Effective ligand sha for L1 disk-match (HTTP conf / stream warmer).
 -- Returns sha string or nil; tombstoned / missing ligand for a paged shard → nil
 -- so L1 cannot keep a body the handshake would refuse.
-function _M.ligand_effective_sha(shard_meta, fingerprint)
+-- Live shard wins over caller meta (same contract as ligand_verdict).
+function _M.ligand_effective_sha(_shard_meta, fingerprint)
+	local live_shard = read_ocsp_json(fingerprint)
 	local ligand = read_ocsp_ligand(fingerprint)
-	local eff = merge_ligand(shard_meta, ligand, fingerprint)
+	local eff = merge_ligand(live_shard, ligand, fingerprint)
 	if type(eff) ~= "table" then
 		return nil
 	end
 	if eff.tombstoned == true then
 		return nil
 	end
-	if type(shard_meta) == "table" and shard_meta.paged == true and not ligand then
+	if type(live_shard) == "table" and live_shard.paged == true and not ligand then
 		return nil
 	end
-	if type(eff.der_sha256) == "string" and #eff.der_sha256 == 64 then
-		return eff.der_sha256:lower()
+	if type(eff.der_sha256) == "string" then
+		local sha = eff.der_sha256:lower()
+		if #sha == 64 and sha:match("^[0-9a-f]+$") then
+			return sha
+		end
 	end
 	return nil
 end
@@ -838,14 +1038,16 @@ end
 -- Shared HTTP↔stream L1↔disk coherence. Fail-closed like ligand_verdict:
 -- corrupt meta / paged+ligand ENOENT / require-path gaps drop L1. Publish-gap keep
 -- (meta+DER both gone, epoch still matches) only while outside ligand is paged=true
--- AND ligand_effective_sha names the cached binding — never bare true / ligand-only
--- after a full shard retract. HTTP conf must call this export rather than inlining.
+-- with an explicit soft_recall_gen and der_sha256 matching the cached binding —
+-- never bare ligand SHA after a full shard retract. HTTP conf must call this
+-- export rather than inlining.
 local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	local binding = resp_binding(resp)
 	if not binding then
 		return false
 	end
-	if not fingerprint or not is_fp64(fingerprint) then
+	fingerprint = fp64_or_nil(fingerprint)
+	if not fingerprint then
 		return false
 	end
 	if (stored_epoch or "") ~= current_ocsp_epoch() then
@@ -857,7 +1059,7 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	local meta_missing = false
 	local meta_corrupt = false
 	local shard_meta = nil
-	pcall(function()
+	do
 		local meta_path = "/var/cache/bunkerweb/ssl/"
 			.. fingerprint:sub(1, 1)
 			.. "/"
@@ -865,54 +1067,49 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 			.. "/"
 			.. fingerprint
 			.. "/ocsp.json"
-		local f = io.open(meta_path, "r")
-		if not f then
-			meta_missing = true
-			return
-		end
-		local raw = f:read("*a")
-		f:close()
-		if type(raw) ~= "string" or #raw == 0 then
-			meta_corrupt = true
-			return
-		end
-		local ok_decode, decoded = pcall(require("cjson").decode, raw)
-		if not ok_decode or type(decoded) ~= "table" then
-			meta_corrupt = true
-			return
-		end
-		shard_meta = decoded
-		if decoded.tombstoned == true then
-			tombstoned = true
-			return
-		end
-		if type(decoded.der_sha256) == "string" then
-			local sha = decoded.der_sha256:lower()
-			if #sha == 64 and sha:match("^[0-9a-f]+$") then
-				disk_sha = sha
+		-- Use shared read_file so empty (truncate race) ≠ missing (ENOENT).
+		local raw, why = read_file(meta_path)
+		if not raw then
+			if why == "empty" then
+				meta_corrupt = true
+			else
+				meta_missing = true
+			end
+		else
+			local ok_decode, decoded = pcall(require("cjson").decode, raw)
+			if not ok_decode or type(decoded) ~= "table" then
+				meta_corrupt = true
+			else
+				shard_meta = decoded
+				if decoded.tombstoned == true then
+					tombstoned = true
+				elseif type(decoded.der_sha256) == "string" then
+					local sha = decoded.der_sha256:lower()
+					if #sha == 64 and sha:match("^[0-9a-f]+$") then
+						disk_sha = sha
+					end
+				end
 			end
 		end
-	end)
+	end
 	if tombstoned or meta_corrupt then
 		return false
 	end
 
-	local eff = _M.ligand_effective_sha(shard_meta, fingerprint)
-	if type(eff) == "string" and #eff == 64 then
-		disk_sha = eff
-	elseif type(shard_meta) == "table" and shard_meta.paged == true then
-		return false
-	elseif eff == nil and disk_sha == nil then
-		return false
-	end
-
-	if disk_sha then
-		return disk_sha == binding
-	end
-	-- Both shard files gone: do NOT keep L1 on ligand SHA alone (staggered job
-	-- delete can leave outside ligand naming the old body). Require ligand present
-	-- with paged=true (active canary generation mid-promote) plus SHA match.
-	if meta_missing and not read_file(ocsp_path(fingerprint)) then
+	-- Shard meta+DER both gone: publish-gap keep only (never bare ligand SHA).
+	-- Must run before ligand_effective_sha, which would otherwise accept any
+	-- ligand der_sha256 and skip paged + explicit soft_recall_gen gates.
+	if meta_missing then
+		-- Clean publish-gap: both meta and DER gone (ENOENT). Empty DER is a
+		-- truncate race, not absence — same as empty ocsp.json → drop L1.
+		local der_raw, der_why = read_file(ocsp_path(fingerprint))
+		if der_raw then
+			-- DER without ocsp.json: not a clean publish-gap; drop L1.
+			return false
+		end
+		if der_why == "empty" then
+			return false
+		end
 		local ligand = read_ocsp_ligand(fingerprint)
 		if type(ligand) ~= "table" or ligand.paged ~= true then
 			return false
@@ -926,10 +1123,30 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 		if type(gap_gen) ~= "number" then
 			return false
 		end
-		local ligand_sha = _M.ligand_effective_sha(nil, fingerprint)
-		return type(ligand_sha) == "string" and #ligand_sha == 64 and ligand_sha == binding
+		if ligand.tombstoned == true then
+			return false
+		end
+		local ligand_sha = ligand.der_sha256
+		return type(ligand_sha) == "string"
+			and #ligand_sha == 64
+			and ligand_sha:match("^[0-9a-f]+$") ~= nil
+			and ligand_sha == binding
 	end
-	return false
+
+	local eff = _M.ligand_effective_sha(shard_meta, fingerprint)
+	if type(eff) == "string" and #eff == 64 and eff:match("^[0-9a-f]+$") then
+		disk_sha = eff
+	elseif type(shard_meta) == "table" and shard_meta.paged == true then
+		return false
+	elseif read_ocsp_ligand(fingerprint) then
+		-- Ligand present but effective sha nil → tombstoned (or refuse-shaped).
+		-- Never fall back to in-shard der_sha256 while outside ligand refuses.
+		return false
+	elseif disk_sha == nil then
+		return false
+	end
+
+	return disk_sha == binding
 end
 
 l1_matches_disk = function(_internalstore, fingerprint, resp, stored_epoch)
@@ -991,17 +1208,7 @@ local function meta_expires_unix(meta)
 	if type(meta) ~= "table" then
 		return nil
 	end
-	local u = meta.expires_unix
-	if type(u) == "number" and u > 0 then
-		return math.floor(u)
-	end
-	if type(u) == "string" then
-		local n = tonumber(u)
-		if n and n > 0 then
-			return math.floor(n)
-		end
-	end
-	return nil
+	return positive_expires_unix(meta.expires_unix)
 end
 
 function _M.meta_expires_unix(meta)
@@ -1013,23 +1220,14 @@ local function meta_max_age_unix(meta)
 	if type(meta) ~= "table" then
 		return nil
 	end
-	local u = meta.max_age_unix
-	if type(u) == "number" and u > 0 then
-		return math.floor(u)
+	local max_age = positive_unix(meta.max_age_unix)
+	if max_age then
+		return max_age
 	end
-	if type(u) == "string" then
-		local n = tonumber(u)
-		if n and n > 0 then
-			return math.floor(n)
-		end
-	end
-	local published = meta.published_unix
-	if type(published) == "string" then
-		published = tonumber(published)
-	end
-	if type(published) == "number" and published > 0 then
+	local published = positive_unix(meta.published_unix)
+	if published then
 		-- Match PREVIOUS_GOOD_MAX_AGE_SECONDS in ocsp-refresh.py (24h).
-		return math.floor(published) + 86400
+		return published + 86400
 	end
 	return nil
 end
@@ -1066,15 +1264,25 @@ local function intrinsic_timing_ok(meta)
 end
 
 local function resp_still_fresh(expires_unix, fingerprint, meta)
-	meta = meta or (fingerprint and read_ocsp_json(fingerprint)) or nil
+	-- Overlay outside ligand so freshness uses the same min(expires) as
+	-- warm_cache / merge_ligand. ligand_or_meta always samples live shard
+	-- (caller meta ignored — can lag tombstone / expires tighten).
+	local fp = fp64_or_nil(fingerprint)
+	if fp then
+		meta = ligand_or_meta(nil, fp)
+	elseif type(meta) ~= "table" then
+		meta = nil
+	end
+	-- After ligand merge: refuse if either side tombstoned (callers often only
+	-- checked shard ocsp.json before calling).
+	if type(meta) == "table" and meta.tombstoned == true then
+		return false, "tombstoned"
+	end
 	local ok_intrinsic, why = intrinsic_timing_ok(meta)
 	if not ok_intrinsic then
 		log(
 			ngx.ERR,
-			"OCSP intrinsic timing refuse reason="
-				.. tostring(why)
-				.. " fp="
-				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
+			"OCSP intrinsic timing refuse reason=" .. tostring(why) .. " fp=" .. tostring(fp and fp:sub(1, 16) or "?")
 		)
 		return false, why or "unmet"
 	end
@@ -1091,8 +1299,7 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	if not exp then
 		log(
 			ngx.ERR,
-			"OCSP refuse staple: no expires_unix/max_age death clock fp="
-				.. tostring(fingerprint and fingerprint:sub(1, 16) or "?")
+			"OCSP refuse staple: no expires_unix/max_age death clock fp=" .. tostring(fp and fp:sub(1, 16) or "?")
 		)
 		return false, "response_stale"
 	end
@@ -1106,22 +1313,59 @@ local function resp_still_fresh(expires_unix, fingerprint, meta)
 	return true
 end
 
+-- Meta death clock first; L1 expires_unix may only tighten, never extend or
+-- invent a clock when meta/ligand is stripped (matches resp_still_fresh).
 meta_effective_expires_unix = function(meta, expires_unix)
-	local exp = expires_unix or meta_expires_unix(meta)
+	local meta_exp = meta_expires_unix(meta)
 	local max_age = meta_max_age_unix(meta)
+	local exp = meta_exp
 	if exp and max_age then
 		if max_age < exp then
-			return max_age
+			exp = max_age
 		end
-		return exp
+	elseif max_age and not exp then
+		exp = max_age
 	end
-	return exp or max_age
+	if not exp then
+		-- No meta/ligand death clock: do not keep a stripped-meta DER alive via L1.
+		return nil
+	end
+	if type(expires_unix) == "number" and expires_unix > 0 and expires_unix < exp then
+		return math.floor(expires_unix)
+	end
+	return exp
 end
 
 -- Tri-state export for HTTP/conf callers that need unknown ≠ false vs true.
 -- Returns true | false | nil (see resolve_leaf_must_staple).
 function _M.resolve_leaf_must_staple(cert_pem, fingerprint)
 	return resolve_leaf_must_staple(cert_pem, fingerprint)
+end
+
+function _M.serial_blacklist_blocks(fingerprint, resp)
+	return serial_blacklist_blocks(fingerprint, resp)
+end
+
+function _M.meta_tombstoned(meta, fingerprint)
+	return meta_tombstoned(meta, fingerprint)
+end
+
+-- Public colony-floor gate (HTTP must call this — do not reintroduce a loose
+-- tonumber inline that accepts "1e20" / inf and forks Must-Staple closes).
+function _M.cluster_floor_blocks(fingerprint, meta)
+	return cluster_floor_blocks(fingerprint, meta)
+end
+
+-- Public freshness gate (HTTP must call this — do not reintroduce a shard-only
+-- inline that ignores ligand min(expires) / tombstone).
+function _M.resp_still_fresh(expires_unix, fingerprint, meta)
+	return resp_still_fresh(expires_unix, fingerprint, meta)
+end
+
+-- Public live gen (HTTP must call this — do not reintroduce ligand-only soft_recall
+-- that ignores shard gen when the ligand omits the key).
+function _M.live_soft_recall_gen(fingerprint)
+	return live_soft_recall_gen(fingerprint)
 end
 
 _M.internal = {
@@ -1135,6 +1379,9 @@ _M.internal = {
 	get_l1 = get_l1,
 	l1_matches_disk = l1_matches_disk,
 	ligand_or_meta = ligand_or_meta,
+	live_soft_recall_gen = live_soft_recall_gen,
+	-- pin.ligand_or_meta wrapper caches via these (same ngx.ctx table as read path).
+	merge_ligand = merge_ligand,
 	meta_effective_expires_unix = meta_effective_expires_unix,
 	meta_tombstoned = meta_tombstoned,
 	must_staple_binds_shared_ligand = must_staple_binds_shared_ligand,
@@ -1142,6 +1389,7 @@ _M.internal = {
 	ocsp_json_ligand_matches = ocsp_json_ligand_matches,
 	ocsp_json_must_staple = ocsp_json_must_staple,
 	read_ocsp_json = read_ocsp_json,
+	read_ocsp_ligand = read_ocsp_ligand,
 	resolve_leaf_must_staple = resolve_leaf_must_staple,
 	resp_still_fresh = resp_still_fresh,
 	serial_blacklist_blocks = serial_blacklist_blocks,
