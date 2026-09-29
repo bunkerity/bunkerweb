@@ -3320,9 +3320,10 @@ function _M.ssl_certificate(state)
 			if has_must_staple then
 				safe_log(INFO, "OCSP-Must-Staple extension detected in certificate for " .. (server_name or "unknown"))
 			end
-			-- OPTIMIZATION: Cache issuer DN in ngx.ctx (Priority 10) to avoid re-parsing in validation
+			-- Keyed by the PEM it came from: the fingerprint walk validates other leaves
+			-- (dual RSA+ECDSA) whose issuer differs.
 			if cert_meta.issuer_name and ngx.ctx then
-				ngx.ctx.bw_ocsp_issuer_name = cert_meta.issuer_name
+				ngx.ctx.bw_ocsp_issuer_dn = { pem = leaf_for_meta, dn = cert_meta.issuer_name }
 			end
 		end
 		-- When resty cannot see TLS Feature, honor Must-Staple from job-written ocsp.json.
@@ -3750,11 +3751,9 @@ function _M.ssl_certificate(state)
 			local t_val_total_start = ocsp_validate_clock()
 			local issuer_name = nil
 
-			-- OPTIMIZATION: Use cached issuer DN from read_certificate_metadata (Priority 10)
-			-- to avoid re-parsing the same certificate in the validation loop
-			if ngx.ctx and ngx.ctx.bw_ocsp_issuer_name then
-				issuer_name = ngx.ctx.bw_ocsp_issuer_name
-				safe_log(DEBUG, "OCSP using cached issuer DN (Priority 10 optimization)")
+			local cached_dn = ngx.ctx and ngx.ctx.bw_ocsp_issuer_dn
+			if cached_dn and cached_dn.pem == cert_for_fp_pem then
+				issuer_name = cached_dn.dn
 			elseif has_resty_ssl and resty_x509 and resty_x509.new then
 				-- Fallback: Optional fast-path: use resty.openssl to derive issuer DN.
 				local leaf_cert_obj = resty_x509.new(cert_for_fp_pem)
