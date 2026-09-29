@@ -150,6 +150,40 @@ local function claim_l1_warmer_lease(internalstore)
 	return claimed
 end
 
+-- Module-level fingerprint list cache (survives across warm cycles).
+-- Fingerprint list is expensive to scan (10-50ms per cycle); cache until epoch changes.
+local cached_fingerprints = nil
+local cached_fingerprints_epoch = nil
+local cached_fingerprints_timeout = 0
+local FPS_CACHE_TTL = 300  -- Force rescan every 5 minutes as safety valve
+
+-- Get cached fingerprint list, rescanning only on epoch change or timeout.
+-- Tier 2 optimization: avoids 10-50ms lfs.dir/find scan on most warm cycles.
+local function get_cached_fingerprints(current_epoch)
+	local now = ngx.now()
+
+	-- Cache hit: same epoch, not expired
+	if cached_fingerprints and cached_fingerprints_epoch == current_epoch and now < cached_fingerprints_timeout then
+		return cached_fingerprints
+	end
+
+	-- Cache miss or epoch changed: rescan filesystem (10-50ms cost)
+	cached_fingerprints = list_ocsp_fingerprints()
+	cached_fingerprints_epoch = current_epoch
+	cached_fingerprints_timeout = now + FPS_CACHE_TTL
+
+	if cached_fingerprints_epoch ~= current_epoch or now >= cached_fingerprints_timeout then
+		log(
+			ngx.DEBUG,
+			"OCSP L1 warmer rescanned fingerprints: "
+				.. #cached_fingerprints
+				.. " certs epoch="
+				.. tostring(current_epoch)
+		)
+	end
+	return cached_fingerprints
+end
+
 -- Nested hex dirs, or find fallback restricted to root/a/b/fp64.
 local function list_ocsp_fingerprints()
 	local fps = {}
@@ -274,7 +308,9 @@ function _M.warm_l1_from_disk(internalstore, epoch)
 	if not renew_l1_warmer_lease(internalstore) then
 		return 0, false
 	end
-	local fps = list_ocsp_fingerprints()
+	-- Tier 2 optimization: get fingerprint list from cache if epoch hasn't changed
+	-- (avoids 10-50ms filesystem scan on most warm cycles)
+	local fps = get_cached_fingerprints(epoch)
 	if not renew_l1_warmer_lease(internalstore) then
 		return 0, false
 	end
