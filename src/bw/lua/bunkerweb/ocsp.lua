@@ -99,6 +99,22 @@ local chain_pem_from_blocks = chain.chain_pem_from_blocks
 local clear_connection_staple = chain.clear_connection_staple
 local issuer_linked_chain_blocks = chain.issuer_linked_chain_blocks
 
+-- Lazy-loaded must-staple module (only loaded when needed)
+local must_staple_module = nil
+local function get_must_staple_module()
+	if must_staple_module ~= nil then
+		return must_staple_module  -- Already loaded (or marked as not needed)
+	end
+	local mode = ocsp_staple_mode()
+	if mode == "open" then
+		must_staple_module = false  -- Mark as not needed
+		return nil
+	end
+	-- Load module only for normal/staple_only modes
+	must_staple_module = require("bunkerweb.ocsp_must_staple")
+	return must_staple_module
+end
+
 -- Async validation state management (off-path validation)
 -- Defers OCSP validation to background job, reduces TLS critical path latency.
 
@@ -882,10 +898,9 @@ local function try_staple(
 	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
 	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
 	-- require cryptographic validation. We can attach the response blindly.
-	local is_open_mode = ocsp_staple_mode() == "open"
-	local is_must_staple = get_must_staple_with_ctx_cache(leaf_pem, fingerprint)
-	if is_open_mode and not is_must_staple then
-		log(ngx.DEBUG, "OCSP open mode + non-must-staple: skipping validation, attaching speculatively")
+	local ms_module = get_must_staple_module()
+	if not ms_module or ms_module.should_skip_validation(leaf_pem, fingerprint) then
+		log(ngx.DEBUG, "OCSP: skipping validation, attaching speculatively")
 		-- Queue async validation for future handshakes (even though this one doesn't need it)
 		if not async_status then
 			mark_async_validation_pending(fingerprint)
@@ -1249,43 +1264,6 @@ end
 -- On success the second value is the issuer-linked blocks table (array of PEMs plus
 -- optional unresolved_must_staple). Callers may pass it to staple/probe/attach;
 -- table.concat is only for set_cert. Named fields survive — PEM round-trip does not.
--- Compute Must-Staple once per leaf during parsing phase.
--- Avoids re-parsing PEM + re-reading ocsp.json for same cert multiple times.
-local function annotate_leaves_must_staple(leaves)
-	if type(leaves) ~= "table" then
-		return
-	end
-	for leaf_idx, leaf in ipairs(leaves) do
-		if type(leaf) == "table" then
-			local pem = leaf.pem or leaf.ocsp_cert or leaf.cert_pem
-			local fp = leaf.fp or leaf.ocsp_fp_hint
-			if pem or fp then
-				leaf.must_staple = resolve_leaf_must_staple(pem, fp)
-			end
-		end
-	end
-end
-
--- Request-scoped memoization of Must-Staple resolution via ngx.ctx.
--- Avoids re-resolving the same cert during staple(), probe(), and requires_must_staple().
-local function get_must_staple_with_ctx_cache(cert_pem, cert_fp)
-	local ctx = ngx.ctx
-	if not ctx then
-		-- No context (should not happen in TLS handshake); resolve directly
-		return resolve_leaf_must_staple(cert_pem, cert_fp)
-	end
-	if not ctx.bw_ocsp_ms_cache then
-		ctx.bw_ocsp_ms_cache = {}
-	end
-	local key = cert_fp or ("pem_" .. (cert_pem and cert_pem:sub(1, 32) or "unknown"))
-	if ctx.bw_ocsp_ms_cache[key] ~= nil then
-		return ctx.bw_ocsp_ms_cache[key]
-	end
-	local result = resolve_leaf_must_staple(cert_pem, cert_fp)
-	ctx.bw_ocsp_ms_cache[key] = result
-	return result
-end
-
 function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, prefer_kind)
 	maybe_rearm_l1_warmer()
 	if type(cert_pem) ~= "string" or cert_pem == "" or type(key_pem) ~= "string" or key_pem == "" then
@@ -1335,7 +1313,10 @@ function _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name, pr
 	end
 
 	-- Compute Must-Staple once per leaf upfront; reuse throughout selection phase.
-	annotate_leaves_must_staple(leaves)
+	local ms_module = get_must_staple_module()
+	if ms_module then
+		ms_module.annotate_leaves(leaves)
+	end
 
 	local sigalgs_ext = ngx.ctx and ngx.ctx.bw_ocsp_sigalgs_ext or nil
 	local candidates = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
@@ -2513,7 +2494,8 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	local fingerprint = leaf_fp or fp_hint
 
 	-- Use request-scoped cache to avoid re-resolving same cert multiple times.
-	local must_tri = get_must_staple_with_ctx_cache(leaf_pem, fingerprint)
+	local ms_module = get_must_staple_module()
+	local must_tri = ms_module and ms_module.get_must_staple(leaf_pem, fingerprint) or nil
 	-- Fail closed: unknown (nil) enforces Must-Staple; proven false does not.
 	local must_staple = must_tri ~= false
 
@@ -2627,7 +2609,8 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	local fingerprint = leaf_fp or fp_hint
 	-- Use request-scoped cache to avoid re-resolving same cert multiple times.
 	-- Fail closed: unknown enforces Must-Staple; proven false may load unstapled.
-	if get_must_staple_with_ctx_cache(leaf_pem, fingerprint) == false then
+	local ms_module = get_must_staple_module()
+	if ms_module and ms_module.get_must_staple(leaf_pem, fingerprint) == false then
 		-- Optional leaf stapling: path already scored; leaf may load without a live body.
 		return true
 	end
@@ -2664,7 +2647,8 @@ function _M.requires_must_staple(cert_pem, cert_fp_hint)
 	end
 	local leaf_fp = leaf_pem and spki_fingerprint(leaf_pem) or nil
 	-- Use request-scoped cache.
-	return get_must_staple_with_ctx_cache(leaf_pem, leaf_fp or fp_hint) ~= false
+	local ms_module = get_must_staple_module()
+	return not ms_module or ms_module.get_must_staple(leaf_pem, leaf_fp or fp_hint) ~= false
 end
 
 -- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", "ed", or nil.
