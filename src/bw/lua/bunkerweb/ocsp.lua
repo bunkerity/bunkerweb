@@ -196,15 +196,21 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 		-- Use first 32 chars of each PEM as a cache key (fingerprints are unique)
 		local der_cache_key = (leaf_pem and leaf_pem:sub(1, 32) or "leaf") ..
 			"|" .. (issuer_pem and issuer_pem:sub(1, 32) or "issuer")
-		if ctx.bw_ocsp_der_cache[der_cache_key] then
-			-- Cache hit: reuse DER chain
-			der_chain = ctx.bw_ocsp_der_cache[der_cache_key].chain
-			err = ctx.bw_ocsp_der_cache[der_cache_key].err
+		local cached_entry = ctx.bw_ocsp_der_cache[der_cache_key]
+		local current_gen = current_ocsp_epoch()
+		-- Generation binding: invalidate cache if soft-recall (generation) changed.
+		-- Prevents attacker from keeping poisoned DER across certificate rotations.
+		if cached_entry and cached_entry.gen == current_gen then
+			-- Cache hit: reuse DER chain (generation still valid)
+			der_chain = cached_entry.chain
+			err = cached_entry.err
 		else
-			-- Cache miss: compute DER chain
+			-- Cache miss or stale generation: compute DER chain
 			der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
 			-- Bounded cache: cap at 16 entries per request (typical: 1-4 issuers per cert)
-			bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key, { chain = der_chain, err = err }, 16)
+			-- Tag with current generation for soft-recall invalidation
+			bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key,
+				{ chain = der_chain, err = err, gen = current_gen }, 16)
 		end
 	else
 		der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
@@ -370,6 +376,15 @@ local function try_staple(
 	-- must not greenlight a body that force_ffi attach would name issuer_unavailable.
 	if type(issuers) ~= "table" or #issuers == 0 then
 		return false, "issuer_unavailable"
+	end
+	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
+	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
+	-- require cryptographic validation. We can attach the response blindly.
+	local is_open_mode = ocsp_staple_mode() == "open"
+	local is_must_staple = get_must_staple_with_ctx_cache(leaf_pem, fingerprint)
+	if is_open_mode and not is_must_staple then
+		log(ngx.DEBUG, "OCSP open mode + non-must-staple: skipping validation, attaching speculatively")
+		return set_resp()
 	end
 	-- force_ffi: prior validate_budget demoted L1 but KEEP pin — finish one FFI walk.
 	if canary_paged_body_ok(meta, fingerprint, resp) and not force_ffi then
