@@ -708,7 +708,8 @@ function _M.ssl_certificate(state)
 		if ok_store and store and store.live_soft_recall_gen then
 			return store.live_soft_recall_gen(cert_fp)
 		end
-		return nil
+		-- Fallback to 0 when modules unavailable (matches ligand-missing behavior)
+		return 0
 	end
 
 	-- Composite L1: epoch + verified binding + soft_recall_gen + expires + DER.
@@ -889,7 +890,7 @@ function _M.ssl_certificate(state)
 				if type(live) == "table" and live.tombstoned == true then
 					return false
 				end
-				if store.meta_effective_expires_unix then
+				if type(live) == "table" and store.meta_effective_expires_unix then
 					local tight = store.meta_effective_expires_unix(live, nil)
 					if type(tight) ~= "number" or tight <= 0 then
 						return false
