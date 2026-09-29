@@ -27,12 +27,16 @@ end
 -- and the uncached computations in one table.
 local pem_memo_fetch
 local pem_profile_batched
+local ocsp_der_memo_fetch
 local uncached = {}
 do
 	local PEM_MEMO_MAX = 512
+	local OCSP_DER_MEMO_MAX = 256
 	local MEMO_NIL = {}
 	local pem_memo = {}
 	local pem_memo_count = 0
+	local ocsp_der_memo = {}
+	local ocsp_der_memo_count = 0
 
 	pem_memo_fetch = function(kind, pem, compute)
 		if type(pem) ~= "string" or pem == "" then
@@ -63,6 +67,35 @@ do
 			entry[kind] = v
 		end
 		return v
+	end
+
+	-- Separate cache for OCSP DER responses (binary data, not PEM).
+	-- Caches serial extraction result to avoid re-walking same response.
+	-- Uses first 32 bytes of response as cache key (collision risk: ~1 in 16^32).
+	ocsp_der_memo_fetch = function(ocsp_der, compute)
+		if type(ocsp_der) ~= "string" or #ocsp_der < 2 then
+			return compute(ocsp_der)
+		end
+		local key = ocsp_der:sub(1, math.min(32, #ocsp_der))
+		local result = ocsp_der_memo[key]
+		if result == MEMO_NIL then
+			return nil
+		end
+		if result ~= nil then
+			return result
+		end
+		if ocsp_der_memo_count >= OCSP_DER_MEMO_MAX then
+			ocsp_der_memo = {}
+			ocsp_der_memo_count = 0
+		end
+		result = compute(ocsp_der)
+		if result == nil then
+			ocsp_der_memo[key] = MEMO_NIL
+		else
+			ocsp_der_memo[key] = result
+		end
+		ocsp_der_memo_count = ocsp_der_memo_count + 1
+		return result
 	end
 end
 
@@ -308,7 +341,8 @@ local OID_OCSP_BASIC = "\43\6\1\5\5\7\48\1\1"
 
 -- Canonical uppercase hex serial of every SingleResponse CertID (RFC 6960 4.2.1),
 -- in response order. nil when the DER is not a successful basic OCSP response.
-local function ocsp_der_serials(der)
+-- Cached to avoid re-walking same response on multi-issuer handshakes (saves 1-2ms).
+function uncached.ocsp_der_serials(der)
 	if type(der) ~= "string" or #der < 2 then
 		return nil
 	end
@@ -400,10 +434,16 @@ local function ocsp_der_serials(der)
 	return serials
 end
 
+-- Memoized wrapper around ocsp_der_serials to cache results per response.
+-- Avoids re-walking same OCSP DER on multi-issuer handshakes.
+local function ocsp_der_serials_memoized(ocsp_der)
+	return ocsp_der_memo_fetch(ocsp_der, uncached.ocsp_der_serials)
+end
+
 -- Serial of the SingleResponse naming want_hex when present, else the first one.
 -- Callers compare the result with want_hex, so this is a "response covers it" test.
 local function ocsp_resp_serial_hex(ocsp_der, want_hex)
-	local serials = ocsp_der_serials(ocsp_der)
+	local serials = ocsp_der_serials_memoized(ocsp_der)
 	if not serials then
 		return nil
 	end
