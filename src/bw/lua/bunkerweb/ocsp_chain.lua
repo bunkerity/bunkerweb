@@ -43,6 +43,47 @@ local note_connection_staple
 local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP = 71
 local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX = 143
 
+-- Fallback cache for when ngx.ctx is unavailable (optimization #7)
+-- LRU cache: 64 entries, evicts least-recently-used on overflow
+local fallback_chain_cache = {}
+local fallback_cache_order = {}  -- Track access order for LRU
+local fallback_cache_max = 64
+
+local function fallback_cache_get(key)
+	if fallback_chain_cache[key] then
+		-- Move to end (most recent)
+		for i, k in ipairs(fallback_cache_order) do
+			if k == key then
+				table.remove(fallback_cache_order, i)
+				break
+			end
+		end
+		table.insert(fallback_cache_order, key)
+		return fallback_chain_cache[key]
+	end
+	return nil
+end
+
+local function fallback_cache_set(key, value)
+	if fallback_chain_cache[key] then
+		-- Update existing: move to end
+		for i, k in ipairs(fallback_cache_order) do
+			if k == key then
+				table.remove(fallback_cache_order, i)
+				break
+			end
+		end
+	else
+		-- New entry: check eviction
+		if #fallback_cache_order >= fallback_cache_max then
+			local lru_key = table.remove(fallback_cache_order, 1)
+			fallback_chain_cache[lru_key] = nil
+		end
+	end
+	fallback_chain_cache[key] = value
+	table.insert(fallback_cache_order, key)
+end
+
 -- ffi + C with SSL_ctrl, the OpenSSL stack API and the OCSP_RESPONSE codec declared,
 -- or nil. Reuses lua-resty-openssl's typedefs; each fallback declaration gets its own
 -- pcall because a redeclare error aborts the rest of a multi-declaration cdef.
@@ -1111,10 +1152,11 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 		return blocks
 	end
 	local leaf = blocks[1]
+	local leaf_fp = spki_fingerprint(leaf)
+
 	-- Cache chain format conversion per-request (optimization #3)
 	-- Key: leaf SPKI fingerprint (unique per leaf in request)
 	if ngx.ctx then
-		local leaf_fp = spki_fingerprint(leaf)
 		if is_fp64(leaf_fp) then
 			local cache_table = ngx.ctx.bw_presentable_chain_cache
 			if not cache_table then
@@ -1125,6 +1167,23 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 				return cache_table[leaf_fp]
 			end
 		end
+	else
+		-- Fallback for edge case: ngx.ctx not available (optimization #7)
+		-- Use LRU fallback cache (64-entry limit, per-worker process)
+		if is_fp64(leaf_fp) then
+			local cached = fallback_cache_get(leaf_fp)
+			if cached then
+				log(
+					ngx.DEBUG,
+					"OCSP presentable_chain_blocks: fallback cache hit (ngx.ctx unavailable)"
+				)
+				return cached
+			end
+		end
+		log(
+			ngx.DEBUG,
+			"OCSP presentable_chain_blocks: ngx.ctx unavailable, using fallback cache (no per-request cache)"
+		)
 	end
 	local inters = {}
 	for i = 2, #blocks do
@@ -1145,13 +1204,18 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 		note_depleted_pem_unresolved(0, leaf)
 	end
 	-- Store in cache for reuse (optimization #3)
+	-- Fallback: if ngx.ctx not available, use LRU fallback cache (optimization #7)
 	if ngx.ctx then
-		local leaf_fp = spki_fingerprint(leaf)
 		if is_fp64(leaf_fp) then
 			local cache_table = ngx.ctx.bw_presentable_chain_cache
 			if cache_table then
 				cache_table[leaf_fp] = out
 			end
+		end
+	else
+		-- Fallback cache: 64-entry LRU, per-worker storage
+		if is_fp64(leaf_fp) then
+			fallback_cache_set(leaf_fp, out)
 		end
 	end
 	return out
