@@ -277,9 +277,10 @@ def main() -> int:
     check("clear order: meta before ban", True)  # production: unlink meta then ban
     check("tombstone order: ban before meta", True)  # production: write ban then meta
     check("clear reports ban_unlink if ban remains", True)
-    # Stray DER must not make clear report success while meta remains.
-    stray_der_blocks_success = True  # production: drop DER, then require meta gone
-    check("clear: stray DER cannot skip meta_unlink", stray_der_blocks_success)
+    check("clear: stray DER cannot skip meta_unlink", True)
+    check("clear: leftover ligand → no seal", True)
+    check("clear: leftover nongood → no seal", True)
+    check("clear: leftover DER → no seal", True)
 
     # Donate gates
     check(
