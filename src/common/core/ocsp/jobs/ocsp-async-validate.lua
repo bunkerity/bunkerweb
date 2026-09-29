@@ -1,48 +1,43 @@
 #!/usr/bin/env lua
--- OCSP Async Validation Job
--- Runs in scheduler context (not TLS critical path)
--- Validates OCSP responses queued by TLS handshakes
--- Marks validated responses so future handshakes skip validation
+-- OCSP Async Validation Job with Must-Staple Prioritization
 --
--- ============================================================================
--- INTEGRATION INSTRUCTIONS
--- ============================================================================
+-- This job runs periodically (default: every minute) to validate OCSP responses
+-- for certificates in the Redis-backed validation queue. It implements a two-phase
+-- validation strategy:
 --
--- 1. Add to plugin.json (src/common/core/ocsp/plugin.json):
+-- PHASE 1 (High Priority): Validates ALL must-staple certificates first
+--   - Must-staple certificates REQUIRE an OCSP staple (mandatory security requirement)
+--   - Failed must-staple certs are re-queued for automatic retry
+--   - Ensures critical certificates get validated with priority
 --
---    "jobs": [
---      {
---        "name": "ocsp-async-validate",
---        "file": "jobs/ocsp-async-validate.lua",
---        "every": "minute",           # every 1 minute (adjust as needed)
---        "reload": false,             # validation doesn't require reload
---        "async": true                # can run in background
---      }
---    ]
+-- PHASE 2 (Low Priority): Validates optional certificates with remaining capacity
+--   - Non-must-staple certificates are optional (best-effort)
+--   - Only runs if batch capacity remains after phase 1
+--   - Prevents starvation of optional certs while prioritizing critical ones
 --
--- 2. Dependencies:
---    - ngx.shared.bw_ocsp_validations (shared dict, auto-created by OpenResty)
---    - /var/cache/bunkerweb/ocsp/ (shard directory for OCSP responses)
---    - bunkerweb.logger (standard logging)
---    - bunkerweb.ocsp (TLS-path module with async_validate_response())
+-- Key features:
+-- - Responder health tracking with exponential backoff (5min→10min→20min→...)
+-- - HTTP 429 (rate limit) handling with Retry-After header parsing
+-- - Request rate limiting to prevent overwhelming responders
+-- - Per-certificate validation with proper error handling
+-- - Version tagging for cache invalidation on cert rotation
 --
--- 3. Environment:
---    - Runs in scheduler worker context (not in TLS worker)
---    - Can use IO operations (file reads) without TLS latency concern
---    - Reports via logger; metrics optional
---
--- 4. Monitoring:
---    - Watch logs for "[OCSP-ASYNC]" prefix
---    - Track "validated", "failed", "skipped" counts
---    - Alert if failure rate > 10% or job duration > 5s
---
--- ============================================================================
+-- Configuration (env vars):
+--   OCSP_BATCH_SIZE=10                    -- Certs per cycle (default: 10)
+--   OCSP_REQUEST_RATE_LIMIT=50            -- Requests/sec to responder (default: 50)
+--   OCSP_RATE_LIMIT_JITTER=20             -- Jitter % ±randomization (default: 20%)
+--   OCSP_RESPONDER_RETRY_INITIAL=300      -- Initial backoff seconds (default: 5min)
+--   OCSP_RESPONDER_RETRY_MAX=86400        -- Max backoff seconds (default: 24hr)
 
 local logger = require "bunkerweb.logger"
 local ocsp_module = require "bunkerweb.ocsp"
-local queue = require "ocsp_redis_queue"  -- Persistent queue with Redis fallback
+local queue = require "ocsp_redis_queue"
 
--- Logging helpers
+-- ============================================================================
+-- Logging Helpers
+-- ============================================================================
+-- All logs are prefixed with [OCSP-ASYNC] for easy filtering and debugging
+
 local function log_info(msg)
 	logger:info("[OCSP-ASYNC] " .. msg)
 end
@@ -55,80 +50,112 @@ local function log_err(msg)
 	logger:err("[OCSP-ASYNC] " .. msg)
 end
 
--- Helper: Check for certificate rotation and increment global version if detected.
--- Compares certificate modification times; if newer certs found, invalidate all cached responses.
-local function detect_and_handle_cert_rotation()
-	local cert_dir = "/var/cache/bunkerweb/letsencrypt" or os.getenv("OCSP_CACHE_DIR") or "/var/cache/bunkerweb/ocsp"
-	local marker_file = cert_dir .. "/.ocsp_cert_rotation_check"
-
-	-- Read previous rotation check timestamp
-	local last_check = 0
-	local marker_f = io.open(marker_file, "r")
-	if marker_f then
-		last_check = tonumber(marker_f:read("*a")) or 0
-		marker_f:close()
-	end
-
-	-- Check if any certificate files have been modified recently
-	local current_time = os.time()
-	local rotation_detected = false
-
-	-- Check for new cert files (simple heuristic: any .pem file newer than last check)
-	local cert_check = os.execute("find " .. cert_dir .. " -name '*.pem' -mmin -60 2>/dev/null | wc -l")
-	if cert_check and tonumber(cert_check) > 0 then
-		rotation_detected = true
-		log_info("Certificate rotation detected: found recently modified certificate files")
-	end
-
-	-- If rotation detected, increment global version to invalidate all cached responses
-	if rotation_detected then
-		pcall(function()
-			if ocsp_module.increment_ocsp_response_version then
-				local new_version = ocsp_module.increment_ocsp_response_version()
-				log_info("Incremented OCSP response version to: " .. new_version .. " (cache invalidated)")
-			end
-		end)
-	end
-
-	-- Update rotation check marker
-	local marker_w = io.open(marker_file, "w")
-	if marker_w then
-		marker_w:write(tostring(current_time))
-		marker_w:close()
-	end
+local function log_debug(msg)
+	logger:debug("[OCSP-ASYNC] " .. msg)
 end
 
--- Helper: Read OCSP response from cache or disk
--- Returns: binary OCSP response DER or nil if not found
+-- ============================================================================
+-- Must-Staple Module Loading
+-- ============================================================================
+-- The must-staple detection module is lazily loaded only when needed.
+-- This avoids unnecessary imports and allows graceful fallback if unavailable.
+-- Caching ensures we only load once, even if called multiple times.
+
+local must_staple_module = nil
+
+-- Lazy-load the must-staple detection module
+-- Returns: module object if available, nil if unavailable
+-- Caches result to avoid repeated load attempts
+local function get_must_staple_module()
+	if must_staple_module ~= nil then
+		return must_staple_module
+	end
+
+	local ok, ms = pcall(function()
+		return require("bunkerweb.ocsp_must_staple")
+	end)
+
+	if ok and ms then
+		must_staple_module = ms
+	else
+		must_staple_module = false  -- Mark as unavailable (distinct from nil)
+	end
+
+	return must_staple_module ~= false and must_staple_module or nil
+end
+
+-- ============================================================================
+-- File Reading Helpers
+-- ============================================================================
+-- Reads certificate data from the OCSP cache directory.
+-- Directory structure uses sharding (first hex char) for filesystem performance:
+--   /var/cache/bunkerweb/ocsp/0/abc123...def.der   (OCSP response, DER format)
+--   /var/cache/bunkerweb/ocsp/f/abc123...def.json  (metadata: cert_path, issuer_path)
+-- This reduces entries per directory for faster lookups with 1000s of certs.
+
+-- Reads OCSP response from disk cache
+-- Returns: DER-encoded OCSP response bytes, or nil if not found/empty
 local function read_ocsp_response(fingerprint)
 	if not fingerprint or fingerprint == "" then
 		return nil
 	end
 
-	-- Calculate shard path (16-way distribution: 0-f)
-	local shard = fingerprint:sub(1, 1)  -- First hex char
+	local shard = fingerprint:sub(1, 1)  -- First hex char for sharding (0-f)
 	local ocsp_path = "/var/cache/bunkerweb/ocsp/" .. shard .. "/" .. fingerprint .. ".der"
 
-	-- Try to read OCSP response from disk
 	local f = io.open(ocsp_path, "rb")
 	if not f then
-		log_warn("OCSP response not found: " .. ocsp_path)
 		return nil
 	end
 
 	local ocsp_der = f:read("*a")
 	f:close()
 
-	if not ocsp_der or ocsp_der == "" then
-		log_warn("OCSP response empty: " .. ocsp_path)
+	return ocsp_der ~= "" and ocsp_der or nil
+end
+
+-- Reads leaf certificate (PEM format) by first reading metadata JSON
+-- Metadata contains the file path to the actual cert file
+-- Returns: PEM-encoded certificate, or nil if not found/empty
+local function read_leaf_pem(fingerprint)
+	if not fingerprint or fingerprint == "" then
 		return nil
 	end
 
-	return ocsp_der
+	local shard = fingerprint:sub(1, 1)
+	local metadata_path = "/var/cache/bunkerweb/ocsp/" .. shard .. "/" .. fingerprint .. ".json"
+
+	-- Read metadata to find cert file path
+	local f = io.open(metadata_path, "r")
+	if not f then
+		return nil
+	end
+
+	local json_str = f:read("*a")
+	f:close()
+
+	-- Extract cert_path from JSON (simple regex, not full JSON parser)
+	local leaf_path = json_str:match('"cert_path"%s*:%s*"([^"]*)"')
+	if not leaf_path or leaf_path == "" then
+		return nil
+	end
+
+	-- Read the actual certificate file
+	local leaf_f = io.open(leaf_path, "r")
+	if not leaf_f then
+		return nil
+	end
+
+	local leaf_pem = leaf_f:read("*a")
+	leaf_f:close()
+
+	return leaf_pem ~= "" and leaf_pem or nil
 end
 
--- Helper: Read certificate chain from metadata
--- Returns: table of issuer PEM strings or nil if not found
+-- Reads issuer certificate chain from metadata file
+-- Chain is stored as concatenated PEM blocks (usually 1-2 certs)
+-- First issuer is typically the CA who signed the leaf, used for OCSP responder URL
+-- Returns: array of PEM-encoded certificates, or nil if not found/empty
 local function read_issuer_chain(fingerprint)
 	if not fingerprint or fingerprint == "" then
 		return nil
@@ -137,29 +164,24 @@ local function read_issuer_chain(fingerprint)
 	local shard = fingerprint:sub(1, 1)
 	local metadata_path = "/var/cache/bunkerweb/ocsp/" .. shard .. "/" .. fingerprint .. ".json"
 
-	-- Try to read metadata JSON
+	-- Read metadata to find issuer chain file path
 	local f = io.open(metadata_path, "r")
 	if not f then
-		log_warn("OCSP metadata not found: " .. metadata_path)
 		return nil
 	end
 
 	local json_str = f:read("*a")
 	f:close()
 
-	-- Parse JSON to extract issuer chain (basic parsing)
-	-- Full implementation should use proper JSON library
-	-- For now: look for "issuer_path" field
+	-- Extract issuer_path from JSON
 	local issuer_path = json_str:match('"issuer_path"%s*:%s*"([^"]*)"')
 	if not issuer_path or issuer_path == "" then
-		log_warn("Issuer path not in metadata: " .. metadata_path)
 		return nil
 	end
 
-	-- Read issuer chain file
+	-- Read the issuer chain file
 	local issuer_f = io.open(issuer_path, "r")
 	if not issuer_f then
-		log_warn("Issuer chain file not found: " .. issuer_path)
 		return nil
 	end
 
@@ -167,11 +189,11 @@ local function read_issuer_chain(fingerprint)
 	issuer_f:close()
 
 	if not chain_pem or chain_pem == "" then
-		log_warn("Issuer chain empty: " .. issuer_path)
 		return nil
 	end
 
-	-- Split PEM chain into individual issuers
+	-- Parse PEM blocks (multiple certs concatenated)
+	-- Each cert is bounded by -----BEGIN/END CERTIFICATE-----
 	local issuers = {}
 	local current_pem = ""
 	for line in chain_pem:gmatch("[^\n]+") do
@@ -182,569 +204,391 @@ local function read_issuer_chain(fingerprint)
 		end
 	end
 
-	if #issuers == 0 then
-		log_warn("No issuers extracted from chain: " .. issuer_path)
-		return nil
-	end
-
-	return issuers
+	return #issuers > 0 and issuers or nil
 end
 
--- Helper: Read leaf certificate PEM
--- Returns: leaf certificate PEM string or nil if not found
-local function read_leaf_pem(fingerprint)
-	if not fingerprint or fingerprint == "" then
-		return nil
+-- ============================================================================
+-- Must-Staple Detection
+-- ============================================================================
+-- Checks if a certificate has the must-staple extension (RFC 6961).
+-- Must-staple means the certificate REQUIRES an OCSP staple during TLS handshake.
+-- These are high-priority and must be validated before optional certs.
+--
+-- Returns:
+--   true  = Certificate has must-staple requirement (high priority)
+--   false = Certificate does NOT have must-staple (optional, low priority)
+--   nil   = Unable to determine (module unavailable or cert unreadable)
+
+local function is_must_staple_cert(fingerprint, leaf_pem)
+	-- If PEM not provided, read from disk
+	if not leaf_pem then
+		leaf_pem = read_leaf_pem(fingerprint)
 	end
 
-	local shard = fingerprint:sub(1, 1)
-	local metadata_path = "/var/cache/bunkerweb/ocsp/" .. shard .. "/" .. fingerprint .. ".json"
-
-	-- Read metadata to get leaf cert path
-	local f = io.open(metadata_path, "r")
-	if not f then
-		return nil
+	if not leaf_pem then
+		return nil  -- Cannot read cert
 	end
 
-	local json_str = f:read("*a")
-	f:close()
-
-	-- Extract leaf cert path from metadata
-	local leaf_path = json_str:match('"cert_path"%s*:%s*"([^"]*)"')
-	if not leaf_path or leaf_path == "" then
-		log_warn("Cert path not in metadata: " .. metadata_path)
-		return nil
+	-- Get must-staple detection module
+	local ms_module = get_must_staple_module()
+	if not ms_module then
+		return nil  -- Module unavailable, cannot determine
 	end
 
-	-- Read leaf cert
-	local leaf_f = io.open(leaf_path, "r")
-	if not leaf_f then
-		log_warn("Leaf cert file not found: " .. leaf_path)
-		return nil
-	end
-
-	local leaf_pem = leaf_f:read("*a")
-	leaf_f:close()
-
-	if not leaf_pem or leaf_pem == "" then
-		log_warn("Leaf cert empty: " .. leaf_path)
-		return nil
-	end
-
-	return leaf_pem
+	-- Delegate to module for actual must-staple detection
+	return ms_module.get_must_staple(leaf_pem, fingerprint) or false
 end
 
--- Main: Enumerate pending validations and gather data
-local function get_pending_validations()
-	local pending = {}
+-- ============================================================================
+-- Core Validation Logic
+-- ============================================================================
+-- Validates a single OCSP response for a certificate.
+-- Handles responder health checks, rate limiting, and various error conditions.
+--
+-- Parameters:
+--   fingerprint    = SHA-256 fingerprint of the certificate (hex string)
+--   batch_position = Position in current batch (for rate limiting)
+--
+-- Returns:
+--   true  = Successfully validated and cached
+--   false = Failed (marked as failed, will not retry)
+--   nil   = Skipped (responder backoff, keeping existing staple)
+--
+-- Process:
+--   1. Read OCSP response, leaf cert, and issuer chain from disk
+--   2. Check responder health (skip if unhealthy, responder in backoff)
+--   3. Apply rate limiting based on batch position
+--   4. Call async_validate_response (crypto validation)
+--   5. Handle HTTP errors (429 = rate limited, 500+ = responder error, 400+ = client error)
+--   6. Mark as validated/failed and update responder health
+--   7. Tag response with version for cache invalidation
 
-	-- Access shared dict (bw_ocsp_validations)
-	local ngx_shared = ngx and ngx.shared
-	if not ngx_shared or not ngx_shared.bw_ocsp_validations then
-		log_warn("Shared dict bw_ocsp_validations not available")
-		return pending
+local function validate_single_cert(fingerprint, batch_position)
+	-- Step 1: Read cached OCSP response (DER format)
+	local ocsp_der = read_ocsp_response(fingerprint)
+	if not ocsp_der then
+		log_warn("Skipping: could not read OCSP response for " .. fingerprint:sub(1, 16) .. "...")
+		queue.mark_failed(fingerprint, "no_ocsp_response")
+		return false
 	end
 
-	local dict = ngx_shared.bw_ocsp_validations
-	local async_prefix = "OCSP:ASYNC_VALIDATE:"
+	-- Step 2: Read leaf certificate (PEM format)
+	local leaf_pem = read_leaf_pem(fingerprint)
+	if not leaf_pem then
+		log_warn("Skipping: could not read leaf cert for " .. fingerprint:sub(1, 16) .. "...")
+		queue.mark_failed(fingerprint, "no_leaf_cert")
+		return false
+	end
 
-	-- Iterate shared dict to find pending validations
-	-- Note: ngx.shared dict iteration is expensive; in production, consider
-	-- maintaining a separate "pending queue" in Redis or database
-	for key, value in pairs(dict:get_keys(0)) do
-		if key:sub(1, #async_prefix) == async_prefix and value == "pending" then
-			-- Extract fingerprint from key
-			local fingerprint = key:sub(#async_prefix + 1)
+	-- Step 3: Read issuer certificate chain (needed to validate OCSP response)
+	local issuers = read_issuer_chain(fingerprint)
+	if not issuers or #issuers == 0 then
+		log_warn("Skipping: could not read issuer chain for " .. fingerprint:sub(1, 16) .. "...")
+		queue.mark_failed(fingerprint, "no_issuer_chain")
+		return false
+	end
 
-			if fingerprint and #fingerprint == 64 then
-				log_info("Found pending validation: " .. fingerprint:sub(1, 16) .. "...")
+	-- Step 4: Extract responder URL from issuer certificate (first issuer usually contains OCSP URL)
+	-- Used for responder health tracking (group errors by responder, not by cert)
+	local responder_url = "ocsp:unknown"
+	if issuers and #issuers > 0 then
+		responder_url = "ocsp:" .. issuers[1]:sub(1, 16) .. "..."
+	end
 
-				-- Read OCSP response, leaf, and issuers
-				local ocsp_der = read_ocsp_response(fingerprint)
-				if not ocsp_der then
-					log_warn("Skipping: could not read OCSP response for " .. fingerprint:sub(1, 16) .. "...")
-					goto skip_item
-				end
+	-- Step 5: Check responder health before making request
+	-- If responder recently failed, back off exponentially (5min → 10min → 20min → ...)
+	-- Keeps existing OCSP staple while responder recovers
+	local is_healthy, wait_seconds = queue.is_responder_healthy(responder_url)
+	if not is_healthy then
+		log_warn("Responder unhealthy (backoff " .. wait_seconds .. "s): " .. responder_url)
+		log_debug("Skipping validation, keeping existing staple for: " .. fingerprint:sub(1, 16) .. "...")
+		return nil  -- Skip (don't fail), will retry after backoff period
+	end
 
-				local leaf_pem = read_leaf_pem(fingerprint)
-				if not leaf_pem then
-					log_warn("Skipping: could not read leaf cert for " .. fingerprint:sub(1, 16) .. "...")
-					goto skip_item
-				end
-
-				local issuers = read_issuer_chain(fingerprint)
-				if not issuers or #issuers == 0 then
-					log_warn("Skipping: could not read issuer chain for " .. fingerprint:sub(1, 16) .. "...")
-					goto skip_item
-				end
-
-				-- Add to pending validations
-				table.insert(pending, {
-					fingerprint = fingerprint,
-					ocsp_der = ocsp_der,
-					leaf_pem = leaf_pem,
-					issuers = issuers
-				})
-
-				::skip_item::
-			end
+	-- Step 6: Apply rate limiting to prevent overwhelming responder
+	-- Spreads requests over time based on batch position and configured rate limit
+	-- Default: 50 requests/second = 20ms per request
+	if batch_position and batch_position > 1 then
+		local request_rate_limit = tonumber(os.getenv("OCSP_REQUEST_RATE_LIMIT") or "50")
+		local base_delay_ms = 1000 / request_rate_limit
+		if ngx and ngx.sleep then
+			ngx.sleep(base_delay_ms / 1000)
 		end
 	end
 
-	log_info("Found " .. #pending .. " pending validations to process")
-	return pending
-end
-
--- Helper: Validate issuer certificate and compute SPKI
--- Returns: issuer_spki (fingerprint) if valid, nil if validation fails
-local function validate_issuer_cert_and_compute_spki(issuer_pem)
-	if not issuer_pem or issuer_pem == "" then
-		return nil
-	end
-
-	-- In a full implementation, this would:
-	-- 1. Parse issuer certificate PEM
-	-- 2. Verify certificate dates (not expired)
-	-- 3. Check certificate chain validity
-	-- 4. Compute SPKI fingerprint (SHA256 of public key)
-	--
-	-- For now: use placeholder that extracts basic info
-	-- Actual implementation requires lua-resty-openssl FFI
-
-	local pcall_ok, issuer_cert
-	pcall_ok = pcall(function()
-		local openssl = require "resty.openssl"
-		issuer_cert = openssl.x509.new(issuer_pem, "PEM")
+	-- Step 7: Validate OCSP response cryptographically
+	-- This calls the OCSP module to verify the response signature, freshness, etc.
+	-- Wrapped in pcall() to catch any unexpected crashes
+	local ok, http_code, error_msg
+	local success = pcall(function()
+		ok, http_code, error_msg = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
 	end)
 
-	if not pcall_ok or not issuer_cert then
-		log_warn("Failed to parse issuer certificate")
-		return nil
+	if not success then
+		log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
+		queue.mark_responder_failed(responder_url, "validation_crash")
+		queue.mark_failed(fingerprint, "validation_crash")
+		return false
 	end
 
-	-- Compute SPKI (placeholder: would use openssl.pkey:get_public_key_sha256())
-	-- For now, return a marker that issuer was validated
-	return "spki_placeholder"
-end
+	-- Step 8: Handle HTTP response codes
+	-- Different codes require different actions:
+	-- - 429 (Too Many Requests): Responder-level backoff, keep existing staple
+	-- - 5xx (Server Error): Responder-level backoff, mark cert failed
+	-- - 4xx (Client Error): Cert-specific failure, doesn't affect responder
+	-- - 2xx (Success): Proceed to crypto validation below
 
--- Validate from Redis queue (persists across restarts)
-local function validate_from_redis_queue()
-	local validated_count = 0
-	local failed_count = 0
-	local skipped_count = 0
-	local spki_cached_count = 0
+	if http_code == 429 then
+		-- Responder rate-limited us. Parse Retry-After header to know how long to wait.
+		log_warn("Responder rate limited (429) for: " .. responder_url)
+		local retry_after_seconds = queue.parse_retry_after(error_msg)
+		queue.mark_responder_failed(responder_url, "rate_limited_429", retry_after_seconds or 300)
+		log_info("Keeping existing staple, will retry after " .. (retry_after_seconds or 300) .. "s")
+		return nil  -- Skip, keep existing OCSP staple
 
-	-- Read batch size from environment (respects startup throttling)
-	local batch_size = tonumber(os.getenv("OCSP_BATCH_SIZE") or "10")
-	local request_rate_limit = tonumber(os.getenv("OCSP_REQUEST_RATE_LIMIT") or "50")
-	local rate_limit_jitter = tonumber(os.getenv("OCSP_RATE_LIMIT_JITTER") or "20")
+	elseif http_code and http_code >= 500 then
+		-- Responder returned server error. Mark responder unhealthy.
+		-- All certs from this responder will wait before retry.
+		log_warn("Responder error (" .. http_code .. ") for: " .. responder_url)
+		queue.mark_responder_failed(responder_url, "http_" .. http_code)
+		queue.mark_failed(fingerprint, "responder_error_" .. http_code)
+		return false
 
-	-- Calculate delay between requests (with jitter)
-	local base_delay_ms = 1000 / request_rate_limit
-	local jitter_pct = (math.random(100 - rate_limit_jitter, 100 + rate_limit_jitter) / 100)
-	local request_delay_ms = base_delay_ms * jitter_pct
-
-	log_info("Batch config: size=" .. batch_size .. ", rate=" .. request_rate_limit ..
-		" req/s, jitter=" .. rate_limit_jitter .. "%, delay=" .. string.format("%.1f", request_delay_ms) .. "ms")
-
-	for batch = 1, batch_size do
-		local fingerprint = queue.get_next_pending()
-		if not fingerprint then
-			break  -- No more pending
-		end
-
-		-- Read OCSP response from cache
-		local ocsp_der = read_ocsp_response(fingerprint)
-		if not ocsp_der then
-			log_warn("Skipping: could not read OCSP response for " .. fingerprint:sub(1, 16) .. "...")
-			queue.mark_failed(fingerprint, "no_ocsp_response")
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		-- Read leaf cert and issuers
-		local leaf_pem = read_leaf_pem(fingerprint)
-		if not leaf_pem then
-			log_warn("Skipping: could not read leaf cert for " .. fingerprint:sub(1, 16) .. "...")
-			queue.mark_failed(fingerprint, "no_leaf_cert")
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		local issuers = read_issuer_chain(fingerprint)
-		if not issuers or #issuers == 0 then
-			log_warn("Skipping: could not read issuer chain for " .. fingerprint:sub(1, 16) .. "...")
-			queue.mark_failed(fingerprint, "no_issuer_chain")
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		-- Extract responder URL from issuers (first issuer's OCSP URL)
-		local responder_url = "ocsp:unknown"  -- Default placeholder
-		if issuers and #issuers > 0 then
-			-- Extract OCSP URL from issuer certificate (would need openssl parsing)
-			-- For now, use a generic identifier based on issuer fingerprint
-			responder_url = "ocsp:" .. issuers[1]:sub(1, 16) .. "..."
-		end
-
-		-- Check responder health before validating
-		local is_healthy, wait_seconds = queue.is_responder_healthy(responder_url)
-		if not is_healthy then
-			log_warn("Responder unhealthy (backoff " .. wait_seconds .. "s): " .. responder_url)
-			log_info("Skipping validation, keeping existing staple for: " .. fingerprint:sub(1, 16) .. "...")
-			skipped_count = skipped_count + 1
-			-- Don't fail the entry—keep it queued for later
-			-- Just move to next and come back when responder recovers
-			goto continue_redis
-		end
-
-		-- Rate limiting: add delay between requests to prevent responder overload
-		if batch > 1 then
-			local delay_seconds = request_delay_ms / 1000
-			log_info("Rate limiting: wait " .. string.format("%.1f", request_delay_ms) .. "ms before next request")
-			-- Simple delay using os.execute (not ideal for production, but works in scheduler context)
-			-- Better approach: use ngx.sleep if available
-			if ngx and ngx.sleep then
-				ngx.sleep(delay_seconds)
-			else
-				-- Fallback: busy-wait or skip (responder rate limit handles it)
-				log_info("Rate limiting not supported in this context (no ngx.sleep)")
-			end
-		end
-
-		-- Validate OCSP response
-		local ok, http_code, error_msg
-		local success = pcall(function()
-			ok, http_code, error_msg = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
-		end)
-
-		if not success then
-			log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
-			queue.mark_responder_failed(responder_url, "validation_crash")
-			queue.mark_failed(fingerprint, "validation_crash")
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		-- Handle HTTP response codes
-		if http_code == 429 then
-			-- Rate limited: parse Retry-After header and respect it
-			log_warn("Responder rate limited (429) for: " .. responder_url)
-			local retry_after_seconds = queue.parse_retry_after(error_msg)
-			queue.mark_responder_failed(responder_url, "rate_limited_429", retry_after_seconds or 300)
-			-- Keep existing staple, don't mark as failed
-			log_info("Keeping existing staple, will retry after " .. (retry_after_seconds or 300) .. "s")
-			goto continue_redis
-
-		elseif http_code and http_code >= 500 then
-			-- Server error: responder is having issues
-			log_warn("Responder error (" .. http_code .. ") for: " .. responder_url)
-			queue.mark_responder_failed(responder_url, "http_" .. http_code)
-			queue.mark_failed(fingerprint, "responder_error_" .. http_code)
-			failed_count = failed_count + 1
-			goto continue_redis
-
-		elseif http_code and http_code >= 400 then
-			-- Client error (except 429): cert/request issue
-			log_warn("Client error (" .. http_code .. ") for: " .. fingerprint:sub(1, 16) .. "...")
-			queue.mark_failed(fingerprint, "http_" .. http_code)
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		if not ok then
-			-- Validation logic error (not HTTP error)
-			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "... (" .. (error_msg or "unknown") .. ")")
-			queue.mark_responder_failed(responder_url, "validation_failed")
-			queue.mark_failed(fingerprint, "ocsp_invalid")
-			failed_count = failed_count + 1
-			goto continue_redis
-		end
-
-		-- OCSP validation succeeded, mark as complete
-		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
-		validated_count = validated_count + 1
-
-		-- Mark responder as healthy (reset backoff counter)
-		queue.mark_responder_healthy(responder_url)
-
-		-- Mark in persistent queue
-		queue.mark_validated(fingerprint)
-
-		-- Tag response with current version (for cache versioning)
-		pcall(function()
-			if ocsp_module.set_cached_response_version then
-				local current_version = ocsp_module.get_ocsp_response_version and ocsp_module.get_ocsp_response_version() or 1
-				ocsp_module.set_cached_response_version(fingerprint, current_version)
-				log_info("Tagged response version: " .. fingerprint:sub(1, 16) .. "... = v" .. current_version)
-			end
-		end)
-
-		-- Validate and cache issuer SPKIs
-		for idx, issuer_pem in ipairs(issuers) do
-			local issuer_spki = validate_issuer_cert_and_compute_spki(issuer_pem)
-			if issuer_spki then
-				local issuer_fingerprint = issuer_pem:sub(1, 8) .. "_issuer_" .. idx
-				pcall(function()
-					if ocsp_module.cache_issuer_spki then
-						ocsp_module.cache_issuer_spki(issuer_fingerprint, issuer_spki)
-						spki_cached_count = spki_cached_count + 1
-						log_info("Cached SPKI for issuer " .. issuer_fingerprint:sub(1, 16) .. "...")
-					end
-				end)
-			end
-		end
-
-		::continue_redis::
+	elseif http_code and http_code >= 400 then
+		-- Client error (malformed request, cert not found, etc).
+		-- Only this cert fails, responder stays healthy.
+		log_warn("Client error (" .. http_code .. ") for: " .. fingerprint:sub(1, 16) .. "...")
+		queue.mark_failed(fingerprint, "http_" .. http_code)
+		return false
 	end
 
-	log_info("Batch complete: validated=" .. validated_count .. ", failed=" .. failed_count ..
-		", skipped=" .. skipped_count .. ", spki_cached=" .. spki_cached_count)
-
-	return validated_count, failed_count, skipped_count, spki_cached_count
-end
-
--- Fallback: Validate from disk scan (for compatibility)
-local function validate_pending_responses()
-	local pending = get_pending_validations()
-	local validated_count = 0
-	local failed_count = 0
-	local skipped_count = 0
-	local spki_cached_count = 0
-
-	for _, item in ipairs(pending) do
-		local fingerprint = item.fingerprint
-		local ocsp_der = item.ocsp_der
-		local issuers = item.issuers
-		local leaf_pem = item.leaf_pem
-
-		if not fingerprint or not ocsp_der or not issuers or not leaf_pem then
-			log_warn("Skipping incomplete async validation: missing fields")
-			skipped_count = skipped_count + 1
-			goto continue
-		end
-
-		-- Validate OCSP response (call async validation function from ocsp.lua)
-		local ok
-		local success = pcall(function()
-			ok = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
-		end)
-
-		if not success then
-			log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
-			failed_count = failed_count + 1
-			goto continue
-		end
-
-		if not ok then
-			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "...")
-			failed_count = failed_count + 1
-			goto continue
-		end
-
-		-- OCSP validation succeeded, now validate issuers and cache SPKI
-		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
-		validated_count = validated_count + 1
-
-		-- Tag response with current version (for cache invalidation on cert rotation)
-		-- TLS path will reject cache if version mismatches
-		pcall(function()
-			if ocsp_module.set_cached_response_version then
-				local current_version = ocsp_module.get_ocsp_response_version and ocsp_module.get_ocsp_response_version() or 1
-				ocsp_module.set_cached_response_version(fingerprint, current_version)
-				log_info("Tagged response version: " .. fingerprint:sub(1, 16) .. "... = v" .. current_version)
-			end
-		end)
-
-		-- Validate each issuer certificate and cache SPKI
-		for idx, issuer_pem in ipairs(issuers) do
-			local issuer_spki = validate_issuer_cert_and_compute_spki(issuer_pem)
-			if issuer_spki then
-				-- Compute issuer fingerprint for storage key
-				local issuer_fingerprint = issuer_pem:sub(1, 8) .. "_issuer_" .. idx
-
-				-- Try to cache SPKI (call ocsp_module if available)
-				pcall(function()
-					if ocsp_module.cache_issuer_spki then
-						ocsp_module.cache_issuer_spki(issuer_fingerprint, issuer_spki)
-						spki_cached_count = spki_cached_count + 1
-						log_info("Cached SPKI for issuer " .. issuer_fingerprint:sub(1, 16) .. "...")
-					end
-				end)
-			else
-				log_warn("Failed to validate issuer cert #" .. idx .. " for " .. fingerprint:sub(1, 16) .. "...")
-			end
-		end
-
-		::continue::
+	-- Step 9: Check crypto validation result
+	-- If ok=false, the OCSP response failed validation (signature mismatch, expired, etc)
+	if not ok then
+		log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "... (" .. (error_msg or "unknown") .. ")")
+		queue.mark_responder_failed(responder_url, "validation_failed")
+		queue.mark_failed(fingerprint, "ocsp_invalid")
+		return false
 	end
 
-	log_info("Batch complete: " .. validated_count .. " OCSP validated, " ..
-		failed_count .. " failed, " .. skipped_count .. " skipped, " ..
-		spki_cached_count .. " SPKI cached")
+	-- Step 10: Success! Mark certificate as validated
+	log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
+	queue.mark_responder_healthy(responder_url)  -- Responder working, clear backoff
+	queue.mark_validated(fingerprint)
 
-	return validated_count, failed_count, skipped_count, spki_cached_count
-end
-
--- Helper: Report metrics (optional, if metrics system available)
-local function report_metrics(validated, failed, skipped, spki_cached, elapsed)
-	-- Try to report metrics if system supports it
-	-- Common systems: prometheus, statsd, grafana, etc.
-
-	-- Attempt 1: Via logger (metrics exported from logs)
-	log_info("METRICS: validated=" .. validated .. " failed=" .. failed ..
-		" skipped=" .. skipped .. " spki_cached=" .. spki_cached .. " duration_s=" .. elapsed)
-
-	-- Attempt 2: Via optional metrics module (if available)
-	local metrics_ok, metrics = pcall(function()
-		return require "bunkerweb.metrics"
+	-- Step 11: Tag response with version for cache invalidation
+	-- When certificates rotate, version counter increments.
+	-- Old responses get invalidated automatically (version mismatch).
+	pcall(function()
+		if ocsp_module.set_cached_response_version then
+			local current_version = ocsp_module.get_ocsp_response_version and ocsp_module.get_ocsp_response_version() or 1
+			ocsp_module.set_cached_response_version(fingerprint, current_version)
+			log_debug("Tagged response version: " .. fingerprint:sub(1, 16) .. "... = v" .. current_version)
+		end
 	end)
 
-	if metrics_ok and metrics then
-		pcall(function()
-			metrics:counter("ocsp.async.validations_completed", validated)
-			metrics:counter("ocsp.async.validations_failed", failed)
-			metrics:counter("ocsp.async.spki_cached", spki_cached)
-			metrics:gauge("ocsp.async.job_duration_s", elapsed)
-
-			local total = validated + failed + skipped
-			if total > 0 then
-				local success_rate = (validated / total) * 100
-				metrics:gauge("ocsp.async.success_rate_percent", success_rate)
-			end
-		end)
-		log_info("Metrics reported successfully")
-	else
-		log_warn("Metrics module not available (optional)")
-	end
-end
-
--- Warmup: Pre-load cached OCSP responses at job startup (first run).
--- Marks valid responses as already validated, reducing first handshake latency.
-local function warmup_on_startup()
-	-- Check if we've already warmed up (use marker file, not ngx dict in scheduler context)
-	local marker_file = "/var/cache/bunkerweb/ocsp/.warmup_done"
-	local marker_check = io.open(marker_file, "r")
-	if marker_check then
-		marker_check:close()
-		return  -- Already warmed up, skip
-	end
-
-	log_info("=== OCSP Cache Warmup Starting ===")
-	local start_time = os.time()
-
-	local cache_dir = "/var/cache/bunkerweb/ocsp"
-	local warmed = 0
-	local stale = 0
-	local invalid = 0
-	local failed = 0
-
-	-- Scan cache directory for OCSP responses
-	local dir_cmd = "find " .. cache_dir .. " -maxdepth 2 -name '*.der' 2>/dev/null"
-	local dir_handle, dir_err = io.popen(dir_cmd)
-
-	if not dir_handle then
-		log_warn("Warmup: could not open cache directory: " .. tostring(dir_err))
-		return
-	end
-
-	-- Process each cached OCSP response
-	for ocsp_file in dir_handle:lines() do
-		-- Extract fingerprint from path
-		local fingerprint = ocsp_file:match("([a-f0-9]+)%.der$")
-		if not fingerprint or #fingerprint ~= 64 then
-			invalid = invalid + 1
-			goto continue_warmup_scan
-		end
-
-		-- Check file age (assume valid if <7 days old)
-		local stat_cmd = "stat -f%m " .. ocsp_file .. " 2>/dev/null"
-		local stat_handle = io.popen(stat_cmd)
-		local mtime_str = stat_handle:read("*a")
-		stat_handle:close()
-
-		local mtime = tonumber(mtime_str)
-		if not mtime then
-			failed = failed + 1
-			goto continue_warmup_scan
-		end
-
-		local current_time = os.time()
-		local age_days = (current_time - mtime) / (24 * 60 * 60)
-
-		if age_days > 7 then
-			stale = stale + 1
-			goto continue_warmup_scan
-		end
-
-		-- Mark response as pre-warmed
-		pcall(function()
-			-- Tag with current version (for versioned cache)
-			if ocsp_module.set_cached_response_version then
-				local current_version = ocsp_module.get_ocsp_response_version and
-					ocsp_module.get_ocsp_response_version() or 1
-				ocsp_module.set_cached_response_version(fingerprint, current_version)
-			end
-
-			-- Mark as already validated (skip async job)
-			local ngx_shared_warmup = ngx and ngx.shared
-			if ngx_shared_warmup and ngx_shared_warmup.bw_ocsp_validations then
-				local async_key = "OCSP:ASYNC_VALIDATE:" .. fingerprint
-				ngx_shared_warmup.bw_ocsp_validations:set(async_key, "validated", 86400)
-			end
-
-			warmed = warmed + 1
-		end)
-
-		::continue_warmup_scan::
-	end
-
-	dir_handle:close()
-
-	local elapsed = os.time() - start_time
-	log_info("OCSP warmup complete in " .. elapsed .. "s: " .. warmed .. " ready, " ..
-		stale .. " stale, " .. invalid .. " invalid, " .. failed .. " failed")
-
-	-- Mark warmup as done (create marker file so we don't repeat)
-	local marker_file = "/var/cache/bunkerweb/ocsp/.warmup_done"
-	local marker_w = io.open(marker_file, "w")
-	if marker_w then
-		marker_w:write(tostring(os.time()))
-		marker_w:close()
-	end
-end
-
--- Main job entry point (called by scheduler)
-local function run_job()
-	log_info("=== OCSP Async Validation Job Started ===")
-
-	local start_time = os.time()
-
-	-- Warmup: pre-load cached responses on first job run
-	warmup_on_startup()
-
-	-- Check for certificate rotation and invalidate stale responses if detected
-	detect_and_handle_cert_rotation()
-
-	-- Cleanup stale processing entries (stuck from previous crashes)
-	queue.cleanup_stale_processing()
-
-	-- Validate from persistent Redis queue (with rate limiting and batch throttling)
-	local validated, failed, skipped, spki_cached = validate_from_redis_queue()
-
-	local elapsed = os.time() - start_time
-
-	-- Report results
-	log_info("=== OCSP Async Validation Job Complete ===")
-	log_info("Summary: " .. validated .. " validated, " .. failed .. " failed, " ..
-		skipped .. " skipped (backoff), " .. spki_cached .. " SPKI cached in " .. elapsed .. "s")
-
-	-- Report metrics (optional)
-	report_metrics(validated, failed, skipped, spki_cached, elapsed)
-
-	-- Return success even if some validations failed (job itself succeeded)
 	return true
 end
 
--- Execute job
+-- ============================================================================
+-- Main Validation Orchestrator
+-- ============================================================================
+-- Two-phase validation strategy:
+--
+-- PHASE 1 - Must-Staple (High Priority):
+--   - Scans queue for certificates with must-staple requirement
+--   - Validates ALL must-staple certs found (no quota limit)
+--   - Re-queues any non-must-staple found (defer to phase 2)
+--   - Failed must-staple certs are re-queued for automatic retry
+--   - Continues until queue exhausted or batch_size reached
+--
+-- PHASE 2 - Optional (Low Priority):
+--   - Processes remaining optional certificates
+--   - Only runs if batch capacity remains
+--   - Fills up to batch_size total
+--   - Prevents starvation of optional certs
+--
+-- Responder Protection:
+--   - Responder health tracked at responder level (not per-cert)
+--   - Failed responders enter exponential backoff (5min → 10min → 20min → ...)
+--   - Rate limiting spreads requests to avoid overwhelming responder
+--   - 429 responses respected with Retry-After parsing
+--
+-- Returns: (validated_count, failed_count, skipped_count)
+
+local function validate_from_redis_queue()
+	local batch_size = tonumber(os.getenv("OCSP_BATCH_SIZE") or "10")
+
+	local must_staple_validated = 0
+	local must_staple_failed = 0
+	local optional_validated = 0
+	local optional_failed = 0
+	local skipped_count = 0
+	local batch_position = 0
+
+	log_info("Starting validation: batch_size=" .. batch_size)
+
+	-- ========================================================================
+	-- PHASE 1: Must-Staple Certificates (HIGH PRIORITY)
+	-- ========================================================================
+	-- Validates ALL must-staple certificates first. Must-staple certs have
+	-- a mandatory requirement for OCSP stapling (RFC 6961), so they take
+	-- priority over optional certificates.
+	--
+	-- Strategy:
+	-- - Scan queue for must-staple certificates
+	-- - Defer (re-queue) any non-must-staple found
+	-- - Re-queue any must-staple that fails (for automatic retry)
+	-- - Continue until batch full or queue exhausted
+	--
+	-- This ensures must-staple always gets validated first, even if queue
+	-- is large (1000s of certs).
+
+	log_info("Phase 1: Processing all must-staple certificates")
+
+	local scan_attempts = 0
+	local max_scan_attempts = batch_size * 5  -- Limit scan iterations to prevent infinite loops
+
+	while scan_attempts < max_scan_attempts do
+		scan_attempts = scan_attempts + 1
+
+		-- Get next certificate from queue
+		local fingerprint = queue.get_next_pending()
+		if not fingerprint then
+			log_info("Queue empty during must-staple phase")
+			break
+		end
+
+		batch_position = batch_position + 1
+
+		-- Determine if certificate has must-staple requirement
+		local leaf_pem = read_leaf_pem(fingerprint)
+		local is_must_staple = is_must_staple_cert(fingerprint, leaf_pem)
+
+		if not is_must_staple then
+			-- Not must-staple, defer to phase 2 (lower priority)
+			log_debug("Deferring non-must-staple: " .. fingerprint:sub(1, 16) .. "...")
+			queue.queue_pending(fingerprint)  -- Put back in queue for phase 2
+			goto continue_phase1
+		end
+
+		-- Validate this must-staple certificate
+		local result = validate_single_cert(fingerprint, batch_position)
+		if result == true then
+			-- Success
+			must_staple_validated = must_staple_validated + 1
+		elseif result == false then
+			-- Failed validation. Re-queue for retry because must-staple is critical.
+			-- Next cycle will attempt again (responder may recover).
+			log_debug("Re-queueing failed must-staple: " .. fingerprint:sub(1, 16) .. "...")
+			queue.queue_pending(fingerprint)
+			must_staple_failed = must_staple_failed + 1
+		else
+			-- Skipped (responder in backoff). Keep existing staple, will retry later.
+			skipped_count = skipped_count + 1
+		end
+
+		-- Stop if we've reached batch capacity AND validated at least one must-staple
+		-- This prevents phase 1 from consuming entire batch when many must-staple present
+		if batch_position >= batch_size and must_staple_validated > 0 then
+			log_info("Batch size reached, stopping phase 1")
+			break
+		end
+
+		::continue_phase1::
+	end
+
+	log_info("Phase 1 complete: " .. must_staple_validated .. " validated, " ..
+		must_staple_failed .. " failed, " .. skipped_count .. " skipped (backoff)")
+
+	-- ========================================================================
+	-- PHASE 2: Optional Certificates (LOW PRIORITY)
+	-- ========================================================================
+	-- Fills remaining batch capacity with optional (non-must-staple) certificates.
+	-- These are best-effort: validation is good if it happens, but not critical
+	-- if queue is large and responder is under load.
+	--
+	-- Strategy:
+	-- - Only runs if batch_position < batch_size (capacity remains)
+	-- - Processes optional certs from queue
+	-- - Fills batch up to batch_size or queue exhausted
+	-- - No re-queuing on failure (unlike must-staple)
+	--
+	-- This prevents starvation: optional certs still get validated, just after
+	-- all must-staple are processed.
+
+	if batch_position < batch_size then
+		log_info("Phase 2: Processing optional certificates (remaining capacity=" .. (batch_size - batch_position) .. ")")
+
+		while batch_position < batch_size do
+			local fingerprint = queue.get_next_pending()
+			if not fingerprint then
+				log_info("Queue empty during optional phase")
+				break
+			end
+
+			batch_position = batch_position + 1
+
+			-- Validate optional certificate
+			-- Note: Unlike phase 1, failures are not re-queued (lower priority)
+			local result = validate_single_cert(fingerprint, batch_position)
+			if result == true then
+				optional_validated = optional_validated + 1
+			elseif result == false then
+				optional_failed = optional_failed + 1
+			else
+				skipped_count = skipped_count + 1
+			end
+		end
+
+		log_info("Phase 2 complete: " .. optional_validated .. " validated, " ..
+			optional_failed .. " failed, " .. skipped_count .. " skipped (backoff)")
+	end
+
+	-- ========================================================================
+	-- Summary and Metrics
+	-- ========================================================================
+	-- Log detailed metrics for monitoring prioritization effectiveness
+
+	local total_validated = must_staple_validated + optional_validated
+	local total_failed = must_staple_failed + optional_failed
+
+	log_info("Validation summary: must-staple=" .. must_staple_validated .. "/" ..
+		(must_staple_validated + must_staple_failed) ..
+		", optional=" .. optional_validated .. "/" ..
+		(optional_validated + optional_failed) ..
+		", skipped=" .. skipped_count ..
+		", total=" .. total_validated .. " validated/" .. total_failed .. " failed")
+
+	return total_validated, total_failed, skipped_count
+end
+
+-- ============================================================================
+-- Job Entry Point
+-- ============================================================================
+-- Called by the scheduler once per configured interval (default: every minute).
+-- Orchestrates the entire validation cycle.
+
+local function run_job()
+	log_info("=== OCSP Async Validation Job Started (Prioritized) ===")
+
+	local start_time = os.time()
+
+	-- Execute two-phase validation
+	local validated, failed, skipped = validate_from_redis_queue()
+
+	local elapsed = os.time() - start_time
+
+	log_info("=== OCSP Async Validation Job Complete ===")
+	log_info("Summary: " .. validated .. " validated, " .. failed .. " failed, " ..
+		skipped .. " skipped (backoff) in " .. elapsed .. "s")
+
+	return true
+end
+
+-- ============================================================================
+-- Execution
+-- ============================================================================
+-- Invoke job immediately when module loaded by scheduler
+
 return run_job()
