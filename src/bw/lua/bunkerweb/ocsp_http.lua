@@ -1721,10 +1721,31 @@ function _M.ssl_certificate(state)
 	end
 
 	-- Read /var/cache/bunkerweb/ssl/{h1}/{h2}/{fp}/ocsp.json → table or nil.
+	-- OPTIMIZATION: Deduplicate reads within same handshake via ngx.ctx
+	-- Per-handshake cache to avoid repeated disk reads for the same cert_fp
 	local function read_ocsp_json_for_fp(cert_fp)
 		if not is_fp64_lower_hex(cert_fp) then
 			return nil
 		end
+
+		-- OPTIMIZATION: Check per-handshake cache first (deduplicate within handshake)
+		-- Initialize cache key in ngx.ctx if needed
+		if ngx.ctx and not ngx.ctx.ocsp_json_cache then
+			ngx.ctx.ocsp_json_cache = {}
+		end
+
+		if ngx.ctx and ngx.ctx.ocsp_json_cache then
+			local cached = ngx.ctx.ocsp_json_cache[cert_fp]
+			if cached ~= nil then
+				-- Distinguish between "file not found" (false) and "found" (table)
+				if cached == false then
+					return nil
+				end
+				safe_log(DEBUG, "OCSP ocsp.json cache hit (per-handshake) for fp=" .. cert_fp:sub(1, 16) .. "...")
+				return cached
+			end
+		end
+
 		local meta_path = "/var/cache/bunkerweb/ssl/"
 			.. cert_fp:sub(1, 1)
 			.. "/"
@@ -1741,11 +1762,23 @@ function _M.ssl_certificate(state)
 			end
 		end)
 		if not meta_raw or #meta_raw == 0 or not cjson then
+			-- OPTIMIZATION: Cache the "not found" result to prevent re-reading
+			if ngx.ctx and ngx.ctx.ocsp_json_cache then
+				ngx.ctx.ocsp_json_cache[cert_fp] = false
+			end
 			return nil
 		end
 		local ok_decode, decoded = pcall(cjson.decode, meta_raw)
 		if ok_decode and type(decoded) == "table" then
+			-- OPTIMIZATION: Cache successful decode result
+			if ngx.ctx and ngx.ctx.ocsp_json_cache then
+				ngx.ctx.ocsp_json_cache[cert_fp] = decoded
+			end
 			return decoded
+		end
+		-- OPTIMIZATION: Cache the decode failure
+		if ngx.ctx and ngx.ctx.ocsp_json_cache then
+			ngx.ctx.ocsp_json_cache[cert_fp] = false
 		end
 		return nil
 	end
