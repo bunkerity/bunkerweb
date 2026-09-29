@@ -141,33 +141,69 @@ local function apply_site_override(vars, service_id, name, global_value)
 	return global_value
 end
 
--- Cached database access for configuration (optimization #1)
+-- Per-worker lazy-loaded config cache (optimization #4)
+-- Caches vars across multiple requests to avoid repeated DB access
+-- Invalidates on config version change (reload detection)
+local _worker_vars_cache = {}  -- {[internalstore_id] = {vars, version}}
+
+-- Cached database access for configuration (optimization #1 + #4)
+-- Tier 1: Per-worker cache (across requests, optimization #4)
+-- Tier 2: Per-request cache (optimization #1)
+-- Tier 3: Database (fallback)
 -- Returns variables table from cache if available, otherwise fetches from DB
 local function get_vars_cached(internalstore)
-	if not ngx.ctx then
-		-- Fallback: no ngx.ctx available, fetch directly
-		local ok, vars = pcall(function()
-			return internalstore:get("variables", true)
-		end)
-		return ok and vars or nil
+	if not internalstore then
+		return nil
 	end
 
-	-- Cache key: use internalstore object reference (unique per instance)
-	local cache_key = "ocsp_vars_" .. tostring(internalstore):match("[0-9a-f]+$")
+	local internalstore_id = tostring(internalstore):match("[0-9a-f]+$")
 
-	-- Check cache first (optimization #1)
-	if ngx.ctx[cache_key] then
-		return ngx.ctx[cache_key]
+	-- Tier 1: Check per-worker cache (optimization #4)
+	-- Reuses config across multiple requests until reload detected
+	local worker_cache = _worker_vars_cache[internalstore_id]
+	if worker_cache and worker_cache.vars then
+		-- Validate cache version (detect config reload)
+		if worker_cache.version == (worker_cache.vars["_config_version"] or "unknown") then
+			-- Warm cache: return cached vars
+			if ngx.ctx then
+				local req_cache_key = "ocsp_vars_" .. internalstore_id
+				ngx.ctx[req_cache_key] = worker_cache.vars
+			end
+			return worker_cache.vars
+		end
+		-- Cache invalidated (config reloaded): clear stale cache
+		_worker_vars_cache[internalstore_id] = nil
 	end
 
-	-- Cache miss: fetch from database
+	-- Tier 2: Check per-request cache (optimization #1)
+	if ngx.ctx then
+		local req_cache_key = "ocsp_vars_" .. internalstore_id
+		if ngx.ctx[req_cache_key] then
+			return ngx.ctx[req_cache_key]
+		end
+	end
+
+	-- Tier 3: Cache miss - fetch from database
 	local ok, vars = pcall(function()
 		return internalstore:get("variables", true)
 	end)
 
 	if ok and type(vars) == "table" then
-		-- Store in cache for reuse in same request
-		ngx.ctx[cache_key] = vars
+		-- Store version for reload detection (optimization #4)
+		local config_version = vars["_config_version"] or os.time()
+
+		-- Store in per-worker cache (optimization #4)
+		_worker_vars_cache[internalstore_id] = {
+			vars = vars,
+			version = config_version
+		}
+
+		-- Also store in per-request cache (optimization #1)
+		if ngx.ctx then
+			local req_cache_key = "ocsp_vars_" .. internalstore_id
+			ngx.ctx[req_cache_key] = vars
+		end
+
 		return vars
 	end
 
