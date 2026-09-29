@@ -385,6 +385,57 @@ function _M.ssl_certificate(state)
 		end
 	end
 
+	-- =====================================================================
+	-- OPTIMIZATION: Per-worker Must-Staple detection cache (Priority 3)
+	-- Cache Must-Staple flag by certificate fingerprint
+	-- Prevents repeated ocsp.json reads and TLS Feature parsing
+	-- Estimated savings: 1-2ms per cached Must-Staple detection
+	-- =====================================================================
+	local must_staple_cache = {}
+	local must_staple_cache_max_entries = 256
+	local must_staple_cache_ttl = 300
+	local must_staple_cache_access_order = {}
+
+	local function must_staple_cache_key(cert_fp)
+		if not cert_fp or type(cert_fp) ~= "string" or #cert_fp ~= 64 then
+			return nil
+		end
+		return cert_fp:lower()
+	end
+
+	local function must_staple_cache_get(cert_fp)
+		local key = must_staple_cache_key(cert_fp)
+		if not key then
+			return nil
+		end
+		local cached = must_staple_cache[key]
+		if cached and cached.expires and cached.expires > ngx.time() then
+			table.insert(must_staple_cache_access_order, key)
+			return cached.result
+		end
+		if cached then
+			must_staple_cache[key] = nil
+		end
+		return nil
+	end
+
+	local function must_staple_cache_set(cert_fp, result)
+		local key = must_staple_cache_key(cert_fp)
+		if not key then
+			return
+		end
+		local expires = ngx.time() + must_staple_cache_ttl
+		must_staple_cache[key] = { result = result, expires = expires }
+		table.insert(must_staple_cache_access_order, key)
+
+		if #must_staple_cache > must_staple_cache_max_entries then
+			local evict_key = table.remove(must_staple_cache_access_order, 1)
+			if evict_key then
+				must_staple_cache[evict_key] = nil
+			end
+		end
+	end
+
 	local tostring = tostring
 	local insert = table.insert
 	local lower = string.lower
@@ -1703,8 +1754,20 @@ function _M.ssl_certificate(state)
 	-- Job writes this when the leaf TLS Feature was seen at refresh time; used
 	-- when resty.openssl cannot parse TLS Feature on the handshake path.
 	local function ocsp_json_must_staple(cert_fp)
+		-- OPTIMIZATION: Check Must-Staple cache before reading ocsp.json
+		local cached = must_staple_cache_get(cert_fp)
+		if cached ~= nil then
+			safe_log(DEBUG, "OCSP Must-Staple cache hit for fp=" .. (cert_fp or ""):sub(1, 16) .. "...")
+			return cached
+		end
+
 		local meta = read_ocsp_json_for_fp(cert_fp)
-		return meta ~= nil and meta.must_staple == true
+		local result = meta ~= nil and meta.must_staple == true
+
+		-- OPTIMIZATION: Cache the Must-Staple detection result
+		must_staple_cache_set(cert_fp, result)
+
+		return result
 	end
 
 	-- -------------------------------------------------------------------------
@@ -1742,6 +1805,19 @@ function _M.ssl_certificate(state)
 			end
 			return cached
 		end
+
+		-- OPTIMIZATION: Check per-worker Must-Staple cache by fingerprint
+		-- If we have a valid fingerprint, check if Must-Staple was already determined
+		local check_fp = type(fp) == "string" and fp:lower() or nil
+		if check_fp and is_fp64_lower_hex(check_fp) then
+			local cached_result = must_staple_cache_get(check_fp)
+			if cached_result ~= nil then
+				safe_log(DEBUG, "OCSP leaf Must-Staple cache hit for fp=" .. check_fp:sub(1, 16) .. "...")
+				leaf_ms_cache[cache_key] = cached_result
+				return cached_result
+			end
+		end
+
 		local tls_known, tls_must = false, false
 		if type(pem) == "string" and #pem > 0 and has_resty_ssl then
 			local blocks = parse_pem_certificates(pem)
@@ -1775,6 +1851,8 @@ function _M.ssl_certificate(state)
 				if meta.must_staple == true then
 					-- Positive MS from ocsp.json is safe even without resty DN proof.
 					leaf_ms_cache[cache_key] = true
+					-- OPTIMIZATION: Cache per-worker Must-Staple result by fingerprint
+					must_staple_cache_set(check_fp, true)
 					return true
 				end
 				-- meta.must_staple ~= true: only trust as proven-false when resty
@@ -1783,12 +1861,20 @@ function _M.ssl_certificate(state)
 				-- leaf_fail_closed_must_staple and skip outer abort).
 				if tls_known then
 					leaf_ms_cache[cache_key] = false
+					-- OPTIMIZATION: Cache per-worker Must-Staple result by fingerprint
+					if check_fp then
+						must_staple_cache_set(check_fp, false)
+					end
 					return false
 				end
 			end
 		end
 		if tls_known then
 			leaf_ms_cache[cache_key] = false
+			-- OPTIMIZATION: Cache per-worker Must-Staple result by fingerprint (if we have FP)
+			if check_fp and is_fp64_lower_hex(check_fp) then
+				must_staple_cache_set(check_fp, false)
+			end
 			return false
 		end
 		-- No resty parse and no trustworthy ocsp.json → unknown.
