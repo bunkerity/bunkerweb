@@ -18,12 +18,61 @@ local read_file = common.read_file
 local store = require("bunkerweb.ocsp_store").internal
 local L1_MAX_TTL = store.L1_MAX_TTL
 local generation_tuple = store.generation_tuple
-local ligand_or_meta = store.ligand_or_meta
+local ligand_or_meta_uncached = store.ligand_or_meta
 local shard_not_paged = store.shard_not_paged
 local soft_recall_gen_of = store.soft_recall_gen_of
 
 -- Transient allow-pin TTL when expires_unix is absent (align with L1).
 local ALLOW_PIN_TTL_SECONDS = L1_MAX_TTL
+
+-- Cache ligand_or_meta results per-request to avoid repeated file I/O + JSON decode
+-- Ligand file reads are expensive (1-2ms) and often repeat within a handshake
+local function ligand_or_meta(meta, fingerprint)
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_ligand_cache then
+		ctx.bw_ocsp_ligand_cache = {}
+	end
+
+	-- Use fingerprint as cache key (guaranteed 64-char hex if valid)
+	local key = fingerprint
+	if not key or type(key) ~= "string" or #key ~= 64 then
+		-- No fingerprint: cannot cache, call directly
+		return ligand_or_meta_uncached(meta, fingerprint)
+	end
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_ligand_cache then
+		local cached = ctx.bw_ocsp_ligand_cache[key]
+		if cached ~= nil then
+			-- Distinguish between "no ligand" (false) and "found ligand" (table)
+			-- Merge cached ligand with current meta (ligand_or_meta handles merge logic)
+			if cached == false then
+				return meta
+			end
+			-- Cached ligand: merge with current meta
+			local merge_ligand = store.merge_ligand
+			if merge_ligand then
+				return merge_ligand(meta, cached, fingerprint)
+			end
+			return cached
+		end
+	end
+
+	-- Cache miss: call the actual function
+	local result = ligand_or_meta_uncached(meta, fingerprint)
+
+	-- Extract and cache the ligand part for future calls
+	-- ligand_or_meta returns merged result, but we cache the ligand component
+	-- by calling read_ocsp_ligand internally
+	local read_ocsp_ligand = store.read_ocsp_ligand
+	if read_ocsp_ligand and ctx and ctx.bw_ocsp_ligand_cache then
+		local ligand = read_ocsp_ligand(fingerprint)
+		ctx.bw_ocsp_ligand_cache[key] = ligand or false
+	end
+
+	return result
+end
 
 -- DROP/KEEP tables live in ocsp_common (STAPLE_POLICY). Prefix rules stay here:
 -- canary_* defaults DROP; shared_ligand_* DROP unless KEEP on the stripped suffix.
