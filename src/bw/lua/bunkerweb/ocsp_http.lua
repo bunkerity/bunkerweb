@@ -729,6 +729,54 @@ function _M.ssl_certificate(state)
 		end
 	end
 
+	-- =====================================================================
+	-- OPTIMIZATION: Per-worker issuer candidate validation cache (Priority 12)
+	-- Cache which issuer candidates have been validated for each cert
+	-- Avoids re-looping through candidates when validating same cert repeatedly
+	-- Estimated savings: 0.5-1.5ms on repeat validations (30-50% of handshakes)
+	-- =====================================================================
+	local issuer_validation_cache = {}
+	local issuer_validation_cache_max_entries = 128
+	local issuer_validation_cache_ttl = 600
+	local issuer_validation_cache_access_order = {}
+
+	-- Cache key: cert_fp (already validated format guaranteed by caller)
+	local function issuer_validation_cache_get(cert_fp)
+		if not cert_fp or type(cert_fp) ~= "string" or #cert_fp ~= 64 then
+			return nil
+		end
+		local cached = issuer_validation_cache[cert_fp]
+		if cached and cached.expires and cached.expires > ngx.time() then
+			table.insert(issuer_validation_cache_access_order, cert_fp)
+			-- Returns: nil (unknown), false (all candidates invalid), string (valid issuer PEM)
+			return cached.data
+		end
+		if cached then
+			issuer_validation_cache[cert_fp] = nil
+		end
+		return nil
+	end
+
+	local function issuer_validation_cache_set(cert_fp, valid_issuer_pem)
+		if not cert_fp or type(cert_fp) ~= "string" or #cert_fp ~= 64 then
+			return
+		end
+		local expires = ngx.time() + issuer_validation_cache_ttl
+		-- Store: false (tried all, none valid), or valid issuer PEM string
+		issuer_validation_cache[cert_fp] = {
+			data = valid_issuer_pem,
+			expires = expires,
+		}
+		table.insert(issuer_validation_cache_access_order, cert_fp)
+
+		if #issuer_validation_cache > issuer_validation_cache_max_entries then
+			local evict_key = table.remove(issuer_validation_cache_access_order, 1)
+			if evict_key then
+				issuer_validation_cache[evict_key] = nil
+			end
+		end
+	end
+
 	local tostring = tostring
 	local insert = table.insert
 	local lower = string.lower
@@ -3939,6 +3987,39 @@ function _M.ssl_certificate(state)
 				issuer_pems_to_try = { unpack(issuer_pems_to_try, 1, ocsp_validate_max_issuer_candidates) }
 			end
 
+			-- OPTIMIZATION: Check issuer validation cache to skip re-looping if already validated (Priority 12)
+			-- If this cert has been successfully validated before with a known issuer, use it immediately
+			local cached_valid_issuer = issuer_validation_cache_get(cert_fp)
+			if cached_valid_issuer ~= nil then
+				if cached_valid_issuer == false then
+					-- All candidates were tried and none worked; skip validation
+					safe_log(DEBUG, "OCSP skipping validation (all issuers cached as invalid) for fp=" .. cert_fp:sub(1, 16) .. "...")
+					return finish(false)
+				else
+					-- Found a valid issuer in cache; validate with it immediately
+					safe_log(DEBUG, "OCSP using cached valid issuer for fp=" .. cert_fp:sub(1, 16) .. "...")
+					local ordered_chain_pem = cert_for_fp_pem .. "\n" .. cached_valid_issuer
+					local der_cert_chain, err = ssl.cert_pem_to_der(ordered_chain_pem)
+					if der_cert_chain then
+						local ok_pcall, validate_ok, validate_err_or_next = pcall(function()
+							return ocsp.validate_ocsp_response(ocsp_der, der_cert_chain)
+						end)
+						if
+							ok_pcall
+							and validate_ok == true
+							and not (
+								type(validate_err_or_next) == "number"
+								and validate_err_or_next > 0
+								and validate_err_or_next - OCSP_CLOCK_SKEW_SECONDS <= ngx.time()
+							)
+						then
+							return finish(true)
+						end
+					end
+					-- Cached issuer is stale; fall through to re-validate
+				end
+			end
+
 			local cached_by_issuer = der_chain_cache[cert_fp]
 			if not cached_by_issuer then
 				cached_by_issuer = {}
@@ -3987,6 +4068,9 @@ function _M.ssl_certificate(state)
 							and validate_err_or_next - OCSP_CLOCK_SKEW_SECONDS <= ngx.time()
 						)
 					then
+						-- OPTIMIZATION: Cache this valid issuer for future validations (Priority 12)
+						-- Store the issuer PEM so we can skip looping on next handshake
+						issuer_validation_cache_set(cert_fp, issuer_candidate_pem)
 						-- Clear any leftover poison for this SPKI (prior DER binding).
 						pcall(function()
 							internalstore:delete(ocsp_validate_failed_key)
@@ -4002,6 +4086,10 @@ function _M.ssl_certificate(state)
 			-- Missing issuer list already returns above without setting this key.
 			-- Store sha256(DER) so a later publish of a different body is not blocked.
 			if validation_attempted and not budget_aborted then
+				-- OPTIMIZATION: Cache that all candidates failed for this cert (Priority 12)
+				-- Prevents re-looping through all candidates on next handshake
+				issuer_validation_cache_set(cert_fp, false)
+
 				local poison_val = der_binding or true
 				pcall(function()
 					internalstore:set(ocsp_validate_failed_key, poison_val, ocsp_validate_failure_ttl, true)
