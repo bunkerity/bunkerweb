@@ -67,6 +67,7 @@ local function build_sni_index(vars)
 	local index = {
 		primary_lower = {}, -- Map: lowercase_name -> original_name
 		domain_primaries = {}, -- Set: primary_name → true (has SERVER_NAME)
+		service_count = 0, -- Track count to detect in-place mutations of vars
 	}
 
 	for primary, site_vars in pairs(vars) do
@@ -77,6 +78,7 @@ local function build_sni_index(vars)
 			and primary:sub(1, 1) ~= "_"
 			and type(site_vars) == "table"
 		then
+			index.service_count = index.service_count + 1
 			local primary_lower = primary:lower()
 			-- First wins when two primaries lower to the same string.
 			if not index.primary_lower[primary_lower] then
@@ -107,6 +109,19 @@ local function resolve_multisite_service_id_from_vars(vars, sni)
 	end
 
 	local sni_index = sni_index_by_vars[vars]
+	-- Validate cached index: if service count changed, vars was mutated in-place; rebuild
+	if sni_index then
+		local current_service_count = 0
+		for primary, _ in pairs(vars) do
+			if primary ~= "global" and type(primary) == "string" and primary:sub(1, 1) ~= "_" then
+				current_service_count = current_service_count + 1
+			end
+		end
+		if current_service_count ~= sni_index.service_count then
+			sni_index = nil
+		end
+	end
+
 	if not sni_index then
 		sni_index = build_sni_index(vars)
 		sni_index_by_vars[vars] = sni_index
