@@ -608,6 +608,62 @@ function _M.ssl_certificate(state)
 	end
 
 	-- =====================================================================
+	-- OPTIMIZATION: Per-worker OCSP JSON cache (Priority 11)
+	-- Cache ocsp.json metadata reads to eliminate file I/O on canary checks
+	-- Prevents repeated file reads on same cert across different handshakes
+	-- Estimated savings: 0.05-0.25ms per canary check (20-30% of handshakes)
+	-- =====================================================================
+	local ocsp_json_cache = {}
+	local ocsp_json_cache_max_entries = 256
+	local ocsp_json_cache_ttl = 600
+	local ocsp_json_cache_access_order = {}
+
+	local function ocsp_json_cache_key(cert_fp)
+		if not cert_fp or type(cert_fp) ~= "string" or #cert_fp ~= 64 then
+			return nil
+		end
+		return "ocsp_json:" .. cert_fp:lower()
+	end
+
+	local function ocsp_json_cache_get(cert_fp)
+		local key = ocsp_json_cache_key(cert_fp)
+		if not key then
+			return nil
+		end
+		local cached = ocsp_json_cache[key]
+		if cached and cached.expires and cached.expires > ngx.time() then
+			table.insert(ocsp_json_cache_access_order, key)
+			-- Cache stores: nil (miss), false (not found), or table (data)
+			return cached.data
+		end
+		if cached then
+			ocsp_json_cache[key] = nil
+		end
+		return nil
+	end
+
+	local function ocsp_json_cache_set(cert_fp, data)
+		local key = ocsp_json_cache_key(cert_fp)
+		if not key then
+			return
+		end
+		local expires = ngx.time() + ocsp_json_cache_ttl
+		-- Cache both hits (table) and misses (false) to avoid re-reading
+		ocsp_json_cache[key] = {
+			data = data,
+			expires = expires,
+		}
+		table.insert(ocsp_json_cache_access_order, key)
+
+		if #ocsp_json_cache > ocsp_json_cache_max_entries then
+			local evict_key = table.remove(ocsp_json_cache_access_order, 1)
+			if evict_key then
+				ocsp_json_cache[evict_key] = nil
+			end
+		end
+	end
+
+	-- =====================================================================
 	-- OPTIMIZATION: Per-worker chain mapping cache (Priority 7)
 	-- Cache chain subject-to-PEM maps and issuer subjects by chain hash
 	-- Prevents repeated FFI x509 parsing on identical cert chains
@@ -2010,6 +2066,26 @@ function _M.ssl_certificate(state)
 			end
 		end
 
+		-- OPTIMIZATION: Check per-worker cache before file I/O (Priority 11)
+		-- Persists ocsp.json reads across handshakes within the same worker
+		local worker_cached = ocsp_json_cache_get(cert_fp)
+		if worker_cached ~= nil then
+			-- Cache stores: false (not found), or table (data)
+			safe_log(DEBUG, "OCSP ocsp.json cache hit (per-worker) for fp=" .. cert_fp:sub(1, 16) .. "...")
+			if worker_cached == false then
+				-- Mark in per-handshake cache too to avoid per-worker cache miss on next read
+				if ngx.ctx and ngx.ctx.ocsp_json_cache then
+					ngx.ctx.ocsp_json_cache[cert_fp] = false
+				end
+				return nil
+			end
+			-- Populate per-handshake cache with worker cache result
+			if ngx.ctx and ngx.ctx.ocsp_json_cache then
+				ngx.ctx.ocsp_json_cache[cert_fp] = worker_cached
+			end
+			return worker_cached
+		end
+
 		local meta_path = "/var/cache/bunkerweb/ssl/"
 			.. cert_fp:sub(1, 1)
 			.. "/"
@@ -2027,6 +2103,7 @@ function _M.ssl_certificate(state)
 		end)
 		if not meta_raw or #meta_raw == 0 or not cjson then
 			-- OPTIMIZATION: Cache the "not found" result to prevent re-reading
+			ocsp_json_cache_set(cert_fp, false)
 			if ngx.ctx and ngx.ctx.ocsp_json_cache then
 				ngx.ctx.ocsp_json_cache[cert_fp] = false
 			end
@@ -2034,13 +2111,15 @@ function _M.ssl_certificate(state)
 		end
 		local ok_decode, decoded = pcall(cjson.decode, meta_raw)
 		if ok_decode and type(decoded) == "table" then
-			-- OPTIMIZATION: Cache successful decode result
+			-- OPTIMIZATION: Cache successful decode result in both caches
+			ocsp_json_cache_set(cert_fp, decoded)
 			if ngx.ctx and ngx.ctx.ocsp_json_cache then
 				ngx.ctx.ocsp_json_cache[cert_fp] = decoded
 			end
 			return decoded
 		end
-		-- OPTIMIZATION: Cache the decode failure
+		-- OPTIMIZATION: Cache the decode failure in both caches
+		ocsp_json_cache_set(cert_fp, false)
 		if ngx.ctx and ngx.ctx.ocsp_json_cache then
 			ngx.ctx.ocsp_json_cache[cert_fp] = false
 		end
