@@ -827,6 +827,7 @@
       "certificate_authority": "Urząd certyfikacji",
       "certificate_priority": "Priorytet certyfikatu",
       "challenge_type": "Rodzaj wyzwania",
+      "comment": "Komentarz",
       "config_type": "Typ konfiguracji",
       "configuration_name": "Nazwa konfiguracji",
       "confirm_password": "Potwierdź hasło",
@@ -895,6 +896,7 @@
       "search": "Wyszukaj...",
       "secret_token": "Tajemniczy token",
       "select_service": "Wybierz usługę",
+      "service_comment": "Opcjonalna notatka lub opis dla tej us?ugi...",
       "username_example": "Jan Kowalski"
     },
     "validation": {
@@ -1437,6 +1439,7 @@
       "active": "Aktywne",
       "async": "Asymetryczne",
       "checksum": "Suma kontrolna",
+      "comment": "Komentarz",
       "configs": "Konfiguracje",
       "country": "Kraj",
       "created": "Utworzono",
@@ -1891,6 +1894,7 @@
       "select_rows_for_action": "Wybierz jeden lub więcej wierszy, aby wykonać czynność.",
       "services": {
         "actions": "Dostępne działania dla tej usługi",
+        "comment": "Notatka lub opis dla Us?ugi",
         "created": "Data i godzina utworzenia Usługi",
         "details": "Pokaż szczegóły usługi",
         "last_update": "Data i godzina ostatniej aktualizacji Usługi",

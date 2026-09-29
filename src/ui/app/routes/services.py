@@ -71,6 +71,12 @@ def _submit_service_task(task, *args):
     future.add_done_callback(completed)
 
 
+def _normalize_service_comment(raw_comment: Optional[str]) -> str:
+    if not raw_comment:
+        return ""
+    return " ".join(raw_comment.splitlines()).strip()[:256]
+
+
 def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
     services_map: Dict[str, Dict[str, str]] = {}
     errors: List[str] = []
@@ -337,7 +343,7 @@ def services_service_page(service: str):
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
-        service_comment = variables.pop("service_comment", "").replace("\r", " ").replace("\n", " ").strip()[:256]
+        service_comment = _normalize_service_comment(variables.pop("service_comment", ""))
         file_setting_names = extract_file_setting_names(variables)
 
         mode = request.args.get("mode", "easy")
@@ -681,6 +687,16 @@ def services_service_page(service: str):
                 and not has_file_name_changes
             ):
                 if comment_changed:
+                    service_owner_method = current_service_meta["method"] if current_service_meta else service_method
+                    if not is_editable_method(service_owner_method):
+                        DATA["TO_FLASH"].append(
+                            {
+                                "content": f"Service {service} is managed by the {service_owner_method} method and cannot be edited from the Web UI.",
+                                "type": "error",
+                            }
+                        )
+                        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                        return
                     comment_error = DB.set_service_comment(service, service_comment)
                     if comment_error:
                         DATA["TO_FLASH"].append({"content": f"An error occurred while saving the service comment: {comment_error}", "type": "error"})
@@ -948,7 +964,7 @@ def services_service_export():
     include_configs = request.args.get("include_configs", "").lower() in ("1", "yes", "true", "on")
 
     db_config = BW_CONFIG.get_config(methods=False, with_drafts=True)
-    service_comments = {item["id"]: item.get("comment", "") for item in DB.get_services(with_drafts=True)}
+    service_comments = {item["id"]: _normalize_service_comment(item.get("comment", "")) for item in DB.get_services(with_drafts=True)}
 
     def export_service(service: str) -> List[str]:
         if service not in db_config["SERVER_NAME"].split():
@@ -1099,7 +1115,7 @@ def services_service_import():
         for service_id, variables in services_map.items():
             service_variables = variables.copy()
             is_draft = service_variables.pop("IS_DRAFT", "no") == "yes"
-            service_comment = service_variables.pop("COMMENT", "").replace("\r", " ").replace("\n", " ").strip()[:256]
+            service_comment = _normalize_service_comment(service_variables.pop("COMMENT", ""))
 
             if service_id in existing_services:
                 skipped.append(service_id)
@@ -1124,7 +1140,14 @@ def services_service_import():
 
             created_service_id = server_name.split(" ")[0]
             if service_comment:
-                DB.set_service_comment(created_service_id, service_comment)
+                comment_error = DB.set_service_comment(created_service_id, service_comment)
+                if comment_error:
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": f"Service {created_service_id} was imported, but its comment could not be saved: {comment_error}",
+                            "type": "warning",
+                        }
+                    )
             created.append(created_service_id)
 
         if created:

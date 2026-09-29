@@ -3916,7 +3916,10 @@ class Database:
             if service is None:
                 return f"Service {service_id} doesn't exist"
 
-            normalized_comment = comment.strip() if comment else ""
+            if service.method not in EDITABLE_METHODS:
+                return f"Service {service_id} is managed by the {service.method} method and cannot be edited from the Web UI"
+
+            normalized_comment = " ".join(comment.splitlines()).strip() if comment else ""
             if (service.comment or "") == normalized_comment:
                 return ""
 
@@ -3925,7 +3928,11 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException as e:
+            except (ConnectionRefusedError, OperationalError, DatabaseError) as e:
+                if self._is_transient_connection_error(e):
+                    raise
+                return str(e)
+            except SQLAlchemyError as e:
                 return str(e)
 
         return ""

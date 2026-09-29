@@ -827,6 +827,7 @@
       "certificate_authority": "Zertifizierungsstelle",
       "certificate_priority": "Zertifikatspriorität",
       "challenge_type": "Challenge-Typ",
+      "comment": "Kommentar",
       "config_type": "Konfigurationstyp",
       "configuration_name": "Konfigurationsname",
       "confirm_password": "Passwort bestätigen",
@@ -895,6 +896,7 @@
       "search": "Suchen...",
       "secret_token": "Geheimer Token",
       "select_service": "Dienst auswählen",
+      "service_comment": "Optionale Notiz oder Beschreibung f?r diesen Dienst...",
       "username_example": "maxmustermann"
     },
     "validation": {
@@ -1438,6 +1440,7 @@
       "active": "Aktiv",
       "async": "Asynchron",
       "checksum": "Prüfsumme",
+      "comment": "Kommentar",
       "configs": "Konfigs",
       "country": "Land",
       "created": "Erstellt",
@@ -1892,6 +1895,7 @@
       "select_rows_for_action": "Bitte wählen Sie eine oder mehrere Zeilen aus, um eine Aktion durchzuführen.",
       "services": {
         "actions": "Für diesen Dienst verfügbare Aktionen",
+        "comment": "Notiz oder Beschreibung f?r den Dienst",
         "created": "Datum und Uhrzeit der Diensterstellung",
         "details": "Dienstdetails anzeigen",
         "last_update": "Datum und Uhrzeit der letzten Aktualisierung des Dienstes",

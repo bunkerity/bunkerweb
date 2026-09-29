@@ -827,6 +827,7 @@
       "certificate_authority": "证书颁发机构",
       "certificate_priority": "证书优先级",
       "challenge_type": "质询类型",
+      "comment": "??",
       "config_type": "配置类型",
       "configuration_name": "配置名称",
       "confirm_password": "确认密码",
@@ -895,6 +896,7 @@
       "search": "搜索...",
       "secret_token": "密钥",
       "select_service": "选择服务",
+      "service_comment": "???????????...",
       "username_example": "张三"
     },
     "validation": {
@@ -1438,6 +1440,7 @@
       "active": "活动",
       "async": "异步",
       "checksum": "校验和",
+      "comment": "??",
       "configs": "配置",
       "country": "国家/地区",
       "created": "创建时间",
@@ -1892,6 +1895,7 @@
       "select_rows_for_action": "请选择一行或多行以执行操作。",
       "services": {
         "actions": "此服务可用的操作",
+        "comment": "????????",
         "created": "服务创建的日期和时间",
         "details": "显示服务详情",
         "last_update": "服务最后更新的日期和时间",

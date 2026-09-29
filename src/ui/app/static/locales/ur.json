@@ -827,6 +827,7 @@
       "certificate_authority": "سرٹیفکیٹ اتھارٹی",
       "certificate_priority": "سرٹیفکیٹ کی ترجیح",
       "challenge_type": "چیلنج کی قسم",
+      "comment": "?????",
       "config_type": "کنفیگریشن کی قسم",
       "configuration_name": "کنفیگریشن کا نام",
       "confirm_password": "پاس ورڈ کی تصدیق کریں",
@@ -895,6 +896,7 @@
       "search": "تلاش کریں...",
       "secret_token": "خفیہ ٹوکن",
       "select_service": "سروس منتخب کریں",
+      "service_comment": "?? ???? ?? ??? ??????? ??? ?? ?????...",
       "username_example": "علی احمد"
     },
     "validation": {
@@ -1437,6 +1439,7 @@
       "active": "فعال",
       "async": "غیر مطابقت پذیر",
       "checksum": "چیک سم",
+      "comment": "?????",
       "configs": "کنفیگریشنز",
       "country": "ملک",
       "created": "بنایا گیا",
@@ -1891,6 +1894,7 @@
       "select_rows_for_action": "براہ کرم عمل کرنے کے لیے ایک یا زیادہ قطاریں منتخب کریں۔",
       "services": {
         "actions": "اس سروس کے لیے دستیاب اعمال",
+        "comment": "???? ?? ??? ??? ?? ?????",
         "created": "سروس بنانے کی تاریخ اور وقت",
         "details": "سروس کی تفصیلات دکھائیں",
         "last_update": "سروس کی آخری اپ ڈیٹ کی تاریخ اور وقت",

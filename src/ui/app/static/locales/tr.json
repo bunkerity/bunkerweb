@@ -827,6 +827,7 @@
       "certificate_authority": "Sertifika Yetkilisi",
       "certificate_priority": "Sertifika Önceliği",
       "challenge_type": "Doğrulama Türü",
+      "comment": "Yorum",
       "config_type": "Yapılandırma Türü",
       "configuration_name": "Yapılandırma Adı",
       "confirm_password": "Şifreyi Onayla",
@@ -895,6 +896,7 @@
       "search": "Ara...",
       "secret_token": "Gizli Belirteç",
       "select_service": "Servis Seç",
+      "service_comment": "Bu hizmet i?in iste?e ba?l? not veya a??klama...",
       "username_example": "mehmetyilmaz"
     },
     "validation": {
@@ -1437,6 +1439,7 @@
       "active": "Aktif",
       "async": "Asenkron",
       "checksum": "Sağlama",
+      "comment": "Yorum",
       "configs": "Yapılandırmalar",
       "country": "Ülke",
       "created": "Oluşturulma",
@@ -1891,6 +1894,7 @@
       "select_rows_for_action": "Bir işlem yapmak için lütfen bir veya daha fazla satır seçin.",
       "services": {
         "actions": "Bu Servis için mevcut aksiyonlar",
+        "comment": "Hizmet i?in not veya a??klama",
         "created": "Servisin oluşturulduğu tarih ve saat",
         "details": "Servis detaylarını göster",
         "last_update": "Servisin en son güncellendiği tarih ve saati",

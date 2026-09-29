@@ -505,4 +505,15 @@ class UIDatabase(Database):
                     session.commit()
                 return default_columns
 
-            return default_columns | (columns_preferences.columns or {})
+            stored_columns = dict(columns_preferences.columns or {})
+            if table_name == "services" and "9" not in stored_columns and ("7" in stored_columns or "8" in stored_columns):
+                old_created = stored_columns.get("7", default_columns.get("8", True))
+                old_last_update = stored_columns.get("8", default_columns.get("9", True))
+                stored_columns["7"] = default_columns.get("7", True)
+                stored_columns["8"] = old_created
+                stored_columns["9"] = old_last_update
+                if not self.readonly:
+                    columns_preferences.columns = default_columns | stored_columns
+                    session.commit()
+
+            return default_columns | stored_columns

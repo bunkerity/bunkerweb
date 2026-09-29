@@ -827,6 +827,7 @@
       "certificate_authority": "Otoritas Sertifikat",
       "certificate_priority": "Prioritas Sertifikat",
       "challenge_type": "Tipe Tantangan",
+      "comment": "Komentar",
       "config_type": "Tipe Konfigurasi",
       "configuration_name": "Nama Konfigurasi",
       "confirm_password": "Konfirmasi Kata Sandi",
@@ -895,6 +896,7 @@
       "search": "Cari...",
       "secret_token": "Token Rahasia",
       "select_service": "Pilih Layanan",
+      "service_comment": "Catatan atau deskripsi opsional untuk layanan ini...",
       "username_example": "johndoe"
     },
     "validation": {
@@ -1437,6 +1439,7 @@
       "active": "Aktif",
       "async": "Async",
       "checksum": "Checksum",
+      "comment": "Komentar",
       "configs": "Konfigurasi",
       "country": "Negara",
       "created": "Dibuat",
@@ -1891,6 +1894,7 @@
       "select_rows_for_action": "Silakan pilih satu atau lebih baris untuk melakukan tindakan.",
       "services": {
         "actions": "Tindakan yang tersedia untuk Layanan ini",
+        "comment": "Catatan atau deskripsi untuk Layanan",
         "created": "Tanggal dan waktu Layanan dibuat",
         "details": "Tampilkan detail Layanan",
         "last_update": "Tanggal dan waktu Layanan terakhir diperbarui",
