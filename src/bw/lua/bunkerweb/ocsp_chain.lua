@@ -1051,6 +1051,21 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 		return blocks
 	end
 	local leaf = blocks[1]
+	-- Cache chain format conversion per-request (optimization #3)
+	-- Key: leaf SPKI fingerprint (unique per leaf in request)
+	if ngx.ctx then
+		local leaf_fp = spki_fingerprint(leaf)
+		if is_fp64(leaf_fp) then
+			local cache_table = ngx.ctx.bw_presentable_chain_cache
+			if not cache_table then
+				cache_table = {}
+				ngx.ctx.bw_presentable_chain_cache = cache_table
+			end
+			if cache_table[leaf_fp] then
+				return cache_table[leaf_fp]
+			end
+		end
+	end
 	local inters = {}
 	for i = 2, #blocks do
 		inters[#inters + 1] = blocks[i]
@@ -1068,6 +1083,16 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 	-- Clean linked path for this leaf: drop any leftover depleted-PEM stamp.
 	if (tonumber(out.unresolved_must_staple) or 0) <= 0 then
 		note_depleted_pem_unresolved(0, leaf)
+	end
+	-- Store in cache for reuse (optimization #3)
+	if ngx.ctx then
+		local leaf_fp = spki_fingerprint(leaf)
+		if is_fp64(leaf_fp) then
+			local cache_table = ngx.ctx.bw_presentable_chain_cache
+			if cache_table then
+				cache_table[leaf_fp] = out
+			end
+		end
 	end
 	return out
 end
