@@ -6851,6 +6851,58 @@ def _persist_ocsp_results_to_disk(
     _restamp_paged_shards(skip=set(published_fps))
 
 
+def _cleanup_stale_revoke_claims(allow_dir: Path, age_threshold_seconds: int = 60) -> int:
+    """Clean up stale revoke claim files left behind by lazy deletion optimization.
+
+    Handshakes defer os.remove(claim) to job-side cleanup by leaving .ocsp_revoke.*.tmp
+    files in ocsp-allow directory. This function scans and deletes any files older than
+    age_threshold_seconds to prevent accumulation. Returns count of files deleted.
+
+    Args:
+        allow_dir: Path to /var/cache/bunkerweb/ssl/ocsp-allow/
+        age_threshold_seconds: Only delete files older than this (default 60s to avoid
+                              deleting in-progress renames)
+
+    Returns:
+        Number of stale claim files deleted
+    """
+    if not allow_dir.exists() or not allow_dir.is_dir():
+        return 0
+
+    cleaned = 0
+    now_ts = time.time()
+    pattern = re.compile(r"^\.ocsp_revoke\..+\.tmp$")
+
+    try:
+        for entry in allow_dir.iterdir():
+            if not entry.is_file() or not pattern.match(entry.name):
+                continue
+
+            try:
+                stat_info = entry.stat()
+                file_age_seconds = now_ts - stat_info.st_mtime
+
+                if file_age_seconds > age_threshold_seconds:
+                    entry.unlink(missing_ok=True)
+                    cleaned += 1
+                    log_debug(
+                        "🧹 OCSP cleaned stale revoke claim file: %s (age=%.1fs)",
+                        entry.name, file_age_seconds
+                    )
+            except OSError as e:
+                # File may have been deleted between listdir and unlink, or permission denied
+                log_debug("⚠️ OCSP could not clean revoke claim file %s: %s", entry.name, e)
+                continue
+    except OSError as e:
+        log_debug("⚠️ OCSP could not scan ocsp-allow for stale claims: %s", e)
+        return 0
+
+    if cleaned > 0:
+        log_debug("✓ OCSP cleaned %d stale revoke claim files", cleaned)
+
+    return cleaned
+
+
 def main() -> int:
     global status
     db: Optional[Any] = None
@@ -6864,12 +6916,23 @@ def main() -> int:
     timed_out = False
 
     # Provision allow/ligand/legacy-refuse dirs off the TLS path (handshake must not mkdir).
+    ocsp_allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
     try:
-        (CONFIGS_SSL_BASE / "ocsp-allow").mkdir(parents=True, exist_ok=True)
+        ocsp_allow_dir.mkdir(parents=True, exist_ok=True)
         (CONFIGS_SSL_BASE / "ocsp-ligand").mkdir(parents=True, exist_ok=True)
         (CONFIGS_SSL_BASE / "ocsp-refuse").mkdir(parents=True, exist_ok=True)
     except Exception as e:
         log_debug("⚠️ OCSP could not provision ocsp-allow/ligand/refuse dirs: %s", e)
+
+    # Path A cleanup: Remove stale revoke claim files from lazy deletion optimization.
+    # Handshakes leave .ocsp_revoke.*.tmp files instead of os.remove(claim) to save latency.
+    # This cleanup runs once per job, keeping the directory from accumulating temp files.
+    try:
+        cleaned_count = _cleanup_stale_revoke_claims(ocsp_allow_dir, age_threshold_seconds=60)
+        if cleaned_count > 0:
+            stats["revoke_claims_cleaned"] = cleaned_count
+    except Exception as e:
+        log_debug("⚠️ OCSP stale revoke claim cleanup failed: %s", e)
 
     def check_job_timeout(phase: str = "") -> bool:
         """Check if job has exceeded timeout. Returns True if timeout exceeded."""
@@ -7318,7 +7381,7 @@ def main() -> int:
 
         elapsed = time.time() - job_start_time
         log_info(
-            "📊 Statistics (completed in %.3fs): 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (unchanged=%d, skipped=%d, no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | 🧹 Orphaned=%d | 🔍 Verified=%d (restored=%d, corrected=%d) | ❌ Errors=%d",
+            "📊 Statistics (completed in %.3fs): 🔐 LE certs=%d (skipped=%d, no OCSP=%d) | 🔐 Custom certs=%d (unchanged=%d, skipped=%d, no OCSP=%d) | 🔄 Fetched=%d | ✓ Cached=%d | 🧹 Orphaned=%d | 🧹 Revoke claims=%d | 🔍 Verified=%d (restored=%d, corrected=%d) | ❌ Errors=%d",
             elapsed,
             stats["le_certs_processed"],
             stats["le_certs_skipped"],
@@ -7330,6 +7393,7 @@ def main() -> int:
             stats["ocsp_fetched_responses"],
             stats["ocsp_cached_responses"],
             stats.get("orphaned_cleaned", 0),
+            stats.get("revoke_claims_cleaned", 0),
             stats.get("ocsp_verified", 0),
             stats.get("ocsp_restored", 0),
             stats.get("ocsp_corrected", 0),

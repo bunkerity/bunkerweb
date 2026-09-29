@@ -304,6 +304,8 @@ end
 -- handshake_drop=true: refuse to CAS soft_recall_gen=0 upgrade-grace pins
 -- (only job drop_allow_pin may clear those). Soft-recall not_paged cleanup
 -- passes handshake_drop=false so leftover gen-0 pins can still be revoked.
+-- Path A + B optimization: per-request cache avoids re-runs in same handshake;
+-- lazy deletion defers os.remove(claim) to job cleanup when handshake_drop=true.
 local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, quiet, handshake_drop)
 	if not is_fp64(fingerprint) then
 		return "allow_drop_failed"
@@ -312,10 +314,24 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 		return "allow_drop_failed"
 	end
 	local want_g = tonumber(want_gen) or 0
+
+	-- Path B: Per-request cache to avoid re-running same revoke in same handshake
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_revoke_cache then
+		ctx.bw_ocsp_revoke_cache = {}
+	end
+	local cache_key = fingerprint .. "|" .. want_sha .. "|" .. tostring(want_g)
+	if ctx and ctx.bw_ocsp_revoke_cache[cache_key] then
+		return ctx.bw_ocsp_revoke_cache[cache_key]
+	end
 	-- Read-only fast path: most mismatches never touch the directory.
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
-		return "allow_absent"
+		local outcome = "allow_absent"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
 	-- Upgrade-grace gen-0 pins: handshake DROP must not wipe the one-release pin
 	-- every sibling still relies on. Job drop_allow_pin remains unconditional.
@@ -333,7 +349,11 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 				})
 			)
 		end
-		return "allow_kept_gen0_grace"
+		local outcome = "allow_kept_gen0_grace"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
 	if not allow_pin_matches(pin, want_sha, want_g) then
 		if not quiet then
@@ -349,7 +369,11 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 				})
 			)
 		end
-		return "allow_kept_gen_moved"
+		local outcome = "allow_kept_gen_moved"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
 	local path = ocsp_allow_path(fingerprint)
 	local claim = allow_pin_claim_path(fingerprint)
@@ -368,9 +392,17 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 					})
 				)
 			end
-			return "allow_drop_eacces"
+			local outcome = "allow_drop_eacces"
+			if ctx and ctx.bw_ocsp_revoke_cache then
+				ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+			end
+			return outcome
 		end
-		return "allow_absent"
+		local outcome = "allow_absent"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
 	-- We now exclusively own what was at `path` at rename time. If the job restamped
 	-- between the read above and the rename, this is the newer pin: put it back.
@@ -389,10 +421,21 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 				})
 			)
 		end
-		return "allow_kept_gen_moved"
+		local outcome = "allow_kept_gen_moved"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
-	os.remove(claim)
+	-- Path A: Lazy deletion when in handshake context (handshake_drop=true).
+	-- Leave claim file for job cleanup instead of os.remove(claim) here.
+	-- This defers ~1-2ms syscall cost to background scheduler, saving TLS handshake latency.
+	-- Job scans ocsp-allow/.ocsp_revoke.*.tmp files and deletes aged ones.
+	if not handshake_drop then
+		os.remove(claim)
+	end
 	if not quiet then
+		local delete_mode = handshake_drop and "lazy" or "immediate"
 		log(
 			ngx.NOTICE,
 			"OCSP allow-pin revoked fp="
@@ -405,9 +448,15 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 				.. tostring(want_g)
 				.. " refused_by="
 				.. tostring((ngx.config and ngx.config.subsystem) or "unknown")
+				.. " delete_mode="
+				.. delete_mode
 		)
 	end
-	return "allow_dropped"
+	local outcome = "allow_dropped"
+	if ctx and ctx.bw_ocsp_revoke_cache then
+		ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+	end
+	return outcome
 end
 
 -- Job/canary only — never call from handshake refuse paths.
