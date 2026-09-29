@@ -632,35 +632,121 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 			return false
 		end
 	end
-	-- Cache cert_pem_to_der() results to avoid expensive PEM parsing per issuer candidate.
-	-- Key: hash of (leaf_pem, issuer_pem) pair; only valid for this stapling operation.
+	-- ========================================================================
+	-- Certificate Parsing with Two-Tier DER Cache
+	-- ========================================================================
+	-- Tier 1: Per-request cache (ngx.ctx) — survives for single handshake
+	-- Tier 2: Persistent cache (shared dict) — survives across handshakes
+	--
+	-- Problem: cert_pem_to_der() is expensive (2-5ms)
+	-- - Multi-issuer certs parse same leaf multiple times
+	-- - Cold start handshakes parse without benefit of prior requests
+	--
+	-- Solution:
+	-- 1. Per-request cache (Tier 1): Reuse within same handshake [DONE]
+	-- 2. Persistent cache (Tier 2): Reuse across handshakes [NEW]
+	--
+	-- Generation binding: Invalidate when cert rotates (soft-recall)
+	-- Prevents using stale DER after certificate renewal
+
 	local der_chain, err
+	local current_gen = current_ocsp_epoch()
+	local der_cache_key = (leaf_pem and leaf_pem:sub(1, 32) or "leaf") ..
+		"|" .. (issuer_pem and issuer_pem:sub(1, 32) or "issuer")
+	local persistent_cache_key = "OCSP:DER_CACHE:" .. der_cache_key
+
+	-- ────────────────────────────────────────────────────────────────────
+	-- Tier 1: Per-Request Cache (Handshake-scoped)
+	-- ────────────────────────────────────────────────────────────────────
 	local ctx = ngx.ctx
 	if ctx then
 		if not ctx.bw_ocsp_der_cache then
 			ctx.bw_ocsp_der_cache = {}
 		end
-		-- Use first 32 chars of each PEM as a cache key (fingerprints are unique)
-		local der_cache_key = (leaf_pem and leaf_pem:sub(1, 32) or "leaf") ..
-			"|" .. (issuer_pem and issuer_pem:sub(1, 32) or "issuer")
+
 		local cached_entry = ctx.bw_ocsp_der_cache[der_cache_key]
-		local current_gen = current_ocsp_epoch()
-		-- Generation binding: invalidate cache if soft-recall (generation) changed.
-		-- Prevents attacker from keeping poisoned DER across certificate rotations.
 		if cached_entry and cached_entry.gen == current_gen then
-			-- Cache hit: reuse DER chain (generation still valid)
+			-- Tier 1 HIT: Reuse from current handshake [<0.1ms]
 			der_chain = cached_entry.chain
 			err = cached_entry.err
-		else
-			-- Cache miss or stale generation: compute DER chain
-			der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
-			-- Bounded cache: cap at 16 entries per request (typical: 1-4 issuers per cert)
-			-- Tag with current generation for soft-recall invalidation
-			bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key,
-				{ chain = der_chain, err = err, gen = current_gen }, 16)
+			if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
+				ngx.ctx.bw_ocsp_metrics.der_cache_tier1_hit = true
+			end
 		end
-	else
+	end
+
+	-- ────────────────────────────────────────────────────────────────────
+	-- Tier 2: Persistent Cache (Shared Dict, across handshakes)
+	-- ────────────────────────────────────────────────────────────────────
+	-- Only try if Tier 1 missed
+	if not der_chain and ngx.shared and ngx.shared.bw_ocsp_validations then
+		local cached_str = nil
+		pcall(function()
+			cached_str = ngx.shared.bw_ocsp_validations:get(persistent_cache_key)
+		end)
+
+		if cached_str then
+			-- Parse cached entry format: "der_bytes|gen"
+			-- (JSON would be overkill; use delimiter)
+			local gen_pos = cached_str:rfind("|")
+			if gen_pos then
+				local cached_der = cached_str:sub(1, gen_pos - 1)
+				local cached_gen = tonumber(cached_str:sub(gen_pos + 1))
+
+				if cached_gen == current_gen then
+					-- Tier 2 HIT: Reuse from persistent cache [<0.1ms]
+					der_chain = cached_der
+					if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
+						ngx.ctx.bw_ocsp_metrics.der_cache_tier2_hit = true
+					end
+				end
+			end
+		end
+	end
+
+	-- ────────────────────────────────────────────────────────────────────
+	-- Cache Miss: Parse Certificate (expensive 2-5ms operation)
+	-- ────────────────────────────────────────────────────────────────────
+	if not der_chain then
+		-- Measure parsing latency
+		local t_parse_start = ngx.hrtime and ngx.hrtime() or nil
 		der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
+
+		if t_parse_start and ngx.ctx then
+			local elapsed_ns = ngx.hrtime() - t_parse_start
+			local elapsed_ms = elapsed_ns / 1e6
+			if not ngx.ctx.bw_ocsp_disk_io then
+				ngx.ctx.bw_ocsp_disk_io = {}
+			end
+			ngx.ctx.bw_ocsp_disk_io.cert_parse_ms = elapsed_ms
+
+			-- Log slow parsing (>5ms indicates issue)
+			if elapsed_ms > 5 then
+				log(ngx.WARN, "OCSP cert parse slow: " .. string.format("%.1f", elapsed_ms) .. "ms")
+			end
+		end
+
+		if der_chain then
+			-- Store in Tier 1 cache (per-request)
+			if ctx then
+				if not ctx.bw_ocsp_der_cache then
+					ctx.bw_ocsp_der_cache = {}
+				end
+				pcall(function()
+					bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key,
+						{ chain = der_chain, err = err, gen = current_gen }, 16)
+				end)
+			end
+
+			-- Store in Tier 2 cache (persistent, across handshakes)
+			if ngx.shared and ngx.shared.bw_ocsp_validations then
+				pcall(function()
+					-- Format: "der_bytes|generation" (separator is rare in binary)
+					local cache_value = der_chain .. "|" .. current_gen
+					ngx.shared.bw_ocsp_validations:set(persistent_cache_key, cache_value, 3600)
+				end)
+			end
+		end
 	end
 	if not der_chain then
 		log(ngx.DEBUG, "OCSP cert_pem_to_der failed: " .. tostring(err))
@@ -3077,17 +3163,31 @@ function _M.get_l1_cache_hit()
 end
 
 -- Get disk I/O latencies from current request
--- Returns: table with latencies {issuer_pem_ms, meta_json_ms, ocsp_der_ms}
--- Used to track slow disk reads
+-- Returns: table with latencies {issuer_pem_ms, meta_json_ms, ocsp_der_ms, cert_parse_ms}
+-- Used to track slow disk reads and certificate parsing
 function _M.get_disk_io_latencies()
 	if ngx.ctx and ngx.ctx.bw_ocsp_disk_io then
 		return {
 			issuer_pem_ms = ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns and ngx.ctx.bw_ocsp_disk_io.issuer_pem_ns / 1e6 or nil,
 			meta_json_ms = ngx.ctx.bw_ocsp_disk_io.meta_json_ns and ngx.ctx.bw_ocsp_disk_io.meta_json_ns / 1e6 or nil,
-			ocsp_der_ms = ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns and ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns / 1e6 or nil
+			ocsp_der_ms = ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns and ngx.ctx.bw_ocsp_disk_io.ocsp_der_ns / 1e6 or nil,
+			cert_parse_ms = ngx.ctx.bw_ocsp_disk_io.cert_parse_ms or nil
 		}
 	end
 	return {}
+end
+
+-- Get DER cache hit status from current handshake
+-- Returns: table with {tier1_hit, tier2_hit}
+-- Used to monitor certificate parsing cache effectiveness
+function _M.get_der_cache_status()
+	if ngx.ctx and ngx.ctx.bw_ocsp_metrics then
+		return {
+			tier1_hit = ngx.ctx.bw_ocsp_metrics.der_cache_tier1_hit or false,
+			tier2_hit = ngx.ctx.bw_ocsp_metrics.der_cache_tier2_hit or false
+		}
+	end
+	return {tier1_hit = false, tier2_hit = false}
 end
 
 -- Get all OCSP metrics from current request
