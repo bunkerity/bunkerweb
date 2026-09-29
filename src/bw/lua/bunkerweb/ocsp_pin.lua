@@ -25,53 +25,12 @@ local soft_recall_gen_of = store.soft_recall_gen_of
 -- Transient allow-pin TTL when expires_unix is absent (align with L1).
 local ALLOW_PIN_TTL_SECONDS = L1_MAX_TTL
 
--- Cache ligand_or_meta results per-request to avoid repeated file I/O + JSON decode
--- Ligand file reads are expensive (1-2ms) and often repeat within a handshake
-local function ligand_or_meta(meta, fingerprint)
-	-- Initialize per-request cache on first use
-	local ctx = ngx.ctx
-	if ctx and not ctx.bw_ocsp_ligand_cache then
-		ctx.bw_ocsp_ligand_cache = {}
-	end
-
-	-- Use fingerprint as cache key (guaranteed 64-char hex if valid)
-	local key = fingerprint
-	if not key or type(key) ~= "string" or #key ~= 64 then
-		-- No fingerprint: cannot cache, call directly
-		return ligand_or_meta_uncached(meta, fingerprint)
-	end
-
-	-- Check per-request cache first
-	if ctx and ctx.bw_ocsp_ligand_cache then
-		local cached = ctx.bw_ocsp_ligand_cache[key]
-		if cached ~= nil then
-			-- Distinguish between "no ligand" (false) and "found ligand" (table)
-			-- Merge cached ligand with current meta (ligand_or_meta handles merge logic)
-			if cached == false then
-				return meta
-			end
-			-- Cached ligand: merge with current meta
-			local merge_ligand = store.merge_ligand
-			if merge_ligand then
-				return merge_ligand(meta, cached, fingerprint)
-			end
-			return cached
-		end
-	end
-
-	-- Cache miss: call the actual function
-	local result = ligand_or_meta_uncached(meta, fingerprint)
-
-	-- Extract and cache the ligand part for future calls
-	-- ligand_or_meta returns merged result, but we cache the ligand component
-	-- by calling read_ocsp_ligand internally
-	local read_ocsp_ligand = store.read_ocsp_ligand
-	if read_ocsp_ligand and ctx and ctx.bw_ocsp_ligand_cache then
-		local ligand = read_ocsp_ligand(fingerprint)
-		ctx.bw_ocsp_ligand_cache[key] = ligand or false
-	end
-
-	return result
+-- store.ligand_or_meta always samples live shard+ligand (ignores caller meta) and
+-- already per-request-caches via read_ocsp_json / read_ocsp_ligand. A prior wrapper
+-- that merged caller meta with a cached ligand reintroduced stale-caller
+-- tombstone/gen holes after the live-first store fix — do not resurrect it.
+local function ligand_or_meta(_meta, fingerprint)
+	return ligand_or_meta_uncached(nil, fingerprint)
 end
 
 -- DROP/KEEP tables live in ocsp_common (STAPLE_POLICY). Prefix rules stay here:
@@ -79,12 +38,13 @@ end
 -- Invariant: every cause should_skip_peer_bus returns true for must also be KEEP.
 
 local function ocsp_allow_path(fingerprint)
-	return "/var/cache/bunkerweb/ssl/ocsp-allow/" .. fingerprint
+	-- Lowercase so uppercase hex cannot fork a parallel pin path vs the job.
+	return "/var/cache/bunkerweb/ssl/ocsp-allow/" .. fingerprint:lower()
 end
 
 -- Legacy refuse path — job-side cleanup only after the allow-pin invert.
 local function ocsp_refuse_path_legacy(fingerprint)
-	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint
+	return "/var/cache/bunkerweb/ssl/ocsp-refuse/" .. fingerprint:lower()
 end
 
 -- Handshake is read-only on the pin directory (except compare-and-delete revoke).
@@ -112,8 +72,57 @@ local function decode_allow_pin(raw)
 		return nil
 	end
 	obj.der_sha256 = sha
-	obj.soft_recall_gen = soft_recall_gen_of(obj)
+	-- Same sentinel contract as read_ocsp_ligand: omit→0 (upgrade grace);
+	-- present-but-invalid → false so a later soft_recall_gen_of cannot treat
+	-- that as omit→0 and rematch leftover gen-0 pins.
+	local raw_gen = obj.soft_recall_gen
+	if raw_gen == nil then
+		obj.soft_recall_gen = 0
+	else
+		local normalized = soft_recall_gen_of(obj)
+		if type(normalized) == "number" then
+			obj.soft_recall_gen = normalized
+		else
+			obj.soft_recall_gen = false
+		end
+	end
 	return obj
+end
+
+-- Drop per-request pin/claim/revoke caches after revoke/write/drop/reclaim.
+-- Pin entries must be cleared (nil), not set to false: false means "confirmed
+-- missing" and would hide a just-written / just-reclaimed pin in the same ctx.
+local function invalidate_pin_caches(fingerprint)
+	local ctx = ngx.ctx
+	if not ctx or type(fingerprint) ~= "string" then
+		return
+	end
+	local lower = fingerprint:lower()
+	if ctx.bw_ocsp_pin_cache then
+		ctx.bw_ocsp_pin_cache[fingerprint] = nil
+		if lower ~= fingerprint then
+			ctx.bw_ocsp_pin_cache[lower] = nil
+		end
+	end
+	if ctx.bw_ocsp_claim_cache then
+		ctx.bw_ocsp_claim_cache[fingerprint] = nil
+		if lower ~= fingerprint then
+			ctx.bw_ocsp_claim_cache[lower] = nil
+		end
+	end
+	-- Revoke outcomes are keyed fp|sha|gen; drop any entry for this fp so a
+	-- prior allow_absent cannot suppress a post-restamp DROP in the same ctx.
+	if ctx.bw_ocsp_revoke_cache then
+		local prefix = lower .. "|"
+		for k in pairs(ctx.bw_ocsp_revoke_cache) do
+			if
+				type(k) == "string"
+				and (k:sub(1, #prefix) == prefix or k:sub(1, #fingerprint + 1) == fingerprint .. "|")
+			then
+				ctx.bw_ocsp_revoke_cache[k] = nil
+			end
+		end
+	end
 end
 
 -- Read allow-pin with per-request dedup cache (ngx.ctx)
@@ -122,6 +131,9 @@ local function read_allow_pin(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
 	end
+	-- Lowercase cache key: is_fp64 allows A-F; disk path is lowercase — mixed
+	-- case must not fork a parallel ngx.ctx entry beside the live pin.
+	fingerprint = fingerprint:lower()
 
 	-- Initialize per-request cache on first use
 	local ctx = ngx.ctx
@@ -159,7 +171,7 @@ end
 
 -- True when the pin names exactly this generation (der_sha256, soft_recall_gen).
 -- want_g must be a number; pin.soft_recall_gen must already be a number (decode
--- ran soft_recall_gen_of — nil means type drift on the pin file, never match).
+-- stores 0 for omit, false for present-but-invalid — false fails closed here).
 local function allow_pin_matches(pin, want_sha, want_g)
 	if type(want_g) ~= "number" or type(pin) ~= "table" then
 		return false
@@ -174,34 +186,105 @@ local function allow_pin_matches(pin, want_sha, want_g)
 	return pin_g == want_g
 end
 
--- Claim files match the job's stale-temp sweep (**/.ocsp_*.tmp, >5 min) so a
--- worker that dies mid-revoke cannot leave litter behind indefinitely.
-local revoke_claim_seq = 0
-local function allow_pin_claim_path(fingerprint)
-	revoke_claim_seq = revoke_claim_seq + 1
+-- Claim / write temps match the job's stale-temp sweep (**/.ocsp_*.tmp) so a
+-- worker that dies mid-CAS cannot leave litter behind indefinitely.
+local pin_tmp_seq = 0
+local function allow_pin_tmp_path(fingerprint, kind)
+	pin_tmp_seq = pin_tmp_seq + 1
 	local pid = (ngx.worker and ngx.worker.pid and ngx.worker.pid()) or 0
-	return "/var/cache/bunkerweb/ssl/ocsp-allow/.ocsp_revoke."
-		.. fingerprint
+	return "/var/cache/bunkerweb/ssl/ocsp-allow/.ocsp_"
+		.. tostring(kind or "tmp")
+		.. "."
+		.. fingerprint:lower()
 		.. "."
 		.. tostring(pid)
 		.. "."
-		.. tostring(revoke_claim_seq)
+		.. tostring(pin_tmp_seq)
 		.. ".tmp"
 end
 
--- Put a claimed pin back at `path` without clobbering a newer one the job may have
--- published meanwhile. Hard link fails with EEXIST when path is occupied; without
--- lfs.link, rename only into an empty slot. Returns true when the pin was restored.
-local function restore_claimed_pin(claim, path)
-	local ok_lfs, lfs = pcall(require, "lfs")
-	if ok_lfs and type(lfs) == "table" and lfs.link and lfs.link(claim, path) then
-		os.remove(claim)
-		return true
-	end
-	if not path_exists(path) and os.rename(claim, path) then
+local function allow_pin_claim_path(fingerprint)
+	return allow_pin_tmp_path(fingerprint, "revoke")
+end
+
+-- Destroy or disarm a sticky claim so try_reclaim cannot restore it.
+-- Order: unlink → rename out of .ocsp_revoke.* → poison decode with "{}".
+local function neutralize_allow_claim(claim, fingerprint)
+	if type(claim) ~= "string" or claim == "" then
 		return true
 	end
 	os.remove(claim)
+	if not path_exists(claim) then
+		return true
+	end
+	os.remove(claim)
+	if not path_exists(claim) then
+		return true
+	end
+	local tomb = allow_pin_tmp_path(fingerprint, "dead")
+	if os.rename(claim, tomb) then
+		os.remove(tomb)
+		return not path_exists(claim)
+	end
+	local poison = io.open(claim, "w")
+	if poison then
+		poison:write("{}")
+		poison:close()
+	end
+	-- Still under revoke prefix, but decode_allow_pin rejects "{}".
+	return decode_allow_pin(read_file(claim)) == nil
+end
+
+-- Put a claimed pin back at `path` without clobbering a newer one the job may have
+-- published meanwhile. Prefer hard link (EEXIST = live pin already present).
+-- Rename fallback when link fails with an empty slot (EXDEV / no lfs.link) — without
+-- it, stale_gen / race_restore left the pin only in the claim until job sweep
+-- unlinked it (~60s) and the fleet pin vanished.
+--
+-- After a successful link, the claim name MUST be unlinked. A leftover hardlink
+-- to the same inode means DROP of `path` still leaves a reclaimable claim that
+-- try_reclaim_orphan_claim will restore — undoing the DROP.
+-- fingerprint is required to neutralize an obsolete claim when path is already taken.
+local function restore_claimed_pin(claim, path, fingerprint)
+	local ok_lfs, lfs = pcall(require, "lfs")
+	if ok_lfs and type(lfs) == "table" and lfs.link and lfs.link(claim, path) then
+		os.remove(claim)
+		if path_exists(claim) then
+			os.remove(claim)
+		end
+		if not path_exists(claim) then
+			return true
+		end
+		-- Dual hardlink: undo by dropping the new path name. Never neutralize/poison
+		-- here — that would wipe the shared inode (live pin + claim).
+		os.remove(path)
+		if not path_exists(path) then
+			-- Claim is again the sole name (reclaimable litter).
+			return false
+		end
+		-- Path unlink failed; try claim unlink once more (still no poison).
+		os.remove(claim)
+		if not path_exists(claim) then
+			return true
+		end
+		-- Dual hardlink remains; caller may retry. Do not poison.
+		return false
+	end
+	if path_exists(path) then
+		-- Live pin already present (peer won): disarm claim so it cannot be
+		-- reclaimed after a later DROP of the peer's pin.
+		-- Safe: claim and path are distinct inodes (we never linked them).
+		neutralize_allow_claim(claim, fingerprint)
+		return false
+	end
+	if os.rename(claim, path) then
+		return true
+	end
+	-- Race created path between exists-check and rename: keep claim only if
+	-- path still empty (transient error); otherwise claim is obsolete.
+	if path_exists(path) then
+		neutralize_allow_claim(claim, fingerprint)
+	end
 	return false
 end
 
@@ -211,7 +294,7 @@ local function list_allow_pin_claims(fingerprint)
 	if not is_fp64(fingerprint) then
 		return claims
 	end
-	local prefix = ".ocsp_revoke." .. fingerprint .. "."
+	local prefix = ".ocsp_revoke." .. fingerprint:lower() .. "."
 	local ok_lfs, lfs = pcall(require, "lfs")
 	if not ok_lfs or type(lfs) ~= "table" or not lfs.dir then
 		return claims
@@ -227,6 +310,23 @@ local function list_allow_pin_claims(fingerprint)
 	return claims
 end
 
+-- Neutralize every .ocsp_revoke.{fp}.* claim. Write/revoke used to disarm only
+-- their own claim path; a crashed peer's orphan (other pid/seq, often older gen)
+-- then survived and either blocked handshakes as claim_inflight after the live
+-- pin was DROPped, or let try_reclaim restore the wrong generation.
+-- Returns true when no still-decodeable revoke claim remains.
+local function sweep_allow_pin_claims(fingerprint)
+	for _, claim in ipairs(list_allow_pin_claims(fingerprint)) do
+		neutralize_allow_claim(claim, fingerprint)
+	end
+	for _, claim in ipairs(list_allow_pin_claims(fingerprint)) do
+		if decode_allow_pin(read_file(claim)) then
+			return false
+		end
+	end
+	return true
+end
+
 -- If a claim still holds want (sha, gen) and the live pin path is empty, restore it.
 local function try_reclaim_orphan_claim(fingerprint, want_sha, want_g)
 	local path = ocsp_allow_path(fingerprint)
@@ -236,7 +336,7 @@ local function try_reclaim_orphan_claim(fingerprint, want_sha, want_g)
 	for _, claim in ipairs(list_allow_pin_claims(fingerprint)) do
 		local pin = decode_allow_pin(read_file(claim))
 		if allow_pin_matches(pin, want_sha, want_g) then
-			if restore_claimed_pin(claim, path) then
+			if restore_claimed_pin(claim, path, fingerprint) then
 				return true
 			end
 		end
@@ -244,9 +344,14 @@ local function try_reclaim_orphan_claim(fingerprint, want_sha, want_g)
 	return false
 end
 
--- Check if allow-pin has a claim with per-request dedup cache (ngx.ctx)
--- Avoids repeated expensive lfs.dir scans within a single handshake
+-- True when a still-decodeable revoke claim exists (poisoned "{}" litter does not
+-- count — that is post-DROP debris, not an in-flight CAS).
 local function allow_pin_has_claim(fingerprint)
+	if not is_fp64(fingerprint) then
+		return false
+	end
+	fingerprint = fingerprint:lower()
+
 	-- Initialize per-request cache on first use
 	local ctx = ngx.ctx
 	if ctx and not ctx.bw_ocsp_claim_cache then
@@ -257,13 +362,19 @@ local function allow_pin_has_claim(fingerprint)
 	if ctx and ctx.bw_ocsp_claim_cache then
 		local cached = ctx.bw_ocsp_claim_cache[fingerprint]
 		if cached ~= nil then
-			-- Cache stores: false (no claims) or true (claims exist)
+			-- Cache stores: false (no reclaimable claims) or true (claims exist)
 			return cached == true
 		end
 	end
 
-	-- Cache miss: scan directory
-	local has_claims = #list_allow_pin_claims(fingerprint) > 0
+	-- Cache miss: scan directory for decodeable claims only
+	local has_claims = false
+	for _, claim in ipairs(list_allow_pin_claims(fingerprint)) do
+		if decode_allow_pin(read_file(claim)) then
+			has_claims = true
+			break
+		end
+	end
 	if ctx and ctx.bw_ocsp_claim_cache then
 		ctx.bw_ocsp_claim_cache[fingerprint] = has_claims
 	end
@@ -273,17 +384,25 @@ end
 -- Unconditional drop (job / admin / soft-recall cleanup that already knows the
 -- generation is gone). Handshake refuse paths must use revoke_allow_pin instead.
 -- Checks os.remove's nil,err return — pcall alone never sees EACCES.
+-- Also sweeps .ocsp_revoke.{fp}.* claim litter: leaving it let try_reclaim
+-- resurrect a pin the job/admin just cleared (worker-death mid-revoke debris).
 local function drop_allow_pin(fingerprint)
 	if not is_fp64(fingerprint) then
 		return false, "invalid_fingerprint"
 	end
+	fingerprint = fingerprint:lower()
 	local path = ocsp_allow_path(fingerprint)
 	local ok, err = os.remove(path)
 	if not ok and err and not tostring(err):find("No such file", 1, true) then
 		return false, tostring(err)
 	end
+	if not sweep_allow_pin_claims(fingerprint) then
+		invalidate_pin_caches(fingerprint)
+		return false, "claim_unlink_failed"
+	end
 	-- Legacy refuse cleanup is job-side; best-effort here for admin clear.
 	os.remove(ocsp_refuse_path_legacy(fingerprint))
+	invalidate_pin_caches(fingerprint)
 	return true
 end
 
@@ -304,16 +423,26 @@ end
 -- handshake_drop=true: refuse to CAS soft_recall_gen=0 upgrade-grace pins
 -- (only job drop_allow_pin may clear those). Soft-recall not_paged cleanup
 -- passes handshake_drop=false so leftover gen-0 pins can still be revoked.
--- Path A + B optimization: per-request cache avoids re-runs in same handshake;
--- lazy deletion defers os.remove(claim) to job cleanup when handshake_drop=true.
+-- Per-request revoke cache avoids re-runs in the same handshake.
+-- Always destroy the claim on successful DROP — leaving it let
+-- try_reclaim_orphan_claim restore a just-revoked pin for up to ~60s.
 local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, quiet, handshake_drop)
 	if not is_fp64(fingerprint) then
 		return "allow_drop_failed"
 	end
-	if type(want_sha) ~= "string" or #want_sha ~= 64 then
+	fingerprint = fingerprint:lower()
+	if type(want_sha) ~= "string" then
 		return "allow_drop_failed"
 	end
-	local want_g = tonumber(want_gen) or 0
+	want_sha = want_sha:lower()
+	if #want_sha ~= 64 or not want_sha:match("^[0-9a-f]+$") then
+		return "allow_drop_failed"
+	end
+	-- Same hardening as write_allow_pin (no tonumber("1e2") / false→0 surprises).
+	local want_g = soft_recall_gen_of({ soft_recall_gen = want_gen })
+	if type(want_g) ~= "number" then
+		return "allow_drop_failed"
+	end
 
 	-- Path B: Per-request cache to avoid re-running same revoke in same handshake
 	local ctx = ngx.ctx
@@ -398,6 +527,8 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 			end
 			return outcome
 		end
+		-- ENOENT under us: drop the cached live pin so the next read sees absence.
+		invalidate_pin_caches(fingerprint)
 		local outcome = "allow_absent"
 		if ctx and ctx.bw_ocsp_revoke_cache then
 			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
@@ -407,7 +538,9 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 	-- We now exclusively own what was at `path` at rename time. If the job restamped
 	-- between the read above and the rename, this is the newer pin: put it back.
 	if not allow_pin_matches(decode_allow_pin(read_file(claim)), want_sha, want_g) then
-		local restored = restore_claimed_pin(claim, path)
+		local restored = restore_claimed_pin(claim, path, fingerprint)
+		-- Disk now holds N+1 (restored or peer); cached pre-claim pin was N.
+		invalidate_pin_caches(fingerprint)
 		if not quiet then
 			log(
 				ngx.NOTICE,
@@ -427,15 +560,58 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 		end
 		return outcome
 	end
-	-- Path A: Lazy deletion when in handshake context (handshake_drop=true).
-	-- Leave claim file for job cleanup instead of os.remove(claim) here.
-	-- This defers ~1-2ms syscall cost to background scheduler, saving TLS handshake latency.
-	-- Job scans ocsp-allow/.ocsp_revoke.*.tmp files and deletes aged ones.
-	if not handshake_drop then
-		os.remove(claim)
+	-- Destroy the claim. neutralize may unlink, tomb, or poison "{}".
+	-- If it cannot disarm a still-decodeable claim, try restore; if that also
+	-- fails, neutralize again so try_reclaim cannot undo the DROP attempt.
+	-- Then sweep ANY sibling crash litter for this fp (other pid/seq) — disarming
+	-- only our claim left orphans that blocked as claim_inflight or reclaimed
+	-- an older gen after the live pin was gone.
+	if not neutralize_allow_claim(claim, fingerprint) then
+		local restored = restore_claimed_pin(claim, path, fingerprint)
+		if not restored and path_exists(claim) then
+			neutralize_allow_claim(claim, fingerprint)
+		end
+		invalidate_pin_caches(fingerprint)
+		if not quiet then
+			log(
+				ngx.ERR,
+				format_staple_decision("peer_refuse_bus", {
+					tag = "OCSP_PEER_REFUSE_BUS",
+					action = "allow_drop_failed",
+					refuse_cause = tostring(refuse_cause or ""),
+					fp = fingerprint:sub(1, 16) .. "...",
+					detail = restored and "claim_unlink_restored" or "claim_unlink_failed",
+				})
+			)
+		end
+		local outcome = "allow_drop_failed"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
 	end
+	if not sweep_allow_pin_claims(fingerprint) then
+		invalidate_pin_caches(fingerprint)
+		if not quiet then
+			log(
+				ngx.ERR,
+				format_staple_decision("peer_refuse_bus", {
+					tag = "OCSP_PEER_REFUSE_BUS",
+					action = "allow_drop_failed",
+					refuse_cause = tostring(refuse_cause or ""),
+					fp = fingerprint:sub(1, 16) .. "...",
+					detail = "sibling_claim_unlink_failed",
+				})
+			)
+		end
+		local outcome = "allow_drop_failed"
+		if ctx and ctx.bw_ocsp_revoke_cache then
+			ctx.bw_ocsp_revoke_cache[cache_key] = outcome
+		end
+		return outcome
+	end
+	invalidate_pin_caches(fingerprint)
 	if not quiet then
-		local delete_mode = handshake_drop and "lazy" or "immediate"
 		log(
 			ngx.NOTICE,
 			"OCSP allow-pin revoked fp="
@@ -448,8 +624,6 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 				.. tostring(want_g)
 				.. " refused_by="
 				.. tostring((ngx.config and ngx.config.subsystem) or "unknown")
-				.. " delete_mode="
-				.. delete_mode
 		)
 	end
 	local outcome = "allow_dropped"
@@ -460,38 +634,45 @@ local function revoke_allow_pin(fingerprint, want_sha, want_gen, refuse_cause, q
 end
 
 -- Job/canary only — never call from handshake refuse paths.
--- Compare-and-stamp: refuse overwrite when on-disk soft_recall_gen is strictly
--- newer (lagging canary must not clobber N+1 with N).
+-- Compare-and-stamp via claim: rename live pin aside, refuse if claimed gen is
+-- strictly newer, then install tmp into the empty slot. Plain rename over a live
+-- path is last-writer-wins and can clobber N+1 with N.
 local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires_unix)
 	if not is_fp64(fingerprint) or type(der_sha256) ~= "string" then
 		return false, "invalid_inputs"
 	end
+	fingerprint = fingerprint:lower()
 	local sha = der_sha256:lower()
 	if #sha ~= 64 or not sha:match("^[0-9a-f]+$") then
 		return false, "invalid_der_sha256"
 	end
-	local gen = tonumber(soft_recall_gen) or 0
-	if gen < 0 then
+	-- Digit-only / finite non-negative only (no tonumber("1e2") surprises).
+	local gen
+	if soft_recall_gen == nil then
 		gen = 0
+	else
+		gen = soft_recall_gen_of({ soft_recall_gen = soft_recall_gen })
+		if type(gen) ~= "number" then
+			return false, "invalid_soft_recall_gen"
+		end
 	end
-	gen = math.floor(gen)
 	local path = ocsp_allow_path(fingerprint)
-	-- Best-effort CAS: re-check immediately before rename (still TOCTOU vs another
-	-- writer, but closes the common lagging-canary clobber of a newer pin).
-	local existing = decode_allow_pin(read_file(path))
-	if existing and type(existing.soft_recall_gen) == "number" and existing.soft_recall_gen > gen then
-		return false, "stale_gen"
-	end
-	local tmp = path
-		.. ".tmp."
-		.. tostring((ngx.worker and ngx.worker.pid and ngx.worker.pid()) or math.floor(ngx.now() * 1000))
+	-- Dotfile under ocsp-allow so job `**/.ocsp_*.tmp` sweep cleans crash litter
+	-- (legacy `{fp}.tmp.{pid}` sat beside the live pin and was never swept).
+	local tmp = allow_pin_tmp_path(fingerprint, "write")
 	local payload_obj = {
 		der_sha256 = sha,
 		soft_recall_gen = gen,
 		allowed_unix = ngx.time(),
 		allowed_by = tostring((ngx.config and ngx.config.subsystem) or "job"),
 	}
-	if type(expires_unix) == "number" and expires_unix > 0 then
+	if
+		type(expires_unix) == "number"
+		and expires_unix == expires_unix
+		and expires_unix ~= math.huge
+		and expires_unix ~= -math.huge
+		and expires_unix > 0
+	then
 		payload_obj.expires_unix = math.floor(expires_unix)
 	end
 	local payload = require("cjson").encode(payload_obj)
@@ -506,19 +687,91 @@ local function write_allow_pin(fingerprint, der_sha256, soft_recall_gen, expires
 		os.remove(tmp)
 		return false, "write_tmp:" .. tostring(write_err or "nil")
 	end
-	-- Re-check after write: a restamp may have landed while we wrote tmp.
-	existing = decode_allow_pin(read_file(path))
-	if existing and type(existing.soft_recall_gen) == "number" and existing.soft_recall_gen > gen then
-		os.remove(tmp)
-		return false, "stale_gen"
+
+	-- Hold the live pin aside until tmp is installed. Deleting the claim first
+	-- opened a window where rename failure erased the fleet pin, or a lagging
+	-- writer could clobber a newer pin that landed in the empty slot.
+	local claim = nil
+	if path_exists(path) then
+		claim = allow_pin_claim_path(fingerprint)
+		local ok_c, c_err = os.rename(path, claim)
+		if not ok_c then
+			os.remove(tmp)
+			return false, "claim:" .. tostring(c_err or "nil")
+		end
+		local claimed = decode_allow_pin(read_file(claim))
+		if claimed and type(claimed.soft_recall_gen) == "number" and claimed.soft_recall_gen > gen then
+			restore_claimed_pin(claim, path, fingerprint)
+			os.remove(tmp)
+			-- Disk holds the newer pin again; drop any pre-claim cached view.
+			invalidate_pin_caches(fingerprint)
+			return false, "stale_gen"
+		end
 	end
-	local ok_r, rename_err = os.rename(tmp, path)
-	if not ok_r then
-		os.remove(tmp)
-		return false, "rename:" .. tostring(rename_err or "nil")
+
+	-- Prefer hard link into an empty slot (EEXIST = peer won). Plain rename
+	-- replaces an occupied path on Unix and would clobber a newer pin.
+	-- If link fails with an empty slot (EXDEV / unsupported), fall back to rename.
+	-- After link, tmp MUST be unlinked — a leftover hardlink would keep pin bytes
+	-- reachable after DROP of path (same inode resurrection class as restore).
+	local installed = false
+	local install_err = nil
+	do
+		local ok_lfs, lfs = pcall(require, "lfs")
+		if ok_lfs and type(lfs) == "table" and lfs.link and lfs.link(tmp, path) then
+			os.remove(tmp)
+			if path_exists(tmp) then
+				os.remove(tmp)
+			end
+			if not path_exists(tmp) then
+				installed = true
+			else
+				-- Dual hardlink: undo path name. Never poison tmp (shared inode).
+				os.remove(path)
+				if not path_exists(path) then
+					install_err = "tmp_unlink_failed"
+				else
+					os.remove(tmp)
+					if not path_exists(tmp) then
+						installed = true
+					else
+						install_err = "tmp_unlink_failed"
+					end
+				end
+			end
+		elseif path_exists(path) then
+			install_err = "slot_taken"
+		else
+			local ok_r, rename_err = os.rename(tmp, path)
+			if ok_r then
+				installed = true
+			else
+				install_err = tostring(rename_err or "nil")
+			end
+		end
 	end
+	if not installed then
+		os.remove(tmp)
+		if claim then
+			if path_exists(path) then
+				-- Peer filled the slot; disarm our claim so it cannot be reclaimed
+				-- after a later DROP of the peer's pin (same as restore_claimed_pin).
+				neutralize_allow_claim(claim, fingerprint)
+				invalidate_pin_caches(fingerprint)
+				return false, "stale_gen"
+			end
+			restore_claimed_pin(claim, path, fingerprint)
+			invalidate_pin_caches(fingerprint)
+		end
+		return false, "rename:" .. tostring(install_err or "nil")
+	end
+	-- Sweep all revoke claims for this fp (our aside-claim and any foreign
+	-- crash litter). Own-claim-only cleanup left orphans that resurfaced as
+	-- claim_inflight / wrong-gen reclaim after a later DROP of this pin.
+	sweep_allow_pin_claims(fingerprint)
 	-- Legacy refuse must not shadow allow polarity (job write path only).
 	os.remove(ocsp_refuse_path_legacy(fingerprint))
+	invalidate_pin_caches(fingerprint)
 	return true
 end
 
@@ -562,16 +815,17 @@ function _M.ensure_ocsp_bus_dirs()
 end
 
 -- Pin dies at expires_unix - skew (same death clock as L1 / resp_still_fresh).
+-- Reject NaN / ±inf so a corrupt pin cannot claim immortality.
 local function allow_pin_expired(pin)
 	if type(pin) ~= "table" then
 		return true
 	end
 	local exp = pin.expires_unix
-	if type(exp) == "number" and exp > 0 then
-		return ngx.time() >= (exp - OCSP_CLOCK_SKEW_SECONDS)
+	if type(exp) == "number" and exp == exp and exp ~= math.huge and exp ~= -math.huge and exp > 0 then
+		return ngx.time() >= (math.floor(exp) - OCSP_CLOCK_SKEW_SECONDS)
 	end
 	local t = pin.allowed_unix
-	if type(t) ~= "number" then
+	if type(t) ~= "number" or t ~= t or t == math.huge or t == -math.huge then
 		return true
 	end
 	return (ngx.time() - t) > ALLOW_PIN_TTL_SECONDS
@@ -589,8 +843,28 @@ end
 -- shard_not_paged) still refuse. "not_paged" is KEEP_ALLOW, so a later
 -- record_peer_refuse does not DROP again.
 -- Expired pin: refuse locally (KEEP) but do not unlink (race with job restamp).
+-- Soft-recall / unpaged before generation identity — control keys often lack
+-- der_sha256 (negative-only meta). Checking after the sha early-return made
+-- intermediate soft-recall invisible (Must-Staple fail-open until tombstone).
 local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
+	-- Fail closed without a bus key: generation_tuple(resp) can still yield a sha
+	-- when meta is nil, and fingerprint:sub in logs would throw on nil/garbage.
+	if not is_fp64(fingerprint) then
+		return "allow_pin_missing"
+	end
+	fingerprint = fingerprint:lower()
 	meta = ligand_or_meta(meta, fingerprint)
+	if type(meta) == "table" and (shard_not_paged(meta, fingerprint) or meta.unpaged_after_nongood == true) then
+		local sha, recall_gen = generation_tuple(meta, resp)
+		if sha and type(recall_gen) == "number" then
+			-- Soft-recall / unpaged: revoke leftover allow for THIS (sha, gen) only so
+			-- a lagging worker cannot erase a re-canaried pin (same DER, newer gen).
+			-- handshake_drop=false: soft-recall cleanup may clear leftover gen-0 pins.
+			revoke_allow_pin(fingerprint, sha, recall_gen, "not_paged", quiet, false)
+		end
+		-- Non-nil so a caller that skips shard_not_paged cannot staple this generation.
+		return "not_paged"
+	end
 	local sha, recall_gen = generation_tuple(meta, resp)
 	if not sha then
 		-- Must-Staple without a generation cannot prove allow — fail closed.
@@ -609,18 +883,13 @@ local function peer_refuse_blocks(fingerprint, meta, resp, quiet)
 		end
 		return "gen_type_drift"
 	end
-	-- Soft-recall / unpaged: revoke leftover allow for THIS (sha, gen) only so
-	-- a lagging worker cannot erase a re-canaried pin (same DER, newer gen).
-	-- handshake_drop=false: soft-recall cleanup may clear leftover gen-0 pins.
-	if type(meta) == "table" and (shard_not_paged(meta) or meta.unpaged_after_nongood == true) then
-		revoke_allow_pin(fingerprint, sha, recall_gen, "not_paged", quiet, false)
-		-- Non-nil so a caller that skips shard_not_paged cannot staple this generation.
-		return "not_paged"
-	end
 	local pin = read_allow_pin(fingerprint)
 	if not pin then
 		-- Worker death mid-revoke may leave a matching claim with an empty live path.
 		if try_reclaim_orphan_claim(fingerprint, sha, recall_gen) then
+			-- Reclaim restored disk; drop the cached false "missing" sentinel or the
+			-- re-read below still reports allow_pin_missing / claim_inflight wrongly.
+			invalidate_pin_caches(fingerprint)
 			pin = read_allow_pin(fingerprint)
 		end
 	end
@@ -681,29 +950,27 @@ end
 -- Soft fuse: continue without touching the allow pin.
 -- normal: revoke allow for DROP_ALLOW refuse_cause so sibling Must-Staple fails closed.
 --
--- Transient causes must not enter the peer bus (HTTP↔stream). skip ⊆ KEEP_ALLOW:
--- every arm here is also KEEP so a future list drift that forgets KEEP still cannot
--- drop the shared pin via record_peer_refuse if skip somehow regresses.
+-- Transient causes must not enter the peer bus (HTTP↔stream).
+-- skip is derived from KEEP_ALLOW_ON_REFUSE (plus unpaged / set_staple arms)
+-- so the hand list cannot drift from ocsp_common policy tables.
 local function should_skip_peer_bus(detail, meta, fingerprint)
 	local d = tostring(detail or "unmet")
 	local eff = meta
 	if type(fingerprint) == "string" and is_fp64(fingerprint) then
 		eff = ligand_or_meta(meta, fingerprint)
 	end
-	return d == "not_paged"
-		or d == "validate_budget"
-		or d == "intermediate_must_staple_colony"
-		or d == "intermediate_must_staple_libssl"
-		or d == "fingerprint_chain_unavailable"
-		or d == "multi_staple_attach_failed"
-		or d == "issuer_unresolved_must_staple"
-		or d == "issuer_unavailable"
-		or d == "validate_exhausted"
-		or d == "response_empty"
-		or d == "force_ffi_pending"
-		or d == "peer_refuse_unavailable"
-		or (type(eff) == "table" and eff.paged ~= true)
-		or ((d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true)
+	-- Derive from KEEP_ALLOW so skip cannot drift ahead of / behind the policy table.
+	-- Unpaged shards and paged set_staple_* failures also skip (local refuse only).
+	if KEEP_ALLOW_ON_REFUSE[d] then
+		return true
+	end
+	if type(eff) == "table" and eff.paged ~= true then
+		return true
+	end
+	if (d == "set_staple_failed" or d == "set_staple_exception") and type(eff) == "table" and eff.paged == true then
+		return true
+	end
+	return false
 end
 
 -- Handshake refuse: DROP allow pin for DROP_ALLOW causes via compare-and-delete.
@@ -768,7 +1035,12 @@ local function record_peer_refuse(fingerprint, meta, resp, decision)
 		)
 		return false
 	end
-	local sha, recall_gen = generation_tuple(meta, resp)
+	-- META_ONLY causes revoke the meta/pin generation, not a possibly-mismatched body.
+	local gen_resp = resp
+	if META_ONLY_DROP_ALLOW[refuse_cause] then
+		gen_resp = nil
+	end
+	local sha, recall_gen = generation_tuple(meta, gen_resp)
 	if not sha or type(recall_gen) ~= "number" then
 		log(
 			ngx.DEBUG,
