@@ -151,6 +151,28 @@ end
 -- validate: one ngx.ocsp.validate_ocsp_response against leaf+issuer DER.
 -- Enforces shard issuer SPKI pin when shard_issuer_spki is set, then death-time
 -- (nextUpdate − skew). Returns boolean only; budget / multi-issuer walk lives in try_staple.
+-- Bounded cache manager: prevents der_cache from growing unbounded.
+-- Keeps track of cache size; evicts oldest entry when limit exceeded.
+local function bounded_cache_set(cache, key, value, max_entries)
+	if not cache or not key or not value then
+		return
+	end
+	-- Count entries
+	local count = 0
+	local first_key = nil
+	for k in pairs(cache) do
+		if not first_key then
+			first_key = k
+		end
+		count = count + 1
+	end
+	-- If at limit, evict oldest (first key in iteration order)
+	if count >= max_entries and first_key then
+		cache[first_key] = nil
+	end
+	cache[key] = value
+end
+
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki)
 	if not issuer_pem or issuer_pem == "" or not ssl.cert_pem_to_der then
 		return false
@@ -181,7 +203,8 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 		else
 			-- Cache miss: compute DER chain
 			der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
-			ctx.bw_ocsp_der_cache[der_cache_key] = { chain = der_chain, err = err }
+			-- Bounded cache: cap at 16 entries per request (typical: 1-4 issuers per cert)
+			bounded_cache_set(ctx.bw_ocsp_der_cache, der_cache_key, { chain = der_chain, err = err }, 16)
 		end
 	else
 		der_chain, err = ssl.cert_pem_to_der(leaf_pem .. "\n" .. issuer_pem)
@@ -355,6 +378,33 @@ local function try_staple(
 	end
 	if force_ffi and canary_paged_body_ok(meta, fingerprint, resp) then
 		log(ngx.NOTICE, "OCSP force FFI after validate_budget; ignoring canary skip once")
+	end
+	-- Deduplicate issuers by SPKI to avoid redundant validate() calls on duplicate certs.
+	-- Malformed cert bundles may include the same issuer multiple times; skip them.
+	local seen_spkis = {}
+	local unique_issuers = {}
+	for _, issuer_pem in ipairs(issuers) do
+		if issuer_pem and issuer_pem ~= "" then
+			local issuer_spki = spki_fingerprint(issuer_pem)
+			if issuer_spki and not seen_spkis[issuer_spki] then
+				seen_spkis[issuer_spki] = true
+				unique_issuers[#unique_issuers + 1] = issuer_pem
+			end
+		end
+	end
+	-- Replace issuers with deduplicated list
+	issuers = unique_issuers
+	-- Probabilistic issuer reordering: shuffle candidates using deterministic seed
+	-- (fingerprint + epoch) to prevent attackers from controlling validation order.
+	-- Seed is constant per request but varies across requests.
+	if #issuers > 1 and fingerprint and type(fingerprint) == "string" then
+		local seed = fingerprint:sub(1, 8) .. tostring(current_ocsp_epoch() or 0)
+		math.randomseed(tonumber(seed:sub(1, 12), 16) or ngx.time() * 1000)
+		-- Fisher-Yates shuffle with deterministic seed
+		for i = #issuers, 2, -1 do
+			local j = math.random(1, i)
+			issuers[i], issuers[j] = issuers[j], issuers[i]
+		end
 	end
 	local n = #issuers
 	if n > OCSP_VALIDATE_MAX_ISSUERS then
