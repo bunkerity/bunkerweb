@@ -688,7 +688,14 @@ local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_
 		if cached_str then
 			-- Parse cached entry format: "der_bytes|gen"
 			-- (JSON would be overkill; use delimiter)
-			local gen_pos = cached_str:rfind("|")
+			-- Find last occurrence of "|" (Lua 5.1 has no rfind, iterate backwards)
+			local gen_pos = nil
+			for i = #cached_str, 1, -1 do
+				if cached_str:sub(i, i) == "|" then
+					gen_pos = i
+					break
+				end
+			end
 			if gen_pos then
 				local cached_der = cached_str:sub(1, gen_pos - 1)
 				local cached_gen = tonumber(cached_str:sub(gen_pos + 1))
