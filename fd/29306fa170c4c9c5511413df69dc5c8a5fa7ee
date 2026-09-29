@@ -1,0 +1,45 @@
+docs/zh/integrations.md
+  h_a33a1e80933106 1818,2496,2733,3298,5013-5326
+  s_55367ee0fa903d::t_c277567a48799e 1817,1819-1826,2495,2497,2732,2734-2748,3297,3299-3300,3302
+docs/integrations.md
+  h_a33a1e80933106 5337-5338,5380,5441,5448
+  s_77bdd832a90bf5::t_ef64103dfcd75a 1832-1835,1837-1841,2611-2613,2848-2863,3425-3428,3430,5143-5336,5339-5379,5381-5440,5442-5447,5449-5457
+docs/es/integrations.md
+  h_a33a1e80933106 1819,2497,2734,3302,5019-5332
+  s_55367ee0fa903d::t_2596ff41cb74bc 1818,1820-1821,1823-1827,2496,2498,2733,2735-2749,3301,3303-3304,3306
+docs/fr/integrations.md
+  h_a33a1e80933106 1827,1830-1834,2499,2736-2738,2743-2746,2749-2751,3268,4985-5298
+  s_55367ee0fa903d::t_49175483041e05 1826,1828-1829,1835,2498,2500,2735,2739-2742,2747-2748,3267,3269-3270,3272
+docs/de/integrations.md
+  h_a33a1e80933106 1818,2495,2732,3301,5019-5332
+  s_55367ee0fa903d::t_47e2e820248318 1817,1819-1826,2494,2496,2731,2733-2747,3300,3302-3303,3305
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fd29306fa170c4c9c5511413df69dc5c8a5fa7ee",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_55367ee0fa903d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ebde-decd-7731-b52d-7c592500f4ae",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_77bdd832a90bf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ec08-693a-7652-8eb3-d2a724cc5386",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
