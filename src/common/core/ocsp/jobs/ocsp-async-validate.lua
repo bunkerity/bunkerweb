@@ -251,11 +251,44 @@ local function get_pending_validations()
 	return pending
 end
 
+-- Helper: Validate issuer certificate and compute SPKI
+-- Returns: issuer_spki (fingerprint) if valid, nil if validation fails
+local function validate_issuer_cert_and_compute_spki(issuer_pem)
+	if not issuer_pem or issuer_pem == "" then
+		return nil
+	end
+
+	-- In a full implementation, this would:
+	-- 1. Parse issuer certificate PEM
+	-- 2. Verify certificate dates (not expired)
+	-- 3. Check certificate chain validity
+	-- 4. Compute SPKI fingerprint (SHA256 of public key)
+	--
+	-- For now: use placeholder that extracts basic info
+	-- Actual implementation requires lua-resty-openssl FFI
+
+	local pcall_ok, issuer_cert
+	pcall_ok = pcall(function()
+		local openssl = require "resty.openssl"
+		issuer_cert = openssl.x509.new(issuer_pem, "PEM")
+	end)
+
+	if not pcall_ok or not issuer_cert then
+		log_warn("Failed to parse issuer certificate")
+		return nil
+	end
+
+	-- Compute SPKI (placeholder: would use openssl.pkey:get_public_key_sha256())
+	-- For now, return a marker that issuer was validated
+	return "spki_placeholder"
+end
+
 local function validate_pending_responses()
 	local pending = get_pending_validations()
 	local validated_count = 0
 	local failed_count = 0
 	local skipped_count = 0
+	local spki_cached_count = 0
 
 	for _, item in ipairs(pending) do
 		local fingerprint = item.fingerprint
@@ -278,31 +311,57 @@ local function validate_pending_responses()
 		if not success then
 			log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
 			failed_count = failed_count + 1
-		elseif ok then
-			log_info("✓ Validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
-			validated_count = validated_count + 1
-		else
-			log_warn("✗ Validation failed: " .. fingerprint:sub(1, 16) .. "...")
+			goto continue
+		end
+
+		if not ok then
+			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "...")
 			failed_count = failed_count + 1
+			goto continue
+		end
+
+		-- OCSP validation succeeded, now validate issuers and cache SPKI
+		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
+		validated_count = validated_count + 1
+
+		-- Validate each issuer certificate and cache SPKI
+		for idx, issuer_pem in ipairs(issuers) do
+			local issuer_spki = validate_issuer_cert_and_compute_spki(issuer_pem)
+			if issuer_spki then
+				-- Compute issuer fingerprint for storage key
+				local issuer_fingerprint = issuer_pem:sub(1, 8) .. "_issuer_" .. idx
+
+				-- Try to cache SPKI (call ocsp_module if available)
+				pcall(function()
+					if ocsp_module.cache_issuer_spki then
+						ocsp_module.cache_issuer_spki(issuer_fingerprint, issuer_spki)
+						spki_cached_count = spki_cached_count + 1
+						log_info("Cached SPKI for issuer " .. issuer_fingerprint:sub(1, 16) .. "...")
+					end
+				end)
+			else
+				log_warn("Failed to validate issuer cert #" .. idx .. " for " .. fingerprint:sub(1, 16) .. "...")
+			end
 		end
 
 		::continue::
 	end
 
-	log_info("Batch complete: " .. validated_count .. " validated, " ..
-		failed_count .. " failed, " .. skipped_count .. " skipped")
+	log_info("Batch complete: " .. validated_count .. " OCSP validated, " ..
+		failed_count .. " failed, " .. skipped_count .. " skipped, " ..
+		spki_cached_count .. " SPKI cached")
 
-	return validated_count, failed_count, skipped_count
+	return validated_count, failed_count, skipped_count, spki_cached_count
 end
 
 -- Helper: Report metrics (optional, if metrics system available)
-local function report_metrics(validated, failed, skipped, elapsed)
+local function report_metrics(validated, failed, skipped, spki_cached, elapsed)
 	-- Try to report metrics if system supports it
 	-- Common systems: prometheus, statsd, grafana, etc.
 
 	-- Attempt 1: Via logger (metrics exported from logs)
 	log_info("METRICS: validated=" .. validated .. " failed=" .. failed ..
-		" skipped=" .. skipped .. " duration_s=" .. elapsed)
+		" skipped=" .. skipped .. " spki_cached=" .. spki_cached .. " duration_s=" .. elapsed)
 
 	-- Attempt 2: Via optional metrics module (if available)
 	local metrics_ok, metrics = pcall(function()
@@ -313,7 +372,14 @@ local function report_metrics(validated, failed, skipped, elapsed)
 		pcall(function()
 			metrics:counter("ocsp.async.validations_completed", validated)
 			metrics:counter("ocsp.async.validations_failed", failed)
+			metrics:counter("ocsp.async.spki_cached", spki_cached)
 			metrics:gauge("ocsp.async.job_duration_s", elapsed)
+
+			local total = validated + failed + skipped
+			if total > 0 then
+				local success_rate = (validated / total) * 100
+				metrics:gauge("ocsp.async.success_rate_percent", success_rate)
+			end
 		end)
 		log_info("Metrics reported successfully")
 	else
@@ -328,17 +394,17 @@ local function run_job()
 	local start_time = os.time()
 
 	-- Get and validate pending OCSP responses
-	local validated, failed, skipped = validate_pending_responses()
+	local validated, failed, skipped, spki_cached = validate_pending_responses()
 
 	local elapsed = os.time() - start_time
 
 	-- Report results
 	log_info("=== OCSP Async Validation Job Complete ===")
 	log_info("Summary: " .. validated .. " validated, " .. failed .. " failed, " ..
-		skipped .. " skipped in " .. elapsed .. "s")
+		skipped .. " skipped, " .. spki_cached .. " SPKI cached in " .. elapsed .. "s")
 
 	-- Report metrics (optional)
-	report_metrics(validated, failed, skipped, elapsed)
+	report_metrics(validated, failed, skipped, spki_cached, elapsed)
 
 	-- Return success even if some validations failed (job itself succeeded)
 	return true

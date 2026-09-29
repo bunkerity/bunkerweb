@@ -684,6 +684,31 @@ local function try_staple(
 		return false, "async_validation_failed"
 	end
 
+	-- SPKI-only provisional trust: validate against issuer key fingerprint alone (1ms).
+	-- Full issuer cert validation deferred to async job.
+	-- Only used in soft-fuse modes (open/staple_only); normal mode requires full validation.
+	if shard_issuer_spki and type(shard_issuer_spki) == "string" then
+		local issuer_spki_status = get_spki_validation_status(shard_issuer_spki)
+
+		if issuer_spki_status == SPKI_VALIDATION_CONFIRMED then
+			log(ngx.DEBUG, "OCSP SPKI issuer cert already validated: skipping validation, attaching")
+			return set_resp()
+		elseif issuer_spki_status == SPKI_VALIDATION_FAILED then
+			log(ngx.DEBUG, "OCSP SPKI issuer cert validation failed: refusing staple")
+			return false, "spki_validation_failed"
+		elseif issuer_spki_status == SPKI_VALIDATION_PROVISIONAL then
+			-- SPKI matched, full cert validation pending in async job
+			-- Safe to use in soft-fuse modes (open/staple_only)
+			local mode = ocsp_staple_mode()
+			if mode == "open" or mode == "staple_only" then
+				log(ngx.DEBUG, "OCSP SPKI provisional trust: issuer SPKI matched, using provisional (async job will confirm)")
+				return set_resp()
+			end
+			-- In normal mode, still requires full validation even if SPKI matches
+			log(ngx.DEBUG, "OCSP SPKI provisional (normal mode): deferring to full validation")
+		end
+	end
+
 	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
 	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
 	-- require cryptographic validation. We can attach the response blindly.
