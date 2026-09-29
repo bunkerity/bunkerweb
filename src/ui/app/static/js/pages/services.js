@@ -128,7 +128,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7, 8],
+        columns: [3, 4, 5, 6, 8, 9],
       },
     },
     topStart: {},
@@ -511,7 +511,7 @@ $(document).ready(function () {
   const services_config = {
     tableSelector: "#services",
     tableName: "services",
-    columnVisibilityCondition: (column) => column > 2 && column < 9,
+    columnVisibilityCondition: (column) => column > 2 && column < 10,
     dataTableOptions: {
       columnDefs: [
         {
@@ -526,7 +526,7 @@ $(document).ready(function () {
         },
         { orderable: false, targets: -1 },
         {
-          targets: [7, 8],
+          targets: [8, 9],
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -608,49 +608,6 @@ $(document).ready(function () {
                   "Last 24 hours",
                 )}</span>`,
                 value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) >= 2592000000,
-              },
-            ],
-            combiner: "or",
-            orderable: false,
-          },
-          targets: 7,
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.last_update", "Last update"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
                   new Date() - new Date(rowData[8]) < 86400000,
               },
               {
@@ -682,6 +639,49 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 8,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.last_update", "Last update"),
+            options: [
+              {
+                label: `<span data-i18n="searchpane.last_24h">${t(
+                  "searchpane.last_24h",
+                  "Last 24 hours",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[9]) < 86400000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_7d">${t(
+                  "searchpane.last_7d",
+                  "Last 7 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[9]) < 604800000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_30d">${t(
+                  "searchpane.last_30d",
+                  "Last 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[9]) < 2592000000,
+              },
+              {
+                label: `<span data-i18n="searchpane.older_30d">${t(
+                  "searchpane.older_30d",
+                  "More than 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[9]) >= 2592000000,
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 9,
         },
       ],
       order: [[2, "asc"]],

@@ -35,6 +35,21 @@
            value="{{ is_draft }}"
            data-original="{% if current_endpoint != 'new' and not clone %}{{ is_draft }}{% else %}no{% endif %}"
            data-default="no">
+    <div class="card p-2 mb-3">
+        <div class="form-floating">
+            <input id="service-comment"
+                   name="service_comment"
+                   type="text"
+                   maxlength="256"
+                   class="form-control form-control-sm border-0 border-primary border-bottom shadow-none"
+                   placeholder="Optional note or description for this service..."
+                   data-i18n="form.placeholder.service_comment"
+                   value="{{ service_comment|default('') }}"
+                   data-original="{{ service_comment|default('') if current_endpoint != 'new' and not clone else '' }}"
+                   {% if is_readonly %}disabled{% endif %}>
+            <label for="service-comment" data-i18n="form.label.comment">Comment</label>
+        </div>
+    </div>
     <div class="tab-content p-0 position-relative">
         <div class="tab-pane fade{% if mode == 'easy' %} show active{% endif %}"
              id="navs-modes-easy"

@@ -1353,6 +1353,16 @@ $(document).ready(() => {
       appendHiddenInput(form, "IS_DRAFT", $draftInput.val());
     }
 
+    // Append service comment if present on the service settings page.
+    const $serviceComment = $("#service-comment");
+    if ($serviceComment.length) {
+      appendHiddenInput(
+        form,
+        "service_comment",
+        ($serviceComment.val() || "").trim(),
+      );
+    }
+
     // Append 'OLD_SERVER_NAME' if it exists
     const $oldServerName = $("#old-server-name");
     if ($oldServerName.length) {
@@ -2227,8 +2237,17 @@ $(document).ready(() => {
       const draftInput = $("#is-draft");
       const wasDraft = draftInput.data("original") === "yes";
       const isDraft = form.find("input[name='IS_DRAFT']").val() === "yes";
+      const commentInput = $("#service-comment");
+      const commentChanged =
+        commentInput.length > 0 &&
+        (commentInput.val() || "").trim() !==
+          String(commentInput.data("original") ?? "").trim();
 
-      if (form.children().length < 2 && isDraft === wasDraft) {
+      if (
+        form.children().length < (commentInput.length ? 3 : 2) &&
+        isDraft === wasDraft &&
+        !commentChanged
+      ) {
         alert(t("alert.no_changes_detected"));
         return;
       }

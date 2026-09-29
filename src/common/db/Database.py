@@ -3864,6 +3864,7 @@ class Database:
                     Services.id,
                     Services.method,
                     Services.is_draft,
+                    Services.comment,
                     Services.creation_date,
                     Services.last_update,
                     template_alias.value.label("template"),
@@ -3890,6 +3891,7 @@ class Database:
                     "id": service.id,
                     "method": service.method,
                     "is_draft": service.is_draft,
+                    "comment": self._empty_if_none(service.comment),
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
                     "template": service.template if service.template is not None else inherited.get("USE_TEMPLATE") or "",
@@ -3898,6 +3900,35 @@ class Database:
             )
 
         return services
+
+    @retry_on_transient_db_errors
+    def set_service_comment(self, service_id: str, comment: str) -> str:
+        """Update the comment for a service. Returns an empty string on success, or an error message."""
+        service_id = service_id.strip()
+        if not service_id:
+            return "Service name is required"
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            service = session.query(Services).get(service_id)
+            if service is None:
+                return f"Service {service_id} doesn't exist"
+
+            normalized_comment = comment.strip() if comment else ""
+            if (service.comment or "") == normalized_comment:
+                return ""
+
+            service.comment = normalized_comment
+            service.last_update = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
 
     @retry_on_transient_db_errors
     def delete_services(self, service_ids: List[str]) -> str:

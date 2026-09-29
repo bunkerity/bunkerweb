@@ -496,13 +496,13 @@ class UIDatabase(Database):
 
     def get_ui_user_columns_preferences(self, username: str, table_name: str) -> Dict[str, bool]:
         """Get ui user columns preferences."""
+        default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
         with self._db_session() as session:
             columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
             if not columns_preferences:
-                default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
                 if not self.readonly and session.query(UiUsers).filter_by(username=username).first():
                     session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=default_columns))
                     session.commit()
                 return default_columns
 
-            return columns_preferences.columns
+            return default_columns | (columns_preferences.columns or {})

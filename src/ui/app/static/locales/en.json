@@ -827,6 +827,7 @@
       "certificate_authority": "Certificate Authority",
       "certificate_priority": "Certificate Priority",
       "challenge_type": "Challenge Type",
+      "comment": "Comment",
       "config_type": "Config Type",
       "configuration_name": "Configuration Name",
       "confirm_password": "Confirm Password",
@@ -895,6 +896,7 @@
       "search": "Search...",
       "secret_token": "Secret Token",
       "select_service": "Select Service",
+      "service_comment": "Optional note or description for this service...",
       "username_example": "johndoe"
     },
     "validation": {
@@ -1438,6 +1440,7 @@
       "active": "Active",
       "async": "Async",
       "checksum": "Checksum",
+      "comment": "Comment",
       "configs": "Configs",
       "country": "Country",
       "created": "Created",
@@ -1892,6 +1895,7 @@
       "select_rows_for_action": "Please select one or more rows to perform an action.",
       "services": {
         "actions": "Actions available for this Service",
+        "comment": "Note or description for the Service",
         "created": "Date and time when the Service was created",
         "details": "Show Service details",
         "last_update": "Date and time when the Service was last updated",
