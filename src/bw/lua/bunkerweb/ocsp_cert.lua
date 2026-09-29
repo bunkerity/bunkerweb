@@ -22,7 +22,8 @@ end
 
 -- Per-worker memo of pure PEM-derived facts (SPKI, DNs, Must-Staple bit, serial, key
 -- kind). One handshake used to re-parse the same PEM ~20 times. Keyed by the exact
--- PEM bytes, so a rewrapped PEM is only a miss, never a wrong answer. Wiped when full.
+-- PEM bytes, so a rewrapped PEM is only a miss, never a wrong answer.
+-- Uses LRU eviction: when full, removes least recently used entry instead of wiping all.
 -- Main-chunk locals are capped at 200 by LuaJIT, so memo state lives in this block
 -- and the uncached computations in one table.
 local pem_memo_fetch
@@ -35,8 +36,32 @@ do
 	local MEMO_NIL = {}
 	local pem_memo = {}
 	local pem_memo_count = 0
+	local pem_memo_lru = {}  -- Track access order: {pem1, pem2, ...}
 	local ocsp_der_memo = {}
 	local ocsp_der_memo_count = 0
+
+	-- Find and remove least recently used (oldest) entry from memo.
+	-- Returns the removed PEM key or nil if memo empty.
+	local function evict_lru()
+		if #pem_memo_lru == 0 then
+			return nil
+		end
+		local oldest = pem_memo_lru[1]
+		table.remove(pem_memo_lru, 1)
+		pem_memo[oldest] = nil
+		return oldest
+	end
+
+	-- Move PEM key to end of LRU queue (mark as recently used).
+	local function mark_accessed(pem)
+		for i, key in ipairs(pem_memo_lru) do
+			if key == pem then
+				table.remove(pem_memo_lru, i)
+				break
+			end
+		end
+		pem_memo_lru[#pem_memo_lru + 1] = pem
+	end
 
 	pem_memo_fetch = function(kind, pem, compute)
 		if type(pem) ~= "string" or pem == "" then
@@ -44,6 +69,8 @@ do
 		end
 		local entry = pem_memo[pem]
 		if entry then
+			-- Cache hit: mark as recently used and return cached value
+			mark_accessed(pem)
 			local v = entry[kind]
 			if v == MEMO_NIL then
 				return nil
@@ -52,14 +79,17 @@ do
 				return v
 			end
 		else
+			-- Cache miss: evict LRU if at capacity, then create new entry
 			if pem_memo_count >= PEM_MEMO_MAX then
-				pem_memo = {}
-				pem_memo_count = 0
+				evict_lru()
+				pem_memo_count = pem_memo_count - 1
 			end
 			entry = {}
 			pem_memo[pem] = entry
+			pem_memo_lru[#pem_memo_lru + 1] = pem
 			pem_memo_count = pem_memo_count + 1
 		end
+		-- Compute and cache the requested fact
 		local v = compute(pem)
 		if v == nil then
 			entry[kind] = MEMO_NIL
