@@ -974,6 +974,7 @@ end
 
 _M.internal = {
 	aia_uri_pin_ok = aia_uri_pin_ok,
+	batch_spki_fingerprints = batch_spki_fingerprints,
 	cert_pubkey_kind = cert_pubkey_kind,
 	cert_sig_profile = cert_sig_profile,
 	cert_spki_fingerprint = cert_spki_fingerprint,
