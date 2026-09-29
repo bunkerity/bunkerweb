@@ -1030,13 +1030,16 @@ local function latch_token_tag(token, fingerprint)
 	if not token or not fingerprint then
 		return nil
 	end
+	-- Use SHA2-256 for integrity checking (collision-resistant, cryptographically secure)
+	-- The tag is used to detect accidental corruption of the latch value in shared dict
 	local combined = token .. "|" .. fingerprint
-	local tag = 0
-	for i = 1, #combined do
-		local byte_val = combined:byte(i)
-		tag = (tag * 31 + byte_val) % 0xFFFFFFFF
+	local sha256 = require("resty.sha256")
+	local hasher = sha256:new()
+	if not hasher then
+		return nil
 	end
-	return string.format("%08x", tag)
+	hasher:update(combined)
+	return hasher:final():sub(1, 8)  -- Take first 16 hex chars (8 bytes) for compact tag
 end
 
 -- Compact generation identity for the latch value. nil when sha/gen incomplete
