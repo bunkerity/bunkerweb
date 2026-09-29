@@ -3619,6 +3619,8 @@ function _M.ssl_certificate(state)
 					.. " server_name="
 					.. (server_name or "nil")
 			)
+			-- Declared before finish() so the closure captures this local, not a global.
+			local der_binding = nil
 			local function finish(retv)
 				local time_ns = nil
 				if t_fn_start_hr then
@@ -3643,9 +3645,9 @@ function _M.ssl_certificate(state)
 						.. (server_name or "nil")
 				)
 
-				-- OPTIMIZATION: Cache validation result (both success and failure)
-				-- Store in per-worker cache to skip expensive FFI crypto on next identical cert/response
-				if der_binding then
+				-- Only successes are cached: false also covers transient outcomes (no issuer.pem
+				-- yet, budget abort) that must retry. Definitive rejects use the DER-bound poison.
+				if retv == true and der_binding then
 					ocsp_validation_cache_set(cert_fp, der_binding, retv)
 				end
 
@@ -3666,27 +3668,15 @@ function _M.ssl_certificate(state)
 
 			-- If validation previously failed for this exact OCSP body, skip re-verify briefly.
 			-- Bind poison to sha256(DER) so a job-published replacement auto-misses the latch.
-			-- OPTIMIZATION: Lazy-compute der_binding (Priority 9) — defer SHA256 until needed
-			-- Only compute when poison check requires it or cache lookup is performed
-			-- Savings: 0.02-0.05ms when no poison is stored (negligible but zero-cost)
 			local ocsp_validate_failed_key = "TLS:SSL:ocsp_validate_failed:" .. cert_fp
 			local stored_poison = nil
 			pcall(function()
 				stored_poison = internalstore:get(ocsp_validate_failed_key, true)
 			end)
 
-			-- Only compute der_binding if poison check could succeed (poison exists)
-			local der_binding = nil
-			if stored_poison then
-				der_binding = ocsp_resp_binding(ocsp_der)
-				if der_binding == stored_poison then
-					return finish(false)
-				end
-			end
-
-			-- Still need der_binding for cache lookup; compute if not yet computed
-			if not der_binding then
-				der_binding = ocsp_resp_binding(ocsp_der)
+			der_binding = ocsp_resp_binding(ocsp_der)
+			if stored_poison and der_binding == stored_poison then
+				return finish(false)
 			end
 
 			-- OPTIMIZATION: Check per-worker validation cache before expensive FFI crypto
