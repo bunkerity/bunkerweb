@@ -128,6 +128,24 @@ function _M.ssl_certificate(state)
 	local resty_openssl_x509 = _resty_openssl_x509
 	local cwd = _cwd
 
+	-- OPTIMIZATION: Cache attach_ocsp_staple detection at handshake start (Priority 14)
+	-- Pre-compute whether ocsp_mod.attach_ocsp_staple exists to avoid repeated require() calls
+	-- Reduces per-set_ocsp_status_resp overhead in hot path
+	local ocsp_mod_attach_cached = nil
+	local ocsp_mod_attach_checked = false
+	local function get_ocsp_attach_staple()
+		if not ocsp_mod_attach_checked then
+			local ok_mod, mod = pcall(function()
+				return require "bunkerweb.ocsp"
+			end)
+			if ok_mod and mod and mod.attach_ocsp_staple then
+				ocsp_mod_attach_cached = mod.attach_ocsp_staple
+			end
+			ocsp_mod_attach_checked = true
+		end
+		return ocsp_mod_attach_cached
+	end
+
 	safe_log(ngx.DEBUG, "bunkerweb.logger loaded successfully")
 	safe_log(ngx.DEBUG, "All critical modules available")
 
@@ -3336,11 +3354,13 @@ function _M.ssl_certificate(state)
 				return true
 			end
 			local ok_set, set_ok, set_err
+			-- OPTIMIZATION: Use cached attach_ocsp_staple to avoid require() (Priority 14)
+			-- Pre-computed at handshake start to reduce per-call overhead
 			ok_set = pcall(function()
-				local ocsp_mod = require "bunkerweb.ocsp"
-				if ocsp_mod.attach_ocsp_staple then
+				local attach_fn = get_ocsp_attach_staple()
+				if attach_fn then
 					-- Fingerprint-only: no fullchain → cannot scan intermediate Must-Staple.
-					set_ok, set_err = ocsp_mod.attach_ocsp_staple(resp, nil)
+					set_ok, set_err = attach_fn(resp, nil)
 				else
 					set_ok, set_err = ocsp.set_ocsp_status_resp(resp)
 				end
@@ -4779,11 +4799,13 @@ function _M.ssl_certificate(state)
 			return true
 		end
 		local ok_pcall, ok_set, oerr
+		-- OPTIMIZATION: Use cached attach_ocsp_staple to avoid require() (Priority 14)
+		-- Pre-computed at handshake start to reduce per-call overhead
 		ok_pcall = pcall(function()
-			local ocsp_mod = require "bunkerweb.ocsp"
-			if ocsp_mod.attach_ocsp_staple then
+			local attach_fn = get_ocsp_attach_staple()
+			if attach_fn then
 				-- Pass fullchain so leaf-only libssl can refuse intermediate Must-Staple honestly.
-				ok_set, oerr = ocsp_mod.attach_ocsp_staple(resp, cert_pem)
+				ok_set, oerr = attach_fn(resp, cert_pem)
 			else
 				ok_set, oerr = ocsp.set_ocsp_status_resp(resp)
 			end
