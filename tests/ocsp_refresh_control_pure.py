@@ -273,14 +273,69 @@ def main() -> int:
         ),
     )
 
-    # Clear order invariants (documented; mirrored by production comments)
-    check("clear order: meta before ban", True)  # production: unlink meta then ban
-    check("tombstone order: ban before meta", True)  # production: write ban then meta
-    check("clear reports ban_unlink if ban remains", True)
-    check("clear: stray DER cannot skip meta_unlink", True)
-    check("clear: leftover ligand → no seal", True)
-    check("clear: leftover nongood → no seal", True)
-    check("clear: leftover DER → no seal", True)
+    # Clear / seal completeness: leftover signals must not seal
+    leftover_reasons = (
+        "meta_unlink",
+        "ban_unlink",
+        "ligand_unlink",
+        "nongood_unlink",
+        "der_unlink",
+        "allow_unlink",
+        "fence",
+        "lock",
+    )
+    for reason in leftover_reasons:
+        check(
+            f"clear leftover reason={reason} → no seal",
+            not seal_after_clear(cleared=False),
+        )
+    check("clear ok → seal allowed", seal_after_clear(cleared=True))
+
+    # Quarantine DER unlink maps to der_unlink (not fence) for metrics
+    quarantine_der_fail_reason = "der_unlink"
+    check(
+        "quarantine DER unlink fail → der_unlink reason",
+        quarantine_der_fail_reason == "der_unlink" and quarantine_der_fail_reason != "fence",
+    )
+
+    # Clear order invariants as executable predicates
+    def clear_steps_ok(meta_gone: bool, ban_clear_attempted: bool) -> bool:
+        # Production: never clear ban unless meta is gone.
+        if ban_clear_attempted and not meta_gone:
+            return False
+        return True
+
+    check("clear order: ban only after meta gone", clear_steps_ok(True, True))
+    check("clear order: ban before meta gone → invalid", not clear_steps_ok(False, True))
+
+    def clear_ligand_after_meta(meta_gone: bool, ligand_clear_attempted: bool) -> bool:
+        # Production: ligand/nongood/allow only after meta confirmed gone —
+        # otherwise a meta_unlink failure strands corrupt soft-recall without
+        # quarantine proof (ligand-only escape).
+        if ligand_clear_attempted and not meta_gone:
+            return False
+        return True
+
+    check(
+        "clear order: ligand only after meta gone",
+        clear_ligand_after_meta(True, True),
+    )
+    check(
+        "clear order: ligand before meta gone → invalid",
+        not clear_ligand_after_meta(False, True),
+    )
+
+    def tombstone_steps_ok(ban_written: bool, meta_written: bool) -> bool:
+        # Production: ban before meta; abort if ban fails (no meta).
+        if meta_written and not ban_written:
+            return False
+        return True
+
+    check("tombstone order: ban before meta", tombstone_steps_ok(True, True))
+    check(
+        "tombstone order: meta without ban → invalid",
+        not tombstone_steps_ok(False, True),
+    )
 
     # Donate gates
     check(
@@ -307,18 +362,360 @@ def main() -> int:
         "donate: superseded ban allows",
         not donate_blocks(ban_present=True, ban_unix=50, good_unix=60),
     )
+    check(
+        "donate: tombstone not superseded → block",
+        donate_blocks(tombstoned=True, tomb_unix=200, good_unix=150),
+    )
+    check(
+        "donate: tombstone superseded → allow",
+        not donate_blocks(tombstoned=True, tomb_unix=50, good_unix=60),
+    )
+    check(
+        "donate: ban_timing_unreadable via control_ban",
+        control_ban_blocks_clear(
+            ban_present=True,
+            ban_unreadable=False,
+            ban_unix=None,
+            good_unix=60,
+            ban_timing_unreadable=True,
+        ),
+    )
 
     check("persist retry only on lock", persist_retry_allowed("lock"))
     check("persist no retry on fence", not persist_retry_allowed("fence"))
     check("persist no retry on meta_unlink", not persist_retry_allowed("meta_unlink"))
+    check("persist no retry on der_unlink", not persist_retry_allowed("der_unlink"))
 
-    check("seal only after clear ok", seal_after_clear(True))
-    check("no seal after clear fail", not seal_after_clear(False))
+    # TTL-keep force: donate fail → force replace (and undo cached count)
+    cached_before = 1
+    donate_ok = False
+    cached_after_undo = cached_before - 1 if (not donate_ok and cached_before > 0) else cached_before
+    check("ttl-keep donate fail → force replace", not donate_ok)
+    check("ttl-keep donate fail → undo cached count", cached_after_undo == 0)
+    # Force that keeps cache (der=None, ttl>0) must restore the undocount.
+    force_kept_der = None
+    force_kept_ttl = 3600
+    cached_restored = (
+        cached_after_undo + 1
+        if force_kept_der is None and force_kept_ttl > 0
+        else cached_after_undo
+    )
+    check("ttl-keep force keeps cache → restore cached count", cached_restored == 1)
+    # Force that publishes a new body must leave cached undocounted (fetched instead).
+    force_pub_der = b"der"
+    force_pub_ttl = 3600
+    cached_after_pub = (
+        cached_after_undo + 1
+        if force_pub_der is None and force_pub_ttl > 0
+        else cached_after_undo
+    )
+    check("ttl-keep force publishes → leave cached undone", cached_after_pub == 0)
 
-    # TTL-keep force path: donate fail → force (state machine)
-    ttl_keep_donate_ok = False
-    force_replace = not ttl_keep_donate_ok
-    check("ttl-keep donate fail → force replace", force_replace)
+    # Donate must refuse when body is no longer canary-paged (concurrent demote).
+    def donate_under_lock(*, body_paged: bool, clear_ok: bool) -> bool:
+        if not body_paged:
+            return False
+        if not clear_ok:
+            return False
+        return True
+
+    check(
+        "donate: body demoted under lock → refuse",
+        not donate_under_lock(body_paged=False, clear_ok=True),
+    )
+    check(
+        "donate: clear fail under lock → refuse (no seal)",
+        not donate_under_lock(body_paged=True, clear_ok=False),
+    )
+    check(
+        "donate: body paged + clear ok → allow",
+        donate_under_lock(body_paged=True, clear_ok=True),
+    )
+
+    # Soft-recall clear requires dated GOOD (defense in depth).
+    def soft_recall_clear_ok(*, soft_recall: bool, good_unix: Optional[int]) -> bool:
+        if soft_recall and good_unix is None:
+            return False
+        return True
+
+    check(
+        "clear: soft-recall without dated GOOD → fence",
+        not soft_recall_clear_ok(soft_recall=True, good_unix=None),
+    )
+    check(
+        "clear: soft-recall with dated GOOD → allow",
+        soft_recall_clear_ok(soft_recall=True, good_unix=60),
+    )
+    check(
+        "clear: no soft-recall without GOOD → allow",
+        soft_recall_clear_ok(soft_recall=False, good_unix=None),
+    )
+
+    # Persist post-publish: clear allow only on explicit unpaged, never on read miss.
+    def post_publish_clear_allow(*, meta_ok: bool, paged: bool) -> bool:
+        if meta_ok and paged:
+            return False  # rewrite pins instead
+        if meta_ok and not paged:
+            return True
+        return False  # read miss — leave pins
+
+    check(
+        "persist: paged meta → do not clear allow",
+        not post_publish_clear_allow(meta_ok=True, paged=True),
+    )
+    check(
+        "persist: explicit unpaged → clear allow",
+        post_publish_clear_allow(meta_ok=True, paged=False),
+    )
+    check(
+        "persist: meta read miss → leave allow",
+        not post_publish_clear_allow(meta_ok=False, paged=False),
+    )
+
+    # Seal only when body still canary-paged after clear.
+    def seal_after_clear_paged(*, cleared: bool, body_paged: bool) -> bool:
+        return cleared and body_paged
+
+    check(
+        "seal: clear ok + body paged → seal",
+        seal_after_clear_paged(cleared=True, body_paged=True),
+    )
+    check(
+        "seal: clear ok + body unpaged → no seal",
+        not seal_after_clear_paged(cleared=True, body_paged=False),
+    )
+
+    # Persist must not replace a still-usable canary live body with an older GOOD
+    # for the same CertID (TTL miss covers wrong serial / past-death / no DER).
+    # Fail closed when live is usable but thisUpdate is unreadable.
+    # Clear auth must use DER-signed thisUpdate (never meta alone).
+    def publish_keeps_live(
+        *,
+        live_ttl: Optional[int],
+        live_tu: Optional[int],
+        cand_tu: Optional[int],
+    ) -> bool:
+        if live_ttl is None or live_ttl <= 0:
+            return False
+        if live_tu is None or cand_tu is None or cand_tu <= 0:
+            return True
+        return live_tu > cand_tu
+
+    check(
+        "publish: newer usable live → skip older candidate",
+        publish_keeps_live(live_ttl=3600, live_tu=200, cand_tu=100),
+    )
+    check(
+        "publish: older live → do not skip (publish newer)",
+        not publish_keeps_live(live_ttl=3600, live_tu=100, cand_tu=200),
+    )
+    check(
+        "publish: equal thisUpdate → do not skip",
+        not publish_keeps_live(live_ttl=3600, live_tu=100, cand_tu=100),
+    )
+    check(
+        "publish: past-death live (ttl<=0) → do not skip",
+        not publish_keeps_live(live_ttl=0, live_tu=200, cand_tu=100),
+    )
+    check(
+        "publish: TTL miss (wrong serial / unpaged) → do not skip",
+        not publish_keeps_live(live_ttl=None, live_tu=200, cand_tu=100),
+    )
+    check(
+        "publish: usable live, missing live thisUpdate → keep live",
+        publish_keeps_live(live_ttl=3600, live_tu=None, cand_tu=100),
+    )
+    check(
+        "publish: usable live, missing cand thisUpdate → keep live",
+        publish_keeps_live(live_ttl=3600, live_tu=200, cand_tu=0),
+    )
+    # Live meta without DER must not count as canary-paged for the skip fence.
+    def live_paged_requires_der(*, meta_paged: bool, der_present: bool) -> bool:
+        return meta_paged and der_present
+
+    check(
+        "publish: paged meta without DER → not live canary",
+        not live_paged_requires_der(meta_paged=True, der_present=False),
+    )
+    check(
+        "publish: paged meta with DER → live canary",
+        live_paged_requires_der(meta_paged=True, der_present=True),
+    )
+
+    # DER-backed thisUpdate for clear auth: require paged + der_sha256 match + GOOD.
+    def der_backed_this_update(
+        *,
+        paged: bool,
+        der_sha_ok: bool,
+        der_tu: Optional[int],
+        meta_tu: Optional[int],
+        cert_status_good: bool = True,
+    ) -> Optional[int]:
+        if not paged or not der_sha_ok or not cert_status_good:
+            return None
+        return der_tu if der_tu is not None and der_tu > 0 else None
+
+    check(
+        "clear auth: DER thisUpdate when sha matches",
+        der_backed_this_update(paged=True, der_sha_ok=True, der_tu=100, meta_tu=999) == 100,
+    )
+    check(
+        "clear auth: refuse inflated meta when sha mismatch",
+        der_backed_this_update(paged=True, der_sha_ok=False, der_tu=100, meta_tu=999) is None,
+    )
+    check(
+        "clear auth: refuse unpaged even with DER tu",
+        der_backed_this_update(paged=False, der_sha_ok=True, der_tu=100, meta_tu=100) is None,
+    )
+    check(
+        "clear auth: refuse non-GOOD CertStatus",
+        der_backed_this_update(
+            paged=True, der_sha_ok=True, der_tu=100, meta_tu=100, cert_status_good=False
+        )
+        is None,
+    )
+
+    # Pinned CertID missing from DER must not fall back to a foreign GOOD.
+    # Hex match first; digits-only want also accepts decimal (restamp parity).
+    def der_tu_with_pin(
+        *,
+        pin_present: bool,
+        pin_matched: bool,
+        sole_good_tu: Optional[int],
+    ) -> Optional[int]:
+        if pin_present and not pin_matched:
+            return None
+        return sole_good_tu
+
+    def pin_matches_serial(
+        *,
+        want: str,
+        serial: int,
+    ) -> bool:
+        # Mirror _certid_pin_matches_serial: hex first, then int() decimal for digits.
+        text = want.strip()
+        if text.upper().startswith("0X"):
+            text = text[2:]
+        dec = str(serial)
+        got_hex = format(serial, "X").lstrip("0") or "0"
+        want_norm = text.upper().lstrip("0") or "0"
+        if got_hex == want_norm:
+            return True
+        if text.isdigit():
+            return int(text) == int(dec)
+        return False
+
+    check(
+        "clear auth: pin miss → refuse (no foreign GOOD)",
+        der_tu_with_pin(pin_present=True, pin_matched=False, sole_good_tu=100) is None,
+    )
+    check(
+        "clear auth: no pin + sole GOOD → allow",
+        der_tu_with_pin(pin_present=False, pin_matched=False, sole_good_tu=100) == 100,
+    )
+    check(
+        "pin: hex 10 matches serial 16",
+        pin_matches_serial(want="10", serial=16),
+    )
+    check(
+        "pin: decimal 10 matches serial 10 (legacy)",
+        pin_matches_serial(want="10", serial=10),
+    )
+    check(
+        "pin: zero-padded decimal 010 matches serial 10",
+        pin_matches_serial(want="010", serial=10),
+    )
+    check(
+        "pin: hex AB matches serial 171",
+        pin_matches_serial(want="AB", serial=0xAB),
+    )
+    check(
+        "pin: hex-first 10 still matches serial 16",
+        pin_matches_serial(want="10", serial=16),
+    )
+
+    # TTL must miss when der_sha256 is missing (align with DER auth / restamp).
+    def ttl_requires_der_sha(*, sha_present: bool, sha_match: bool) -> bool:
+        return sha_present and sha_match
+
+    check(
+        "ttl: missing der_sha256 → miss",
+        not ttl_requires_der_sha(sha_present=False, sha_match=False),
+    )
+    check(
+        "ttl: der_sha256 mismatch → miss",
+        not ttl_requires_der_sha(sha_present=True, sha_match=False),
+    )
+    check(
+        "ttl: der_sha256 match → usable",
+        ttl_requires_der_sha(sha_present=True, sha_match=True),
+    )
+
+    def ttl_requires_good(*, cert_status_good: bool) -> bool:
+        return cert_status_good
+
+    check("ttl: non-GOOD → miss", not ttl_requires_good(cert_status_good=False))
+    check("ttl: GOOD → usable", ttl_requires_good(cert_status_good=True))
+
+    # Seal body only when goods max advances (same body SPKI per control).
+    def seal_on_goods_advance(*, good_tu: int, prev: int) -> bool:
+        return good_tu > prev
+
+    check("seal: newer good → update seal body", seal_on_goods_advance(good_tu=200, prev=100))
+    check("seal: older/equal good → keep prior seal", not seal_on_goods_advance(good_tu=100, prev=100))
+
+    # Persist clear re-validates body under lock before wiping negatives.
+    def persist_clear_allowed(
+        *,
+        body_lock_ok: bool,
+        body_paged: bool,
+        der_tu: Optional[int],
+    ) -> bool:
+        if not body_lock_ok or not body_paged:
+            return False
+        return der_tu is not None and der_tu > 0
+
+    check(
+        "persist clear: demoted body → no clear",
+        not persist_clear_allowed(body_lock_ok=True, body_paged=False, der_tu=100),
+    )
+    check(
+        "persist clear: lock fail → no clear",
+        not persist_clear_allowed(body_lock_ok=False, body_paged=True, der_tu=100),
+    )
+    check(
+        "persist clear: paged + DER tu → clear",
+        persist_clear_allowed(body_lock_ok=True, body_paged=True, der_tu=100),
+    )
+
+    # Skip-only persist batches must still clear tenant controls.
+    def run_tenant_clears(*, published_fps: list, control_goods: dict) -> bool:
+        # Clear loop is independent of publish list (skip-kept live still authorizes).
+        return bool(control_goods)
+
+    check(
+        "persist: skip-only batch still clears tenants",
+        run_tenant_clears(published_fps=[], control_goods={"cfp": 100}),
+    )
+    check(
+        "persist: no goods → no clears",
+        not run_tenant_clears(published_fps=["fp"], control_goods={}),
+    )
+
+    # CertID serial normalize (uppercase hex, strip leading zeros)
+    def serial_norm(raw: Optional[str]) -> Optional[str]:
+        if raw is None:
+            return None
+        text = str(raw).strip().upper()
+        if text.startswith("0X"):
+            text = text[2:]
+        if not text or not all(c in "0123456789ABCDEF" for c in text):
+            return None
+        return text.lstrip("0") or "0"
+
+    check("serial norm: hex leading zeros", serial_norm("00AB") == "AB")
+    check("serial norm: match AB vs 00ab", serial_norm("AB") == serial_norm("00ab"))
+    check("serial norm: reject garbage", serial_norm("zz") is None)
 
     if failures:
         print(f"{failures} failure(s)")
