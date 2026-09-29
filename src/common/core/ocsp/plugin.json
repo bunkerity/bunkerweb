@@ -42,12 +42,93 @@
       "label": "OCSP cache directory",
       "regex": "^/.*$",
       "type": "text"
+    },
+    "OCSP_QUEUE_TTL_PENDING": {
+      "context": "global",
+      "default": "86400",
+      "help": "Redis TTL (seconds) for pending validation entries (86400s = 1 day). Aligned with 7-day certificate validity.",
+      "id": "ocsp-queue-ttl-pending",
+      "label": "Pending queue TTL",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_QUEUE_TTL_VALIDATED": {
+      "context": "global",
+      "default": "604800",
+      "help": "Redis TTL (seconds) for validated response entries (604800s = 7 days). Matches 7-day certificate lifetime.",
+      "id": "ocsp-queue-ttl-validated",
+      "label": "Validated responses TTL",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_QUEUE_TTL_FAILED": {
+      "context": "global",
+      "default": "86400",
+      "help": "Redis TTL (seconds) for failed validation entries (86400s = 24 hours). Failed entries are retried after 1 day.",
+      "id": "ocsp-queue-ttl-failed",
+      "label": "Failed entries TTL",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_QUEUE_TTL_PROCESSING": {
+      "context": "global",
+      "default": "3600",
+      "help": "Redis TTL (seconds) for processing entries (3600s = 1 hour). Stale processing entries are automatically cleaned up and requeued.",
+      "id": "ocsp-queue-ttl-processing",
+      "label": "Processing entries TTL",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_RESPONDER_RETRY_INITIAL": {
+      "context": "global",
+      "default": "300",
+      "help": "Initial retry interval (seconds) when OCSP responder fails (300s = 5 minutes). Uses exponential backoff: 5min → 10min → 20min → ...",
+      "id": "ocsp-responder-retry-initial",
+      "label": "Responder retry interval",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_RESPONDER_RETRY_MAX": {
+      "context": "global",
+      "default": "86400",
+      "help": "Maximum retry interval (seconds) for OCSP responder failures (86400s = 24 hours). Prevents infinite exponential backoff.",
+      "id": "ocsp-responder-retry-max",
+      "label": "Responder retry max interval",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "OCSP_BATCH_SIZE": {
+      "context": "global",
+      "default": "10",
+      "help": "Number of OCSP validations to process per job cycle (default: 10). Prevents startup DDOS when 1000s of certs need validation. Lower = slower warmup but less load on responder.",
+      "id": "ocsp-batch-size",
+      "label": "Validation batch size",
+      "regex": "^[1-9][0-9]*$",
+      "type": "text"
+    },
+    "OCSP_REQUEST_RATE_LIMIT": {
+      "context": "global",
+      "default": "50",
+      "help": "Maximum requests per second to OCSP responder (default: 50 req/s). Prevents overwhelming the responder on startup. Tune based on responder capacity.",
+      "id": "ocsp-request-rate-limit",
+      "label": "OCSP request rate limit",
+      "regex": "^[1-9][0-9]*$",
+      "type": "text"
+    },
+    "OCSP_RATE_LIMIT_JITTER": {
+      "context": "global",
+      "default": "20",
+      "help": "Jitter percentage (0-100) to randomize request delays and prevent thundering herd (default: 20%). Adds ±20% randomization to spread out requests.",
+      "id": "ocsp-rate-limit-jitter",
+      "label": "Rate limit jitter",
+      "regex": "^[0-9]+$",
+      "type": "text"
     }
   },
   "jobs": [
     {
       "name": "ocsp-async-validate",
-      "file": "jobs/ocsp-async-validate.lua",
+      "file": "jobs/ocsp_async_validate.py",
       "every": "minute",
       "reload": false,
       "async": true

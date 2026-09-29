@@ -40,6 +40,7 @@
 
 local logger = require "bunkerweb.logger"
 local ocsp_module = require "bunkerweb.ocsp"
+local queue = require "ocsp_redis_queue"  -- Persistent queue with Redis fallback
 
 -- Logging helpers
 local function log_info(msg)
@@ -326,6 +327,103 @@ local function validate_issuer_cert_and_compute_spki(issuer_pem)
 	return "spki_placeholder"
 end
 
+-- Validate from Redis queue (persists across restarts)
+local function validate_from_redis_queue()
+	local validated_count = 0
+	local failed_count = 0
+	local spki_cached_count = 0
+	local max_batch = 100  -- Process up to 100 per run
+
+	for batch = 1, max_batch do
+		local fingerprint = queue.get_next_pending()
+		if not fingerprint then
+			break  -- No more pending
+		end
+
+		-- Read OCSP response from cache
+		local ocsp_der = read_ocsp_response(fingerprint)
+		if not ocsp_der then
+			log_warn("Skipping: could not read OCSP response for " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "no_ocsp_response")
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
+		-- Read leaf cert and issuers
+		local leaf_pem = read_leaf_pem(fingerprint)
+		if not leaf_pem then
+			log_warn("Skipping: could not read leaf cert for " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "no_leaf_cert")
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
+		local issuers = read_issuer_chain(fingerprint)
+		if not issuers or #issuers == 0 then
+			log_warn("Skipping: could not read issuer chain for " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "no_issuer_chain")
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
+		-- Validate OCSP response
+		local ok
+		local success = pcall(function()
+			ok = ocsp_module.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
+		end)
+
+		if not success then
+			log_err("Async validation crashed for " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "validation_crash")
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
+		if not ok then
+			log_warn("✗ OCSP validation failed: " .. fingerprint:sub(1, 16) .. "...")
+			queue.mark_failed(fingerprint, "ocsp_invalid")
+			failed_count = failed_count + 1
+			goto continue_redis
+		end
+
+		-- OCSP validation succeeded, mark as complete
+		log_info("✓ OCSP validation succeeded: " .. fingerprint:sub(1, 16) .. "...")
+		validated_count = validated_count + 1
+
+		-- Mark in persistent queue
+		queue.mark_validated(fingerprint)
+
+		-- Tag response with current version (for cache versioning)
+		pcall(function()
+			if ocsp_module.set_cached_response_version then
+				local current_version = ocsp_module.get_ocsp_response_version and ocsp_module.get_ocsp_response_version() or 1
+				ocsp_module.set_cached_response_version(fingerprint, current_version)
+				log_info("Tagged response version: " .. fingerprint:sub(1, 16) .. "... = v" .. current_version)
+			end
+		end)
+
+		-- Validate and cache issuer SPKIs
+		for idx, issuer_pem in ipairs(issuers) do
+			local issuer_spki = validate_issuer_cert_and_compute_spki(issuer_pem)
+			if issuer_spki then
+				local issuer_fingerprint = issuer_pem:sub(1, 8) .. "_issuer_" .. idx
+				pcall(function()
+					if ocsp_module.cache_issuer_spki then
+						ocsp_module.cache_issuer_spki(issuer_fingerprint, issuer_spki)
+						spki_cached_count = spki_cached_count + 1
+						log_info("Cached SPKI for issuer " .. issuer_fingerprint:sub(1, 16) .. "...")
+					end
+				end)
+			end
+		end
+
+		::continue_redis::
+	end
+
+	return validated_count, failed_count, spki_cached_count
+end
+
+-- Fallback: Validate from disk scan (for compatibility)
 local function validate_pending_responses()
 	local pending = get_pending_validations()
 	local validated_count = 0
@@ -547,8 +645,12 @@ local function run_job()
 	-- Check for certificate rotation and invalidate stale responses if detected
 	detect_and_handle_cert_rotation()
 
-	-- Get and validate pending OCSP responses
-	local validated, failed, skipped, spki_cached = validate_pending_responses()
+	-- Cleanup stale processing entries (stuck from previous crashes)
+	queue.cleanup_stale_processing()
+
+	-- Validate from persistent Redis queue (with fallback to disk scan)
+	local validated, failed, spki_cached = validate_from_redis_queue()
+	local skipped = 0
 
 	local elapsed = os.time() - start_time
 
