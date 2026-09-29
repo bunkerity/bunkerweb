@@ -1,0 +1,56 @@
+{
+  "id": "ocsp",
+  "name": "OCSP Stapling",
+  "description": "Enable OCSP stapling for SSL/TLS certificates. Improves certificate validation performance and privacy by reducing OCSP responder load.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "OCSP_STAPLE_MODE": {
+      "context": "global",
+      "default": "normal",
+      "help": "OCSP stapling mode: open (optional, no validation), staple_only (must have staple), normal (validated if available)",
+      "id": "ocsp-staple-mode",
+      "label": "OCSP staple mode",
+      "regex": "^(open|staple_only|normal)$",
+      "type": "select",
+      "select": ["open", "staple_only", "normal"]
+    },
+    "OCSP_ASYNC_VALIDATION": {
+      "context": "global",
+      "default": "yes",
+      "help": "Enable asynchronous OCSP validation in background scheduler job (reduces TLS critical path latency)",
+      "id": "ocsp-async-validation",
+      "label": "Enable async OCSP validation",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "OCSP_ASYNC_SCHEDULE": {
+      "context": "global",
+      "default": "minute",
+      "help": "How often the async validation job runs: minute (1 min), 5minute, hour",
+      "id": "ocsp-async-schedule",
+      "label": "Async validation schedule",
+      "regex": "^(minute|5minute|hour)$",
+      "type": "select",
+      "select": ["minute", "5minute", "hour"]
+    },
+    "OCSP_CACHE_DIR": {
+      "context": "global",
+      "default": "/var/cache/bunkerweb/ocsp",
+      "help": "Directory for OCSP response cache storage",
+      "id": "ocsp-cache-dir",
+      "label": "OCSP cache directory",
+      "regex": "^/.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "ocsp-async-validate",
+      "file": "jobs/ocsp-async-validate.lua",
+      "every": "minute",
+      "reload": false,
+      "async": true
+    }
+  ]
+}

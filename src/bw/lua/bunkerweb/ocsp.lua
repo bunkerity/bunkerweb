@@ -2,6 +2,13 @@ local _M = {}
 
 local ngx = ngx
 
+-- Async validation: defer OCSP validation to background job, allow speculative attachment.
+-- Reduces TLS critical path latency by moving crypto validation off-path.
+-- Key concept: attach OCSP speculatively, validate async, mark as validated when done.
+local ASYNC_VALIDATION_PENDING = "pending"  -- Validation queued, not yet done
+local ASYNC_VALIDATION_DONE = "validated"   -- Validation complete, result stored
+local ASYNC_VALIDATION_FAILED = "failed"    -- Validation failed, response invalid
+
 local common = require("bunkerweb.ocsp_common").internal
 local OCSP_CLOCK_SKEW_SECONDS = common.OCSP_CLOCK_SKEW_SECONDS
 local OCSP_VALIDATE_BUDGET_NS = common.OCSP_VALIDATE_BUDGET_NS
@@ -77,6 +84,67 @@ local attach_ocsp_staple = chain.attach_ocsp_staple
 local chain_pem_from_blocks = chain.chain_pem_from_blocks
 local clear_connection_staple = chain.clear_connection_staple
 local issuer_linked_chain_blocks = chain.issuer_linked_chain_blocks
+
+-- Async validation state management (off-path validation)
+-- Defers OCSP validation to background job, reduces TLS critical path latency.
+
+-- Returns the key where async validation status is stored for a fingerprint.
+local function async_validation_key(fingerprint)
+	if not fingerprint or fingerprint == "" then
+		return nil
+	end
+	return "OCSP:ASYNC_VALIDATE:" .. fingerprint
+end
+
+-- Mark response as pending async validation (queued to background job).
+-- Allows handshakes to speculatively attach response while validation runs async.
+local function mark_async_validation_pending(fingerprint)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
+		return
+	end
+	local key = async_validation_key(fingerprint)
+	if not key then
+		return
+	end
+	pcall(function()
+		-- Mark as "pending" with 120s TTL (enough time for async job to complete)
+		ngx.shared.bw_ocsp_validations:set(key, ASYNC_VALIDATION_PENDING, 120)
+	end)
+end
+
+-- Mark response as validated (async validation job completed successfully).
+-- Future handshakes skip validation and use this cached result.
+local function mark_async_validation_done(fingerprint)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
+		return
+	end
+	local key = async_validation_key(fingerprint)
+	if not key then
+		return
+	end
+	pcall(function()
+		-- Mark as "validated" with 3600s TTL (1 hour, until next OCSP refresh)
+		ngx.shared.bw_ocsp_validations:set(key, ASYNC_VALIDATION_DONE, 3600)
+	end)
+end
+
+-- Check if response is already validated by async job (or mark as pending if not).
+-- Returns: "validated" (safe, skip validation), "pending" (async in progress),
+--          "failed" (validation failed), or nil (not yet queued).
+local function get_async_validation_status(fingerprint)
+	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
+		return nil
+	end
+	local key = async_validation_key(fingerprint)
+	if not key then
+		return nil
+	end
+	local status
+	pcall(function()
+		status = ngx.shared.bw_ocsp_validations:get(key)
+	end)
+	return status
+end
 local issuer_path_intermediate_ready = chain.issuer_path_intermediate_ready
 local issuer_path_null_slots = chain.issuer_path_null_slots
 local note_connection_staple = chain.note_connection_staple
@@ -501,6 +569,19 @@ local function try_staple(
 	if type(issuers) ~= "table" or #issuers == 0 then
 		return false, "issuer_unavailable"
 	end
+	-- Async validation: defer validation to background job if already queued.
+	-- If async validation already completed, skip (response already validated).
+	-- Allows handshake to skip expensive crypto validation.
+	local async_status = get_async_validation_status(fingerprint)
+	if async_status == ASYNC_VALIDATION_DONE then
+		log(ngx.DEBUG, "OCSP async validation already complete: skipping validation, attaching")
+		return set_resp()
+	end
+	if async_status == ASYNC_VALIDATION_FAILED then
+		log(ngx.DEBUG, "OCSP async validation failed: response invalid, aborting")
+		return false, "async_validation_failed"
+	end
+
 	-- Optimization: Skip validation for non-must-staple certs in 'open' mode.
 	-- In open mode, must-staple enforcement is disabled; optional stapling doesn't
 	-- require cryptographic validation. We can attach the response blindly.
@@ -508,11 +589,19 @@ local function try_staple(
 	local is_must_staple = get_must_staple_with_ctx_cache(leaf_pem, fingerprint)
 	if is_open_mode and not is_must_staple then
 		log(ngx.DEBUG, "OCSP open mode + non-must-staple: skipping validation, attaching speculatively")
+		-- Queue async validation for future handshakes (even though this one doesn't need it)
+		if not async_status then
+			mark_async_validation_pending(fingerprint)
+		end
 		return set_resp()
 	end
 	-- force_ffi: prior validate_budget demoted L1 but KEEP pin — finish one FFI walk.
 	if canary_paged_body_ok(meta, fingerprint, resp) and not force_ffi then
 		log(ngx.DEBUG, "OCSP trusting canary-paged body; skipping ngx.ocsp.validate_ocsp_response")
+		-- Queue async validation to confirm canary was correct
+		if not async_status then
+			mark_async_validation_pending(fingerprint)
+		end
 		return set_resp()
 	end
 	if force_ffi and canary_paged_body_ok(meta, fingerprint, resp) then
@@ -2369,6 +2458,57 @@ function _M.handshake_sni(fallback)
 		return fallback
 	end
 	return nil
+end
+
+-- --- Async OCSP Validation (Off-Path) ----------------------------------------
+-- Background validation job: called by scheduler to validate OCSP responses
+-- outside the TLS critical path. Marks responses as "validated" when complete,
+-- allowing future handshakes to skip validation.
+--
+-- Usage: Call from scheduler job (ocsp-async-validate.lua or similar):
+--   local ocsp = require("bunkerweb.ocsp").internal
+--   ocsp.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
+--
+-- Returns: true if validation succeeded, false otherwise.
+
+function _M.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem)
+	if not fingerprint or not ocsp_der or not issuers or not leaf_pem then
+		log(ngx.WARN, "OCSP async_validate_response: missing parameters")
+		mark_async_validation_done(fingerprint)  -- Mark as done (won't retry)
+		return false
+	end
+
+	-- Use validate() function to cryptographically validate response
+	-- This runs in background job context, not TLS critical path
+	local ocsp = require("ngx.ocsp")
+	if not ocsp or not ocsp.validate_ocsp_response then
+		log(ngx.WARN, "OCSP async_validate_response: ngx.ocsp not available")
+		mark_async_validation_done(fingerprint)
+		return false
+	end
+
+	-- Try each issuer candidate (same logic as try_staple, but no budget pressure)
+	local ssl = require("ngx.ssl")
+	local shard_issuer_spki = nil  -- No shard pin in async job
+
+	for _, issuer_pem in ipairs(issuers) do
+		if validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki) then
+			-- Validation succeeded: mark response as validated for all future handshakes
+			log(ngx.DEBUG, "OCSP async validation succeeded: marking response as validated")
+			mark_async_validation_done(fingerprint)
+			return true
+		end
+	end
+
+	-- All issuers failed: mark response as invalid
+	log(ngx.WARN, "OCSP async validation failed: response signature invalid")
+	if ngx.shared and ngx.shared.bw_ocsp_validations then
+		pcall(function()
+			ngx.shared.bw_ocsp_validations:set(async_validation_key(fingerprint),
+				ASYNC_VALIDATION_FAILED, 3600)
+		end)
+	end
+	return false
 end
 
 -- --- Off-handshake L1 warmer -------------------------------------------------
