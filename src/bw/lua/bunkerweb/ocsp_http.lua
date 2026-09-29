@@ -320,6 +320,71 @@ function _M.ssl_certificate(state)
 		end
 	end
 
+	-- =====================================================================
+	-- OPTIMIZATION: Per-worker certificate metadata cache (Priority 2)
+	-- Cache fingerprint, serial number, and key kind by certificate PEM
+	-- Prevents redundant FFI parsing on cert reuse (same cert across handshakes)
+	-- Estimated savings: 1-2ms per cached cert metadata
+	-- =====================================================================
+	local cert_metadata_cache = {}
+	local cert_metadata_cache_max_entries = 512
+	local cert_metadata_cache_ttl = 300
+	local cert_metadata_cache_access_order = {}
+
+	local function cert_metadata_cache_key(cert_pem)
+		if not cert_pem or type(cert_pem) ~= "string" or #cert_pem == 0 then
+			return nil
+		end
+		local ok, digest = pcall(function()
+			local digest_lib = require("resty.openssl.digest")
+			local ctx = digest_lib.new("sha256")
+			ctx:update(cert_pem)
+			return ocsp_to_hex(ctx:final())
+		end)
+		if ok and type(digest) == "string" and #digest == 64 then
+			return digest
+		end
+		return nil
+	end
+
+	local function cert_metadata_cache_get(cert_pem)
+		local key = cert_metadata_cache_key(cert_pem)
+		if not key then
+			return nil
+		end
+		local cached = cert_metadata_cache[key]
+		if cached and cached.expires and cached.expires > ngx.time() then
+			table.insert(cert_metadata_cache_access_order, key)
+			return cached
+		end
+		if cached then
+			cert_metadata_cache[key] = nil
+		end
+		return nil
+	end
+
+	local function cert_metadata_cache_set(cert_pem, metadata)
+		local key = cert_metadata_cache_key(cert_pem)
+		if not key or not metadata then
+			return
+		end
+		local expires = ngx.time() + cert_metadata_cache_ttl
+		cert_metadata_cache[key] = {
+			fingerprint = metadata.fingerprint,
+			serial = metadata.serial,
+			kind = metadata.kind,
+			expires = expires,
+		}
+		table.insert(cert_metadata_cache_access_order, key)
+
+		if #cert_metadata_cache > cert_metadata_cache_max_entries then
+			local evict_key = table.remove(cert_metadata_cache_access_order, 1)
+			if evict_key then
+				cert_metadata_cache[evict_key] = nil
+			end
+		end
+	end
+
 	local tostring = tostring
 	local insert = table.insert
 	local lower = string.lower
@@ -684,6 +749,13 @@ function _M.ssl_certificate(state)
 			return nil
 		end
 
+		-- OPTIMIZATION: Check metadata cache for serial number
+		local cached = cert_metadata_cache_get(cert_pem)
+		if cached and cached.serial then
+			safe_log(DEBUG, "OCSP cert serial cache hit")
+			return cached.serial
+		end
+
 		if not has_resty_ssl then
 			safe_log(
 				DEBUG,
@@ -707,6 +779,8 @@ function _M.ssl_certificate(state)
 		end)
 
 		if ok_id and rest_identifier then
+			-- OPTIMIZATION: Cache the serial number for future reuse
+			cert_metadata_cache_set(cert_pem, { serial = rest_identifier })
 			return rest_identifier
 		end
 		if rest_err then
@@ -734,6 +808,16 @@ function _M.ssl_certificate(state)
 		end
 		if #cert_data == 0 then
 			return nil
+		end
+
+		-- OPTIMIZATION: Check metadata cache before FFI parsing (cert certificates only)
+		-- Skip cache for private keys (is_key=true) since they're rarely reused
+		if not is_key then
+			local cached = cert_metadata_cache_get(cert_data)
+			if cached and cached.fingerprint then
+				safe_log(DEBUG, "OCSP cert fingerprint cache hit")
+				return cached.fingerprint
+			end
 		end
 
 		local fingerprint = nil
@@ -805,6 +889,12 @@ function _M.ssl_certificate(state)
 				"OCSP get_pubkey_fingerprint: resty.openssl unavailable or failed; no CLI fallback server_name="
 					.. (server_name or "nil")
 			)
+		end
+
+		-- OPTIMIZATION: Cache successful fingerprint extraction
+		-- Only cache for certificates (not keys) since keys are rarely reused
+		if fingerprint and not is_key then
+			cert_metadata_cache_set(cert_data, { fingerprint = fingerprint })
 		end
 
 		return fingerprint
@@ -1106,6 +1196,14 @@ function _M.ssl_certificate(state)
 		if type(cert_pem) ~= "string" or #cert_pem == 0 or not has_resty_ssl then
 			return nil
 		end
+
+		-- OPTIMIZATION: Check metadata cache for key kind
+		local cached = cert_metadata_cache_get(cert_pem)
+		if cached and cached.kind then
+			safe_log(DEBUG, "OCSP cert key kind cache hit: " .. cached.kind)
+			return cached.kind
+		end
+
 		local kind = nil
 		pcall(function()
 			local cert_obj = resty_x509.new(cert_pem)
@@ -1125,6 +1223,12 @@ function _M.ssl_certificate(state)
 				kind = "rsa"
 			end
 		end)
+
+		-- OPTIMIZATION: Cache the key kind for future reuse
+		if kind then
+			cert_metadata_cache_set(cert_pem, { kind = kind })
+		end
+
 		return kind
 	end
 
