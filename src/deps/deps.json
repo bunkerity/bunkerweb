@@ -152,6 +152,13 @@
       "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
     },
     {
+      "id": "resty-redis-cluster",
+      "name": "resty-redis-cluster v1.6.1",
+      "url": "https://github.com/Kong/resty-redis-cluster.git",
+      "commit": "09ab3295db2e42b144a3a8c67117a1c55c052409",
+      "post_install": "rm -r src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
+    },
+    {
       "id": "lua-resty-session",
       "name": "lua-resty-session v4.2.0",
       "url": "https://github.com/bungle/lua-resty-session.git",

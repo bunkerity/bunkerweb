@@ -28,6 +28,7 @@ from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from re import compile as re_compile
+from redis_keys import cluster_config_error  # type: ignore
 import tarfile
 from tarfile import open as tar_open
 from stat import S_ISDIR, S_ISREG
@@ -749,6 +750,7 @@ def get_redis_client(
     redis_sentinel_username: Optional[str] = None,
     redis_sentinel_password: Optional[str] = None,
     redis_sentinel_master: str = "",
+    redis_cluster_nodes: str = "",
     logger: Optional[logging.Logger] = None,
 ) -> Any:
     """
@@ -769,6 +771,7 @@ def get_redis_client(
         redis_sentinel_username: Redis Sentinel username
         redis_sentinel_password: Redis Sentinel password
         redis_sentinel_master: Redis Sentinel master name
+        redis_cluster_nodes: Redis Cluster seed nodes, space separated; enables cluster mode
         logger: Logger instance for logging errors
 
     Returns:
@@ -779,16 +782,15 @@ def get_redis_client(
     if not use_redis:
         return None
 
+    # A whitespace-only value must fall through to standalone/Sentinel, not be mistaken
+    # for a configured cluster with zero nodes.
+    redis_cluster_nodes = redis_cluster_nodes.strip()
+
     try:
         from redis import StrictRedis, Sentinel
     except ImportError:
         if logger:
             logger.error("Redis package is not installed")
-        return None
-
-    if not redis_host and not redis_sentinel_hosts:
-        if logger:
-            logger.error("Neither redis_host nor redis_sentinel_hosts is provided")
         return None
 
     # Convert string parameters to appropriate types
@@ -832,6 +834,7 @@ def get_redis_client(
         redis_sentinel_username,
         redis_sentinel_password,
         redis_sentinel_master,
+        redis_cluster_nodes,
     )
 
     entry = _REDIS_CLIENT_ENTRY
@@ -843,6 +846,23 @@ def get_redis_client(
         if monotonic() < entry[2]:
             return None
 
+    config_error = cluster_config_error(redis_cluster_nodes, redis_sentinel_hosts, redis_db)
+    if config_error:
+        if logger:
+            logger.error(f"Invalid Redis configuration, Redis is not used: {config_error}")
+        # Same negative-cache mechanism as an unreachable Redis, so a misconfiguration does
+        # not log an ERROR on every request: once per REDIS_NEGATIVE_CACHE_SECONDS instead.
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is None or entry[0] != cache_key or entry[1] is not None:
+                _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
+        return None
+
+    if not redis_host and not redis_sentinel_hosts and not redis_cluster_nodes:
+        if logger:
+            logger.error("Neither redis_host, redis_sentinel_hosts nor redis_cluster_nodes is provided")
+        return None
+
     # ssl_cert_reqs is only meaningful on a TLS connection, and the non-SSL Sentinel
     # connection class does not accept it at all.
     ssl_kwargs = {"ssl_cert_reqs": "required" if redis_ssl_verify else "none"} if redis_ssl else {}
@@ -850,8 +870,34 @@ def get_redis_client(
     redis_client = None
 
     try:
+        if redis_cluster_nodes:
+            from redis.cluster import ClusterNode, RedisCluster
+
+            if logger:
+                logger.info(f"Connecting to Redis Cluster: {redis_cluster_nodes}")
+            startup_nodes = []
+            for node in redis_cluster_nodes.split():
+                if node.startswith("[") and "]:" in node:
+                    host, _, port = node[1:].partition("]:")
+                elif node.count(":") == 1:
+                    host, _, port = node.partition(":")
+                else:
+                    host, port = node, "6379"
+                startup_nodes.append(ClusterNode(host, int(port)))
+            redis_client = RedisCluster(
+                startup_nodes=startup_nodes,
+                username=redis_username,
+                password=redis_password,
+                socket_timeout=redis_timeout / 1000,
+                socket_connect_timeout=redis_timeout / 1000,
+                socket_keepalive=True,
+                max_connections=shared_redis_pool_size(),
+                ssl=redis_ssl,
+                **ssl_kwargs,
+            )
+
         # Connect via Sentinel if sentinel hosts are provided
-        if redis_sentinel_hosts:
+        elif redis_sentinel_hosts:
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
 

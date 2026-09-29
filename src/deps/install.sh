@@ -194,6 +194,11 @@ echo "ℹ️ Installing lua-resty-redis-connector"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-redis-connector"
 do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 
+# Installing resty-redis-cluster
+echo "ℹ️ Installing resty-redis-cluster"
+export CHANGE_DIR="/tmp/bunkerweb/deps/src/resty-redis-cluster"
+do_and_check_cmd cp lib/resty/rediscluster.lua lib/resty/xmodem.lua /usr/share/bunkerweb/deps/lib/lua/resty/
+
 # Patch modsec module
 export CHANGE_DIR="/tmp/bunkerweb/deps/misc"
 do_and_check_cmd bash -c "mv ngx_http_modsecurity_access.c /tmp/bunkerweb/deps/src/modsecurity-nginx/src/"

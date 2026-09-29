@@ -31,6 +31,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_TIMEOUT`           | `1s`       | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
+| `REDIS_CLUSTER_NODES`     |            | global | 否   | **集群节点：** Redis 集群的种子节点，`主机[:端口]`，以空格分隔，IPv6 使用 `[ipv6]:端口`。启用集群模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。          |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                     |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
@@ -55,6 +56,18 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     -   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
     -   在所有实例中配置相同的数据库编号
     -   确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接
+
+### Redis 集群
+
+将 `REDIS_CLUSTER_NODES` 设置为至少一个可访问的节点；BunkerWeb 会从该节点发现集群中的其余节点。此功能适用于 Redis 6.2+、Valkey，以及通过其配置端点提供的托管集群服务（如 ElastiCache、MemoryDB）。种子节点接受 `主机`、`主机:端口` 或 `[ipv6]:端口`，但集群本身必须宣告 IPv4 地址或主机名（使用 `cluster-announce-hostname` 配合 `cluster-preferred-endpoint-type hostname`）；不支持宣告 IPv6 的集群。
+
+集群模式使用数据库 0。将 `REDIS_CLUSTER_NODES` 与 `REDIS_SENTINEL_HOSTS` 同时设置，或与非 0 的 `REDIS_DATABASE` 同时设置，属于配置错误：BunkerWeb 会记录一条同时指出这两个设置的错误日志，并且在移除其中一个之前完全不使用 Redis（回退到本地计数器和 cookie 会话）。
+
+将现有部署切换到集群模式会从空的键空间开始：活跃和永久封禁、会话及报告都不会被保留。切换后请重新应用永久封禁。
+
+封禁和不良行为计数器按客户端 IP 分散在各个主节点上。被阻止请求的报告共用一个哈希槽，因此只有一个主节点存储全部报告。
+
+在默认的 `cluster-require-full-coverage yes` 下，失去一个没有副本的主节点会导致整个集群停止；此时 BunkerWeb 会回退到本地计数器和 cookie 会话，直至集群恢复。`cluster-require-full-coverage no` 可将影响限制在丢失分片的键范围内。
 
 ### 配置示例
 

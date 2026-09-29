@@ -20,6 +20,8 @@ from ApiCaller import ApiCaller  # type: ignore
 
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 
+from redis_keys import facet_key, initialized_key, is_cluster, requests_key  # type: ignore
+
 # Short-lived process-local cache for home page aggregates. /home recomputes a
 # full 7-day Redis aggregation on every load; caching it for a few seconds makes
 # repeated/concurrent loads near-instant. Per-process (each gunicorn worker has
@@ -295,7 +297,7 @@ class InstancesUtils:
         is the iterators' signal to fall back to chunk-based termination.
         """
         try:
-            total = int(redis_client.llen("requests") or 0)
+            total = int(redis_client.llen(requests_key(is_cluster(redis_client))) or 0)
         except Exception:
             return 0, None
         if max_requests <= 0:
@@ -349,9 +351,10 @@ class InstancesUtils:
         look stale.
         """
         with suppress(ValueError, TypeError):
+            cluster = is_cluster(redis_client)
             pipe = redis_client.pipeline(transaction=False)
-            pipe.get("requests:facets:initialized")
-            pipe.llen("requests")
+            pipe.get(initialized_key(cluster))
+            pipe.llen(requests_key(cluster))
             raw_state, raw_length = pipe.execute()
             state = loads(raw_state or "null")
             if isinstance(state, dict) and state.get("version") == 2 and state.get("length") == int(raw_length or 0):
@@ -379,6 +382,7 @@ class InstancesUtils:
         # "nonfast" is a paging property: one legacy row raises it while the facets stay
         # exactly the count of state["valid"], which is what the per-field check below
         # verifies. Only _get_redis_requests_fast_page needs a nonfast-free list.
+        cluster = is_cluster(redis_client)
         state = state or self._get_redis_request_state(redis_client)
         if not state:
             return None
@@ -389,7 +393,7 @@ class InstancesUtils:
             top_heap: list[tuple[int, str]] = []
             total = 0
             try:
-                for raw_value, raw_count in self._iter_redis_hash(redis_client, f"requests:facet:{field}"):
+                for raw_value, raw_count in self._iter_redis_hash(redis_client, facet_key(cluster, field)):
                     value = self._decode_redis_text(raw_value) or "N/A"
                     count = int(self._decode_redis_text(raw_count))
                     if count <= 0:
@@ -416,12 +420,12 @@ class InstancesUtils:
             # Deep validation piggybacks on this existing scan. Ask the next metrics
             # timer to repair the cache, but never invalidate a newer writer generation.
             with suppress(Exception):
-                marker = redis_client.get("requests:facets:initialized")
+                marker = redis_client.get(initialized_key(cluster))
                 if loads(marker) == state:
                     redis_client.eval(
                         "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0",
                         1,
-                        "requests:facets:initialized",
+                        initialized_key(cluster),
                         marker,
                     )
         return pane_counts
@@ -471,6 +475,8 @@ class InstancesUtils:
         if length <= 0:
             return None
 
+        cluster = is_cluster(redis_client)
+
         # A worker sync burst changes the generation between the two reads on a busy
         # deployment; re-page the new one instead of taking a transient change for a
         # permanent disqualification and streaming the whole retained list.
@@ -508,7 +514,7 @@ class InstancesUtils:
                     start_idx = end_idx - fetch_count + 1
                     next_idx = start_idx - 1
 
-                raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
+                raw_chunk = redis_client.lrange(requests_key(cluster), start_idx, end_idx)
                 if not raw_chunk:
                     break
                 if order_dir == "desc":
@@ -1032,6 +1038,7 @@ class InstancesUtils:
         so a caller that breaks early wastes at most ``pipeline_batch`` chunks.
         """
         start = max(0, start_index)
+        cluster = is_cluster(redis_client)
 
         # Bound the scan with the list length so we don't pipeline ranges past the
         # end of it. Callers that already computed a scan window pass it in; only
@@ -1039,7 +1046,7 @@ class InstancesUtils:
         # termination (the original contract).
         if total is None:
             try:
-                total = int(redis_client.llen("requests") or 0)
+                total = int(redis_client.llen(requests_key(cluster)) or 0)
             except Exception:
                 total = None
 
@@ -1053,7 +1060,7 @@ class InstancesUtils:
             for _ in range(pipeline_batch):
                 if total is not None and s >= total:
                     break
-                pipe.lrange("requests", s, s + chunk_size - 1)
+                pipe.lrange(requests_key(cluster), s, s + chunk_size - 1)
                 issued += 1
                 s += chunk_size
             if issued == 0:
@@ -1086,9 +1093,10 @@ class InstancesUtils:
         scanning the whole capped window (which is what the forward iterator
         forces when it must pick the max-date match).
         """
+        cluster = is_cluster(redis_client)
         if total is None:
             try:
-                total = int(redis_client.llen("requests") or 0)
+                total = int(redis_client.llen(requests_key(cluster)) or 0)
             except Exception:
                 # Redis flaky: yield nothing so single-id callers fall through to the
                 # instance-API fallback (unlike the forward iterator's chunk-based
@@ -1099,7 +1107,7 @@ class InstancesUtils:
         while hi >= low:
             lo = max(low, hi - chunk_size + 1)
             try:
-                chunk = redis_client.lrange("requests", lo, hi)
+                chunk = redis_client.lrange(requests_key(cluster), lo, hi)
             except Exception:
                 return
             if not chunk:
@@ -1486,7 +1494,7 @@ class InstancesUtils:
                     error_counters = {}
                     if not keys:
                         return error_counters
-                    values = redis_client.mget(keys)
+                    values = redis_client.mget_nonatomic(keys) if is_cluster(redis_client) else redis_client.mget(keys)
                     for key, value in zip(keys, values):
                         try:
                             if value is None:

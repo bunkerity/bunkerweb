@@ -3,12 +3,25 @@ from typing import Any, Optional
 
 from cachelib.base import BaseCache
 from flask_session.redis import RedisSessionInterface
-from redis.exceptions import ConnectionError as RedisConnectionError, RedisError, TimeoutError as RedisTimeoutError
+from redis.exceptions import (
+    ClusterDownError,
+    ClusterError,
+    ConnectionError as RedisConnectionError,
+    RedisClusterException,
+    RedisError,
+    TimeoutError as RedisTimeoutError,
+)
 
 # Only these are worth leaving Redis alone for. A command rejected because Redis is at
 # maxmemory comes back instantly and says nothing about the next one: reads and deletes are
 # still served, so skipping them would hide live sessions and leave logged-out ones behind.
-UNREACHABLE_ERRORS = (RedisConnectionError, RedisTimeoutError)
+# ClusterError (TTL exhausted after redirections) is Redis-unavailable the same as ClusterDownError.
+UNREACHABLE_ERRORS = (RedisConnectionError, RedisTimeoutError, ClusterDownError, ClusterError, RedisClusterException)
+
+# RedisClusterException (topology refresh failures, SlotNotCoveredError during a failover
+# window) does not derive from RedisError, so a bare "except RedisError" never sees it and it
+# escapes the interface as a 500. Every handler below catches this instead.
+REDIS_ERRORS = (RedisError, RedisClusterException)
 
 # Marks a fallback entry as a delete that has not reached Redis yet, so a read never resurrects
 # the stale copy Redis still holds. Reconciled (and dropped) the next time Redis is available.
@@ -98,7 +111,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
             return False
         try:
             self.client.delete(store_id)
-        except RedisError as e:
+        except REDIS_ERRORS as e:
             self._handle_failure("delete", e)
             return False
         else:
@@ -137,7 +150,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
                     return local_session_data
                 try:
                     self.client.set(name=store_id, value=serialized, ex=_total_seconds(self.app.permanent_session_lifetime))
-                except RedisError as e:
+                except REDIS_ERRORS as e:
                     self._handle_failure("write", e)
                 else:
                     self._note_redis_answered()
@@ -150,7 +163,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
                 self._note_redis_answered()
                 if serialized_session_data:
                     return self.serializer.decode(serialized_session_data)
-            except RedisError as e:
+            except REDIS_ERRORS as e:
                 self._handle_failure("read", e)
 
         return None
@@ -161,7 +174,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
         if self.redis_available:
             try:
                 self.client.set(name=store_id, value=self.serializer.encode(session), ex=storage_time_to_live)
-            except RedisError as e:
+            except REDIS_ERRORS as e:
                 self._handle_failure("write", e)
             else:
                 self._note_redis_answered()

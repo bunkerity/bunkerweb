@@ -31,6 +31,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_TIMEOUT`           | `1s`              | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
+| `REDIS_CLUSTER_NODES`     |                   | global   | no       | **Nodos del clúster:** Nodos semilla de un clúster Redis, `host[:puerto]` separados por espacios, `[ipv6]:puerto` para IPv6. Habilita el modo clúster. |
 | `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                   |
 | `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                           |
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
@@ -55,6 +56,18 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     -   Todas las instancias de BunkerWeb deben conectarse al mismo servidor Redis o Valkey o al clúster de Sentinel
     -   Configure el mismo número de base de datos en todas las instancias
     -   Asegúrese de que haya conectividad de red entre todas las instancias de BunkerWeb y los servidores Redis/Valkey
+
+### Clúster de Redis
+
+Establezca `REDIS_CLUSTER_NODES` con al menos un nodo accesible; BunkerWeb descubre el resto del clúster a partir de ahí. Funciona con Redis 6.2+, Valkey, y servicios de clúster gestionados como ElastiCache o MemoryDB a través de su endpoint de configuración. Los nodos semilla aceptan `host`, `host:puerto` o `[ipv6]:puerto`, pero el propio clúster debe anunciar direcciones IPv4 o nombres de host (`cluster-announce-hostname` con `cluster-preferred-endpoint-type hostname`); los clústeres que anuncian IPv6 no son compatibles.
+
+El modo clúster utiliza la base de datos 0. Establecer `REDIS_CLUSTER_NODES` junto con `REDIS_SENTINEL_HOSTS`, o con `REDIS_DATABASE` distinto de 0, es un error de configuración: BunkerWeb registra un error que nombra ambos ajustes y no utiliza Redis en absoluto (recurriendo a contadores locales y sesiones por cookie) hasta que se elimine uno de los dos.
+
+Cambiar una implementación existente al modo clúster parte de un espacio de claves vacío: los baneos activos y permanentes, las sesiones y los informes no se trasladan. Vuelva a aplicar los baneos permanentes después del cambio.
+
+Los baneos y los contadores de mal comportamiento se reparten entre los primarios por IP del cliente. Los informes de peticiones bloqueadas comparten un único hash slot, por lo que un solo primario los almacena todos.
+
+Con el valor predeterminado `cluster-require-full-coverage yes`, la pérdida de un primario sin réplica detiene todo el clúster; BunkerWeb entonces recurre a contadores locales y sesiones por cookie hasta que se recupera. `cluster-require-full-coverage no` limita el impacto a las claves del shard perdido.
 
 ### Configuraciones de Ejemplo
 

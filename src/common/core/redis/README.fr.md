@@ -29,6 +29,7 @@ Comment ça marche :
 | `REDIS_TIMEOUT`           | `1s`       | global   | non      | Timeout (ms) pour connexion/lecture/écriture. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                               |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                  |
+| `REDIS_CLUSTER_NODES`     |            | global   | non      | Nœuds de départ d’un cluster Redis, `hôte[:port]` séparés par espaces, `[ipv6]:port` pour IPv6. Active le mode cluster. |
 | `REDIS_SENTINEL_HOSTS`    |            | global   | non      | Hôtes Sentinel (séparés par espaces, `hôte:port`).             |
 | `REDIS_SENTINEL_USERNAME` |            | global   | non      | Utilisateur Sentinel.                                          |
 | `REDIS_SENTINEL_PASSWORD` |            | global   | non      | Mot de passe Sentinel.                                         |
@@ -51,6 +52,18 @@ Comment ça marche :
     - Toutes les instances BunkerWeb doivent se connecter au même serveur Redis/Valkey ou cluster Sentinel
     - Configurez le même numéro de base de données sur toutes les instances
     - Assurez-vous de la connectivité réseau entre toutes les instances BunkerWeb et les serveurs Redis/Valkey
+
+### Cluster Redis
+
+Définissez `REDIS_CLUSTER_NODES` avec au moins un nœud joignable ; BunkerWeb découvre le reste du cluster à partir de là. Fonctionne avec Redis 6.2+, Valkey, et les services de cluster managés comme ElastiCache ou MemoryDB via leur endpoint de configuration. Les nœuds de départ acceptent `hôte`, `hôte:port` ou `[ipv6]:port`, mais le cluster doit lui-même annoncer des adresses IPv4 ou des noms d’hôte (`cluster-announce-hostname` avec `cluster-preferred-endpoint-type hostname`) ; les clusters qui annoncent de l’IPv6 ne sont pas pris en charge.
+
+Le mode cluster utilise la base 0. Définir `REDIS_CLUSTER_NODES` en même temps que `REDIS_SENTINEL_HOSTS`, ou avec `REDIS_DATABASE` différent de 0, est une erreur de configuration : BunkerWeb consigne une erreur nommant les deux paramètres et n’utilise pas Redis du tout (retour aux compteurs locaux et aux sessions en cookie) tant que l’un des deux n’est pas retiré.
+
+Basculer un déploiement existant en mode cluster repart d’un espace de clés vide : bannissements actifs et permanents, sessions et rapports ne sont pas repris. Réappliquez les bannissements permanents après le basculement.
+
+Les bannissements et compteurs de mauvais comportement sont répartis entre les primaires par IP client. Les rapports de requêtes bloquées partagent un seul hash slot, donc un seul primaire les stocke tous.
+
+Avec la valeur par défaut `cluster-require-full-coverage yes`, la perte d’un primaire sans réplica arrête tout le cluster ; BunkerWeb revient alors aux compteurs locaux et aux sessions en cookie jusqu’au rétablissement. `cluster-require-full-coverage no` limite l’impact aux clés du shard perdu.
 
 ### Exemples
 

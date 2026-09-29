@@ -202,6 +202,7 @@ def get_redis_client():
             "REDIS_SENTINEL_USERNAME",
             "REDIS_SENTINEL_PASSWORD",
             "REDIS_SENTINEL_MASTER",
+            "REDIS_CLUSTER_NODES",
         ),
     )
 
@@ -225,6 +226,7 @@ def get_redis_client():
         redis_sentinel_username=db_config.get("REDIS_SENTINEL_USERNAME") or None,
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
+        redis_cluster_nodes=db_config.get("REDIS_CLUSTER_NODES", ""),
         logger=LOGGER,
     )
 
