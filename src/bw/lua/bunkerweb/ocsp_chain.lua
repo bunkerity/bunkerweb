@@ -43,45 +43,63 @@ local note_connection_staple
 local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP = 71
 local SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP_EX = 143
 
--- Fallback cache for when ngx.ctx is unavailable (optimization #7)
--- LRU cache: 64 entries, evicts least-recently-used on overflow
+-- Fallback cache for when ngx.ctx is unavailable (optimization #7).
+-- Touch-counter LRU: O(1) hits, O(n) only on eviction when full.
+-- Keys MUST include the intermediate bag identity (not leaf SPKI alone) —
+-- same leaf with a fatter Must-Staple bag must not hit a prior clean entry.
 local fallback_chain_cache = {}
-local fallback_cache_order = {}  -- Track access order for LRU
+local fallback_cache_touch = {} -- key → monotonic touch
+local fallback_touch_gen = 0
+local fallback_cache_count = 0
 local fallback_cache_max = 64
 
-local function fallback_cache_get(key)
-	if fallback_chain_cache[key] then
-		-- Move to end (most recent)
-		for i, k in ipairs(fallback_cache_order) do
-			if k == key then
-				table.remove(fallback_cache_order, i)
-				break
-			end
+local function fallback_touch(key)
+	fallback_touch_gen = fallback_touch_gen + 1
+	fallback_cache_touch[key] = fallback_touch_gen
+end
+
+local function fallback_evict_lru()
+	local oldest_key, oldest_touch = nil, nil
+	for k, t in pairs(fallback_cache_touch) do
+		if oldest_touch == nil or t < oldest_touch then
+			oldest_touch = t
+			oldest_key = k
 		end
-		table.insert(fallback_cache_order, key)
-		return fallback_chain_cache[key]
+	end
+	if not oldest_key then
+		return false
+	end
+	fallback_chain_cache[oldest_key] = nil
+	fallback_cache_touch[oldest_key] = nil
+	fallback_cache_count = fallback_cache_count - 1
+	return true
+end
+
+local function fallback_cache_get(key)
+	local v = fallback_chain_cache[key]
+	if v ~= nil then
+		fallback_touch(key)
+		return v
 	end
 	return nil
 end
 
 local function fallback_cache_set(key, value)
-	if fallback_chain_cache[key] then
-		-- Update existing: move to end
-		for i, k in ipairs(fallback_cache_order) do
-			if k == key then
-				table.remove(fallback_cache_order, i)
-				break
-			end
-		end
-	else
-		-- New entry: check eviction
-		if #fallback_cache_order >= fallback_cache_max then
-			local lru_key = table.remove(fallback_cache_order, 1)
-			fallback_chain_cache[lru_key] = nil
+	if fallback_chain_cache[key] ~= nil then
+		fallback_chain_cache[key] = value
+		fallback_touch(key)
+		return
+	end
+	if fallback_cache_count >= fallback_cache_max then
+		if not fallback_evict_lru() then
+			fallback_chain_cache = {}
+			fallback_cache_touch = {}
+			fallback_cache_count = 0
 		end
 	end
 	fallback_chain_cache[key] = value
-	table.insert(fallback_cache_order, key)
+	fallback_touch(key)
+	fallback_cache_count = fallback_cache_count + 1
 end
 
 -- ffi + C with SSL_ctrl, the OpenSSL stack API and the OCSP_RESPONSE codec declared,
@@ -238,10 +256,12 @@ end
 -- publish writes a temp then rename(2)s it, so readers never need a lock.
 -- A live file whose first byte is neither "0" nor "1" (torn or garbage) is
 -- leaf-only (false), not "no opinion" (nil). nil would let openssl_multi_staple_ready
--- attach multi-staple while a peer's vote is unreadable.
+-- attach multi-staple while a peer's vote is unreadable. Any such invalid live
+-- vote forces leaf-only even when other live votes are "1" (MIN, not majority).
 local function colony_multi_staple_min()
 	local found_zero = false
 	local found_one = false
+	local found_invalid = false
 	local live = false
 	pcall(function()
 		local lfs = require "lfs"
@@ -260,10 +280,13 @@ local function colony_multi_staple_min()
 						local raw = f:read("*l") or ""
 						f:close()
 						live = true
-						if raw:sub(1, 1) == "0" then
+						local bit = raw:sub(1, 1)
+						if bit == "0" then
 							found_zero = true
-						elseif raw:sub(1, 1) == "1" then
+						elseif bit == "1" then
 							found_one = true
+						else
+							found_invalid = true
 						end
 					end
 				end
@@ -273,13 +296,13 @@ local function colony_multi_staple_min()
 	if not live then
 		return nil
 	end
-	if found_zero then
+	-- Any live "0" or unreadable/torn vote → leaf-only (colony MIN).
+	if found_zero or found_invalid then
 		return false
 	end
 	if found_one then
 		return true
 	end
-	-- Live marker exists but is neither 0 nor 1.
 	return false
 end
 
@@ -294,13 +317,21 @@ local function publish_multi_staple_attach(ready, force)
 	if not force and (now - _multi_staple_last_publish) < MULTI_STAPLE_PUBLISH_INTERVAL then
 		-- Heartbeat: refresh vote mtime even when the bit matches the colony MIN,
 		-- so a matched-true worker does not age out under TTL while still live.
+		-- Atomic rename (same as full publish) — truncate-in-place can tear-read as
+		-- empty/garbage and briefly trip the invalid-vote leaf-only gate.
 		local ok_hb = false
 		pcall(function()
-			local f = io.open(worker_path, "w")
-			if f then
-				f:write(ready and "1\n" or "0\n")
-				f:close()
+			local wtmp = worker_path .. ".tmp." .. tostring(ngx.worker.id() or 0)
+			local wf = io.open(wtmp, "w")
+			if not wf then
+				return
+			end
+			wf:write(ready and "1\n" or "0\n")
+			wf:close()
+			if os.rename(wtmp, worker_path) then
 				ok_hb = true
+			else
+				os.remove(wtmp)
 			end
 		end)
 		if ok_hb then
@@ -363,7 +394,8 @@ local function openssl_multi_staple_ready()
 			return false, nil, "libssl"
 		end
 		local colony = colony_multi_staple_min()
-		-- false covers a live "0" and a live vote that is neither "0" nor "1".
+		-- false covers a live "0" and any live vote that is neither "0" nor "1"
+		-- (including when other peers voted "1" — colony MIN, not majority).
 		-- nil (no live markers yet) does not block this worker.
 		if colony == false then
 			return false, nil, "colony"
@@ -456,18 +488,20 @@ local function load_paged_intermediate_staple(cert_pem, leaf_pem)
 	end
 	if control_fp then
 		local cmeta = read_ocsp_json(control_fp)
-		if meta_tombstoned(cmeta) then
+		if meta_tombstoned(cmeta, control_fp) then
 			return nil, body_fp
 		end
 		if peer_refuse_blocks(control_fp, cmeta, nil, true) then
 			return nil, body_fp
 		end
-		if cluster_floor_blocks(control_fp, cmeta) then
-			return nil, body_fp
-		end
+		-- Control shards are negative-only (no this_update_unix); floor lives on body SPKI.
 	end
 	local meta = read_ocsp_json(body_fp)
-	if not meta or meta_tombstoned(meta) or shard_not_paged(meta) then
+	if not meta or meta_tombstoned(meta, body_fp) or shard_not_paged(meta, body_fp) then
+		return nil, body_fp
+	end
+	-- Body SPKI floor vs body this_update (job advances floor on body publish).
+	if cluster_floor_blocks(body_fp, meta) then
 		return nil, body_fp
 	end
 	local fresh = resp_still_fresh(nil, body_fp, meta)
@@ -1115,6 +1149,54 @@ local function restore_ctx_unresolved(out, leaf_pem)
 	end
 end
 
+-- Cache key: leaf SPKI + intermediate bag identity. Leaf-only keying allowed a
+-- clean linked path to poison a later call with a fatter Must-Staple bag
+-- (fail-open on unresolved_must_staple). crc32+len is collision-hard enough for
+-- a per-request / small LRU memo; wrong hit would only miss-optimize.
+local function presentable_cache_key(leaf_fp, blocks)
+	if not is_fp64(leaf_fp) or type(blocks) ~= "table" then
+		return nil
+	end
+	local n = #blocks
+	local parts = { leaf_fp, tostring(n) }
+	for i = 2, n do
+		local pem = blocks[i]
+		if type(pem) ~= "string" then
+			parts[#parts + 1] = "?"
+		else
+			local crc = 0
+			pcall(function()
+				if ngx.crc32_long then
+					crc = ngx.crc32_long(pem) or 0
+				end
+			end)
+			parts[#parts + 1] = tostring(#pem) .. ":" .. string.format("%08x", crc)
+		end
+	end
+	return table.concat(parts, "|")
+end
+
+-- Merge prior/ctx unresolved onto a presentable result (cache hit or miss).
+-- Mutates out in place (shared cache entry) so a raised refuse flag sticks.
+local function finalize_presentable(out, leaf, prior_unresolved, from_pem_string)
+	if type(out) ~= "table" then
+		return out
+	end
+	if prior_unresolved and prior_unresolved > 0 then
+		local cur = tonumber(out.unresolved_must_staple) or 0
+		if prior_unresolved > cur then
+			out.unresolved_must_staple = prior_unresolved
+		end
+	end
+	if from_pem_string then
+		restore_ctx_unresolved(out, leaf)
+	end
+	if (tonumber(out.unresolved_must_staple) or 0) <= 0 then
+		note_depleted_pem_unresolved(0, leaf)
+	end
+	return out
+end
+
 local function issuer_linked_chain_pem(leaf_pem, intermediate_pems)
 	local blocks = issuer_linked_chain_blocks(leaf_pem, intermediate_pems)
 	if type(blocks) ~= "table" or #blocks == 0 then
@@ -1153,31 +1235,31 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 	end
 	local leaf = blocks[1]
 	local leaf_fp = spki_fingerprint(leaf)
+	local cache_key = presentable_cache_key(leaf_fp, blocks)
 
-	-- Cache chain format conversion per-request (optimization #3)
-	-- Key: leaf SPKI fingerprint (unique per leaf in request)
+	-- Cache chain format conversion per-request (optimization #3).
+	-- Key includes intermediate bag identity so leaf SPKI alone cannot collide.
 	if ngx.ctx then
-		if is_fp64(leaf_fp) then
+		if cache_key then
 			local cache_table = ngx.ctx.bw_presentable_chain_cache
 			if not cache_table then
 				cache_table = {}
 				ngx.ctx.bw_presentable_chain_cache = cache_table
 			end
-			if cache_table[leaf_fp] then
-				return cache_table[leaf_fp]
+			local cached = cache_table[cache_key]
+			if cached then
+				-- Cache hit still merges prior/ctx unresolved (fail closed).
+				return finalize_presentable(cached, leaf, prior_unresolved, from_pem_string)
 			end
 		end
 	else
 		-- Fallback for edge case: ngx.ctx not available (optimization #7)
 		-- Use LRU fallback cache (64-entry limit, per-worker process)
-		if is_fp64(leaf_fp) then
-			local cached = fallback_cache_get(leaf_fp)
+		if cache_key then
+			local cached = fallback_cache_get(cache_key)
 			if cached then
-				log(
-					ngx.DEBUG,
-					"OCSP presentable_chain_blocks: fallback cache hit (ngx.ctx unavailable)"
-				)
-				return cached
+				log(ngx.DEBUG, "OCSP presentable_chain_blocks: fallback cache hit (ngx.ctx unavailable)")
+				return finalize_presentable(cached, leaf, prior_unresolved, from_pem_string)
 			end
 		end
 		log(
@@ -1190,32 +1272,20 @@ local function presentable_chain_blocks(cert_pem_or_blocks)
 		inters[#inters + 1] = blocks[i]
 	end
 	local out = issuer_linked_chain_blocks(leaf, inters)
-	if prior_unresolved and prior_unresolved > 0 then
-		local cur = tonumber(out.unresolved_must_staple) or 0
-		if prior_unresolved > cur then
-			out.unresolved_must_staple = prior_unresolved
-		end
-	end
-	if from_pem_string then
-		restore_ctx_unresolved(out, leaf)
-	end
-	-- Clean linked path for this leaf: drop any leftover depleted-PEM stamp.
-	if (tonumber(out.unresolved_must_staple) or 0) <= 0 then
-		note_depleted_pem_unresolved(0, leaf)
-	end
+	finalize_presentable(out, leaf, prior_unresolved, from_pem_string)
 	-- Store in cache for reuse (optimization #3)
 	-- Fallback: if ngx.ctx not available, use LRU fallback cache (optimization #7)
 	if ngx.ctx then
-		if is_fp64(leaf_fp) then
+		if cache_key then
 			local cache_table = ngx.ctx.bw_presentable_chain_cache
 			if cache_table then
-				cache_table[leaf_fp] = out
+				cache_table[cache_key] = out
 			end
 		end
 	else
 		-- Fallback cache: 64-entry LRU, per-worker storage
-		if is_fp64(leaf_fp) then
-			fallback_cache_set(leaf_fp, out)
+		if cache_key then
+			fallback_cache_set(cache_key, out)
 		end
 	end
 	return out
@@ -1280,6 +1350,11 @@ end
 
 function _M.issuer_path_intermediate_ready(chain_pem_or_blocks)
 	return issuer_path_intermediate_ready(chain_pem_or_blocks)
+end
+
+function _M.chain_has_intermediate_must_staple(chain_pem_or_blocks)
+	local blocks = presentable_chain_blocks(chain_pem_or_blocks)
+	return chain_has_intermediate_must_staple(blocks)
 end
 
 -- How many issuer-path intermediates would attach as NULL (ok_partial slots).
@@ -1348,6 +1423,7 @@ _M.internal = {
 	issuer_linked_chain_blocks = issuer_linked_chain_blocks,
 	issuer_path_intermediate_ready = issuer_path_intermediate_ready,
 	issuer_path_null_slots = issuer_path_null_slots,
+	chain_has_intermediate_must_staple = chain_has_intermediate_must_staple,
 	note_connection_staple = note_connection_staple,
 	openssl_multi_staple_ready = openssl_multi_staple_ready,
 	presentable_chain_blocks = presentable_chain_blocks,
