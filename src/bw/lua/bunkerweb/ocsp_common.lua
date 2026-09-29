@@ -189,6 +189,12 @@ local STAPLE_DECISION = {
 	validate_budget = true,
 	-- Body present but no accepted issuer PEM/SPKI for ngx.ocsp.validate (not a missing DER).
 	issuer_unavailable = true,
+	-- Every issuer candidate failed validate (body present; not empty queue, not missing DER).
+	validate_exhausted = true,
+	-- Disk ocsp.der exists but is zero-length (truncate race); not ENOENT.
+	response_empty = true,
+	-- Fingerprint-only path cannot finish a gen-bound force_ffi walk (no leaf PEM issuers).
+	force_ffi_pending = true,
 	unmet = true,
 }
 
@@ -240,6 +246,9 @@ local KEEP_ALLOW_ON_REFUSE = {
 	multi_staple_attach_failed = true,
 	issuer_unresolved_must_staple = true,
 	issuer_unavailable = true,
+	validate_exhausted = true,
+	response_empty = true,
+	force_ffi_pending = true,
 	thisUpdate_future = true,
 	thisUpdate_stale = true,
 	lifetime_invalid = true,
@@ -375,6 +384,8 @@ end
 -- Convert a Must-Staple miss into abort (normal) or soft continue (fuse).
 -- Always logs staple_decision=CODE (runbook) with tag=OCSP_MUST_STAPLE_REFUSE
 -- and refuse_cause= raw detail (pre-alias) so pin/bus forensics survive collapse.
+-- Skips a second ERR when set_certs_from_pem already logged action=continue_install
+-- for this handshake (ngx.ctx.bw_ocsp_soft_fuse_logged) — one intentional fuse, one line.
 --
 -- Return contract (callers MUST branch on the second value, not bare falsiness):
 --   soft continue → false, nil, "continue"
@@ -389,15 +400,18 @@ local function soften_must_staple(mode, ok, reason, detail)
 		action = "continue"
 	end
 	local raw_cause = tostring(detail or "unmet")
-	log(
-		ngx.ERR,
-		format_staple_decision(raw_cause, {
-			tag = "OCSP_MUST_STAPLE_REFUSE",
-			action = action,
-			mode = mode or "normal",
-			refuse_cause = raw_cause,
-		})
-	)
+	local already = ngx.ctx and ngx.ctx.bw_ocsp_soft_fuse_logged
+	if not already then
+		log(
+			ngx.ERR,
+			format_staple_decision(raw_cause, {
+				tag = "OCSP_MUST_STAPLE_REFUSE",
+				action = action,
+				mode = mode or "normal",
+				refuse_cause = raw_cause,
+			})
+		)
+	end
 	if action == "continue" then
 		return false, nil, "continue"
 	end
