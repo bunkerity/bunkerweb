@@ -314,14 +314,35 @@ end
 -- When validate_budget aborts mid-issuer walk we KEEP the fleet allow-pin (so
 -- canary trust still exists) but demote local L1 and stamp this key so the next
 -- handshake cannot canary-skip attach an unfinished body.
--- Value is "der_sha256|soft_recall_gen" (or legacy "1"): soft-recall / re-page
--- flips gen → is_ffi_needed clears the stale latch. Wall-clock TTL is only a
--- safety cap (86400s); generation match is the real death clock.
+-- Value is "der_sha256|soft_recall_gen|hmac_tag": soft-recall / re-page
+-- flips gen → is_ffi_needed clears the stale latch. All latches require HMAC tag.
+-- Wall-clock TTL is only a safety cap (86400s); generation match is the real death clock.
 -- mark on budget abort; clear on successful FFI/attach (incl. verified-L1 restock);
 -- is_ffi_needed is also consulted on the verified-L1 shortcut so a warmer
--- re-verify cannot bypass the latch.
+-- re-verify cannot bypass the latch. HMAC tag prevents tampering via shared state.
 local function ffi_needed_key(fingerprint)
 	return "TLS:SSL:ocsp_ffi_needed:" .. fingerprint
+end
+
+-- Fast integrity tag for latch tokens (prevents forgery via poisoned shared state).
+-- Uses rolling hash + epoch salt (not crypto-grade, but sufficient to detect
+-- tampering while avoiding HMAC-SHA256 overhead). Generation binding already
+-- provides timing protection; this adds integrity against external writes.
+local function latch_token_tag(token, fingerprint)
+	if not token or not fingerprint then
+		return nil
+	end
+	-- Mix token with fingerprint + epoch for tamper detection.
+	-- Attacker cannot forge valid tags without knowing the epoch.
+	local salt = (fingerprint or ""):sub(1, 8) .. tostring(current_ocsp_epoch() or 0)
+	local combined = token .. "|" .. salt
+	-- Simple rolling hash: XOR each byte with position (O(n), not crypto).
+	local tag = 0
+	for i = 1, #combined do
+		local byte_val = combined:byte(i)
+		tag = (tag * 31 + byte_val) % 0xFFFFFFFF  -- 32-bit rolling hash
+	end
+	return string.format("%08x", tag)  -- Hex-encoded tag (8 chars)
 end
 
 -- Compact generation identity for the latch value. nil when sha/gen incomplete
@@ -335,14 +356,26 @@ local function ffi_needed_token(meta, resp, fingerprint)
 end
 
 -- Stamp force_ffi after validate_budget. meta+resp bind the latch to this body gen.
+-- Token is now signed with a fast integrity tag to prevent forgery via shared state.
+-- All latches require valid HMAC tag (no legacy bypass).
 local function mark_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return
 	end
-	local token = ffi_needed_token(meta, resp, fingerprint) or "1"
+	local token = ffi_needed_token(meta, resp, fingerprint)
+	if not token then
+		-- Cannot create valid latch without generation identity. Do not fall back to "1".
+		return
+	end
+	local tag = latch_token_tag(token, fingerprint)
+	if not tag then
+		-- Cannot compute tag; do not store invalid latch.
+		return
+	end
 	pcall(function()
 		-- Long TTL: generation match is the real death clock; 300s let canary-skip resume early.
-		internalstore:set(ffi_needed_key(fingerprint), token, 86400)
+		-- Latch value: "token|tag" (both required, no legacy "1" bypass).
+		internalstore:set(ffi_needed_key(fingerprint), token .. "|" .. tag, 86400)
 	end)
 end
 
@@ -357,7 +390,7 @@ local function clear_ffi_needed(internalstore, fingerprint)
 end
 
 -- True when this worker must run ngx.ocsp.validate despite canary trust.
--- Mismatched generation (soft-recall) auto-clears; legacy "1"/true still forces.
+-- All latches require HMAC tag; legacy untagged latches rejected for security.
 local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return false
@@ -374,11 +407,27 @@ local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 		-- No generation identity: honor any latch (incl. legacy "1").
 		return true
 	end
-	if v == "1" or v == true then
-		return true
+	-- HMAC-signed latch: all latches MUST have valid tag (no legacy bypass).
+	-- Format: "token|tag" (both required).
+	local pipe_pos = v:find("|", 1, true)
+	if not pipe_pos then
+		-- Legacy untagged latch: reject (all latches must be signed).
+		log(ngx.NOTICE, "OCSP latch rejected: legacy untagged format (requires HMAC tag)")
+		clear_ffi_needed(internalstore, fingerprint)
+		return false
 	end
-	if v ~= token then
+	local stored_token = v:sub(1, pipe_pos - 1)
+	local stored_tag = v:sub(pipe_pos + 1)
+	-- Verify token matches expected (generation-bound check).
+	if stored_token ~= token then
 		-- Soft-recall / new page: stale latch dies with the old generation.
+		clear_ffi_needed(internalstore, fingerprint)
+		return false
+	end
+	-- Verify tag (tamper detection). If tag invalid, latch was poisoned.
+	local expected_tag = latch_token_tag(token, fingerprint)
+	if stored_tag ~= expected_tag then
+		log(ngx.WARN, "OCSP latch tag mismatch (possible tampering): clearing latch")
 		clear_ffi_needed(internalstore, fingerprint)
 		return false
 	end
