@@ -67,11 +67,45 @@ local function decode_allow_pin(raw)
 	return obj
 end
 
+-- Read allow-pin with per-request dedup cache (ngx.ctx)
+-- Avoids re-reading the same file within a single handshake
 local function read_allow_pin(fingerprint)
 	if not is_fp64(fingerprint) then
 		return nil
 	end
-	return decode_allow_pin(read_file(ocsp_allow_path(fingerprint)))
+
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_pin_cache then
+		ctx.bw_ocsp_pin_cache = {}
+	end
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_pin_cache then
+		local cached = ctx.bw_ocsp_pin_cache[fingerprint]
+		if cached ~= nil then
+			-- Distinguish between "file not found" (false) and "found" (table)
+			if cached == false then
+				return nil
+			end
+			return cached
+		end
+	end
+
+	-- Cache miss: read from disk
+	local pin = decode_allow_pin(read_file(ocsp_allow_path(fingerprint)))
+	if pin == nil then
+		-- Cache the "not found" result to prevent re-reading
+		if ctx and ctx.bw_ocsp_pin_cache then
+			ctx.bw_ocsp_pin_cache[fingerprint] = false
+		end
+		return nil
+	end
+	-- Cache successful decode
+	if ctx and ctx.bw_ocsp_pin_cache then
+		ctx.bw_ocsp_pin_cache[fingerprint] = pin
+	end
+	return pin
 end
 
 -- True when the pin names exactly this generation (der_sha256, soft_recall_gen).
@@ -161,8 +195,30 @@ local function try_reclaim_orphan_claim(fingerprint, want_sha, want_g)
 	return false
 end
 
+-- Check if allow-pin has a claim with per-request dedup cache (ngx.ctx)
+-- Avoids repeated expensive lfs.dir scans within a single handshake
 local function allow_pin_has_claim(fingerprint)
-	return #list_allow_pin_claims(fingerprint) > 0
+	-- Initialize per-request cache on first use
+	local ctx = ngx.ctx
+	if ctx and not ctx.bw_ocsp_claim_cache then
+		ctx.bw_ocsp_claim_cache = {}
+	end
+
+	-- Check per-request cache first
+	if ctx and ctx.bw_ocsp_claim_cache then
+		local cached = ctx.bw_ocsp_claim_cache[fingerprint]
+		if cached ~= nil then
+			-- Cache stores: false (no claims) or true (claims exist)
+			return cached == true
+		end
+	end
+
+	-- Cache miss: scan directory
+	local has_claims = #list_allow_pin_claims(fingerprint) > 0
+	if ctx and ctx.bw_ocsp_claim_cache then
+		ctx.bw_ocsp_claim_cache[fingerprint] = has_claims
+	end
+	return has_claims
 end
 
 -- Unconditional drop (job / admin / soft-recall cleanup that already knows the
