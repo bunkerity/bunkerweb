@@ -2270,6 +2270,7 @@ class Database:
                                 session.query(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
                                 session.query(Custom_configs).filter(Custom_configs.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
                                 session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                self._blob_sweep(session)
                                 session.query(Metadata).filter_by(id=1).update(
                                     {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
                                 )
@@ -4033,6 +4034,7 @@ class Database:
             session.query(Custom_configs).filter(Custom_configs.service_id.in_(service_ids)).delete(synchronize_session=False)
             session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(service_ids)).delete(synchronize_session=False)
             session.query(Services).filter(Services.id.in_(service_ids)).delete(synchronize_session=False)
+            self._blob_sweep(session)
 
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).get(1)
@@ -4194,6 +4196,7 @@ class Database:
                 return None
 
             try:
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -5387,6 +5390,7 @@ class Database:
                             metadata.reload_ui_plugins = True
 
             try:
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 return str(e)
