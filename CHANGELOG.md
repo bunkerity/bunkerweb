@@ -17,6 +17,7 @@
 - [BUGFIX] `ui`, `api`: editing a service no longer deletes another one sharing a server name; shared server names are refused.
 - [BUGFIX] `ui`: plugins without a page (e.g. PRO Maintenance) no longer ask to restart the Web UI.
 - [BUGFIX] `ui`: the Global config breadcrumb and the service conversion and cache deletion modals are translated.
+- [BUGFIX] `ui`: the active PRO plugin entry in the dark-mode menu is readable again.
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
 - [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).

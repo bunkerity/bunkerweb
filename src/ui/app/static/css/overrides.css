@@ -3132,6 +3132,16 @@ div.dt-button-background {
   background-color: #fff !important;
 }
 
+.dark-style
+  .bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link
+  .text-primary.shine {
+  color: rgba(7, 53, 74, 0.1) !important;
+  background-color: #07354a !important;
+}
+
 .dark-style .bg-menu-theme .menu-inner > .menu-item.active:before {
   background-color: #fff !important;
 }
