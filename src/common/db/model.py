@@ -195,6 +195,17 @@ class Plugin_pages(Base):
     plugin = relationship("Plugins", back_populates="pages")
 
 
+class Blob_chunks(Base):
+    """Pieces of a blob too large for one statement; the owner row's data column holds a marker instead."""
+
+    __tablename__ = "bw_blob_chunks"
+
+    owner = Column(String(128), primary_key=True)
+    checksum = Column(String(64), primary_key=True)
+    idx = Column(Integer, primary_key=True, autoincrement=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+
+
 class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
 

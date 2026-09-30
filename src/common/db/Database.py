@@ -6,6 +6,7 @@ from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import wraps
+from hashlib import sha256
 from json import JSONDecodeError, loads
 from logging import Logger
 from os import _exit, getenv, sep
@@ -22,6 +23,7 @@ from warnings import filterwarnings
 
 from model import (
     Base,
+    Blob_chunks,
     Instances,
     Plugins,
     Settings,
@@ -52,7 +54,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
 from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
+from sqlalchemy import and_, bindparam, case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
@@ -93,6 +95,11 @@ DEFAULT_POOL_MAX_OVERFLOW = 20
 DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
+
+# A blob larger than one statement can carry on MySQL/MariaDB (max_allowed_packet, which a non-SUPER user
+# cannot raise) is stored in bw_blob_chunks and its owner column holds this marker followed by the sha256.
+BLOB_CHUNK_MARKER = b"\x00bw-blob-chunks\x00"
+BLOB_CHUNK_MAX = 4 * 1024 * 1024
 
 # Methods that mean "a human edited this through a first-class interface". They overwrite
 # one another freely. "wizard" belongs here: the setup wizard creates its service with that
@@ -562,6 +569,98 @@ class Database:
 
         return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
 
+    def _blob_chunk_size(self, session: scoped_session) -> Optional[int]:
+        """Largest blob one statement can carry, or None when the backend has no practical limit."""
+        if self.sql_engine.dialect.name not in ("mysql", "mariadb"):
+            return None
+        packet = int(session.execute(text("SELECT @@max_allowed_packet")).scalar())
+        # PyMySQL >= 1.2.1 sends bytes as a hex literal, so a blob costs twice its size on the wire.
+        return max(16 * 1024, min(BLOB_CHUNK_MAX, (packet - 64 * 1024) // 3))
+
+    def _blob_store(self, session: scoped_session, owner: str, data: Optional[bytes]) -> Optional[bytes]:
+        """Return what to write in the owner's data column: the data itself when it fits one statement,
+        otherwise a marker, the data going to bw_blob_chunks one row per statement. Drops the owner's
+        other chunk sets in the same transaction, so a reader sees the old blob or the new one."""
+        size = self._blob_chunk_size(session)
+        value = data
+        checksum = ""
+        if data is not None and size and len(data) > size:
+            checksum = sha256(data).hexdigest()
+            value = BLOB_CHUNK_MARKER + checksum.encode()
+            if not session.query(Blob_chunks.idx).filter_by(owner=owner, checksum=checksum).first():
+                for idx, start in enumerate(range(0, len(data), size)):
+                    end = start + size
+                    session.add(Blob_chunks(owner=owner, checksum=checksum, idx=idx, data=data[start:end]))
+                    session.flush()
+        self._blob_drop(session, Blob_chunks.owner == owner, Blob_chunks.checksum != checksum)
+        return value
+
+    @staticmethod
+    def _blob_drop(session: scoped_session, *conditions: Any) -> None:
+        """Delete chunk rows one primary key at a time, after a non-locking look for them. A ranged DELETE
+        takes next-key locks and, under MariaDB's snapshot isolation, fails with 1020 as soon as a
+        concurrent job has touched a neighbouring chunk row."""
+        keys = [
+            {"o": row.owner, "c": row.checksum, "i": row.idx}
+            for row in session.query(Blob_chunks.owner, Blob_chunks.checksum, Blob_chunks.idx).filter(*conditions)
+        ]
+        if keys:
+            table = Blob_chunks.__table__
+            session.execute(
+                table.delete().where(and_(table.c.owner == bindparam("o"), table.c.checksum == bindparam("c"), table.c.idx == bindparam("i"))), keys
+            )
+
+    @staticmethod
+    def _blob_matches(value: Optional[bytes], data: Optional[bytes]) -> bool:
+        """Compare a stored column value, marker or not, with plain data."""
+        if value and value.startswith(BLOB_CHUNK_MARKER):
+            return data is not None and value.removeprefix(BLOB_CHUNK_MARKER) == sha256(data).hexdigest().encode()
+        return value == data
+
+    def _blob_load(
+        self, session: scoped_session, owner: str, value: Optional[bytes], reread: Optional[Callable[[], Optional[bytes]]] = None
+    ) -> Optional[bytes]:
+        """Resolve a data column value: plain data is returned as is, a marker is reassembled from its chunks.
+
+        A writer may commit between the read of the marker and the read of the chunks (READ COMMITTED on
+        PostgreSQL, autocommit reads on SQLite), leaving the old chunk set gone. `reread` fetches the owner's
+        column again so the newer marker is followed instead."""
+        for _ in range(3):
+            if not value or not value.startswith(BLOB_CHUNK_MARKER):
+                return value
+            checksum = value.removeprefix(BLOB_CHUNK_MARKER).decode()
+            data = b"".join(row.data for row in session.query(Blob_chunks.data).filter_by(owner=owner, checksum=checksum).order_by(Blob_chunks.idx))
+            if sha256(data).hexdigest() == checksum:
+                return data
+            if reread is None:
+                break
+            value = reread()
+        self.logger.error(f"Stored blob {owner} is incomplete, its chunks are missing or corrupted")
+        return None
+
+    def _blob_sweep(self, session: scoped_session) -> None:
+        """Delete chunk sets whose owner row is gone or no longer points at them (owner rows deleted in bulk or by cascade)."""
+        owners = {row.owner for row in session.query(Blob_chunks.owner).distinct()}
+        if not owners:
+            return
+        live = set()
+        for table, key, column in (
+            ("bw_plugins", Plugins.id, Plugins.data),
+            ("bw_plugin_pages", Plugin_pages.plugin_id, Plugin_pages.data),
+            ("bw_jobs_cache", Jobs_cache.id, Jobs_cache.data),
+        ):
+            ids = [owner.split(":", 1)[1] for owner in owners if owner.startswith(f"{table}:")]
+            if not ids:
+                continue
+            if key.type.python_type is int:
+                ids = [int(i) for i in ids if i.isdigit()]
+            for row in session.query(key, column).filter(key.in_(ids), func.length(column) == len(BLOB_CHUNK_MARKER) + 64):
+                if row[1].startswith(BLOB_CHUNK_MARKER):
+                    live.add((f"{table}:{row[0]}", row[1].removeprefix(BLOB_CHUNK_MARKER).decode()))
+        for owner, checksum in session.query(Blob_chunks.owner, Blob_chunks.checksum).distinct().all():
+            if (owner, checksum) not in live:
+                self._blob_drop(session, Blob_chunks.owner == owner, Blob_chunks.checksum == checksum)
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -927,6 +1026,8 @@ class Database:
             for table_name in Base.metadata.tables.keys():
                 if table_name == "bw_plugin_pages":
                     old_data[table_name] = session.query(Plugin_pages).with_entities(Plugin_pages.plugin_id, Plugin_pages.checksum).all()
+                elif table_name == "bw_blob_chunks":
+                    continue
                 else:
                     old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
 
@@ -1274,15 +1375,21 @@ class Database:
             # Plugins to create
             for pid in new_plugin_ids - old_plugin_ids:
                 p = desired_plugins[pid]
-                to_put.append(Plugins(**p))
+                to_put.append(Plugins(**p | {"data": self._blob_store(session, f"bw_plugins:{pid}", p.get("data"))}))
 
             # Plugins to update
             for pid in old_plugin_ids & new_plugin_ids:
                 old_p = old_plugins[pid]
                 new_p = desired_plugins[pid]
-                attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum")
-                if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check) and old_p.method == new_p.get("method", "manual"):
-                    to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
+                attrs_to_check = ("name", "description", "version", "stream", "type", "method", "checksum")
+                data_changed = not self._blob_matches(getattr(old_p, "data", None), new_p.get("data"))
+                if (data_changed or any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check)) and old_p.method == new_p.get(
+                    "method", "manual"
+                ):
+                    update_data = {k: new_p[k] for k in attrs_to_check if k in new_p}
+                    if "data" in new_p:
+                        update_data["data"] = self._blob_store(session, f"bw_plugins:{pid}", new_p["data"])
+                    to_update.append({"type": "plugin", "filter": {"id": pid}, "data": update_data})
 
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
@@ -1382,13 +1489,14 @@ class Database:
 
             for pid in new_page_ids - old_page_ids:
                 pp = desired_plugin_pages[pid]
-                to_put.append(Plugin_pages(plugin_id=pid, data=pp["data"], checksum=pp["checksum"]))
+                to_put.append(Plugin_pages(plugin_id=pid, data=self._blob_store(session, f"bw_plugin_pages:{pid}", pp["data"]), checksum=pp["checksum"]))
 
             for pid in old_page_ids & new_page_ids:
                 old_pp = old_plugin_pages[pid]
                 new_pp = desired_plugin_pages[pid]
                 if old_pp.checksum != new_pp["checksum"]:
-                    to_update.append({"type": "plugin_page", "filter": {"plugin_id": pid}, "data": {"data": new_pp["data"], "checksum": new_pp["checksum"]}})
+                    data = self._blob_store(session, f"bw_plugin_pages:{pid}", new_pp["data"])
+                    to_update.append({"type": "plugin_page", "filter": {"plugin_id": pid}, "data": {"data": data, "checksum": new_pp["checksum"]}})
 
             for pid in old_page_ids - new_page_ids:
                 to_delete.append({"type": "plugin_page", "filter": {"plugin_id": pid}})
@@ -1644,8 +1752,10 @@ class Database:
 
                 if to_put_by_type["jobs"]:
                     session.add_all(to_put_by_type["jobs"])
-                if to_put_by_type["plugin_pages"]:
-                    session.add_all(to_put_by_type["plugin_pages"])
+                # One page per flush: MariaDB's INSERT ... RETURNING otherwise batches every page into one statement.
+                for page in to_put_by_type["plugin_pages"]:
+                    session.add(page)
+                    session.flush()
                 if to_put_by_type["cli_commands"]:
                     session.add_all(to_put_by_type["cli_commands"])
                 if to_put_by_type["other"]:
@@ -1677,6 +1787,7 @@ class Database:
                     elif t == "service_setting":
                         session.query(Services_settings).filter_by(**update["filter"]).update(update["data"])
 
+                self._blob_sweep(session)
                 session.commit()
             except SQLAlchemyError as e:
                 self.logger.debug(format_exc())
@@ -4125,16 +4236,20 @@ class Database:
                     key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
                     cache = session.query(Jobs_cache).filter_by(**key).first()
                     if cache is None:
-                        cache = Jobs_cache(**key, data=entry["data"], checksum=entry["checksum"])
+                        # Flushed empty first: the chunks, when needed, are keyed by the row id.
+                        cache = Jobs_cache(**key, data=b"", checksum=entry["checksum"])
                         session.add(cache)
+                        session.flush()
+                        cache.data = self._blob_store(session, f"bw_jobs_cache:{cache.id}", entry["data"])
                     elif entry["checksum"] is None or cache.checksum != entry["checksum"]:
-                        cache.data = entry["data"]
+                        cache.data = self._blob_store(session, f"bw_jobs_cache:{cache.id}", entry["data"])
                         cache.checksum = entry["checksum"]
                     # Unchanged data still refreshes the expiry window.
                     cache.last_update = datetime.now().astimezone()
                 for entry in deletions:
                     key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
                     session.query(Jobs_cache).filter_by(**key).delete(synchronize_session=False)
+                self._blob_sweep(session)
                 session.commit()
         except Exception as e:
             # Driver exceptions can embed the cache payload or connection credentials.
@@ -4227,8 +4342,10 @@ class Database:
 
                 if buckets["jobs"]:
                     session.add_all(buckets["jobs"])
-                if buckets["plugin_pages"]:
-                    session.add_all(buckets["plugin_pages"])
+                # One page per flush: MariaDB's INSERT ... RETURNING otherwise batches every page into one statement.
+                for page in buckets["plugin_pages"]:
+                    session.add(page)
+                    session.flush()
                 if buckets["cli_commands"]:
                     session.add_all(buckets["cli_commands"])
                 if buckets["other"]:
@@ -4367,7 +4484,7 @@ class Database:
 
                     if plugin.get("checksum") != db_plugin.checksum:
                         updates[Plugins.checksum] = plugin.get("checksum")
-                        updates[Plugins.data] = plugin.get("data")
+                        updates[Plugins.data] = self._blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data"))
 
                     if plugin.get("type") != db_plugin.type:
                         updates[Plugins.type] = plugin.get("type")
@@ -4617,9 +4734,11 @@ class Database:
 
                         if not db_plugin_page:
                             changes = True
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                             local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
                         elif checksum != db_plugin_page.checksum:
                             changes = True
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                             session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(
                                 {Plugin_pages.data: content, Plugin_pages.checksum: checksum}
                             )
@@ -4966,7 +5085,7 @@ class Database:
                         stream=plugin["stream"],
                         type=_type,
                         method=plugin["method"],
-                        data=plugin.get("data"),
+                        data=self._blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data")),
                         checksum=plugin.get("checksum"),
                     )
                 )
@@ -5030,7 +5149,8 @@ class Database:
                         try:
                             plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", plugin_page_content.getvalue())
+                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
                         except (FileNotFoundError, OSError) as e:
                             self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 
@@ -5213,6 +5333,7 @@ class Database:
             try:
                 if not per_plugin_commit and to_put:
                     _add_ordered(to_put)
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -5334,7 +5455,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in query:
+            for plugin in query.all():
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,
@@ -5348,7 +5469,12 @@ class Database:
                     "checksum": plugin.checksum,
                 }
                 if with_data:
-                    plugin_data["data"] = plugin.data
+                    plugin_data["data"] = self._blob_load(
+                        session,
+                        f"bw_plugins:{plugin.id}",
+                        plugin.data,
+                        lambda plugin_id=plugin.id: session.query(Plugins.data).filter_by(id=plugin_id).scalar(),
+                    )
 
                 for setting in settings_map.get(plugin.id, []):
                     setting_data = {
@@ -5446,7 +5572,7 @@ class Database:
         if with_info:
             entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
         if with_data:
-            entities.append(Jobs_cache.data)
+            entities.extend([Jobs_cache.id, Jobs_cache.data])
 
         filters = {"job_name": job_name, "file_name": file_name, "service_id": service_id or None}
 
@@ -5456,18 +5582,20 @@ class Database:
                 if not job:
                     return None
             data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
+            if data and with_data:
+                blob = self._blob_load(session, f"bw_jobs_cache:{data.id}", data.data, lambda: session.query(Jobs_cache.data).filter_by(id=data.id).scalar())
 
         if not data:
             return None
         elif with_data and not with_info:
-            return data.data
+            return blob
 
         ret_data = {}
         if with_info:
             ret_data["last_update"] = data.last_update.timestamp() if data.last_update is not None else "Never"
             ret_data["checksum"] = data.checksum
         if with_data:
-            ret_data["data"] = data.data
+            ret_data["data"] = blob
         return ret_data
 
     def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
@@ -5476,7 +5604,7 @@ class Database:
             filters = {}
             entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum]
             if with_data:
-                entities.append(Jobs_cache.data)
+                entities.extend([Jobs_cache.id, Jobs_cache.data])
             query = session.query(Jobs_cache).with_entities(*entities)
 
             if job_name:
@@ -5518,7 +5646,12 @@ class Database:
                     }
                 )
                 if with_data:
-                    cache_files[-1]["data"] = cache.data
+                    cache_files[-1]["data"] = self._blob_load(
+                        session,
+                        f"bw_jobs_cache:{cache.id}",
+                        cache.data,
+                        lambda cache_id=cache.id: session.query(Jobs_cache.data).filter_by(id=cache_id).scalar(),
+                    )
 
             return cache_files
 
@@ -5836,7 +5969,9 @@ class Database:
             if not page:
                 return None
 
-            return page.data
+            return self._blob_load(
+                session, f"bw_plugin_pages:{plugin_id}", page.data, lambda: session.query(Plugin_pages.data).filter_by(plugin_id=plugin_id).scalar()
+            )
 
     def get_templates(self, plugin: Optional[str] = None) -> Dict[str, dict]:
         """Get templates."""
