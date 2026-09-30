@@ -8,6 +8,7 @@
 - [FEATURE] `realip`, `blacklist`, `whitelist`, `greylist`: IP list URLs also read JSON documents, JSON lines, CSV and tab-separated lists, such as the AWS, Google, Cloudflare API, Fastly or Spamhaus feeds, and a `#key=value` fragment keeps only part of a JSON list, e.g. `ip-ranges.json#service=CLOUDFRONT`.
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which turned an ignored user agent into its first word and exempted most browsers.
 - [BUGFIX] The loading page answers 503 with `Retry-After` instead of 200, so API clients stop taking it for a successful response. (Fixes #3988)
+- [BUGFIX] `ui`: a form posted to a freshly started or recycled Web UI worker, such as the login form, no longer fails with "The CSRF session token is missing" and a `session_expired` redirect.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
