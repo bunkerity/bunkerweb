@@ -827,7 +827,7 @@
       "certificate_authority": "الجهة المصدرة للشهادة",
       "certificate_priority": "أولوية الشهادة",
       "challenge_type": "نوع التحدي",
-      "comment": "?????",
+      "comment": "تعليق",
       "config_type": "نوع التكوين",
       "configuration_name": "اسم التكوين",
       "confirm_password": "تأكيد كلمة المرور",
@@ -896,7 +896,7 @@
       "search": "بحث...",
       "secret_token": "الرمز السري",
       "select_service": "اختر خدمة",
-      "service_comment": "?????? ?? ??? ??????? ???? ??????...",
+      "service_comment": "ملاحظة أو وصف اختياري لهذه الخدمة...",
       "username_example": "زيدعمر"
     },
     "validation": {
@@ -1439,7 +1439,7 @@
       "active": "نشط",
       "async": "غير متزامن",
       "checksum": "Checksum",
-      "comment": "?????",
+      "comment": "تعليق",
       "configs": "التكوينات",
       "country": "البلد",
       "created": "تاريخ الإنشاء",
@@ -1894,7 +1894,7 @@
       "select_rows_for_action": "يرجى تحديد صف واحد أو أكثر لتنفيذ إجراء.",
       "services": {
         "actions": "الإجراءات المتاحة لهذه الخدمة",
-        "comment": "?????? ?? ??? ??????",
+        "comment": "ملاحظة أو وصف للخدمة",
         "created": "تاريخ ووقت إنشاء الخدمة",
         "details": "إظهار تفاصيل الخدمة",
         "last_update": "تاريخ ووقت آخر تحديث للخدمة",

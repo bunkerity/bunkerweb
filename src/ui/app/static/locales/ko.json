@@ -827,7 +827,7 @@
       "certificate_authority": "인증 기관",
       "certificate_priority": "인증서 우선순위",
       "challenge_type": "챌린지 유형",
-      "comment": "???",
+      "comment": "댓글",
       "config_type": "설정 유형",
       "configuration_name": "설정 이름",
       "confirm_password": "비밀번호 확인",
@@ -896,7 +896,7 @@
       "search": "검색...",
       "secret_token": "비밀 토큰",
       "select_service": "서비스 선택",
-      "service_comment": "? ???? ?? ??? ?? ?? ??...",
+      "service_comment": "이 서비스에 대한 선택적 메모 또는 설명...",
       "username_example": "홍길동"
     },
     "validation": {
@@ -1439,7 +1439,7 @@
       "active": "활성",
       "async": "비동기",
       "checksum": "체크섬",
-      "comment": "???",
+      "comment": "댓글",
       "configs": "설정",
       "country": "국가",
       "created": "생성일",
@@ -1894,7 +1894,7 @@
       "select_rows_for_action": "작업을 수행할 행을 하나 이상 선택하세요.",
       "services": {
         "actions": "이 서비스에 사용 가능한 작업",
-        "comment": "???? ?? ?? ?? ??",
+        "comment": "서비스에 대한 메모 또는 설명",
         "created": "서비스 생성 날짜 및 시간",
         "details": "서비스 상세 정보 표시",
         "last_update": "서비스 마지막 업데이트 날짜 및 시간",

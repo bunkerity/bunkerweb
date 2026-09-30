@@ -896,7 +896,7 @@
       "search": "Ara...",
       "secret_token": "Gizli Belirteç",
       "select_service": "Servis Seç",
-      "service_comment": "Bu hizmet i?in iste?e ba?l? not veya a??klama...",
+      "service_comment": "Bu hizmet için isteğe bağlı not veya açıklama...",
       "username_example": "mehmetyilmaz"
     },
     "validation": {
@@ -1894,7 +1894,7 @@
       "select_rows_for_action": "Bir işlem yapmak için lütfen bir veya daha fazla satır seçin.",
       "services": {
         "actions": "Bu Servis için mevcut aksiyonlar",
-        "comment": "Hizmet i?in not veya a??klama",
+        "comment": "Hizmet için not veya açıklama",
         "created": "Servisin oluşturulduğu tarih ve saat",
         "details": "Servis detaylarını göster",
         "last_update": "Servisin en son güncellendiği tarih ve saati",

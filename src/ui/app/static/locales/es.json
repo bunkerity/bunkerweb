@@ -896,7 +896,7 @@
       "search": "Buscar...",
       "secret_token": "Token Secreto",
       "select_service": "Seleccionar Servicio",
-      "service_comment": "Nota o descripci?n opcional para este servicio...",
+      "service_comment": "Nota o descripción opcional para este servicio...",
       "username_example": "juandoe"
     },
     "validation": {
@@ -1895,7 +1895,7 @@
       "select_rows_for_action": "Por favor, selecciona una o más filas para realizar una acción.",
       "services": {
         "actions": "Acciones disponibles para este Servicio",
-        "comment": "Nota o descripci?n del Servicio",
+        "comment": "Nota o descripción del Servicio",
         "created": "Fecha y hora de creación del Servicio",
         "details": "Mostrar detalles del Servicio",
         "last_update": "Fecha y hora de la última actualización del Servicio",

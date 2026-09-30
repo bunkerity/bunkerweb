@@ -896,7 +896,7 @@
       "search": "Suchen...",
       "secret_token": "Geheimer Token",
       "select_service": "Dienst auswählen",
-      "service_comment": "Optionale Notiz oder Beschreibung f?r diesen Dienst...",
+      "service_comment": "Optionale Notiz oder Beschreibung für diesen Dienst...",
       "username_example": "maxmustermann"
     },
     "validation": {
@@ -1895,7 +1895,7 @@
       "select_rows_for_action": "Bitte wählen Sie eine oder mehrere Zeilen aus, um eine Aktion durchzuführen.",
       "services": {
         "actions": "Für diesen Dienst verfügbare Aktionen",
-        "comment": "Notiz oder Beschreibung f?r den Dienst",
+        "comment": "Notiz oder Beschreibung für den Dienst",
         "created": "Datum und Uhrzeit der Diensterstellung",
         "details": "Dienstdetails anzeigen",
         "last_update": "Datum und Uhrzeit der letzten Aktualisierung des Dienstes",

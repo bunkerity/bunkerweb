@@ -827,7 +827,7 @@
       "certificate_authority": "प्रमाणपत्र प्राधिकरण",
       "certificate_priority": "प्रमाणपत्र प्राथमिकता",
       "challenge_type": "चुनौती प्रकार",
-      "comment": "???????",
+      "comment": "टिप्पणी",
       "config_type": "कॉन्फ़िगरेशन प्रकार",
       "configuration_name": "कॉन्फ़िगरेशन नाम",
       "confirm_password": "पासवर्ड की पुष्टि करें",
@@ -896,7 +896,7 @@
       "search": "खोजें...",
       "secret_token": "गुप्त टोकन",
       "select_service": "सेवा चुनें",
-      "service_comment": "?? ???? ?? ??? ???????? ??? ?? ?????...",
+      "service_comment": "इस सेवा के लिए वैकल्पिक नोट या विवरण...",
       "username_example": "जॉनडो"
     },
     "validation": {
@@ -1439,7 +1439,7 @@
       "active": "सक्रिय",
       "async": "असिंक्रोनस",
       "checksum": "चेकसम",
-      "comment": "???????",
+      "comment": "टिप्पणी",
       "configs": "कॉन्फ़िग्स",
       "country": "देश",
       "created": "बनाया गया",
@@ -1894,7 +1894,7 @@
       "select_rows_for_action": "कार्रवाई करने के लिए कृपया एक या अधिक पंक्तियाँ चुनें।",
       "services": {
         "actions": "इस सेवा के लिए उपलब्ध कार्रवाइयाँ",
-        "comment": "???? ?? ??? ??? ?? ?????",
+        "comment": "सेवा के लिए नोट या विवरण",
         "created": "सेवा बनाने की तारीख और समय",
         "details": "सेवा विवरण दिखाएं",
         "last_update": "सेवा को अंतिम बार अपडेट करने की तारीख और समय",
