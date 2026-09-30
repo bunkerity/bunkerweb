@@ -432,8 +432,10 @@ function initializeDataTable(config) {
       columnVisibility = JSON.parse(columnVisibility);
     }
 
+    // Without the second argument every call re-measures the whole table; the
+    // adjust() at the end of this function does it once.
     Object.entries(columnVisibility).forEach(([key, value]) => {
-      dataTable.column(key).visible(value);
+      dataTable.column(key).visible(value, false);
     });
 
     // Save column preferences. The debounce batches a run of column toggles, so
@@ -626,8 +628,6 @@ function initializeDataTable(config) {
       }, 100);
     }
   });
-
-  if (dataTable.responsive) dataTable.responsive.recalc();
 
   dataTable.on("select", function (e, dt, type, indexes) {
     const actionButton = $(".action-button");

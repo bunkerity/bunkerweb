@@ -18,6 +18,7 @@
 - [BUGFIX] `ui`: plugins without a page (e.g. PRO Maintenance) no longer ask to restart the Web UI.
 - [BUGFIX] `ui`: the Global config breadcrumb and the service conversion and cache deletion modals are translated.
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
+- [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
