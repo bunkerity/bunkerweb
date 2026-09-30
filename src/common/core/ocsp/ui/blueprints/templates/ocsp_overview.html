@@ -1,0 +1,362 @@
+{% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    <!-- Content -->
+    <div class="card p-1 mb-4 sticky-card text-nowrap">
+        <div class="card-header d-flex justify-content-between align-items-center mw-100">
+            <div class="pt-1 flex-grow-1 me-2" style="min-width: 0">
+                <h5 class="card-title d-inline don-jose">OCSP Status Overview</h5>
+                <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">SSL/TLS Certificate OCSP Configuration, Validity Times and Refresh Schedule</p>
+            </div>
+            <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center gap-2">
+                <button class="btn btn-sm btn-primary rounded-pill" id="fetch-responses-btn" type="button">
+                    <i class="bx bx-refresh me-1"></i>Fetch New Responses
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Table -->
+    <div class="card shadow-md">
+        <div class="card-body p-0">
+            {% if services %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="services-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service</th>
+                                <th class="text-center">SSL</th>
+                                <th class="text-center">OCSP</th>
+                                <th class="text-center">Must-Staple</th>
+                                <th class="text-center">Multi-Cert</th>
+                                <th class="text-center">Cert Expires</th>
+                                <th class="text-center">OCSP Expires</th>
+                                <th class="text-center">Next Refresh</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr>
+                                    <td class="courier-prime fw-bold">{{ service.service }}</td>
+                                    <td class="text-center">
+                                        {% if service.ssl_enabled %}
+                                            <span class="badge bg-success"><i class="bx bx-check"></i></span>
+                                        {% else %}
+                                            <span class="badge bg-secondary"><i class="bx bx-x"></i></span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if service.ocsp_enabled %}
+                                            <span class="badge bg-success"><i class="bx bx-check"></i></span>
+                                        {% else %}
+                                            <span class="badge bg-warning"><i class="bx bx-x"></i></span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if service.must_staple %}
+                                            <span class="badge bg-info"><i class="bx bx-lock"></i></span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark"><i class="bx bx-lock-open"></i></span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if service.multi_cert %}
+                                            <span class="badge bg-info"><i class="bx bx-files"></i></span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark"><i class="bx bx-file"></i></span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="courier-prime">
+                                            {% if service.cert_remaining %}
+                                                <span class="text-nowrap" title="{{ service.cert_end }}">{{ service.cert_remaining }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="courier-prime">
+                                            {% if service.ocsp_remaining %}
+                                                <span class="text-nowrap" title="{{ service.ocsp_end }}">{{ service.ocsp_remaining }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="courier-prime">
+                                            {% if service.next_refresh %}
+                                                <span class="text-nowrap" title="{{ service.next_refresh }}">{{ service.next_refresh.split()[0] if ' ' in service.next_refresh else service.next_refresh }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary fetch-single" data-service="{{ service.service }}" type="button" title="Fetch new OCSP response">
+                                            <i class="bx bx-download"></i> Fetch
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="viewServiceDetails('{{ service.service }}')" title="View details">
+                                            <i class="bx bx-info-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center p-5">
+                    <p class="text-muted">No services configured</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Status Legend -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-md">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Configuration Guide</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bx bx-check text-success"></i> OCSP Enabled
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                OCSP stapling is active. The server will include OCSP responses with TLS handshakes.
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bx bx-lock text-info"></i> Must-Staple
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                The certificate includes the OCSP Must-Staple extension. An OCSP response is required.
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bx bx-files text-info"></i> Multi-Cert
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                Multiple certificates (e.g., RSA + ECDSA) are deployed for this service.
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-2">Time Columns</h6>
+                            <ul class="small text-muted mb-0">
+                                <li><strong>Cert Expires:</strong> Remaining time until certificate expiration (format: Xd Yh = X days, Y hours)</li>
+                                <li><strong>OCSP Expires:</strong> Remaining time until OCSP response expiration</li>
+                                <li><strong>Next Refresh:</strong> When the OCSP response will be refreshed (20% into validity period)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Details Modal -->
+    <div class="modal fade" id="serviceDetailsModal" tabindex="-1" aria-labelledby="serviceDetailsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceDetailsLabel">Service OCSP Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="serviceDetailsBody">
+                    <p class="text-center text-muted">Loading...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script nonce="{{ script_nonce }}">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize DataTable
+            const table = new DataTable('#services-table', {
+                order: [[0, 'asc']],
+                pageLength: 25,
+                responsive: true,
+            });
+
+            // Fetch responses button
+            document.getElementById('fetch-responses-btn').addEventListener('click', function() {
+                const checkedRows = document.querySelectorAll('#services-table tbody tr');
+                const services = Array.from(checkedRows)
+                    .map(row => row.cells[0].textContent.trim())
+                    .filter(s => s.length > 0);
+
+                if (services.length === 0) {
+                    alert('No services available to refresh');
+                    return;
+                }
+
+                fetchOCSPResponses(services);
+            });
+
+            // Fetch single service
+            document.querySelectorAll('.fetch-single').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const service = this.dataset.service;
+                    fetchOCSPResponses([service]);
+                });
+            });
+
+            window.viewServiceDetails = function(service) {
+                fetch(`/ocsp/service-status?service=${encodeURIComponent(service)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const modal = new bootstrap.Modal(document.getElementById('serviceDetailsModal'));
+                        const body = document.getElementById('serviceDetailsBody');
+
+                        // Helper function to escape HTML special characters
+                        const escapeHtml = str => {
+                            if (!str) return '';
+                            return String(str)
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/"/g, '&quot;')
+                                .replace(/'/g, '&#39;');
+                        };
+
+                        body.innerHTML = `
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <h6>Service: <code>${escapeHtml(data.service)}</code></h6>
+                                </div>
+                                <div class="col-6">
+                                    <strong>SSL Enabled:</strong><br/>
+                                    <span class="badge ${data.ssl_enabled ? 'bg-success' : 'bg-danger'}">
+                                        ${data.ssl_enabled ? 'Yes' : 'No'}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>OCSP Enabled:</strong><br/>
+                                    <span class="badge ${data.ocsp_enabled ? 'bg-success' : 'bg-warning'}">
+                                        ${data.ocsp_enabled ? 'Yes' : 'No'}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Must-Staple:</strong><br/>
+                                    <span class="badge ${data.must_staple ? 'bg-info' : 'bg-light text-dark'}">
+                                        ${data.must_staple ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Multi-Cert:</strong><br/>
+                                    <span class="badge ${data.multi_cert ? 'bg-info' : 'bg-light text-dark'}">
+                                        ${data.multi_cert ? 'Yes' : 'No'}
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <strong>OCSP Staple Mode:</strong><br/>
+                                    <code>${escapeHtml(data.ocsp_staple_mode)}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Certificate Path:</strong><br/>
+                                    <code class="text-break">${escapeHtml(data.ssl_certificate_path || 'Not configured')}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Key Path:</strong><br/>
+                                    <code class="text-break">${escapeHtml(data.ssl_certificate_key_path || 'Not configured')}</code>
+                                </div>
+                                <div class="col-12 border-top pt-3">
+                                    <h6 class="fw-bold mb-3">Certificate Validity</h6>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Certificate Valid Until:</strong><br/>
+                                    <code>${escapeHtml(data.cert_end || 'Unknown')}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Remaining:</strong><br/>
+                                    <code>${escapeHtml(data.cert_remaining || 'Unknown')}</code>
+                                </div>
+                                <div class="col-12 border-top pt-3">
+                                    <h6 class="fw-bold mb-3">OCSP Response Validity</h6>
+                                </div>
+                                <div class="col-12">
+                                    <strong>OCSP Response Start Time:</strong><br/>
+                                    <code>${escapeHtml(data.ocsp_start || 'Unknown')}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>OCSP Response Valid Until:</strong><br/>
+                                    <code>${escapeHtml(data.ocsp_end || 'Unknown')}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>OCSP Remaining:</strong><br/>
+                                    <code>${escapeHtml(data.ocsp_remaining || 'Unknown')}</code>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Next Planned Refresh:</strong><br/>
+                                    <code>${escapeHtml(data.next_refresh || 'Unknown')}</code>
+                                </div>
+                            </div>
+                        `;
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to load service details');
+                    });
+            };
+
+            function fetchOCSPResponses(services) {
+                const button = document.getElementById('fetch-responses-btn');
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Fetching...';
+
+                fetch('/ocsp/fetch-responses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ services: services })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert(`Success! Queued OCSP refresh for ${data.services.length} service(s)`);
+                    } else {
+                        alert(`Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch OCSP responses');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
+            }
+        });
+    </script>
+{% endblock %}

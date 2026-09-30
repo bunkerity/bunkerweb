@@ -1,0 +1,347 @@
+{% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    <!-- Content -->
+    <div class="card p-1 mb-4 sticky-card text-nowrap">
+        <div class="card-header d-flex justify-content-between align-items-center mw-100">
+            <div class="pt-1 flex-grow-1 me-2" style="min-width: 0">
+                <h5 class="card-title d-inline don-jose">OCSP Configuration</h5>
+                <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">Configure OCSP stapling settings globally and per-service</p>
+            </div>
+            <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center gap-2">
+                <a href="{{ url_for('ocsp.ocsp_overview') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    <i class="bx bx-chart"></i> View Status
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="global-tab" data-bs-toggle="tab" data-bs-target="#global-settings" type="button" role="tab" aria-controls="global-settings" aria-selected="true">
+                <i class="bx bx-server"></i> Global Settings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-settings" type="button" role="tab" aria-controls="services-settings" aria-selected="false">
+                <i class="bx bx-globe"></i> Per-Service Configuration
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Global Settings Tab -->
+        <div class="tab-pane fade show active" id="global-settings" role="tabpanel" aria-labelledby="global-tab">
+            <div class="card shadow-md">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">Global OCSP Settings</h6>
+                </div>
+                <div class="card-body">
+                    <form id="global-settings-form">
+                        <div class="row g-4">
+                            <!-- Async Validation -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">Asynchronous OCSP Validation</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="ocsp-async-validation"
+                                               {% if global_settings.OCSP_ASYNC_VALIDATION == 'yes' %}checked{% endif %}>
+                                        <label class="form-check-label" for="ocsp-async-validation">
+                                            Enable background validation job
+                                        </label>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        Validates OCSP responses in background, reducing TLS critical path latency.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Validation Schedule -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">Validation Schedule</label>
+                                    <select class="form-select" id="ocsp-async-schedule">
+                                        <option value="minute" {% if global_settings.OCSP_ASYNC_SCHEDULE == 'minute' %}selected{% endif %}>Every minute (1m)</option>
+                                        <option value="5minute" {% if global_settings.OCSP_ASYNC_SCHEDULE == '5minute' %}selected{% endif %}>Every 5 minutes (5m)</option>
+                                        <option value="hour" {% if global_settings.OCSP_ASYNC_SCHEDULE == 'hour' %}selected{% endif %}>Every hour (1h)</option>
+                                    </select>
+                                    <small class="text-muted d-block mt-2">
+                                        How often the async validation job runs. More frequent = fresher responses but higher load.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Batch Size -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">Validation Batch Size</label>
+                                    <input type="number" class="form-control" id="ocsp-batch-size"
+                                           value="{{ global_settings.OCSP_BATCH_SIZE }}" min="1">
+                                    <small class="text-muted d-block mt-2">
+                                        Number of validations per job cycle. Lower = slower warmup, higher = more responder load.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Rate Limit -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">OCSP Request Rate Limit</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="ocsp-request-rate-limit"
+                                               value="{{ global_settings.OCSP_REQUEST_RATE_LIMIT }}" min="1">
+                                        <span class="input-group-text">/sec</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        Maximum requests per second to OCSP responder. Prevents overwhelming the responder.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Staple Mode -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">Default OCSP Staple Mode</label>
+                                    <select class="form-select" id="ocsp-staple-mode">
+                                        <option value="normal" {% if global_settings.OCSP_STAPLE_MODE == 'normal' %}selected{% endif %}>
+                                            Normal (strict - refuse if must-staple unmet)
+                                        </option>
+                                        <option value="staple_only" {% if global_settings.OCSP_STAPLE_MODE == 'staple_only' %}selected{% endif %}>
+                                            Staple Only (prefer stapled certs)
+                                        </option>
+                                        <option value="open" {% if global_settings.OCSP_STAPLE_MODE == 'open' %}selected{% endif %}>
+                                            Open (recovery mode - allow unstapled)
+                                        </option>
+                                    </select>
+                                    <small class="text-muted d-block mt-2">
+                                        Controls behavior when OCSP responses are unavailable (must-staple enforcement).
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Cache Directory -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">OCSP Cache Directory</label>
+                                    <input type="text" class="form-control courier-prime" id="ocsp-cache-dir"
+                                           value="{{ global_settings.OCSP_CACHE_DIR }}" readonly>
+                                    <small class="text-muted d-block mt-2">
+                                        Read-only: configured at deployment. Where cached OCSP responses are stored.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <button type="submit" class="btn btn-primary">Save Global Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Service Settings Tab -->
+        <div class="tab-pane fade" id="services-settings" role="tabpanel" aria-labelledby="services-tab">
+            <div class="card shadow-md">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">Per-Service OCSP Configuration</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if services %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="services-config-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Service</th>
+                                        <th class="text-center">SSL Enabled</th>
+                                        <th class="text-center">OCSP Stapling</th>
+                                        <th class="text-center">Staple Mode</th>
+                                        <th class="text-center">Must-Staple</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service in services %}
+                                        <tr>
+                                            <td class="courier-prime fw-bold">{{ service.service }}</td>
+                                            <td class="text-center">
+                                                {% if service.ssl_enabled %}
+                                                    <span class="badge bg-success"><i class="bx bx-check"></i></span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary"><i class="bx bx-x"></i></span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                {% if service.ocsp_enabled %}
+                                                    <span class="badge bg-success"><i class="bx bx-check"></i> Enabled</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning"><i class="bx bx-x"></i> Disabled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <small class="courier-prime">normal</small>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if service.must_staple %}
+                                                    <span class="badge bg-info"><i class="bx bx-lock"></i> Enabled</span>
+                                                {% else %}
+                                                    <span class="badge bg-light text-dark"><i class="bx bx-lock-open"></i> Disabled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" type="button" onclick="editServiceConfig('{{ service.service }}')">
+                                                    <i class="bx bx-edit"></i> Configure
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center p-5">
+                            <p class="text-muted">No services configured</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Configuration Modal -->
+    <div class="modal fade" id="serviceConfigModal" tabindex="-1" aria-labelledby="serviceConfigLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceConfigLabel">Configure OCSP for Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="service-config-form">
+                    <div class="modal-body">
+                        <input type="hidden" id="config-service-name">
+
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Service: <code id="config-service-display"></code></label>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="config-ocsp-enabled">
+                            <label class="form-check-label" for="config-ocsp-enabled">
+                                Enable OCSP Stapling
+                            </label>
+                            <small class="d-block text-muted mt-1">
+                                Certificate must advertise an OCSP responder. For Let's Encrypt, use ZeroSSL as the CA.
+                            </small>
+                        </div>
+
+                        <div class="form-group mb-3" id="staple-mode-group" style="display: none;">
+                            <label class="form-label fw-bold">OCSP Staple Mode</label>
+                            <select class="form-select" id="config-staple-mode">
+                                <option value="normal">Normal (strict - refuse if must-staple unmet)</option>
+                                <option value="staple_only">Staple Only (prefer stapled certs)</option>
+                                <option value="open">Open (recovery mode - allow unstapled)</option>
+                            </select>
+                            <small class="d-block text-muted mt-2">
+                                Controls behavior when OCSP responses are unavailable (must-staple enforcement).
+                            </small>
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="config-must-staple">
+                            <label class="form-check-label" for="config-must-staple">
+                                Enforce Must-Staple
+                            </label>
+                            <small class="d-block text-muted mt-1">
+                                Only applicable if your certificate has the must-staple extension.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Configuration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bx bx-info-circle"></i> About OCSP Stapling
+                </h6>
+                <p class="mb-2">
+                    OCSP stapling improves TLS handshake performance by having the server provide an OCSP response directly to clients,
+                    eliminating the need for clients to contact the OCSP responder separately.
+                </p>
+                <ul class="mb-0">
+                    <li><strong>Normal Mode:</strong> Strictly enforces OCSP responses for certificates with must-staple extension</li>
+                    <li><strong>Staple Only Mode:</strong> Prefers stapled certificates but falls back to unstapled if needed</li>
+                    <li><strong>Open Mode:</strong> Recovery mode - disables must-staple enforcement if experiencing issues</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script nonce="{{ script_nonce }}">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize DataTable for services
+            new DataTable('#services-config-table', {
+                order: [[0, 'asc']],
+                pageLength: 25,
+                responsive: true,
+            });
+
+            // Toggle staple mode group visibility
+            const ocspEnabledCheckbox = document.getElementById('config-ocsp-enabled');
+            const staleModeGroup = document.getElementById('staple-mode-group');
+
+            ocspEnabledCheckbox.addEventListener('change', function() {
+                staleModeGroup.style.display = this.checked ? 'block' : 'none';
+            });
+
+            // Handle global settings form submission
+            document.getElementById('global-settings-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Global settings update feature will be implemented. Currently, edit these in Global Settings page.');
+            });
+
+            // Handle service configuration form submission
+            document.getElementById('service-config-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Service configuration update feature will be implemented. Currently, edit per-service settings in Services page.');
+            });
+
+            // Edit service configuration
+            window.editServiceConfig = function(service) {
+                const modal = new bootstrap.Modal(document.getElementById('serviceConfigModal'));
+                document.getElementById('config-service-name').value = service;
+                document.getElementById('config-service-display').textContent = service;
+
+                // Reset form
+                document.getElementById('config-ocsp-enabled').checked = false;
+                document.getElementById('config-staple-mode').value = 'normal';
+                document.getElementById('config-must-staple').checked = false;
+                document.getElementById('staple-mode-group').style.display = 'none';
+
+                modal.show();
+            };
+        });
+    </script>
+{% endblock %}
