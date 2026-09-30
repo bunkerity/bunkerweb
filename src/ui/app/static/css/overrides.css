@@ -3875,3 +3875,20 @@ code.bad-behavior-event__value {
   left: 4px;
   color: var(--bs-secondary-color);
 }
+
+/* DataTables toolbars: the start group (actions) and the end group (search,
+   filters) wrap as whole units. When both do not fit, the end group drops to
+   its own row aligned with the first one, instead of floating right under an
+   action group that split itself. Independent of label length. */
+.dt-container > .row {
+  row-gap: 0.5rem;
+}
+
+.dt-container > .row > .dt-layout-start + .dt-layout-end {
+  margin-left: 0 !important;
+}
+
+.dt-container > .row > .dt-layout-start .dt-buttons,
+.dt-container > .row > .dt-layout-end .dt-buttons {
+  row-gap: 0.5rem;
+}
