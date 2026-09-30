@@ -36,6 +36,7 @@ from common_utils import get_version, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
+from app.models.session_cookie import use_per_request_cookie
 
 from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
@@ -163,38 +164,6 @@ _config_tasks_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="b
 _db_check_lock = Lock()
 _db_check_future = None
 _db_check_next_allowed = 0.0
-
-_cookie_config_lock = Lock()
-_cookie_config_detected = False
-
-
-def detect_session_cookie_config(wsgi_app):
-    """Pick the session cookie flavour from the first request a worker serves, as a WSGI layer.
-
-    Flask opens the session, under the cookie name in the config, before any before_request
-    runs, and CSRFProtect's check is one of those. Detecting from a before_request left that
-    first request reading the default __Host- name while the browser sent bw_ui_session, so a
-    form posted to a freshly started worker failed with "The CSRF session token is missing".
-    The proxy status never changes during a process's lifetime, so detecting once is correct.
-    """
-
-    def wrapper(environ, start_response):
-        global _cookie_config_detected
-        if not _cookie_config_detected:
-            with _cookie_config_lock:
-                if not _cookie_config_detected:
-                    if environ.get("HTTP_X_FORWARDED_FOR") is not None:
-                        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-                        app.config["SESSION_COOKIE_SECURE"] = True
-                    else:
-                        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-                        app.config["SESSION_COOKIE_SECURE"] = False
-                        app.config["SESSION_COOKIE_DOMAIN"] = None
-                    _cookie_config_detected = True
-        return wsgi_app(environ, start_response)
-
-    return wrapper
-
 
 _SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
 _session_cleanup_last_run = 0.0
@@ -628,7 +597,6 @@ app.logger = LOGGER
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
-    app.wsgi_app = detect_session_cookie_config(app.wsgi_app)
 
     if not LIB_DIR.joinpath(".flask_secret").is_file():
         LOGGER.error("The .flask_secret file is missing, exiting ...")
@@ -651,7 +619,7 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    # Secure by default — auto-detection in before_request may downgrade if no proxy detected
+    # Strict defaults; the session interface below picks the real name and Secure flag per request
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
 
@@ -788,6 +756,9 @@ with app.app_context():
         return session_storage_due(flask_session, _session_lifetime_seconds)
 
     app.session_interface.should_set_storage = _throttled_should_set_storage
+
+    # Reached through BunkerWeb and directly over HTTP, the same worker needs both cookie flavours
+    use_per_request_cookie(app.session_interface)
 
     biscuit = BiscuitMiddleware(app)
 

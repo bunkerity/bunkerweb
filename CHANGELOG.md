@@ -7,15 +7,15 @@
 - [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics: Redis keys now carry the instance hostname next to the worker id, so give each instance a distinct hostname. Keys written by older versions are kept as history, still counted in the Web UI and renewed with `METRICS_REDIS_TTL` while the instance runs.
 - [FEATURE] `realip`, `blacklist`, `whitelist`, `greylist`: IP list URLs also read JSON documents, JSON lines, CSV and tab-separated lists, such as the AWS, Google, Cloudflare API, Fastly or Spamhaus feeds, and a `#key=value` fragment keeps only part of a JSON list, e.g. `ip-ranges.json#service=CLOUDFRONT`.
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which turned an ignored user agent into its first word and exempted most browsers.
-- [BUGFIX] The loading page answers 503 with `Retry-After` instead of 200, so API clients stop taking it for a successful response. (Fixes #3988)
-- [BUGFIX] `ui`: a form posted to a freshly started or recycled Web UI worker, such as the login form, no longer fails with "The CSRF session token is missing" and a `session_expired` redirect.
-- [BUGFIX] `ui`: raw translation keys no longer flash on page load, page scripts wait for the translations before building tables and toolbars. (Fixes #3963)
-- [BUGFIX] `ui`: when a table toolbar wraps, as with longer translations, its search and filter controls move to their own left-aligned row instead of floating under a split row of actions. (Fixes #3969)
-- [BUGFIX] `ui`: creating or deleting a service no longer rewrites the other services' settings, which restored a setting edited back to its template value and bumped every service's last update. Editing a setting back to its default now updates the service's last update. (Fixes #3986)
-- [BUGFIX] PRO plugin pages are no longer deleted from the database when a force update finds them unchanged, which left their Web UI pages missing until the next scheduler restart.
-- [BUGFIX] `db`: large plugin archives, plugin pages and job cache files are stored in chunks sized from the server's `max_allowed_packet`, so PRO plugin updates no longer fail with "MySQL server has gone away" on MariaDB or MySQL and no longer need a raised limit. Adds the `bw_blob_chunks` table. (Fixes #3965)
-- [BUGFIX] `ui`, `api`: saving or renaming a service no longer deletes another service that shares one of its server names, and a server name already used by another service is refused with an error naming that service.
-- [BUGFIX] `ui`: the page of a loaded plugin that has no page of its own, such as PRO Maintenance, says so instead of asking to restart the Web UI.
+- [BUGFIX] The loading page answers 503 with `Retry-After` instead of 200. (Fixes #3988)
+- [BUGFIX] `ui`: logins no longer fail with "The CSRF session token is missing" on a fresh worker or when the Web UI is reached both through BunkerWeb and directly.
+- [BUGFIX] `ui`: raw translation keys no longer flash on page load. (Fixes #3963)
+- [BUGFIX] `ui`: wrapped table toolbars keep their controls aligned. (Fixes #3969)
+- [BUGFIX] `ui`: creating or deleting a service no longer rewrites the other services' settings. (Fixes #3986)
+- [BUGFIX] A PRO force update no longer deletes unchanged PRO plugin pages.
+- [BUGFIX] `db`: large blobs are stored in chunks, so PRO plugin updates no longer need a raised `max_allowed_packet` on MariaDB/MySQL. (Fixes #3965)
+- [BUGFIX] `ui`, `api`: editing a service no longer deletes another one sharing a server name; shared server names are refused.
+- [BUGFIX] `ui`: plugins without a page (e.g. PRO Maintenance) no longer ask to restart the Web UI.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
