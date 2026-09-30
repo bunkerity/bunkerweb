@@ -46,15 +46,30 @@ for deps_path in [
 try:
     from jobs import (  # type: ignore
         Job,
+        disk_ocsp_strictly_newer_than,
         encode_ocsp_floor_payload,
+        fingerprints_tombstoned_in_ocsp_cache_entries,
+        load_disk_ocsp_floor,
+        load_disk_ocsp_meta,
         normalize_restored_ocsp_json_bytes,
         ocsp_floor_published_unix,
-        ocsp_restore_skip_fingerprints,
+        ocsp_heal_coherence_eligible,
+        ocsp_incoming_floors_from_cache,
+        ocsp_meta_same_colony_generation,
+        ocsp_meta_allows_missing_der_completion,
+        ocsp_prefer_incoming_meets_colony_floor,
+        ocsp_floor_cap_for_live_shard,
+        ocsp_restore_plan,
+        ocsp_serial_blacklist_blocks_restore,
+        note_ocsp_der_restore_refused,
+        strip_ocsp_der_if_meta_sha_conflicts,
         parse_ocsp_floor_bytes,
         parse_ocsp_floor_cache_name,
-        load_disk_ocsp_floor,
+        parse_ocsp_meta_bytes,
         publish_ocsp_restore_coherence,
         should_keep_disk_ocsp_floor,
+        should_keep_disk_ocsp_shard,
+        plan_ocsp_floor_restore_write,
     )
 except ImportError as e:
     print(f"FATAL: Could not import Job: {e}", file=_sys.stderr)
@@ -203,6 +218,11 @@ _OPENSSL_IDENTITY: Optional[Dict[str, Any]] = None
 # that share the issuer reuse the shared shard; they do not re-hit the OCSP responder
 # even under force_fetch. Negatives stay on the per-tenant control key.
 _SEALED_INTER_BODY_SPKI: set = set()
+# Fingerprints that must not be restamped this run (e.g. demote after ligand/allow
+# failure left paged=true when meta write failed — restamp must not re-open MS).
+# Also mirrored on disk as ``.ocsp_do_not_restamp`` so the next job run refuses.
+_OCSP_DO_NOT_RESTAMP: set = set()
+_OCSP_DO_NOT_RESTAMP_MARKER = ".ocsp_do_not_restamp"
 
 _FINGERPRINT_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _OCSP_RESPONDER_DNS_CACHE_MAX = 256
@@ -328,6 +348,11 @@ def _invalidate_ocsp_responder_dns(hostname: str) -> None:
         log_debug("🔄 OCSP invalidated DNS cache for responder %s", hostname)
 
 
+# Cap OCSP POST bodies. A short read is not a response: parse only when the
+# socket had no further byte, and refuse anything larger than this.
+_OCSP_HTTP_BODY_MAX = 1_048_576
+
+
 def _post_ocsp_over_ip_with_sni(
     ocsp_url: str,
     ocsp_request_data: bytes,
@@ -389,7 +414,14 @@ def _post_ocsp_over_ip_with_sni(
         resp = conn.getresponse()
         status_code = resp.status
         reason = getattr(resp, "reason", "") or ""
-        body = resp.read(102400)
+        body = resp.read(_OCSP_HTTP_BODY_MAX + 1)
+        if len(body) > _OCSP_HTTP_BODY_MAX:
+            log_warning(
+                "⚠️ OCSP response from %s exceeds %d bytes; refusing",
+                ocsp_hostname,
+                _OCSP_HTTP_BODY_MAX,
+            )
+            return None, status_code, reason
         try:
             resp.close()
         except Exception:
@@ -487,6 +519,22 @@ def _get_sharded_ocsp_path(fingerprint: str) -> Path:
 	hex1 = normalized[0]
 	hex2 = normalized[1]
 	return CONFIGS_SSL_BASE / hex1 / hex2 / normalized
+
+
+def _cache_blob_bytes(data: Any) -> Optional[bytes]:
+    """Job-cache payloads are bytes, bytearray, or memoryview depending on the driver.
+
+    ``load_der_ocsp_response`` rejects memoryview/bytearray. ``Path.write_bytes``
+    accepts memoryview, so a failed parse must not be treated as "keep going
+    and write the blob" — callers coerce here first.
+    """
+    if isinstance(data, memoryview):
+        data = data.tobytes()
+    elif isinstance(data, bytearray):
+        data = bytes(data)
+    if isinstance(data, bytes) and data:
+        return data
+    return None
 
 
 def _resolved_sharded_ocsp_path(fingerprint: str) -> Path:
@@ -649,6 +697,56 @@ def _delete_cert_name_marker(db: Any, cert_name: str) -> None:
         db.delete_job_cache(file_name=key, job_name="ocsp-refresh")
     except Exception:
         pass
+
+
+def _marker_fingerprint_from_payload(data: Any) -> Optional[str]:
+    """Normalize an ``ocsp-marker`` payload (bytes, memoryview, or str)."""
+    if isinstance(data, memoryview):
+        data = data.tobytes()
+    if isinstance(data, (bytes, bytearray)):
+        text = data.decode("utf-8", errors="ignore")
+    elif isinstance(data, str):
+        text = data
+    else:
+        return None
+    return _normalize_fingerprint(text.strip())
+
+
+def _other_markers_share_fingerprint(
+    db: Any, fingerprint: str, except_cert_name: str
+) -> Optional[bool]:
+    """
+    True when another ``ocsp-marker/*`` row points at ``fingerprint``.
+
+    None when the scan cannot prove exclusivity (no DB, list failure, or a
+    marker payload that could not be read) — callers must keep the shared
+    SPKI shard. Skipping unreadable rows would look like "no other marker"
+    and rmtree a sibling staple (PostgreSQL BYTEA often arrives as memoryview).
+    """
+    fp = _normalize_fingerprint(fingerprint)
+    if db is None or not fp:
+        return None
+    except_key = _ocsp_marker_relpath(except_cert_name)
+    try:
+        rows = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+    except Exception:
+        return None
+    saw_unreadable = False
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("file_name") or ""
+        if not name.startswith(OCSP_MARKER_PREFIX) or name == except_key:
+            continue
+        other = _marker_fingerprint_from_payload(row.get("data"))
+        if other is None:
+            saw_unreadable = True
+            continue
+        if other == fp:
+            return True
+    if saw_unreadable:
+        return None
+    return False
 
 
 def _get_cert_pubkey_fingerprint(cert_data: bytes) -> Optional[str]:
@@ -963,47 +1061,99 @@ def _acquire_shared_lease(
 
 
 def _release_shared_lease(lease_path: Optional[Path], lease_token: Optional[str]) -> None:
+    """
+    Unlink only if we still own the lease inode (token match).
+
+    Prefer Linux ``/proc/self/fd/{fd}`` unlink (inode-stable). Fallback: rename
+    to a unique dead name then verify token before unlink.
+    """
     if lease_path is None or lease_token is None:
         return
+    fd = None
     try:
-        if not lease_path.is_file() or lease_path.is_symlink():
-            return
-        # Only unlink if we still own the lease (another node may have reclaimed).
-        raw = lease_path.read_text(encoding="utf-8", errors="ignore")
+        fd = os.open(str(lease_path), os.O_RDONLY)
+        raw = os.read(fd, 4096).decode("utf-8", errors="ignore")
         if raw != lease_token:
             log_debug("⚠️ OCSP shared lease %s no longer owned; skip unlink", lease_path)
             return
-        lease_path.unlink()
+        proc_fd = Path(f"/proc/self/fd/{fd}")
+        if proc_fd.exists():
+            try:
+                proc_fd.unlink()
+                return
+            except FileNotFoundError:
+                return
+            except Exception as e:
+                log_debug("⚠️ OCSP /proc lease unlink failed for %s: %s", lease_path, e)
+        dead = lease_path.parent / f".{lease_path.name}.dead.{os.getpid()}.{time.time_ns()}"
+        try:
+            lease_path.rename(dead)
+        except FileNotFoundError:
+            return
+        except Exception as e:
+            log_debug("⚠️ OCSP shared lease rename-release failed for %s: %s", lease_path, e)
+            return
+        try:
+            dead_raw = dead.read_text(encoding="utf-8", errors="ignore")
+            if dead_raw != lease_token:
+                # Renamed a replaced lease — fail closed: leave ``dead`` for
+                # stale reclaim. Never path-rename-back (TOCTOU vs third O_EXCL).
+                log_debug(
+                    "⚠️ OCSP shared lease %s replaced during release; left dead=%s",
+                    lease_path,
+                    dead.name,
+                )
+                return
+            dead.unlink()
+        except Exception as e:
+            log_debug("⚠️ OCSP shared lease release failed for %s: %s", lease_path, e)
     except FileNotFoundError:
         return
     except Exception as e:
         log_debug("⚠️ OCSP shared lease release failed for %s: %s", lease_path, e)
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except Exception:
+                pass
 
 
 def _refresh_shared_lease(lease_path: Optional[Path], lease_token: Optional[str]) -> Optional[str]:
     """Rewrite lease content to refresh mtime; returns updated token or None."""
     if lease_path is None or lease_token is None:
         return lease_token
+    fd = None
     try:
-        if not lease_path.is_file():
-            return lease_token
-        raw = lease_path.read_text(encoding="utf-8", errors="ignore")
+        fd = os.open(str(lease_path), os.O_RDWR)
+        st = os.fstat(fd)
+        raw = os.read(fd, 4096).decode("utf-8", errors="ignore")
         if raw != lease_token:
+            return lease_token
+        try:
+            st2 = lease_path.stat()
+        except FileNotFoundError:
+            return lease_token
+        if st2.st_ino != st.st_ino or st2.st_dev != st.st_dev:
             return lease_token
         parts = lease_token.split("\n")
         host = parts[0] if parts else ""
         pid = parts[1] if len(parts) > 1 else str(os.getpid())
         new_token = f"{host}\n{pid}\n{time.time_ns()}\n"
-        fd = os.open(str(lease_path), os.O_WRONLY | os.O_TRUNC, 0o600)
-        try:
-            os.write(fd, new_token.encode())
-            os.fsync(fd)
-        finally:
-            os.close(fd)
+        os.lseek(fd, 0, os.SEEK_SET)
+        os.ftruncate(fd, 0)
+        os.write(fd, new_token.encode())
+        os.fsync(fd)
         return new_token
     except Exception as e:
         log_debug("⚠️ OCSP shared lease refresh failed for %s: %s", lease_path, e)
         return lease_token
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except Exception:
+                pass
 
 
 def _acquire_local_flock(
@@ -1548,7 +1698,18 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
                                 )
                             continue
 
-                        issuer_der = resp.read(1_048_576)  # Cap at 1MB
+                        issuer_der = resp.read(_OCSP_HTTP_BODY_MAX + 1)
+                        if len(issuer_der) > _OCSP_HTTP_BODY_MAX:
+                            log_warning(
+                                "⚠️ OCSP AIA issuer from %s exceeds %d bytes; refusing",
+                                issuer_hostname,
+                                _OCSP_HTTP_BODY_MAX,
+                            )
+                            try:
+                                resp.close()
+                            except Exception:
+                                pass
+                            continue
                         try:
                             resp.close()
                         except Exception as close_e:
@@ -1562,11 +1723,30 @@ def _fetch_issuer_from_aia(leaf: x509.Certificate, cert_name: str = "") -> Optio
                         if not issuer_der:
                             continue
 
-                        # Try DER first (most common for caIssuers), then PEM
+                        # Try DER first (most common for caIssuers), then PEM.
+                        # Require subject == leaf.issuer (same DN gate as chain pick).
                         try:
-                            return x509.load_der_x509_certificate(issuer_der)
+                            candidate = x509.load_der_x509_certificate(issuer_der)
                         except Exception:
-                            return x509.load_pem_x509_certificate(issuer_der)
+                            try:
+                                candidate = x509.load_pem_x509_certificate(issuer_der)
+                            except Exception:
+                                continue
+                        if leaf.issuer != candidate.subject:
+                            log_warning(
+                                "⚠️ OCSP AIA caIssuers blob subject does not match leaf.issuer for %s from %s; skipping",
+                                cert_name,
+                                issuer_url,
+                            )
+                            continue
+                        if not _leaf_issued_by(leaf, candidate):
+                            log_warning(
+                                "⚠️ OCSP AIA caIssuers blob does not sign leaf for %s from %s; skipping",
+                                cert_name,
+                                issuer_url,
+                            )
+                            continue
+                        return candidate
                     except Exception as e:
                         log_warning(
                             "⚠️ OCSP failed to fetch issuer from AIA for %s from %s (%s -> %s): %s",
@@ -1647,29 +1827,64 @@ def _extract_cert_metadata(pem_data: bytes, cert_name: str = "") -> Dict[str, An
     return meta
 
 
+def _leaf_issued_by(leaf: x509.Certificate, issuer: x509.Certificate) -> bool:
+    """True when ``issuer``'s key signs ``leaf`` (not subject-DN alone)."""
+    if leaf.issuer != issuer.subject:
+        return False
+    try:
+        leaf.verify_directly_issued_by(issuer)
+        return True
+    except Exception:
+        return False
+
+
 def _parse_chain(pem_data: bytes, cert_name: str = "") -> Tuple[x509.Certificate, x509.Certificate]:
     """
     Parse fullchain PEM data and return (leaf_cert, issuer_cert).
-    The leaf is the first certificate; the issuer is identified by matching
-    the leaf's issuer DN against the subject DNs of the remaining certificates.
-    Falls back to the second certificate if no DN match is found.
+
+    The leaf is the first certificate. The issuer is chosen by matching
+    ``leaf.issuer`` to candidate subject DNs among the remaining PEMs, then
+    proving that key signed the leaf.
+
+    Several bag PEMs can share one subject DN (cross-signs). Require a unique
+    SPKI (same rule as Lua ``pick_issuer_candidate`` / ``_handshake_intermediate_path``).
+    Distinct SPKIs or unreadable SPKI fail closed — never bag-order or
+    ``certs[1]`` fallback (that would fetch/page against the wrong issuer).
     """
     certs = x509.load_pem_x509_certificates(pem_data)
     leaf = certs[0]
 
     if len(certs) >= 2:
-        # Find the issuer by matching leaf.issuer to candidate.subject
-        for idx, candidate in enumerate(certs[1:], start=1):
-            if leaf.issuer == candidate.subject:
-                log_debug("✓ OCSP selected issuer certificate index %d for %s", idx, cert_name)
-                return leaf, candidate
-
-        # Fallback: use the second certificate
-        log_warning(
-            "⚠️ OCSP could not verify issuer chain for %s by DN match, falling back to second certificate",
-            cert_name,
-        )
-        return leaf, certs[1]
+        matches = [c for c in certs[1:] if leaf.issuer == c.subject and _leaf_issued_by(leaf, c)]
+        if not matches:
+            log_error(
+                "❌ OCSP could not find a signing issuer for %s among %d chain PEM(s)",
+                cert_name,
+                len(certs) - 1,
+            )
+            raise RuntimeError(f"fullchain for {cert_name} has no signing issuer")
+        fps: List[str] = []
+        for candidate in matches:
+            fp = _cert_spki_hex(candidate)
+            if not fp:
+                log_error(
+                    "❌ OCSP issuer DN matched %d PEM(s) with unreadable SPKI for %s; "
+                    "refusing bag-order pick",
+                    len(matches),
+                    cert_name,
+                )
+                raise RuntimeError(f"fullchain for {cert_name} has unreadable issuer SPKI")
+            fps.append(fp)
+        if len(set(fps)) > 1:
+            log_error(
+                "❌ OCSP issuer DN matched %d PEMs with different SPKIs for %s; "
+                "refusing bag-order pick",
+                len(matches),
+                cert_name,
+            )
+            raise RuntimeError(f"fullchain for {cert_name} has ambiguous issuer SPKI")
+        log_debug("✓ OCSP selected unique-SPKI issuer for %s (candidates=%d)", cert_name, len(matches))
+        return leaf, matches[0]
 
     # Single cert (no chain): try to fetch issuer from AIA caIssuers URL
     log_debug("🔄 OCSP single cert for %s, attempting to fetch issuer from AIA caIssuers", cert_name)
@@ -1716,6 +1931,10 @@ def _handshake_intermediate_path(
 
     Matches what TLS presents after the leaf: follow subject==issuer DN links from
     certs[0], skipping sibling leaves and other PEM extras that are not on that path.
+
+    Several bag PEMs can share one subject DN (cross-signs). Do not take bag order —
+    require a unique SPKI (same rule as Lua ``pick_issuer_candidate``). Distinct SPKIs
+    under one DN stop the walk (fail closed) rather than prefetching the wrong path.
     """
     if not certs:
         return []
@@ -1731,13 +1950,41 @@ def _handshake_intermediate_path(
     for _ in range(max_depth):
         if current.subject == current.issuer:
             break
+        cands = by_subject.get(current.issuer, [])
+        non_roots = [c for c in cands if c.subject != c.issuer]
         issuer: Optional[x509.Certificate] = None
-        for candidate in by_subject.get(current.issuer, []):
-            if candidate.subject == candidate.issuer:
-                # Trust anchor — path complete; do not staple the root.
+        if non_roots:
+            fps = []
+            for candidate in non_roots:
+                fp = _cert_spki_hex(candidate)
+                if not fp:
+                    # Unreadable SPKI among DN matches → cannot prove uniqueness.
+                    log_error(
+                        "❌ OCSP intermediate path: issuer DN matched %d PEM(s) with "
+                        "unreadable SPKI for %s; refusing bag-order pick",
+                        len(non_roots),
+                        cert_name,
+                    )
+                    return path
+                fps.append(fp)
+            if len(set(fps)) > 1:
+                log_error(
+                    "❌ OCSP intermediate path: issuer DN matched %d PEMs with different "
+                    "SPKIs for %s; refusing bag-order pick (prefetch would diverge from handshake)",
+                    len(non_roots),
+                    cert_name,
+                )
                 return path
-            issuer = candidate
-            break
+            if not _leaf_issued_by(current, non_roots[0]):
+                log_error(
+                    "❌ OCSP intermediate path: DN match does not sign %s; refusing",
+                    cert_name,
+                )
+                return path
+            issuer = non_roots[0]
+        elif cands:
+            # Only trust-anchor PEMs under this DN — path complete.
+            return path
         if issuer is None:
             # PEM omitted the next issuer; AIA caIssuers may still complete the path.
             try:
@@ -1836,9 +2083,35 @@ def _intermediate_ocsp_targets(cert_name: str, pem_data: bytes) -> List[Tuple[st
         if path_idx >= 0 and path_idx + 1 < len(path):
             issuer_pem = path[path_idx + 1].public_bytes(Encoding.PEM)
         if not issuer_pem:
-            for candidate in by_subject.get(cert.issuer, []):
-                issuer_pem = candidate.public_bytes(Encoding.PEM)
-                break
+            # Same uniqueness rule as the path walk — never bag-order on cross-signs.
+            issuer_cands = [c for c in by_subject.get(cert.issuer, []) if c.subject != c.issuer]
+            if issuer_cands:
+                issuer_fps: List[str] = []
+                ambiguous = False
+                for candidate in issuer_cands:
+                    cfp = _cert_spki_hex(candidate)
+                    if not cfp:
+                        ambiguous = True
+                        break
+                    issuer_fps.append(cfp)
+                if ambiguous or len(set(issuer_fps)) > 1:
+                    log_debug(
+                        "ℹ️ OCSP skipping handshake intermediate index %d for %s: "
+                        "ambiguous issuer DN (%d candidates)",
+                        i,
+                        cert_name,
+                        len(issuer_cands),
+                    )
+                    continue
+                if not _leaf_issued_by(cert, issuer_cands[0]):
+                    log_debug(
+                        "ℹ️ OCSP skipping handshake intermediate index %d for %s: "
+                        "issuer DN does not sign cert",
+                        i,
+                        cert_name,
+                    )
+                    continue
+                issuer_pem = issuer_cands[0].public_bytes(Encoding.PEM)
         if not issuer_pem:
             try:
                 fetched = _fetch_issuer_from_aia(cert, f"{cert_name}__ocsp_inter{i}")
@@ -1903,9 +2176,10 @@ def _colony_multi_staple_min() -> Optional[bool]:
 
     Reads ``.multi_staple_attach.d/*`` (same markers Lua publishes). Any live
     ``"0"`` (e.g. OpenSSL 3.5) forces the fleet leaf-only so intermediate AIA
-    prefetch is skipped. Returns False / True / None (no live markers — fall
-    back to aggregate file / dlsym). Stale votes expire after
-    ``_MULTI_STAPLE_WORKER_TTL``.
+    prefetch is skipped. A live vote whose first byte is neither ``0`` nor ``1``
+    (torn/garbage) is also leaf-only — even when other live votes are ``1``.
+    Returns False / True / None (no live markers — fall back to aggregate file /
+    dlsym). Stale votes expire after ``_MULTI_STAPLE_WORKER_TTL``.
     """
     try:
         if not _MULTI_STAPLE_ATTACH_DIR.is_dir():
@@ -1915,6 +2189,7 @@ def _colony_multi_staple_min() -> Optional[bool]:
     now = time.time()
     found_zero = False
     found_one = False
+    found_invalid = False
     live = False
     try:
         for entry in _MULTI_STAPLE_ATTACH_DIR.iterdir():
@@ -1939,16 +2214,18 @@ def _colony_multi_staple_min() -> Optional[bool]:
                 found_zero = True
             elif raw.startswith("1"):
                 found_one = True
+            else:
+                found_invalid = True
     except OSError:
         return None
     if not live:
         return None
-    if found_zero:
+    # Any live "0" or unreadable/torn vote → leaf-only (colony MIN).
+    if found_zero or found_invalid:
         return False
     if found_one:
         return True
-    return None
-
+    return False
 
 def _worker_can_attach_multi_staple() -> bool:
     """
@@ -1994,24 +2271,609 @@ def _intermediate_control_fp(leaf_fp: Optional[str], inter_fp: Optional[str]) ->
     return hashlib.sha256(f"{leaf}:{inter}".encode("ascii")).hexdigest()
 
 
-def _clear_tenant_control_negatives(control_fp: Optional[str]) -> None:
-    """Drop tenant-scoped intermediate negatives after a successful GOOD page for that lease."""
-    normalized = _normalize_fingerprint(control_fp) if control_fp else None
+def _serial_ban_superseded_by_good(ban_unix: Optional[int], this_unix: Optional[int]) -> bool:
+    """
+    Same-serial GOOD clears the ban when its thisUpdate is strictly newer.
+    Bans without this_update_unix are invalid and treated as superseded.
+    """
+    if this_unix is None:
+        return False
+    if ban_unix is None:
+        return True
+    return this_unix > ban_unix
+
+
+def _control_clear_should_skip(
+    *,
+    tombstoned: bool,
+    tomb_unix: Optional[int],
+    good_unix: Optional[int],
+    fence_uncertain: bool,
+) -> bool:
+    """
+    Pure fence: True when tenant-control clear must abort.
+
+    ``fence_uncertain`` covers I/O / unreadable meta — fail closed unless a dated
+    GOOD strictly supersedes a known tombstone/ban thisUpdate.
+    """
+    if fence_uncertain:
+        if good_unix is None or tomb_unix is None:
+            return True
+        return not _serial_ban_superseded_by_good(tomb_unix, good_unix)
+    if not tombstoned:
+        return False
+    if good_unix is None:
+        return True
+    if tomb_unix is not None and not _serial_ban_superseded_by_good(tomb_unix, good_unix):
+        return True
+    # tomb_unix missing + dated GOOD: legacy tombstone without timing — allow.
+    return False
+
+
+def _control_tombstone_this_update(normalized: str, meta: Optional[Dict[str, Any]]) -> Optional[int]:
+    """Best-effort thisUpdate for a control-key tombstone (meta, else serial ban)."""
+    if isinstance(meta, dict):
+        try:
+            raw = meta.get("this_update_unix")
+            if raw is not None:
+                val = int(raw)
+                if val > 0:
+                    return val
+        except (TypeError, ValueError):
+            pass
+    ban = _read_serial_blacklist(normalized)
+    if not isinstance(ban, dict) or ban.get("unreadable"):
+        return None
+    try:
+        raw = ban.get("this_update_unix")
+        if raw is None:
+            return None
+        val = int(raw)
+        return val if val > 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _body_shard_this_update_unix(fingerprint: Optional[str]) -> Optional[int]:
+    """
+    CA-signed thisUpdate from the live canary DER for this body SPKI.
+
+    Meta ``this_update_unix`` alone must never authorize tenant clear or older-body
+    skip — an inflated value would wipe a newer tombstone/ban or block a fresher
+    candidate. Requires canary-paged meta, non-empty DER, ``der_sha256`` match,
+    and a GOOD SingleResponse. When a CertID pin is present it must match (hex
+    first, then digits-only decimal via int() like restamp — including zero-padded
+    ``\"010\"``); a pin miss refuses (no foreign GOOD fallback). Without a pin,
+    exactly one GOOD.
+    """
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
     if not normalized:
-        return
-    _clear_nongood_marker(normalized)
-    _clear_ocsp_peer_refuse(normalized)
-    _clear_serial_blacklist(normalized)
+        return None
     try:
         shard = _get_sharded_ocsp_path(normalized)
-        # Control shards are negative-only (no ocsp.der). Remove tombstone meta so the
-        # tenant can staple the shared SPKI body again.
+        der_path = shard / "ocsp.der"
+        meta_path = shard / "ocsp.json"
+        if not der_path.is_file() or der_path.stat().st_size <= 0 or not meta_path.is_file():
+            return None
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict):
+            return None
+        if meta.get("paged") is not True:
+            return None
+        if meta.get("tombstoned") is True:
+            return None
+        if meta.get("unpaged_after_nongood") is True:
+            return None
+        sha = meta.get("der_sha256")
+        if not isinstance(sha, str) or len(sha) != 64:
+            return None
+        der = der_path.read_bytes()
+        if hashlib.sha256(der).hexdigest().lower() != sha.lower():
+            return None
+        resp = x509_ocsp.load_der_ocsp_response(der)
+        try:
+            if resp.response_status != x509_ocsp.OCSPResponseStatus.SUCCESSFUL:
+                return None
+        except Exception:
+            return None
+        matched_single = None
+        # Prefer SingleResponse matching the pinned CertID serial when present
+        # (same rules as restamp via ``_certid_pin_matches_serial``). A pin miss
+        # refuses — do not auth from a foreign GOOD in the same body.
+        raw_pin = None
+        certid = meta.get("certid")
+        if isinstance(certid, dict):
+            raw_pin = certid.get("serial")
+        if raw_pin is None:
+            raw_pin = meta.get("serial")
+        pin_text = str(raw_pin).strip() if raw_pin is not None else ""
+        pin_present = bool(pin_text)
+        if pin_present:
+            try:
+                for single in resp.responses:
+                    try:
+                        if _certid_pin_matches_serial(pin_text, int(single.serial_number)):
+                            matched_single = single
+                            break
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+            if matched_single is None:
+                return None
+        if matched_single is None:
+            # No CertID pin: unambiguous timing from exactly one GOOD SingleResponse.
+            goods = []
+            try:
+                for single in resp.responses:
+                    try:
+                        if single.certificate_status == x509_ocsp.OCSPCertStatus.GOOD:
+                            goods.append(single)
+                    except Exception:
+                        continue
+            except Exception:
+                goods = []
+            if len(goods) == 1:
+                matched_single = goods[0]
+            else:
+                # Single-response API (raises on multi) — still require GOOD.
+                try:
+                    if resp.certificate_status != x509_ocsp.OCSPCertStatus.GOOD:
+                        return None
+                except Exception:
+                    return None
+                this_unix = _ocsp_this_update_unix(resp)
+                if this_unix is None or this_unix <= 0:
+                    return None
+                return int(this_unix)
+        try:
+            if matched_single.certificate_status != x509_ocsp.OCSPCertStatus.GOOD:
+                return None
+        except Exception:
+            return None
+        this_unix, _ = _ocsp_single_update_unix(matched_single)
+        if this_unix is None or this_unix <= 0:
+            return None
+        return int(this_unix)
+    except Exception:
+        return None
+
+
+def _meta_certid_serial_norm(meta: Optional[Dict[str, Any]]) -> Optional[str]:
+    """
+    Normalize CertID serial from shard meta for equality checks (uppercase hex,
+    strip leading zeros). Prefer certid.serial; fall back to top-level serial.
+    Publish pins store uppercase hex — compare in that alphabet only.
+    """
+    if not isinstance(meta, dict):
+        return None
+    raw = None
+    certid = meta.get("certid")
+    if isinstance(certid, dict):
+        raw = certid.get("serial")
+    if raw is None:
+        raw = meta.get("serial")
+    if raw is None:
+        return None
+    try:
+        text = str(raw).strip().upper()
+    except Exception:
+        return None
+    if text.startswith("0X"):
+        text = text[2:]
+    if not text or not all(c in "0123456789ABCDEF" for c in text):
+        return None
+    return text.lstrip("0") or "0"
+
+
+def _live_paged_meta(fingerprint: Optional[str]) -> Optional[Dict[str, Any]]:
+    """
+    Return canary-paged live ocsp.json for fingerprint, or None.
+
+    Requires a non-empty ocsp.der (same bar as ``_inter_body_shard_paged``) so the
+    older-body publish skip cannot keep a paged=true meta with a missing DER.
+    """
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return None
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
         der = shard / "ocsp.der"
         meta_path = shard / "ocsp.json"
-        if meta_path.is_file() and not der.is_file():
-            meta_path.unlink()
-    except Exception as e:
-        log_debug("⚠️ OCSP could not clear control meta for %s: %s", normalized[:16], e)
+        if not der.is_file() or der.stat().st_size <= 0 or not meta_path.is_file():
+            return None
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict):
+            return None
+        if meta.get("paged") is not True:
+            return None
+        if meta.get("tombstoned") is True:
+            return None
+        if meta.get("unpaged_after_nongood") is True:
+            return None
+        return meta
+    except Exception:
+        return None
+
+
+def _control_ban_blocks_clear(normalized: str, good_unix: Optional[int]) -> bool:
+    """
+    True when control serial-blacklist must not be cleared.
+
+    Unreadable/missing-parse bans fail closed (Lua refuses the same file).
+    Readable bans clear only when a dated GOOD strictly supersedes ban thisUpdate
+    (missing ban timing is invalid and treated as superseded by any dated GOOD).
+    """
+    ban_path = _serial_blacklist_path(normalized)
+    if ban_path is None or not ban_path.is_file():
+        return False
+    ban = _read_serial_blacklist(normalized)
+    if not isinstance(ban, dict) or ban.get("unreadable"):
+        return True
+    try:
+        raw = ban.get("this_update_unix")
+        ban_unix = int(raw) if raw is not None else None
+        if ban_unix is not None and ban_unix <= 0:
+            ban_unix = None
+    except (TypeError, ValueError):
+        return True
+    if good_unix is None or not _serial_ban_superseded_by_good(ban_unix, good_unix):
+        return True
+    return False
+
+
+def _control_has_soft_recall_signal(normalized: str) -> bool:
+    """
+    True when a soft-recall ligand is present for a control key.
+
+    Soft-recall writes ligand ``paged=false``; successful tombstone clears that
+    ligand (and nongood). ``nongood.json`` is NOT soft-recall proof — it is
+    written on every nongood streak before soft-recall/tombstone, so treating it
+    as proof would fail-open quarantine for tombstone-without-ban (legacy or
+    mid-flight). Ligand-only remains the durable soft-recall signal for
+    corrupt-meta recovery.
+    """
+    try:
+        ligand_path = CONFIGS_SSL_BASE / "ocsp-ligand" / normalized
+        if ligand_path.is_file():
+            lig = json.loads(ligand_path.read_text(encoding="utf-8"))
+            if isinstance(lig, dict) and lig.get("paged") is False:
+                return True
+    except Exception:
+        # Unreadable ligand: do not treat as soft-recall proof.
+        pass
+    return False
+
+
+def _clear_tenant_control_negatives(
+    control_fp: Optional[str],
+    *,
+    held_lock: Optional[Any] = None,
+    good_this_update_unix: Optional[int] = None,
+) -> Tuple[bool, str]:
+    """
+    Drop tenant-scoped intermediate negatives after a successful GOOD page / donate.
+
+    ``held_lock``: when the caller already holds the control-fp cert lock (e.g.
+    plasmid donate), reuse it — the shared lease is non-reentrant (O_EXCL), so a
+    nested ``_acquire_cert_lock`` would spin until timeout and skip the clear.
+
+    ``good_this_update_unix``: CA-signed thisUpdate of the verified GOOD that
+    authorizes clearing a tombstone/ban. Without it, a concurrent/newer tombstone
+    or ban is kept. With it, clear only when the GOOD supersedes.
+
+    Clear order (fail-closed mid-flight): fence → stray DER → meta → ban →
+    nongood / allow / ligand. Ligand stays until meta is gone so a ``meta_unlink``
+    failure cannot strip soft-recall quarantine proof.
+
+    Returns ``(ok, reason)`` where reason is ``\"ok\"``, ``\"lock\"``, ``\"fence\"``,
+    ``\"meta_unlink\"``, ``\"ban_unlink\"``, ``\"ligand_unlink\"``, ``\"nongood_unlink\"``,
+    ``\"der_unlink\"``, or ``\"allow_unlink\"``.
+    """
+    normalized = _normalize_fingerprint(control_fp) if control_fp else None
+    if not normalized:
+        return True, "ok"
+    own_lock = False
+    lock = held_lock
+    if lock is None:
+        lock = _acquire_cert_lock(normalized)
+        own_lock = True
+        if lock is None:
+            log_warning(
+                "⚠️ OCSP could not lock control_fp=%s... to clear tenant negatives",
+                normalized[:16],
+            )
+            return False, "lock"
+    try:
+        # Fence: a concurrent/newer tombstone or ban must not be wiped by a lagging clear.
+        try:
+            good_unix: Optional[int] = None
+            try:
+                if good_this_update_unix is not None:
+                    good_unix = int(good_this_update_unix)
+                    if good_unix <= 0:
+                        good_unix = None
+            except (TypeError, ValueError):
+                good_unix = None
+            shard = _get_sharded_ocsp_path(normalized)
+            meta_path = shard / "ocsp.json"
+            meta: Optional[Dict[str, Any]] = None
+            if meta_path.is_file():
+                raw = meta_path.read_text(encoding="utf-8")
+                try:
+                    meta = json.loads(raw)
+                except Exception:
+                    meta = None
+                if not isinstance(meta, dict):
+                    # Non-dict JSON or parse failure: same uncertain fence as corrupt meta.
+                    tomb_unix = _control_tombstone_this_update(normalized, None)
+                    if _control_clear_should_skip(
+                        tombstoned=True,
+                        tomb_unix=tomb_unix,
+                        good_unix=good_unix,
+                        fence_uncertain=True,
+                    ):
+                        # Escape only for corrupt soft-recall (ligand paged=false).
+                        # Tombstone-without-ban that later corrupts has no ban timing —
+                        # must NOT unlink meta or full-clear (would revive the tenant).
+                        # nongood.json alone is NOT proof (streak marker, not soft-recall).
+                        der = shard / "ocsp.der"
+                        # Stray DER on a control key is layout corruption — drop it so
+                        # negative-only quarantine can proceed when soft-recall is proven.
+                        if der.is_file() and _control_has_soft_recall_signal(normalized):
+                            try:
+                                der.unlink()
+                                log_warning(
+                                    "⚠️ OCSP removed stray DER on control_fp=%s... before quarantine",
+                                    normalized[:16],
+                                )
+                            except Exception:
+                                return False, "der_unlink"
+                        if (
+                            good_unix is not None
+                            and not der.is_file()
+                            and not _control_ban_blocks_clear(normalized, good_unix)
+                            and _control_has_soft_recall_signal(normalized)
+                        ):
+                            try:
+                                meta_path.unlink()
+                                log_warning(
+                                    "⚠️ OCSP quarantined unreadable soft-recall control meta "
+                                    "fp=%s... (dated GOOD thisUpdate=%s)",
+                                    normalized[:16],
+                                    good_unix,
+                                )
+                                meta = None
+                            except Exception:
+                                log_debug(
+                                    "⏭️ OCSP skip control clear fp=%s... (unreadable meta, quarantine failed)",
+                                    normalized[:16],
+                                )
+                                return False, "fence"
+                        else:
+                            log_debug(
+                                "⏭️ OCSP skip control clear fp=%s... "
+                                "(unreadable meta; no soft-recall proof or ban blocks)",
+                                normalized[:16],
+                            )
+                            return False, "fence"
+                    else:
+                        meta = None
+                if isinstance(meta, dict) and meta.get("tombstoned") is True:
+                    tomb_unix = _control_tombstone_this_update(normalized, meta)
+                    if _control_clear_should_skip(
+                        tombstoned=True,
+                        tomb_unix=tomb_unix,
+                        good_unix=good_unix,
+                        fence_uncertain=False,
+                    ):
+                        log_debug(
+                            "⏭️ OCSP skip control clear fp=%s... (tombstone thisUpdate=%s, good=%s)",
+                            normalized[:16],
+                            tomb_unix,
+                            good_unix,
+                        )
+                        return False, "fence"
+            # Ban may outlive tombstone meta (partial clear / legacy) — same supersede rule.
+            if _control_ban_blocks_clear(normalized, good_unix):
+                log_debug(
+                    "⏭️ OCSP skip control clear fp=%s... (serial ban not superseded, good=%s)",
+                    normalized[:16],
+                    good_unix,
+                )
+                return False, "fence"
+            # Soft-recall (ligand paged=false and/or unpaged_after_nongood) must only
+            # clear with a dated GOOD — never a body_tu-less donate / caller mistake.
+            soft_meta = isinstance(meta, dict) and meta.get("unpaged_after_nongood") is True
+            if good_unix is None and (
+                soft_meta or _control_has_soft_recall_signal(normalized)
+            ):
+                log_debug(
+                    "⏭️ OCSP skip control clear fp=%s... (soft-recall present, no dated GOOD)",
+                    normalized[:16],
+                )
+                return False, "fence"
+        except Exception as e:
+            log_debug("⚠️ OCSP control clear fence read failed for %s: %s", normalized[:16], e)
+            # Fail closed on fence I/O — never wipe tombstone/soft-recall blindly.
+            return False, "fence"
+        try:
+            shard = _get_sharded_ocsp_path(normalized)
+            # Control shards are negative-only (no ocsp.der). Drop stray DER first
+            # (layout corruption), then remove meta BEFORE clearing the ban so a
+            # failed unlink leaves ban+meta (fail-closed), never meta-without-ban.
+            # Outside ligand/nongood/allow stay until meta+ban are gone — clearing
+            # ligand first stranded corrupt soft-recall meta with no quarantine proof
+            # (ligand-only escape) on the next run.
+            der = shard / "ocsp.der"
+            meta_path = shard / "ocsp.json"
+            if der.is_file():
+                try:
+                    der.unlink()
+                    log_warning(
+                        "⚠️ OCSP removed stray DER on control_fp=%s... during clear",
+                        normalized[:16],
+                    )
+                except Exception as der_err:
+                    log_warning(
+                        "⚠️ OCSP could not remove stray control DER fp=%s...: %s",
+                        normalized[:16],
+                        der_err,
+                    )
+            # Orphan control DER poisons later soft-recall der_sha256 — fail closed.
+            if der.is_file():
+                log_warning(
+                    "⚠️ OCSP stray control DER still present after clear fp=%s...",
+                    normalized[:16],
+                )
+                return False, "der_unlink"
+            if meta_path.is_file():
+                meta_path.unlink()
+            # Any remaining control meta is failure.
+            if meta_path.is_file():
+                log_warning(
+                    "⚠️ OCSP control meta still present after clear fp=%s...",
+                    normalized[:16],
+                )
+                return False, "meta_unlink"
+        except Exception as e:
+            log_debug("⚠️ OCSP could not clear control meta for %s: %s", normalized[:16], e)
+            try:
+                shard = _get_sharded_ocsp_path(normalized)
+                meta_path = shard / "ocsp.json"
+                if meta_path.is_file():
+                    return False, "meta_unlink"
+                der = shard / "ocsp.der"
+                if der.is_file():
+                    return False, "der_unlink"
+            except Exception:
+                return False, "meta_unlink"
+        # Ban after meta is confirmed gone.
+        _clear_serial_blacklist(normalized)
+        ban_path = _serial_blacklist_path(normalized)
+        if ban_path is not None and ban_path.is_file():
+            log_warning(
+                "⚠️ OCSP serial blacklist still present after clear fp=%s...",
+                normalized[:16],
+            )
+            return False, "ban_unlink"
+        # Outside signals last — ligand soft-recall proof must survive a failed
+        # meta unlink so the next dated GOOD can still quarantine corrupt meta.
+        _clear_nongood_marker(normalized)
+        _clear_ocsp_peer_refuse(normalized)
+        _clear_ocsp_ligand(normalized)
+        # Must not seal while soft-recall/nongood signals remain (Lua refuse / streak).
+        nongood_left = _nongood_marker_path(normalized)
+        if nongood_left is not None and nongood_left.is_file():
+            log_warning(
+                "⚠️ OCSP nongood marker still present after clear fp=%s...",
+                normalized[:16],
+            )
+            return False, "nongood_unlink"
+        ligand_left = CONFIGS_SSL_BASE / "ocsp-ligand" / normalized
+        if ligand_left.is_file():
+            log_warning(
+                "⚠️ OCSP ligand still present after clear fp=%s...",
+                normalized[:16],
+            )
+            return False, "ligand_unlink"
+        allow_left = CONFIGS_SSL_BASE / "ocsp-allow" / normalized
+        if allow_left.is_file():
+            log_warning(
+                "⚠️ OCSP allow-pin still present after clear fp=%s...",
+                normalized[:16],
+            )
+            return False, "allow_unlink"
+        return True, "ok"
+    finally:
+        if own_lock:
+            _release_cert_lock(lock, normalized)
+
+
+def _tenant_control_blocks_donate(
+    control_fp: Optional[str],
+    good_this_update_unix: Optional[int] = None,
+) -> bool:
+    """
+    True when plasmid donate must NOT clear tenant negatives.
+
+    REVOKED/UNKNOWN tombstones and serial bans live on the control key. Soft-recall
+    / nongood streak always block donate (tenant must re-fetch). Tombstone/ban may
+    be superseded by a dated shared-body GOOD thisUpdate (same rule as persist clear).
+    """
+    normalized = _normalize_fingerprint(control_fp) if control_fp else None
+    if not normalized:
+        return False
+    good_unix: Optional[int] = None
+    try:
+        if good_this_update_unix is not None:
+            good_unix = int(good_this_update_unix)
+            if good_unix <= 0:
+                good_unix = None
+    except (TypeError, ValueError):
+        good_unix = None
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        meta_path = shard / "ocsp.json"
+        meta: Optional[Dict[str, Any]] = None
+        if meta_path.is_file():
+            try:
+                loaded = json.loads(meta_path.read_text(encoding="utf-8"))
+            except Exception:
+                # Unreadable control meta: fail closed (do not donate-clear).
+                return True
+            if isinstance(loaded, dict):
+                meta = loaded
+            else:
+                # Non-dict JSON: treat as unreadable (fail closed).
+                return True
+            if isinstance(meta, dict) and meta.get("tombstoned") is True:
+                tomb_unix = _control_tombstone_this_update(normalized, meta)
+                if _control_clear_should_skip(
+                    tombstoned=True,
+                    tomb_unix=tomb_unix,
+                    good_unix=good_unix,
+                    fence_uncertain=False,
+                ):
+                    return True
+                # Superseded tombstone — fall through; clear will unlink meta/ban.
+            if isinstance(meta, dict) and meta.get("unpaged_after_nongood") is True:
+                return True
+            # Bare meta paged=false without soft-recall flag does not block donate.
+            # Soft-recall always sets unpaged_after_nongood on meta; ligand paged=false
+            # is checked separately below (ligand has no unpaged_after_nongood field).
+        ban_path = shard / "serial-blacklist.json"
+        if ban_path.is_file():
+            ban = _read_serial_blacklist(normalized)
+            # Unreadable ban: fail closed (Lua serial_blacklist_blocks refuses too).
+            if not isinstance(ban, dict) or ban.get("unreadable"):
+                return True
+            ban_unix = None
+            try:
+                raw = ban.get("this_update_unix")
+                ban_unix = int(raw) if raw is not None else None
+                if ban_unix is not None and ban_unix <= 0:
+                    ban_unix = None
+            except (TypeError, ValueError):
+                return True
+            if good_unix is None or not _serial_ban_superseded_by_good(ban_unix, good_unix):
+                return True
+        nongood = _nongood_marker_path(normalized)
+        if nongood is not None and nongood.is_file():
+            return True
+        # Outside ligand may still advertise soft-recall after a partial clear
+        # (meta unlinked, ligand left) — do not donate while Lua would refuse.
+        try:
+            ligand_path = CONFIGS_SSL_BASE / "ocsp-ligand" / normalized
+            if ligand_path.is_file():
+                lig = json.loads(ligand_path.read_text(encoding="utf-8"))
+                if isinstance(lig, dict) and lig.get("paged") is False:
+                    return True
+        except Exception:
+            return True
+    except Exception:
+        return True
+    return False
 
 
 def _inter_body_shard_paged(fingerprint: Optional[str]) -> bool:
@@ -2029,6 +2891,8 @@ def _inter_body_shard_paged(fingerprint: Optional[str]) -> bool:
         if not isinstance(meta, dict) or meta.get("paged") is not True:
             return False
         if meta.get("tombstoned") is True:
+            return False
+        if meta.get("unpaged_after_nongood") is True:
             return False
         return True
     except Exception:
@@ -2078,24 +2942,105 @@ def _donate_inter_body_to_tenant(
     iname: str,
     stats: Optional[dict],
     reason: str,
-) -> None:
+) -> bool:
     """
     Reuse a shared intermediate GOOD body for this tenant without re-fetching.
 
-    Clears tenant control-key negatives, seals the body SPKI for the run, and
-    increments ``ocsp_intermediate_plasmid_reuse``. Does not touch the live shard.
+    Clears tenant control-key negatives only when no soft-recall/nongood blocks the
+    tenant (tombstone/ban may clear when body thisUpdate supersedes). Seals the body
+    SPKI for the run. Does not touch the live shard. Returns False when donate was
+    refused (caller must fetch/refresh).
+
+    Under body then control locks (persist publish→clear order), re-checks that the
+    body is still canary-paged before clear/seal so a concurrent demote cannot leave
+    this tenant cleared while the shared body is unpaged.
     """
-    _clear_tenant_control_negatives(control_fp)
-    _seal_inter_body_spki(inter_fp)
-    if stats is not None:
-        stats["ocsp_intermediate_plasmid_reuse"] = stats.get("ocsp_intermediate_plasmid_reuse", 0) + 1
-    log_debug(
-        "🧬 OCSP intermediate plasmid %s body_fp=%s... control_fp=%s... for %s",
-        reason,
-        inter_fp[:16],
-        (control_fp[:16] + "...") if control_fp else "nil",
-        iname,
-    )
+    # Hold body lock then control lock (same order as persist publish→clear) across
+    # paged check + clear + seal so a concurrent demote cannot clear the tenant
+    # while the shared body is unpaged. Shared lease is non-reentrant per fp.
+    body_lock = None
+    control_lock = None
+    normalized_body = _normalize_fingerprint(inter_fp) if inter_fp else None
+    normalized_control = _normalize_fingerprint(control_fp) if control_fp else None
+    if not normalized_control:
+        # Without a tenant key, seal/clear would be meaningless or hit the body SPKI.
+        return False
+    if not normalized_body:
+        return False
+    body_lock = _acquire_cert_lock(normalized_body)
+    if body_lock is None:
+        log_info(
+            "⏭️ OCSP intermediate plasmid donate refused for %s "
+            "(body_fp=%s... lock busy) — require fresh GOOD",
+            iname,
+            normalized_body[:16],
+        )
+        return False
+    try:
+        control_lock = _acquire_cert_lock(normalized_control)
+        if control_lock is None:
+            log_info(
+                "⏭️ OCSP intermediate plasmid donate refused for %s "
+                "(control_fp=%s... lock busy) — require fresh GOOD",
+                iname,
+                normalized_control[:16],
+            )
+            return False
+        try:
+            # Re-check under both locks: concurrent demote of the shared body must
+            # not clear tenant negatives or seal an unpaged SPKI.
+            if not _inter_body_shard_paged(inter_fp):
+                log_info(
+                    "⏭️ OCSP intermediate plasmid donate refused for %s "
+                    "(body_fp=%s... no longer canary-paged) — require fresh GOOD",
+                    iname,
+                    inter_fp[:16],
+                )
+                return False
+            body_tu = _body_shard_this_update_unix(inter_fp)
+            if _tenant_control_blocks_donate(control_fp, good_this_update_unix=body_tu):
+                log_info(
+                    "⏭️ OCSP intermediate plasmid donate refused for %s "
+                    "(control_fp=%s... still tombstoned/banned/nongood) — require fresh GOOD",
+                    iname,
+                    (control_fp[:16] if control_fp else "?"),
+                )
+                return False
+            # Clear under the already-held control lock (shared lease is non-reentrant).
+            cleared, clear_reason = _clear_tenant_control_negatives(
+                control_fp,
+                held_lock=control_lock,
+                good_this_update_unix=body_tu,
+            )
+            if not cleared:
+                log_info(
+                    "⏭️ OCSP intermediate plasmid donate refused for %s "
+                    "(control_fp=%s... clear failed reason=%s) — require fresh GOOD",
+                    iname,
+                    (control_fp[:16] if control_fp else "?"),
+                    clear_reason,
+                )
+                if stats is not None:
+                    stats["ocsp_donate_clear_failed"] = stats.get("ocsp_donate_clear_failed", 0) + 1
+                return False
+            # Body still paged under the held body lock — safe to seal.
+            _seal_inter_body_spki(inter_fp)
+            if stats is not None:
+                stats["ocsp_intermediate_plasmid_reuse"] = stats.get("ocsp_intermediate_plasmid_reuse", 0) + 1
+            log_debug(
+                "🧬 OCSP intermediate plasmid %s body_fp=%s... control_fp=%s... for %s",
+                reason,
+                inter_fp[:16],
+                (control_fp[:16] + "...") if control_fp else "nil",
+                iname,
+            )
+            return True
+        finally:
+            if control_lock is not None and normalized_control:
+                _release_cert_lock(control_lock, normalized_control)
+    finally:
+        if body_lock is not None and normalized_body:
+            _release_cert_lock(body_lock, normalized_body)
 
 
 def _process_cert_chain(
@@ -2131,22 +3076,44 @@ def _process_cert_chain(
             cleaned_inter = _clean_pem(ipem)
             inter_fp = _get_cert_pubkey_fingerprint(cleaned_inter)
             control_fp = _intermediate_control_fp(leaf_fp, inter_fp)
+            # Without a tenant control key, nongood/tombstone would land on the
+            # shared body SPKI and brick every site on that CA — skip.
+            if not control_fp:
+                log_warning(
+                    "⏭️ OCSP skipping intermediate for %s: cannot compute control_fp "
+                    "(leaf_fp=%s inter_fp=%s)",
+                    iname,
+                    (leaf_fp[:16] + "...") if leaf_fp else "nil",
+                    (inter_fp[:16] + "...") if inter_fp else "nil",
+                )
+                if stats is not None:
+                    stats["ocsp_intermediate_skipped_no_control"] = (
+                        stats.get("ocsp_intermediate_skipped_no_control", 0) + 1
+                    )
+                continue
             # Plasmid reuse: one GOOD body per intermediate SPKI per job run.
-            # Never re-fetch/republish a live shared shard while handshakes read it —
-            # including the first leaf under force_fetch when the body is still keepable.
+            # Sealed means "already donated/published this run" — still require
+            # keepable (CertID serial + TTL) so a same-SPKI reissue cannot donate
+            # a wrong-serial body. Sealed only skips force-republish of keepable.
             sealed = bool(inter_fp) and _inter_body_spki_sealed(inter_fp)
             body_paged = bool(inter_fp) and _inter_body_shard_paged(inter_fp)
-            if inter_fp and body_paged and (sealed or _inter_body_shard_keepable(iname, cleaned_inter, inter_fp)):
-                _donate_inter_body_to_tenant(
+            keepable = bool(inter_fp) and _inter_body_shard_keepable(iname, cleaned_inter, inter_fp)
+            donate_refused = False
+            if inter_fp and body_paged and keepable:
+                donated = _donate_inter_body_to_tenant(
                     inter_fp=inter_fp,
                     control_fp=control_fp,
                     iname=iname,
                     stats=stats,
                     reason="reuse" if sealed else "keep",
                 )
-                continue
-            # Body missing, soft-recalled, or near expiry: refresh once, then seal.
-            inter_force = bool(force_fetch)
+                if donated:
+                    continue
+                # Tenant still gated — must force-fetch; TTL-skip would leave
+                # tombstone/ban uncleared and seal the SPKI anyway.
+                donate_refused = True
+            # Body missing, soft-recalled, near expiry, serial mismatch, or donate refused.
+            inter_force = bool(force_fetch) or donate_refused or (sealed and not keepable)
             result = _process_cert(
                 iname,
                 ipem,
@@ -2158,15 +3125,58 @@ def _process_cert_chain(
             results.append(result)
             if stats is not None:
                 stats["ocsp_intermediate_processed"] = stats.get("ocsp_intermediate_processed", 0) + 1
-            ocsp_der = result[1]
             cached_ttl = result[2]
             was_attempted = result[6]
-            # Seal after a fresh GOOD fetch, or after accepting an already-paged cache.
-            if inter_fp and (
-                ocsp_der is not None
-                or (not was_attempted and isinstance(cached_ttl, int) and cached_ttl > 0 and _inter_body_shard_paged(inter_fp))
+            # Concurrent race: body became keepable during _process_cert TTL-skip.
+            # Reuse the locked donate helper (blocks soft-recall; may supersede tombstone).
+            if (
+                inter_fp
+                and not donate_refused
+                and not was_attempted
+                and isinstance(cached_ttl, int)
+                and cached_ttl > 0
+                and _inter_body_shard_keepable(iname, cleaned_inter, inter_fp)
             ):
-                _seal_inter_body_spki(inter_fp)
+                donated = _donate_inter_body_to_tenant(
+                    inter_fp=inter_fp,
+                    control_fp=control_fp,
+                    iname=iname,
+                    stats=stats,
+                    reason="ttl-keep",
+                )
+                if not donated:
+                    # Tenant still gated after TTL-skip — force-fetch so we do not
+                    # leave soft-recall/ban uncleared for the rest of the run.
+                    if stats is not None:
+                        stats["ocsp_ttl_keep_donate_failed"] = (
+                            stats.get("ocsp_ttl_keep_donate_failed", 0) + 1
+                        )
+                        # Soft TTL-skip already incremented cached; undo so the
+                        # subsequent force-fetch is not double-counted as both.
+                        cached = int(stats.get("ocsp_cached_responses", 0) or 0)
+                        if cached > 0:
+                            stats["ocsp_cached_responses"] = cached - 1
+                    results[-1] = _process_cert(
+                        iname,
+                        ipem,
+                        db,
+                        stats,
+                        force_fetch=True,
+                        control_fp=control_fp,
+                    )
+                    # Force-fetch that keeps the existing body (transport fail /
+                    # below-threshold nongood) never re-increments cached — restore
+                    # so the undocount matches "still serving cache".
+                    if stats is not None:
+                        kept = results[-1]
+                        if (
+                            kept[1] is None
+                            and isinstance(kept[2], int)
+                            and kept[2] > 0
+                        ):
+                            stats["ocsp_cached_responses"] = (
+                                stats.get("ocsp_cached_responses", 0) + 1
+                            )
         except Exception as e:
             log_warning("⚠️ OCSP intermediate fetch failed for %s: %s", iname, e)
             if stats is not None:
@@ -2197,6 +3207,8 @@ OCSP_RATE_LIMIT_TEMP_ERROR = 2  # Temporary error delay (responder slow/overload
 OCSP_RATE_LIMIT_TOO_MANY_REQUESTS = 30  # Delay when 429 (Too Many Requests) received
 OCSP_RATE_LIMIT_NETWORK_ERROR_BASE = 2  # Base delay for network errors (backoff applied)
 OCSP_RATE_LIMIT_NETWORK_ERROR_MAX = 30  # Max backoff delay for network errors
+# Job-wide streak for network-error exponential backoff (reset on success).
+_OCSP_NETWORK_ERROR_STREAK = 0
 
 # Signed-window policy (intrinsic to the OCSP response — not retention / skew death).
 # Must match handshake Lua. A CA-stretched GOOD cannot outlive these ceilings.
@@ -2534,6 +3546,40 @@ def _serial_forms(serial: Optional[int]) -> Tuple[Optional[str], Optional[str]]:
     return decimal, serial_hex
 
 
+def _certid_pin_matches_serial(want: Optional[str], serial: Optional[int]) -> bool:
+    """
+    True when a meta CertID pin matches this SingleResponse serial.
+
+    Publish pins uppercase hex. Legacy digit-only pins may be decimal.
+    Hex compare first (leading zeros stripped) so modern pin ``\"10\"`` matches
+    serial 16. Digit-only want also accepts decimal via ``int()`` so zero-padded
+    ``\"010\"`` matches serial 10 (``want == dec`` would miss).
+    """
+    if want is None or serial is None:
+        return False
+    try:
+        text = str(want).strip()
+    except Exception:
+        return False
+    if text.upper().startswith("0X"):
+        text = text[2:]
+    if not text or not all(c in "0123456789ABCDEFabcdef" for c in text):
+        return False
+    dec, got_hex = _serial_forms(int(serial))
+    if not got_hex:
+        return False
+    want_norm = text.upper().lstrip("0") or "0"
+    got_norm = got_hex.upper().lstrip("0") or "0"
+    if got_norm == want_norm:
+        return True
+    if text.isdigit() and dec is not None:
+        try:
+            return int(text) == int(dec)
+        except ValueError:
+            return False
+    return False
+
+
 def _ocsp_expiry_meta(ttl: Optional[int]) -> Dict[str, Any]:
     """
     Fields handshake Lua uses to refuse stapling past nextUpdate.
@@ -2597,12 +3643,120 @@ def _new_job_run_id() -> str:
 
 def _begin_job_run() -> str:
     """Start a new job run id and refresh cached OpenSSL identity."""
-    global _JOB_RUN_ID, _OPENSSL_IDENTITY, _MULTI_STAPLE_ATTACH_CACHE, _SEALED_INTER_BODY_SPKI
+    global _JOB_RUN_ID, _OPENSSL_IDENTITY, _MULTI_STAPLE_ATTACH_CACHE, _SEALED_INTER_BODY_SPKI, _OCSP_DO_NOT_RESTAMP
     _JOB_RUN_ID = _new_job_run_id()
     _OPENSSL_IDENTITY = None
     _MULTI_STAPLE_ATTACH_CACHE = None
     _SEALED_INTER_BODY_SPKI = set()
+    _OCSP_DO_NOT_RESTAMP = set()
     return _JOB_RUN_ID
+
+
+def _do_not_restamp_marker_path(fingerprint: Optional[str]) -> Optional[Path]:
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return None
+    return _get_sharded_ocsp_path(normalized) / _OCSP_DO_NOT_RESTAMP_MARKER
+
+
+def _mark_do_not_restamp(fingerprint: Optional[str], reason: str = "") -> bool:
+    """
+    Block restamp for this SPKI for the rest of the run and across job runs.
+
+    Process-local set alone is cleared by ``_begin_job_run``; a durable marker
+    prevents the next job from re-pinning a demoted/broken paged=true shard.
+
+    Returns True when the in-memory block is set AND the durable marker is on disk
+    (or the shard path is unavailable). False if the marker could not be written —
+    callers that still have live paged=true+DER must keep demoting until safe.
+    """
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return False
+    _OCSP_DO_NOT_RESTAMP.add(normalized)
+    marker = _do_not_restamp_marker_path(normalized)
+    if marker is None:
+        return True
+    try:
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(
+            marker,
+            json.dumps(
+                {
+                    "reason": reason or "demote",
+                    "unix": int(time.time()),
+                    "job_run_id": _JOB_RUN_ID,
+                },
+                separators=(",", ":"),
+            ),
+            mode=0o640,
+        )
+        return marker.is_file()
+    except Exception as e:
+        log_error(
+            "❌ OCSP could not write durable do-not-restamp marker for fp=%s...: %s",
+            normalized[:16],
+            e,
+        )
+        return False
+
+
+def _clear_do_not_restamp(fingerprint: Optional[str]) -> bool:
+    """
+    Clear in-memory + durable restamp block after a successful canary page.
+
+    Returns True when no marker remains (or never existed). False if unlink failed
+    — caller should not leave a sticky quarantine on a GOOD paged shard.
+    """
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return True
+    _OCSP_DO_NOT_RESTAMP.discard(normalized)
+    marker = _do_not_restamp_marker_path(normalized)
+    if marker is None:
+        return True
+    try:
+        if not marker.is_file():
+            return True
+        marker.unlink()
+        if marker.is_file():
+            log_error(
+                "❌ OCSP do-not-restamp marker still present after unlink for fp=%s...",
+                normalized[:16],
+            )
+            return False
+        return True
+    except Exception as e:
+        log_error(
+            "❌ OCSP could not clear do-not-restamp marker for fp=%s...: %s",
+            normalized[:16],
+            e,
+        )
+        # Best-effort rename aside so restamp is not stuck forever on a GOOD page.
+        try:
+            aside = marker.with_name(marker.name + f".stale-{os.getpid()}.{time.time_ns()}")
+            marker.rename(aside)
+            return not marker.is_file()
+        except Exception as rename_err:
+            log_error(
+                "❌ OCSP could not rename aside sticky do-not-restamp for fp=%s...: %s",
+                normalized[:16],
+                rename_err,
+            )
+            return False
+
+
+def _shard_blocked_from_restamp(fingerprint: Optional[str]) -> bool:
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return False
+    if normalized in _OCSP_DO_NOT_RESTAMP:
+        return True
+    marker = _do_not_restamp_marker_path(normalized)
+    try:
+        return bool(marker is not None and marker.is_file())
+    except Exception:
+        return True
 
 
 def _openssl_identity() -> Dict[str, Any]:
@@ -2709,12 +3863,22 @@ def _wall_clock_remaining(meta: Optional[Dict[str, Any]], now_unix: Optional[int
 
 
 def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
-    """Write bytes via tempfile + replace so readers never see a partial file."""
-    path.parent.mkdir(parents=True, exist_ok=True)
+    """Write bytes via tempfile + replace so readers never see a partial file.
+
+    The parent is resolved and must stay under the cache root before any
+    create. A symlinked ``ocsp-ligand`` / ``ocsp-allow`` / shard directory
+    would otherwise receive the temp file and the replace outside the jail.
+    A symlinked leaf is removed first so readers do not follow it.
+    """
+    parent = _assert_path_under_cache_root(path.parent)
+    parent.mkdir(parents=True, exist_ok=True)
+    leaf = parent / path.name
+    if leaf.is_symlink():
+        leaf.unlink()
     tmp_path: Optional[Path] = None
     try:
         with tempfile.NamedTemporaryFile(
-            dir=path.parent,
+            dir=parent,
             delete=False,
             prefix=f".{path.name}.",
             suffix=".tmp",
@@ -2725,7 +3889,7 @@ def _atomic_write_bytes(path: Path, data: bytes, mode: int = 0o640) -> None:
             tmp_file.flush()
             os.fsync(tmp_file.fileno())
         tmp_path.chmod(mode)
-        tmp_path.replace(path)
+        tmp_path.replace(leaf)
         tmp_path = None
     finally:
         if tmp_path is not None:
@@ -2747,8 +3911,12 @@ def _atomic_write_text(path: Path, text: str, mode: int = 0o640) -> None:
     _atomic_write_bytes(path, text.encode("utf-8"), mode=mode)
 
 
-# Sidecars that must survive a shard directory swap (not rewritten by a GOOD publish).
-_OCSP_SHARD_SIDECARS = frozenset({"nongood.json", "serial-blacklist.json"})
+# Sidecars that must survive a shard directory swap.
+# serial-blacklist.json: CertID-scoped bans must survive renameat2 exchange so Lua
+# still refuses a revoked serial after a different-serial GOOD page.
+# nongood.json is NOT copied — a verified GOOD resets the streak; copying would
+# re-page the streak marker into a successful canary tree.
+_OCSP_SHARD_SIDECARS = frozenset({"serial-blacklist.json"})
 
 
 def _write_bytes_inplace(path: Path, data: bytes, mode: int = 0o640) -> None:
@@ -2881,17 +4049,43 @@ def _page_shard_directory_into_place(staging: Path, final_dir: Path, stale: Path
 
 
 def _copy_ocsp_shard_sidecars(live_dir: Path, staging_dir: Path) -> None:
-    """Carry quarantine/blacklist markers into a new shard tree before rename."""
+    """
+    Carry quarantine markers into a new shard tree before rename.
+
+    Required for renameat2(RENAME_EXCHANGE): the old live tree (with bans) is
+    discarded after swap. Without this copy, a different-serial GOOD page wipes
+    an active serial ban Lua would still enforce for the revoked CertID.
+    In-place promote keeps the live dir (sidecars survive without copy).
+
+    Fail closed: if a required sidecar exists on live and cannot be copied into
+    staging, abort publish before exchange (never silently drop a ban).
+    """
     if not live_dir.is_dir():
         return
     for name in _OCSP_SHARD_SIDECARS:
         src = live_dir / name
         if not src.is_file():
             continue
+        dst = staging_dir / name
         try:
-            shutil.copy2(src, staging_dir / name)
+            shutil.copy2(src, dst)
         except Exception as e:
-            log_debug("⚠️ OCSP could not copy sidecar %s into staging: %s", name, e)
+            log_error(
+                "❌ OCSP could not copy sidecar %s into staging (refuse page): %s",
+                name,
+                e,
+            )
+            raise RuntimeError(f"sidecar copy failed for {name}: {e}") from e
+        try:
+            if not dst.is_file() or dst.stat().st_size <= 0:
+                raise RuntimeError(f"sidecar copy empty/missing for {name}")
+        except Exception as e:
+            log_error(
+                "❌ OCSP sidecar %s missing after copy (refuse page): %s",
+                name,
+                e,
+            )
+            raise
 
 
 def _canary_ocsp_handshake(
@@ -2953,14 +4147,9 @@ def _canary_ocsp_handshake(
                 else str(issuer_pem)
             )
             f_issuer.flush()
-            # Prefer the leaf PEM the job will staple against (fullchain first block ok).
-            if isinstance(leaf_pem, (bytes, bytearray)):
-                leaf_text = leaf_pem.decode("utf-8", errors="ignore")
-            else:
-                leaf_text = str(leaf_pem)
-            if "BEGIN CERTIFICATE" not in leaf_text:
-                leaf_text = leaf.public_bytes(Encoding.PEM).decode("utf-8")
-            f_leaf.write(leaf_text)
+            # Always leaf-only PEM (same as fetch_ocsp_response openssl -cert).
+            # Fullchain input can make openssl verify diverge from the fetch path.
+            f_leaf.write(leaf.public_bytes(Encoding.PEM).decode("utf-8"))
             f_leaf.flush()
             cmd = [
                 OPENSSL_BIN,
@@ -3131,10 +4320,165 @@ def _publish_ocsp_shard(
 
         # Outside-shard ligand then allow-pin (canary-only write). Handshake fails
         # closed until both exist; .ocsp_epoch bump stays deferred to the persist batch.
-        _write_ocsp_ligand(normalized, page_meta)
-        _write_ocsp_allow_pin(normalized, page_meta)
+        ligand_ok = _write_ocsp_ligand(normalized, page_meta)
+        pin_ok = _write_ocsp_allow_pin(normalized, page_meta)
+        if not ligand_ok or not pin_ok:
+            log_error(
+                "❌ OCSP canary-paged fp=%s... but ligand/allow write failed "
+                "(ligand=%s allow=%s) — demoting to unpaged (Must-Staple refuse)",
+                normalized[:16],
+                ligand_ok,
+                pin_ok,
+            )
+            # Live tree already swapped with paged=true. Without ligand/allow,
+            # Must-Staple refuses forever if restamp re-opens pins — demote now,
+            # upsert DB, and durably block restamp even if meta write fails.
+            marker_ok = _mark_do_not_restamp(normalized, reason="ligand_allow_demote")
+            try:
+                prev_gen = int(page_meta.get("soft_recall_gen") or 0)
+            except (TypeError, ValueError):
+                prev_gen = 0
+            if prev_gen < 0:
+                prev_gen = 0
+            page_meta["paged"] = False
+            page_meta["unpaged_after_nongood"] = True
+            page_meta["soft_recall_gen"] = prev_gen + 1
+            page_meta.pop("paged_unix", None)
+            try:
+                _atomic_write_text(
+                    final_dir / "ocsp.json",
+                    json.dumps(page_meta, separators=(",", ":")),
+                    mode=0o640,
+                )
+            except Exception as demote_err:
+                log_error(
+                    "❌ OCSP could not demote shard meta after ligand/allow failure (fp=%s...): %s",
+                    normalized[:16],
+                    demote_err,
+                )
+                # Last resort: drop the DER so restamp cannot re-pin a paged=true lie,
+                # then best-effort rewrite meta to paged=false without DER.
+                try:
+                    der_live = final_dir / "ocsp.der"
+                    if der_live.is_file():
+                        der_live.unlink()
+                except Exception as unlink_err:
+                    log_error(
+                        "❌ OCSP could not unlink ocsp.der after demote meta failure (fp=%s...): %s",
+                        normalized[:16],
+                        unlink_err,
+                    )
+                try:
+                    page_meta.pop("der_sha256", None)
+                    _atomic_write_text(
+                        final_dir / "ocsp.json",
+                        json.dumps(page_meta, separators=(",", ":")),
+                        mode=0o640,
+                    )
+                except Exception:
+                    pass
+                _clear_ocsp_ligand(normalized)
 
-        # Keep caller meta in sync with what was paged (floor / DB use published_unix).
+            def _live_still_restampable() -> bool:
+                """True when live still looks like a canary-paged body restamp could re-pin."""
+                try:
+                    der_p = final_dir / "ocsp.der"
+                    meta_p = final_dir / "ocsp.json"
+                    if not der_p.is_file() or der_p.stat().st_size <= 0:
+                        return False
+                    if not meta_p.is_file():
+                        return True
+                    m = json.loads(meta_p.read_text(encoding="utf-8"))
+                    return isinstance(m, dict) and m.get("paged") is True
+                except Exception:
+                    return True
+
+            # If demote could not unpage disk, strip DER and ensure durable marker
+            # — otherwise the next job restamps ligand+allow onto a paged lie.
+            if _live_still_restampable():
+                for _attempt in range(3):
+                    try:
+                        der_live = final_dir / "ocsp.der"
+                        if der_live.is_file():
+                            der_live.unlink()
+                    except Exception:
+                        pass
+                    if not _live_still_restampable():
+                        break
+                if not marker_ok:
+                    marker_ok = _mark_do_not_restamp(
+                        normalized, reason="ligand_allow_demote_retry"
+                    )
+                if _live_still_restampable() and not marker_ok:
+                    log_error(
+                        "❌ OCSP CRITICAL demote left paged=true+DER without durable "
+                        "restamp block (fp=%s...) — truncating DER",
+                        normalized[:16],
+                    )
+                    try:
+                        der_live = final_dir / "ocsp.der"
+                        der_live.write_bytes(b"")
+                        try:
+                            der_live.unlink(missing_ok=True)
+                        except TypeError:
+                            if der_live.is_file():
+                                der_live.unlink()
+                    except Exception as trunc_err:
+                        log_error(
+                            "❌ OCSP could not truncate/unlink DER after demote (fp=%s...): %s",
+                            normalized[:16],
+                            trunc_err,
+                        )
+                    marker_ok = _mark_do_not_restamp(
+                        normalized, reason="ligand_allow_demote_critical"
+                    )
+
+            # Drop DB DER always — end-of-job / next-job restore must not rehydrate
+            # a staple onto a demoted or still-paged lie (marker alone is not enough
+            # if the durable write failed).
+            if not _delete_ocsp_der_db_rows(db, normalized):
+                log_error(
+                    "❌ OCSP demote could not drop DB DER for fp=%s... "
+                    "(do-not-restamp + disk strip still apply)",
+                    normalized[:16],
+                )
+            # Always upsert demoted meta to DB (best-effort) so restore normalizes
+            # to paged=false even when the live meta write failed.
+            try:
+                _upsert_ocsp_json_to_db(
+                    db,
+                    normalized,
+                    json.dumps(page_meta, separators=(",", ":")),
+                    cert_name or normalized[:16],
+                )
+            except Exception as upsert_err:
+                log_error(
+                    "❌ OCSP could not upsert demoted meta to DB (fp=%s...): %s",
+                    normalized[:16],
+                    upsert_err,
+                )
+            if not marker_ok:
+                _mark_do_not_restamp(normalized, reason="ligand_allow_demote_final")
+
+            _write_ocsp_ligand(normalized, page_meta)
+            _clear_ocsp_peer_refuse(normalized)
+            _bump_ocsp_cache_epoch()
+            if isinstance(meta, dict):
+                meta.clear()
+                meta.update(page_meta)
+            raise RuntimeError(
+                f"canary ligand/allow write failed after page (ligand={ligand_ok} allow={pin_ok})"
+            )
+
+        # Successful canary page — clear any prior demote/restamp quarantine.
+        if not _clear_do_not_restamp(normalized):
+            # Sticky marker would block post-DROP restamp on an otherwise GOOD page.
+            if not _clear_do_not_restamp(normalized):
+                log_error(
+                    "❌ OCSP sticky do-not-restamp marker after successful canary page "
+                    "(fp=%s...) — restamp may skip until marker is removed",
+                    normalized[:16],
+                )
         if isinstance(meta, dict):
             meta.clear()
             meta.update(page_meta)
@@ -3260,8 +4604,9 @@ def _write_ocsp_http_error_backoff(
                             meta[age_key] = int(old_age)
                     # Keep prior GOOD verifier identity; backoff is not a new openssl publish.
                     _preserve_provenance(meta, old)
-                    # Keep canary / pin fields so a fetch blip does not demote a live GOOD shard
-                    # (missing paged → not_paged; missing AIA/CertID pins fail Must-Staple).
+                    # Keep canary / pin / generation fields so a fetch blip does not
+                    # demote a live GOOD shard (missing paged → not_paged; missing AIA/
+                    # CertID pins fail Must-Staple; dropping soft_recall_gen → gen→0 vs pin).
                     for keep_key in (
                         "paged",
                         "paged_unix",
@@ -3276,6 +4621,8 @@ def _write_ocsp_http_error_backoff(
                         "fingerprint",
                         "serial",
                         "unpaged_after_nongood",
+                        "soft_recall_gen",
+                        "tombstoned",
                     ):
                         if keep_key not in meta and keep_key in old:
                             meta[keep_key] = old[keep_key]
@@ -3387,7 +4734,7 @@ def _cert_priority_score(cert_name: str, pem_data: bytes, cached_ttl: Optional[i
         age_ratio = (total_lifetime - cached_ttl) / total_lifetime
         age_priority = min(24, int(age_ratio * 24))
 
-    return (must_staple_priority + ttl_priority, -ttl_priority if cached_ttl else 0, age_priority)
+    return (must_staple_priority + ttl_priority, -ttl_priority if cached_ttl is not None else 0, age_priority)
 
 
 def _adaptive_rate_limit(
@@ -3428,9 +4775,11 @@ def _adaptive_rate_limit(
 
     if last_result == "network_error":
         # Exponential backoff: 2s, 4s, 8s, 16s, 30s (capped)
+        # consecutive_errors is 1-based streak count (first failure → base delay).
+        streak = max(0, int(consecutive_errors) - 1) if consecutive_errors else 0
         delay = min(
             OCSP_RATE_LIMIT_NETWORK_ERROR_MAX,
-            OCSP_RATE_LIMIT_NETWORK_ERROR_BASE * (2 ** min(consecutive_errors, 3))
+            OCSP_RATE_LIMIT_NETWORK_ERROR_BASE * (2 ** min(streak, 3))
         )
         return float(delay)
 
@@ -3524,6 +4873,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
 
     # Used for writing backoff metadata on HTTP errors.
     cert_fp = _get_cert_pubkey_fingerprint(pem_data)
+    global _OCSP_NETWORK_ERROR_STREAK
 
     try:
         # Try SHA256 first, fallback to SHA1 if responder returns non-successful status (RFC 6960 compatibility)
@@ -3552,6 +4902,18 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
                 ocsp_hostname, ips = _get_ocsp_responder_ips(ocsp_url, default_port=default_port)
                 if not ocsp_hostname or not ips:
                     log_error("❌ OCSP could not resolve safe IPs for responder %s (host=%s)", cert_name, ocsp_hostname)
+                    _OCSP_NETWORK_ERROR_STREAK += 1
+                    delay = _adaptive_rate_limit(
+                        "network_error", consecutive_errors=_OCSP_NETWORK_ERROR_STREAK
+                    )
+                    if delay > 0:
+                        log_debug(
+                            "⏸️ OCSP rate limiting: %.1fs delay after DNS failure for %s (streak=%d)",
+                            delay,
+                            cert_name,
+                            _OCSP_NETWORK_ERROR_STREAK,
+                        )
+                        time.sleep(delay)
                     return None, 0, None
 
                 # Fetch by connecting to each resolved IP, while keeping TLS SNI for `ocsp_hostname`.
@@ -3641,6 +5003,18 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         else:
             # Loop finished without a break: all attempts failed
             log_error("❌ OCSP failed to fetch successful response for %s after trying both SHA256 and SHA1", cert_name)
+            # Primary path catches connect/HTTP failures inside the IP loop, so the
+            # outer URLError handler rarely runs — escalate streak here.
+            _OCSP_NETWORK_ERROR_STREAK += 1
+            delay = _adaptive_rate_limit("network_error", consecutive_errors=_OCSP_NETWORK_ERROR_STREAK)
+            if delay > 0:
+                log_debug(
+                    "⏸️ OCSP rate limiting: %.1fs delay after total fetch failure for %s (streak=%d)",
+                    delay,
+                    cert_name,
+                    _OCSP_NETWORK_ERROR_STREAK,
+                )
+                time.sleep(delay)
             return None, 0, None
 
         # === SECURE OCSP RESPONSE VERIFICATION ===
@@ -3762,6 +5136,7 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
             ttl = 86400  # RFC standard fallback
 
         # Adaptive rate limiting after successful fetch to prevent responder overload
+        _OCSP_NETWORK_ERROR_STREAK = 0
         delay = _adaptive_rate_limit("success")
         if delay > 0:
             log_debug("⏸️ OCSP rate limiting: %.1fs delay after successful fetch for %s", delay, cert_name)
@@ -3814,14 +5189,43 @@ def fetch_ocsp_response(pem_data: bytes, ocsp_url: str, cert_name: str = "", tim
         # Network error — DNS, connection refused, timeout, SSL error, etc.
         log_error("❌ OCSP network error fetching response for %s from %s: %s", cert_name, ocsp_url, e)
         # Adaptive rate limiting for network errors (exponential backoff)
-        delay = _adaptive_rate_limit("network_error", consecutive_errors=0)
+        _OCSP_NETWORK_ERROR_STREAK += 1
+        delay = _adaptive_rate_limit("network_error", consecutive_errors=_OCSP_NETWORK_ERROR_STREAK)
         if delay > 0:
-            log_debug("⏸️ OCSP rate limiting: %.1fs delay after network error for %s", delay, cert_name)
+            log_debug(
+                "⏸️ OCSP rate limiting: %.1fs delay after network error for %s (streak=%d)",
+                delay,
+                cert_name,
+                _OCSP_NETWORK_ERROR_STREAK,
+            )
             time.sleep(delay)
         return None, 0, None
     except Exception as e:
         log_error("❌ OCSP failed to fetch response for %s: %s", cert_name, e)
         return None, 0, None
+
+
+def _shard_is_canary_paged(fingerprint: Optional[str]) -> bool:
+    """True when shard has canary-paged meta and a non-empty ocsp.der (not soft-recalled / demoted)."""
+    normalized = _normalize_fingerprint(fingerprint) if fingerprint else None
+    if not normalized:
+        return False
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        der = shard / "ocsp.der"
+        meta_path = shard / "ocsp.json"
+        if not der.is_file() or der.stat().st_size <= 0 or not meta_path.is_file():
+            return False
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict):
+            return False
+        if meta.get("tombstoned") is True:
+            return False
+        if meta.get("unpaged_after_nongood") is True:
+            return False
+        return meta.get("paged") is True
+    except Exception:
+        return False
 
 
 def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, fingerprint: Optional[str] = None) -> Tuple[Optional[int], Optional[int]]:
@@ -3835,6 +5239,9 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
     current leaf. Shards are SPKI-keyed, so a same-key renew (or two names sharing a
     key) can leave a still-fresh DER for a different serial — callers that skip fetch
     on TTL must treat that as a miss.
+
+    Soft-recall / demote leave DER on disk with ``paged=false`` — treat as miss so
+    the job re-canaries instead of TTL-skipping a Must-Staple outage.
 
     Args:
         cert_name: Certificate identifier (for logging only)
@@ -3857,6 +5264,51 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
 
     if not ocsp_path.is_file():
         log_debug("⚡ OCSP TTL check: cache miss - file not found for %s", cert_name)
+        return None, None
+
+    # Demote / soft-recall keep DER but clear canary — must not TTL-skip.
+    if not _shard_is_canary_paged(fingerprint):
+        log_debug(
+            "⚡ OCSP TTL check: cache miss for %s — shard not canary-paged (soft-recall/demote)",
+            cert_name,
+        )
+        return None, None
+
+    # Meta/DER sync: restamp, canary, and DER thisUpdate auth all require a
+    # 64-char der_sha256. Missing/invalid sha must miss like a mismatch — otherwise
+    # TTL-skip + older-body fence keep a sha-less body forever (live_tu None).
+    meta_path = _get_sharded_ocsp_path(fingerprint) / "ocsp.json"
+    try:
+        meta_for_sha = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.is_file() else None
+    except Exception:
+        meta_for_sha = None
+    if not isinstance(meta_for_sha, dict):
+        log_info(
+            "⚡ OCSP cached response for %s: fp=%s meta unreadable after canary-paged check; "
+            "treating as miss so refresh can refetch",
+            cert_name,
+            (fingerprint[:16] + "...") if fingerprint else "unknown",
+        )
+        return None, None
+    sha = meta_for_sha.get("der_sha256")
+    if not isinstance(sha, str) or len(sha) != 64:
+        log_info(
+            "⚡ OCSP cached response for %s: fp=%s missing/invalid der_sha256; "
+            "treating as miss so refresh can restamp",
+            cert_name,
+            (fingerprint[:16] + "...") if fingerprint else "unknown",
+        )
+        return None, None
+    try:
+        if hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower() != sha.lower():
+            log_info(
+                "⚡ OCSP cached response for %s: fp=%s der_sha256 mismatch; "
+                "treating as miss so refresh can refetch",
+                cert_name,
+                (fingerprint[:16] + "...") if fingerprint else "unknown",
+            )
+            return None, None
+    except Exception:
         return None, None
 
     log_debug("⚡ OCSP cached file found for %s, reading This/Next Update...", cert_name)
@@ -3911,6 +5363,51 @@ def get_cached_ocsp_ttl(cert_name: str, cert_pem: Optional[bytes] = None, finger
                         leaf_serial,
                     )
                     return None, None
+
+        # Refuse TTL-skip on non-GOOD (align with DER thisUpdate auth / canary).
+        try:
+            status_ok = False
+            matched_for_status = None
+            if cert_pem is not None:
+                try:
+                    leaf_for_st = x509.load_pem_x509_certificate(_clean_pem(cert_pem))
+                    want_serial = int(leaf_for_st.serial_number)
+                    for single in ocsp_response.responses:
+                        try:
+                            if int(single.serial_number) == want_serial:
+                                matched_for_status = single
+                                break
+                        except Exception:
+                            continue
+                except Exception:
+                    matched_for_status = None
+            if matched_for_status is not None:
+                status_ok = matched_for_status.certificate_status == x509_ocsp.OCSPCertStatus.GOOD
+            else:
+                try:
+                    status_ok = ocsp_response.certificate_status == x509_ocsp.OCSPCertStatus.GOOD
+                except Exception:
+                    goods = []
+                    try:
+                        for single in ocsp_response.responses:
+                            try:
+                                if single.certificate_status == x509_ocsp.OCSPCertStatus.GOOD:
+                                    goods.append(single)
+                            except Exception:
+                                continue
+                    except Exception:
+                        goods = []
+                    status_ok = len(goods) == 1
+            if not status_ok:
+                log_info(
+                    "⚡ OCSP cached response for %s: fp=%s CertStatus not GOOD; "
+                    "treating as miss so refresh can refetch",
+                    cert_name,
+                    (fingerprint[:16] + "...") if fingerprint else "unknown",
+                )
+                return None, None
+        except Exception:
+            return None, None
 
         # Prefer matched-leaf timing when the body has multiple SingleResponses.
         remaining, total_lifetime = None, None
@@ -4043,10 +5540,10 @@ def _get_cert_checksums(db: Any, cert_data: Dict[str, bytes]) -> Dict[str, str]:
                 fingerprint = file_name[len("cert_checksum/"):]
                 if fingerprint in fingerprint_to_name:
                     cert_name = fingerprint_to_name[fingerprint]
-                    data = entry.get("data")
-                    if data:
+                    raw = _cache_blob_bytes(entry.get("data"))
+                    if raw:
                         try:
-                            checksums[cert_name] = data.decode("utf-8").strip()
+                            checksums[cert_name] = raw.decode("utf-8").strip()
                         except Exception:
                             pass
     except Exception as e:
@@ -4066,7 +5563,14 @@ def _clean_pem(pem_data: bytes) -> bytes:
     """
     Strip private keys, comments, and noise before the first certificate block.
     Ensures consistent checksums regardless of extra data in the database.
+
+    Drivers return ``memoryview`` / ``bytearray``. ``bytes in memoryview`` is
+    always false, and ``memoryview`` has no ``split`` — both skip the cert.
     """
+    blob = _cache_blob_bytes(pem_data)
+    if blob is None:
+        return b""
+    pem_data = blob
     # 1. Strip embedded private keys
     if b"PRIVATE KEY" in pem_data:
         pem_data = re.sub(rb"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----\s*", b"", pem_data)
@@ -4247,8 +5751,8 @@ def _load_custom_certs_from_db(db: Any) -> Dict[str, bytes]:
             if not re.match(r"^[A-Za-z0-9_.*-]+$", service_id):
                 log_warning("⚠️ OCSP sanitization: skipping custom cert with invalid service_id: %s", service_id)
                 continue
-            data = entry.get("data")
-            if not data:
+            data = _cache_blob_bytes(entry.get("data"))
+            if data is None:
                 log_warning("⚠️ OCSP custom cert %s for service %s has no data, skipping", file_name, service_id)
                 continue
             # Derive suffix from filename: cert-ecdsa.pem -> -ecdsa, cert.pem -> ""
@@ -4288,8 +5792,8 @@ def _load_selfsigned_certs_from_db(db: Any) -> Dict[str, bytes]:
             if not re.match(r"^[A-Za-z0-9_.*-]+$", service_id):
                 log_warning("⚠️ OCSP sanitization: skipping self-signed cert with invalid service_id: %s", service_id)
                 continue
-            data = entry.get("data")
-            if not data or b"-----BEGIN" not in data:
+            data = _cache_blob_bytes(entry.get("data"))
+            if data is None or b"-----BEGIN" not in data:
                 continue
             result[f"selfsigned-{service_id}"] = data
             log_debug("✓ OCSP loaded self-signed cert for %s from database", service_id)
@@ -4326,66 +5830,331 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
 
         # Get all OCSP cache entries from database for this job
         cache_files = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
+        db_tombstoned = _fingerprints_tombstoned_in_cache_entries(cache_files)
+        refuse_all_ocsp_shard_restore = False
+        ocsp_floor_caps: Dict[str, int] = {}
+        meta_body_uncertain = _fingerprints_meta_body_uncertain(cache_files)
         try:
-            ocsp_skip = ocsp_restore_skip_fingerprints(list(cache_files or []), CONFIGS_SSL_BASE)
+            ocsp_skip, ocsp_floor_caps = ocsp_restore_plan(
+                list(cache_files or []), CONFIGS_SSL_BASE
+            )
         except Exception as e:
-            log_debug("⚠️ OCSP restore fence unavailable: %s", e)
+            log_warning(
+                "⚠️ OCSP restore fence unavailable: %s — "
+                "refusing all OCSP shard/floor restores (keep disk)",
+                e,
+            )
+            refuse_all_ocsp_shard_restore = True
             ocsp_skip = {}
+            ocsp_floor_caps = {}
+        for fp in meta_body_uncertain:
+            ocsp_skip.setdefault(fp, "meta_body_unreadable")
 
-        for entry in cache_files:
+        # Meta/issuer before DER so a recovered GOOD DB meta can clear a lagging
+        # disk tombstone before force-unpage would strip a just-restored body.
+        # Floor after DER so a refused body cannot leave Must-Staple dark via
+        # cluster_floor alone. Track refused DERs to skip matching floor rows.
+        tombstone_cleared_fps: set = set()
+        der_restore_refused_fps: set = set()
+        incoming_meta_by_fp: Dict[str, Dict[str, Any]] = {}
+        fps_with_incoming_der: set = set()
+        incoming_der_by_fp: Dict[str, bytes] = {}
+        incoming_floors = ocsp_incoming_floors_from_cache(list(cache_files or []))
+        for entry in cache_files or []:
+            if not isinstance(entry, dict) or not entry.get("data"):
+                continue
+            file_name = entry.get("file_name") or ""
+            der_name_fp = _fingerprint_from_ocsp_der_name(file_name)
+            if der_name_fp:
+                fps_with_incoming_der.add(der_name_fp)
+                blob = _cache_blob_bytes(entry.get("data"))
+                if blob is not None:
+                    incoming_der_by_fp[der_name_fp] = blob
+            meta_name_fp = _fingerprint_from_meta_name(file_name)
+            if meta_name_fp:
+                parsed_in = parse_ocsp_meta_bytes(entry["data"])
+                if isinstance(parsed_in, dict):
+                    incoming_meta_by_fp[meta_name_fp] = parsed_in
+        ordered = sorted(
+            list(cache_files or []),
+            key=lambda e: _ocsp_cache_restore_phase(e.get("file_name") or ""),
+        )
+        for entry in ordered:
             file_name = entry.get("file_name", "")
             if not entry.get("data"):
                 continue
-            # Cluster floor rows: max-only merge before shard leaves.
-            if parse_ocsp_floor_cache_name(file_name):
+            # Cluster floor rows: capped merge after shard leaves (phase 3).
+            floor_fp = parse_ocsp_floor_cache_name(file_name)
+            if floor_fp:
+                if refuse_all_ocsp_shard_restore:
+                    log_info(
+                        "⏭️ OCSP floor restore skip fp=%s... "
+                        "(fence uncertain — keep disk floor)",
+                        floor_fp[:16],
+                    )
+                    continue
+                # Any plan fence (not only do-not-restamp): keep disk floor.
+                # Belt-and-suspenders with meta-skip → der_restore_refused.
+                if floor_fp in ocsp_skip:
+                    log_info(
+                        "⏭️ OCSP floor restore skip fp=%s... "
+                        "(fenced shard reason=%s — keep disk floor)",
+                        floor_fp[:16],
+                        ocsp_skip[floor_fp],
+                    )
+                    continue
+                if floor_fp in der_restore_refused_fps:
+                    log_info(
+                        "⏭️ OCSP floor restore skip fp=%s... "
+                        "(DER refused this pass — keep disk floor)",
+                        floor_fp[:16],
+                    )
+                    continue
                 try:
-                    if _restore_ocsp_cluster_floor_entry(file_name, entry["data"]):
+                    if _restore_ocsp_cluster_floor_entry(
+                        file_name,
+                        entry["data"],
+                        floor_cap=ocsp_floor_caps.get(floor_fp),
+                    ):
                         restored_count += 1
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore cluster floor %s: %s", file_name, e)
                 continue
             issuer_fp = _fingerprint_from_issuer_name(file_name)
             if issuer_fp:
-                if issuer_fp in ocsp_skip:
-                    skipped_newer += 1
-                    log_info(
-                        "⏭️ OCSP restore skip issuer.pem fp=%s... reason=%s",
-                        issuer_fp[:16],
-                        ocsp_skip[issuer_fp],
-                    )
+                if refuse_all_ocsp_shard_restore or issuer_fp in ocsp_skip:
+                    if refuse_all_ocsp_shard_restore:
+                        log_info(
+                            "⏭️ OCSP restore skip issuer.pem fp=%s... "
+                            "(fence uncertain — keep disk)",
+                            issuer_fp[:16],
+                        )
+                    else:
+                        skipped_newer += 1
+                        log_info(
+                            "⏭️ OCSP restore skip issuer.pem fp=%s... reason=%s",
+                            issuer_fp[:16],
+                            ocsp_skip[issuer_fp],
+                        )
                     continue
                 try:
-                    issuer_path = _resolved_sharded_ocsp_path(issuer_fp) / "issuer.pem"
-                    if not issuer_path.is_file() or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower() != hashlib.sha256(entry["data"]).hexdigest().lower():
-                        issuer_path.write_bytes(entry["data"])
-                        issuer_path.chmod(0o640)
-                        restored_ocsp_fps.add(issuer_fp)
-                        log_debug("✓ OCSP restored issuer certificate for %s", issuer_fp[:16])
+                    lock = _acquire_cert_lock(issuer_fp)
+                    if lock is None:
+                        log_warning(
+                            "⚠️ OCSP could not lock to restore issuer.pem fp=%s...",
+                            issuer_fp[:16],
+                        )
+                        continue
+                    try:
+                        issuer_path = _resolved_sharded_ocsp_path(issuer_fp) / "issuer.pem"
+                        if (
+                            not issuer_path.is_file()
+                            or hashlib.sha256(issuer_path.read_bytes()).hexdigest().lower()
+                            != hashlib.sha256(entry["data"]).hexdigest().lower()
+                        ):
+                            issuer_path.parent.mkdir(parents=True, exist_ok=True)
+                            issuer_path.write_bytes(entry["data"])
+                            issuer_path.chmod(0o640)
+                            # Do NOT add to restored_ocsp_fps — coherence clears bans via
+                            # der/meta fallback; only DER path after fail-closed may enter.
+                            log_debug(
+                                "✓ OCSP restored issuer certificate for %s",
+                                issuer_fp[:16],
+                            )
+                    finally:
+                        _release_cert_lock(lock, issuer_fp)
                 except Exception as e:
                     log_debug("⚠️ OCSP could not restore issuer certificate for %s: %s", file_name, e)
                 continue
             meta_fp = _fingerprint_from_meta_name(file_name)
             if meta_fp:
-                if meta_fp in ocsp_skip:
-                    skipped_newer += 1
-                    log_info(
-                        "⏭️ OCSP restore skip ocsp.json fp=%s... reason=%s",
-                        meta_fp[:16],
-                        ocsp_skip[meta_fp],
+                if refuse_all_ocsp_shard_restore or meta_fp in ocsp_skip:
+                    if refuse_all_ocsp_shard_restore:
+                        log_info(
+                            "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                            "(fence uncertain — keep disk)",
+                            meta_fp[:16],
+                        )
+                    else:
+                        skipped_newer += 1
+                        log_info(
+                            "⏭️ OCSP restore skip ocsp.json fp=%s... reason=%s",
+                            meta_fp[:16],
+                            ocsp_skip[meta_fp],
+                        )
+                    # Meta refuse ⇒ refuse DER+floor (cluster_floor MS-dark hole).
+                    # Keep disk: do not unlocked-strip mid-canary bodies.
+                    note_ocsp_der_restore_refused(
+                        der_restore_refused_fps,
+                        CONFIGS_SSL_BASE,
+                        meta_fp,
+                        LOG,
+                        strip_conflict=False,
                     )
                     continue
                 try:
-                    meta_path = _resolved_sharded_ocsp_path(meta_fp) / "ocsp.json"
                     write_data = normalize_restored_ocsp_json_bytes(entry["data"])
                     if write_data is None:
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            meta_fp,
+                            LOG,
+                            strip_conflict=False,
+                        )
                         continue
-                    if not meta_path.is_file() or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower() != hashlib.sha256(write_data).hexdigest().lower():
-                        meta_path.parent.mkdir(parents=True, exist_ok=True)
-                        meta_path.write_bytes(write_data)
-                        meta_path.chmod(0o640)
-                        restored_ocsp_fps.add(meta_fp)
-                        log_debug("✓ OCSP restored metadata for %s", meta_fp[:16])
+                    incoming = parse_ocsp_meta_bytes(entry["data"])
+                    if not isinstance(incoming, dict):
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            meta_fp,
+                            LOG,
+                            strip_conflict=False,
+                        )
+                        continue
+                    lock = _acquire_cert_lock(meta_fp)
+                    if lock is None:
+                        log_warning(
+                            "⚠️ OCSP could not lock to restore meta fp=%s...",
+                            meta_fp[:16],
+                        )
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            meta_fp,
+                            LOG,
+                            strip_conflict=False,
+                        )
+                        continue
+                    try:
+                        meta_path = _resolved_sharded_ocsp_path(meta_fp) / "ocsp.json"
+                        # Demote may have landed the marker after plan time — refuse
+                        # under lock before undoing quarantined meta.
+                        if _shard_blocked_from_restamp(meta_fp):
+                            skipped_newer += 1
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                meta_fp,
+                                LOG,
+                                strip_conflict=False,
+                            )
+                            log_info(
+                                "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                                "(do-not-restamp under lock — keep demote)",
+                                meta_fp[:16],
+                            )
+                            continue
+                        # Refuse meta when serial-blacklist still applies to this
+                        # generation (batch DER when present; else meta serial/
+                        # thisUpdate — closes meta-only+floor MS-dark under a ban).
+                        if ocsp_serial_blacklist_blocks_restore(
+                            CONFIGS_SSL_BASE,
+                            meta_fp,
+                            der_bytes=incoming_der_by_fp.get(meta_fp),
+                            meta=incoming,
+                        ):
+                            skipped_newer += 1
+                            # Clear pre-existing sha≠body under lock (meta-only
+                            # batches never reach DER-phase strip).
+                            try:
+                                strip_ocsp_der_if_meta_sha_conflicts(
+                                    CONFIGS_SSL_BASE, meta_fp, LOG
+                                )
+                            except Exception:
+                                pass
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                meta_fp,
+                                LOG,
+                                strip_conflict=False,
+                            )
+                            log_warning(
+                                "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                                "(serial-blacklisted — refuse meta+DER+floor)",
+                                meta_fp[:16],
+                            )
+                            continue
+                        was_tombstoned = _disk_meta_tombstoned(meta_fp)
+                        disk_meta = load_disk_ocsp_meta(_get_sharded_ocsp_path(meta_fp))
+                        # Live fence re-check under lock (plan-time skip may be stale).
+                        # Floor-meeting exception matches ocsp_restore_plan.
+                        if should_keep_disk_ocsp_shard(disk_meta, incoming):
+                            if ocsp_prefer_incoming_meets_colony_floor(
+                                CONFIGS_SSL_BASE,
+                                meta_fp,
+                                disk_meta,
+                                incoming,
+                                has_der=meta_fp in fps_with_incoming_der,
+                                incoming_floor=incoming_floors.get(meta_fp),
+                            ):
+                                pass  # allow overwrite
+                            elif (
+                                not disk_ocsp_strictly_newer_than(disk_meta, incoming)
+                                and ocsp_meta_same_colony_generation(disk_meta, incoming)
+                            ):
+                                # Same colony generation — skip meta rewrite; do not refuse DER.
+                                skipped_newer += 1
+                                log_info(
+                                    "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                                    "(same colony generation — keep meta, allow DER)",
+                                    meta_fp[:16],
+                                )
+                                continue
+                            elif (
+                                meta_fp in fps_with_incoming_der
+                                and not disk_ocsp_strictly_newer_than(disk_meta, incoming)
+                                and not (_get_sharded_ocsp_path(meta_fp) / "ocsp.der").is_file()
+                                and ocsp_meta_allows_missing_der_completion(disk_meta, incoming)
+                            ):
+                                # Missing disk DER, same thisUpdate (+ SHA) — complete trio.
+                                skipped_newer += 1
+                                log_info(
+                                    "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                                    "(missing DER, same thisUpdate — keep meta, allow DER)",
+                                    meta_fp[:16],
+                                )
+                                continue
+                            else:
+                                skipped_newer += 1
+                                note_ocsp_der_restore_refused(
+                                    der_restore_refused_fps,
+                                    CONFIGS_SSL_BASE,
+                                    meta_fp,
+                                    LOG,
+                                    strip_conflict=False,
+                                )
+                                log_info(
+                                    "⏭️ OCSP restore skip ocsp.json fp=%s... "
+                                    "(live fence keeps disk)",
+                                    meta_fp[:16],
+                                )
+                                continue
+                        if (
+                            not meta_path.is_file()
+                            or hashlib.sha256(meta_path.read_bytes()).hexdigest().lower()
+                            != hashlib.sha256(write_data).hexdigest().lower()
+                        ):
+                            meta_path.parent.mkdir(parents=True, exist_ok=True)
+                            meta_path.write_bytes(write_data)
+                            meta_path.chmod(0o640)
+                            # Do NOT add to restored_ocsp_fps (same ban-clear hole as issuer).
+                            log_debug("✓ OCSP restored metadata for %s", meta_fp[:16])
+                            if was_tombstoned and not _disk_meta_tombstoned(meta_fp):
+                                tombstone_cleared_fps.add(meta_fp)
+                    finally:
+                        _release_cert_lock(lock, meta_fp)
                 except Exception as e:
+                    # Meta may not have landed — do not unlocked-strip mid-canary.
+                    note_ocsp_der_restore_refused(
+                        der_restore_refused_fps,
+                        CONFIGS_SSL_BASE,
+                        meta_fp,
+                        LOG,
+                        strip_conflict=False,
+                    )
                     log_debug("⚠️ OCSP could not restore metadata for %s: %s", file_name, e)
                 continue
             # Marker entries live under ocsp-marker/<cert_name>.
@@ -4394,15 +6163,122 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
             if not fingerprint:
                 continue
 
-            db_data = entry["data"]
+            db_data = _cache_blob_bytes(entry.get("data"))
+            if db_data is None:
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
             db_checksum = (entry.get("checksum") or hashlib.sha256(db_data).hexdigest()).lower()
+            if refuse_all_ocsp_shard_restore:
+                log_info(
+                    "⏭️ OCSP restore skip ocsp.der fp=%s... "
+                    "(fence uncertain — keep disk)",
+                    fingerprint[:16],
+                )
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
             if _serial_blacklist_blocks(fingerprint, db_data, fingerprint[:16]):
                 log_warning("🧹 OCSP skipping database sync of blacklisted serial for %s", fingerprint[:16])
+                # Meta may already have landed this pass — strip sha≠body under
+                # cert lock (unlocked strip races mid-canary).
+                ban_lock = _acquire_cert_lock(fingerprint)
+                if ban_lock is not None:
+                    try:
+                        strip_ocsp_der_if_meta_sha_conflicts(
+                            CONFIGS_SSL_BASE, fingerprint, LOG
+                        )
+                    finally:
+                        _release_cert_lock(ban_lock, fingerprint)
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
+            if fingerprint in db_tombstoned:
+                log_warning(
+                    "⏭️ OCSP skipping database sync of ocsp.der for fp=%s... "
+                    "(DB meta tombstoned — refuse rehydrate; deleting leftover DER)",
+                    fingerprint[:16],
+                )
+                _delete_ocsp_der_db_rows(db, fingerprint)
+                try:
+                    der_path = _get_sharded_ocsp_path(fingerprint) / "ocsp.der"
+                    if der_path.is_file():
+                        der_path.unlink()
+                except Exception as e:
+                    log_warning(
+                        "⚠️ OCSP could not strip disk DER for tombstoned fp=%s...: %s",
+                        fingerprint[:16],
+                        e,
+                    )
+                # Do NOT mark do-not-restamp here: that marker also fences meta
+                # restore via ocsp_restore_plan, so a later recovered GOOD DB
+                # generation could never heal this node without a live canary.
+                # Per-run db_tombstoned already refuses DER while DB stays tombstoned.
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
+            # Disk tombstone with recovered GOOD DB meta: refuse DER write until
+            # meta leaf has cleared the lagging tombstone (meta-first pass above).
+            if fingerprint in der_restore_refused_fps:
+                log_info(
+                    "⏭️ OCSP skipping database sync of ocsp.der for fp=%s... "
+                    "(meta refused this pass — refuse DER+floor)",
+                    fingerprint[:16],
+                )
+                continue
+            if _disk_meta_tombstoned(fingerprint):
+                log_info(
+                    "⏭️ OCSP skipping database sync of ocsp.der for fp=%s... "
+                    "(disk tombstone lagging — refuse until meta clears)",
+                    fingerprint[:16],
+                )
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
+            if _shard_blocked_from_restamp(fingerprint):
+                log_warning(
+                    "⏭️ OCSP skipping database sync of ocsp.der for fp=%s... "
+                    "(do-not-restamp after demote — refuse rehydrate)",
+                    fingerprint[:16],
+                )
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
                 continue
 
             try:
                 ocsp_cert_dir = _resolved_sharded_ocsp_path(fingerprint)
                 ocsp_path = ocsp_cert_dir / "ocsp.der"
+                incoming_for_der = incoming_meta_by_fp.get(fingerprint)
 
                 if ocsp_path.is_file():
                     # File exists — compare checksum
@@ -4410,8 +6286,23 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                     if disk_checksum == db_checksum:
                         ok_count += 1
                         log_debug("✓ OCSP disk file for %s matches database (checksum=%s)", fingerprint, db_checksum[:8])
+                        # Matching DER must NOT go through fail-closed: unpage/lock
+                        # failure would strip the intact body and delete the DB DER.
+                        # Meta heal already stamped paged=false — enqueue coherence only
+                        # when body is GOOD + SHA-matched (not a stale leftover).
+                        if fingerprint in tombstone_cleared_fps and ocsp_heal_coherence_eligible(
+                            CONFIGS_SSL_BASE, fingerprint, LOG
+                        ):
+                            restored_ocsp_fps.add(fingerprint)
                     elif fingerprint in ocsp_skip:
                         skipped_newer += 1
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            fingerprint,
+                            LOG,
+                            strip_conflict=False,
+                        )
                         log_info(
                             "⏭️ OCSP restore skip ocsp.der fp=%s... (disk newer than DB) reason=%s",
                             fingerprint[:16],
@@ -4425,20 +6316,107 @@ def restore_ocsp_from_database(db: Optional[Any] = None) -> None:
                             disk_checksum[:8],
                             db_checksum[:8],
                         )
-                        ocsp_path.write_bytes(db_data)
-                        ocsp_path.chmod(0o640)
-                        replaced_count += 1
-                        restored_ocsp_fps.add(fingerprint)
+                        der_ok = _restore_foreign_ocsp_der(
+                            fingerprint,
+                            fingerprint[:16],
+                            db_data,
+                            db,
+                            expected_checksum=db_checksum,
+                            incoming_meta=incoming_for_der,
+                            incoming_floor=incoming_floors.get(fingerprint),
+                        )
+                        if der_ok is True:
+                            replaced_count += 1
+                            restored_ocsp_fps.add(fingerprint)
+                        elif der_ok is False:
+                            # Fail-closed under lock already stripped — refuse floor only.
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
+                        else:
+                            # None: live-fence keep-disk / tombstone — do not unlocked-strip.
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
                 else:
-                    # File missing — restore from database
-                    ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
-                    ocsp_path.write_bytes(db_data)
-                    ocsp_path.chmod(0o640)
-                    restored_count += 1
-                    restored_ocsp_fps.add(fingerprint)
-                    log_debug("✓ OCSP restored cached response for %s from database", fingerprint)
+                    # File missing — restore from database only when fence allows.
+                    # Fenced newer meta without DER must not get an older DB body
+                    # (fail-closed would rewrite the fenced meta + upsert).
+                    if fingerprint in ocsp_skip:
+                        skipped_newer += 1
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            fingerprint,
+                            LOG,
+                            strip_conflict=False,
+                        )
+                        log_info(
+                            "⏭️ OCSP restore skip ocsp.der fp=%s... "
+                            "(missing on disk but fenced — keep meta, refuse rehydrate) reason=%s",
+                            fingerprint[:16],
+                            ocsp_skip[fingerprint],
+                        )
+                    else:
+                        der_ok = _restore_foreign_ocsp_der(
+                            fingerprint,
+                            fingerprint[:16],
+                            db_data,
+                            db,
+                            expected_checksum=db_checksum,
+                            incoming_meta=incoming_for_der,
+                            incoming_floor=incoming_floors.get(fingerprint),
+                        )
+                        if der_ok is True:
+                            restored_count += 1
+                            restored_ocsp_fps.add(fingerprint)
+                            log_debug(
+                                "✓ OCSP restored cached response for %s from database",
+                                fingerprint,
+                            )
+                        elif der_ok is False:
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
+                        else:
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
             except Exception as e:
+                # May not have written — do not unlocked-strip mid-canary.
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
                 log_debug("⚠️ OCSP could not sync cache for %s: %s", fingerprint, e)
+
+        # Meta heal with leftover live DER (no DB DER row this pass) still needs
+        # coherence — otherwise peer-refuse / blacklist stick after tombstone clear.
+        # Only GOOD + SHA-matched bodies may clear bans.
+        for fp in tombstone_cleared_fps:
+            if fp in restored_ocsp_fps:
+                continue
+            if ocsp_heal_coherence_eligible(CONFIGS_SSL_BASE, fp, LOG):
+                restored_ocsp_fps.add(fp)
 
         if restored_ocsp_fps:
             try:
@@ -4484,7 +6462,6 @@ def _process_cert(
         stats = {}
 
     service_name = _service_name_from_dir(cert_name)
-    sanitized_name = _sanitize_filename(cert_name)
 
     # === PEM CLEANING & SECURITY STRIPPING ===
     # Clean it immediately so all subsequent logic (OCSP fetch, checksum, parsing) 
@@ -4500,20 +6477,6 @@ def _process_cert(
         cleanup_ocsp_cache(db, cert_name, fingerprint=cert_fp)
         stats["le_certs_skipped"] = stats.get("le_certs_skipped", 0) + 1
         return (cert_name, None, 0, cert_checksum, pem_data, None, False)
-
-    # Check if certificate checksum matches what we have in database
-    # Checksums are stored by fingerprint (cert_checksum/{fingerprint}), so compute it first
-    cached_checksum = None
-    fingerprint_for_checksum = cert_fp
-    if db and fingerprint_for_checksum:
-        try:
-            checksum_key = f"cert_checksum/{fingerprint_for_checksum}"
-            checksum_data = db.get_job_cache_file(file_name=checksum_key, job_name="ocsp-refresh")
-            if checksum_data:
-                cached_checksum = checksum_data.decode("utf-8").strip()
-                log_debug("✓ OCSP found cached checksum for %s (key=%s)", cert_name, checksum_key[:30])
-        except Exception as e:
-            log_debug("⚠️ OCSP could not check cached checksum for %s: %s", cert_name, e)
 
     log_debug("🔄 OCSP processing certificate %s", cert_name)
 
@@ -4539,7 +6502,6 @@ def _process_cert(
         # Negatives for intermediates: tenant control key. Body/TTL: shared SPKI.
         neg_fp = control_fp or fingerprint
         if control_fp and fingerprint:
-            stats.setdefault("ocsp_inter_control_by_body", {})[fingerprint] = control_fp
             log_debug(
                 "🔗 OCSP intermediate body_fp=%s... control_fp=%s... for %s",
                 fingerprint[:16],
@@ -4566,7 +6528,9 @@ def _process_cert(
                     cert_name,
                     backoff_remaining,
                 )
-                return (cert_name, None, backoff_remaining, cert_checksum, pem_data, ocsp_url, False)
+                # was_attempted=True + ttl=0: must not look like a TTL-keep to the
+                # chain seal path (which clears control + seals on not-attempted).
+                return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
 
         # === Check if cached OCSP response is still fresh (disk + database) ===
         # This two-tier check handles aborted downloads, database inconsistencies, and ephemeral storage
@@ -4616,8 +6580,8 @@ def _process_cert(
                     return (cert_name, None, 0, cert_checksum, pem_data, ocsp_url, True)
                 log_debug("✓ OCSP successfully fetched response for %s on attempt %d (TTL=%ds)", cert_name, attempt, ttl)
                 stats["ocsp_fetched_responses"] = stats.get("ocsp_fetched_responses", 0) + 1
-                if neg_fp:
-                    _clear_nongood_marker(neg_fp)
+                # Defer nongood clear until canary page succeeds — a pin/canary failure
+                # must not reset the streak (would delay soft-recall/tombstone).
                 break
             if attempt == 1:
                 log_warning("⚠️ OCSP fetch failed for %s, retrying once after 2 seconds ...", cert_name)
@@ -4707,6 +6671,13 @@ def _process_cert(
         )
 
         # === Return result for batched database writes ===
+        # Record tenant control by cert_name for persist — do NOT append to
+        # ocsp_inter_control_pairs here (that would clear other tenants when a
+        # shared body pages for a different leaf). Persist promotes on success.
+        if control_fp and fingerprint and ocsp_der and stats is not None:
+            by_name = stats.setdefault("ocsp_inter_control_by_name", {})
+            if isinstance(by_name, dict):
+                by_name[cert_name] = control_fp
         return (cert_name, ocsp_der, ttl, cert_checksum, pem_data, ocsp_url, True)
 
     except Exception as e:
@@ -4808,7 +6779,10 @@ def process_custom_certs(
             # Add recategorized certs to results so their checksums get persisted to database
             # (even though we didn't fetch new OCSP responses, we need to record their checksums for future runs)
             for cert_name, cert_pem in sorted(recategorized_changed_custom.items()):
-                pem_checksum = _calculate_cert_checksum(cert_pem)
+                # Compare path hashes _clean_pem. A raw custom PEM (private key
+                # still attached) never matches that, so the cert stays "changed"
+                # and force-fetches on every TTL expiry.
+                pem_checksum = _calculate_cert_checksum(_clean_pem(cert_pem))
                 # Tuple: (cert_name, ocsp_der=None, ttl=0, checksum, pem_data, ocsp_url=None, was_attempted=False)
                 # We're not fetching, just recording the cert's checksum for differential tracking
                 results.append((cert_name, None, 0, pem_checksum, cert_pem, None, False))
@@ -4912,6 +6886,42 @@ def _is_ocsp_enabled_anywhere() -> bool:
     return os.getenv("SSL_USE_OCSP_STAPLING", "no").lower() == "yes"
 
 
+def _drop_staple_authorizations(fingerprint: Optional[str] = None) -> None:
+    """Drop L1 plus outside ligand/allow/refuse after a staple is removed.
+
+    ``fingerprint`` set: that SPKI only (exclusive shard drop).
+    ``fingerprint`` None: every outside authorization file (full purge).
+
+    Serial-blacklist and cluster floor are deny signals and stay.
+    Dotfiles (allow locks, in-flight revoke claims) stay for the lock holder
+    and the stale-claim sweep.
+    """
+    # Epoch first so a worker cannot rewrite an allow-pin from a stale L1
+    # entry after the pin file is gone.
+    _bump_ocsp_cache_epoch()
+    if fingerprint:
+        normalized = _normalize_fingerprint(fingerprint)
+        if not normalized:
+            return
+        _clear_ocsp_ligand(normalized)
+        _clear_ocsp_peer_refuse(normalized)
+        return
+
+    for dirname in ("ocsp-ligand", "ocsp-allow", "ocsp-refuse"):
+        directory = CONFIGS_SSL_BASE / dirname
+        if not directory.is_dir():
+            continue
+        try:
+            for entry in directory.iterdir():
+                if entry.name.startswith("."):
+                    continue
+                if entry.is_file() or entry.is_symlink():
+                    entry.unlink()
+        except Exception as e:
+            log_debug("⚠️ OCSP could not clear %s during staple purge: %s", dirname, e)
+    _bump_ocsp_cache_epoch()
+
+
 def cleanup_ocsp_cache(
     db: Optional[Any] = None,
     cert_name: Optional[str] = None,
@@ -4942,12 +6952,27 @@ def cleanup_ocsp_cache(
                 log_debug("⚠️ OCSP could not resolve fingerprint marker for %s: %s", cert_name, e)
                 resolved_fp = None
 
-        # Disk cleanup: fingerprint-sharded storage only.
+        # Disk cleanup: fingerprint-sharded storage is shared by every service
+        # using this SPKI. Drop the shard only when no other marker still points
+        # at it (per-service OCSP disable must not wipe a sibling's staple).
+        drop_shared_shard = False
         if resolved_fp:
+            others = _other_markers_share_fingerprint(db, resolved_fp, cert_name)
+            drop_shared_shard = others is False
+        if resolved_fp and drop_shared_shard:
             ocsp_fp_dir = _get_sharded_ocsp_path(resolved_fp)
             if ocsp_fp_dir.is_dir():
                 shutil.rmtree(ocsp_fp_dir, ignore_errors=True)
                 log_info("🧹 OCSP removed sharded cache for %s (fingerprint=%s)", cert_name, resolved_fp[:16] + "...")
+            # rmtree does not reach ocsp-ligand/ or ocsp-allow/, and L1 ignores
+            # the unlink until .ocsp_epoch changes.
+            _drop_staple_authorizations(resolved_fp)
+        elif resolved_fp:
+            log_info(
+                "🧹 OCSP keeping shared shard fp=%s... (other service still references it; dropped marker for %s)",
+                resolved_fp[:16],
+                cert_name,
+            )
         else:
             log_debug("🧹 OCSP no fingerprint for %s; skipping disk shard cleanup", cert_name)
 
@@ -4955,10 +6980,10 @@ def cleanup_ocsp_cache(
             try:
                 # Always remove the cert-name marker (differential tracking).
                 _delete_cert_name_marker(db, cert_name)
-                # If we resolved a fingerprint, also remove the corresponding response+checksum.
-                if resolved_fp:
+                # Fingerprint rows are shared — delete only when this cert was the last marker.
+                if resolved_fp and drop_shared_shard:
                     _delete_fingerprint_db_rows(db, resolved_fp)
-                log_debug("🧹 OCSP database records removed for %s (fingerprint resolved=%s)", cert_name, bool(resolved_fp))
+                log_debug("🧹 OCSP database records removed for %s (fingerprint resolved=%s shared_kept=%s)", cert_name, bool(resolved_fp), not drop_shared_shard)
             except Exception as e:
                 log_debug("🧹 OCSP could not remove database entry for %s: %s", cert_name, e)
     else:
@@ -5024,6 +7049,10 @@ def cleanup_ocsp_cache(
                 log_debug("🧹 OCSP could not clean database entries: %s", e)
         elif not purge_db:
             log_info("🧹 OCSP disk caches cleaned up")
+
+        # Workers keep L1 until the epoch changes. Ligand paged=true and an
+        # allow-pin would authorize a body this walk just deleted.
+        _drop_staple_authorizations(None)
 
         log_info("🧹 OCSP all stapling caches cleaned up")
 
@@ -5103,9 +7132,11 @@ def _cleanup_expired_ocsp_entries(
                 if not isinstance(meta, dict):
                     continue
 
-                fingerprint = _normalize_fingerprint(meta.get("fingerprint")) or _normalize_fingerprint(
-                    meta_file.parent.name
-                )
+                fingerprint = _normalize_fingerprint(meta_file.parent.name)
+                # Staging (`.{fp}.pub-*`) and aside trees are not live shards.
+                # Their ocsp.json still carries the live fingerprint and may be
+                # expired while the live trio is fresh — deleting by that field
+                # would rmtree the good cache.
                 if not fingerprint:
                     continue
 
@@ -5176,8 +7207,8 @@ def _cleanup_expired_ocsp_entries(
                 if not fingerprint or fingerprint in expired_fingerprints:
                     continue
 
-                data = entry.get("data")
-                if not data:
+                data = _cache_blob_bytes(entry.get("data"))
+                if data is None:
                     continue
 
                 if checked_db >= max_db_checks:
@@ -5325,6 +7356,680 @@ def _cleanup_orphaned_ocsp(db: Optional[Any], le_certs: Dict[str, bytes], stats:
         stats["orphaned_cleaned"] = orphaned_count
 
 
+def _force_unpage_restored_shard(
+    fingerprint: str,
+    cert_name: str,
+    *,
+    held_lock: Optional[Any] = None,
+    refresh_der_sha: bool = True,
+) -> bool:
+    """
+    After restore writes a foreign DER, stamp ``paged=false`` on disk so restamp
+    cannot re-pin without a local canary (DB ``paged=true`` is not local proof).
+
+    Disk-only: never upsert meta to the DB (DER-before-meta restore would poison
+    a newer DB GOOD generation with stale disk meta). On disk ``tombstoned``:
+    strip disk DER only — never delete the DB DER row (``db_tombstoned`` owns
+    that); a recovered GOOD DB body must survive until meta clears the lag.
+
+    ``held_lock``: when the caller already holds the cert lock (e.g. write-then-
+    unpage under one critical section), skip acquire/release.
+
+    ``refresh_der_sha``: when True (post-body), refresh ``der_sha256`` from the
+    live DER **only when** meta has no hash or the hash already matches the body.
+    A kept meta SHA that disagrees with the body is a generation lie — refuse
+    rebind, strip the DER, return False (parity with
+    ``stamp_disk_ocsp_meta_der_sha_after_restore``). When False (pre-write unpage),
+    never hash a leftover body into meta — that would clobber a meta-first
+    restored hash and let coherence strip the just-written GOOD DER on SHA mismatch.
+
+    Returns True when disk meta is durably not canary-paged (or tombstoned), or
+    when meta is missing (already not canary-paged).
+    False on lock/write failure — caller must fail closed (strip DER / mark
+    do-not-restamp) so same-job restamp cannot re-open Must-Staple.
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    own_lock = held_lock is None
+    lock = held_lock if held_lock is not None else _acquire_cert_lock(normalized)
+    if lock is None:
+        log_warning("⚠️ OCSP could not lock to unpage restored shard %s", cert_name)
+        return False
+    try:
+        shard = _get_sharded_ocsp_path(normalized)
+        meta_path = shard / "ocsp.json"
+        der_path = shard / "ocsp.der"
+        if not meta_path.is_file():
+            # DER-before-meta restore order (cold/tmpfs). Missing meta is already
+            # not canary-paged — do NOT invent sparse ocsp.json or upsert it to
+            # the DB (would poison the real CertID/AIA/expires row before the
+            # batch's meta leaf is written to disk only).
+            return True
+        try:
+            loaded = json.loads(meta_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                meta: Dict[str, Any] = loaded
+            else:
+                # Corrupt non-dict meta — refuse to invent blank paged=false
+                # (would drop tombstoned / quarantine signals).
+                return False
+        except Exception:
+            # Unreadable meta — strip DER via fail-closed caller; do not overwrite.
+            return False
+        if meta.get("tombstoned") is True:
+            # Disk tombstone must not keep a live body. Strip disk DER only —
+            # do NOT delete DB DER here. DB tombstone authority is db_tombstoned
+            # (restore/verify already drop DB+disk DER). Disk-only tombstone with
+            # a recovered GOOD DB body must keep that row so meta-first restore
+            # can clear the lagging tombstone without destroying colony GOOD.
+            try:
+                if der_path.is_file():
+                    der_path.unlink()
+                if der_path.is_file():
+                    return False
+            except Exception:
+                return False
+            return True
+        already_unpaged = meta.get("paged") is not True
+        try:
+            prev_gen = int(meta.get("soft_recall_gen") or 0)
+        except (TypeError, ValueError):
+            prev_gen = 0
+        if prev_gen < 0:
+            prev_gen = 0
+        meta["paged"] = False
+        meta["fingerprint"] = normalized
+        # Avoid gen churn on repeated verify-restore of an already-unpaged shard
+        # (coherence deletes ligand anyway; bumping fights soft-recall merge).
+        if not already_unpaged:
+            meta["soft_recall_gen"] = prev_gen + 1
+        else:
+            meta["soft_recall_gen"] = prev_gen
+        meta.pop("paged_unix", None)
+        # Only refresh der_sha256 after the new body is durable. Pre-write unpage
+        # must not hash a leftover DER over a meta-first restored hash (coherence
+        # would then SHA-mismatch-strip the just-written GOOD body).
+        # Never rebind a kept meta SHA to a foreign body (Job stamp parity).
+        if refresh_der_sha and der_path.is_file():
+            try:
+                got_sha = hashlib.sha256(der_path.read_bytes()).hexdigest().lower()
+                cur_sha = meta.get("der_sha256")
+                if isinstance(cur_sha, str):
+                    lowered = cur_sha.lower()
+                    if len(lowered) == 64 and all(c in "0123456789abcdef" for c in lowered):
+                        if lowered != got_sha:
+                            log_warning(
+                                "⚠️ OCSP refuse der_sha256 rebind for %s "
+                                "(kept meta sha≠body — strip DER, refuse generation lie)",
+                                cert_name,
+                            )
+                            try:
+                                if der_path.is_file():
+                                    der_path.unlink()
+                            except Exception as unlink_err:
+                                log_warning(
+                                    "⚠️ OCSP could not strip DER after sha≠body refuse for %s: %s",
+                                    cert_name,
+                                    unlink_err,
+                                )
+                            return False
+                meta["der_sha256"] = got_sha
+            except Exception as e:
+                log_warning(
+                    "⚠️ OCSP could not refresh der_sha256 for %s after DER restore: %s — "
+                    "stripping body (refuse generation lie)",
+                    cert_name,
+                    e,
+                )
+                try:
+                    if der_path.is_file():
+                        der_path.unlink()
+                except Exception:
+                    pass
+                return False
+        meta.update(_provenance_meta())
+        meta_text = json.dumps(meta, separators=(",", ":"))
+        _atomic_write_text(meta_path, meta_text, mode=0o640)
+        # Disk-only unpage. Do NOT upsert to DB here: restore/verify often process
+        # DER before meta; upserting live disk meta would overwrite a newer DB
+        # GOOD generation with stale/soft-recalled disk meta. Restored meta leaves
+        # already go through normalize_restored_ocsp_json_bytes (paged=false).
+        # Confirm durable unpage landed (restamp trusts disk meta).
+        try:
+            check = json.loads(meta_path.read_text(encoding="utf-8"))
+            return isinstance(check, dict) and check.get("paged") is not True
+        except Exception:
+            return False
+    except Exception as e:
+        log_warning("⚠️ OCSP could not force-unpage restored shard %s: %s", cert_name, e)
+        return False
+    finally:
+        if own_lock:
+            _release_cert_lock(lock, normalized)
+
+
+def _strip_restored_der_fail_closed(
+    fingerprint: str,
+    cert_name: str,
+    db: Optional[Any] = None,
+    *,
+    delete_db_der: bool = False,
+    mark_do_not_restamp: bool = True,
+) -> None:
+    """
+    Strip disk DER after a failed foreign restore; optionally mark + drop DB DER.
+
+    ``mark_do_not_restamp``: only after a body was written (or confirmed bad).
+    Pre-write unpage/lock failure must not durable-mark — that fences meta via
+    ``ocsp_restore_plan`` and recreates the sticky heal hole db_tombstoned avoided.
+    Restamp already no-ops without DER after strip.
+
+    ``delete_db_der``: only after a foreign body was written. Also refuse DB
+    delete when live disk meta is tombstoned (keep DB for heal).
+    """
+    if mark_do_not_restamp:
+        _mark_do_not_restamp(fingerprint, reason="restore_unpage_failed")
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return
+    try:
+        der_path = _get_sharded_ocsp_path(normalized) / "ocsp.der"
+        if der_path.is_file():
+            der_path.unlink()
+    except Exception as e:
+        log_error(
+            "❌ OCSP could not strip DER after failed restore unpage for %s: %s",
+            cert_name,
+            e,
+        )
+    if not delete_db_der:
+        return
+    if _disk_meta_tombstoned(fingerprint):
+        # Live disk tombstone — keep DB GOOD for meta-heal recovery.
+        return
+    if not _delete_ocsp_der_db_rows(db, normalized):
+        log_error(
+            "❌ OCSP could not drop DB DER after failed restore unpage for %s",
+            cert_name,
+        )
+
+
+def _restore_foreign_ocsp_der(
+    fingerprint: str,
+    cert_name: str,
+    der_bytes: bytes,
+    db: Optional[Any] = None,
+    *,
+    expected_checksum: Optional[str] = None,
+    incoming_meta: Optional[Dict[str, Any]] = None,
+    incoming_floor: Optional[Dict[str, Any]] = None,
+) -> Optional[bool]:
+    """
+    Write a foreign DB DER under the cert lock: unpage meta *first*, then body.
+
+    Never lands ``ocsp.der`` under still-``paged=true`` meta (handshake
+    skip-validate / restamp window).
+
+    ``incoming_meta`` / ``incoming_floor``: when provided, re-check live fence
+    under lock so a concurrent newer canary is not force-unpaged / overwritten.
+    Pass batch ``incoming_floor`` so floor-meeting prefer matches the plan.
+
+    Returns:
+      True  — body written and safe for coherence (incl. keep-body after
+              non-canary exception)
+      False — fail-closed / refused write (may strip disk; DB DER deleted only
+              for affirmative paged=true lie)
+      None  — skipped (disk tombstoned / do-not-restamp / live fence under lock /
+              lock miss — keep disk; do not unlocked-strip mid-canary)
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not der_bytes:
+        return False
+    lock = _acquire_cert_lock(normalized)
+    if lock is None:
+        log_error(
+            "❌ OCSP could not lock to restore DER for %s — "
+            "refusing body write (would land under unlocked/paged meta)",
+            cert_name,
+        )
+        # Do NOT durable-mark: transient lock miss must not fence meta restore.
+        # Return None (keep-disk): False would unlocked-strip sha≠body while
+        # another holder owns the canary critical section.
+        return None
+    body_written = False
+    try:
+        # Re-check durable quarantine under lock (caller sampled pre-lock).
+        if _shard_blocked_from_restamp(fingerprint):
+            return None
+        # Sample tombstone under lock (plan-time sample can race with demote).
+        if _disk_meta_tombstoned(fingerprint):
+            # Strip leftover disk body only — never touch DB DER here.
+            try:
+                der_path = _get_sharded_ocsp_path(normalized) / "ocsp.der"
+                if der_path.is_file():
+                    der_path.unlink()
+            except Exception:
+                pass
+            return None
+        # Ban re-check under lock (canary may stamp ban after unlocked probe).
+        # Job/generate_caches already re-check under DER flock — parity here.
+        if ocsp_serial_blacklist_blocks_restore(
+            CONFIGS_SSL_BASE,
+            normalized,
+            der_bytes=der_bytes,
+            meta=incoming_meta,
+        ):
+            log_warning(
+                "🧹 OCSP skip DER restore for %s "
+                "(serial-blacklisted under lock — refuse rehydrate)",
+                cert_name,
+            )
+            # Strip generation lie under lock (callers must not unlocked-strip).
+            try:
+                strip_ocsp_der_if_meta_sha_conflicts(CONFIGS_SSL_BASE, normalized, LOG)
+            except Exception:
+                pass
+            return False
+        # Live fence: concurrent canary may have published a *strictly newer*
+        # trio after plan. Equal generation (meta-first just wrote this meta)
+        # must still allow DER to complete the trio — should_keep keeps equals.
+        # Floor-meeting override matches ocsp_restore_plan (disk wins expires but
+        # loses colony floor rank).
+        disk_meta = load_disk_ocsp_meta(_get_sharded_ocsp_path(normalized))
+        if incoming_meta is not None:
+            if disk_ocsp_strictly_newer_than(
+                disk_meta, incoming_meta
+            ) and not ocsp_prefer_incoming_meets_colony_floor(
+                CONFIGS_SSL_BASE,
+                normalized,
+                disk_meta,
+                incoming_meta,
+                has_der=True,
+                incoming_floor=incoming_floor,
+            ):
+                log_info(
+                    "⏭️ OCSP skip DER restore for %s "
+                    "(live fence: disk strictly newer — refuse unpage/overwrite)",
+                    cert_name,
+                )
+                return None
+        elif (
+            isinstance(disk_meta, dict)
+            and disk_meta.get("tombstoned") is not True
+        ):
+            # DER-only restore: plan skips when disk already has usable meta.
+            # Re-check under lock — a concurrent canary may have landed meta
+            # after plan sampled an empty shard (unpage would clobber it).
+            log_info(
+                "⏭️ OCSP skip DER restore for %s "
+                "(live fence: DER-only under disk meta — refuse unpage/overwrite)",
+                cert_name,
+            )
+            return None
+        # Unpage before body so paged=true + foreign DER never coexists briefly.
+        # Do not hash leftover DER into der_sha256 (meta-first hash must survive).
+        if not _force_unpage_restored_shard(
+            fingerprint, cert_name, held_lock=lock, refresh_der_sha=False
+        ):
+            log_error(
+                "❌ OCSP could not unpage before restoring DER for %s — refuse write",
+                cert_name,
+            )
+            # Pre-write: strip leftover disk only — no marker, keep DB GOOD.
+            _strip_restored_der_fail_closed(
+                fingerprint,
+                cert_name,
+                db,
+                delete_db_der=False,
+                mark_do_not_restamp=False,
+            )
+            return False
+        if _disk_meta_tombstoned(fingerprint):
+            # Unpage path stripped any leftover body under tombstone — do not write.
+            return None
+        der_path = _get_sharded_ocsp_path(normalized) / "ocsp.der"
+        der_path.parent.mkdir(parents=True, exist_ok=True)
+        # Refuse write when the caller's checksum does not match the body bytes
+        # (stale checksum column) — do not land a mismatched pair on disk.
+        if expected_checksum:
+            source_sha = hashlib.sha256(der_bytes).hexdigest().lower()
+            if source_sha != expected_checksum.lower():
+                log_error(
+                    "❌ OCSP refuse DER restore for %s — DB data/checksum mismatch "
+                    "(data=%s, checksum=%s); keeping DB body",
+                    cert_name,
+                    source_sha[:8],
+                    expected_checksum[:8],
+                )
+                try:
+                    strip_ocsp_der_if_meta_sha_conflicts(
+                        CONFIGS_SSL_BASE, normalized, LOG
+                    )
+                except Exception:
+                    pass
+                return False
+        der_path.write_bytes(der_bytes)
+        der_path.chmod(0o640)
+        body_written = True
+        if expected_checksum:
+            written = hashlib.sha256(der_path.read_bytes()).hexdigest().lower()
+            if written != expected_checksum.lower():
+                log_error(
+                    "❌ OCSP checksum mismatch after restoring %s (expected=%s, got=%s) — "
+                    "stripping disk only (keep DB GOOD for retry)",
+                    cert_name,
+                    expected_checksum[:8],
+                    written[:8],
+                )
+                # Local I/O glitch must not wipe colony DER (pre-write keep-DB parity).
+                _strip_restored_der_fail_closed(
+                    fingerprint,
+                    cert_name,
+                    db,
+                    delete_db_der=False,
+                    mark_do_not_restamp=False,
+                )
+                return False
+        # Refresh der_sha256 under lock after body lands; confirm still unpaged.
+        # Pre-write unpage already succeeded — a refresh/atomic-write failure is
+        # not a paged=true lie unless live meta is still canary-paged.
+        # SHA-conflict refuse strips DER inside force-unpage (no rebind).
+        if not _force_unpage_restored_shard(
+            fingerprint, cert_name, held_lock=lock, refresh_der_sha=True
+        ):
+            if _disk_meta_canary_paged(fingerprint):
+                log_error(
+                    "❌ OCSP restored DER for %s but meta still paged=true — "
+                    "marking do-not-restamp and stripping DER (refuse MS reopen)",
+                    cert_name,
+                )
+                _strip_restored_der_fail_closed(
+                    fingerprint,
+                    cert_name,
+                    db,
+                    delete_db_der=True,
+                    mark_do_not_restamp=True,
+                )
+                return False
+            # Generation-lie path already unlinked the body; do not "keep" it.
+            # If unlink failed, sha≠body still on disk — strip and refuse (do not
+            # return True / enqueue coherence under a generation lie).
+            if not der_path.is_file():
+                log_error(
+                    "❌ OCSP restored DER for %s refused (kept meta sha≠body) — "
+                    "body stripped; keeping DB for retry",
+                    cert_name,
+                )
+                return False
+            if _disk_meta_der_sha_conflicts_body(fingerprint, der_path):
+                log_error(
+                    "❌ OCSP restored DER for %s refused (kept meta sha≠body, "
+                    "strip incomplete) — stripping again; keeping DB for retry",
+                    cert_name,
+                )
+                _strip_restored_der_fail_closed(
+                    fingerprint,
+                    cert_name,
+                    db,
+                    delete_db_der=False,
+                    mark_do_not_restamp=False,
+                )
+                return False
+            log_warning(
+                "⚠️ OCSP restored DER for %s but could not refresh meta "
+                "(not affirmatively paged=true) — keeping body; der_sha256 may be stale",
+                cert_name,
+            )
+        if _disk_meta_tombstoned(fingerprint):
+            # Body should already be stripped by unpage tombstone path; if not, strip.
+            try:
+                if der_path.is_file():
+                    der_path.unlink()
+            except Exception:
+                pass
+            return None
+        return True
+    except Exception as e:
+        log_error("❌ OCSP could not restore DER for %s: %s", cert_name, e)
+        # Mirror post-body refresh: strip/mark/DB-delete only for affirmative
+        # paged=true lie. Exception after a successful unpage+write must not
+        # recreate the sticky heal hole.
+        if body_written and _disk_meta_canary_paged(fingerprint):
+            _strip_restored_der_fail_closed(
+                fingerprint,
+                cert_name,
+                db,
+                delete_db_der=True,
+                mark_do_not_restamp=True,
+            )
+            return False
+        if not body_written:
+            _strip_restored_der_fail_closed(
+                fingerprint,
+                cert_name,
+                db,
+                delete_db_der=False,
+                mark_do_not_restamp=False,
+            )
+            return False
+        # Parity with post-body force-unpage False path: never keep-body /
+        # coherence-success under a generation lie (meta sha≠body).
+        exc_der_path = _get_sharded_ocsp_path(normalized) / "ocsp.der"
+        if not exc_der_path.is_file():
+            log_error(
+                "❌ OCSP exception after DER write for %s but body missing — "
+                "refuse coherence; keeping DB for retry",
+                cert_name,
+            )
+            return False
+        if _disk_meta_der_sha_conflicts_body(fingerprint, exc_der_path):
+            log_error(
+                "❌ OCSP exception after DER write for %s with kept meta sha≠body — "
+                "stripping body; refuse coherence; keeping DB for retry",
+                cert_name,
+            )
+            _strip_restored_der_fail_closed(
+                fingerprint,
+                cert_name,
+                db,
+                delete_db_der=False,
+                mark_do_not_restamp=False,
+            )
+            return False
+        log_warning(
+            "⚠️ OCSP exception after DER write for %s but meta not "
+            "canary-paged — keeping body (no sticky mark)",
+            cert_name,
+        )
+        # Body kept and unpaged — treat as success for coherence (not an error).
+        if _disk_meta_tombstoned(fingerprint):
+            return None
+        return True
+    finally:
+        _release_cert_lock(lock, normalized)
+
+
+def _disk_meta_tombstoned(fingerprint: str) -> bool:
+    """True when live ocsp.json is tombstoned."""
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    try:
+        meta_path = _get_sharded_ocsp_path(normalized) / "ocsp.json"
+        if not meta_path.is_file():
+            return False
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        return isinstance(meta, dict) and meta.get("tombstoned") is True
+    except Exception:
+        return False
+
+
+def _disk_meta_canary_paged(fingerprint: str) -> bool:
+    """
+    True only when live ocsp.json affirmatively claims ``paged=true``.
+
+    Missing, unreadable, or non-dict meta → False. Lua never canary-trusts those
+    states, so callers must not treat uncertainty as a paged lie that warrants
+    strip + DB DER delete + durable do-not-restamp (sticky heal hole).
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized:
+        return False
+    try:
+        meta_path = _get_sharded_ocsp_path(normalized) / "ocsp.json"
+        if not meta_path.is_file():
+            return False
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict):
+            return False
+        return meta.get("paged") is True
+    except Exception:
+        return False
+
+
+def _disk_meta_der_sha_conflicts_body(fingerprint: str, der_path: Path) -> bool:
+    """
+    True when live meta claims a valid ``der_sha256`` that does not match ``der_path``.
+
+    Used after post-body force-unpage fails: unlink may have failed on sha≠body
+    refuse — must not take the keep-body success path. Missing/unreadable meta or
+    empty sha → False (no proven generation lie).
+    """
+    normalized = _normalize_fingerprint(fingerprint)
+    if not normalized or not der_path.is_file():
+        return False
+    try:
+        got = hashlib.sha256(der_path.read_bytes()).hexdigest().lower()
+        meta_path = _get_sharded_ocsp_path(normalized) / "ocsp.json"
+        if not meta_path.is_file():
+            return False
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        if not isinstance(meta, dict):
+            return False
+        cur = meta.get("der_sha256")
+        if not isinstance(cur, str):
+            return False
+        lowered = cur.lower()
+        if len(lowered) != 64 or any(c not in "0123456789abcdef" for c in lowered):
+            return False
+        return lowered != got
+    except Exception:
+        return False
+
+
+def _heal_lagging_disk_tombstone_meta(
+    entries: Optional[List[Any]],
+    *,
+    ocsp_skip: Optional[Dict[str, str]] = None,
+    refuse_all: bool = False,
+    db_tombstoned: Optional[Set[str]] = None,
+) -> Set[str]:
+    """
+    Write normalized GOOD DB ``ocsp.json`` over a lagging disk tombstone.
+
+    Used by verify-restore (DER-only loop) so a recovered colony meta can clear
+    ``tombstoned`` before DER rehydrate. Honors fence skip / refuse_all /
+    db_tombstoned, serial-blacklist, and re-checks ``should_keep_disk_ocsp_shard``
+    under the cert lock so a newer disk tombstone published after plan time is
+    not overwritten. Returns fingerprints whose disk tombstone was cleared.
+    """
+    cleared: Set[str] = set()
+    skip = ocsp_skip or {}
+    tomb_db = db_tombstoned or set()
+    if refuse_all:
+        return cleared
+    # Prefetch DER for ban fence (parity with restore_ocsp_from_database meta path).
+    incoming_der_by_fp: Dict[str, bytes] = {}
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        der_fp = _fingerprint_from_ocsp_der_name(entry.get("file_name") or "")
+        blob = _cache_blob_bytes(entry.get("data"))
+        if der_fp and blob is not None:
+            incoming_der_by_fp[der_fp] = blob
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        file_name = entry.get("file_name") or ""
+        fp = _fingerprint_from_meta_name(file_name)
+        if not fp or fp in skip or fp in tomb_db:
+            continue
+        data = _cache_blob_bytes(entry.get("data"))
+        if data is None:
+            continue
+        incoming = parse_ocsp_meta_bytes(data)
+        if not isinstance(incoming, dict) or incoming.get("tombstoned") is True:
+            continue
+        write_data = normalize_restored_ocsp_json_bytes(data)
+        if write_data is None:
+            continue
+        lock = _acquire_cert_lock(fp)
+        if lock is None:
+            log_warning(
+                "⚠️ OCSP could not lock to heal lagging disk tombstone fp=%s...",
+                fp[:16],
+            )
+            continue
+        try:
+            if not _disk_meta_tombstoned(fp):
+                continue
+            # Concurrent demote may have landed the marker after plan time.
+            if _shard_blocked_from_restamp(fp):
+                log_info(
+                    "⏭️ OCSP heal skip fp=%s... (do-not-restamp under lock — keep demote)",
+                    fp[:16],
+                )
+                continue
+            # Refuse heal under active serial-blacklist (would leave unpaged GOOD
+            # meta while ban holds; DER skip later leaves MS-dark / ligand confusion).
+            if ocsp_serial_blacklist_blocks_restore(
+                CONFIGS_SSL_BASE,
+                fp,
+                der_bytes=incoming_der_by_fp.get(fp),
+                meta=incoming,
+            ):
+                log_warning(
+                    "⏭️ OCSP heal skip fp=%s... "
+                    "(serial-blacklisted — refuse tombstone clear)",
+                    fp[:16],
+                )
+                # Strip sha≠body leftover under still-tombstoned meta if any.
+                try:
+                    strip_ocsp_der_if_meta_sha_conflicts(CONFIGS_SSL_BASE, fp, LOG)
+                except Exception:
+                    pass
+                continue
+            shard = _get_sharded_ocsp_path(fp)
+            disk_meta = load_disk_ocsp_meta(shard)
+            # Live fence re-check: plan-time skip may be stale vs concurrent demote.
+            if should_keep_disk_ocsp_shard(disk_meta, incoming):
+                log_info(
+                    "⏭️ OCSP heal skip fp=%s... (live fence keeps disk tombstone)",
+                    fp[:16],
+                )
+                continue
+            meta_path = _resolved_sharded_ocsp_path(fp) / "ocsp.json"
+            meta_path.parent.mkdir(parents=True, exist_ok=True)
+            meta_path.write_bytes(write_data)
+            meta_path.chmod(0o640)
+            if not _disk_meta_tombstoned(fp):
+                cleared.add(fp)
+                log_info(
+                    "✓ OCSP healed lagging disk tombstone via DB meta fp=%s...",
+                    fp[:16],
+                )
+        except Exception as e:
+            log_warning(
+                "⚠️ OCSP could not heal lagging disk tombstone for fp=%s...: %s",
+                fp[:16],
+                e,
+            )
+        finally:
+            _release_cert_lock(lock, fp)
+    return cleared
+
+
 def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dict] = None) -> None:
     """
     End-of-job verification: ensure all OCSP files on disk match database checksums.
@@ -5332,6 +8037,9 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
 
     This handles cases where OCSP cache directories are externally deleted or corrupted.
     Includes sleep before verification to allow concurrent writers to finish.
+
+    Never overwrites a newer canary-paged on-disk shard with a lagging DB DER
+    (same fence as ``restore_ocsp_from_database``).
     """
     if stats is None:
         stats = {}
@@ -5345,16 +8053,83 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
     verify_count = 0
     restored_count = 0
     mismatch_count = 0
+    skipped_newer = 0
+    restored_ocsp_fps: set = set()
+    der_restore_refused_fps: set = set()
 
     try:
         # Get all OCSP entries from database
         # Get all entries and filter for actual OCSP responses
         all_entries = db.get_jobs_cache_files(job_name="ocsp-refresh", with_data=True)
         ocsp_entries = [e for e in all_entries if _fingerprint_from_ocsp_der_name(e.get("file_name", ""))]
+
+        db_tombstoned = _fingerprints_tombstoned_in_cache_entries(all_entries)
+        refuse_all_ocsp_shard_restore = False
+        meta_body_uncertain = _fingerprints_meta_body_uncertain(all_entries)
+        try:
+            ocsp_skip, _ocsp_floor_caps = ocsp_restore_plan(
+                list(all_entries or []), CONFIGS_SSL_BASE
+            )
+        except Exception as e:
+            log_warning(
+                "⚠️ OCSP verify-restore fence unavailable: %s — "
+                "refusing all ocsp.der restores (keep disk)",
+                e,
+            )
+            refuse_all_ocsp_shard_restore = True
+            ocsp_skip = {}
+        for fp in meta_body_uncertain:
+            ocsp_skip.setdefault(fp, "meta_body_unreadable")
+
+        # Heal lagging disk tombstones even when DB has no DER rows yet (DER may
+        # have been deleted under a prior DB tombstone while GOOD meta recovered).
+        incoming_meta_by_fp: Dict[str, Dict[str, Any]] = {}
+        incoming_floors = ocsp_incoming_floors_from_cache(list(all_entries or []))
+        for entry in all_entries or []:
+            if not isinstance(entry, dict):
+                continue
+            meta_fp = _fingerprint_from_meta_name(entry.get("file_name") or "")
+            if not meta_fp or not entry.get("data"):
+                continue
+            parsed_in = parse_ocsp_meta_bytes(entry["data"])
+            if isinstance(parsed_in, dict):
+                incoming_meta_by_fp[meta_fp] = parsed_in
+        tombstone_cleared_fps = _heal_lagging_disk_tombstone_meta(
+            all_entries,
+            ocsp_skip=ocsp_skip,
+            refuse_all=refuse_all_ocsp_shard_restore,
+            db_tombstoned=db_tombstoned,
+        )
+
         if not ocsp_entries:
-            log_info("ℹ️ OCSP no cache entries in database to verify")
+            if tombstone_cleared_fps:
+                log_info(
+                    "✓ OCSP verify: healed %d lagging disk tombstone(s); "
+                    "no DER rows in database to verify",
+                    len(tombstone_cleared_fps),
+                )
+            else:
+                log_info("ℹ️ OCSP no cache entries in database to verify")
+            # Fall through to heal-coherence enqueue below (same gate as DER path).
+            # Early return previously skipped when other fps had DER rows but H did not.
+            if not tombstone_cleared_fps:
+                return
+            # No DER rows to walk — still enqueue eligible heals then return.
+            for fp in tombstone_cleared_fps:
+                if ocsp_heal_coherence_eligible(CONFIGS_SSL_BASE, fp, LOG):
+                    restored_ocsp_fps.add(fp)
+            if restored_ocsp_fps:
+                try:
+                    publish_ocsp_restore_coherence(
+                        CONFIGS_SSL_BASE, restored_ocsp_fps, LOG
+                    )
+                except Exception as e:
+                    log_warning(
+                        "⚠️ OCSP restore coherence failed after tombstone heal: %s",
+                        e,
+                    )
             return
-            
+
         log_info("🔍 OCSP verifying %d cache entry(ies) from database", len(ocsp_entries))
 
         for entry in ocsp_entries:
@@ -5363,10 +8138,10 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 continue
 
             cert_name_raw = _fingerprint_from_ocsp_der_name(file_name) or file_name
-            data = entry.get("data")
+            data = _cache_blob_bytes(entry.get("data"))
             db_checksum = entry.get("checksum", "")
 
-            if not data or not db_checksum:
+            if data is None or not db_checksum:
                 log_warning("⚠️ OCSP database entry %s has no data or checksum, skipping verification", cert_name_raw)
                 continue
 
@@ -5393,6 +8168,23 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                 continue
             verify_count += 1
 
+            if refuse_all_ocsp_shard_restore:
+                log_info(
+                    "⏭️ OCSP verify-restore skip fp=%s... "
+                    "(fence uncertain — keep disk)",
+                    fingerprint[:16],
+                )
+                continue
+
+            if fingerprint in ocsp_skip:
+                skipped_newer += 1
+                log_info(
+                    "⏭️ OCSP verify-restore skip fp=%s... reason=%s",
+                    fingerprint[:16],
+                    ocsp_skip[fingerprint],
+                )
+                continue
+
             # Check if file exists on disk
             ocsp_cert_dir = _get_sharded_ocsp_path(fingerprint)
             ocsp_path = ocsp_cert_dir / "ocsp.der"
@@ -5418,10 +8210,64 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                             log_debug("⚠️ OCSP could not remove expired database entry %s: %s", file_name, e)
                     continue
             except Exception as e:
+                # Do not restore a body we could not lifetime-check. memoryview
+                # used to throw here and then write_bytes() still accepted it.
                 log_warning("⚠️ OCSP could not parse response from database for %s during verification: %s", cert_name_raw, e)
+                continue
 
             if data and _serial_blacklist_blocks(fingerprint, data, cert_name_raw):
                 log_warning("🧹 OCSP skipping restore of blacklisted serial for %s", cert_name_raw)
+                # Meta may have been healed this pass — strip under cert lock.
+                ban_lock = _acquire_cert_lock(fingerprint)
+                if ban_lock is not None:
+                    try:
+                        strip_ocsp_der_if_meta_sha_conflicts(
+                            CONFIGS_SSL_BASE, fingerprint, LOG
+                        )
+                    finally:
+                        _release_cert_lock(ban_lock, fingerprint)
+                note_ocsp_der_restore_refused(
+                    der_restore_refused_fps,
+                    CONFIGS_SSL_BASE,
+                    fingerprint,
+                    LOG,
+                    strip_conflict=False,
+                )
+                continue
+            if fingerprint in db_tombstoned:
+                log_warning(
+                    "⏭️ OCSP skipping verify-restore of ocsp.der for %s "
+                    "(DB meta tombstoned — refuse rehydrate; deleting leftover DER)",
+                    cert_name_raw,
+                )
+                _delete_ocsp_der_db_rows(db, fingerprint)
+                try:
+                    if ocsp_path.is_file():
+                        ocsp_path.unlink()
+                except Exception as e:
+                    log_warning(
+                        "⚠️ OCSP could not strip disk DER for tombstoned %s: %s",
+                        cert_name_raw,
+                        e,
+                    )
+                # Do NOT mark do-not-restamp (same sticky fence as restore_ocsp_from_database).
+                continue
+            # Verify is DER-only for bodies — meta heal above clears lagging
+            # tombstones when DB GOOD meta is available; still refuse if disk
+            # remains tombstoned (fence kept disk or heal failed).
+            if _disk_meta_tombstoned(fingerprint):
+                log_info(
+                    "⏭️ OCSP skipping verify-restore of ocsp.der for %s "
+                    "(disk tombstone lagging — refuse until meta clears)",
+                    cert_name_raw,
+                )
+                continue
+            if _shard_blocked_from_restamp(fingerprint):
+                log_warning(
+                    "⏭️ OCSP skipping verify-restore of ocsp.der for %s "
+                    "(do-not-restamp after demote — refuse rehydrate)",
+                    cert_name_raw,
+                )
                 continue
 
             try:
@@ -5429,19 +8275,47 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                     # File missing: restore from database
                     log_warning("⚠️ OCSP file missing for %s, restoring from database", cert_name_raw)
                     try:
-                        ocsp_cert_dir.mkdir(parents=True, exist_ok=True)
-                        ocsp_path.write_bytes(data)
-                        ocsp_path.chmod(0o640)
-                        # Verify checksum after restoration
-                        written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
-                        if written_checksum != db_checksum:
-                            log_error("❌ OCSP checksum mismatch after restoring %s (expected=%s, got=%s)", cert_name_raw, db_checksum[:8], written_checksum[:8])
+                        der_ok = _restore_foreign_ocsp_der(
+                            fingerprint,
+                            cert_name_raw,
+                            data,
+                            db,
+                            expected_checksum=db_checksum,
+                            incoming_meta=incoming_meta_by_fp.get(fingerprint),
+                            incoming_floor=incoming_floors.get(fingerprint),
+                        )
+                        if der_ok is True:
+                            log_info("✓ OCSP restored %s from database (verified)", cert_name_raw)
+                            restored_count += 1
+                            restored_ocsp_fps.add(fingerprint)
+                        elif der_ok is False:
+                            # Fail-closed under lock already stripped — refuse bookkeeping only.
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
                             stats["errors"] = stats.get("errors", 0) + 1
-                            continue
-                        log_info("✓ OCSP restored %s from database (verified)", cert_name_raw)
-                        restored_count += 1
+                        else:
+                            # None: disk tombstoned / live fence under lock — keep disk.
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
                     except Exception as e:
                         log_error("❌ OCSP could not restore %s from database: %s", cert_name_raw, e)
+                        note_ocsp_der_restore_refused(
+                            der_restore_refused_fps,
+                            CONFIGS_SSL_BASE,
+                            fingerprint,
+                            LOG,
+                            strip_conflict=False,
+                        )
                         stats["errors"] = stats.get("errors", 0) + 1
                         continue
 
@@ -5457,30 +8331,81 @@ def _verify_and_restore_ocsp_files(db: Optional[Any] = None, stats: Optional[dic
                             cert_name_raw, file_checksum[:8], db_checksum[:8]
                         )
                         try:
-                            ocsp_path.write_bytes(data)
-                            ocsp_path.chmod(0o640)
-                            # Verify checksum after restoration
-                            written_checksum = hashlib.sha256(ocsp_path.read_bytes()).hexdigest().lower()
-                            if written_checksum != db_checksum:
-                                log_error("❌ OCSP checksum mismatch after restoring %s (expected=%s, got=%s)", cert_name_raw, db_checksum[:8], written_checksum[:8])
+                            der_ok = _restore_foreign_ocsp_der(
+                                fingerprint,
+                                cert_name_raw,
+                                data,
+                                db,
+                                expected_checksum=db_checksum,
+                                incoming_meta=incoming_meta_by_fp.get(fingerprint),
+                                incoming_floor=incoming_floors.get(fingerprint),
+                            )
+                            if der_ok is True:
+                                log_info(
+                                    "✓ OCSP restored correct version of %s (verified)",
+                                    cert_name_raw,
+                                )
+                                mismatch_count += 1
+                                restored_ocsp_fps.add(fingerprint)
+                            elif der_ok is False:
+                                note_ocsp_der_restore_refused(
+                                    der_restore_refused_fps,
+                                    CONFIGS_SSL_BASE,
+                                    fingerprint,
+                                    LOG,
+                                    strip_conflict=False,
+                                )
                                 stats["errors"] = stats.get("errors", 0) + 1
-                                continue
-                            log_info("✓ OCSP restored correct version of %s (verified)", cert_name_raw)
-                            mismatch_count += 1
+                            else:
+                                note_ocsp_der_restore_refused(
+                                    der_restore_refused_fps,
+                                    CONFIGS_SSL_BASE,
+                                    fingerprint,
+                                    LOG,
+                                    strip_conflict=False,
+                                )
                         except Exception as e:
                             log_error("❌ OCSP could not restore %s: %s", cert_name_raw, e)
+                            note_ocsp_der_restore_refused(
+                                der_restore_refused_fps,
+                                CONFIGS_SSL_BASE,
+                                fingerprint,
+                                LOG,
+                                strip_conflict=False,
+                            )
                             stats["errors"] = stats.get("errors", 0) + 1
                     else:
                         log_debug("✓ OCSP %s checksum verified (matches database)", cert_name_raw)
+                        # Matching DER must NOT fail-closed (would strip intact body).
+                        # Meta heal already stamped paged=false — coherence only when
+                        # body is GOOD + SHA-matched.
+                        if fingerprint in tombstone_cleared_fps and ocsp_heal_coherence_eligible(
+                            CONFIGS_SSL_BASE, fingerprint, LOG
+                        ):
+                            restored_ocsp_fps.add(fingerprint)
 
             except Exception as e:
                 log_warning("⚠️ OCSP error verifying %s: %s", cert_name_raw, e)
                 stats["errors"] = stats.get("errors", 0) + 1
 
+        # Heal fps with leftover GOOD DER but no DB DER row this pass still need
+        # coherence (sticky refuse hole when other fps had DER rows).
+        for fp in tombstone_cleared_fps:
+            if fp in restored_ocsp_fps:
+                continue
+            if ocsp_heal_coherence_eligible(CONFIGS_SSL_BASE, fp, LOG):
+                restored_ocsp_fps.add(fp)
+
+        if restored_ocsp_fps:
+            try:
+                publish_ocsp_restore_coherence(CONFIGS_SSL_BASE, restored_ocsp_fps, LOG)
+            except Exception as e:
+                log_debug("⚠️ OCSP verify-restore coherence failed: %s", e)
+
         if verify_count > 0:
             log_info(
-                "🔍 OCSP verification complete: %d checked | ✓ %d restored (missing) | 🔄 %d corrected (mismatch)",
-                verify_count, restored_count, mismatch_count
+                "🔍 OCSP verification complete: %d checked | ✓ %d restored (missing) | 🔄 %d corrected (mismatch) | ⏭️ %d skipped (newer disk)",
+                verify_count, restored_count, mismatch_count, skipped_newer
             )
             if stats is not None:
                 stats["ocsp_verified"] = stats.get("ocsp_verified", 0) + verify_count
@@ -5595,20 +8520,37 @@ def _persist_ocsp_results_to_db(
                     checksum=ocsp_checksum,
                 )
                 if not err:
+                    meta_err = ""
                     try:
                         # Prefer the paged on-disk meta (includes paged_unix / canary_reason).
                         # Disk is already verified paged=true above; never invent paged without canary.
                         meta = dict(disk_meta_obj)
                         meta_bytes = json.dumps(meta, separators=(",", ":")).encode("utf-8")
-                        db.upsert_job_cache(
+                        meta_err = db.upsert_job_cache(
                             service_id=None,
                             file_name=_ocsp_cache_relpath(cert_fp, "ocsp.json"),
                             data=meta_bytes,
                             job_name="ocsp-refresh",
                             checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
+                        ) or ""
+                    except Exception as meta_exc:
+                        meta_err = str(meta_exc)
+                    if meta_err:
+                        # DER without matching meta is a colony restore hole — roll back DER.
+                        log_error(
+                            "❌ OCSP meta upsert failed for %s after DER store (%s) — deleting DER row",
+                            cert_name,
+                            meta_err,
                         )
-                    except Exception as meta_err:
-                        log_debug("⚠️ OCSP could not store metadata for %s: %s", cert_name, meta_err)
+                        try:
+                            db.delete_job_cache(file_name=cache_key, job_name="ocsp-refresh")
+                        except Exception as del_err:
+                            log_error(
+                                "❌ OCSP could not roll back DER row for %s: %s",
+                                cert_name,
+                                del_err,
+                            )
+                        err = meta_err
 
                 if err:
                     log_error("❌ OCSP error while storing response for %s (fingerprint: %s) in database: %s", cert_name, cert_fp[:16] + "...", err)
@@ -5755,8 +8697,9 @@ def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> b
     ``(der_sha256, soft_recall_gen)``. Soft fuse and KEEP_ALLOW causes leave
     the pin alone.
 
-    Compare-and-stamp: refuse overwrite when on-disk ``soft_recall_gen`` is
-    strictly newer (lagging canary must not clobber N+1 with N).
+    Compare-and-stamp under an exclusive flock on ``.{fp}.allow.lock``: refuse
+    overwrite when on-disk ``soft_recall_gen`` is strictly newer (lagging canary
+    must not clobber N+1 with N).
 
     Also clears any legacy refuse marker for this fingerprint so the old
     polarity cannot shadow the new one after cutover.
@@ -5795,23 +8738,39 @@ def _write_ocsp_allow_pin(fingerprint: str, meta: Optional[Dict[str, Any]]) -> b
         allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
         allow_dir.mkdir(parents=True, exist_ok=True)
         path = allow_dir / normalized
-        # Best-effort CAS: skip clobber when a newer pin already landed.
-        if path.is_file():
-            try:
-                existing = json.loads(path.read_text(encoding="utf-8"))
-                if isinstance(existing, dict):
-                    got_gen = int(existing.get("soft_recall_gen") or 0)
-                    if got_gen > gen:
-                        log_debug(
-                            "OCSP allow-pin stale_gen skip fp=%s... on_disk=%s want=%s",
-                            normalized[:16],
-                            got_gen,
-                            gen,
-                        )
-                        return False
-            except (OSError, TypeError, ValueError, json.JSONDecodeError):
-                pass
-        _atomic_write_text(path, json.dumps(payload, separators=(",", ":")), mode=0o640)
+        lock_path = allow_dir / f".{normalized}.allow.lock"
+        lock_fd: Optional[int] = None
+        try:
+            lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o640)
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            # Compare-and-stamp under flock: refuse overwrite when on-disk
+            # soft_recall_gen is strictly newer (lagging canary must not clobber N+1).
+            if path.is_file():
+                try:
+                    existing = json.loads(path.read_text(encoding="utf-8"))
+                    if isinstance(existing, dict):
+                        got_gen = int(existing.get("soft_recall_gen") or 0)
+                        if got_gen > gen:
+                            log_debug(
+                                "OCSP allow-pin stale_gen skip fp=%s... on_disk=%s want=%s",
+                                normalized[:16],
+                                got_gen,
+                                gen,
+                            )
+                            return False
+                except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                    pass
+            _atomic_write_text(path, json.dumps(payload, separators=(",", ":")), mode=0o640)
+        finally:
+            if lock_fd is not None:
+                try:
+                    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+                except OSError:
+                    pass
+                try:
+                    os.close(lock_fd)
+                except OSError:
+                    pass
         # Legacy refuse must not shadow allow polarity.
         legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / normalized
         if legacy.is_file():
@@ -5837,6 +8796,9 @@ def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
     Must-Staple fail-closed until the pin is rewritten (by canary or restamp).
 
     Name kept for call-site compatibility with the pre-invert refuse bus.
+
+    Allow-pin unlink takes the same ``.{fp}.allow.lock`` as compare-and-stamp
+    writes so a lagging canary cannot recreate the pin between unlock and unlink.
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -5845,9 +8807,24 @@ def _clear_ocsp_peer_refuse(fingerprint: str) -> None:
         allow_dir = CONFIGS_SSL_BASE / "ocsp-allow"
         allow_dir.mkdir(parents=True, exist_ok=True)
         allow_path = allow_dir / normalized
-        if allow_path.is_file():
-            allow_path.unlink()
-            log_debug("🧹 OCSP cleared allow-pin for fp=%s...", normalized[:16])
+        lock_path = allow_dir / f".{normalized}.allow.lock"
+        lock_fd: Optional[int] = None
+        try:
+            lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o640)
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            if allow_path.is_file():
+                allow_path.unlink()
+                log_debug("🧹 OCSP cleared allow-pin for fp=%s...", normalized[:16])
+        finally:
+            if lock_fd is not None:
+                try:
+                    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+                except OSError:
+                    pass
+                try:
+                    os.close(lock_fd)
+                except OSError:
+                    pass
         refuse_dir = CONFIGS_SSL_BASE / "ocsp-refuse"
         refuse_dir.mkdir(parents=True, exist_ok=True)
         path = refuse_dir / normalized
@@ -5906,22 +8883,22 @@ def _restamp_local_predicates(fingerprint: str, meta: Dict[str, Any], der: bytes
         return "canary_cert_status_not_good"
     matched = None
     meta_certid = meta.get("certid") if isinstance(meta.get("certid"), dict) else None
+    if not meta_certid or not str(meta_certid.get("serial") or "").strip():
+        return "missing_certid_serial"
+    want = str(meta_certid.get("serial") or "").strip()
     for single in singles:
         try:
             if single.certificate_status != x509_ocsp.OCSPCertStatus.GOOD:
                 continue
         except (ValueError, AttributeError):
             continue
-        if meta_certid:
-            try:
-                serial = str(single.serial_number)
-            except Exception:
-                serial = ""
-            want = str(meta_certid.get("serial") or "")
-            if want and serial and want != serial:
-                continue
-        matched = single
-        break
+        # Publish pins uppercase hex; legacy digit-only may be decimal (incl. zero-padded).
+        try:
+            if _certid_pin_matches_serial(want, int(single.serial_number)):
+                matched = single
+                break
+        except Exception:
+            continue
     if matched is None:
         return "canary_cert_status_not_good"
     policy = _ocsp_single_intrinsic_policy_reason(matched, fingerprint[:16])
@@ -6021,33 +8998,45 @@ def _restamp_paged_shards(*, skip: Optional[Set[str]] = None) -> int:
                         continue
                     if fp in skip_set:
                         continue
-                    meta_path = shard / "ocsp.json"
-                    der_path = shard / "ocsp.der"
-                    if not meta_path.is_file() or not der_path.is_file():
+                    if _shard_blocked_from_restamp(fp):
+                        refused += 1
+                        log_debug("⏭️ OCSP restamp skip fp=%s... reason=demote_block", fp[:16])
+                        continue
+                    lock = _acquire_cert_lock(fp)
+                    if lock is None:
+                        log_debug("⏭️ OCSP restamp skip fp=%s... reason=lock_busy", fp[:16])
                         continue
                     try:
-                        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-                        der = der_path.read_bytes()
-                    except Exception:
-                        continue
-                    if not isinstance(meta, dict) or not der:
-                        continue
-                    reason = _restamp_local_predicates(fp, meta, der)
-                    if reason:
-                        refused += 1
-                        log_debug("⏭️ OCSP restamp skip fp=%s... reason=%s", fp[:16], reason)
-                        continue
-                    if not _pin_or_ligand_needs_restamp(fp, meta):
-                        # Still clear legacy refuse so polarity stays clean.
-                        legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / fp
-                        if legacy.is_file():
-                            try:
-                                legacy.unlink()
-                            except Exception:
-                                pass
-                        continue
-                    if _write_ocsp_ligand(fp, meta) and _write_ocsp_allow_pin(fp, meta):
-                        restamped += 1
+                        meta_path = shard / "ocsp.json"
+                        der_path = shard / "ocsp.der"
+                        if not meta_path.is_file() or not der_path.is_file():
+                            continue
+                        try:
+                            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                            der = der_path.read_bytes()
+                        except Exception:
+                            continue
+                        if not isinstance(meta, dict) or not der:
+                            continue
+                        # Re-check under lock: soft-recall may have unpaged since walk.
+                        reason = _restamp_local_predicates(fp, meta, der)
+                        if reason:
+                            refused += 1
+                            log_debug("⏭️ OCSP restamp skip fp=%s... reason=%s", fp[:16], reason)
+                            continue
+                        if not _pin_or_ligand_needs_restamp(fp, meta):
+                            # Still clear legacy refuse so polarity stays clean.
+                            legacy = CONFIGS_SSL_BASE / "ocsp-refuse" / fp
+                            if legacy.is_file():
+                                try:
+                                    legacy.unlink()
+                                except Exception:
+                                    pass
+                            continue
+                        if _write_ocsp_ligand(fp, meta) and _write_ocsp_allow_pin(fp, meta):
+                            restamped += 1
+                    finally:
+                        _release_cert_lock(lock, fp)
     except Exception as e:
         log_debug("⚠️ OCSP restamp walk failed: %s", e)
     if restamped or refused:
@@ -6156,34 +9145,43 @@ def _advance_ocsp_cluster_floor(
     return True
 
 
-def _restore_ocsp_cluster_floor_entry(file_name: str, data: bytes) -> bool:
-    """Max-only restore of one ocsp-floor/{fp} row from DB. Returns True if applied."""
+def _restore_ocsp_cluster_floor_entry(
+    file_name: str,
+    data: bytes,
+    floor_cap: Optional[int] = None,
+) -> bool:
+    """Capped max-only restore of one ocsp-floor/{fp} row from DB. Returns True if applied."""
     floor_fp = parse_ocsp_floor_cache_name(file_name)
     if not floor_fp:
         return False
     incoming = parse_ocsp_floor_bytes(data)
     disk_floor = load_disk_ocsp_floor(CONFIGS_SSL_BASE, floor_fp)
-    if should_keep_disk_ocsp_floor(disk_floor, incoming):
+    # Tighten plan cap with live still-GOOD meta so floor cannot outrank body.
+    # Clamp write to that cap when batch floor sits ahead of live meta.
+    effective_cap = ocsp_floor_cap_for_live_shard(CONFIGS_SSL_BASE, floor_fp, floor_cap)
+    write_rank, floor_reason = plan_ocsp_floor_restore_write(
+        disk_floor, incoming, effective_cap
+    )
+    if write_rank is None:
         log_info(
-            "⏭️ OCSP floor restore skip fp=%s... disk_rank=%s incoming_rank=%s",
+            "⏭️ OCSP floor restore skip fp=%s... reason=%s",
             floor_fp[:16],
-            ocsp_floor_published_unix(disk_floor),
-            ocsp_floor_published_unix(incoming),
+            floor_reason,
         )
-        return False
-    if not isinstance(incoming, dict) or ocsp_floor_published_unix(incoming) <= 0:
         return False
     floor_dir = CONFIGS_SSL_BASE / "ocsp-floor"
     floor_dir.mkdir(parents=True, exist_ok=True)
-    run_id = incoming.get("job_run_id") if isinstance(incoming.get("job_run_id"), str) else None
-    this_u = int(incoming["this_update_unix"]) if incoming.get("this_update_unix") else 0
-    pub_u = int(incoming["published_unix"]) if incoming.get("published_unix") else 0
-    if this_u <= 0:
-        return False
+    run_id = incoming.get("job_run_id") if isinstance(incoming, dict) and isinstance(incoming.get("job_run_id"), str) else None
+    pub_u = 0
+    if isinstance(incoming, dict):
+        try:
+            pub_u = int(incoming.get("published_unix") or 0)
+        except (TypeError, ValueError):
+            pub_u = 0
     _atomic_write_bytes(
         floor_dir / floor_fp,
         encode_ocsp_floor_payload(
-            this_u,
+            write_rank,
             run_id,
             published_unix=pub_u if pub_u > 0 else None,
         ),
@@ -6192,7 +9190,7 @@ def _restore_ocsp_cluster_floor_entry(file_name: str, data: bytes) -> bool:
     log_info(
         "📈 OCSP floor restored fp=%s... this_update_unix=%s published_unix=%s",
         floor_fp[:16],
-        this_u or "none",
+        write_rank,
         pub_u or "none",
     )
     return True
@@ -6291,18 +9289,6 @@ def _der_serial_and_this_update(ocsp_der: bytes) -> Tuple[Optional[str], Optiona
         return None, None
 
 
-def _serial_ban_superseded_by_good(ban_unix: Optional[int], this_unix: Optional[int]) -> bool:
-    """
-    Same-serial GOOD clears the ban when its thisUpdate is strictly newer.
-    Bans without this_update_unix are invalid and treated as superseded.
-    """
-    if this_unix is None:
-        return False
-    if ban_unix is None:
-        return True
-    return this_unix > ban_unix
-
-
 def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_name: str) -> bool:
     """
     True when this body must not be published or restored.
@@ -6323,9 +9309,11 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     got_serial, this_unix = _der_serial_and_this_update(ocsp_der)
     if ban.get("serial_unknown"):
         if got_serial:
-            _clear_serial_blacklist(fingerprint)
+            # Superseded — do not unlink here (canary/publish may still fail).
+            # Caller clears after successful page / tenant clear.
             log_info(
-                "✓ OCSP serial_unknown blacklist cleared for %s (verified GOOD serial=%s)",
+                "✓ OCSP serial_unknown blacklist superseded for %s (verified GOOD serial=%s); "
+                "defer clear until after canary/page",
                 cert_name,
                 got_serial,
             )
@@ -6343,9 +9331,10 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     except (TypeError, ValueError):
         ban_unix = None
     if _serial_ban_superseded_by_good(ban_unix, this_unix):
-        _clear_serial_blacklist(fingerprint)
+        # Do not unlink before canary — a failed page must keep the ban.
         log_info(
-            "✓ OCSP serial blacklist cleared for %s serial=%s (newer GOOD thisUpdate=%s, ban=%s)",
+            "✓ OCSP serial blacklist superseded for %s serial=%s "
+            "(newer GOOD thisUpdate=%s, ban=%s); defer clear until after canary/page",
             cert_name,
             got_serial,
             this_unix,
@@ -6362,19 +9351,161 @@ def _serial_blacklist_blocks(fingerprint: Optional[str], ocsp_der: bytes, cert_n
     return True
 
 
-def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> None:
-    """Drop stored DER so end-of-job restore cannot put a tombstoned staple back."""
-    if db is None or not fingerprint:
+def _clear_superseded_serial_blacklist_after_page(
+    fingerprint: Optional[str],
+    ocsp_der: bytes,
+    cert_name: str,
+) -> None:
+    """
+    Unlink a body/control serial ban only after a successful canary page.
+
+    ``_serial_blacklist_blocks`` intentionally does not clear on supersede so a
+    failed publish cannot leave the tenant/body unbanned while still unpaged.
+    """
+    if not fingerprint or not ocsp_der:
         return
-    names = []
-    rel = _ocsp_cache_relpath(fingerprint, "ocsp.der")
-    if rel:
-        names.append(rel)
-    for name in names:
-        try:
-            db.delete_job_cache(file_name=name, job_name="ocsp-refresh")
-        except Exception:
-            pass
+    ban = _read_serial_blacklist(fingerprint)
+    if not ban or ban.get("unreadable"):
+        return
+    got_serial, this_unix = _der_serial_and_this_update(ocsp_der)
+    if ban.get("serial_unknown"):
+        if got_serial:
+            _clear_serial_blacklist(fingerprint)
+            log_info(
+                "✓ OCSP serial_unknown blacklist cleared for %s after page (serial=%s)",
+                cert_name,
+                got_serial,
+            )
+        return
+    banned_serial = str(ban.get("serial")) if ban.get("serial") is not None else None
+    if not banned_serial or not got_serial or got_serial != banned_serial:
+        return
+    try:
+        ban_unix = int(ban.get("this_update_unix"))
+    except (TypeError, ValueError):
+        ban_unix = None
+    if _serial_ban_superseded_by_good(ban_unix, this_unix):
+        _clear_serial_blacklist(fingerprint)
+        log_info(
+            "✓ OCSP serial blacklist cleared for %s after page serial=%s "
+            "(GOOD thisUpdate=%s, ban=%s)",
+            cert_name,
+            got_serial,
+            this_unix,
+            ban_unix,
+        )
+
+
+def _delete_ocsp_cache_leaf_db_rows(
+    db: Optional[Any], fingerprint: str, leaf: str
+) -> bool:
+    """
+    Drop a stored shard leaf (``ocsp.der`` / ``ocsp.json``) from the job cache.
+
+    Returns True when the row is absent (deleted or never present), or when
+    ``db`` is None. False when delete reports an error or the row still remains.
+    """
+    if db is None or not fingerprint or not leaf:
+        return True
+    rel = _ocsp_cache_relpath(fingerprint, leaf)
+    if not rel:
+        return True
+    try:
+        err = db.delete_job_cache(file_name=rel, job_name="ocsp-refresh")
+        # None = no matching row, "" = deleted — both mean the leaf is gone.
+        if err is not None and err != "":
+            log_error(
+                "❌ OCSP could not delete DB %s for fp=%s...: %s",
+                leaf,
+                fingerprint[:16],
+                err,
+            )
+            return False
+    except Exception as e:
+        log_error(
+            "❌ OCSP DB %s delete raised for fp=%s...: %s",
+            leaf,
+            fingerprint[:16],
+            e,
+        )
+        return False
+    # Confirm gone — a silent no-op leave-behind would rehydrate on restore.
+    try:
+        leftover = db.get_job_cache_file(
+            "ocsp-refresh", rel, with_data=False, with_info=True
+        )
+        if leftover is not None:
+            log_error(
+                "❌ OCSP DB %s still present after delete for fp=%s...",
+                leaf,
+                fingerprint[:16],
+            )
+            return False
+    except Exception as e:
+        log_error(
+            "❌ OCSP could not verify DB %s absence for fp=%s...: %s",
+            leaf,
+            fingerprint[:16],
+            e,
+        )
+        return False
+    return True
+
+
+def _delete_ocsp_der_db_rows(db: Optional[Any], fingerprint: str) -> bool:
+    """Drop stored DER so end-of-job restore cannot put a tombstoned staple back."""
+    return _delete_ocsp_cache_leaf_db_rows(db, fingerprint, "ocsp.der")
+
+
+def _delete_ocsp_json_db_rows(db: Optional[Any], fingerprint: str) -> bool:
+    """Drop stored meta so restore cannot revive pre-tombstone GOOD ocsp.json."""
+    return _delete_ocsp_cache_leaf_db_rows(db, fingerprint, "ocsp.json")
+
+
+def _fingerprints_tombstoned_in_cache_entries(
+    entries: Optional[List[Any]],
+) -> Set[str]:
+    """SPKIs whose DB ``ocsp.json`` row claims ``tombstoned=true``."""
+    return fingerprints_tombstoned_in_ocsp_cache_entries(entries)
+
+
+def _fingerprints_meta_body_uncertain(
+    entries: Optional[List[Any]],
+) -> Set[str]:
+    """
+    SPKIs whose DB ``ocsp.json`` row is missing or not a binary blob.
+
+    ``memoryview`` and ``bytearray`` count as readable (coerced). A non-binary
+    payload still cannot prove not-tombstoned.
+
+    Cannot prove not-tombstoned — restore/verify must refuse DER rehydrate
+    (parity with Job.restore_cache / generate_caches meta_body_uncertain).
+    """
+    out: Set[str] = set()
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        fp = _fingerprint_from_meta_name(entry.get("file_name") or "")
+        if not fp:
+            continue
+        # memoryview/bytearray are real payloads (driver-dependent). Only a
+        # missing or non-binary blob is uncertain.
+        if _cache_blob_bytes(entry.get("data")) is None:
+            out.add(fp)
+    return out
+
+
+def _ocsp_cache_restore_phase(file_name: str) -> int:
+    """Sort key: issuer → meta → DER → floor (floor last avoids MS-dark via cluster_floor)."""
+    if _fingerprint_from_issuer_name(file_name):
+        return 0
+    if _fingerprint_from_meta_name(file_name):
+        return 1
+    if _fingerprint_from_ocsp_der_name(file_name):
+        return 2
+    if parse_ocsp_floor_cache_name(file_name):
+        return 3
+    return 4
 
 
 def _tombstone_ocsp_shard(
@@ -6384,17 +9515,24 @@ def _tombstone_ocsp_shard(
     cert_name: str,
     db: Optional[Any],
     this_update_unix: Optional[int] = None,
+    *,
+    advance_floor: bool = True,
 ) -> bool:
     """
     Remove the published staple for this SPKI.
 
     Order matters for the mid-flight handshake window:
-    1. Write ocsp.json with tombstoned=true / paged=false (no der_sha256) so Lua
+    1. Write serial-blacklist first (fail-closed if later steps fail).
+    2. Write ocsp.json with tombstoned=true / paged=false (no der_sha256) so Lua
        can refuse without waiting for .ocsp_epoch.
-    2. Bump .ocsp_epoch immediately so both L1 zones drop the last GOOD.
-    3. Then unlink ocsp.der, write serial blacklist, clear refuse, drop DB DER.
+    3. Upsert that tombstone meta to the DB (ephemeral restore must not rehydrate
+       a pre-tombstone GOOD generation).
+    4. Bump .ocsp_epoch immediately so both L1 zones drop the last GOOD.
+    5. Unlink ocsp.der, clear refuse, drop DB DER (fail closed if DB DER remains).
 
     Keeps must_staple in ocsp.json so Must-Staple still fail-closes.
+    ``advance_floor``: False for intermediate control-key tombstones (Lua floors
+    body SPKI only — control floor rows are orphans).
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -6416,6 +9554,11 @@ def _tombstone_ocsp_shard(
         if serial is not None:
             meta["serial"] = str(serial)
         try:
+            if isinstance(this_update_unix, (int, float)) and int(this_update_unix) > 0:
+                meta["this_update_unix"] = int(this_update_unix)
+        except (TypeError, ValueError):
+            pass
+        try:
             if meta_path.is_file():
                 old = json.loads(meta_path.read_text(encoding="utf-8"))
                 if isinstance(old, dict) and old.get("must_staple") is True:
@@ -6424,28 +9567,82 @@ def _tombstone_ocsp_shard(
             pass
         meta.update(_provenance_meta())
         meta["published_unix"] = int(datetime.now(timezone.utc).timestamp())
-        # Visible refuse signal first — Lua samples tombstoned before epoch/DER.
-        _atomic_write_text(meta_path, json.dumps(meta), mode=0o640)
+        # Ban BEFORE tombstone meta: if meta write fails later, Lua still refuses via
+        # serial-blacklist. Meta-before-ban left tombstone-without-ban on ban I/O failure
+        # (corrupt meta + quarantine could then revive the tenant).
+        try:
+            _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
+        except Exception as ban_err:
+            log_error(
+                "❌ OCSP tombstone aborted for %s: serial blacklist write failed: %s",
+                cert_name,
+                ban_err,
+            )
+            return False
+        # Visible refuse signal — Lua samples tombstoned before epoch/DER.
+        meta_text = json.dumps(meta, separators=(",", ":"))
+        _atomic_write_text(meta_path, meta_text, mode=0o640)
+        der_path = shard / "ocsp.der"
+        # Mirror tombstone to DB before DER delete so a volume wipe cannot restore
+        # pre-tombstone GOOD meta (+ leftover DER) from the job cache.
+        if not _upsert_ocsp_json_to_db(db, normalized, meta_text, cert_name):
+            log_error(
+                "❌ OCSP tombstone aborted for %s: could not upsert tombstone meta to DB "
+                "(refuse success — ephemeral restore must not rehydrate pre-tombstone GOOD)",
+                cert_name,
+            )
+            # Poison: drop pre-tombstone GOOD meta so a wipe cannot revive deny-less
+            # GOOD ocsp.json while tombstone upsert awaits retry.
+            if not _delete_ocsp_json_db_rows(db, normalized):
+                log_error(
+                    "❌ OCSP also could not drop DB ocsp.json after tombstone upsert "
+                    "failure for %s",
+                    cert_name,
+                )
+            # Hard bar: DER must be gone (same as post-success path).
+            if not _delete_ocsp_der_db_rows(db, normalized):
+                log_error(
+                    "❌ OCSP also could not drop DB DER after tombstone upsert failure for %s",
+                    cert_name,
+                )
+            try:
+                if der_path.is_file():
+                    der_path.unlink()
+            except Exception as strip_err:
+                log_error(
+                    "❌ OCSP could not strip disk DER after tombstone upsert failure for %s: %s",
+                    cert_name,
+                    strip_err,
+                )
+            return False
         _clear_ocsp_ligand(normalized)
+        _clear_nongood_marker(normalized)
         _clear_ocsp_peer_refuse(normalized)
         _bump_ocsp_cache_epoch()
-        _write_serial_blacklist(normalized, serial, status_name, this_update_unix)
-        der_path = shard / "ocsp.der"
         try:
             if der_path.is_file():
                 der_path.unlink()
         except Exception as e:
             log_error("❌ OCSP could not remove ocsp.der while tombstoning %s: %s", cert_name, e)
             return False
-        _delete_ocsp_der_db_rows(db, normalized)
+        if not _delete_ocsp_der_db_rows(db, normalized):
+            log_error(
+                "❌ OCSP tombstone meta landed for %s but DB DER delete failed — "
+                "refusing success so the next run retries (avoid rehydrate)",
+                cert_name,
+            )
+            return False
         _clear_ocsp_peer_refuse(normalized)
-        _advance_ocsp_cluster_floor(
-            normalized,
-            this_update_unix,
-            meta.get("job_run_id"),
-            db,
-            meta.get("published_unix"),
-        )
+        # Intermediate control keys are negative-only — Lua floors body SPKI.
+        # Advancing floor on control_fp left orphan rows that never gate staples.
+        if advance_floor:
+            _advance_ocsp_cluster_floor(
+                normalized,
+                this_update_unix,
+                meta.get("job_run_id"),
+                db,
+                meta.get("published_unix"),
+            )
         log_error(
             "🧹 OCSP tombstoned shard for %s (fp=%s..., CertStatus=%s, serial=%s); previous GOOD staple removed",
             cert_name,
@@ -6495,8 +9692,13 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str, db: Optional[Any]
                         expires_unix = int(raw_exp)
                     elif isinstance(raw_exp, str) and raw_exp.isdigit():
                         expires_unix = int(raw_exp)
+                else:
+                    # Corrupt non-dict meta — refuse to invent blank and rewrite
+                    # (would drop tombstoned / quarantine signals).
+                    return None
             except Exception:
-                meta = {}
+                # Unreadable meta — do not invent blank and overwrite.
+                return None
 
         if expires_unix is None:
             try:
@@ -6535,29 +9737,35 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str, db: Optional[Any]
         meta.update(_provenance_meta())
         meta_text = json.dumps(meta, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
-        _bump_ocsp_cache_epoch()
-        if db is not None:
-            try:
-                meta_bytes = meta_text.encode("utf-8")
-                err = db.upsert_job_cache(
-                    service_id=None,
-                    file_name=_ocsp_cache_relpath(normalized, "ocsp.json"),
-                    data=meta_bytes,
-                    job_name="ocsp-refresh",
-                    checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
-                )
-                if err:
-                    log_warning(
-                        "⚠️ OCSP halved TTL on disk for %s but DB upsert failed: %s",
-                        cert_name,
-                        err,
-                    )
-            except Exception as e:
+        # Keep outside ligand (+ allow-pin) death clock in sync (merge takes min;
+        # a stale longer ligand expires would only loosen after shard retract).
+        if meta.get("paged") is True and meta.get("tombstoned") is not True:
+            if not _write_ocsp_ligand(normalized, meta):
                 log_warning(
-                    "⚠️ OCSP halved TTL on disk for %s but could not upsert meta: %s",
+                    "⚠️ OCSP halved TTL for %s but ligand rewrite failed (fp=%s...)",
                     cert_name,
-                    e,
+                    normalized[:16],
                 )
+            else:
+                if not _write_ocsp_allow_pin(normalized, meta):
+                    log_warning(
+                        "⚠️ OCSP halved TTL for %s but allow-pin rewrite failed (fp=%s...) — clearing pin",
+                        cert_name,
+                        normalized[:16],
+                    )
+                    _clear_ocsp_peer_refuse(normalized)
+        _bump_ocsp_cache_epoch()
+        # Disk is already shortened. A failed mirror must not leave the longer
+        # DB death clock for a later wipe to restore. DER stays: the half-TTL
+        # body is still meant to be served from this node's shard.
+        _mirror_ocsp_recall_meta(
+            db,
+            normalized,
+            meta_text,
+            cert_name,
+            drop_der=False,
+            reason="ttl-halve",
+        )
         log_warning(
             "⚠️ OCSP halved leftover staple TTL for %s after first non-GOOD (fp=%s... %ds → %ds)",
             cert_name,
@@ -6573,10 +9781,89 @@ def _halve_cached_staple_ttl(fingerprint: str, cert_name: str, db: Optional[Any]
         _release_cert_lock(lock, normalized)
 
 
+def _upsert_ocsp_json_to_db(db: Optional[Any], fingerprint: str, meta_text: str, cert_name: str) -> bool:
+    """
+    Mirror ocsp.json bytes into job cache so restore cannot resurrect a pre-mutation generation.
+
+    Returns True when upsert succeeded (or ``db`` is None). False on error — callers that
+    require durable denial (tombstone) must fail closed.
+    """
+    if db is None or not fingerprint or not meta_text:
+        return True
+    try:
+        meta_bytes = meta_text.encode("utf-8")
+        rel = _ocsp_cache_relpath(fingerprint, "ocsp.json")
+        if not rel:
+            return False
+        err = db.upsert_job_cache(
+            service_id=None,
+            file_name=rel,
+            data=meta_bytes,
+            job_name="ocsp-refresh",
+            checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
+        )
+        if err:
+            log_warning(
+                "⚠️ OCSP disk meta for %s updated but DB upsert failed: %s",
+                cert_name,
+                err,
+            )
+            return False
+        return True
+    except Exception as e:
+        log_warning(
+            "⚠️ OCSP disk meta for %s updated but could not upsert meta: %s",
+            cert_name,
+            e,
+        )
+        return False
+
+
+def _mirror_ocsp_recall_meta(
+    db: Optional[Any],
+    fingerprint: str,
+    meta_text: str,
+    cert_name: str,
+    *,
+    drop_der: bool,
+    reason: str,
+) -> bool:
+    """
+    Upsert recall meta. On failure, drop the previous DB generation.
+
+    A volume wipe restores whatever the job cache still holds. Leaving the
+    pre-halve or pre-unpage ``ocsp.json`` (and, for soft-recall, the DER) puts
+    the longer or still-paged staple back.
+    """
+    if _upsert_ocsp_json_to_db(db, fingerprint, meta_text, cert_name):
+        return True
+    log_error(
+        "❌ OCSP %s for %s could not upsert meta (fp=%s...); "
+        "dropping stale DB meta so restore cannot resurrect the previous generation",
+        reason,
+        cert_name,
+        fingerprint[:16],
+    )
+    if not _delete_ocsp_json_db_rows(db, fingerprint):
+        log_error(
+            "❌ OCSP also could not drop DB ocsp.json after %s upsert failure for %s",
+            reason,
+            cert_name,
+        )
+    if drop_der and not _delete_ocsp_der_db_rows(db, fingerprint):
+        log_error(
+            "❌ OCSP also could not drop DB DER after %s upsert failure for %s",
+            reason,
+            cert_name,
+        )
+    return False
+
+
 def _unpage_ocsp_shard_after_nongood(
     fingerprint: str,
     cert_name: str,
     db: Optional[Any] = None,
+    body_fp: Optional[str] = None,
 ) -> bool:
     """
     Soft-recall a shard after repeated non-GOOD answers without tombstoning yet.
@@ -6586,6 +9873,10 @@ def _unpage_ocsp_shard_after_nongood(
     the allow-pin, rewrites ``ocsp-ligand/{fp}``, upserts meta, and bumps
     ``.ocsp_epoch`` so L1 drops the body. A later verified GOOD must canary-page
     again. Idempotent when already unpaged.
+
+    body_fp: when soft-recalling a control key (no local DER), pin the shared
+    body SPKI's der_sha256 so Lua ``peer_refuse_blocks`` has a generation identity
+    (without it the soft-recall check is skipped and intermediates keep stapling).
     """
     normalized = _normalize_fingerprint(fingerprint)
     if not normalized:
@@ -6597,17 +9888,115 @@ def _unpage_ocsp_shard_after_nongood(
     try:
         shard = _get_sharded_ocsp_path(normalized)
         meta_path = shard / "ocsp.json"
-        if not meta_path.is_file():
-            return False
-        try:
-            loaded = json.loads(meta_path.read_text(encoding="utf-8"))
-        except Exception:
-            return False
-        if not isinstance(loaded, dict):
-            return False
+        loaded: Optional[Dict[str, Any]] = None
+        meta_existed = meta_path.is_file()
+        if meta_existed:
+            try:
+                parsed = json.loads(meta_path.read_text(encoding="utf-8"))
+                if isinstance(parsed, dict):
+                    loaded = parsed
+                else:
+                    # Corrupt non-dict meta — refuse to invent soft-recall over it
+                    # (would drop tombstoned / quarantine signals).
+                    log_warning(
+                        "⚠️ OCSP soft-recall refused for %s (fp=%s... unreadable non-dict meta)",
+                        cert_name,
+                        normalized[:16],
+                    )
+                    return False
+            except Exception:
+                log_warning(
+                    "⚠️ OCSP soft-recall refused for %s (fp=%s... unreadable meta)",
+                    cert_name,
+                    normalized[:16],
+                )
+                return False
+        if loaded is None:
+            # Prefer not to invent soft-recall over an active serial ban.
+            if (shard / "serial-blacklist.json").is_file():
+                log_debug(
+                    "⏭️ OCSP soft-recall create skipped for %s (fp=%s... serial ban present)",
+                    cert_name,
+                    normalized[:16],
+                )
+                return False
+            # Control shards are negative-only (often no ocsp.json). Create minimal
+            # soft-recall meta so Lua peer_refuse_blocks(control_fp) sees the gate
+            # before the tombstone threshold.
+            shard.mkdir(parents=True, exist_ok=True)
+            loaded = {
+                "fingerprint": normalized,
+                "paged": False,
+                "unpaged_after_nongood": True,
+                "soft_recall_gen": 1,
+            }
+            # Prefer local DER hash; else shared body hash for control soft-recall.
+            der_path = shard / "ocsp.der"
+            body_norm = _normalize_fingerprint(body_fp) if body_fp else None
+            hash_src = der_path if der_path.is_file() else None
+            if hash_src is None and body_norm and body_norm != normalized:
+                body_der = _get_sharded_ocsp_path(body_norm) / "ocsp.der"
+                if body_der.is_file():
+                    hash_src = body_der
+            if hash_src is not None:
+                try:
+                    loaded["der_sha256"] = hashlib.sha256(hash_src.read_bytes()).hexdigest().lower()
+                except Exception:
+                    pass
+            loaded.update(_provenance_meta())
+            meta_text = json.dumps(loaded, separators=(",", ":"))
+            _atomic_write_text(meta_path, meta_text, mode=0o640)
+            _clear_ocsp_peer_refuse(normalized)
+            if not _write_ocsp_ligand(normalized, loaded):
+                log_error(
+                    "❌ OCSP soft-recall created control meta for %s but ligand write failed "
+                    "(fp=%s... soft_recall_gen=%s)",
+                    cert_name,
+                    normalized[:16],
+                    loaded.get("soft_recall_gen"),
+                )
+                _mirror_ocsp_recall_meta(
+                    db, normalized, meta_text, cert_name, drop_der=True, reason="soft-recall"
+                )
+                _bump_ocsp_cache_epoch()
+                return False
+            if not _mirror_ocsp_recall_meta(
+                db, normalized, meta_text, cert_name, drop_der=True, reason="soft-recall"
+            ):
+                _bump_ocsp_cache_epoch()
+                return False
+            _bump_ocsp_cache_epoch()
+            log_warning(
+                "⚠️ OCSP soft-recalled control key for %s "
+                "(fp=%s... paged=false soft_recall_gen=%s; no prior meta)",
+                cert_name,
+                normalized[:16],
+                loaded.get("soft_recall_gen"),
+            )
+            return True
         if loaded.get("tombstoned") is True:
             return False
         if loaded.get("paged") is not True and loaded.get("unpaged_after_nongood") is True:
+            # Already soft-recalled. Prior run may have failed the ligand write
+            # after bumping shard gen — retry so merge cannot keep a stale gen.
+            meta_text = json.dumps(loaded, separators=(",", ":"))
+            if not _write_ocsp_ligand(normalized, loaded):
+                log_error(
+                    "❌ OCSP soft-recall ligand retry failed for %s (fp=%s... soft_recall_gen=%s)",
+                    cert_name,
+                    normalized[:16],
+                    loaded.get("soft_recall_gen"),
+                )
+                # Keep DB aligned with disk unpage even when ligand lags.
+                _mirror_ocsp_recall_meta(
+                    db, normalized, meta_text, cert_name, drop_der=True, reason="soft-recall"
+                )
+                return False
+            _clear_ocsp_peer_refuse(normalized)
+            if not _mirror_ocsp_recall_meta(
+                db, normalized, meta_text, cert_name, drop_der=True, reason="soft-recall"
+            ):
+                return False
             return True
         loaded["paged"] = False
         loaded["unpaged_after_nongood"] = True
@@ -6623,38 +10012,35 @@ def _unpage_ocsp_shard_after_nongood(
         loaded["soft_recall_gen"] = prev_gen + 1
         loaded["fingerprint"] = normalized
         loaded.update(_provenance_meta())
-        # Clear allow-pin before and after advertising unpage — defense in
-        # depth alongside soft_recall_gen (marker clear can race with writers).
-        _clear_ocsp_peer_refuse(normalized)
+        # Durable unpage FIRST, then clear allow. Clearing allow while meta still
+        # says paged=true lets the next job's restamp re-open Must-Staple.
         meta_text = json.dumps(loaded, separators=(",", ":"))
         _atomic_write_text(meta_path, meta_text, mode=0o640)
+        # Mirror before allow-clear. A failed upsert drops the previous DB
+        # generation (meta + DER) so a wipe cannot restore paged=true.
+        meta_mirrored = _mirror_ocsp_recall_meta(
+            db, normalized, meta_text, cert_name, drop_der=True, reason="soft-recall"
+        )
+        _clear_ocsp_peer_refuse(normalized)
         # Ligand outside shard: advertise unpage + new gen before epoch bump.
-        _write_ocsp_ligand(normalized, loaded)
+        # Ligand wins soft_recall_gen on merge — a failed write would leave the
+        # old gen authoritative over the bumped shard. Retry via idempotent path.
+        if not _write_ocsp_ligand(normalized, loaded):
+            log_error(
+                "❌ OCSP soft-recall wrote shard meta for %s but ligand update failed "
+                "(fp=%s... soft_recall_gen=%s) — allow cleared; next nongood retries ligand",
+                cert_name,
+                normalized[:16],
+                loaded.get("soft_recall_gen"),
+            )
+            _bump_ocsp_cache_epoch()
+            _clear_ocsp_peer_refuse(normalized)
+            return False
         # Epoch first (invalidate L1), then drop allow again (race with writers).
         _bump_ocsp_cache_epoch()
         _clear_ocsp_peer_refuse(normalized)
-        if db is not None:
-            try:
-                meta_bytes = meta_text.encode("utf-8")
-                err = db.upsert_job_cache(
-                    service_id=None,
-                    file_name=_ocsp_cache_relpath(normalized, "ocsp.json"),
-                    data=meta_bytes,
-                    job_name="ocsp-refresh",
-                    checksum=hashlib.sha256(meta_bytes).hexdigest().lower(),
-                )
-                if err:
-                    log_warning(
-                        "⚠️ OCSP unpaged shard for %s but DB upsert failed: %s",
-                        cert_name,
-                        err,
-                    )
-            except Exception as e:
-                log_warning(
-                    "⚠️ OCSP unpaged shard for %s but could not upsert meta: %s",
-                    cert_name,
-                    e,
-                )
+        if not meta_mirrored:
+            return False
         log_warning(
             "⚠️ OCSP soft-recalled staple for %s after repeated non-GOOD "
             "(fp=%s... paged=false soft_recall_gen=%s; DER kept until tombstone)",
@@ -6702,32 +10088,49 @@ def _note_verified_nongood(
     path = _nongood_marker_path(normalized)
     if path is None:
         return False, None
+    # Streak file lives in the shard. Halve/unpage/tombstone take the same
+    # non-reentrant lease, so count under the lock and release before they run.
+    # Two nodes that both read consecutive=N would otherwise both write N+1
+    # and delay a REVOKED tombstone.
+    streak_lock = _acquire_cert_lock(normalized)
+    if streak_lock is None:
+        log_error(
+            "❌ OCSP could not lock to record CertStatus=%s for %s (fp=%s...); "
+            "not counting this sighting",
+            status_name,
+            cert_name,
+            normalized[:16],
+        )
+        return False, None
     consecutive = 1
     try:
-        if path.is_file():
-            old = json.loads(path.read_text(encoding="utf-8"))
-            if isinstance(old, dict):
-                old_serial = str(old.get("serial")) if old.get("serial") is not None else None
-                new_serial = str(serial) if serial is not None else None
-                same_serial = old_serial == new_serial
-                same_status = old.get("status") == status_name
-                if same_serial and same_status:
-                    try:
-                        consecutive = int(old.get("consecutive") or 0) + 1
-                    except (TypeError, ValueError):
-                        consecutive = 1
-    except Exception:
-        consecutive = 1
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        _atomic_write_text(
-            path,
-            json.dumps({"consecutive": consecutive, "status": status_name, "serial": None if serial is None else str(serial)}),
-            mode=0o640,
-        )
-    except Exception as e:
-        log_error("❌ OCSP could not record non-GOOD streak for %s: %s", cert_name, e)
-        return False, None
+        try:
+            if path.is_file():
+                old = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(old, dict):
+                    old_serial = str(old.get("serial")) if old.get("serial") is not None else None
+                    new_serial = str(serial) if serial is not None else None
+                    same_serial = old_serial == new_serial
+                    same_status = old.get("status") == status_name
+                    if same_serial and same_status:
+                        try:
+                            consecutive = int(old.get("consecutive") or 0) + 1
+                        except (TypeError, ValueError):
+                            consecutive = 1
+        except Exception:
+            consecutive = 1
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            _atomic_write_text(
+                path,
+                json.dumps({"consecutive": consecutive, "status": status_name, "serial": None if serial is None else str(serial)}),
+                mode=0o640,
+            )
+        except Exception as e:
+            log_error("❌ OCSP could not record non-GOOD streak for %s: %s", cert_name, e)
+            return False, None
+    finally:
+        _release_cert_lock(streak_lock, normalized)
     log_error(
         "❌ OCSP verified CertStatus=%s for %s (serial=%s) streak=%d/%d%s",
         status_name,
@@ -6745,14 +10148,43 @@ def _note_verified_nongood(
                 halved = _halve_cached_staple_ttl(normalized, cert_name, db)
             unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
             if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
-                _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
+                if not _unpage_ocsp_shard_after_nongood(normalized, cert_name, db):
+                    log_error(
+                        "❌ OCSP soft-recall failed for %s at streak=%d (fp=%s...); "
+                        "staple may remain until next nongood/tombstone",
+                        cert_name,
+                        consecutive,
+                        normalized[:16],
+                    )
         else:
             unpage_after = _NON_GOOD_UNPAGE_AFTER.get(status_name)
             if isinstance(unpage_after, int) and unpage_after > 0 and consecutive >= unpage_after:
                 # Soft-recall only the tenant control meta (no shared DER).
-                _unpage_ocsp_shard_after_nongood(normalized, cert_name, db)
+                # Pass body_fp so control meta gets der_sha256 for Lua peer_refuse.
+                if not _unpage_ocsp_shard_after_nongood(
+                    normalized, cert_name, db, body_fp=shared_body
+                ):
+                    log_error(
+                        "❌ OCSP soft-recall failed for control %s at streak=%d "
+                        "(fp=%s...); tenant may keep stapling until next nongood",
+                        cert_name,
+                        consecutive,
+                        normalized[:16],
+                    )
         return False, halved
-    return _tombstone_ocsp_shard(normalized, serial, status_name, cert_name, db, this_update_unix), None
+    # Control-key tombstone (shared_body set): do not advance body-SPKI floor.
+    return (
+        _tombstone_ocsp_shard(
+            normalized,
+            serial,
+            status_name,
+            cert_name,
+            db,
+            this_update_unix,
+            advance_floor=not bool(shared_body),
+        ),
+        None,
+    )
 
 
 def _persist_ocsp_results_to_disk(
@@ -6778,12 +10210,20 @@ def _persist_ocsp_results_to_disk(
         stats = {}
 
     published_fps: List[str] = []
-    published_controls: List[str] = []
-    control_map = {}
+    # control_fp → max verified GOOD this_update_unix that authorized clear this batch
+    published_control_goods: Dict[str, int] = {}
+    # control_fp → body SPKI to seal only after that tenant's clear succeeds
+    control_seal_body: Dict[str, str] = {}
+    control_by_name: Dict[str, str] = {}
     if isinstance(stats, dict):
-        raw_map = stats.get("ocsp_inter_control_by_body")
-        if isinstance(raw_map, dict):
-            control_map = raw_map
+        raw_by_name = stats.get("ocsp_inter_control_by_name")
+        if isinstance(raw_by_name, dict):
+            for name, ctrl in raw_by_name.items():
+                if not isinstance(name, str):
+                    continue
+                ctrl_n = _normalize_fingerprint(ctrl if isinstance(ctrl, str) else None)
+                if ctrl_n:
+                    control_by_name[name] = ctrl_n
     for cert_name, ocsp_der, ttl, checksum, pem_data, ocsp_url, was_attempted in all_ocsp_results:
         if not ocsp_der:
             continue
@@ -6795,14 +10235,11 @@ def _persist_ocsp_results_to_disk(
                 log_error("❌ OCSP cannot store response for %s: failed to compute fingerprint", cert_name)
                 stats["errors"] = stats.get("errors", 0) + 1
                 continue
-            control_fp = control_map.get(cert_fp)
-            if isinstance(control_fp, str):
-                control_fp = _normalize_fingerprint(control_fp)
-            else:
-                control_fp = None
-            # Intermediate: blacklist is tenant-scoped; never block shared publish via another tenant's ban.
-            bl_fp = control_fp or cert_fp
-            if _serial_blacklist_blocks(bl_fp, ocsp_der, cert_name):
+            tenant_control = control_by_name.get(cert_name)
+            # Intermediate: tenant bans live on control keys — never gate the shared
+            # body publish on one tenant's ban (Lua still refuses that tenant).
+            # Body-level blacklist (leaf / rare) still blocks.
+            if _serial_blacklist_blocks(cert_fp, ocsp_der, cert_name):
                 stats["ocsp_serial_blacklist_blocked"] = stats.get("ocsp_serial_blacklist_blocked", 0) + 1
                 continue
 
@@ -6885,6 +10322,48 @@ def _persist_ocsp_results_to_disk(
                     meta["expires_unix"] = meta["next_update_unix"]
                 meta.update(_provenance_meta())
 
+                # Shared intermediate SPKI can appear twice in one persist batch
+                # (two leaves). Never replace a still-usable canary-paged live body
+                # with an older GOOD for the same CertID — same freshness idea as
+                # the restore fence. get_cached_ocsp_ttl folds DER/paged/serial/
+                # death clocks; live thisUpdate is DER-signed (``_body_shard_this_update_unix``)
+                # so inflated meta cannot block a fresher candidate or authorize
+                # wiping a newer tombstone. Fail closed when live is usable but
+                # DER thisUpdate is unreadable — cannot prove candidate is fresher.
+                try:
+                    cand_tu = (
+                        int(meta["this_update_unix"])
+                        if meta.get("this_update_unix") is not None
+                        else 0
+                    )
+                except (TypeError, ValueError):
+                    cand_tu = 0
+                live_ttl, _ = get_cached_ocsp_ttl(cert_name, cleaned_pem, cert_fp)
+                if live_ttl is not None and live_ttl > 0:
+                    live_tu = _body_shard_this_update_unix(cert_fp)
+                    if live_tu is None or cand_tu <= 0 or live_tu > cand_tu:
+                        live_serial = _meta_certid_serial_norm(_live_paged_meta(cert_fp))
+                        log_info(
+                            "⏭️ OCSP skip publish for %s (fp=%s...): keep usable live "
+                            "canary (thisUpdate=%s candidate=%s serial=%s ttl=%ds)",
+                            cert_name,
+                            cert_fp[:16],
+                            live_tu if live_tu is not None else "?",
+                            cand_tu if cand_tu > 0 else "?",
+                            live_serial or "?",
+                            live_ttl,
+                        )
+                        stats["ocsp_publish_skipped_older_body"] = (
+                            stats.get("ocsp_publish_skipped_older_body", 0) + 1
+                        )
+                        # Tenant clear still authorized by the live body when dated.
+                        if tenant_control and live_tu is not None and live_tu > 0:
+                            prev = published_control_goods.get(tenant_control, 0)
+                            if live_tu > prev:
+                                published_control_goods[tenant_control] = live_tu
+                                control_seal_body[tenant_control] = cert_fp
+                        continue
+
                 published_dir = _publish_ocsp_shard(
                     cert_fp,
                     issuer_pem=issuer_pem,
@@ -6895,17 +10374,41 @@ def _persist_ocsp_results_to_disk(
                     db=db,
                 )
                 published_fps.append(cert_fp)
-                # Intermediate GOOD: advance / clear tenant control key, not the shared SPKI floor/refuse.
-                floor_fp = control_fp or cert_fp
+                # Floor tracks the published body's thisUpdate (body SPKI). Control
+                # keys are negative-only and have no this_update_unix — advancing
+                # floor there made Lua cluster_floor_blocks a no-op for intermediates.
                 _advance_ocsp_cluster_floor(
-                    floor_fp,
+                    cert_fp,
                     meta.get("this_update_unix"),
                     meta.get("job_run_id"),
                     db,
                     meta.get("published_unix"),
                 )
-                if control_fp:
-                    published_controls.append(control_fp)
+                # Streak reset only after canary page (fetch success alone must not).
+                _clear_nongood_marker(cert_fp)
+                # Body-level ban (leaf / rare): clear only after successful page.
+                _clear_superseded_serial_blacklist_after_page(cert_fp, ocsp_der, cert_name)
+                try:
+                    good_tu = int(meta["this_update_unix"]) if meta.get("this_update_unix") is not None else 0
+                except (TypeError, ValueError):
+                    good_tu = 0
+                # Schedule tenant clear; seal body only after that clear succeeds.
+                if tenant_control:
+                    if good_tu > 0:
+                        prev = published_control_goods.get(tenant_control, 0)
+                        if good_tu > prev:
+                            published_control_goods[tenant_control] = good_tu
+                            control_seal_body[tenant_control] = cert_fp
+                    else:
+                        log_error(
+                            "❌ OCSP published intermediate for %s without this_update_unix; "
+                            "skipping tenant control clear (fp=%s...)",
+                            cert_name,
+                            tenant_control[:16],
+                        )
+                        stats["ocsp_control_clear_skipped_no_this_update"] = (
+                            stats.get("ocsp_control_clear_skipped_no_this_update", 0) + 1
+                        )
                 log_info(
                     "✓ OCSP saved response for %s to disk at %s (fingerprint: %s)",
                     cert_name,
@@ -6931,8 +10434,20 @@ def _persist_ocsp_results_to_disk(
                 except Exception:
                     pass
                 if not publish_error_logged:
-                    log_error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
-                    log_info("ℹ️ OCSP kept existing OCSP response file for %s (new fetch failed)", cert_name)
+                    err_text = str(e)
+                    if "ligand/allow write failed after page" in err_text:
+                        log_error(
+                            "❌ OCSP demoted after canary page for %s (ligand/allow failed): %s",
+                            cert_name,
+                            e,
+                        )
+                        log_info(
+                            "ℹ️ OCSP left shard unpaged for %s (Must-Staple refuse until re-canary)",
+                            cert_name,
+                        )
+                    else:
+                        log_error("❌ OCSP error while writing response for %s to disk: %s", cert_name, e)
+                        log_info("ℹ️ OCSP kept existing OCSP response file for %s (new fetch failed)", cert_name)
                     stats["errors"] = stats.get("errors", 0) + 1
             finally:
                 if lock_fd is not None:
@@ -6956,10 +10471,136 @@ def _persist_ocsp_results_to_disk(
             if isinstance(live_meta, dict) and live_meta.get("paged") is True:
                 _write_ocsp_ligand(fp, live_meta)
                 _write_ocsp_allow_pin(fp, live_meta)
-            else:
+            elif isinstance(live_meta, dict):
+                # Explicitly unpaged/demoted — drop pin. Meta read miss must NOT
+                # clear allow (would Must-Staple-dark a still-paged body until restamp).
                 _clear_ocsp_peer_refuse(fp)
-        for cfp in published_controls:
-            _clear_tenant_control_negatives(cfp)
+            # else: missing/unreadable meta — leave pins; restamp may repair.
+
+    # Tenant clears authorized by published OR skip-kept live bodies. Must run
+    # even when this batch only skipped (older candidates vs usable live) —
+    # otherwise published_control_goods never clears and Lua keeps refusing.
+    # Re-validate the body under lock (donate order: body → control) so a demote
+    # between publish/skip and clear cannot wipe negatives while the shared body
+    # is unpaged. Authorize only with DER-signed thisUpdate at clear time.
+    for cfp, _recorded_good in published_control_goods.items():
+        body_fp = control_seal_body.get(cfp)
+        body_lock = None
+        auth_tu: Optional[int] = None
+        try:
+            if body_fp:
+                body_lock = _acquire_cert_lock(body_fp)
+                if body_lock is None:
+                    stats["ocsp_control_clear_lock_failed"] = (
+                        stats.get("ocsp_control_clear_lock_failed", 0) + 1
+                    )
+                    log_error(
+                        "❌ OCSP could not lock body_fp=%s... before clearing "
+                        "control_fp=%s...; Lua will keep refusing until a later clear",
+                        body_fp[:16],
+                        cfp[:16],
+                    )
+                    continue
+                if not _inter_body_shard_paged(body_fp):
+                    log_warning(
+                        "⚠️ OCSP skip tenant clear control_fp=%s... — body_fp=%s... "
+                        "no longer canary-paged (demoted after publish/skip)",
+                        cfp[:16],
+                        body_fp[:16],
+                    )
+                    stats["ocsp_control_clear_skipped_body_unpaged"] = (
+                        stats.get("ocsp_control_clear_skipped_body_unpaged", 0) + 1
+                    )
+                    continue
+                auth_tu = _body_shard_this_update_unix(body_fp)
+                if auth_tu is None:
+                    log_warning(
+                        "⚠️ OCSP skip tenant clear control_fp=%s... — body_fp=%s... "
+                        "DER thisUpdate unreadable (refuse meta-only clear auth)",
+                        cfp[:16],
+                        body_fp[:16],
+                    )
+                    stats["ocsp_control_clear_skipped_no_this_update"] = (
+                        stats.get("ocsp_control_clear_skipped_no_this_update", 0) + 1
+                    )
+                    continue
+            else:
+                # No seal body recorded — refuse clear (would lack DER re-check).
+                log_warning(
+                    "⚠️ OCSP skip tenant clear control_fp=%s... — no body SPKI recorded",
+                    cfp[:16],
+                )
+                stats["ocsp_control_clear_skipped_no_body"] = (
+                    stats.get("ocsp_control_clear_skipped_no_body", 0) + 1
+                )
+                continue
+
+            cleared, reason = _clear_tenant_control_negatives(
+                cfp, good_this_update_unix=auth_tu
+            )
+            if not cleared and reason == "lock":
+                # One retry — control lock may have been briefly held by handshake/job.
+                time.sleep(0.05)
+                cleared, reason = _clear_tenant_control_negatives(
+                    cfp, good_this_update_unix=auth_tu
+                )
+            if cleared:
+                # Seal only after tenant negatives are gone — otherwise plasmid reuse
+                # would skip force-republish while Lua still refuses this control.
+                # Body still held locked + re-checked paged above.
+                if _inter_body_shard_paged(body_fp):
+                    _seal_inter_body_spki(body_fp)
+                else:
+                    log_warning(
+                        "⚠️ OCSP cleared control_fp=%s... but body_fp=%s... is not "
+                        "canary-paged — skipping seal (require fresh GOOD next leaf)",
+                        cfp[:16],
+                        body_fp[:16],
+                    )
+                    if stats is not None:
+                        stats["ocsp_seal_skipped_body_unpaged"] = (
+                            stats.get("ocsp_seal_skipped_body_unpaged", 0) + 1
+                        )
+            else:
+                if reason == "lock":
+                    stats["ocsp_control_clear_lock_failed"] = stats.get("ocsp_control_clear_lock_failed", 0) + 1
+                elif reason == "fence":
+                    stats["ocsp_control_clear_fence_refused"] = (
+                        stats.get("ocsp_control_clear_fence_refused", 0) + 1
+                    )
+                elif reason == "ban_unlink":
+                    stats["ocsp_control_clear_ban_failed"] = (
+                        stats.get("ocsp_control_clear_ban_failed", 0) + 1
+                    )
+                elif reason == "ligand_unlink":
+                    stats["ocsp_control_clear_ligand_failed"] = (
+                        stats.get("ocsp_control_clear_ligand_failed", 0) + 1
+                    )
+                elif reason == "nongood_unlink":
+                    stats["ocsp_control_clear_nongood_failed"] = (
+                        stats.get("ocsp_control_clear_nongood_failed", 0) + 1
+                    )
+                elif reason == "der_unlink":
+                    stats["ocsp_control_clear_der_failed"] = (
+                        stats.get("ocsp_control_clear_der_failed", 0) + 1
+                    )
+                elif reason == "allow_unlink":
+                    stats["ocsp_control_clear_allow_failed"] = (
+                        stats.get("ocsp_control_clear_allow_failed", 0) + 1
+                    )
+                else:
+                    stats["ocsp_control_clear_meta_failed"] = (
+                        stats.get("ocsp_control_clear_meta_failed", 0) + 1
+                    )
+                log_error(
+                    "❌ OCSP published/kept body but could not clear tenant control_fp=%s... "
+                    "(reason=%s); Lua will keep refusing until a later clear",
+                    cfp[:16],
+                    reason,
+                )
+        finally:
+            if body_lock is not None and body_fp:
+                _release_cert_lock(body_lock, body_fp)
     # Upgrade / post-DROP repair: re-write ligand+allow for every other live paged
     # shard that still passes local predicates (no network). Restored shards stay
     # paged=false and are excluded. Always run so a no-publish job still backfills.
@@ -6967,11 +10608,11 @@ def _persist_ocsp_results_to_disk(
 
 
 def _cleanup_stale_revoke_claims(allow_dir: Path, age_threshold_seconds: int = 60) -> int:
-    """Clean up stale revoke claim files left behind by lazy deletion optimization.
+    """Clean up stale mid-revoke claim files (worker crash between rename and unlink).
 
-    Handshakes defer os.remove(claim) to job-side cleanup by leaving .ocsp_revoke.*.tmp
-    files in ocsp-allow directory. This function scans and deletes any files older than
-    age_threshold_seconds to prevent accumulation. Returns count of files deleted.
+    Handshake DROP always removes the claim on success; leftover `.ocsp_revoke.*.tmp`
+    files only remain when a worker dies mid-CAS. This sweep deletes aged litter so
+    try_reclaim_orphan_claim cannot resurrect a DROPped generation forever.
 
     Args:
         allow_dir: Path to /var/cache/bunkerweb/ssl/ocsp-allow/
@@ -7039,16 +10680,6 @@ def main() -> int:
     except Exception as e:
         log_debug("⚠️ OCSP could not provision ocsp-allow/ligand/refuse dirs: %s", e)
 
-    # Path A cleanup: Remove stale revoke claim files from lazy deletion optimization.
-    # Handshakes leave .ocsp_revoke.*.tmp files instead of os.remove(claim) to save latency.
-    # This cleanup runs once per job, keeping the directory from accumulating temp files.
-    try:
-        cleaned_count = _cleanup_stale_revoke_claims(ocsp_allow_dir, age_threshold_seconds=60)
-        if cleaned_count > 0:
-            stats["revoke_claims_cleaned"] = cleaned_count
-    except Exception as e:
-        log_debug("⚠️ OCSP stale revoke claim cleanup failed: %s", e)
-
     def check_job_timeout(phase: str = "") -> bool:
         """Check if job has exceeded timeout. Returns True if timeout exceeded."""
         nonlocal timed_out
@@ -7087,6 +10718,15 @@ def main() -> int:
         "orphaned_cleaned": 0,
         "expired_cleaned": 0,
     }
+
+    # Mid-revoke crash litter: handshake always unlinks claims on successful DROP;
+    # aged .ocsp_revoke.*.tmp files are worker-death leftovers only.
+    try:
+        cleaned_count = _cleanup_stale_revoke_claims(ocsp_allow_dir, age_threshold_seconds=60)
+        if cleaned_count > 0:
+            stats["revoke_claims_cleaned"] = cleaned_count
+    except Exception as e:
+        log_debug("⚠️ OCSP stale revoke claim cleanup failed: %s", e)
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="OCSP refresh job for BunkerWeb")
@@ -7235,7 +10875,10 @@ def main() -> int:
             last_refresh_entry = db.get_job_cache_file(file_name=last_refresh_key, job_name="ocsp-refresh", with_info=True)
             if last_refresh_entry and last_refresh_entry.get("data") and stats.get("expired_cleaned", 0) == 0:
                 try:
-                    last_refresh_time = int(last_refresh_entry["data"].decode("utf-8"))
+                    last_raw = _cache_blob_bytes(last_refresh_entry.get("data"))
+                    if last_raw is None:
+                        raise ValueError("last_full_refresh payload is not bytes")
+                    last_refresh_time = int(last_raw.decode("utf-8"))
                     if now_ts - last_refresh_time < 1800: # 30 minutes window
                         skip_unchanged_ttl_checks = True
                         log_info("ℹ️ OCSP full refresh was recently run (%ds ago), will only process new/changed certificates", now_ts - last_refresh_time)
@@ -7350,7 +10993,8 @@ def main() -> int:
                 # Add recategorized certs to all_ocsp_results so their checksums get persisted to database
                 # (even though we didn't fetch new OCSP responses, we need to record their checksums for future runs)
                 for cert_name, pem_data in sorted(recategorized_changed.items()):
-                    pem_checksum = _calculate_cert_checksum(pem_data)
+                    # Same bytes as the changed-vs-unchanged compare (_clean_pem).
+                    pem_checksum = _calculate_cert_checksum(_clean_pem(pem_data))
                     # Tuple: (cert_name, ocsp_der=None, ttl=0, checksum, pem_data, ocsp_url=None, was_attempted=False)
                     # We're not fetching, just recording the cert's checksum for differential tracking
                     all_ocsp_results.append((cert_name, None, 0, pem_checksum, pem_data, None, False))
@@ -7545,6 +11189,30 @@ def main() -> int:
             stats.get("ocsp_corrected", 0),
             stats["errors"],
         )
+        # Intermediate control-plane counters (omit when all zero to keep the main line short).
+        ctrl_bits = []
+        for key, label in (
+            ("ocsp_intermediate_processed", "processed"),
+            ("ocsp_intermediate_plasmid_reuse", "plasmid"),
+            ("ocsp_ttl_keep_donate_failed", "ttl_keep_force"),
+            ("ocsp_donate_clear_failed", "donate_clear"),
+            ("ocsp_seal_skipped_body_unpaged", "seal_unpaged"),
+            ("ocsp_publish_skipped_older_body", "skip_older"),
+            ("ocsp_control_clear_lock_failed", "clear_lock"),
+            ("ocsp_control_clear_fence_refused", "clear_fence"),
+            ("ocsp_control_clear_ban_failed", "clear_ban"),
+            ("ocsp_control_clear_ligand_failed", "clear_ligand"),
+            ("ocsp_control_clear_nongood_failed", "clear_nongood"),
+            ("ocsp_control_clear_der_failed", "clear_der"),
+            ("ocsp_control_clear_allow_failed", "clear_allow"),
+            ("ocsp_control_clear_meta_failed", "clear_meta"),
+            ("ocsp_control_clear_skipped_no_this_update", "clear_no_tu"),
+        ):
+            val = int(stats.get(key, 0) or 0)
+            if val:
+                ctrl_bits.append(f"{label}={val}")
+        if ctrl_bits:
+            log_info("📊 Intermediate control: %s", " | ".join(ctrl_bits))
         return status
     except BaseException as e:
         LOG.exception("❌ OCSP exception in ocsp-refresh.py")
