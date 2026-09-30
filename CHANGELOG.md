@@ -12,6 +12,7 @@
 - [BUGFIX] `ui`: raw translation keys no longer flash on page load, page scripts wait for the translations before building tables and toolbars. (Fixes #3963)
 - [BUGFIX] `ui`: when a table toolbar wraps, as with longer translations, its search and filter controls move to their own left-aligned row instead of floating under a split row of actions. (Fixes #3969)
 - [BUGFIX] `ui`: creating or deleting a service no longer rewrites the other services' settings, which restored a setting edited back to its template value and bumped every service's last update. Editing a setting back to its default now updates the service's last update. (Fixes #3986)
+- [BUGFIX] PRO plugin pages are no longer deleted from the database when a force update finds them unchanged, which left their Web UI pages missing until the next scheduler restart.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 

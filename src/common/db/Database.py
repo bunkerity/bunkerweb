@@ -4607,26 +4607,22 @@ class Database:
                     remove = not path_ui.is_dir() and db_plugin_page
 
                     if path_ui.is_dir():
-                        remove = True
                         try:
                             plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             content = plugin_page_content.getvalue()
                         except (FileNotFoundError, OSError) as e:
                             self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
-                            remove = False
                             continue
 
                         if not db_plugin_page:
                             changes = True
                             local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
-                            remove = False
                         elif checksum != db_plugin_page.checksum:
                             changes = True
                             session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(
                                 {Plugin_pages.data: content, Plugin_pages.checksum: checksum}
                             )
-                            remove = False
 
                     if db_plugin_page and remove:
                         changes = True
