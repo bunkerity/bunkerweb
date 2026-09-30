@@ -304,8 +304,11 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
+        # Seed with the global config only, like edit_service. The full stored config carries each
+        # service's inherited global value as a fallback that ignores templates, and gen_conf keeps
+        # it over the template-aware value from get_services, so it was saved back as a service row.
         ret = self.gen_conf(
-            self.get_config(methods=False),
+            self.get_config(global_only=True, methods=False),
             services,
             check_changes=False if not check_changes else not is_draft,
             override_method=override_method,
@@ -434,7 +437,7 @@ class Config:
             raises this if the service_name given isn't found
         """
         service_name = service_name.split(" ")[0]
-        full_env = self.get_config(methods=False)
+        full_env = self.get_config(global_only=True, methods=False)
         services = self.get_services(methods=False, with_drafts=True)
         new_services = []
         found = False

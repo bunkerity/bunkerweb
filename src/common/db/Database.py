@@ -2478,6 +2478,9 @@ class Database:
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
                                     )
+                                    local_to_update.append(
+                                        {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
+                                    )
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
