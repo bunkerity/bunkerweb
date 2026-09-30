@@ -15,6 +15,7 @@
 - [BUGFIX] PRO plugin pages are no longer deleted from the database when a force update finds them unchanged, which left their Web UI pages missing until the next scheduler restart.
 - [BUGFIX] `db`: large plugin archives, plugin pages and job cache files are stored in chunks sized from the server's `max_allowed_packet`, so PRO plugin updates no longer fail with "MySQL server has gone away" on MariaDB or MySQL and no longer need a raised limit. Adds the `bw_blob_chunks` table. (Fixes #3965)
 - [BUGFIX] `ui`, `api`: saving or renaming a service no longer deletes another service that shares one of its server names, and a server name already used by another service is refused with an error naming that service.
+- [BUGFIX] `ui`: the page of a loaded plugin that has no page of its own, such as PRO Maintenance, says so instead of asking to restart the Web UI.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 

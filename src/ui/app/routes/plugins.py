@@ -590,8 +590,16 @@ def custom_plugin_page(plugin: str):
                 try:
                     return redirect(url_for(plugin))
                 except BuildError:
+                    # A registered blueprint without a page endpoint never gets a page, only a blueprint loaded after the UI started needs a restart
                     return render_template(
-                        "plugin_page.html", plugin_page="", plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render={}, no_page=True
+                        "plugin_page.html",
+                        plugin_page="",
+                        plugin=plugin_data,
+                        is_used=is_used,
+                        is_metrics=is_metrics_on,
+                        pre_render={},
+                        no_page=True,
+                        blueprint_loaded=plugin in current_app.blueprints,
                     )
 
         # Execute pre-render action if exists

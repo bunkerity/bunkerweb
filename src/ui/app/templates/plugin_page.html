@@ -65,10 +65,15 @@
     {% elif no_page %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-                   data-i18n="plugin.page.status.dedicated_page_unavailable">
-                    This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
-                </p>
+                {% if blueprint_loaded %}
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                       data-i18n="plugin.page.status.no_content">This plugin does not provide an embedded page.</p>
+                {% else %}
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                       data-i18n="plugin.page.status.dedicated_page_unavailable">
+                        This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
+                    </p>
+                {% endif %}
             </div>
         </div>
     {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
