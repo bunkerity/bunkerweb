@@ -640,9 +640,11 @@ class Database:
 
     def _blob_sweep(self, session: scoped_session) -> None:
         """Delete chunk sets whose owner row is gone or no longer points at them (owner rows deleted in bulk or by cascade)."""
-        owners = {row.owner for row in session.query(Blob_chunks.owner).distinct()}
-        if not owners:
+        # Read the sets once, before the live markers: a set committed after this read is never a deletion candidate.
+        sets = session.query(Blob_chunks.owner, Blob_chunks.checksum).distinct().all()
+        if not sets:
             return
+        owners = {owner for owner, _ in sets}
         live = set()
         for table, key, column in (
             ("bw_plugins", Plugins.id, Plugins.data),
@@ -657,7 +659,7 @@ class Database:
             for row in session.query(key, column).filter(key.in_(ids), func.length(column) == len(BLOB_CHUNK_MARKER) + 64):
                 if row[1].startswith(BLOB_CHUNK_MARKER):
                     live.add((f"{table}:{row[0]}", row[1].removeprefix(BLOB_CHUNK_MARKER).decode()))
-        for owner, checksum in session.query(Blob_chunks.owner, Blob_chunks.checksum).distinct().all():
+        for owner, checksum in sets:
             if (owner, checksum) not in live:
                 self._blob_drop(session, Blob_chunks.owner == owner, Blob_chunks.checksum == checksum)
 
