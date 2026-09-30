@@ -1,3 +1,59 @@
+--[[
+================================================================================
+OCSP Main Orchestrator Module: Central Stapling and Validation Pipeline
+================================================================================
+
+MODULE OVERVIEW:
+Central orchestrator for OCSP stapling across HTTP and stream subsystems.
+Implements two-tier validation (Tier 1 L1 cache + Tier 2 FFI), allow-pin bus
+coordination, Must-Staple enforcement, and dual-cert leaf ranking.
+
+DESIGN: Split architecture with HTTP (ocsp_http.lua) and stream (stream/ocsp.lua)
+subsystem-specific code calling into this module for shared logic: SPKI parsing,
+CertID matching, chain building, Must-Staple detection, cache management.
+
+KEY VALIDATION TIERS:
+- Tier 1 (L1 Cache): Shared-dict lookup (0.1-1ms) with verified binding
+  (SHA256 of DER) and soft_recall_gen match. Hit → skip FFI, attach immediately.
+- Tier 2 (Full FFI): ngx.ocsp.validate_ocsp_response (10-20ms) on L1 miss.
+  Result shared via compare-and-delete for thundering-herd protection.
+- Tier 3 (Async): Background job validation (ocsp-refresh.py) pre-warms L1
+  for next epoch. TLS path uses canary-paged ligand + allow-pin for skip-validate.
+
+TWO-TIER STORAGE:
+- In-Memory: Per-worker PEM/DER/ISS caches (no shared state to avoid invalidation)
+- Disk: Shard metadata (ocsp.json), outside ligand, L1 cache dumps, allow-pins
+- Shared-Dict L1: Coherent via .ocsp_epoch (job bump bus)
+
+DUAL-CERT HANDLING:
+- ordered_leaves_for_handshake(): ClientHello signature_algorithms aware
+- Must-Staple tri-state + allow-pin gate for health ranking
+- Single leaf install per TLS handshake (HTTP/2 one cert per conn)
+
+ALLOW-PIN BUS:
+- Missing pin → Must-Staple refuse (conservative default)
+- Present pin → generation-matched allow (der_sha256 + soft_recall_gen)
+- Compare-and-delete revoke (atomic, gen-bound, sibling claim sweep)
+
+MUST-STAPLE ENFORCEMENT:
+- Tri-state detection (true/false/nil unknown): TLS Feature + ocsp.json
+- Fail-closed: unknown treated as Must-Staple (enforce)
+- Soft-fuse modes (open/staple_only) continue handshake on Must-Staple miss
+
+KEY FUNCTIONS:
+- try_staple(): Leaf + issuer validation → attach with budget guard + force_ffi latch
+- validate(): FFI signature + death-time check with cross-handshake sharing
+- ordered_leaves_for_handshake(): Rank leaves by Must-Staple health + sig-alg fit
+- attachment flow: probe → health → final install with staple attach/clear
+
+DEPENDENCIES:
+All OCSP submodules: ocsp_common, ocsp_cert, ocsp_chain, ocsp_store, ocsp_pin,
+ocsp_must_staple, ocsp_warmer; HTTP integration: ocsp_http.lua;
+Stream integration: stream/ocsp.lua
+
+================================================================================
+]]
+
 local _M = {}
 
 local ngx = ngx
@@ -85,6 +141,39 @@ local store_drop_cache = store.drop_cache
 -- (or a sibling leaf still under consideration) may still need. Callers set
 -- ngx.ctx.bw_ocsp_skip_l1_drop = true around rank-time _M.probe only; install-time
 -- re-probe and real refuse paths leave it unset so poison still evicts DRAM.
+-- ============================================================================
+-- drop_cache(internalstore, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Evict L1 cache entry for a certificate. Guards against L1 poisoning during
+--   multi-cert leaf ranking (probe phase) when same fingerprint reused in different
+--   Must-Staple health scenarios.
+--
+-- PARAMETERS:
+--   internalstore (table): shared dict object (ngx.shared.internalstore or _stream)
+--   fingerprint (string): certificate SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   nil (side effect: evicts L1 entry if guard is not set)
+--
+-- SIDE EFFECTS:
+--   - Calls store_drop_cache() to evict L1 shared-dict entry
+--   - Checks ngx.ctx.bw_ocsp_skip_l1_drop guard (set during ranking phase)
+--   - If guard is set, returns early (no eviction)
+--
+-- DESIGN NOTES:
+--   - Guard (bw_ocsp_skip_l1_drop) prevents L1 poison during ranking:
+--     Probing multiple Must-Staple siblings must not clear L1 for a fingerprint
+--     that a later handshake (or a sibling still under consideration) may need
+--   - Install-time re-probe and real refuse paths leave guard unset so poison
+--     still evicts DRAM (normal operation, safety-critical)
+--   - Performance: O(1) (shared dict operation)
+--
+-- RELATED:
+--   - store_drop_cache() in ocsp_store.lua (actual eviction)
+--   - ngx.ctx.bw_ocsp_skip_l1_drop guard set by ordered_leaves_for_handshake()
+--
+-- ============================================================================
 local function drop_cache(internalstore, fingerprint)
 	if ngx.ctx and ngx.ctx.bw_ocsp_skip_l1_drop then
 		return
@@ -123,6 +212,39 @@ local issuer_linked_chain_blocks = chain.issuer_linked_chain_blocks
 -- (open vs normal), so a worker-global "skip load because open" memo was wrong
 -- and ocsp_staple_mode() without internalstore+SNI always returned "open".
 local must_staple_module = nil
+-- ============================================================================
+-- get_must_staple_module()
+-- ============================================================================
+-- PURPOSE:
+--   Lazy-load and cache ocsp_must_staple module for Must-Staple detection.
+--   Returns cached module on subsequent calls (single pcall overhead).
+--
+-- PARAMETERS:
+--   None
+--
+-- RETURNS:
+--   (table|nil): Must-Staple module if available
+--               nil if module unavailable or load failed
+--
+-- SIDE EFFECTS:
+--   - Caches result in local variable (Lua module-level)
+--   - Calls: require("bunkerweb.ocsp_must_staple") once (lazy-load)
+--   - Performance: O(1) after first call (cached)
+--
+-- DESIGN NOTES:
+--   - Lazy-load: Module loaded only on first call
+--   - Caching: false cached to indicate unavailable (not nil retry loop)
+--   - Fail-safe: pcall() catches load errors (no throw)
+--   - Type check: Validates module is table before caching
+--   - Used by: set_certs_from_pem(), staple(), probe() for Must-Staple detection
+--   - Performance: First call ~1ms (module load), subsequent <0.1ms
+--
+-- RELATED:
+--   - ocsp_must_staple.lua provides Must-Staple detection
+--   - _M.requires_must_staple() uses this to get detector
+--   - staple()/probe() use for Must-Staple health checks
+--
+-- ============================================================================
 local function get_must_staple_module()
 	if must_staple_module ~= nil then
 		if must_staple_module == false then
@@ -145,6 +267,32 @@ end
 -- Async status is fingerprint-keyed but value-bound to body generation:
 --   "pending|sha|gen" | "validated|sha|gen" | "failed|sha|gen"
 -- Soft-recall / re-page of a new body must not inherit a prior FAILED for 3600s.
+-- ============================================================================
+-- async_validation_key(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Generate shared-dict key for async validation status tracking.
+--   Used to cache whether background job has validated an OCSP response.
+--
+-- PARAMETERS:
+--   fingerprint (string): certificate SPKI fingerprint (64 hex chars, required)
+--
+-- RETURNS:
+--   (string): key formatted as "OCSP:ASYNC_VALIDATE:{fingerprint}"
+--   (nil): if fingerprint is nil or empty (invalid input)
+--
+-- DESIGN NOTES:
+--   - Key format enables per-certificate status tracking
+--   - Used with async_status_payload() to encode status + generation binding
+--   - Generation binding (soft_recall_gen) prevents stale status blocking new cert
+--   - Performance: O(1) string concatenation
+--
+-- RELATED:
+--   - async_status_payload() encodes status with generation
+--   - get_async_validation_status() retrieves status
+--   - mark_async_validation_* functions store status
+--
+-- ============================================================================
 local function async_validation_key(fingerprint)
 	if not fingerprint or fingerprint == "" then
 		return nil
@@ -152,6 +300,40 @@ local function async_validation_key(fingerprint)
 	return "OCSP:ASYNC_VALIDATE:" .. fingerprint
 end
 
+-- ============================================================================
+-- async_status_payload(status, meta, resp, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Encode async validation status with generation binding to prevent stale
+--   status from blocking new cert bodies after soft-recall (cert rotation).
+--
+-- PARAMETERS:
+--   status (string): validation status ("pending"|"validated"|"failed")
+--   meta (table): ocsp.json metadata containing soft_recall_gen
+--   resp (string): OCSP response DER bytes (for generation tuple)
+--   fingerprint (string): certificate fingerprint (for ligand lookup)
+--
+-- RETURNS:
+--   (string): encoded payload "{status}|{sha256_der}|{soft_recall_gen}"
+--   (nil): if validation fails or inputs invalid
+--
+-- SIDE EFFECTS:
+--   - Reads meta.soft_recall_gen and resp body
+--   - Calls generation_tuple() to extract DER SHA + gen
+--
+-- DESIGN NOTES:
+--   - Format: "status|sha256_64chars|gen_number"
+--   - Generation binding: soft_recall_gen increments on cert rotation
+--   - Old payload (gen=N) becomes invalid when soft_recall_gen increments (N+1)
+--   - Prevents "VALIDATED" from gen=1 blocking new DER with gen=2
+--   - Performance: O(n) for generation_tuple() + parsing
+--
+-- RELATED:
+--   - parse_async_status_payload() decodes this format
+--   - generation_tuple() extracts (DER_SHA, soft_recall_gen)
+--   - soft_recall_gen prevents stale responses blocking new certs
+--
+-- ============================================================================
 local function async_status_payload(status, meta, resp, fingerprint)
 	if not status then
 		return nil
@@ -163,6 +345,30 @@ local function async_status_payload(status, meta, resp, fingerprint)
 	return status .. "|" .. sha .. "|" .. tostring(gen)
 end
 
+-- ============================================================================
+-- parse_async_status_payload(raw)
+-- ============================================================================
+-- PURPOSE:
+--   Decode async validation status payload with generation validation.
+--   Extracts status + DER SHA + generation from encoded payload string.
+--
+-- PARAMETERS:
+--   raw (string): encoded payload "{status}|{sha256}|{gen}" | nil or empty
+--
+-- RETURNS:
+--   (string, string, number): (status, sha256_hex, soft_recall_gen)
+--   (nil): if payload invalid, malformed, or legacy bare status (no gen)
+--
+-- DESIGN NOTES:
+--   - Rejects legacy bare status (PENDING|DONE|FAILED with no "|")
+--   - Validates format: must be "x|y|z" with z being a number
+--   - SHA256 validation: must be exactly 64 hex characters
+--   - Generation binding: soft_recall_gen must be positive number
+--   - Performance: O(n) string parsing (~0.1ms)
+--   - Used by: get_async_validation_status() to check status
+--   - Related: async_status_payload() creates this format
+--
+-- ============================================================================
 local function parse_async_status_payload(raw)
 	if type(raw) ~= "string" or raw == "" then
 		return nil
@@ -182,7 +388,36 @@ local function parse_async_status_payload(raw)
 	return a, b, gen
 end
 
--- Mark response as pending async validation (queued to background job).
+-- ============================================================================
+-- mark_async_validation_pending(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Mark OCSP response as queued for async validation (short-term placeholder).
+--   Signals to other TLS handshakes that validation is in-flight.
+--
+-- PARAMETERS:
+--   fingerprint (string): certificate SPKI fingerprint
+--   meta (table): ocsp.json metadata
+--   resp (string): OCSP response DER
+--
+-- RETURNS:
+--   nil (side effect: stores "pending|sha|gen" in shared dict)
+--
+-- SIDE EFFECTS:
+--   - Writes to ngx.shared.bw_ocsp_validations with TTL 120s
+--   - Wraps in pcall to handle shared dict unavailability
+--
+-- DESIGN NOTES:
+--   - Short TTL (120s): job should validate quickly or status expires
+--   - Used in try_staple() before FFI to mark "in-flight"
+--   - Generation binding: prevents old responses from blocking new cert
+--
+-- RELATED:
+--   - mark_async_validation_done() marks success
+--   - mark_async_validation_failed() marks failure
+--   - get_async_validation_status() retrieves status
+--
+-- ============================================================================
 local function mark_async_validation_pending(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return
@@ -197,7 +432,36 @@ local function mark_async_validation_pending(fingerprint, meta, resp)
 	end)
 end
 
--- Mark response as validated (async job succeeded for this generation).
+-- ============================================================================
+-- mark_async_validation_done(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Mark OCSP response as successfully validated by async job.
+--   Signals to subsequent TLS handshakes that validation is complete + valid.
+--
+-- PARAMETERS:
+--   fingerprint (string): certificate SPKI fingerprint
+--   meta (table): ocsp.json metadata
+--   resp (string): OCSP response DER
+--
+-- RETURNS:
+--   nil (side effect: stores "validated|sha|gen" in shared dict)
+--
+-- SIDE EFFECTS:
+--   - Writes to ngx.shared.bw_ocsp_validations with TTL 3600s (1 hour)
+--   - Wraps in pcall to handle shared dict unavailability
+--
+-- DESIGN NOTES:
+--   - Long TTL (3600s): validation result valid for 1 hour
+--   - Used after successful async FFI validation
+--   - Generation binding: soft-recall increments invalidate this status
+--
+-- RELATED:
+--   - mark_async_validation_pending() marks start
+--   - mark_async_validation_failed() marks failure
+--   - get_async_validation_status() retrieves status
+--
+-- ============================================================================
 local function mark_async_validation_done(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return
@@ -212,6 +476,37 @@ local function mark_async_validation_done(fingerprint, meta, resp)
 	end)
 end
 
+-- ============================================================================
+-- mark_async_validation_failed(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Mark OCSP response as validation failure in async job.
+--   Signals to subsequent TLS handshakes that async validation failed.
+--
+-- PARAMETERS:
+--   fingerprint (string): certificate SPKI fingerprint
+--   meta (table): ocsp.json metadata
+--   resp (string): OCSP response DER
+--
+-- RETURNS:
+--   nil (side effect: stores "failed|sha|gen" in shared dict)
+--
+-- SIDE EFFECTS:
+--   - Writes to ngx.shared.bw_ocsp_validations with TTL 3600s (1 hour)
+--   - Wraps in pcall to handle shared dict unavailability
+--
+-- DESIGN NOTES:
+--   - Long TTL (3600s): failure status valid for 1 hour
+--   - Advisory only: TLS path still attempts local FFI validation
+--   - Generation binding: soft-recall invalidates this status
+--   - Conservative: failure doesn't hard-block stapling (job issuer set thin)
+--
+-- RELATED:
+--   - mark_async_validation_pending() marks start
+--   - mark_async_validation_done() marks success
+--   - get_async_validation_status() retrieves status
+--
+-- ============================================================================
 local function mark_async_validation_failed(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return
@@ -227,6 +522,40 @@ local function mark_async_validation_failed(fingerprint, meta, resp)
 end
 
 -- Returns status only when the stored generation matches this body; else nil.
+-- ============================================================================
+-- get_async_validation_status(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Retrieve async validation status (if any) for OCSP response, with
+--   generation binding to prevent stale status from blocking new cert.
+--
+-- PARAMETERS:
+--   fingerprint (string): certificate SPKI fingerprint
+--   meta (table): ocsp.json metadata (for ligand lookup + generation)
+--   resp (string): OCSP response DER (for generation tuple)
+--
+-- RETURNS:
+--   (string): "pending"|"validated"|"failed" if status found and generation matches
+--   (nil): if no status, generation mismatch (soft-recall), or inputs invalid
+--
+-- DESIGN NOTES:
+--   - Generation binding: stored (sha, gen) must match current (sha, gen)
+--   - Soft-recall safety: old status (gen=1) rejected when gen increments (2)
+--   - Shared dict access wrapped in pcall (handle unavailability gracefully)
+--   - Three validation gates:
+--     (1) Status present in shared dict
+--     (2) Status payload parseable
+--     (3) Generation + DER SHA match current state
+--   - Performance: O(1) shared dict lookup (~0.1ms)
+--   - Used by: try_staple() to skip FFI when async_validated
+--
+-- RELATED:
+--   - mark_async_validation_* functions store status
+--   - parse_async_status_payload() decodes status
+--   - generation_tuple() extracts binding
+--   - ligand_or_meta() chooses live state
+--
+-- ============================================================================
 local function get_async_validation_status(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations or not fingerprint then
 		return nil
@@ -239,14 +568,17 @@ local function get_async_validation_status(fingerprint, meta, resp)
 	pcall(function()
 		raw = ngx.shared.bw_ocsp_validations:get(key)
 	end)
+	-- Decode status + generation binding from stored payload
 	local status, stored_sha, stored_gen = parse_async_status_payload(raw)
 	if not status then
 		return nil
 	end
+	-- Extract current generation from metadata + response
 	local sha, gen = generation_tuple(ligand_or_meta(meta, fingerprint), resp)
 	if type(sha) ~= "string" or #sha ~= 64 or type(gen) ~= "number" then
 		return nil
 	end
+	-- Generation match required: soft-recall increments gen, invalidating old status
 	if sha ~= stored_sha or gen ~= stored_gen then
 		return nil
 	end
@@ -512,14 +844,52 @@ local presentable_chain_blocks = chain.presentable_chain_blocks
 local warmer = require("bunkerweb.ocsp_warmer").internal
 local maybe_rearm_l1_warmer = warmer.maybe_rearm_l1_warmer
 
--- issuer_candidates: PEMs ngx.ocsp.validate may try for this leaf body.
--- Prefer shard issuer.pem SPKI when present; otherwise accept chain issuers
--- (issuer.pem absent is fail-open by design — not fail-closed).
--- stored_pem: caller-supplied issuer.pem (string), false = known absent, nil = read here.
--- Returns an ordered list deduped by SPKI (not PEM bytes) so re-encodings of the
--- same key cannot burn the soft validate_budget as distinct candidates.
--- Empty list is a real outcome (no pin + no chain issuer) → try_staple returns
--- issuer_unavailable, not a hollow response_not_found.
+-- ============================================================================
+-- issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
+-- ============================================================================
+-- PURPOSE:
+--   Build list of issuer PEM candidates for FFI validation, with optional
+--   shard issuer pin. Prevents re-encodings of same key from burning
+--   validate_budget via deduplication by SPKI (not PEM bytes).
+--
+-- PARAMETERS:
+--   blocks (table): certificate chain blocks (may include issuers)
+--   leaf_pem (string): leaf certificate (for filtering chain)
+--   fingerprint (string): leaf SPKI fingerprint (for reading issuer.pem)
+--   stored_pem (string|false|nil):
+--     - string: issuer.pem PEM content (use directly)
+--     - false: issuer.pem confirmed absent (don't read from disk)
+--     - nil: not checked yet (read from disk if available)
+--
+-- RETURNS:
+--   (table): ordered {issuer_pem, ...} deduplicated by SPKI
+--   (empty table): if no issuer candidates found (issuer_unavailable outcome)
+--
+-- SIDE EFFECTS:
+--   - May read: issuer.pem from disk via issuer_path()
+--   - Calls: spki_fingerprint() to deduplicate
+--   - Logs: errors if issuer.pem unreadable (ERR level)
+--
+-- DESIGN NOTES:
+--   - SPKI PIN ENFORCEMENT: If issuer.pem present, only that issuer's SPKI
+--     is accepted (or identical re-encoding from chain). Prevents using
+--     different CA to validate response (security).
+--   - FAIL-OPEN: If issuer.pem absent, accept unpinned chain issuers
+--     (conservative default when shard doesn't have pin).
+--   - FAIL-CLOSED: If issuer.pem unreadable (corruption/permission),
+--     refuse chain fallthrough (empty list → issuer_unavailable).
+--   - DEDUPLICATION: Re-encodings of same key (PEM vs DER re-wrap)
+--     deduplicated by SPKI. Prevents validate_budget burn on duplicates.
+--   - Performance: O(n*m) where n=blocks, m=SPKI computations (but deduped)
+--   - Empty list is valid outcome (→ issuer_unavailable, not error).
+--
+-- RELATED:
+--   - try_staple() calls this to build validation candidate list
+--   - validate() called for each candidate with validate_budget guard
+--   - issuer_path() reads shard issuer.pem location
+--   - spki_fingerprint() for PIN enforcement + deduplication
+--
+-- ============================================================================
 local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	-- When the shard has issuer.pem, only accept that issuer SPKI (or an identical
 	-- re-encoding from the chain). Do not let validate succeed against a different CA.
@@ -582,15 +952,40 @@ local function issuer_candidates(blocks, leaf_pem, fingerprint, stored_pem)
 	return issuers
 end
 
--- validate: one ngx.ocsp.validate_ocsp_response against leaf+issuer DER.
--- Enforces shard issuer SPKI pin when shard_issuer_spki is set, then death-time
--- (nextUpdate − skew). Returns boolean only; budget / multi-issuer walk lives in try_staple.
--- Cross-handshake validation state sharing (thundering-herd protection).
--- Multiple concurrent handshakes for the same cert can share validation results.
--- First handshake validates (5-20ms); others read cached result (0.1ms each).
--- Uses shared dict: cold miss validates locally; in_flight waits briefly; pass reused (not fail).
--- Bind shared validate state to body generation so a "pass" for DER₁ cannot
--- attach DER₂ after soft-recall / re-page within the 60s TTL.
+-- ============================================================================
+-- get_shared_validation_state_key(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Build cache key for cross-handshake validation result sharing.
+--   Binds key to leaf fingerprint + OCSP generation (soft-recall safe).
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   meta (table|nil): ocsp.json metadata for current generation
+--   resp (string): OCSP response DER bytes (for generation tuple)
+--
+-- RETURNS:
+--   (string|nil): cache key "OCSP:VALIDATE:{fp}:{sha}|{gen}"
+--                 nil if unable to form generation tuple
+--
+-- SIDE EFFECTS:
+--   - Calls: generation_tuple(), ligand_or_meta() for generation binding
+--   - No state modification
+--
+-- DESIGN NOTES:
+--   - Key format: "OCSP:VALIDATE:{fingerprint}:{sha256_of_der}|{generation}"
+--   - Generation binding: Prevents DER₁ validation from attaching DER₂
+--   - Fail-closed: Returns nil if generation_tuple fails (no cross-handshake share)
+--   - Thundering-herd: Multiple handshakes share validation result (60s TTL)
+--   - Per-generation: Soft-recall invalidates old key without cleanup
+--   - Performance: O(1) key construction after generation_tuple (~0.1ms)
+--
+-- RELATED:
+--   - set_shared_validation_result() writes using this key
+--   - get_shared_validation_result() reads using this key
+--   - generation_tuple() binds to current OCSP generation
+--
+-- ============================================================================
 local function get_shared_validation_state_key(fingerprint, meta, resp)
 	if not fingerprint or fingerprint == "" then
 		return nil
@@ -603,6 +998,41 @@ local function get_shared_validation_state_key(fingerprint, meta, resp)
 	return "OCSP:VALIDATE:" .. fingerprint .. ":" .. sha .. "|" .. tostring(gen)
 end
 
+-- ============================================================================
+-- set_shared_validation_result(fingerprint, meta, resp, result)
+-- ============================================================================
+-- PURPOSE:
+--   Store OCSP validation result in cross-handshake cache for thundering-herd.
+--   Shares success ("pass") but not failure (prevents blocking fatter chain).
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--   meta (table|nil): ocsp.json metadata
+--   resp (string): OCSP response DER
+--   result (boolean): validation outcome (true=pass, false=fail)
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Writes: bw_ocsp_validations shared dict with "pass" (60s TTL)
+--   - Clears: in_flight lock on failure (let other handshakes try)
+--   - Performance: O(1) shared dict write (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Success ("pass"): Cached for 60s, reused by concurrent handshakes
+--   - Failure: NOT shared (thin issuer bag must not block fatter chain)
+--   - Fail-closed: On failure, clear in_flight lock so waiters don't spin
+--   - Thin vs Fatter: Multiple issuer chains in shard; thin fails, fatter succeeds
+--   - TTL: 60s matches async shared validation timeout
+--   - Thundering-herd: First handshake validates; others read "pass"
+--
+-- RELATED:
+--   - get_shared_validation_state_key() builds the cache key
+--   - get_shared_validation_result() reads the cached value
+--   - set_shared_validation_in_flight() sets "in_flight" marker
+--
+-- ============================================================================
 local function set_shared_validation_result(fingerprint, meta, resp, result)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return
@@ -627,6 +1057,43 @@ local function set_shared_validation_result(fingerprint, meta, resp, result)
 	end)
 end
 
+-- ============================================================================
+-- get_shared_validation_result(fingerprint, meta, resp, max_wait_ms)
+-- ============================================================================
+-- PURPOSE:
+--   Retrieve cached OCSP validation result from cross-handshake cache.
+--   Waits briefly if in-flight, returns nil on miss/timeout/failure.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--   meta (table|nil): ocsp.json metadata
+--   resp (string): OCSP response DER
+--   max_wait_ms (number|nil): max wait for in-flight result (default 100ms)
+--
+-- RETURNS:
+--   (boolean): true if cached "pass" result found
+--   (nil): on cache miss, timeout, failure, or unreadable state
+--
+-- SIDE EFFECTS:
+--   - Reads: bw_ocsp_validations shared dict
+--   - Sleeps: up to max_wait_ms if in-flight (0.001s per iteration)
+--   - Performance: O(1) hit (<0.1ms), O(max_wait) spin on in-flight
+--
+-- DESIGN NOTES:
+--   - Cold miss (nil): No validator yet; caller does FFI validation
+--   - Pass (true): Cached result; skip FFI, use cached OCSP
+--   - Failure (nil): Never cached (don't block fatter chains)
+--   - In-flight (nil after wait): Concurrent validator still running; timeout safe
+--   - Legacy "fail" (nil): Pre-pass-only writer; treat as cold miss
+--   - Max wait: Default 100ms prevents spinning forever if validator hangs
+--   - Thundering-herd: Fast path when first validator finishes
+--
+-- RELATED:
+--   - set_shared_validation_result() writes the cache
+--   - set_shared_validation_in_flight() marks validation in progress
+--   - get_shared_validation_state_key() builds the cache key
+--
+-- ============================================================================
 local function get_shared_validation_result(fingerprint, meta, resp, max_wait_ms)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return nil
@@ -674,6 +1141,39 @@ local function get_shared_validation_result(fingerprint, meta, resp, max_wait_ms
 	end
 end
 
+-- ============================================================================
+-- set_shared_validation_in_flight(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Mark validation in-flight for this cert (thundering-herd lock).
+--   Allows concurrent handshakes to wait for shared validation result.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--   meta (table|nil): ocsp.json metadata
+--   resp (string): OCSP response DER
+--
+-- RETURNS:
+--   (boolean): true if lock acquired, false if already locked or unavailable
+--
+-- SIDE EFFECTS:
+--   - Writes: bw_ocsp_validations:add() with "in_flight" (60s TTL)
+--   - Atomic: Uses add() (not set) to fail if key already exists
+--   - Performance: O(1) shared dict operation (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Lock pattern: add() returns false if key exists (first writer wins)
+--   - TTL 60s: Matches shared dict timeout for validation results
+--   - Atomic: Prevents multiple concurrent validators (lock-free approach)
+--   - Fail-open: Returns false if shared dict unavailable (no lock possible)
+--   - Waiting: Other handshakes spin via get_shared_validation_result()
+--
+-- RELATED:
+--   - clear_shared_validation_in_flight() removes the lock
+--   - get_shared_validation_result() waits on in-flight lock
+--   - set_shared_validation_result() replaces with "pass" or clears on fail
+--
+-- ============================================================================
 local function set_shared_validation_in_flight(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return false
@@ -689,7 +1189,40 @@ local function set_shared_validation_in_flight(fingerprint, meta, resp)
 	return ok or false
 end
 
--- Drop a stuck in_flight lock (validate_budget / early abort). Never delete pass/fail.
+-- ============================================================================
+-- clear_shared_validation_in_flight(fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Release stuck in-flight lock (validate_budget abort or early exit).
+--   Never deletes "pass" or "fail" results (only in_flight markers).
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--   meta (table|nil): ocsp.json metadata
+--   resp (string): OCSP response DER
+--
+-- RETURNS:
+--   None
+--
+-- SIDE EFFECTS:
+--   - Reads: current value from bw_ocsp_validations shared dict
+--   - Writes: deletes only if current value is "in_flight" (CAS pattern)
+--   - Performance: O(1) shared dict operation
+--
+-- DESIGN NOTES:
+--   - CAS pattern: Read current value, delete only if it matches "in_flight"
+--   - Fail-safe: Never deletes "pass" or "fail" results
+--   - Validate_budget: Called when FFI validation hits time budget
+--   - Thundering-herd: Releases lock so other handshakes can retry
+--   - Preserves results: Race between clear and update is safe
+--   - Early abort: Called if issuer list exhausted or FFI returns
+--
+-- RELATED:
+--   - set_shared_validation_in_flight() sets the lock
+--   - get_shared_validation_result() waits on lock
+--   - try_staple() calls this on validate_budget abort
+--
+-- ============================================================================
 local function clear_shared_validation_in_flight(fingerprint, meta, resp)
 	if not ngx.shared or not ngx.shared.bw_ocsp_validations then
 		return
@@ -706,8 +1239,40 @@ local function clear_shared_validation_in_flight(fingerprint, meta, resp)
 	end)
 end
 
--- Bounded cache manager: prevents der_cache from growing unbounded.
--- Keeps track of cache size; evicts oldest entry when limit exceeded.
+-- ============================================================================
+-- bounded_cache_set(cache, key, value, max_entries)
+-- ============================================================================
+-- PURPOSE:
+--   Insert into bounded Lua table cache with LRU eviction.
+--   Prevents per-request DER cache from growing unbounded.
+--
+-- PARAMETERS:
+--   cache (table): Lua table to use as cache
+--   key (string): cache key (typically DER hash or fingerprint)
+--   value (any): value to store
+--   max_entries (number): maximum cache entries before eviction
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Modifies: cache table (adds entry, possibly evicts first)
+--   - Iteration: Counts entries (O(n) where n=current cache size)
+--
+-- DESIGN NOTES:
+--   - LRU approximation: Evicts "first" key in iteration order (not true LRU)
+--   - Evict-on-full: Only evicts when adding NEW key at max_entries
+--   - Update safe: Re-setting existing key does not evict (count check)
+--   - Fail-open: If any param missing, silently does nothing
+--   - Performance: O(n) where n=cache size; typical n=10-20 (acceptable)
+--   - Per-request: Fresh cache per TLS handshake (no accumulation)
+--   - Use case: DER parsing cache (fingerprint → DER) per handshake
+--
+-- RELATED:
+--   - validate() uses this for per-request DER cache
+--   - Per-request cache (ngx.ctx) separate from shared dict cache
+--
+-- ============================================================================
 local function bounded_cache_set(cache, key, value, max_entries)
 	if not cache or not key or not value then
 		return
@@ -728,6 +1293,64 @@ local function bounded_cache_set(cache, key, value, max_entries)
 	cache[key] = value
 end
 
+-- ============================================================================
+-- validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki)
+-- ============================================================================
+-- PURPOSE:
+--   Perform one FFI-based OCSP response validation attempt against a leaf+issuer
+--   pair. Verifies OCSP signature and validates time bounds (nextUpdate check).
+--   Called by try_staple() in a loop over issuer candidates.
+--
+-- PARAMETERS:
+--   ocsp (ffi): ngx.ocsp FFI module object (for validate_ocsp_response call)
+--   ssl (ffi): ngx.ssl FFI module object (for cert_pem_to_der function)
+--   ocsp_der (string): OCSP response DER bytes (required, non-empty)
+--   leaf_pem (string): leaf certificate PEM (required)
+--   issuer_pem (string): issuer certificate PEM (must be non-empty)
+--   shard_issuer_spki (string): expected issuer SPKI fingerprint for pin validation
+--                              (optional; if set, issuer SPKI must match)
+--
+-- RETURNS:
+--   (boolean): true if OCSP validation succeeds (signature valid + time bounds ok)
+--              false if validation fails, issuer SPKI mismatch, or any error
+--
+-- SIDE EFFECTS:
+--   - Calls FFI: ssl.cert_pem_to_der() for PEM→DER conversion (expensive: 2-5ms)
+--   - Calls FFI: ocsp.validate_ocsp_response() for signature verify (expensive: 10-20ms)
+--   - Per-request cache: stores parsed DER in ngx.ctx (Tier 1 optimization)
+--   - Shared dict cache: stores parsed DER in ngx.shared (Tier 2 persistence)
+--   - Per-request FFI cache: stores validation result (avoid duplicate validates)
+--   - Metrics: records FFI duration in ngx.ctx.bw_ocsp_metrics
+--
+-- DESIGN NOTES:
+--   - Two-tier DER parsing cache:
+--     (1) Per-request (ngx.ctx) - survives single handshake [<0.1ms hit]
+--     (2) Persistent (shared dict) - survives across handshakes [<0.1ms hit]
+--     (3) Fresh parse - on cache miss, store in both tiers [2-5ms cost]
+--   - Key innovation: multiple issuer candidates don't re-parse leaf (same DER)
+--   - Shard issuer pin: if shard_issuer_spki set, candidate issuer SPKI must match
+--   - Death-time validation: response must be fresh enough (nextUpdate - skew)
+--   - Per-request FFI cache: same (response, issuer) pair not validated twice
+--   - Performance: 15-20ms total (10-20ms FFI + 1-2ms parse + 0.1ms cache hits)
+--   - Latency: CRITICAL PATH - must complete in ~50ms budget across all candidates
+--
+-- RELATED:
+--   - try_staple() calls this in a loop with multiple issuers
+--   - issuer_candidates() builds candidate list
+--   - generation_tuple() used for cross-handshake sharing
+--   - set_shared_validation_result() caches result for thundering-herd
+--
+-- EXAMPLE:
+--   local leaf_pem = read_cert("leaf.pem")
+--   local issuer_pem = read_cert("issuer.pem")
+--   local ocsp_der = read_file("ocsp.der")
+--   if validate(ngx.ocsp, ngx.ssl, ocsp_der, leaf_pem, issuer_pem, nil) then
+--     log(ngx.INFO, "OCSP validation succeeded")
+--   else
+--     log(ngx.WARN, "OCSP validation failed")
+--   end
+--
+-- ============================================================================
 local function validate(ocsp, ssl, ocsp_der, leaf_pem, issuer_pem, shard_issuer_spki)
 	if not issuer_pem or issuer_pem == "" or not ssl.cert_pem_to_der then
 		return false
@@ -1018,10 +1641,68 @@ end
 -- mark on budget abort; clear on successful FFI/attach (incl. verified-L1 restock);
 -- is_ffi_needed is also consulted on the verified-L1 shortcut so a warmer
 -- re-verify cannot bypass the latch. Tag is fingerprint-salted (not epoch — see latch_token_tag).
+-- ============================================================================
+-- ffi_needed_key(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Build cache key for force-FFI latch in shared dict.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   (string): shared dict key "TLS:SSL:ocsp_ffi_needed:{fingerprint}"
+--
+-- SIDE EFFECTS:
+--   None (pure key generator, no state modification)
+--
+-- DESIGN NOTES:
+--   - Key format: "TLS:SSL:ocsp_ffi_needed:{fp}"
+--   - Used by mark_ffi_needed() to store latch
+--   - Used by is_ffi_needed() to read latch
+--   - No collision risk (distinct cert per fp)
+--
+-- RELATED:
+--   - mark_ffi_needed() writes using this key
+--   - is_ffi_needed() reads using this key
+--   - latch_token_tag() generates integrity tag
+--
+-- ============================================================================
 local function ffi_needed_key(fingerprint)
 	return "TLS:SSL:ocsp_ffi_needed:" .. fingerprint
 end
 
+-- ============================================================================
+-- latch_token_tag(token, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Generate integrity tag for force-FFI latch (detect corruption).
+--   SHA2-256 hash of token + fingerprint for collision resistance.
+--
+-- PARAMETERS:
+--   token (string): generation token ("sha|gen" or "budget")
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   (string|nil): 8-byte (16-char hex) tag, nil on error
+--
+-- SIDE EFFECTS:
+--   - Calls: resty.sha256 FFI for hashing
+--   - Performance: ~0.5ms per hash computation
+--
+-- DESIGN NOTES:
+--   - Fast integrity check: Not cryptographic auth, just corruption detection
+--   - Salt: Fingerprint only (NOT epoch) to persist across epoch bumps
+--   - Purpose: Detect accidental shared-dict corruption
+--   - Format: SHA256(token|fingerprint) first 8 bytes as hex
+--   - Epoch exclusion: Epoch bump must NOT flip tag (prevents latch re-open)
+--   - Tag mismatch: Fails closed to FFI (safer than reopening canary-skip)
+--
+-- RELATED:
+--   - mark_ffi_needed() uses this to tag the latch
+--   - is_ffi_needed() validates tag before trusting latch
+--
+-- ============================================================================
 -- Lightweight latch tag (not crypto / not HMAC). Salt is fingerprint-only:
 -- global .ocsp_epoch must NOT be mixed in — an unrelated cert publish would
 -- flip the tag, clear the latch, and re-open canary-skip after validate_budget.
@@ -1042,6 +1723,40 @@ local function latch_token_tag(token, fingerprint)
 	return hasher:final():sub(1, 8)  -- Take first 16 hex chars (8 bytes) for compact tag
 end
 
+-- ============================================================================
+-- ffi_needed_token(meta, resp, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Build generation token for force-FFI latch (sha|gen format).
+--   Returns nil if generation cannot be formed (incomplete metadata).
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata
+--   resp (string): OCSP response DER bytes
+--   fingerprint (string): leaf SPKI fingerprint
+--
+-- RETURNS:
+--   (string|nil): token "{sha}|{gen}" where sha=DER_SHA256, gen=soft_recall_gen
+--                 nil if generation_tuple cannot form valid tuple
+--
+-- SIDE EFFECTS:
+--   - Calls: generation_tuple(), ligand_or_meta()
+--   - No state modification
+--
+-- DESIGN NOTES:
+--   - Format: "sha|gen" where sha=64-char hex, gen=number
+--   - Fail-closed: Returns nil if any component invalid (type check)
+--   - Used by: mark_ffi_needed() to stamp latch with current generation
+--   - Used by: is_ffi_needed() to compare stored vs live token
+--   - Soft-recall: Token changes when gen bumps (invalidates old latch)
+--   - Performance: O(1) tuple generation (~0.1ms)
+--
+-- RELATED:
+--   - generation_tuple() creates (sha, gen) pair
+--   - mark_ffi_needed() uses token to build latch value
+--   - is_ffi_needed() uses token to validate latch
+--
+-- ============================================================================
 -- Compact generation identity for the latch value. nil when sha/gen incomplete
 -- (type drift / missing body) — callers treat that as "honor any latch".
 local function ffi_needed_token(meta, resp, fingerprint)
@@ -1052,6 +1767,42 @@ local function ffi_needed_token(meta, resp, fingerprint)
 	return sha .. "|" .. tostring(gen)
 end
 
+-- ============================================================================
+-- mark_ffi_needed(internalstore, fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Mark certificate as requiring FFI validation (after validate_budget abort).
+--   Prevents canary-skip optimization on next handshake for this generation.
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache (ngx.shared.bw_ocsp_*)
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   meta (table|nil): ocsp.json metadata (for generation tuple)
+--   resp (string): OCSP response DER (for generation tuple)
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Writes: ffi_needed_key(fingerprint) to shared dict with TTL 86400s
+--   - Format: "{token}|{tag}" where token="sha|gen"|"budget", tag=integrity
+--   - Performance: O(1) shared dict write (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Trigger: Called when try_staple() hits validate_budget timeout
+--   - Generation-bound: Token = sha|gen (soft-recall invalidates on cert change)
+--   - Fallback: If token cannot form, uses "budget" (gen-less marker)
+--   - Integrity: All latches tagged via latch_token_tag() (no corruption)
+--   - TTL: 86400s (24 hours) for long-lived force_ffi requirement
+--   - Fail-safe: pcall() wraps all writes (no throw on shared dict fail)
+--
+-- RELATED:
+--   - try_staple() calls when validate_budget exhausted
+--   - is_ffi_needed() reads and validates this latch
+--   - clear_ffi_needed() removes latch after successful validate+attach
+--   - ffi_needed_token() builds the generation token
+--
+-- ============================================================================
 -- Stamp force_ffi after validate_budget. meta+resp bind the latch to this body gen.
 -- Token is now signed with a fast integrity tag to prevent forgery via shared state.
 -- All latches require a valid integrity tag (no legacy bypass).
@@ -1073,6 +1824,43 @@ local function mark_ffi_needed(internalstore, fingerprint, meta, resp)
 	end)
 end
 
+-- ============================================================================
+-- clear_ffi_needed(internalstore, fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Remove force-FFI latch after successful validation (CAS-safe deletion).
+--   Only deletes if generation matches current (no TOCTOU race).
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache (ngx.shared.bw_ocsp_*)
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   meta (table|nil): ocsp.json metadata (for generation tuple)
+--   resp (string): OCSP response DER (for generation tuple)
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Reads: current latch value from shared dict
+--   - Writes: deletes latch only if token matches (CAS pattern)
+--   - Performance: O(1) shared dict operations
+--
+-- DESIGN NOTES:
+--   - CAS pattern: Read current token, delete only if matches expected
+--   - Generation binding: Expects token from ffi_needed_token(meta, resp)
+--   - Fail-safe: If meta/resp missing, token is nil (no delete, safe)
+--   - No-op on mismatch: Never wipes a newer generation's latch
+--   - TOCTOU race: Solved by comparing tokens before deleting
+--   - Called by: try_staple() when did_ffi=true and validation succeeded
+--   - Guards: Prevents re-opening canary-skip after validate_budget+FFI
+--
+-- RELATED:
+--   - mark_ffi_needed() sets the latch
+--   - is_ffi_needed() checks if latch set
+--   - try_staple() calls this when did_ffi=true
+--   - ffi_needed_token() generates expected token for CAS check
+--
+-- ============================================================================
 -- Drop the latch after a successful validate+attach for THIS body generation.
 -- CAS-delete only: never wipe a concurrent mark_ffi_needed for a newer gen.
 -- meta+resp required to form the expected token; without them this is a no-op
@@ -1113,8 +1901,42 @@ local function clear_ffi_needed(internalstore, fingerprint, meta, resp)
 	end)
 end
 
--- True when this worker must run ngx.ocsp.validate despite canary trust.
--- Untagged / tag-mismatch latches fail closed to FFI (do not clear).
+-- ============================================================================
+-- is_ffi_needed(internalstore, fingerprint, meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Check if FFI validation must run despite canary-skip optimization.
+--   Validates force-FFI latch with generation binding and tag verification.
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache store
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   meta (table): ocsp.json metadata for current generation
+--   resp (string): OCSP response DER for current generation
+--
+-- RETURNS:
+--   (boolean): true if FFI must run, false if canary-skip is safe
+--
+-- SIDE EFFECTS:
+--   - Reads: ffi_needed_key(fingerprint) from internalstore
+--   - Writes: CAS-deletes stale latch value on soft-recall/new-gen
+--   - Logs: WARN on tag mismatch, NOTICE on corrupt/legacy formats
+--
+-- DESIGN NOTES:
+--   - Format: "token|tag" where token="sha|gen"|"budget" and tag=HMAC
+--   - Fail-closed: Corrupt/untagged latches force FFI (never skip)
+--   - Tag mismatch: Epoch-era tags prevent re-opening canary-skip
+--   - Budget token: Gen-less abort marker (honored until TTL/clear_ffi)
+--   - Soft-recall: CAS-delete stale generation; don't wipe newer latches
+--   - Canary skip safe when: token matches current gen AND tag matches
+--   - Performance: O(1) latch check + tag verification (~0.1ms typical)
+--
+-- RELATED:
+--   - mark_ffi_needed() sets the latch
+--   - ffi_needed_key(), ffi_needed_token(), latch_token_tag() helpers
+--   - try_staple() uses this to skip FFI when canary is trusted
+--
+-- ============================================================================
 local function is_ffi_needed(internalstore, fingerprint, meta, resp)
 	if not internalstore or type(fingerprint) ~= "string" or #fingerprint ~= 64 then
 		return false
@@ -1189,8 +2011,36 @@ end
 --   false, <attach detail>       — intermediate MS / multi attach codes
 --   false                        — generic attach/validate miss (optional stapling)
 
--- Map certid_matches_handshake_leaf why → refuse dialect.
--- Only serial_mismatch / issuer_mismatch DROP the allow-pin.
+-- ============================================================================
+-- certid_handshake_refuse_dialect(why)
+-- ============================================================================
+-- PURPOSE:
+--   Map CertID validation failure reason to stapling decision dialect code.
+--   Determines whether allow-pin should be dropped (certid_mismatch) or kept.
+--
+-- PARAMETERS:
+--   why (string): reason from certid_matches_handshake_leaf() failure
+--
+-- RETURNS:
+--   (string): dialect code ("certid_mismatch", "issuer_unavailable",
+--             "issuer_ambiguous", or "certid_unreadable")
+--
+-- SIDE EFFECTS:
+--   None (pure function, no state modification)
+--
+-- DESIGN NOTES:
+--   - Serial/issuer mismatch → "certid_mismatch" (DROP allow-pin, poison detected)
+--   - No issuer candidates → "issuer_unavailable" (KEEP pin, temporary unavail)
+--   - Ambiguous issuer → "issuer_ambiguous" (KEEP pin, cannot resolve)
+--   - Parse/unreadable → "certid_unreadable" (KEEP pin, transient error)
+--   - Only DROP (certid_mismatch) prevents future staple attempts
+--   - KEEP outcomes allow retries on subsequent connections
+--
+-- RELATED:
+--   - certid_matches_handshake_leaf() generates the reason codes
+--   - try_staple() calls this for decision conversion
+--
+-- ============================================================================
 local function certid_handshake_refuse_dialect(why)
 	if why == "serial_mismatch" or why == "issuer_mismatch" then
 		return "certid_mismatch"
@@ -1204,6 +2054,62 @@ local function certid_handshake_refuse_dialect(why)
 	return "certid_unreadable"
 end
 
+-- ============================================================================
+-- try_staple(ocsp, ssl, resp, leaf_pem, issuers, shard_issuer_spki,
+--            probe_only, meta, fingerprint, chain_blocks, force_ffi, mode)
+-- ============================================================================
+-- PURPOSE:
+--   Core OCSP stapling logic: validate leaf + issuer, attach response if valid.
+--   Implements two-tier validation (L1 cache + FFI), async status checks,
+--   Must-Staple enforcement, and budget guards.
+--
+-- PARAMETERS:
+--   ocsp (ffi): ngx.ocsp module for FFI calls
+--   ssl (ffi): ngx.ssl module for FFI calls
+--   resp (string): OCSP response DER bytes
+--   leaf_pem (string): leaf certificate PEM
+--   issuers (table): {issuer_pem, ...} candidates for validation
+--   shard_issuer_spki (string): optional issuer SPKI pin from shard
+--   probe_only (boolean): true = health check only (skip attachment)
+--   meta (table): ocsp.json metadata
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   chain_blocks (table): {leaf, intermediates...} for presentable chain
+--   force_ffi (boolean): force FFI validation (skip L1 + canary optimizations)
+--   mode (string): "open"|"staple_only"|"normal" (Must-Staple enforcement mode)
+--
+-- RETURNS:
+--   (boolean, string, boolean): (success, decision_code, did_ffi)
+--   - success: true if staple attached/proven (probe_only returns true if ready)
+--   - decision_code: machine-readable outcome (ok, ok_partial, issuer_unavailable, ...)
+--   - did_ffi: true if FFI validation actually ran (used to clear force_ffi latch)
+--
+-- SIDE EFFECTS:
+--   - Reads/writes: L1 cache, async validation state, allow-pin bus
+--   - Calls: issuer_candidates(), validate(), attach_ocsp_staple()
+--   - FFI calls: ngx.ocsp.validate_ocsp_response (up to 10 issuer attempts)
+--   - Shared state: cross-handshake validation result caching
+--   - Metrics: records validation timing + cache hits
+--
+-- DESIGN NOTES:
+--   - TIER 1 - L1 Cache: Shared-dict lookup with binding+gen verification (~0.1ms)
+--   - TIER 2 - Metadata: Freshness, tombstone, peer-refuse checks (~1-5ms)
+--   - TIER 3 - Skip-Validate: If mode=open or Must-Staple=false, attach speculatively
+--   - TIER 4 - FFI Validation: Walk issuer list with budget guard (50ms hardcap)
+--   - Budget Guard: Max 10 issuers + 50ms total time
+--   - Early-Exit: Stop on first successful validation (don't test all issuers)
+--   - Cross-Handshake: Reuse validation result (shared dict, 60s TTL)
+--   - Force FFI: Set when validate_budget aborted; must finish FFI once
+--   - Async Status: Check if scheduler already validated (skip TLS FFI)
+--   - Must-Staple: Tri-state (true/false/nil); nil = enforce (fail-closed)
+--   - Soft-Recall: Generation tuple prevents stale status after cert rotation
+--
+-- RELATED:
+--   - issuer_candidates() builds issuer list
+--   - validate() performs single FFI validation
+--   - attach_ocsp_staple() attaches response to TLS conn
+--   - ordered_leaves_for_handshake() ranks leaves (calls try_staple to probe)
+--
+-- ============================================================================
 local function try_staple(
 	ocsp,
 	ssl,
@@ -1477,6 +2383,45 @@ end
 
 -- Audit which leaf was stapled — kind + SPKI + der_sha256 + epoch this node served.
 -- Multi-staple NULL slots are legal omissions: log staple_decision=ok_partial (not hollow ok).
+-- ============================================================================
+-- log_ocsp_stapled(server_name, kind, fp, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Audit successful OCSP staple attachment to TLS connection.
+--   Logs decision code ("ok" or "ok_partial" for multi-staple NULL slots).
+--
+-- PARAMETERS:
+--   server_name (string): SNI hostname for audit trail
+--   kind (string): certificate key type ("rsa"|"ec"|"ed")
+--   fp (string): leaf SPKI fingerprint (64-char hex)
+--   resp (string): OCSP response DER bytes
+--
+-- RETURNS:
+--   None (logging side effect only)
+--
+-- SIDE EFFECTS:
+--   - Calls: resp_binding() to compute DER SHA256, current_ocsp_epoch()
+--   - Calls: note_connection_staple() to record staple state
+--   - Calls: format_staple_decision() to format audit log
+--   - Logs: INFO level with tag="OCSP_STAPLED"
+--   - Multi-staple: Detects NULL slots from ngx.ctx metrics
+--
+-- DESIGN NOTES:
+--   - Decision "ok": all requested slots stapled
+--   - Decision "ok_partial": some NULL slots remain (multi-staple limitation)
+--   - Fingerprint: validates 64-char format; uses "-" if missing
+--   - Worker ID: captured for load-balancing diagnostics
+--   - DER SHA256: included for auditing/debugging (identifies cached response)
+--   - Epoch: current OCSP generation for cache coherency
+--   - Multi-staple: NULL slots logged when OpenSSL multi-staple has limits
+--   - Performance: O(1), <1ms
+--
+-- RELATED:
+--   - log_ocsp_staple_skip() logs skipped/refused staples
+--   - try_staple() calls this on successful attachment
+--   - staple_one_leaf() calls this for disk OCSP responses
+--
+-- ============================================================================
 local function log_ocsp_stapled(server_name, kind, fp, resp)
 	local der = resp_binding(resp) or "-"
 	local fp_s = (type(fp) == "string" and #fp == 64) and fp or "-"
@@ -1513,6 +2458,42 @@ local function log_ocsp_stapled(server_name, kind, fp, resp)
 	log(ngx.INFO, format_staple_decision(decision, fields))
 end
 
+-- ============================================================================
+-- log_ocsp_staple_skip(kind, fp, reason, server_name)
+-- ============================================================================
+-- PURPOSE:
+--   Audit skipped or refused OCSP staple with machine-readable decision code.
+--   Logs reason for each certificate not stapled (dual-cert, multi-staple, etc.).
+--
+-- PARAMETERS:
+--   kind (string): certificate key type ("rsa"|"ec"|"ed")
+--   fp (string): leaf SPKI fingerprint (64-char hex or partial)
+--   reason (string): machine-readable skip reason (decision code)
+--   server_name (string): SNI hostname for audit trail
+--
+-- RETURNS:
+--   None (logging side effect only)
+--
+-- SIDE EFFECTS:
+--   - Calls: format_staple_decision() to format audit log
+--   - Logs: NOTICE level with tag="OCSP_STAPLE_SKIP"
+--   - Performance: O(1), <1ms
+--
+-- DESIGN NOTES:
+--   - Reason codes: machine-readable (single_slot_rsa_prefer, validate_budget, etc.)
+--   - Fingerprint: accepts 64-char hex or partial (for partial extraction)
+--   - Used for: dual-cert sibling exclusion, validation failures, multi-staple limits
+--   - Audit trail: identifies why each cert wasn't stapled
+--   - Reason default: "skip_slot" if reason is nil/falsy
+--   - Fingerprint handling: partial FP ok for dual-cert logging (16 chars + "...")
+--
+-- RELATED:
+--   - log_ocsp_stapled() logs successful staples
+--   - log_skipped_sibling_leaves() calls this for dual-cert siblings
+--   - try_staple() may log skips via this
+--   - Decision codes defined in ocsp_common.lua
+--
+-- ============================================================================
 local function log_ocsp_staple_skip(kind, fp, reason, server_name)
 	local fp_s = "-"
 	if type(fp) == "string" and #fp == 64 then
@@ -1531,6 +2512,43 @@ local function log_ocsp_staple_skip(kind, fp, reason, server_name)
 	)
 end
 
+-- ============================================================================
+-- ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
+-- ============================================================================
+-- PURPOSE:
+--   Rank certificate leaves in preference order for dual-cert TLS handshake.
+--   Respects ClientHello signature_algorithms and key type preference.
+--
+-- PARAMETERS:
+--   leaves (table): array of leaf certificates {pem, fp, must_staple, ...}
+--   sigalgs_ext (string|nil): ClientHello signature_algorithms extension (raw bytes)
+--   prefer_kind (string|nil): "rsa"|"ec"|"ed" preference override
+--
+-- RETURNS:
+--   (table): ordered array of compatible leaves (each appears once)
+--           empty if no suitable leaves
+--
+-- SIDE EFFECTS:
+--   - Calls: cert_sig_profile() for each leaf (expensive PEM parsing)
+--   - Caches: sig_profile result on each leaf for reuse
+--   - Performance: O(n*m) where n=leaves, m=sigalgs bytes
+--
+-- DESIGN NOTES:
+--   - Ranking: signature_algorithms aware, then must_staple health, then key kind
+--   - Signature validation: Only schemes matching ClientHello advertised algos
+--   - Dual-cert: Selects RSA or ECDSA based on ClientHello preference
+--   - Must-Staple: Demotes leaves that fail path/probe health checks
+--   - Deduplication: Each leaf appears at most once (seen set)
+--   - Profile caching: Expensive cert_sig_profile() result cached on leaf
+--   - Typical OpenSSL default: ECDSA before RSA if both available
+--   - Fallback: Returns all leaves if no sigalgs match
+--
+-- RELATED:
+--   - select_leaf_for_handshake() returns first (best) result
+--   - _M.set_certs_from_pem() uses this to rank for installation
+--   - cert_sig_profile() extracts algorithm from PEM
+--
+-- ============================================================================
 -- Leaves this ClientHello can accept, in preference order (each once).
 -- When signature_algorithms is present, only leaves that match an advertised
 -- scheme are included — installing any other leaf would break CertificateVerify.
@@ -1640,12 +2658,73 @@ local function ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	return ordered
 end
 
--- First of ordered_leaves_for_handshake (single-pick helper).
+-- ============================================================================
+-- select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
+-- ============================================================================
+-- PURPOSE:
+--   Select single leaf from candidate list for dual-cert TLS handshake.
+--   Returns best candidate by ClientHello signature_algorithms + key preference.
+--
+-- PARAMETERS:
+--   leaves (table): array of leaf certificates {pem, fp, must_staple, ...}
+--   sigalgs_ext (string|nil): ClientHello signature_algorithms extension bytes
+--   prefer_kind (string|nil): "rsa"|"ec"|"ed" preference override
+--
+-- RETURNS:
+--   (table|nil): first (best) leaf from ordered list
+--                nil if no suitable leaves after ranking
+--
+-- SIDE EFFECTS:
+--   - Calls: ordered_leaves_for_handshake() for ranking
+--   - No state modification
+--
+-- DESIGN NOTES:
+--   - Wrapper around ordered_leaves_for_handshake() taking first result
+--   - Respects: ClientHello sigalgs (curve matching), Must-Staple health
+--   - Typical OpenSSL default: ECDSA before RSA (if both available)
+--   - Ranking: curve-aware sigalgs → Must-Staple health → key kind preference
+--   - Performance: O(n) leaf ranking, typical <1ms for dual-cert
+--
+-- RELATED:
+--   - ordered_leaves_for_handshake() does full ranking
+--   - _M.set_certs_from_pem() uses this to pick primary leaf
+--
+-- ============================================================================
 local function select_leaf_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	local ordered = ordered_leaves_for_handshake(leaves, sigalgs_ext, prefer_kind)
 	return ordered[1]
 end
 
+-- ============================================================================
+-- leaf_pem_of(leaf)
+-- ============================================================================
+-- PURPOSE:
+--   Extract PEM from leaf (flexible: string or table with pem field).
+--   Supports multiple field names for compatibility across modules.
+--
+-- PARAMETERS:
+--   leaf (string|table|any): leaf representation
+--     - string: PEM directly (returned as-is)
+--     - table: extract from .pem, .ocsp_cert, or .cert_pem field
+--     - other: nil
+--
+-- RETURNS:
+--   (string|nil): PEM content if found, nil otherwise
+--
+-- SIDE EFFECTS:
+--   None (pure function, no state modification)
+--
+-- DESIGN NOTES:
+--   - Flexible interface: handles raw PEM or leaf table objects
+--   - Field precedence: .pem > .ocsp_cert > .cert_pem (first found used)
+--   - Defensive: returns nil for invalid types (no throw)
+--   - Performance: O(1) table lookup
+--
+-- RELATED:
+--   - leaf_fp_of() extract fingerprint from same leaf format
+--   - _M.set_certs_from_pem() uses this throughout
+--
+-- ============================================================================
 local function leaf_pem_of(leaf)
 	if type(leaf) == "string" then
 		return leaf
@@ -1656,6 +2735,37 @@ local function leaf_pem_of(leaf)
 	return nil
 end
 
+-- ============================================================================
+-- leaf_fp_of(leaf)
+-- ============================================================================
+-- PURPOSE:
+--   Extract or compute SPKI fingerprint from leaf table.
+--   Tries cached fields first, then computes from PEM on miss.
+--
+-- PARAMETERS:
+--   leaf (table|any): leaf object with optional .fp or .ocsp_fp_hint field
+--
+-- RETURNS:
+--   (string|nil): 64-char hex SPKI fingerprint, nil if unable to extract/compute
+--
+-- SIDE EFFECTS:
+--   - Calls: spki_fingerprint(pem) to compute if cached field missing
+--   - FFI calls: OpenSSL hash for SHA256 computation (expensive: 2-5ms)
+--
+-- DESIGN NOTES:
+--   - Cache lookup first: .fp (primary) → .ocsp_fp_hint (fallback)
+--   - Cache must be 64-char hex (validates length)
+--   - On cache miss: extract PEM from leaf, compute fingerprint
+--   - Compute fallback: only when cached field absent/invalid
+--   - Performance: O(1) for cached FP, O(len(PEM)) for computation (~2-5ms)
+--   - Returns nil if: not a table, no cached FP, PEM unreadable
+--
+-- RELATED:
+--   - leaf_pem_of() extracts PEM from same leaf
+--   - spki_fingerprint() computes hash from PEM
+--   - issuer_candidates() uses this for PIN enforcement
+--
+-- ============================================================================
 local function leaf_fp_of(leaf)
 	if type(leaf) ~= "table" then
 		return nil
@@ -1670,7 +2780,42 @@ local function leaf_fp_of(leaf)
 	return pem and spki_fingerprint(pem) or nil
 end
 
--- Log siblings not presented on this handshake (single Certificate leaf).
+-- ============================================================================
+-- log_skipped_sibling_leaves(leaves, chosen, server_name)
+-- ============================================================================
+-- PURPOSE:
+--   Log all sibling leaves not presented in TLS Certificate message.
+--   Dual-cert: one leaf installed (RSA or ECDSA), siblings logged as skipped.
+--
+-- PARAMETERS:
+--   leaves (table): array of all candidate leaves
+--   chosen (table): the leaf that was selected for installation
+--   server_name (string): SNI hostname for audit logging
+--
+-- RETURNS:
+--   None (logging side effect only)
+--
+-- SIDE EFFECTS:
+--   - Calls: cert_pubkey_kind() to determine algorithm of each leaf
+--   - Calls: leaf_pem_of(), leaf_fp_of() for leaf data extraction
+--   - Calls: log_ocsp_staple_skip() to audit each skipped sibling
+--   - Logs: one entry per sibling with skip reason (ERR level)
+--
+-- DESIGN NOTES:
+--   - Reason code: "single_slot_ecdsa_prefer"|"single_slot_rsa_prefer"
+--   - Reason shows which algorithm was selected instead
+--   - Only logs for leaves that differ from chosen (siblings)
+--   - Fingerprint extracted: cache first, then computed from PEM
+--   - Key kind used: RSA vs ECDSA (determines skip reason string)
+--   - Audit trail: shows why dual-cert path selected one over other
+--
+-- RELATED:
+--   - log_ocsp_staple_skip() records the skip event
+--   - leaf_pem_of(), leaf_fp_of() extract leaf data
+--   - cert_pubkey_kind() determines RSA vs ECDSA
+--   - _M.set_certs_from_pem() calls this during leaf selection
+--
+-- ============================================================================
 local function log_skipped_sibling_leaves(leaves, chosen, server_name)
 	if type(leaves) ~= "table" or not chosen then
 		return
@@ -1690,6 +2835,63 @@ local function log_skipped_sibling_leaves(leaves, chosen, server_name)
 	end
 end
 
+-- ============================================================================
+-- _M.set_certs_from_pem(cert_pem, key_pem, internalstore, server_name,
+--                       prefer_kind)
+-- ============================================================================
+-- PURPOSE:
+--   Public API: Install certificate and select best leaf for TLS handshake.
+--   Handles dual-cert (RSA+ECDSA) ranking, Must-Staple health checks, and
+--   OCSP staple blocking with soft-fuse capability.
+--
+-- PARAMETERS:
+--   cert_pem (string): full certificate chain PEM (leaf + intermediates)
+--   key_pem (string): private key(s) PEM (must match leaf SPKI)
+--   internalstore (table): per-worker cache (ngx.shared.bw_ocsp_*)
+--   server_name (string): SNI hostname for config/logging
+--   prefer_kind (string|nil): "rsa"|"ec"|"ed" preference override
+--
+-- RETURNS:
+--   (true, blocks, leaf_fp): success
+--     blocks = issuer-linked chain table (leaf + intermediates)
+--     leaf_fp = installed leaf SPKI fingerprint (64 hex chars)
+--   (false, error_msg): failure (cert parse, key mismatch, etc.)
+--
+-- SIDE EFFECTS:
+--   - Calls: ngx.ssl.set_cert(), ngx.ssl.set_priv_key() (installs cert)
+--   - Calls: _M.probe() for Must-Staple health ranking
+--   - Calls: _M.staple() after selected leaf installed
+--   - Caches: issuer-linked blocks with ocsp_path_sealed flag
+--   - Logs: Single leaf selected + skipped siblings (dual-cert audit)
+--   - Clears: Prior staple before cert swap (TOCTOU safe)
+--
+-- DESIGN NOTES:
+--   - Dual-cert: Ranks RSA + ECDSA by Must-Staple health + ClientHello preference
+--   - Ranking: ClientHello sigalgs → must-staple probe → issuer_path health
+--   - Selection: Tries best candidate, falls back to siblings on soft-fuse
+--   - Soft-fuse: Mode "open"/"staple_only" allows unstapled fallback
+--   - Re-probe: TOCTOU check before final installation (gen may change)
+--   - Path sealing: Sets ocsp_path_sealed to avoid re-link (preserves unresolved_ms)
+--   - Fallback: If best fails, tries next sibling (ranked order)
+--   - Performance: ~50-100ms (probes each dual-cert candidate)
+--   - Must-Staple: Probes must pass before install (unless soft-fuse mode)
+--
+-- RELATED:
+--   - _M.probe() health-checks for dual-cert ranking
+--   - _M.staple() attaches OCSP after installation
+--   - ordered_leaves_for_handshake() ranks by signature_algorithms
+--   - issuer_linked_chain_blocks() builds issuer chain
+--
+-- EXAMPLE:
+--   local ocsp = require("bunkerweb.ocsp")
+--   local ok, blocks, leaf_fp = ocsp.set_certs_from_pem(
+--     full_chain_pem, key_pem, ngx.shared.bw_ocsp, "example.com"
+--   )
+--   if ok then
+--     local staple_ok = ocsp.staple(ngx.shared.bw_ocsp, "example.com", blocks)
+--   end
+--
+-- ============================================================================
 -- Install the single leaf this handshake will present (dual-cert: one of RSA/ECDSA).
 -- prefer_kind / ClientHello signature_algorithms select which leaf; only that leaf is
 -- set_cert'd so the OCSP staple cannot land on a different CertificateEntry.
@@ -2049,6 +3251,48 @@ end
 -- Gen-bound ffi_needed: fingerprint path cannot run ngx.ocsp.validate without leaf PEM
 -- issuers — if the latch is set, refuse with force_ffi_pending (KEEP) until a PEM handshake
 -- clears it. Empty disk DER returns response_empty (not response_not_found).
+-- ============================================================================
+-- staple_from_fingerprint(internalstore, server_name, fingerprint,
+--                         probe_only, mode, chain_blocks)
+-- ============================================================================
+-- PURPOSE:
+--   Staple OCSP for certificate identified by fingerprint only (no PEM).
+--   Used for stream subsystem and fingerprint-hint fallback path.
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache
+--   server_name (string): SNI hostname for config/logging
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   probe_only (boolean): health-check only (don't write allow-pin bus)
+--   mode (string): "normal"|"open"|"staple_only" (Must-Staple enforcement)
+--   chain_blocks (table|nil): issuer-linked blocks for intermediate MS check
+--
+-- RETURNS:
+--   (boolean): true if staple ready/attached
+--   (false, "must_staple", detail): Must-Staple unmet
+--   (false): optional stapling skip
+--
+-- SIDE EFFECTS:
+--   - Reads: ocsp.json metadata, L1/disk cache, ocsp.der, issuer.pem
+--   - Writes: ngx.ocsp.set_ocsp_status_resp() if attaching
+--   - Calls: staple_one_leaf() for actual attachment logic
+--   - Logging: Must-Staple detection logged
+--
+-- DESIGN NOTES:
+--   - Fingerprint-only: No leaf PEM (stream context or hint fallback)
+--   - Must-Staple: Fail-closed (no PEM = must prove from ocsp.json)
+--   - Chain blocks: Optional, required for intermediate MS check
+--   - Probe-only: Rank probes don't write allow-pin bus (dual-cert safety)
+--   - Gates: Tombstone, peer-refuse, cluster-floor, not-paged checks
+--   - Soft-fuse: Mode determines enforcement after gates pass
+--   - Performance: Same as PEM path (~1-50ms depending on cache)
+--
+-- RELATED:
+--   - Called by _M.staple() when cert_pem absent (fingerprint-hint fallback)
+--   - staple_one_leaf() does actual stapling for fingerprint
+--   - _M.probe() uses this for fingerprint health-check
+--
+-- ============================================================================
 local function staple_from_fingerprint(internalstore, server_name, fingerprint, probe_only, mode, chain_blocks)
 	mode = mode or "normal"
 	-- probe_only: score health without touching the allow-pin bus (dual-cert rank).
@@ -2398,6 +3642,55 @@ end
 -- (Lua `issuers or …` would keep {}).
 -- probe_only: never writes the allow-pin bus (local refuse wrapper); returns true or false,"must_staple",detail.
 -- Returns true | false [, reason [, detail]] | nil (no usable body).
+-- ============================================================================
+-- staple_one_leaf(internalstore, ocsp, ssl, blocks, leaf_pem, fingerprint,
+--                 must_staple, server_name, probe_only, mode)
+-- ============================================================================
+-- PURPOSE:
+--   Core OCSP stapling orchestrator: L1 cache + disk path with complete gates.
+--   Handles all freshness validation, Must-Staple enforcement, and attachment.
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache
+--   ocsp (ffi): ngx.ocsp FFI module for validation/attachment
+--   ssl (ffi): ngx.ssl FFI module for PEM parsing
+--   blocks (table): certificate chain blocks (intermediates for multi-staple)
+--   leaf_pem (string): leaf certificate PEM
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   must_staple (boolean): enforce Must-Staple requirement
+--   server_name (string): SNI hostname for config/logging
+--   probe_only (boolean): health-check only (no attachment/pin changes)
+--   mode (string): "normal"|"open"|"staple_only" (enforcement mode)
+--
+-- RETURNS:
+--   (boolean): true if staple attached/ready
+--   (false, "must_staple", detail): Must-Staple unmet
+--   (false): optional stapling skip
+--   (nil): no usable body
+--
+-- SIDE EFFECTS:
+--   - Reads: L1 cache, disk ocsp.der/ocsp.json, issuer.pem
+--   - Writes: ngx.ocsp.set_ocsp_status_resp() on success
+--   - Calls: try_staple(), attach_ocsp_staple(), issuer_candidates()
+--   - Caches: issuer SPKI, validation results
+--   - Metrics: disk I/O timing (issuer_pem, meta_json, ocsp_der)
+--
+-- DESIGN NOTES:
+--   - Critical path orchestrator: L1 cache + metadata + freshness gates
+--   - Gates: Tombstone, peer-refuse, cluster-floor, not-paged, AIA, serial-blacklist
+--   - L1 path: Verified (sha256 bound) + generation-matched
+--   - Disk path: Meta authorization + freshness re-check
+--   - FFI latch: Respects force_ffi (after validate_budget)
+--   - Metrics: Tracks disk I/O latency (issuer, metadata, response)
+--   - Soft-fuse: Mode determines enforcement after gates
+--   - Performance: L1 hit (~1ms), L1 miss + disk (~50ms with FFI)
+--
+-- RELATED:
+--   - staple_from_fingerprint() calls this for fingerprint path
+--   - try_staple() does FFI validation logic
+--   - Called by PEM path (via staple_one_leaf wrapper) and fingerprint path
+--
+-- ============================================================================
 local function staple_one_leaf(
 	internalstore,
 	ocsp,
@@ -3039,6 +4332,58 @@ local function staple_one_leaf(
 	return nil
 end
 
+-- ============================================================================
+-- _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
+-- ============================================================================
+-- PURPOSE:
+--   Public API: Attach OCSP staple to TLS connection. Main entry point for
+--   HTTP and stream subsystems to staple cached OCSP responses.
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache (ngx.shared.bw_ocsp_*) or internalstore_stream
+--   server_name (string): SNI hostname for logging/config lookups
+--   cert_pem (string|table): full PEM chain OR issuer-linked blocks table
+--                            blocks[1] = leaf, blocks[2..n] = intermediates
+--   cert_fp_hint (string|nil): SPKI fingerprint (64-char hex) for fingerprint-only path
+--
+-- RETURNS:
+--   (boolean): true if staple attached successfully
+--   (false, "must_staple", detail): Must-Staple unmet (caller may soft-fuse)
+--   (false): optional stapling skip (response missing/invalid/etc.)
+--
+-- SIDE EFFECTS:
+--   - Reads: L1 cache, disk ocsp.der, ocsp.json, issuer.pem
+--   - Writes: ngx.ocsp.set_ocsp_status_resp() to TLS connection
+--   - Calls: try_staple(), validate(), issuer_candidates()
+--   - FFI calls: ngx.ocsp validation (up to 10 issuer attempts)
+--   - Metrics: records validation timing + cache hits
+--   - Logging: log_ocsp_stapled() on success, log_ocsp_staple_skip() on skip
+--
+-- DESIGN NOTES:
+--   - Dual input: PEM string (parses automatically) or blocks table (pre-parsed)
+--   - Blocks.ocsp_path_sealed: Optimization from set_certs_from_pem to skip re-link
+--   - Fingerprint-only: When cert_pem absent, uses cert_fp_hint + ocsp.json
+--   - L1 cache: Verified (DER SHA256 bound) + generation matched
+--   - Soft-fuse: Must-Staple can continue handshake in open/staple_only mode
+--   - Multi-staple: One ECDSA leaf stapled (one ngx.ocsp status slot)
+--   - Performance: L1 hit (~1ms), L1 miss (~50ms with FFI validation)
+--   - Budget: Max 10 issuer candidates, 50ms time hardcap
+--   - Async: Scheduler may pre-validate for skip-FFI optimization
+--
+-- RELATED:
+--   - _M.probe() health-check only (no attachment)
+--   - _M.set_certs_from_pem() installation with blocking staple
+--   - set_certs_from_pem() and this staple use common try_staple logic
+--   - ocsp_http.lua / stream/ocsp.lua call this from TLS hooks
+--
+-- EXAMPLE:
+--   local ocsp_module = require("bunkerweb.ocsp")
+--   local ok = ocsp_module.staple(ngx.shared.bw_ocsp, "example.com", cert_pem)
+--   if not ok then
+--     log(ngx.ERR, "OCSP staple failed")
+--   end
+--
+-- ============================================================================
 -- Staple a cached OCSP response for cert_pem. Used by the stream TLS handshake.
 -- HTTP uses ngx.shared.internalstore; stream uses internalstore_stream. Same key layout
 -- (TLS:SSL:ocsp: composite of epoch|verified|expires|DER) so each subsystem warms its own L1.
@@ -3160,6 +4505,59 @@ function _M.staple(internalstore, server_name, cert_pem, cert_fp_hint)
 	return false
 end
 
+-- ============================================================================
+-- _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soften)
+-- ============================================================================
+-- PURPOSE:
+--   Public API: Health-check OCSP staple readiness without installing cert.
+--   Validates Must-Staple requirement before set_cert (dual-cert ranking).
+--
+-- PARAMETERS:
+--   internalstore (table): per-worker cache (ngx.shared.bw_ocsp_*)
+--   server_name (string): SNI hostname for config/logging
+--   cert_pem (string|table): full PEM chain OR issuer-linked blocks table
+--   cert_fp_hint (string|nil): SPKI fingerprint for fingerprint-only path
+--   apply_soften (boolean|nil): apply soft-fuse (default true for must_staple)
+--                               false = skip-leaf caller logs own action
+--
+-- RETURNS:
+--   (boolean): true if staple ready (Must-Staple satisfied or open mode)
+--   (false, "must_staple", detail): Must-Staple unmet (abort, cannot install)
+--   (false): soft skip (continue without abort, used for sibling ranking)
+--
+-- SIDE EFFECTS:
+--   - Reads: L1 cache, disk ocsp.der, ocsp.json, issuer.pem
+--   - Does NOT write: ngx.ocsp.set_ocsp_status_resp() (no cert installed)
+--   - Does NOT drop: L1 cache when apply_soften=false (rank probe safety)
+--   - Calls: try_staple() with probe_only=true
+--   - Metrics: records validation timing
+--
+-- DESIGN NOTES:
+--   - Purpose: Validate staple before commit (set_cert). Fail-safe gate.
+--   - Dual-cert: Rank leaves by Must-Staple health before installing
+--   - Skip-leaf: apply_soften=false prevents dropping L1 (siblings reuse cache)
+--   - Soft-fuse: apply_soften=true honors soft-fuse modes (open/staple_only)
+--   - open mode: Returns true immediately (Must-Staple off entirely)
+--   - Blocks.ocsp_path_sealed: Honors sealed status from set_certs_from_pem
+--   - Performance: Same as staple() but no TLS attachment (~1-50ms)
+--   - L1 drop gate: Skipped when apply_soften=false (ranking phase safety)
+--
+-- RELATED:
+--   - _M.staple() actually attaches (with soft-fuse capability)
+--   - _M.set_certs_from_pem() uses probe to rank dual-cert leaves
+--   - called by ordered_leaves_for_handshake() for health ranking
+--   - try_staple() with probe_only=true does actual work
+--
+-- EXAMPLE:
+--   -- Rank dual-cert leaves by staple readiness
+--   local probe_ok, reason, detail = ocsp_module.probe(internalstore, sni, leaf_pem)
+--   if probe_ok then
+--     -- This leaf can be installed with valid staple
+--   elseif reason == "must_staple" then
+--     -- This leaf's Must-Staple is unmet, skip this leaf
+--   end
+--
+-- ============================================================================
 -- Live staple probe for a leaf/shard without installing the cert or setting the staple.
 -- Must-Staple leaves must pass this before set_cert (normal and staple_only). Soft fuses
 -- only affect handshake abort after install fails entirely — not the skip-leaf gate.
@@ -3254,6 +4652,48 @@ function _M.probe(internalstore, server_name, cert_pem, cert_fp_hint, apply_soft
 	return finish(false, "must_staple", "response_not_found")
 end
 
+-- ============================================================================
+-- _M.requires_must_staple(cert_pem, cert_fp_hint)
+-- ============================================================================
+-- PURPOSE:
+--   Query whether certificate must have OCSP staple. Returns Must-Staple tri-state
+--   from TLS Feature (PEM) or ocsp.json metadata (fingerprint-only path).
+--
+-- PARAMETERS:
+--   cert_pem (string|nil): leaf certificate PEM
+--   cert_fp_hint (string|nil): SPKI fingerprint (64-char hex) fallback
+--
+-- RETURNS:
+--   (boolean): true = Must-Staple required (enforce staple)
+--             false = Must-Staple disabled (optional stapling ok)
+--   Returns true if: TLS Feature set OR unknown (fail-closed)
+--   Returns false only if: explicitly marked false in ocsp.json or cert
+--
+-- SIDE EFFECTS:
+--   - Calls: pem_blocks(), spki_fingerprint() for PEM parsing
+--   - Calls: get_must_staple_module() for cached detection
+--   - No state modification
+--
+-- DESIGN NOTES:
+--   - Tri-state: true (required), false (optional), nil (unknown, treated as true)
+--   - Fail-closed: Unknown/missing = enforce (safer default)
+--   - TLS Feature: Extracted from PEM during cert parsing
+--   - Fingerprint-only: Falls back to ocsp.json if no PEM
+--   - Request cache: Uses ngx.ctx cache to avoid re-parsing
+--   - Performance: O(1) with cache hit, O(len(PEM)) on miss
+--
+-- RELATED:
+--   - ocsp_must_staple.lua implements Must-Staple detection
+--   - staple() and probe() use this to decide enforcement
+--   - _M.set_certs_from_pem() annotates leaves with Must-Staple result
+--
+-- EXAMPLE:
+--   local needs_staple = ocsp_module.requires_must_staple(leaf_pem)
+--   if needs_staple then
+--     log(ngx.INFO, "Certificate requires OCSP staple")
+--   end
+--
+-- ============================================================================
 -- True when the leaf PEM or ocsp.json marks Must-Staple (TLS Feature status_request).
 -- Unknown (resty miss + no ocsp.json) returns true (fail closed), matching handshake.
 function _M.requires_must_staple(cert_pem, cert_fp_hint)
@@ -3269,6 +4709,44 @@ function _M.requires_must_staple(cert_pem, cert_fp_hint)
 	return not ms_module or ms_module.get_must_staple(leaf_pem, leaf_fp or fp_hint) ~= false
 end
 
+-- ============================================================================
+-- _M.prefer_kind_from_sigalgs(ext)
+-- ============================================================================
+-- PURPOSE:
+--   Extract coarse key type preference from ClientHello signature_algorithms ext.
+--   Returns "ec"|"rsa"|"ed" based on first matching algorithm scheme.
+--
+-- PARAMETERS:
+--   ext (string): raw ClientHello signature_algorithms extension bytes
+--
+-- RETURNS:
+--   (string|nil): "ec" (ECDSA), "rsa" (RSA), "ed" (EdDSA), or nil if absent/unknown
+--
+-- SIDE EFFECTS:
+--   None (pure parsing function, no state modification)
+--
+-- DESIGN NOTES:
+--   - Parsing: Extension format: [len (2 bytes)] [alg_pairs]
+--   - Scheme codes: IANA signature algorithm enum (0x0403, 0x0501, etc.)
+--   - First match: Returns on first recognized algorithm found
+--   - EC schemes: 0x0403, 0x0503, 0x0603 (ECDSA with SHA256/384/512)
+--   - EdDSA schemes: 0x0807, 0x0808 (Ed25519, Ed448)
+--   - RSA schemes: 0x0401, 0x0501, 0x0601, 0x0804-080b (RSA-PSS variants)
+--   - Coarse only: Does not distinguish curves (use raw ext for curve-aware)
+--   - Performance: O(n) where n=extension length (~20 bytes typical)
+--
+-- RELATED:
+--   - ordered_leaves_for_handshake() uses raw ext for curve-aware matching
+--   - This function provides coarse preference for fallback ranking
+--   - _M.capture_client_hello() calls this to cache preference
+--
+-- EXAMPLE:
+--   local kind = ocsp_module.prefer_kind_from_sigalgs(client_hello_ext_13)
+--   if kind == "ec" then
+--     -- Prefer ECDSA leaf for this client
+--   end
+--
+-- ============================================================================
 -- Parse ClientHello signature_algorithms (ext 13) → "ec", "rsa", "ed", or nil.
 -- Coarse kind only; curve-aware selection uses the raw extension via select_leaf_for_handshake.
 function _M.prefer_kind_from_sigalgs(ext)
@@ -3310,6 +4788,48 @@ function _M.prefer_kind_from_sigalgs(ext)
 	return nil
 end
 
+-- ============================================================================
+-- _M.capture_client_hello()
+-- ============================================================================
+-- PURPOSE:
+--   Extract ClientHello SNI and signature_algorithms extension during handshake.
+--   Stores on ngx.ctx for downstream ssl_certificate phase leaf selection.
+--
+-- PARAMETERS:
+--   None (reads from TLS ClientHello)
+--
+-- RETURNS:
+--   None (stores results in ngx.ctx)
+--
+-- SIDE EFFECTS:
+--   - Reads: ngx.ssl.clienthello (FFI, early in TLS handshake)
+--   - Writes: ngx.ctx.bw_ocsp_sni (string|nil)
+--             ngx.ctx.bw_ocsp_sigalgs_ext (string|nil, raw ext 13)
+--             ngx.ctx.bw_ocsp_prefer_kind (string|nil, coarse kind)
+--   - Calls: maybe_rearm_l1_warmer() for early warmer recovery
+--   - Performance: O(n) where n=extension size (~50 bytes typical)
+--
+-- DESIGN NOTES:
+--   - SNI extraction: Server name from ClientHello (required for fallback)
+--   - Signature algorithms: Extension 13 (raw bytes for curve-aware ranking)
+--   - Prefer kind: Coarse extraction (ec/rsa/ed) for fallback ranking
+--   - Per-request: Stores on ngx.ctx (cleared on new request)
+--   - Early timer: Rearms L1 warmer in case timer.at was unscheduled
+--   - Fail-safe: All reads wrapped in pcall(), no errors if feature unavailable
+--   - Performance: Called very early in TLS handshake (~1ms typical)
+--
+-- RELATED:
+--   - _M.handshake_sni() retrieves stored SNI with fallback
+--   - ordered_leaves_for_handshake() uses stored sigalgs_ext
+--   - ssl_client_hello hook calls this (HTTP + stream)
+--
+-- EXAMPLE:
+--   -- Called from http {ssl_client_hello} or stream {ssl_preread}
+--   ocsp_module.capture_client_hello()
+--   -- Later, in ssl_certificate phase:
+--   local sni = ocsp_module.handshake_sni()
+--
+-- ============================================================================
 -- Capture SNI + preferred leaf kind during ssl_client_hello (HTTP and stream).
 -- Stores on ngx.ctx for the later ssl_certificate leaf pick / staple:
 --   bw_ocsp_sni, bw_ocsp_sigalgs_ext (raw ext 13), bw_ocsp_prefer_kind (coarse).
@@ -3342,6 +4862,45 @@ function _M.capture_client_hello()
 	end
 end
 
+-- ============================================================================
+-- _M.handshake_sni(fallback)
+-- ============================================================================
+-- PURPOSE:
+--   Resolve handshake SNI for stream stapling with fallback chain.
+--   Checks ssl.server_name(), ctx, then fallback parameter.
+--
+-- PARAMETERS:
+--   fallback (string|nil): SNI to use if others unavailable (lowest priority)
+--
+-- RETURNS:
+--   (string|nil): SNI hostname (non-empty), or nil if all sources empty
+--
+-- SIDE EFFECTS:
+--   - Reads: ngx.ssl.server_name() (stream phase)
+--             ngx.ctx.bw_ocsp_sni (HTTP/capture_client_hello)
+--             fallback parameter
+--   - No writes or state modification
+--
+-- DESIGN NOTES:
+--   - Fallback chain: ssl.server_name() → ctx → fallback → nil
+--   - Stream: ssl.server_name() available; HTTP must use ctx
+--   - HTTP HTTP: capture_client_hello() populates ctx.bw_ocsp_sni
+--   - Empty check: Returns nil for empty strings
+--   - Performance: O(1) simple lookups
+--
+-- RELATED:
+--   - _M.capture_client_hello() populates ctx.bw_ocsp_sni (HTTP)
+--   - _M.staple() and _M.probe() receive SNI from caller
+--   - Stream uses this directly; HTTP uses ctx version
+--
+-- EXAMPLE:
+--   -- In stream ssl_certificate phase
+--   local sni = ocsp_module.handshake_sni("default.example.com")
+--   if sni then
+--     local ok = ocsp_module.staple(store, sni, cert_pem)
+--   end
+--
+-- ============================================================================
 -- Resolve the handshake SNI for stream stapling (ssl.server_name, else client-hello ctx).
 function _M.handshake_sni(fallback)
 	local ssl = require "ngx.ssl"
@@ -3359,6 +4918,62 @@ function _M.handshake_sni(fallback)
 	return nil
 end
 
+-- ============================================================================
+-- _M.async_validate_response(fingerprint, ocsp_der, issuers, leaf_pem, meta)
+-- ============================================================================
+-- PURPOSE:
+--   Background validator for OCSP responses (off-path, scheduler context).
+--   Validates response FFI-side and marks cache as "validated" for TLS path.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   ocsp_der (string): OCSP response DER bytes (required)
+--   issuers (table): issuer PEM candidates {issuer_pem, ...}
+--   leaf_pem (string): leaf certificate PEM
+--   meta (table|nil): ocsp.json metadata (optional)
+--
+-- RETURNS:
+--   (boolean): true if FFI validation succeeded
+--             false if validation failed or parameters missing
+--
+-- SIDE EFFECTS:
+--   - Reads: issuers list, leaf/issuer PEMs
+--   - Writes: async validation cache via set_shared_validation_result()
+--             (status="validated" on success, cleared on failure)
+--   - Calls: validate() for each issuer (FFI)
+--   - Logging: WARN level on parameter errors
+--   - Performance: ~100-300ms per response (10-20ms FFI per issuer, up to 10 issuers)
+--
+-- DESIGN NOTES:
+--   - Off-path: Called by scheduler job outside TLS handshake
+--   - No TLS attachment: Just validates and caches result
+--   - Cross-handshake: Shares result with concurrent TLS paths via shared dict
+--   - Parameter check: Returns false if critical params missing (no throw)
+--   - Issuer walk: Tries each issuer candidate until success
+--   - Cache write: Only on success (thin chain failures don't block fatter chains)
+--   - TTL: 3600s (one hour) for cached validated status
+--   - Performance: Much slower than L1 hit (~100ms vs ~1ms), but faster overall
+--
+-- RELATED:
+--   - validate() does the actual FFI validation
+--   - ocsp-refresh.py background job calls this
+--   - TLS path reads via get_shared_validation_result()
+--   - mark_async_validation_done() would replace this
+--
+-- EXAMPLE:
+--   -- From scheduler job context
+--   local ocsp_module = require("bunkerweb.ocsp")
+--   local ok = ocsp_module.async_validate_response(
+--     "abc123...64char",  -- fingerprint
+--     ocsp_der_bytes,     -- response DER
+--     {issuer1_pem, issuer2_pem},  -- issuers
+--     leaf_pem
+--   )
+--   if ok then
+--     ngx.log(ngx.INFO, "OCSP validated background")
+--   end
+--
+-- ============================================================================
 -- --- Async OCSP Validation (Off-Path) ----------------------------------------
 -- Background validation job: called by scheduler to validate OCSP responses
 -- outside the TLS critical path. Marks responses as "validated" when complete,

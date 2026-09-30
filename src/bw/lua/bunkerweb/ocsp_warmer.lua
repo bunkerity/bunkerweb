@@ -1,3 +1,55 @@
+--[[
+================================================================================
+OCSP L1 Warmer Module: Background Cache Warm-Up and Lease Coordination
+================================================================================
+
+MODULE OVERVIEW:
+Off-handshake timer task that pre-loads OCSP responses into L1 shared-dict cache
+(ngx.shared.internalstore). Uses shared-dict lease for O(N workers) coordination
+so only one worker scans disk per interval, avoiding thundering-herd.
+
+KEY RESPONSIBILITIES:
+1. Lease Management: Worker heartbeat + atomic add() for lease acquisition.
+   TLS path holds one worker per interval (LEASE_TTL=20-60s). Expiry auto-resets
+   on election. Lease stale after MULTI_STAPLE_WORKER_TTL; can be reclaimed.
+
+2. Scan Resumption: Mid-scan checkpoints via shared-dict cursor so failover
+   workers continue scanning from prior position, not re-starting from index 0.
+   Must-Staple certificates re-sort before cursor; entire scan completes then.
+
+3. Must-Staple Prioritization: Fingerprint list is scanned in Must-Staple-first
+   order to warm high-value certs before TLS critical path hits them. Re-scan
+   after configuration reload (epoch change).
+
+4. Heartbeat Renewal: Every 32 entries + wall-clock threshold keeps lease fresh.
+   Prevents hung lfs.dir or slow I/O from losing lease to peers mid-scan.
+
+5. Transient Skips: ligand_missing and pin_transient causes skip warm but do
+   not increment complete counter (retry before RESCAN).
+
+TIMING:
+- INTERVAL: 5 seconds (L1_WARMER_INTERVAL)
+- RESCAN: 60 seconds (L1_WARMER_RESCAN) — force full re-enumerate if config changed
+- LEASE_TTL: 20-60 seconds (MIN(3*INTERVAL, 60))
+- PUB INTERVAL: 15 seconds (rate-limit to stale write protection)
+
+CACHE HIERARCHY:
+- Tier 1 (L1): ngx.shared.internalstore (warm_cache, 300s TTL)
+- Tier 2 (Disk): /var/cache/bunkerweb/ssl/{h}/{l}/{fp}/{ocsp.der, ocsp.json, issuer.pem}
+
+EXPORTS:
+- Public: start_l1_warmer, warm_l1_from_disk
+- Internal: maybe_rearm_l1_warmer (handshake re-arm after timer fail)
+
+DEPENDENCIES:
+- ocsp_common: Epoch, fingerprint validation, file I/O
+- ocsp_store: Metadata read, ligand validation, warm_cache L1 writes
+- ocsp_pin: peer_refuse_blocks (allow-pin bus validation)
+- ocsp_chain: openssl_multi_staple_ready, refresh_multi_staple_vote (colony coordination)
+
+================================================================================
+]]
+
 -- Off-handshake L1 warmer (timer + shared-dict lease).
 -- Part of bunkerweb.ocsp; other modules use the .internal table, callers use bunkerweb.ocsp.
 local _M = {}
@@ -188,8 +240,24 @@ local function claim_l1_warmer_lease(internalstore)
 	return claimed
 end
 
--- Module-level fingerprint list cache (survives across warm cycles).
--- Fingerprint list is expensive to scan (10-50ms per cycle); cache until epoch changes.
+-- Module-level fingerprint list cache (persists across warm cycles for efficiency).
+-- Fingerprint list is expensive to scan (10-50ms per cycle via lfs.dir or find).
+-- Caching it avoids re-enumeration while epoch is stable (no new certificates published).
+-- TTL: RESCAN duration so new shards appear without waiting full FPS_CACHE_TTL.
+--
+-- CACHE INVALIDATION:
+--   - Epoch change: config publish bumps .ocsp_epoch file → rebuild list
+--   - Timeout: FPS_CACHE_TTL seconds (same as RESCAN) → re-enumerate
+--   - Empty result: never cache (transient lfs.dir miss must not suppress re-enumeration)
+--
+-- @var cached_fingerprints: list of 64-char hex strings (or nil if not cached)
+-- @var cached_fingerprints_epoch: epoch string at time of enumeration (tracks validity)
+-- @var cached_fingerprints_timeout: wall-clock deadline (ngx.now() >= this triggers rebuild)
+--
+-- Performance:
+--   Cache hit: O(1) table return (very hot path)
+--   Cache miss: O(n) directory scan via lfs.dir + regex match, ~10-50ms
+--   Typical: hits most of 60-second rescan window; single miss per epoch
 local cached_fingerprints = nil
 local cached_fingerprints_epoch = nil
 local cached_fingerprints_timeout = 0
@@ -447,6 +515,18 @@ function _M.warm_l1_from_disk(internalstore, epoch)
 	end
 	-- Read each shard's effective meta once for sort + warm (ligand overlay).
 	-- Heartbeat during this pass: large fleets can exceed LEASE_TTL on json alone.
+	--
+	-- SORT STRATEGY: Must-Staple-first (high-value certificates before TLS critical path)
+	--   1. Read every shard meta (ligand-merged for accurate must_staple + paged state)
+	--   2. Mark each fp with is_must[fp] = true if must_staple=true AND paged AND not tombstoned
+	--   3. Sort: stable sort with comparator (is_must[a] > is_must[b]) then lexicographic fallback
+	--   4. Result: all Must-Staple shards before non-MS shards (same list, reordered)
+	--   5. Resume: if cursor is mid-list, MS-first re-sort may move Must-Staples before cursor
+	--            (they are still warmed before suffix; cursor-search re-finds correct index)
+	--
+	-- HEARTBEAT: Renew lease every 32 entries (not after full sort) to prevent hung lfs.dir
+	--   - Concurrent large JSON reads can exceed LEASE_TTL if heartbeat waits until after sort
+	--   - Gap: renew_due(i, HEARTBEAT_EVERY) fires at i%32==0 BEFORE sort, so sort does not block
 	local is_must = {}
 	local meta_by_fp = {}
 	for i, fp in ipairs(fps) do
@@ -459,16 +539,20 @@ function _M.warm_l1_from_disk(internalstore, epoch)
 		end
 		local meta = ligand_or_meta(read_ocsp_json(fp), fp)
 		meta_by_fp[fp] = meta
+		-- Must-Staple detection: true only if must_staple flag + paged + not tombstoned
+		-- (unpaged shards are not warmed in MS-first because they fail canary check anyway)
 		is_must[fp] = type(meta) == "table"
 			and meta.must_staple == true
 			and not meta_tombstoned(meta, fp)
 			and not shard_not_paged(meta, fp)
 	end
+	-- SORT: Stable sort with (is_must[a], a) key — MS=true sorts before MS=false,
+	-- then alphabetic fallback (deterministic across nondeterministic pairs iteration)
 	table.sort(fps, function(a, b)
 		if is_must[a] ~= is_must[b] then
-			return is_must[a]
+			return is_must[a]  -- true > false (Lua: true sorts after false, so invert logic)
 		end
-		return a < b
+		return a < b  -- Lexicographic fallback (deterministic)
 	end)
 
 	-- Renew again after sort prep before the warm walk (prep may have been long).

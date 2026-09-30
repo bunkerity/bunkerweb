@@ -1,3 +1,52 @@
+--[[
+================================================================================
+OCSP Store Module: Metadata Storage, Cache Management, and Ligand Integration
+================================================================================
+
+MODULE OVERVIEW:
+Central data storage layer managing ocsp.json shard metadata, outside-ligand
+bindings, L1 (Tier 1) shared-dict caching, and freshness gates. Implements
+the critical HTTP↔stream coherence bus for OCSP state.
+
+KEY CONCEPTS:
+1. Shard Metadata (ocsp.json): Job-published per-certificate facts (SPKI
+   fingerprint, DER SHA256, soft_recall_gen, expiry, Must-Staple flag).
+
+2. Outside Ligand (ocsp-ligand/): Canary-paged binding (der_sha256 +
+   soft_recall_gen) outside the SPKI directory structure. Enables atomic
+   promotion of issuer.pem + ocsp.der + ocsp.json in paged workflow.
+
+3. L1 Cache (Tier 1): Shared-dict storage (bw3 binary format) with epoch
+   coherence bus (.ocsp_epoch) for TLS path optimization. Survives 300s
+   (or until response expires), avoids frequent disk/ligand checks.
+
+4. Freshness Gates: Validates OCSP response time bounds (thisUpdate, nextUpdate),
+   intrinsic lifetime, max-age, cluster floor consensus, tombstone marks.
+
+5. Must-Staple Resolution: Tri-state detection (true/false/nil unknown) from
+   TLS Feature extension + ocsp.json flag, feeding into Must-Staple enforcement.
+
+CACHE HIERARCHY:
+- L1 (Tier 1/Per-Worker): ngx.shared.internalstore + ngx.shared.internalstore_stream
+  (bw3 format: epoch|verified_sha|soft_recall_gen|expires|DER bytes)
+- L2 (Disk/Shard): /var/cache/bunkerweb/ssl/{h}/{l}/{fp}/ocsp.json (job-maintained)
+- L3 (Disk/Ligand): /var/cache/bunkerweb/ssl/ocsp-ligand/{fp} (job-maintained)
+- L4 (Disk/Expires): /var/cache/bunkerweb/ssl/ocsp-floor/{fp}, serial-blacklist.json
+
+EXPORTS:
+- Public: resolve_leaf_must_staple, serial_blacklist_blocks, resp_still_fresh,
+  cluster_floor_blocks, l1_body_matches_disk, ligand_verdict
+- Internal: Ligand merging, L1 cache operations, freshness validation, Must-Staple
+  resolution, warm_cache
+
+DEPENDENCIES:
+- ocsp_common: Clock skew, lifetime limits, epoch handling, logging
+- ocsp_cert: Must-Staple detection, SPKI fingerprinting, serial extraction
+- Called by ocsp.lua, ocsp_warmer.lua, ocsp_pin.lua for validation gates
+
+================================================================================
+]]
+
 -- Shard metadata (ocsp.json), outside ligand, L1 shared-dict cache and freshness gates.
 -- Part of bunkerweb.ocsp; other modules use the .internal table, callers use bunkerweb.ocsp.
 local _M = {}
@@ -31,6 +80,38 @@ local L1_MAGIC_V2 = "bw2\0"
 -- Cap DRAM residence; never longer than remaining OCSP life when known.
 local L1_MAX_TTL = 300
 
+-- ============================================================================
+-- fp64_or_nil(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Normalize and validate SPKI fingerprint format (64 hex chars, lowercase).
+--   Used before all path operations and cache key generation.
+--
+-- PARAMETERS:
+--   fingerprint (string|nil): potential SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   (string): lowercase 64-char hex fingerprint if valid
+--   (nil): if invalid format, wrong length, or non-hex
+--
+-- SIDE EFFECTS:
+--   - Calls: is_fp64() for format validation
+--   - No reads/writes or state modification
+--   - Performance: O(1) string operation, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Normalization: Disk paths and pin bus use lowercase (job consistency)
+--   - is_fp64 validation: Allows A-F uppercase, normalizes to lowercase
+--   - Fail-safe: Returns nil for invalid (prevents path traversal)
+--   - Used by: All functions needing fingerprint path operations
+--   - Called before: Path joins, cache keys, fingerprint equality checks
+--
+-- RELATED:
+--   - is_fp64() from common module for hex validation
+--   - All path functions (ocsp_path, ocsp_ligand_path) call this first
+--   - Cache keys normalized via this function
+--
+-- ============================================================================
 -- Disk paths and pin bus use lowercase hex (job + ocsp_pin). is_fp64 allows
 -- A-F; normalize before path join / cache key / fingerprint equality checks.
 local function fp64_or_nil(fingerprint)
@@ -40,17 +121,83 @@ local function fp64_or_nil(fingerprint)
 	return fingerprint:lower()
 end
 
--- Harden unix timestamps: digit-only strings / finite positive numbers
--- (no tonumber("1e20") / "inf" surprises). Shared by expires, thisUpdate, max_age.
+-- Parse and validate unix timestamp, preventing common parsing attacks.
+--
+-- This function hardens timestamp parsing to reject non-integer representations
+-- that Lua's tonumber() would accept:
+--   - tonumber("1e20") → 1×10²⁰ (exponential, not a real unix timestamp)
+--   - tonumber("inf") / "nan" (non-finite, would break comparisons)
+--   - Negative numbers (timestamps before epoch, invalid for OCSP)
+--
+-- @param v: value to parse (number or string)
+-- @return: positive integer unix timestamp, or nil if invalid/non-positive
+--
+-- VALIDATION RULES:
+-- - Number: Reject NaN (v ~= v), infinity (math.huge), and non-positive (<= 0)
+--           Accept only finite positive numbers, floor to integer
+-- - String: Reject if not all digits (prevents "1e2", "inf", "abc")
+--           Only parse digit-only strings, verify result is positive
+-- - Any other type: Return nil (fail-closed for unknown input)
+--
+-- Used for: expires_unix, thisUpdate, max_age parsing (OCSP freshness validation)
+-- Called by: resp_still_fresh, meta_effective_expires_unix, warm_cache
+-- Performance: O(1) string matching + optional tonumber
+--
+-- Security: Prevents timestamp coercion attacks where attacker controls
+--           OCSP response timestamps and tries to parse "9e99" as valid TTL
+--
+-- ============================================================================
+-- positive_unix(v)
+-- ============================================================================
+-- PURPOSE:
+--   Parse and validate unix timestamp, rejecting NaN, infinity, non-positive values.
+--   Hardens timestamp parsing against tonumber() attacks and malformed inputs.
+--
+-- PARAMETERS:
+--   v (number|string): timestamp to validate
+--     - number: validated and floored to integer
+--     - string: must be all digits (no scientific notation)
+--     - other: returns nil
+--
+-- RETURNS:
+--   (number): validated unix timestamp (integer seconds)
+--   (nil): if invalid (NaN, infinity, <=0, malformed string)
+--
+-- SIDE EFFECTS:
+--   None (pure validation function)
+--   Performance: O(1) type checks + tonumber (~0.01ms)
+--
+-- DESIGN NOTES:
+--   - NaN rejection: v ~= v true only for NaN (self-comparison fails)
+--   - Infinity rejection: Explicitly checks ±math.huge
+--   - Positive guard: Rejects zero and negative (before epoch invalid)
+--   - String parsing: Only accepts all-digit strings (no scientific notation)
+--   - Numeric string: tonumber("1e20") rejected (not matched by ^%d+$)
+--   - Floor to integer: Removes fractional seconds (unix is integer seconds)
+--   - Type safety: Returns nil for unexpected types
+--   - Called by: meta_expires_unix(), metadata parsing, time validations
+--
+-- RELATED:
+--   - meta_expires_unix() uses this to validate expires field
+--   - l1_shm_ttl() uses for TTL calculation
+--   - resp_still_fresh() uses for freshness checks
+--
+-- ============================================================================
 local function positive_unix(v)
 	if type(v) == "number" then
+		-- Reject NaN (NaN ~= NaN is true; only NaN satisfies this)
+		-- Reject positive/negative infinity (invalid timestamps)
+		-- Reject zero and negative numbers (unix timestamp before epoch)
 		if v ~= v or v == math.huge or v == -math.huge or v <= 0 then
 			return nil
 		end
+		-- Floor to integer (remove fractional seconds)
 		return math.floor(v)
 	end
 	if type(v) == "string" and v:match("^%d+$") then
+		-- String is all digits (no scientific notation, signs, or non-digits)
 		local n = tonumber(v)
+		-- Verify tonumber succeeded and result is positive
 		if n and n > 0 then
 			return n
 		end
@@ -65,56 +212,293 @@ local meta_effective_expires_unix
 local read_ocsp_json
 local read_ocsp_ligand
 
+-- Calculate time-to-live (TTL) for storing OCSP response in L1 shared-dict cache.
+--
+-- OCSP responses have an expiry time (nextUpdate). This function:
+-- 1. Validates the expiry is a valid unix timestamp
+-- 2. Subtracts clock skew (tolerate clock drift between servers)
+-- 3. Calculates time remaining until response is stale
+-- 4. Caps TTL at L1_MAX_TTL (300s) to prevent stale cached responses
+--
+-- @param expires_unix: response expiry timestamp (unix seconds)
+-- @return: TTL in seconds for shared dict, or nil if response already expired
+--
+-- EXAMPLE:
+--   expires_unix = 1696003200 (future)
+--   now = 1696003100
+--   OCSP_CLOCK_SKEW_SECONDS = 60
+--   remaining = 1696003200 - 60 - 1696003100 = 40 seconds
+--   → return 40 (cache for 40 seconds)
+--
+-- EDGE CASES:
+-- - No expiry: Returns nil (never cache undated responses)
+-- - Already expired: Returns nil (response is stale)
+-- - Very long TTL: Capped at L1_MAX_TTL=300s (prevents DRAM bloat)
+-- - Negative remaining: Returns nil (expiry is in the past)
+--
+-- Called by: warm_cache (before storing DER in shared dict)
+-- Performance: O(1) arithmetic
+--
+-- ============================================================================
+-- l1_shm_ttl(expires_unix)
+-- ============================================================================
+-- PURPOSE:
+--   Calculate optimal TTL for L1 cache entry. Prevents stale responses from
+--   living too long in shared dict while respecting response lifetime.
+--
+-- PARAMETERS:
+--   expires_unix (number): response expiry time (unix timestamp)
+--
+-- RETURNS:
+--   (number): TTL in seconds for shared dict.set(key, value, ttl)
+--   (nil): if already stale or no valid expiry
+--
+-- SIDE EFFECTS:
+--   - Reads: ngx.time() for current time
+--   - No state modification
+--   - Performance: O(1) arithmetic (~0.01ms)
+--
+-- DESIGN NOTES:
+--   - TTL calculation: min(remaining_until_expires, L1_MAX_TTL=300s)
+--   - Clock skew buffer: Subtracts OCSP_CLOCK_SKEW_SECONDS (30s typical)
+--   - Stale detection: Returns nil if remaining <= 0 (already expired)
+--   - Max cap: 300s prevents old responses from living in DRAM beyond expiry
+--   - Type checking: Rejects nil, non-numbers, or negative expires
+--   - Called by: warm_cache() to set shared dict TTL
+--   - Principle: Never let DRAM entry outlive response lifetime
+--
+-- RELATED:
+--   - warm_cache() uses this TTL for shared dict.set()
+--   - resp_still_fresh() validates response not past expiry
+--   - meta_effective_expires_unix() computes death clock
+--
+-- ============================================================================
 local function l1_shm_ttl(expires_unix)
-	-- Never park an undated body in L1 (would outlive stripped meta).
+	-- Validate expiry is a positive number (reject nil, non-numeric, or negative)
+	-- Never cache responses without an expiry (they could stay in DRAM forever)
 	if type(expires_unix) ~= "number" or expires_unix <= 0 then
 		return nil
 	end
-	-- Drop L1 at death time (expires_unix - skew), same as resp_still_fresh.
+	-- Calculate seconds remaining until response expires
+	-- Subtract OCSP_CLOCK_SKEW_SECONDS to tolerate clock skew between servers
+	-- Example: expires at T=100, skew=60, now=50 → remaining = 100-60-50 = -10 (expired)
 	local remaining = expires_unix - OCSP_CLOCK_SKEW_SECONDS - ngx.time()
 	if remaining <= 0 then
-		return nil
+		return nil  -- Response already stale (or will be within clock skew tolerance)
 	end
+	-- Cap TTL at L1_MAX_TTL=300 seconds to prevent stale responses living too long in DRAM
+	-- Shared dict entry lives longer if we request longer TTL, but we only want 5 minutes max
 	if remaining > L1_MAX_TTL then
 		return L1_MAX_TTL
 	end
+	-- Return calculated TTL (will be set on shared dict entry)
 	return remaining
 end
 
 -- Pack one L1 shm entry: epoch | verified sha256 binding | soft_recall_gen | expires | DER.
+--
+-- L1 BLOB FORMAT (bw3 version):
+--   "bw3\0" + epoch + "\0" + verified_binding + "\0" + soft_recall_gen + "\0" + expires + "\0" + der_bytes
+--   - epoch: string .ocsp_epoch token (job coherence bus for HTTP↔stream)
+--   - verified_binding: hex SHA256(OCSP DER) or "" if not cryptographically trusted
+--   - soft_recall_gen: generation counter (for soft-recall / allow-pin matching) or ""
+--   - expires: unix timestamp (death-time for response) or ""
+--   - der_bytes: full OCSP response DER (binary)
+--
+-- NULL-SEPARATOR SAFETY: \0 is safe as field delimiter (binary safe; never in hex/epoch/gen/expires)
+--   - epoch: alphanumeric timestamp string (no \0)
+--   - verified_binding: hex digits (no \0)
+--   - soft_recall_gen: digits (no \0)
+--   - expires: digits (no \0)
+--   - DER: binary arbitrary bytes (may contain \0, but is always last)
+-- Pack OCSP response into L1 shared-dict storage format (bw3 version).
+--
+-- Encodes response with metadata into binary blob for storage in nginx shared dict.
+-- Uses null-byte separators which are safe because all prefix fields are digit/hex only.
+--
+-- BLOB FORMAT:
+--   "bw3\0" + epoch + "\0" + verified_binding + "\0" + gen + "\0" + expires + "\0" + der
+--
+-- FIELDS:
+-- - epoch (string): .ocsp_epoch token from scheduler (alphanumeric, no null bytes)
+-- - verified_binding (hex string): SHA256(response_der) if cryptographically validated,
+--                                 or "" if only cached for reuse (unverified)
+-- - gen (digits): soft_recall generation counter (for allow-pin matching after cert rotation)
+-- - expires (digits): unix timestamp when this response expires
+-- - der (binary): full OCSP response bytes (may contain arbitrary bytes including null)
+--
+-- @param epoch: scheduler-managed epoch token (coherence bus for HTTP↔stream)
+-- @param verified_binding: SHA256 hex of DER (64 hex chars) or "" if unverified
+-- @param der: OCSP response DER bytes (binary string)
+-- @param expires_unix: response expiry timestamp (number or digit string)
+-- @param soft_recall_gen: generation counter (number or string digits) or nil
+-- @return: packed blob string (binary safe, can be stored in shared dict)
+--
+-- SECURITY: Uses null-byte delimiters (binary safe):
+--   - epoch: alphanumeric timestamps (no null bytes)
+--   - verified_binding: hex digits only (no null bytes)
+--   - gen: digits only (no null bytes)
+--   - expires: digits only (no null bytes)
+--   - der: binary data (may contain nulls, but is always last)
+--
+-- TYPE SAFETY: Accepts both numbers and strings for expires/gen to handle
+--              cases where values come from different sources (disk, TTL, caller)
+--
+-- ============================================================================
+-- PACK_L1(epoch, verified_binding, der, expires_unix, soft_recall_gen)
+-- ============================================================================
+-- PURPOSE:
+--   Serializes OCSP response data into bw3 binary format for L1 (Tier 1) shared-dict
+--   cache storage. Encodes metadata (epoch, binding, generation, expiry) alongside
+--   DER bytes for coherent per-worker caching.
+--
+-- PARAMETERS:
+--   epoch (string|nil): scheduler epoch token for cache coherence bus
+--   verified_binding (string|nil): SHA256(der) hex if cryptographically verified
+--   der (string): OCSP response DER bytes (binary)
+--   expires_unix (number|string): response expiry unix timestamp (float or digit string)
+--   soft_recall_gen (number|nil): generation counter for soft-recall invalidation
+--
+-- RETURNS:
+--   (string): binary blob in bw3 format: "bw3\0" + epoch + "\0" + binding + "\0" +
+--             gen + "\0" + expires + "\0" + der (null-delimited fields)
+--
+-- SIDE EFFECTS:
+--   - String manipulation only (no state/IO)
+--   - Performance: O(n) linear with DER size (typical ~1KB, trivial)
+--
+-- DESIGN NOTES:
+--   - Format version: "bw3\0" magic prefix for version detection
+--   - Normalization: expires_unix (number or digit string) converted to digit string
+--   - Generation field: included in bw3 (differentiates from legacy bw2)
+--   - Null delimiters: each field separated by \0 for reliable field extraction
+--   - Empty values: binding/gen coerced to "" if nil (unverified/no generation)
+--   - Type safety: rejects non-number expires (preserves only valid timestamps)
+--   - Inverse: unpack_l1() reverses this operation
+--   - Used by: warm_cache() when populating L1 shared dict
+--
+-- RELATED:
+--   - unpack_l1() — unpacks this format for cache retrieval
+--   - get_l1() — stores and retrieves packed data
+--   - L1_MAGIC, L1_MAGIC_V2 — format version constants
+--
+-- ============================================================================
 local function pack_l1(epoch, verified_binding, der, expires_unix, soft_recall_gen)
+	-- Normalize expires_unix to digit string (reject invalid types)
 	local exp = ""
 	if type(expires_unix) == "number" and expires_unix > 0 then
+		-- Convert number to string, floor to remove fractional seconds
 		exp = tostring(math.floor(expires_unix))
 	elseif type(expires_unix) == "string" and expires_unix:match("^%d+$") then
+		-- Already a digit string, use as-is
 		exp = expires_unix
 	end
+	-- Normalize soft_recall_gen to digit string (empty if nil or invalid)
 	local gen = ""
 	if type(soft_recall_gen) == "number" and soft_recall_gen >= 0 then
+		-- Convert non-negative number to string
 		gen = tostring(math.floor(soft_recall_gen))
 	end
+	-- Assemble final blob: magic + epoch + null + binding + null + gen + null + exp + null + der
 	return L1_MAGIC .. (epoch or "0") .. "\0" .. (verified_binding or "") .. "\0" .. gen .. "\0" .. exp .. "\0" .. der
 end
 
--- Unpack bw3 (preferred) or legacy bw2. Returns epoch, binding, der, expires_unix, gen.
--- bw2 → gen=nil so verified trust fails closed until re-warm under bw3.
+-- ============================================================================
+-- UNPACK_L1(blob)
+-- ============================================================================
+-- PURPOSE:
+--   Deserializes bw3 (or legacy bw2) binary format from L1 cache into component
+--   fields. Handles format version detection and field extraction with fail-closed
+--   semantics (corrupted/malformed entries return all-nil).
+--
+-- PARAMETERS:
+--   blob (string): binary blob from L1 shared-dict cache (may be bw3 or bw2 format)
+--
+-- RETURNS:
+--   (string, string|nil, string, number|nil, number|nil): tuple of:
+--     - epoch: scheduler epoch token (version identifier for .ocsp_epoch coherence)
+--     - binding: SHA256(der) hex if verified, nil if unverified/legacy
+--     - der: OCSP response DER bytes (binary string)
+--     - expires_unix: response expiry unix timestamp (number) or nil if unparseable
+--     - gen: soft_recall generation counter or nil (nil in bw2 format)
+--   (nil, nil, nil, nil, nil): on corruption, wrong format, or empty DER
+--
+-- SIDE EFFECTS:
+--   - String matching only (no state/IO)
+--   - Performance: O(n) regex matching where n = blob size (typical ~1KB, trivial)
+--
+-- DESIGN NOTES:
+--   - Format versions: "bw3\0" (current with generation) vs "bw2\0" (legacy, no gen)
+--   - Magic detection: first 4 bytes identify format; unknown magic rejects blob
+--   - Null delimiters: field structure: epoch\0 + binding\0 + gen\0 + expires\0 + der
+--     (bw2 omits gen field: epoch\0 + binding\0 + expires\0 + der)
+--   - Empty binding: treated as nil (unverified response, safe to cache)
+--   - Type coercion: expires digit-string → number; gen only if digit-string
+--   - DER validation: must exist and be non-empty (corrupted blobs rejected)
+--   - Fail-closed: any parsing error returns all-nil (not partial results)
+--   - Inverse: pack_l1() creates this format
+--   - Used by: get_l1(), entry_verified() for cache state management
+--
+-- RELATED:
+--   - pack_l1() — serializes data into this format
+--   - get_l1() — wrapper that retrieves and unpacks blobs
+--   - L1_MAGIC, L1_MAGIC_V2 — format version constants
+--
+-- ============================================================================
+-- Unpack L1 blob into component fields. Supports both bw3 (current) and bw2 (legacy) formats.
+--
+-- Reverses the packing done by pack_l1(). Handles format version detection and field extraction.
+-- Legacy bw2 format lacks generation field (gen=nil), so verified trust is disabled.
+--
+-- @param blob: binary blob from L1 shared dict
+-- @return: epoch, binding, der, expires_unix, gen (or nil,nil,nil,nil,nil on error)
+--
+-- RETURN VALUES:
+-- - epoch: scheduler epoch token (string, version identifier for .ocsp_epoch)
+-- - binding: SHA256(der) in hex, or nil if unverified
+-- - der: OCSP response bytes (binary string)
+-- - expires_unix: response expiry unix timestamp (number)
+-- - gen: soft_recall generation counter (number), or nil in legacy bw2 format
+--
+-- FORMAT DETECTION:
+-- - Checks first 4 bytes for magic: "bw3\0" (current) or "bw2\0" (legacy)
+-- - bw3: Contains generation field (safe for soft-recall invalidation)
+-- - bw2: No generation field (must not trust verified state across soft-recall)
+--
+-- SECURITY:
+-- - Validates DER is non-empty (rejects corrupted entries)
+-- - Parses generation only if digit string (rejects non-numeric)
+-- - Returns nil for both binding and gen if fields are empty (fail-closed)
+-- - Normalizes empty strings to nil (cleaner for caller logic)
+--
+-- Called by: get_l1 (L1 cache lookup), entry_verified (cache state validation)
+-- Performance: O(n) string search for null bytes (n = blob size)
+--
 local function unpack_l1(blob)
+	-- Validate blob is a string with minimum size (magic + null terminator)
 	if type(blob) ~= "string" or #blob < 4 then
 		return nil, nil, nil, nil, nil
 	end
+	-- Extract magic bytes (first 4 bytes identify format version)
 	local magic = blob:sub(1, 4)
 	if magic == L1_MAGIC then
+		-- Current bw3 format: epoch\0 + binding\0 + gen\0 + expires\0 + der
+		-- Use regex to split by null delimiters
 		local epoch, binding, gen_s, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+		-- Validate DER bytes exist and are non-empty (reject corrupted entries)
 		if type(der) ~= "string" or #der == 0 then
 			return nil, nil, nil, nil, nil
 		end
+		-- Empty binding means response was not cryptographically verified (strip to nil for clarity)
 		if binding == "" then
 			binding = nil
 		end
+		-- Parse expires timestamp (digit string → number)
 		local expires_unix = nil
 		if type(exp) == "string" and exp:match("^%d+$") then
 			expires_unix = tonumber(exp)
 		end
+		-- Parse generation (digit string → number, nil if absent or non-numeric)
 		local gen = nil
 		if type(gen_s) == "string" and gen_s:match("^%d+$") then
 			gen = tonumber(gen_s)
@@ -122,51 +506,188 @@ local function unpack_l1(blob)
 		return epoch or "0", binding, der, expires_unix, gen
 	end
 	if magic == L1_MAGIC_V2 then
+		-- Legacy bw2 format: epoch\0 + binding\0 + expires\0 + der (NO generation field)
+		-- Regex: split by three null delimiters only (bw2 has no gen field)
 		local epoch, binding, exp, der = blob:sub(5):match("^([^\0]*)\0([^\0]*)\0([^\0]*)\0(.*)$")
+		-- Validate DER is present and non-empty
 		if type(der) ~= "string" or #der == 0 then
 			return nil, nil, nil, nil, nil
 		end
+		-- Empty binding → nil (same as bw3)
 		if binding == "" then
 			binding = nil
 		end
+		-- Parse expires (same as bw3)
 		local expires_unix = nil
 		if type(exp) == "string" and exp:match("^%d+$") then
 			expires_unix = tonumber(exp)
 		end
-		-- No gen in v2 — caller must not trust verified across soft-recall.
+		-- bw2 has no generation field: caller must not trust verified state across soft-recall
+		-- Return nil for gen to signal "generation mismatch → unverified"
 		return epoch or "0", binding, der, expires_unix, nil
 	end
+	-- Unknown magic bytes: corrupted blob or wrong format
 	return nil, nil, nil, nil, nil
 end
 
--- Returns der, verified_binding, epoch, expires_unix, soft_recall_gen (or nil).
+-- Retrieve OCSP response from L1 shared-dict cache.
+--
+-- L1 is a per-worker shared-dict cache that survives across multiple handshakes
+-- within a single nginx worker. This is populated by warm_cache() and checked
+-- before doing expensive FFI validation.
+--
+-- @param internalstore: ngx.shared dict handle (bw_ocsp_responses or similar)
+-- @param fingerprint: certificate SPKI fingerprint (64-char hex) or nil
+-- @return: der, verified_binding, epoch, expires_unix, gen (or nil if cache miss)
+--
+-- RETURN VALUE SEMANTICS:
+-- - der (string): OCSP response DER bytes (binary)
+-- - verified_binding (string or nil): SHA256(der) hex if cryptographically trusted,
+--                                     nil if cached for reuse but not verified
+-- - epoch (string): scheduler epoch token (coherence bus identifier)
+-- - expires_unix (number): response expiry timestamp
+-- - gen (number or nil): soft_recall generation (nil in legacy bw2 format)
+--
+-- CACHE HIT CRITERIA:
+-- 1. internalstore exists and is accessible
+-- 2. fingerprint is valid 64-char hex
+-- 3. Shared dict key generation succeeds
+-- 4. PCall succeeds (shared dict accessible)
+-- 5. Blob exists and is non-empty
+
+-- CACHE MISS SCENARIOS (return nil):
+-- - internalstore is nil or broken
+-- - fingerprint is invalid (wrong length, non-hex)
+-- - Shared dict inaccessible (PCall fails)
+-- - Key not found in dict (entry expired or never set)
+-- - Blob is empty (corrupted entry)
+-- - Unpack fails (malformed blob, version mismatch)
+--
+-- PERFORMANCE:
+-- - Cache hit: <0.1ms (shared dict lookup + unpack)
+-- - Cache miss: ~1-2µs (key generation + get call)
+--
+-- CALLED BY: try_attach_from_l1_cache (TLS handshake path)
+--
+-- ============================================================================
+-- get_l1(internalstore, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Retrieve cached OCSP response from L1 shared-dict cache.
+--   Validates format (bw3/bw2), unpacks generation binding, returns DER + metadata.
+--
+-- PARAMETERS:
+--   internalstore (table): shared dict (ngx.shared.bw_ocsp_* or internalstore_stream)
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars, normalized lowercase)
+--
+-- RETURNS:
+--   (der, verified, epoch, expires_unix, gen): on hit
+--     der = OCSP response DER bytes
+--     verified = SHA256 binding matched (crypto-verified)
+--     epoch = ocsp.json epoch when cached
+--     expires_unix = response expiry time
+--     gen = soft_recall_gen for generation binding
+--   (nil): on miss or error
+--
+-- SIDE EFFECTS:
+--   - Reads: shared dict lookup via pcall (exception-safe)
+--   - Calls: fp64_or_nil() for normalization, unpack_l1() for format parsing
+--   - Performance: O(1) shared dict lookup (~0.1ms typical)
+--
+-- DESIGN NOTES:
+--   - Fingerprint normalization: Validates 64-char hex, lowercases for key uniformity
+--   - Blob format: bw3 (epoch|verified|gen|expires|der) or bw2 legacy
+--   - Verified flag: True only if DER SHA256 matches stored binding + gen matches
+--   - Exception safety: pcall wraps shared dict access (permissions/storage errors)
+--   - Empty-blob guard: Rejects zero-length entries (corruption protection)
+--   - Unpack validation: Returns nil if format invalid or unpack fails
+--   - All-or-nothing: Returns all 5 fields or nil (no partial returns)
+--
+-- RELATED:
+--   - warm_cache() writes to L1 cache
+--   - entry_verified() validates crypto binding + generation
+--   - unpack_l1() parses blob format
+--
+-- ============================================================================
 local function get_l1(internalstore, fingerprint)
+	-- Validate shared dict is available (not nil)
 	if not internalstore then
 		return nil
 	end
+	-- Normalize fingerprint: validate hex format and lowercase for cache key uniformity
+	-- Rejects fingerprints that are wrong length or contain non-hex characters
 	fingerprint = fp64_or_nil(fingerprint)
 	if not fingerprint then
 		return nil
 	end
+	-- Generate cache key (stable hash of fingerprint for shared dict lookup)
 	local key = cache_key(fingerprint)
 	if not key then
 		return nil
 	end
+	-- Wrap shared dict access in pcall to catch exceptions
+	-- (nginx shared dicts can throw if permissions issue or storage exhausted)
 	local ok, blob = pcall(function()
-		-- Shared dict (not per-worker LRU): one warmer refill serves every worker.
+		-- Shared dict is shared across all workers in this nginx process
+		-- (unlike per-worker caches, which don't survive worker restarts)
 		return internalstore:get(key)
 	end)
+	-- Check three conditions for valid blob:
+	-- 1. PCall succeeded (no exception thrown)
+	-- 2. Blob is a string (not nil or other type)
+	-- 3. Blob is non-empty (reject corrupted zero-length entries)
 	if not ok or type(blob) ~= "string" or #blob == 0 then
 		return nil
 	end
 
+	-- Unpack blob into component fields (handles bw3 and legacy bw2 formats)
 	local epoch, verified, der, expires_unix, gen = unpack_l1(blob)
+	-- Return all fields if unpack succeeded (der is non-nil)
 	if der then
 		return der, verified, epoch, expires_unix, gen
 	end
+	-- Unpack failed (malformed blob, wrong version, etc)
 	return nil
 end
 
+-- ============================================================================
+-- entry_verified(stored_binding, resp, stored_gen, live_gen)
+-- ============================================================================
+-- PURPOSE:
+--   Validate L1 cache entry is crypto-verified and generation-bound.
+--   Both SHA256 binding AND generation must match current to return true.
+--
+-- PARAMETERS:
+--   stored_binding (string|nil): DER SHA256 from L1 cache
+--   resp (string): OCSP response DER bytes (current)
+--   stored_gen (number|nil): soft_recall_gen from L1 cache
+--   live_gen (number|nil): current soft_recall_gen from ligand_or_meta()
+--
+-- RETURNS:
+--   (boolean): true if both binding AND generation match
+--             false if mismatch or type error
+--
+-- SIDE EFFECTS:
+--   - Calls: resp_binding() to compute DER SHA256
+--   - No writes or state modification
+--   - Performance: O(1) comparison (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Dual verification: SHA256 binding + generation number both required
+--   - DER binding: resp_binding(resp) = SHA256 of DER bytes
+--   - Generation binding: Soft-recall gen prevents stale status blocking new cert
+--   - Type checking: Both gen values must be numbers (rejects nil, strings, tables)
+--   - All-or-nothing: Returns false on any mismatch (not partially verified)
+--   - Crypto trust: Only when both conditions met (fail-closed)
+--   - Called by: L1 path validation, entry_verified path
+--   - Legacy handling: bw2 format has no stored_gen (treated as no match)
+--
+-- RELATED:
+--   - resp_binding() computes DER SHA256
+--   - warm_cache() writes stored binding + generation
+--   - get_l1() retrieves stored binding and generation
+--
+-- ============================================================================
 -- True when L1's stored binding is still sha256(resp) AND soft_recall_gen matches.
 -- Missing/mismatched gen (bw2 legacy or soft-recall bump) → not crypto-trusted.
 local function entry_verified(stored_binding, resp, stored_gen, live_gen)
@@ -180,6 +701,51 @@ local function entry_verified(stored_binding, resp, stored_gen, live_gen)
 	return stored_gen == live_gen
 end
 
+-- ============================================================================
+-- warm_cache(internalstore, fingerprint, resp, mark_verified, expires_unix,
+--            packed_epoch, soft_recall_gen)
+-- ============================================================================
+-- PURPOSE:
+--   Write OCSP response to L1 shared-dict cache with generation binding.
+--   Enforces live metadata (ligand+shard) death clock to prevent L1 outliving response.
+--
+-- PARAMETERS:
+--   internalstore (table): shared dict (ngx.shared.bw_ocsp_*)
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--   resp (string): OCSP response DER bytes
+--   mark_verified (boolean|nil): true = crypto-verified (SHA256 bound),
+--                                false = cached unverified, nil = default true
+--   expires_unix (number|nil): caller's expiry time (may be demoted by live meta)
+--   packed_epoch (number|nil): epoch from prior L1 hit (preserve staleness)
+--   soft_recall_gen (number): generation tuple for soft-recall binding
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Writes: L1 blob to shared dict with computed TTL
+--   - Reads: live metadata via ligand_or_meta() (always fresh)
+--   - Calls: meta_effective_expires_unix(), pack_l1()
+--   - Demotion: mark_verified demoted if caller expires looser than live meta
+--   - Performance: O(1) metadata merge + pack + write (~0.5ms)
+--
+-- DESIGN NOTES:
+--   - Live metadata always wins: Never extend DER lifetime beyond ligand+shard
+--   - Tombstone guard: Refuses cache if ligand tombstoned
+--   - Demotion: If caller's expires > live meta, drop verified bit
+--   - Epoch preservation: packed_epoch prevents old body from appearing current
+--   - TTL calculation: min(300s, remaining until expires_unix)
+--   - Stripped metadata: If meta has no death clock, refuse cache entirely
+--   - Generation binding: soft_recall_gen paired with DER for soft-recall invalidation
+--   - Called by: try_staple() on success, disk path on fallthrough validation
+--
+-- RELATED:
+--   - get_l1() reads cached value
+--   - entry_verified() validates crypto binding + generation
+--   - meta_effective_expires_unix() computes live death clock
+--   - ligand_or_meta() merges outside ligand + shard metadata
+--
+-- ============================================================================
 -- Write DER into stream/HTTP L1 (bw3 composite).
 -- packed_epoch: when re-parking a body that already passed l1_matches_disk, pass
 -- the epoch from that get — never stamp "now's" epoch over an old body (that would
@@ -277,6 +843,40 @@ local function warm_cache(internalstore, fingerprint, resp, mark_verified, expir
 	end)
 end
 
+-- ============================================================================
+-- drop_cache(internalstore, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Evict OCSP response from L1 cache. Called when freshness/validation fails
+--   or CertID mismatch detected. Forces reload from disk on next request.
+--
+-- PARAMETERS:
+--   internalstore (table): shared dict (ngx.shared.bw_ocsp_*)
+--   fingerprint (string): leaf SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   None (side effect only)
+--
+-- SIDE EFFECTS:
+--   - Calls: internalstore:delete() twice (normal + expired variants)
+--   - Wrapped in pcall for exception safety
+--   - Performance: O(1) shared dict delete (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Double delete: Removes both current and expired entry variants
+--   - Fingerprint normalization: Validates 64-char hex lowercase
+--   - Exception safety: pcall wraps all shared dict operations
+--   - Triggers: Freshness failure, CertID mismatch, tombstone, serial blacklist
+--   - Effect: Next request reads disk (ligand + ocsp.json + ocsp.der)
+--   - Called by: resp_still_fresh failures, CertID validation, rank probes
+--   - Conservative: Drops on any doubt (fail-closed)
+--
+-- RELATED:
+--   - get_l1() retrieves cached value
+--   - warm_cache() writes to L1
+--   - resp_still_fresh() calls this on stale detection
+--
+-- ============================================================================
 local function drop_cache(internalstore, fingerprint)
 	fingerprint = fp64_or_nil(fingerprint)
 	local key = fingerprint and cache_key(fingerprint) or nil
@@ -295,9 +895,43 @@ local l1_matches_disk
 
 -- Job-written shard metadata ({fp[1]}/{fp[2]}/{fp}/ocsp.json), or nil when absent/invalid.
 -- Must stay above resolve_leaf_must_staple / cert_must_staple_bool: a local
--- referenced before its definition compiles to a nil global in LuaJIT.
--- Read ocsp.json with per-request dedup cache (ngx.ctx)
--- Avoids re-reading the same file within a single handshake
+-- ============================================================================
+-- read_ocsp_json(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Load OCSP metadata from ocsp.json. Per-request cached to avoid repeated disk reads.
+--   Critical metadata source: expires_unix, must_staple, tombstoned, soft_recall_gen.
+--
+-- PARAMETERS:
+--   fingerprint (string|nil): leaf SPKI fingerprint (64 hex chars)
+--
+-- RETURNS:
+--   (table): parsed ocsp.json object with metadata fields
+--   (nil): if file missing, unreadable, or invalid JSON
+--
+-- SIDE EFFECTS:
+--   - Reads: /var/cache/bunkerweb/ssl/{shard}/{fp}/ocsp.json from disk
+--   - Per-request cache: stores result in ngx.ctx.bw_ocsp_json_cache (dedup)
+--   - No writes or external calls
+--   - Performance: O(1) for cache hits, ~2ms for disk reads
+--
+-- DESIGN NOTES:
+--   - Per-request caching: Avoids re-reading same file in single handshake
+--   - Dedup logic: Distinguishes "file missing" (false) from "found" (table)
+--   - Fail-safe: Returns nil on JSON decode error (malformed file)
+--   - Disk layout: Uses 2-char sharding by fingerprint (0x{fp[0]}/{fp[1]}/{fp}.json)
+--   - Truncate safety: Empty file (truncate race) returns nil
+--   - Type checking: Only returns if decoded to table (rejects scalar JSON)
+--   - Called by: All freshness gates, ligand_or_meta(), warm_cache()
+--   - Related: read_ocsp_ligand() is companion for outside ligand
+--
+-- RELATED:
+--   - ligand_or_meta() merges this with outside ligand
+--   - resp_still_fresh() uses metadata for freshness check
+--   - warm_cache() validates metadata before caching
+--   - read_ocsp_ligand() companion for /var/cache/bunkerweb/ssl/ocsp-ligand/{fp}
+--
+-- ============================================================================
 read_ocsp_json = function(fingerprint)
 	fingerprint = fp64_or_nil(fingerprint)
 	if not fingerprint then
@@ -357,6 +991,37 @@ read_ocsp_json = function(fingerprint)
 	return nil
 end
 
+-- ============================================================================
+-- ocsp_json_must_staple(meta)
+-- ============================================================================
+-- PURPOSE:
+--   Check if ocsp.json declares must_staple=true (job-recorded TLS Feature flag).
+--   Used as fallback when TLS Feature extension unavailable.
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata
+--
+-- RETURNS:
+--   (boolean): true only if must_staple field == true
+--   (boolean): false otherwise (nil, missing field, or non-true value)
+--
+-- SIDE EFFECTS:
+--   - No reads/writes or state modification
+--   - Performance: O(1) field check, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Job-recorded flag: Set by ocsp-refresh job after parsing TLS Feature
+--   - Exact match: Only true value accepted (false/nil/string = false)
+--   - Fallback source: Used when TLS Feature parsing unavailable
+--   - Called by: resolve_leaf_must_staple() as secondary check
+--   - Related: has_must_staple() checks live TLS Feature extension
+--
+-- RELATED:
+--   - has_must_staple() checks TLS Feature from certificate
+--   - resolve_leaf_must_staple() wraps both checks (TLS Feature + ocsp.json)
+--   - cert_must_staple_bool() boolean variant for strict contexts
+--
+-- ============================================================================
 -- True only when the job recorded must_staple=true in ocsp.json (resty-invisible TLS Feature).
 local function ocsp_json_must_staple(meta)
 	return meta ~= nil and meta.must_staple == true
@@ -366,6 +1031,41 @@ end
 -- Fail-closed gate: resolve_leaf_must_staple(...) ~= false.
 -- meta without must_staple=true must NOT invent false when TLS Feature is unknown
 -- (parse miss / unrecognized text) — aligns with HTTP leaf_requires tls_known rule.
+-- ============================================================================
+-- resolve_leaf_must_staple(cert_pem, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Tri-state Must-Staple detection: checks TLS Feature extension + ocsp.json.
+--   Returns true/false/nil (unknown treated as required by callers).
+--
+-- PARAMETERS:
+--   cert_pem (string|nil): leaf certificate PEM
+--   fingerprint (string|nil): leaf SPKI fingerprint fallback
+--
+-- RETURNS:
+--   true: Must-Staple required (TLS Feature or ocsp.json flag)
+--   false: Must-Staple explicitly disabled (TLS Feature confirms absent)
+--   nil: unknown (cannot prove false, treat as required)
+--
+-- SIDE EFFECTS:
+--   - Calls: has_must_staple(), ocsp_json_must_staple(), read_ocsp_json()
+--   - No writes or state modification
+--
+-- DESIGN NOTES:
+--   - Tri-state: true (required), false (optional), nil (unknown = required)
+--   - Fail-closed: Unknown defaults to Must-Staple enforcement
+--   - Priority: TLS Feature checked first (authoritative)
+--   - Fallback: fingerprint used if cert_pem unavailable
+--   - JSON check: ocsp.json must_staple=true as secondary signal
+--   - Absence != false: Missing meta flag does not prove false
+--   - Called by: staple(), probe(), set_certs_from_pem()
+--
+-- RELATED:
+--   - has_must_staple() checks TLS Feature extension
+--   - ocsp_json_must_staple() checks ocsp.json flag
+--   - cert_must_staple_bool() boolean variant for strict contexts
+--
+-- ============================================================================
 local function resolve_leaf_must_staple(cert_pem, fingerprint)
 	local tls = has_must_staple(cert_pem)
 	if tls == true then
@@ -392,9 +1092,41 @@ local function resolve_leaf_must_staple(cert_pem, fingerprint)
 	return nil
 end
 
--- Boolean Must-Staple for a PEM block (leaf or intermediate).
--- fail_closed_unknown=true → treat resty miss + no positive json as Must-Staple
--- (intermediate path / bag filtering). false → unknown returns false (rare).
+-- ============================================================================
+-- cert_must_staple_bool(pem, fail_closed_unknown)
+-- ============================================================================
+-- PURPOSE:
+--   Boolean Must-Staple for any PEM block (leaf or intermediate).
+--   Used for bag filtering + intermediate chain validation.
+--
+-- PARAMETERS:
+--   pem (string): certificate PEM block (leaf or intermediate)
+--   fail_closed_unknown (boolean): true = unknown→Must-Staple, false = unknown→optional
+--
+-- RETURNS:
+--   (boolean): true if Must-Staple required, false if optional
+--
+-- SIDE EFFECTS:
+--   - Calls: has_must_staple(), spki_fingerprint(), read_ocsp_json()
+--   - Per-request cache via read_ocsp_json
+--   - No writes or state modification
+--   - Performance: O(1) with cache, ~1ms for misses
+--
+-- DESIGN NOTES:
+--   - Boolean return: Unlike resolve_leaf (tri-state), always true/false
+--   - Unknown handling: Configurable fail_closed_unknown parameter
+--   - Priority: TLS Feature > ocsp.json > configurable default
+--   - Used for: Intermediate filtering, bag verification
+--   - Strict mode: fail_closed_unknown=true (intermediate path)
+--   - Loose mode: fail_closed_unknown=false (rare fallback)
+--   - Called by: Chain validation, intermediate filtering
+--
+-- RELATED:
+--   - resolve_leaf_must_staple() tri-state variant
+--   - has_must_staple() TLS Feature detector
+--   - ocsp_json_must_staple() JSON flag checker
+--
+-- ============================================================================
 local function cert_must_staple_bool(pem, fail_closed_unknown)
 	local tls = has_must_staple(pem)
 	if tls == true then
@@ -412,6 +1144,39 @@ local function cert_must_staple_bool(pem, fail_closed_unknown)
 	return fail_closed_unknown == true
 end
 
+-- ============================================================================
+-- meta_unix_field(meta, key)
+-- ============================================================================
+-- PURPOSE:
+--   Extract and validate unix timestamp field from metadata (helper).
+--   Used for colony consensus checks (floor, this_update, etc).
+--
+-- PARAMETERS:
+--   meta (table|nil): metadata object
+--   key (string): field name to extract (e.g., "this_update_unix")
+--
+-- RETURNS:
+--   (number): validated positive unix timestamp
+--   (nil): if meta missing, key missing, or value invalid
+--
+-- SIDE EFFECTS:
+--   - Calls: positive_unix() for validation
+--   - No reads/writes or state modification
+--   - Performance: O(1), ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Floor consensus: Colony uses CA-signed this_update_unix (not wall clock)
+--   - Missing = no opinion: Never invents 0 (missing doesn't equal 0)
+--   - Clock drift: Uses signed timestamps not wall-clock (nodes drift)
+--   - Called by: cluster_floor_blocks() for consensus comparison
+--   - Related: positive_unix() does actual validation
+--
+-- RELATED:
+--   - positive_unix() for timestamp validation
+--   - cluster_floor_blocks() uses this for consensus check
+--   - parse_floor_rank() similar helper for floor file parsing
+--
+-- ============================================================================
 -- Colony floor: peers advance ocsp-floor/{fp} on publish/tombstone using CA-signed
 -- this_update_unix only (not wall-clock published_unix — clocks drift across nodes).
 -- Missing local this_update_unix is no opinion (do not treat as 0 vs a positive floor).
@@ -422,6 +1187,41 @@ local function meta_unix_field(meta, key)
 	return positive_unix(meta[key])
 end
 
+-- ============================================================================
+-- parse_floor_rank(raw)
+-- ============================================================================
+-- PURPOSE:
+--   Parse JSON floor file to extract CA-signed this_update_unix ranking.
+--   Used for cluster consensus validation (prevents stale OCSP).
+--
+-- PARAMETERS:
+--   raw (string|nil): file contents of /var/cache/bunkerweb/ssl/ocsp-floor/{fp}
+--
+-- RETURNS:
+--   (number): positive unix this_update_unix from JSON (colony rank)
+--   (nil): if file empty, invalid JSON, or missing this_update_unix
+--
+-- SIDE EFFECTS:
+--   - Calls: cjson.decode() for JSON parsing
+--   - Calls: meta_unix_field() for timestamp validation
+--   - No writes or state modification
+--   - Performance: O(n) JSON parse, ~0.5ms typical
+--
+-- DESIGN NOTES:
+--   - Floor rank: Peer's CA-signed this_update_unix (consensus truth)
+--   - JSON format: {"this_update_unix": <number>} from job publish
+--   - Whitespace trim: Handles surrounding whitespace safely
+--   - Fail-safe: Returns nil on decode error (invalid JSON)
+--   - Validation: Must be positive unix timestamp (via meta_unix_field)
+--   - Called by: cluster_floor_blocks() to read peer consensus
+--   - Related: Colony floor used when multiple peers must agree
+--
+-- RELATED:
+--   - cluster_floor_blocks() reads floor file and parses it
+--   - meta_unix_field() validates timestamp field
+--   - Job publishes ocsp-floor/{fp} with consensus
+--
+-- ============================================================================
 -- Parse ocsp-floor/{fp} JSON to CA-signed this_update_unix (colony rank), or nil.
 local function parse_floor_rank(raw)
 	if type(raw) ~= "string" or raw == "" then
@@ -474,12 +1274,40 @@ local function cluster_floor_blocks(fingerprint, _meta)
 	return true
 end
 
--- Live view must be scheduler-paged (canary handshake) before stapling.
--- Require explicit paged=true. Missing field is not canary proof
--- (restore stamps paged=false until canary succeeds).
--- When fingerprint is provided, sample live ligand_or_meta so shard-only
--- caller meta cannot claim paged=true while the ligand is still unpaged/missing
--- (merge requires both sides — see merge_ligand).
+-- ============================================================================
+-- shard_not_paged(meta, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Canary gate: returns true if OCSP not verified by canary handshake.
+--   Prevents stapling unvalidated OCSP from restore (paged=false).
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata (can be nil, will check ligand)
+--   fingerprint (string|nil): optional leaf SPKI fingerprint to sample live ligand
+--
+-- RETURNS:
+--   (boolean): true if paged != true (not yet canary-validated)
+--   (boolean): false if paged == true (canary succeeded)
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_or_meta() to sample live state if fingerprint provided
+--   - Reads: outside ligand from /var/cache/bunkerweb/ssl/ocsp-ligand/{fp}
+--   - No writes or state modification
+--
+-- DESIGN NOTES:
+--   - Canary: Explicit paged=true required (missing/false means unvalidated)
+--   - Live sampling: When fingerprint provided, samples live ligand not stale meta
+--   - Fail-closed: Missing/unpaged returns true (refuse to staple)
+--   - Restore recovery: Job sets paged=false on restore, true on canary pass
+--   - Used in: staple path before attachment (staple_one_leaf)
+--   - Performance: O(1) ligand lookup, ~0.5ms typical
+--
+-- RELATED:
+--   - ligand_or_meta() to get live state from both shard and outside ligand
+--   - resp_still_fresh() other freshness gate
+--   - cluster_floor_blocks() consensus gate
+--
+-- ============================================================================
 local function shard_not_paged(meta, fingerprint)
 	if fingerprint then
 		local live = ligand_or_meta(nil, fingerprint)
@@ -494,11 +1322,41 @@ local function shard_not_paged(meta, fingerprint)
 	return meta.paged ~= true
 end
 
--- Job tombstone writes "tombstoned": true before DER unlink / epoch bump.
--- Handshake must sample this flag (not only .ocsp_epoch), or L1 can keep
--- stapling the last GOOD while the multi-step write is mid-flight.
--- Optional fingerprint samples live shard + outside ligand via ligand_or_meta
--- (caller meta can lag a shard tombstone written before the ligand flips).
+-- ============================================================================
+-- meta_tombstoned(meta, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Tombstone gate: detects when OCSP response is being retired (DER unlinked).
+--   Blocks Must-Staple during multi-step atomicity window of job publish.
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata (from disk or caller state)
+--   fingerprint (string|nil): optional leaf SPKI fingerprint for live ligand check
+--
+-- RETURNS:
+--   (boolean): true if tombstoned == true (response being retired)
+--   (boolean): false if not tombstoned or meta missing
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_or_meta() to sample live state if fingerprint provided
+--   - Reads: live ligand and ocsp.json from disk
+--   - No writes or state modification
+--
+-- DESIGN NOTES:
+--   - Tombstone: Job writes tombstoned=true BEFORE DER unlink (atomicity)
+--   - Why needed: L1 cache can return "last GOOD" while job unlinks DER mid-flight
+--   - Live sampling: fingerprint forces check of live ligand (not stale meta)
+--   - Epoch not enough: ocsp_epoch bump alone insufficient (lag issue)
+--   - Called before: attachment (staple_one_leaf), Must-Staple enforcement
+--   - Performance: O(1) cache/file lookup, ~0.5ms typical
+--
+-- RELATED:
+--   - ligand_or_meta() for live state sampling
+--   - shard_not_paged() similar freshness gate (canary)
+--   - cluster_floor_blocks() consensus gate
+--   - Job publishes ocsp.json with tombstoned=true during retire
+--
+-- ============================================================================
 local function meta_tombstoned(meta, fingerprint)
 	if type(meta) == "table" and meta.tombstoned == true then
 		return true
@@ -542,6 +1400,38 @@ end
 -- Death clocks: pin / L1 / freshness all die at expires_unix − OCSP_CLOCK_SKEW.
 -- =============================================================================
 
+-- ============================================================================
+-- ocsp_ligand_path(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Build path to outside ligand file (/var/cache/bunkerweb/ssl/ocsp-ligand/{fp}).
+--   Used for HTTP/stream cross-zone OCSP state sharing.
+--
+-- PARAMETERS:
+--   fingerprint (string): SPKI fingerprint (64 hex chars, any case)
+--
+-- RETURNS:
+--   (string): full path to ocsp-ligand file (not normalized, lowercase fingerprint)
+--
+-- SIDE EFFECTS:
+--   - String manipulation only, no I/O or state modification
+--   - Performance: O(1) string concat, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - File location: /var/cache/bunkerweb/ssl/ocsp-ligand/{fingerprint}
+--   - Flat layout: Unlike ocsp.json (2-level sharding), ligand is flat namespace
+--   - Lowercase: Job + ocsp_pin both use lowercase hex normalization
+--   - Cross-zone: HTTP (ngx.shared.internalstore) cannot read stream dict
+--   - Outside ligand: Binding + paging truth for consensus checks
+--   - Called by: read_ocsp_ligand(), ligand_or_meta()
+--   - Related: ocsp_path() for DER, ocsp_json paths use sharding
+--
+-- RELATED:
+--   - read_ocsp_ligand() reads this path
+--   - ocsp_path() for DER file path
+--   - fp64_or_nil() for fingerprint normalization
+--
+-- ============================================================================
 -- Disk paths and pin bus use lowercase hex (job + ocsp_pin). is_fp64 allows
 -- A-F; normalize before path join / cache key / fingerprint equality checks.
 local function ocsp_ligand_path(fingerprint)
@@ -555,11 +1445,47 @@ end
 -- Job-minted counter: bumps on soft-recall so peer-refuse / allow identity
 -- (der_sha256, soft_recall_gen) cannot re-match a leftover pin after re-page.
 --
--- Callers that must distinguish omit from explicit 0 (publish-gap keep) must
--- inspect the raw ligand field before soft_recall_gen_of — read_ocsp_ligand
--- leaves soft_recall_gen=nil when the JSON key was absent, and stores false
--- when the key was present but non-integer (so a later call here cannot
--- mistake invalid for omit→0).
+-- ============================================================================
+-- soft_recall_gen_of(meta)
+-- ============================================================================
+-- PURPOSE:
+--   Extract soft-recall generation number from metadata (for pin matching).
+--   Maps omitted gen to 0 (upgrade grace), rejects invalid types (fail-closed).
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json or ligand metadata
+--
+-- RETURNS:
+--   (number): generation number (0 = omitted key, upgrade grace)
+--   (nil): type-drift (invalid value, NaN, negative, or false sentinel)
+--
+-- SIDE EFFECTS:
+--   - Type validation: Checks number/string/nil for soft_recall_gen field
+--   - No reads/writes or external calls
+--   - Performance: O(1) type checking, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Omit = 0: Missing soft_recall_gen key defaults to 0 (upgrade grace)
+--   - False sentinel: read_ocsp_ligand stores false when key present but invalid
+--   - Type-drift: Invalid types (false, table, etc.) return nil (fail-closed)
+--   - Numeric validation: Rejects NaN/infinity/negative (only non-negative allowed)
+--   - String parsing: Digit-only (rejects scientific notation, signs, octal)
+--   - Floor truncation: Fractional JSON numbers truncated to integers
+--   - Publish-gap safety: Must check raw field first to distinguish omit vs invalid
+--   - Used by: generation_tuple, consensus checking, must_staple enforcement
+--
+-- RELATED:
+--   - generation_tuple() uses this for soft-recall binding
+--   - read_ocsp_ligand() stores false for invalid ligand.soft_recall_gen
+--   - live_soft_recall_gen() wraps this with ligand_or_meta sampling
+--   - Pin consensus (ocsp_pin.lua) matches via (sha, gen) tuple
+--
+-- EXAMPLE:
+--   local gen = soft_recall_gen_of(meta)
+--   if gen == nil then return keep_allow[gen_type_drift] end
+--   -- Can use gen for pin matching
+--
+-- ============================================================================
 soft_recall_gen_of = function(meta)
 	if type(meta) ~= "table" then
 		return 0
@@ -696,6 +1622,58 @@ local positive_expires_unix = positive_unix
 --   * expires_unix = min of positive values (generation authority pairs with
 --     the tighter death clock, not a stale looser shard deadline)
 --   * fingerprint is the path fp (never trust a self-assert alone)
+--
+-- MERGE ALGORITHM:
+--   1. Copy shard_meta into merged (avoid mutating caller's cache entry)
+--   2. Overlay ligand.der_sha256 (binding is always ligand's version when present)
+--   3. Soft_recall_gen: only update if ligand key IS PRESENT (omit=0 is implicit; omit-key stays omit)
+--   4. Tombstone: if either side says tombstoned=true → tombstoned=true + paged=false
+--   5. Paged: true only if shard exists AND shard.paged AND ligand.paged (AND gate = fail-safe)
+--   6. Expires: min(shard.expires, ligand.expires) when both present, else ligand>shard>nil
+--   7. Fingerprint: use path fp (argument), else ligand fp, else shard fp (never self-assert alone)
+--
+-- ============================================================================
+-- merge_ligand(shard_meta, ligand, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Merge outside ligand with in-shard metadata (ligand wins tiebreaks).
+--   Ensures HTTP and stream see identical state (deterministic merge).
+--
+-- PARAMETERS:
+--   shard_meta (table|nil): in-shard ocsp.json metadata
+--   ligand (table|nil): outside ligand from /var/cache/.../ocsp-ligand/{fp}
+--   fingerprint (string|nil): path-based SPKI fingerprint (authoritative source)
+--
+-- RETURNS:
+--   (table): merged metadata with ligand-preferred fields
+--   (nil): if both shard and ligand missing
+--
+-- SIDE EFFECTS:
+--   - Creates: shallow copy of shard_meta (prevents caller mutation)
+--   - No external calls or state modification
+--   - Performance: O(n) where n = field count (~10 fields), ~0.1ms
+--
+-- DESIGN NOTES:
+--   - Ligand priority: Ligand fields win over shard (outside state > in-shard)
+--   - Shallow copy: Returns copy of shard when no ligand (prevents poisoning)
+--   - Field logic:
+--     * der_sha256: ligand only (binding source)
+--     * soft_recall_gen: ligand keeps shard gen if omitted (publish-gap safety)
+--     * tombstoned: true if either side tombstoned (OR gate = fail-safe)
+--     * paged: true only if both shard.paged AND ligand.paged (AND gate)
+--     * expires_unix: min(shard, ligand) when both present (takes tightest)
+--     * fingerprint: path arg > ligand > shard (never self-assert alone)
+--   - Determinism: Identical output for HTTP and stream (no random/order deps)
+--   - Called by: ligand_or_meta() as core merge operation
+--
+-- RELATED:
+--   - ligand_or_meta() wrapper that reads both sources
+--   - read_ocsp_json() for shard source
+--   - read_ocsp_ligand() for ligand source
+--   - All validation gates use merged result
+--
+-- ============================================================================
+-- INVARIANT: HTTP + stream must produce identical merges (no version skew, no random errors)
 local function merge_ligand(shard_meta, ligand, fingerprint)
 	if not ligand then
 		-- Shallow copy: read_ocsp_json caches the shard table in ngx.ctx; returning
@@ -758,11 +1736,45 @@ local function merge_ligand(shard_meta, ligand, fingerprint)
 	return merged
 end
 
--- Effective generation meta: read ligand once then merge.
--- Always sample live shard via read_ocsp_json (per-request cached). Caller meta
--- can lag a shard-first tombstone / soft_recall_gen bump / expires tighten;
--- preferring it fail-opened freshness, tombstone, generation, and floor checks.
--- Disk absent/unreadable → nil shard (do not resurrect caller over a retract).
+-- ============================================================================
+-- ligand_or_meta(_meta, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Get effective live metadata: merges outside ligand + in-shard ocsp.json.
+--   Always freshly sampled (ignores caller meta to prevent stale decisions).
+--   Critical for all freshness/validation gates.
+--
+-- PARAMETERS:
+--   _meta (table|nil): caller's metadata (IGNORED; always samples fresh)
+--   fingerprint (string): leaf SPKI fingerprint (samples both shard + ligand)
+--
+-- RETURNS:
+--   (table): merged metadata with fields from both sources (ligand wins tiebreaks)
+--   (nil): if both shard and ligand missing or invalid
+--
+-- SIDE EFFECTS:
+--   - Reads: /var/cache/bunkerweb/ssl/{shard}/{fp}/ocsp.json (in-shard)
+--   - Reads: /var/cache/bunkerweb/ssl/ocsp-ligand/{fp} (outside ligand)
+--   - Per-request cache: Both read_ocsp_json + read_ocsp_ligand are per-request cached
+--   - No writes or external calls
+--   - Performance: O(1) with per-request cache, ~1ms for cache misses
+--
+-- DESIGN NOTES:
+--   - Always fresh: Never trusts caller meta, always re-samples both sources
+--   - Fail-safe: Missing shard = nil (don't resurrect stale caller state)
+--   - Merge strategy: Ligand favored (outside state wins over in-shard)
+--   - Used everywhere: All validation gates call this for live state
+--   - Per-request cached: Avoids redundant reads within single handshake
+--   - Caller meta ignored: Prevents stale decisions from lag (tombstone/gen bump)
+--   - Called by: resp_still_fresh, warm_cache, meta_tombstoned, shard_not_paged
+--
+-- RELATED:
+--   - read_ocsp_json() reads in-shard metadata
+--   - read_ocsp_ligand() reads outside ligand file
+--   - merge_ligand() performs ligand+shard merge (ligand wins)
+--   - All freshness gates sample via this function
+--
+-- ============================================================================
 ligand_or_meta = function(_meta, fingerprint)
 	return merge_ligand(read_ocsp_json(fingerprint), read_ocsp_ligand(fingerprint), fingerprint)
 end
@@ -771,6 +1783,42 @@ end
 -- ligand-only soft_recall_gen_of rematches leftover gen-0 pins when the ligand
 -- omits the key while the shard already holds a bumped gen (same class as
 -- merge_ligand omit-keeps-shard). Missing meta+ligand → upgrade-grace 0.
+-- ============================================================================
+-- live_soft_recall_gen(fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Get current soft-recall generation after ligand+shard merge.
+--   Used for pin consensus and generation binding verification.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--
+-- RETURNS:
+--   (number): soft_recall_gen from merged metadata (0 if omitted)
+--   (nil): if fingerprint invalid or type-drift (false sentinel)
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_or_meta() for live metadata merge (fresh sample)
+--   - Per-request cache via ligand_or_meta()
+--   - No writes or state modification
+--   - Performance: O(1) with cache, ~0.5ms for misses
+--
+-- DESIGN NOTES:
+--   - Live sample: Always re-reads fresh ligand + shard (ignore caller state)
+--   - Merge: Ligand gen wins, shard gen kept if ligand omits (publish-gap safety)
+--   - Omit = 0: Missing gen key defaults to 0 (upgrade grace for old pins)
+--   - Type-drift: Non-integer → nil (fail-closed for generation matching)
+--   - Used for: Pin consensus, allow-pin matching, generation binding
+--   - Related: soft_recall_gen_of() for type validation
+--   - Export: _M.live_soft_recall_gen() for public use
+--
+-- RELATED:
+--   - ligand_or_meta() for live metadata merge
+--   - soft_recall_gen_of() for generation extraction + validation
+--   - generation_tuple() uses this for binding identity
+--   - Pin consensus (ocsp_pin.lua) uses this for matching
+--
+-- ============================================================================
 -- Type-drift (false sentinel / invalid) → nil (fail closed).
 local function live_soft_recall_gen(fingerprint)
 	fingerprint = fp64_or_nil(fingerprint)
@@ -784,14 +1832,50 @@ local function live_soft_recall_gen(fingerprint)
 	return soft_recall_gen_of(live)
 end
 
--- Peer-refuse / allow generation: (der_sha256, soft_recall_gen).
--- When resp bytes are present, body SHA wins. Meta/ligand der_sha256 is only a
--- fallback for meta-only DROP causes (tombstone / serial / canary) — never for
--- probe paths that pass resp=nil after CertID/ligand refuses (that would
--- compare-and-delete the GOOD generation using meta alone).
--- Type-drift soft_recall_gen → (body, nil): incomplete identity — callers must
--- not CAS/rematch on body alone (pin returns gen_type_drift KEEP). Missing body
--- still returns nil,nil.
+-- ============================================================================
+-- generation_tuple(meta, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Build soft-recall binding (der_sha256, soft_recall_gen) for pin consensus.
+--   Unique identity for OCSP response including per-cert generation counter.
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata with der_sha256, soft_recall_gen
+--   resp (string|nil): OCSP DER response bytes (preferred over meta SHA)
+--
+-- RETURNS:
+--   (string, number): (der_sha256_hex, generation) for CAS/rematch
+--   (string, nil): (der_sha256_hex, nil) if gen missing/invalid (type-drift)
+--   (nil, nil): if no body (resp or meta.der_sha256)
+--
+-- SIDE EFFECTS:
+--   - Calls: resp_binding() to hash resp DER, soft_recall_gen_of() for gen
+--   - No writes or state modification
+--
+-- DESIGN NOTES:
+--   - Soft-recall: (SHA, gen) tuple prevents stale allow-pins after cert rotation
+--   - Priority: Actual resp DER SHA wins over meta (never use meta alone after refuse)
+--   - Type-drift: gen=nil means type mismatch (caller must not CAS on body alone)
+--   - Incomplete identity: Callers must handle (body, nil) → cannot rematch on SHA alone
+--   - Used for: Peer consensus (allow-pin bus), Must-Staple enforcement gates
+--   - Performance: O(1) hash + type checking, ~0.5ms typical
+--   - Edge case: Probe paths refusing cert/ligand use meta SHA (tombstone/serial/canary drops)
+--
+-- RELATED:
+--   - resp_binding() to compute DER SHA256
+--   - soft_recall_gen_of() to extract generation number from meta
+--   - must_staple_binds_shared_ligand() uses this for binding verification
+--   - Pin consensus (ocsp_pin.lua) uses generation_tuple for CAS
+--
+-- EXAMPLE:
+--   local sha, gen = generation_tuple(meta, resp)
+--   if gen == nil then
+--     -- Type-drift: incomplete identity, don't rematch on SHA alone
+--     return pin.gen_type_drift
+--   end
+--   -- Can safely compare (sha, gen) with previous allow-pin
+--
+-- ============================================================================
 local function generation_tuple(meta, resp)
 	local body = resp_binding(resp)
 	if not body and type(meta) == "table" and type(meta.der_sha256) == "string" then
@@ -810,10 +1894,43 @@ local function generation_tuple(meta, resp)
 	return body, gen
 end
 
--- serial-blacklist.json bans one leaf serial until a newer GOOD is published.
--- A different serial (reissue on the same key) is allowed. Unreadable /
--- ambiguous JSON while the file exists fails closed.
--- Per-request cache: avoids re-reading and re-validating the serial blacklist per cert
+-- ============================================================================
+-- serial_blacklist_blocks(fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Revocation gate: blocks OCSP if leaf serial banned by serial-blacklist.json.
+--   Used during manual revocation before CRL/OCSP response updates.
+--
+-- PARAMETERS:
+--   fingerprint (string|nil): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes (to extract serial)
+--
+-- RETURNS:
+--   (boolean): true if serial is banned (Must-Staple blocked)
+--   (boolean): false if serial not banned, not in blacklist, or fingerprint missing
+--
+-- SIDE EFFECTS:
+--   - Reads: /var/cache/bunkerweb/ssl/{shard}/{fp}/serial-blacklist.json
+--   - Calls: ocsp_resp_serial_hex() to extract response serial
+--   - Per-request cache: caches result by (fingerprint, body_sha) key
+--   - Logs: ERR if blacklist unreadable/ambiguous or serial banned
+--
+-- DESIGN NOTES:
+--   - Ban format: serial-blacklist.json with serial_hex field (uppercase)
+--   - Single serial: Bans one serial per cert (reissue on same key allowed)
+--   - Fail-closed: Unreadable/ambiguous blacklist refuses staple
+--   - Truncate race: Empty file (truncate mid-write) fails closed
+--   - JSON security: Rejects duplicate serial_hex keys (parsing oddities)
+--   - Performance: O(1) with per-request cache, ~1ms typical
+--   - Used in: staple path (staple_one_leaf → resp_still_fresh gate)
+--   - Related: Manual revocation flow (not CRL/OCSP updates)
+--
+-- RELATED:
+--   - ocsp_resp_serial_hex() to extract serial from response DER
+--   - resp_still_fresh() freshness gate that calls this
+--   - Must-Staple enforcement gate
+--
+-- ============================================================================
 local function serial_blacklist_blocks(fingerprint, resp)
 	fingerprint = fp64_or_nil(fingerprint)
 	if not fingerprint or type(resp) ~= "string" or resp == "" then
@@ -929,6 +2046,51 @@ end
 -- Shared ligand verdict: one ligand read, hardened merge, body binding.
 -- Single source of truth for HTTP (ssl-certificate-by-lua.conf) and stream
 -- (this module). An inlined copy in the conf caused a zone-split after the
+-- ============================================================================
+-- ligand_verdict(shard_meta, fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   **CORE BINDING CHECKER**: Comprehensive OCSP validation via ligand+shard.
+--   Single source of truth for HTTP/stream consistency (must be identical).
+--   Prevents stapling wrong response, swapped files, or tombstoned bodies.
+--
+-- PARAMETERS:
+--   shard_meta (table|nil): in-shard ocsp.json (ignored if live re-sample available)
+--   fingerprint (string): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes
+--
+-- RETURNS:
+--   (true, nil, meta_sha, body_sha, eff_meta): validation passed
+--   (false, reason_code, meta_sha, body_sha, eff_meta): validation failed
+--   reason_codes: fingerprint_mismatch, ligand_missing, tombstoned,
+--                missing_der_sha256, invalid_der_sha256, der_sha256_mismatch
+--
+-- SIDE EFFECTS:
+--   - Reads: live shard + ligand metadata (always fresh, ignores caller meta)
+--   - Calls: read_ocsp_json(), read_ocsp_ligand(), merge_ligand(), resp_binding()
+--   - Per-request cache: Both reads are per-request cached
+--   - No writes or external calls
+--   - Performance: O(1) with cache, ~1ms for misses
+--
+-- DESIGN NOTES:
+--   - Live shard WINS: Always re-samples (caller meta can lag tombstone)
+--   - Paged safety: Requires ligand if shard.paged=true (fail-closed)
+--   - Tombstone check: Refuses if either side tombstoned (OR gate)
+--   - Fingerprint validation: Must match path arg (prevents self-assertion)
+--   - SHA256 check: Binding must match body hash (prevents swaps)
+--   - HTTP/stream identical: No randomness, deterministic logic (zone-split safety)
+--   - Used by: All authorization gates, HTTP conf, stream module
+--   - Critical: Must never be inlined (zone-split vulnerability)
+--
+-- RELATED:
+--   - read_ocsp_json() for shard data source
+--   - read_ocsp_ligand() for ligand data source
+--   - merge_ligand() for ligand+shard merge (ligand wins)
+--   - resp_binding() to compute DER SHA256
+--   - ocsp_json_ligand_matches() wrapper for consensus checks
+--   - All validation gates built on top of this
+--
+-- ============================================================================
 -- outside-ligand move — do not reintroduce it.
 -- Returns ok, reason, meta_sha, body_sha, eff_meta.
 -- Paged shards fail closed on ligand ENOENT (promote tear / missing publish).
@@ -971,15 +2133,86 @@ local function ligand_verdict(shard_meta, fingerprint, resp)
 	return true, nil, meta_sha, body_sha, meta
 end
 
+-- ============================================================================
+-- ocsp_json_ligand_matches(meta, fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Ligand consensus check: validates OCSP response visible to HTTP.
+--   Wrapper around ligand_verdict for HTTP/stream split prevention.
+--
+-- PARAMETERS:
+--   meta (table|nil): stream-side ocsp.json metadata
+--   fingerprint (string): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes
+--
+-- RETURNS:
+--   (ok, reason, meta_sha, body_sha):
+--     ok (boolean): true if ligand + binding match
+--     reason (string|nil): mismatch reason code
+--     meta_sha (string): der_sha256 from metadata
+--     body_sha (string): computed SHA256 of DER
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_verdict() for comprehensive binding check
+--   - Reads: ligand + shard metadata via ligand_verdict
+--   - No writes or state modification
+--   - Performance: ~1ms via ligand_verdict
+--
+-- DESIGN NOTES:
+--   - Zone split prevention: Must-Staple uses this for HTTP visibility
+--   - Wrapper: Direct pass-through to ligand_verdict result
+--   - Used by: must_staple_binds_shared_ligand() gate
+--   - Related: ligand_verdict does actual work
+--
+-- RELATED:
+--   - ligand_verdict() comprehensive binding checker
+--   - must_staple_binds_shared_ligand() calls this
+--   - ocsp_json_authorizes_resp() similar binding check
+--
+-- ============================================================================
 local function ocsp_json_ligand_matches(meta, fingerprint, resp)
 	local ok, reason, meta_sha, body_sha = ligand_verdict(meta, fingerprint, resp)
 	return ok, reason, meta_sha, body_sha
 end
 
--- Ligand+paged only (CLI canary stamped this body). Handshake skip-validate must
--- also require a live allow-pin generation match — see pin.canary_trust_ok /
--- bunkerweb.ocsp.canary_paged_body_ok (pin wraps this). Store stays pin-free
--- (require DAG: store cannot import pin).
+-- ============================================================================
+-- canary_paged_body_ok(meta, fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Canary gate: validates OCSP canary-verified and paged (safe to skip crypto).
+--   Used for skip-validate path (fast handshake without re-validating).
+--
+-- PARAMETERS:
+--   meta (table|nil): stream-side ocsp.json metadata
+--   fingerprint (string): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes
+--
+-- RETURNS:
+--   (boolean): true if ligand binding OK + paged=true + not tombstoned
+--   (boolean): false if any check fails
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_verdict() for comprehensive binding check
+--   - Reads: ligand + shard metadata via ligand_verdict
+--   - No writes or state modification
+--   - Performance: ~1ms via ligand_verdict
+--
+-- DESIGN NOTES:
+--   - Canary requirement: CLI canary handshake must have stamped paged=true
+--   - Ligand binding: Must pass ligand_verdict() binding check first
+--   - Paged validation: Merged metadata must have paged=true (canary proof)
+--   - Tombstone guard: Returns false if tombstoned (no skip-validate mid-retire)
+--   - Pin requirement: Caller must also verify allow-pin generation (not here)
+--   - Used by: skip-validate path (accelerated TLS handshake)
+--   - Related: pin.canary_trust_ok wraps this with generation check
+--
+-- RELATED:
+--   - ligand_verdict() for binding validation
+--   - pin.canary_trust_ok() wrapper with generation match
+--   - shard_not_paged() for paging status check (different context)
+--   - _M.canary_paged_body_ok() public export
+--
+-- ============================================================================
 local function canary_paged_body_ok(meta, fingerprint, resp)
 	local ok, _, _, _, eff = ligand_verdict(meta, fingerprint, resp)
 	if not ok or type(eff) ~= "table" then
@@ -1009,10 +2242,42 @@ function _M.ligand_matches(shard_meta, fingerprint, resp)
 	return ocsp_json_ligand_matches(shard_meta, fingerprint, resp)
 end
 
--- Effective ligand sha for L1 disk-match (HTTP conf / stream warmer).
--- Returns sha string or nil; tombstoned / missing ligand for a paged shard → nil
--- so L1 cannot keep a body the handshake would refuse.
--- Live shard wins over caller meta (same contract as ligand_verdict).
+-- ============================================================================
+-- _M.ligand_effective_sha(_shard_meta, fingerprint)
+-- ============================================================================
+-- PURPOSE:
+--   Get effective binding SHA256 after ligand+shard merge.
+--   Used for L1 disk consistency checks (prevents stale cache hits).
+--
+-- PARAMETERS:
+--   _shard_meta (table|nil): caller's shard metadata (IGNORED, always re-reads)
+--   fingerprint (string): leaf SPKI fingerprint
+--
+-- RETURNS:
+--   (string): 64-char hex SHA256 of OCSP binding (der_sha256)
+--   (nil): if tombstoned, paged+no-ligand, or SHA invalid
+--
+-- SIDE EFFECTS:
+--   - Reads: live shard + ligand metadata (per-request cached)
+--   - Calls: read_ocsp_json(), read_ocsp_ligand(), merge_ligand()
+--   - No writes or state modification
+--   - Performance: O(1) with per-request cache, ~0.5ms
+--
+-- DESIGN NOTES:
+--   - Live shard: Always re-samples fresh metadata (ignores caller's _shard_meta)
+--   - Tombstone guard: Returns nil if tombstoned (L1 must drop)
+--   - Paged+no-ligand: Returns nil (handshake would refuse stale body)
+--   - Ligand effective: Ligand binding wins after merge
+--   - Fail-safe: Returns nil on any mismatch (L1 cannot keep body)
+--   - Used by: l1_body_matches_disk() for disk consistency check
+--   - Related: HTTP conf + stream warmer both use this
+--
+-- RELATED:
+--   - merge_ligand() for ligand+shard merge logic
+--   - l1_body_matches_disk() uses this for L1 validation
+--   - read_ocsp_json() and read_ocsp_ligand() data sources
+--
+-- ============================================================================
 function _M.ligand_effective_sha(_shard_meta, fingerprint)
 	local live_shard = read_ocsp_json(fingerprint)
 	local ligand = read_ocsp_ligand(fingerprint)
@@ -1037,6 +2302,44 @@ end
 
 -- Shared HTTP↔stream L1↔disk coherence. Fail-closed like ligand_verdict:
 -- corrupt meta / paged+ligand ENOENT / require-path gaps drop L1. Publish-gap keep
+-- ============================================================================
+-- l1_body_matches_disk(fingerprint, resp, stored_epoch)
+-- ============================================================================
+-- PURPOSE:
+--   L1 consistency check: validates cached DER still matches disk metadata.
+--   Detects stale cache hits during publish gaps, tombstones, or file removes.
+--
+-- PARAMETERS:
+--   fingerprint (string): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes (to validate SHA256)
+--   stored_epoch (string|nil): epoch from L1 cache entry
+--
+-- RETURNS:
+--   (boolean): true if L1 DER still matches current disk binding
+--   (boolean): false if epoch mismatch, tombstoned, or binding differs
+--
+-- SIDE EFFECTS:
+--   - Reads: ocsp.json + ocsp-ligand from disk (per-request cached)
+--   - Calls: ligand_effective_sha() for ligand + shard merge
+--   - Logs: None (silent validation)
+--   - Performance: O(1) with per-request cache, ~1ms for cache misses
+--
+-- DESIGN NOTES:
+--   - Epoch check: Stored epoch must match current scheduler epoch
+--   - Tombstone guard: Returns false if meta tombstoned
+--   - Publish-gap safety: Handles clean meta+DER removal with ligand fallback
+--   - Gap keep logic: Can use ligand binding if paged=true + explicit soft_recall_gen
+--   - Corruption detection: Distinguishes ENOENT (clean) from empty (truncate race)
+--   - Never bare ligand SHA: Rejects ligand binding after full shard retract
+--   - Called by: L1 validation path (before attaching cached DER)
+--
+-- RELATED:
+--   - l1_matches_disk() public export (same function)
+--   - entry_verified() for generation binding validation
+--   - current_ocsp_epoch() for scheduler epoch
+--   - ligand_effective_sha() for ligand+shard binding merge
+--
+-- ============================================================================
 -- (meta+DER both gone, epoch still matches) only while outside ligand is paged=true
 -- with an explicit soft_recall_gen and der_sha256 matching the cached binding —
 -- never bare ligand SHA after a full shard retract. HTTP conf must call this
@@ -1099,6 +2402,20 @@ local function l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	-- Shard meta+DER both gone: publish-gap keep only (never bare ligand SHA).
 	-- Must run before ligand_effective_sha, which would otherwise accept any
 	-- ligand der_sha256 and skip paged + explicit soft_recall_gen gates.
+	--
+	-- PUBLISH-GAP SCENARIO (all-or-nothing atomic update):
+	--   1. Scheduler removes ocsp.json (metadata gone)
+	--   2. Scheduler removes ocsp.der (body gone)
+	--   3. Between step 1-2 or after, TLS handshake reads disk → may see partial state
+	--
+	-- DETECTION: Shard ocsp.json is ENOENT + ocsp.der is ENOENT → clean gap
+	--   - Shard ocsp.json is ENOENT + ocsp.der is empty → truncate race, not gap
+	--   - Shard ocsp.json is ENOENT + ocsp.der exists → not clean, drop L1 (corrupt)
+	--
+	-- KEEP LOGIC: If BOTH are gone AND outside ligand says paged=true with explicit gen:
+	--   - Ligand is the authority during the gap (body may be on disk elsewhere)
+	--   - Accept L1 body if ligand.der_sha256 matches AND generation is explicit (not omit→0)
+	--   - Never use bare ligand SHA after full shard retract (wait for new shard publish)
 	if meta_missing then
 		-- Clean publish-gap: both meta and DER gone (ENOENT). Empty DER is a
 		-- truncate race, not absence — same as empty ocsp.json → drop L1.
@@ -1157,10 +2474,43 @@ function _M.l1_body_matches_disk(fingerprint, resp, stored_epoch)
 	return l1_body_matches_disk(fingerprint, resp, stored_epoch)
 end
 
--- Fingerprint-hint path cannot call validate_ocsp_response (no leaf PEM).
--- Require meta.fingerprint match AND der_sha256 == sha256(body) so a swapped
--- ocsp.der under matching SPKI meta cannot be stapled.
--- Logs accept/refuse with truncated expected vs observed digests for audit.
+-- ============================================================================
+-- ocsp_json_authorizes_resp(meta, fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Authorization gate: validates OCSP response matches metadata binding.
+--   Prevents stapling wrong response or swapped files (SHA256 mismatch).
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata with fingerprint, der_sha256
+--   fingerprint (string): leaf SPKI fingerprint (path-based, for consistency check)
+--   resp (string): OCSP DER response bytes (to validate SHA256)
+--
+-- RETURNS:
+--   (boolean): true if fingerprint + SHA256 match metadata
+--   (boolean): false if mismatch or metadata missing
+--
+-- SIDE EFFECTS:
+--   - Calls: ligand_verdict() for comprehensive binding check
+--   - Logs: INFO on accept, ERR/DEBUG on refuse (with digest audit)
+--   - No writes or state modification
+--   - Performance: O(1) binding check, ~0.5ms typical
+--
+-- DESIGN NOTES:
+--   - Dual verification: Fingerprint + SHA256 both required
+--   - Audit logging: Truncated digests logged for troubleshooting
+--   - Swapped file protection: Prevents wrong response under matching path
+--   - Fingerprint-hint only: Called for restore/fingerprint-only paths
+--   - PEM unavailable: Cannot validate with crypto, relies on metadata SHA256
+--   - Called by: restore path, fingerprint-hint fallback paths
+--   - Related: ligand_verdict() does comprehensive validation
+--
+-- RELATED:
+--   - ligand_verdict() comprehensive binding checker
+--   - entry_verified() similar for L1 cache validation
+--   - generation_tuple() for soft-recall binding
+--
+-- ============================================================================
 local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 	local fp_short = (type(fingerprint) == "string" and fingerprint:sub(1, 16)) or "?"
 	local ok, reason, meta_sha, body_sha = ligand_verdict(meta, fingerprint, resp)
@@ -1191,10 +2541,41 @@ local function ocsp_json_authorizes_resp(meta, fingerprint, resp)
 	return true
 end
 
--- Must-Staple may not rely on stream-private crypto-verified L1 alone.
--- Returns true, or false, raw ligand_verdict reason for OCSP_MUST_STAPLE_REFUSE.
--- Raw reason (not shared_ligand_*) so KEEP_ALLOW[ligand_missing] can hold the pin;
--- format_staple_decision still aliases to staple_decision=shared_ligand.
+-- ============================================================================
+-- must_staple_binds_shared_ligand(meta, fingerprint, resp)
+-- ============================================================================
+-- PURPOSE:
+--   Must-Staple binding gate: validates ligand consensus visible to HTTP.
+--   Prevents HTTP/stream split decisions on Must-Staple enforcement.
+--
+-- PARAMETERS:
+--   meta (table|nil): stream-side ocsp.json metadata
+--   fingerprint (string): leaf SPKI fingerprint
+--   resp (string): OCSP DER response bytes
+--
+-- RETURNS:
+--   (true): ligand binding verified (safe for Must-Staple enforcement)
+--   (false, reason_string): ligand mismatch (HTTP has different view)
+--
+-- SIDE EFFECTS:
+--   - Calls: ocsp_json_ligand_matches() for HTTP/stream consensus check
+--   - No writes or state modification
+--   - Performance: O(1) binding check, ~0.5ms typical
+--
+-- DESIGN NOTES:
+--   - Zone split prevention: Must-Staple must agree with HTTP path
+--   - Ligand critical: Cannot use stream-private L1 for enforcement gate
+--   - Raw reason: Returns ligand_mismatch for KEEP_ALLOW lookup
+--   - Fail-closed: False when ligand unavailable or mismatch
+--   - Called by: Must-Staple enforcement gate (staple_one_leaf)
+--   - Related: HTTP checks same ligand via ssl-certificate-by-lua.conf
+--
+-- RELATED:
+--   - ocsp_json_ligand_matches() comprehensive binding checker
+--   - resp_still_fresh() other binding gate
+--   - HTTP ssl-certificate-by-lua.conf for HTTP-side check
+--
+-- ============================================================================
 local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
 	local ok, reason = ocsp_json_ligand_matches(meta, fingerprint, resp)
 	if ok then
@@ -1203,7 +2584,39 @@ local function must_staple_binds_shared_ligand(meta, fingerprint, resp)
 	return false, tostring(reason or "ligand_mismatch")
 end
 
--- Absolute unix nextUpdate from job meta. Requires expires_unix (no ISO+Ns fallback).
+-- ============================================================================
+-- meta_expires_unix(meta)
+-- ============================================================================
+-- PURPOSE:
+--   Extract absolute expiry time (nextUpdate) from OCSP metadata.
+--   Critical for freshness checks and cache TTL calculation.
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata with expires_unix field
+--
+-- RETURNS:
+--   (number): unix timestamp when response expires (nextUpdate)
+--   (nil): if meta missing, invalid, or expires_unix not set
+--
+-- SIDE EFFECTS:
+--   - Calls: positive_expires_unix() to validate expires_unix field
+--   - No reads/writes or state modification
+--   - Performance: O(1) field lookup, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Source: CA-signed nextUpdate from OCSP response (job extracted)
+--   - Validation: Only valid positive unix timestamps accepted
+--   - Used by: resp_still_fresh(), warm_cache(), all freshness gates
+--   - Companion: meta_max_age_unix() for wall-clock expiry alternative
+--   - Fail-safe: Returns nil if field missing (cannot assume infinity)
+--
+-- RELATED:
+--   - meta_max_age_unix() for published_unix + max_age calculation
+--   - resp_still_fresh() uses this for freshness checks
+--   - warm_cache() uses this for cache TTL
+--   - meta_effective_expires_unix() combines both sources
+--
+-- ============================================================================
 local function meta_expires_unix(meta)
 	if type(meta) ~= "table" then
 		return nil
@@ -1215,7 +2628,40 @@ function _M.meta_expires_unix(meta)
 	return meta_expires_unix(meta)
 end
 
--- Wall-clock stop from published_unix + max age (independent of nextUpdate).
+-- ============================================================================
+-- meta_max_age_unix(meta)
+-- ============================================================================
+-- PURPOSE:
+--   Extract wall-clock expiry (max_age_unix or published_unix + 24h).
+--   Fallback expiry when nextUpdate missing or less restrictive.
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata
+--
+-- RETURNS:
+--   (number): unix timestamp (either max_age_unix or published_unix + 86400s)
+--   (nil): if both fields missing or invalid
+--
+-- SIDE EFFECTS:
+--   - Calls: positive_unix() to validate metadata fields
+--   - No reads/writes or state modification
+--   - Performance: O(1) field lookup, ~0.01ms
+--
+-- DESIGN NOTES:
+--   - Primary: max_age_unix if set (explicit max age from job)
+--   - Fallback: published_unix + 86400 (24-hour default for PREVIOUS_GOOD)
+--   - Source: Both values from job (independent of OCSP response)
+--   - Used by: resp_still_fresh() when nextUpdate too loose
+--   - Companion: meta_expires_unix() for CA-signed nextUpdate
+--   - Fail-safe: Returns nil if both missing (cannot assume expiry)
+--
+-- RELATED:
+--   - meta_expires_unix() for CA-signed nextUpdate
+--   - resp_still_fresh() compares min(expires_unix, max_age_unix)
+--   - warm_cache() uses this for cache TTL calculation
+--   - meta_effective_expires_unix() combines both sources (takes minimum)
+--
+-- ============================================================================
 local function meta_max_age_unix(meta)
 	if type(meta) ~= "table" then
 		return nil
@@ -1232,10 +2678,42 @@ local function meta_max_age_unix(meta)
 	return nil
 end
 
--- False at death time (nextUpdate/max_age minus skew).
--- Also enforces intrinsic signed-window policy when this_update_unix is present.
--- Meta must carry a death clock (expires_unix and/or max_age/published). L1's
--- cached expires may only shorten that clock — never keep a stripped-meta DER alive.
+-- ============================================================================
+-- intrinsic_timing_ok(meta)
+-- ============================================================================
+-- PURPOSE:
+--   Validate OCSP response's thisUpdate/nextUpdate bounds (CA-signed window).
+--   Ensures response age is within policy (not future, not too old, lifetime valid).
+--
+-- PARAMETERS:
+--   meta (table|nil): ocsp.json metadata with this_update_unix, next_update_unix
+--
+-- RETURNS:
+--   (true, nil): timing valid (or no thisUpdate to check)
+--   (false, reason_code): timing invalid (future, stale, lifetime bounds, etc.)
+--
+-- SIDE EFFECTS:
+--   - Reads: ngx.time() for current time check
+--   - Calls: meta_unix_field() to extract timestamp fields
+--   - No writes or state modification
+--   - Performance: O(1) time arithmetic, ~0.1ms
+--
+-- DESIGN NOTES:
+--   - thisUpdate check: Response must not be future (+ clock skew allowance)
+--   - Max age: thisUpdate cannot be older than OCSP_MAX_THIS_UPDATE_AGE_SECONDS
+--   - Lifetime bounds: nextUpdate - thisUpdate must be positive and <= max policy
+--   - Missing check: No thisUpdate = pass (no signed window to validate)
+--   - Reason codes: Future/stale/invalid_lifetime all fail-closed
+--   - Policy constants: OCSP_CLOCK_SKEW, OCSP_MAX_THIS_UPDATE_AGE, OCSP_MAX_INTRINSIC_LIFETIME
+--   - Called by: resp_still_fresh() as first timing check
+--
+-- RELATED:
+--   - resp_still_fresh() uses this as first gate before checking max_age
+--   - meta_expires_unix() for nextUpdate fallback
+--   - meta_max_age_unix() for max_age field extraction
+--   - Policy: OCSP_MAX_THIS_UPDATE_AGE_SECONDS (typical: 3600s)
+--
+-- ============================================================================
 local function intrinsic_timing_ok(meta)
 	local this_u = meta_unix_field(meta, "this_update_unix")
 	if not this_u then
@@ -1263,6 +2741,87 @@ local function intrinsic_timing_ok(meta)
 	return true, nil
 end
 
+-- ============================================================================
+-- resp_still_fresh(expires_unix, fingerprint, meta)
+-- ============================================================================
+-- PURPOSE:
+--   Validate OCSP response is still within time bounds (thisUpdate, nextUpdate).
+--   Critical gate preventing stale responses from being used. Merges ligand for
+--   always-live freshness checks.
+--
+-- PARAMETERS:
+--   expires_unix (number|nil): L1 cached expiry (may be nil for disk path)
+--   fingerprint (string|nil): leaf SPKI fingerprint for ligand merge
+--   meta (table|nil): ocsp.json metadata (ignored if fingerprint provided)
+--
+-- RETURNS:
+--   (true): response is fresh (within bounds)
+--   (false, reason): response stale (tombstoned, intrinsic invalid, past expiry, etc.)
+--
+-- SIDE EFFECTS:
+--   - Reads: ligand via ligand_or_meta() (always fresh)
+--             ngx.time() for current time check
+--   - Calls: intrinsic_timing_ok(), meta_expires_unix(), meta_max_age_unix()
+--   - Logging: ERR level on intrinsic timing failures
+--   - Performance: O(1) time checks (~0.1ms)
+--
+-- DESIGN NOTES:
+--   - Ligand overlay: Always reads live ligand (caller meta can lag)
+--   - Tombstone check: Refuses if either ligand or shard tombstoned
+--   - Intrinsic validation: thisUpdate age, nextUpdate, max-age bounds
+--   - Death clock: min(expires_unix, meta_expires, max_age)
+--   - L1 constraint: L1 can only tighten meta clock, never extend
+--   - Clock skew: Built-in OCSP_CLOCK_SKEW_SECONDS buffer (30s typical)
+--   - Stripped meta: If neither expires nor max_age, refuse (no death clock)
+--   - Called by: L1 hit path, disk path, ligand validation
+--
+-- RELATED:
+--   - warm_cache() enforces same death clock before caching
+--   - intrinsic_timing_ok() checks thisUpdate/nextUpdate bounds
+--   - meta_effective_expires_unix() computes final death clock
+--   - ligand_or_meta() always returns fresh metadata merge
+--
+-- ============================================================================
+-- ============================================================================
+-- resp_still_fresh(expires_unix, fingerprint, meta)
+-- ============================================================================
+-- PURPOSE:
+--   Freshness gate: validates OCSP response still within time bounds.
+--   Critical path function called before every OCSP staple attachment.
+--
+-- PARAMETERS:
+--   expires_unix (number|nil): L1 cache expiry (may be tighter than meta)
+--   fingerprint (string|nil): leaf SPKI fingerprint (samples live metadata)
+--   meta (table|nil): ocsp.json metadata (ignored if fingerprint provided)
+--
+-- RETURNS:
+--   (boolean): true if response is fresh and valid
+--   (false, string): (false, reason_code) if stale or invalid
+--                    reason_codes: "tombstoned", timing error, "response_stale"
+--
+-- SIDE EFFECTS:
+--   - Reads: Live metadata via ligand_or_meta() (always fresh)
+--   - Calls: intrinsic_timing_ok(), meta_expires_unix(), meta_max_age_unix()
+--   - Logs: ERR if intrinsic timing fails or no death clock
+--   - Performance: O(1) metadata check + time comparison, ~0.5ms typical
+--
+-- DESIGN NOTES:
+--   - Live metadata always wins: Samples fresh shard + ligand via fingerprint
+--   - Tombstone check: Refuses if ligand or shard tombstoned (mid-retire)
+--   - Intrinsic bounds: Validates thisUpdate/nextUpdate (from response)
+--   - Death clock: min(expires_unix, max_age, expires_unix metadata field)
+--   - L1 tightening: Caller expires_unix can only tighten, never extend
+--   - Clock skew: OCSP_CLOCK_SKEW_SECONDS grace period before reject
+--   - Called in: Critical path (must_staple, attachment validation)
+--   - Related: warm_cache() enforces same death clock before caching
+--
+-- RELATED:
+--   - meta_tombstoned() for tombstone detection
+--   - cluster_floor_blocks(), shard_not_paged(), serial_blacklist_blocks()
+--   - intrinsic_timing_ok() for thisUpdate/nextUpdate validation
+--   - warm_cache() enforces consistency before cache write
+--
+-- ============================================================================
 local function resp_still_fresh(expires_unix, fingerprint, meta)
 	-- Overlay outside ligand so freshness uses the same min(expires) as
 	-- warm_cache / merge_ligand. ligand_or_meta always samples live shard

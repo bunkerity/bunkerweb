@@ -1,3 +1,46 @@
+--[[
+================================================================================
+OCSP HTTP Integration: ssl_certificate phase OCSP stapling and validation
+================================================================================
+
+MODULE OVERVIEW (ocsp_http.lua integration into ssl_certificate-by-lua.conf):
+HTTP subsystem OCSP stapling orchestrator called during TLS handshake
+ssl_certificate phase. Implements two-tier validation (Tier 1 L1 cache +
+Tier 2 full FFI validation), dual-cert leaf ranking, and Must-Staple enforcement.
+
+ARCHITECTURE:
+- Stapling-off fast path: Plugins return PEM → install without OCSP overhead
+- Full path: Parse cert chain → probe leaf → rank Must-Staple via allow-pin
+  → attach OCSP response → demote on failure (fail-closed for MS)
+
+TWO-TIER VALIDATION:
+- Tier 1: L1 cache hit (0.1ms) → verified binding + soft_recall_gen match
+           or async "validated" status → skip FFI, attach immediately
+- Tier 2: Full FFI validate_ocsp_response (10-20ms) for cache miss
+           Results shared via compare-and-delete (thundering-herd protection)
+           Per-request FFI cache for (response, issuer) dedup
+
+DUAL-CERT RANKING:
+- ClientHello signature_algorithms parse → filter compatible leaves
+- Must-Staple tri-state check + allow-pin validation → rank by health
+- Single leaf install; skip siblings with skip_slot reason
+
+KEY FUNCTIONS:
+- validate(): FFI signature verification + death-time check with DER cache
+- try_staple(): CertID → cert validation → attach pipeline with budget guard
+- ordered_leaves_for_handshake(): TLS 1.3+ sig-alg aware leaf ordering
+
+EXPORTS:
+- Public (via _M): ssl_certificate, ordered_leaves_for_handshake (for ocsp.lua)
+
+DEPENDENCIES:
+- All OCSP modules: ocsp_common, ocsp_cert, ocsp_chain, ocsp_store, ocsp_pin,
+  ocsp_must_staple, ocsp_warmer
+- ngx.ssl, ngx.ocsp, lua-resty-openssl for FFI operations
+
+================================================================================
+]]
+
 local _M = {}
 _M.__index = _M
 
