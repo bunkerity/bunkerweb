@@ -22,6 +22,7 @@
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
 - [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
+- [DEPS] Added resty-redis-cluster v1.6.1 (Kong) for Redis Cluster support.
 - [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
 
 ## v1.6.16~rc2 - 2026/09/25
