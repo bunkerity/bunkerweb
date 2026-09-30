@@ -237,6 +237,39 @@ Unknown state → enforce strict policy. Example: Must-Staple unknown → treat 
 
 ---
 
+## 📖 Documentation by Use Case
+
+**Choose your path based on what you need:**
+
+```
+"I'm new" 
+  → Read QUICK_START.md (5 minutes)
+
+"It's not working" 
+  → Check TROUBLESHOOTING_FAQ.md (find your issue)
+
+"I need details" 
+  → Read OCSP_STAPLING_GUIDE.md (comprehensive guide)
+
+"I want all settings" 
+  → See SETTINGS_REFERENCE.md (all 20 settings documented)
+
+"I'm developing" 
+  → Check UI_ARCHITECTURE.md (code structure & extension points)
+```
+
+### UI & Configuration Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** - Get OCSP working in 5 minutes
+- **[TROUBLESHOOTING_FAQ.md](TROUBLESHOOTING_FAQ.md)** - Solutions for common problems
+- **[UI_PAGES.md](UI_PAGES.md)** - User guide for web interface
+- **[OCSP_STAPLING_GUIDE.md](OCSP_STAPLING_GUIDE.md)** - Configuration and best practices
+- **[SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md)** - All 20 settings documented
+- **[UI_ARCHITECTURE.md](UI_ARCHITECTURE.md)** - Developer guide and extension points
+- **[UI_DOCUMENTATION_INDEX.md](UI_DOCUMENTATION_INDEX.md)** - Navigation and quick reference
+
+---
+
 **Created:** 2026-09-29  
 **Status:** Complete & comprehensive ✅  
 **Ready for:** Production use, code review, knowledge transfer
