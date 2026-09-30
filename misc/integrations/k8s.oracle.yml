@@ -156,6 +156,7 @@ spec:
             exec:
               command:
                 - /usr/share/bunkerweb/helpers/healthcheck.sh
+                - ok
             initialDelaySeconds: 30
             periodSeconds: 1
             timeoutSeconds: 1

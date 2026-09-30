@@ -2,6 +2,7 @@
 
 ## v1.6.16~rc3 - ????/??/??
 
+- [BUGFIX] `/healthz` answers `ok` during a graceful reload instead of `loading`, so readiness probes and keepalived checks using `healthcheck.sh ok` no longer fail on every reload; only an instance without its configuration answers `loading`; the instance API `/health` still reports `reloading`. (Refs bunkerity/bunkerweb-helm#97)
 - [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
 - [BUGFIX] `ui`: for signed-in users, a single form field larger than 500 kB, such as an Easy Resolve request for a report with a large matched body, is accepted up to `MAX_CONTENT_LENGTH` instead of failing with 413. The login form keeps the 500 kB cap.
 - [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics: Redis keys now carry the instance hostname next to the worker id, so give each instance a distinct hostname. Keys written by older versions are kept as history, still counted in the Web UI and renewed with `METRICS_REDIS_TTL` while the instance runs.
