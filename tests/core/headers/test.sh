@@ -257,14 +257,17 @@ do
             export COOKIE_AUTO_SECURE_FLAG="no"
         fi
     elif [ "$test" = "samesite_none" ] ; then
-        echo "🎛️ Running tests with SameSite=None flag for cookies ..."
-        echo "ℹ️ Keeping the generated self-signed SSL certificate"
+        echo "🎛️ Running tests with SameSite=None flag for cookies over https ..."
+        # SameSite=None requires the Secure flag, which is only added over https, so pin both explicitly
         if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@GENERATE_SELF_SIGNED_SSL: ".*"$@GENERATE_SELF_SIGNED_SSL: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_FLAGS: ".*"$@COOKIE_FLAGS: "* HttpOnly SameSite=None"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_AUTO_SECURE_FLAG: "no"@COOKIE_AUTO_SECURE_FLAG: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_AUTO_SECURE_FLAG: ".*"$@COOKIE_AUTO_SECURE_FLAG: "yes"@' {} \;
         else
+            sudo sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* HttpOnly SameSite=None@' /etc/bunkerweb/variables.env
             sudo sed -i 's@COOKIE_AUTO_SECURE_FLAG=.*$@COOKIE_AUTO_SECURE_FLAG=yes@' /etc/bunkerweb/variables.env
+            export GENERATE_SELF_SIGNED_SSL="yes"
             export COOKIE_FLAGS="* HttpOnly SameSite=None"
             export COOKIE_AUTO_SECURE_FLAG="yes"
         fi
