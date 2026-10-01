@@ -85,7 +85,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
-from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
+from app.routes.utils import active_config_tasks, get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -1595,6 +1595,7 @@ if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 def check_reloading():
     DATA.load_from_file()
     current_time = time()
+    tasks_active = active_config_tasks() > 0
 
     db_metadata = DB.get_metadata()
     if (
@@ -1604,8 +1605,12 @@ def check_reloading():
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         )
         and DATA.get("LAST_RELOAD", 0) + 2 < current_time
+        and not tasks_active
     ):
         DATA["RELOADING"] = False
+    elif tasks_active and not DATA.get("RELOADING", False):
+        # a finished task body cleared RELOADING while another save has not committed yet
+        DATA["RELOADING"] = True
 
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
