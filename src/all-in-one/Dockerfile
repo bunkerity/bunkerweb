@@ -109,6 +109,9 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
+COPY misc/build/merge_css_imports.py /tmp/merge_css_imports.py
+RUN python3 /tmp/merge_css_imports.py /usr/share/bunkerweb/ui/app/static/css/overrides.css && \
+  rm -f /tmp/merge_css_imports.py
 COPY src/api api
 COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
