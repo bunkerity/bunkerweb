@@ -1,0 +1,60 @@
+src/linux/Dockerfile-ubuntu-jammy
+  s_ab368f611898ea::t_667fe830cc564a 80-82
+src/linux/Dockerfile-ubuntu
+  s_ab368f611898ea::t_667fe830cc564a 75-77
+misc/build/merge_css_imports.py
+  s_4600783926e6d7::t_ff93caf0131e48 48
+  s_8b13ffa009eee3::t_5bf58d0e3f9439 1-47,49-104
+src/linux/Dockerfile-rhel-8
+  s_ab368f611898ea::t_667fe830cc564a 78-80
+src/linux/Dockerfile-ubuntu-noble
+  s_ab368f611898ea::t_667fe830cc564a 80-82
+src/linux/Dockerfile-debian-trixie
+  s_ab368f611898ea::t_667fe830cc564a 76-78
+src/all-in-one/Dockerfile
+  s_ab368f611898ea::t_667fe830cc564a 112-114
+src/linux/Dockerfile-rhel-10
+  s_ab368f611898ea::t_667fe830cc564a 81-83
+src/linux/Dockerfile-fedora-44
+  s_ab368f611898ea::t_667fe830cc564a 69-71
+src/ui/Dockerfile
+  s_ab368f611898ea::t_667fe830cc564a 37-39
+src/linux/Dockerfile-rhel-9
+  s_ab368f611898ea::t_667fe830cc564a 79-81
+src/linux/Dockerfile-fedora-43
+  s_ab368f611898ea::t_667fe830cc564a 69-71
+src/linux/Dockerfile-debian-bookworm
+  s_ab368f611898ea::t_667fe830cc564a 81-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f4f8ae1cccc1a742405ad226bcb7ea9b87d07dbb",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8b13ffa009eee3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71706e25-c0a5-4de3-8e89-e81e11325008",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ab368f611898ea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bce12a23-0ba1-47d8-90fa-dfe8e861e80e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
