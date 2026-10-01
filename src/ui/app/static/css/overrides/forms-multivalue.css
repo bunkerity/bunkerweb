@@ -1,0 +1,185 @@
+/* Multivalue setting styles */
+.multivalue-container {
+  width: 100%;
+}
+.multivalue-inputs {
+  width: 100%;
+}
+.multivalue-input-group {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+.multivalue-input-group:last-child {
+  margin-bottom: 0;
+}
+.multivalue-input-group .input-group .form-control {
+  flex: 1;
+  border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+  height: calc(3.5rem + 2px);
+  padding: 1rem 0.75rem;
+}
+.multivalue-input-group .input-group .btn {
+  border-left: 0;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0;
+  height: calc(3.5rem + 2px);
+}
+.multivalue-input-group .btn:last-child {
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+}
+.multivalue-input-group .btn:only-of-type {
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+}
+.multivalue-input-group .btn i {
+  font-size: 16px;
+}
+.multivalue-input-group .btn-outline-success {
+  color: var(--bs-success);
+  border-color: var(--bs-border-color);
+}
+.multivalue-input-group .btn-outline-success:hover {
+  background-color: var(--bs-success);
+  border-color: var(--bs-success);
+  color: white;
+}
+.multivalue-input-group .btn-outline-danger {
+  color: var(--bs-danger);
+  border-color: var(--bs-border-color);
+}
+.multivalue-input-group .btn-outline-danger:hover {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: white;
+}
+/* Focus styles for multivalue inputs */
+.multivalue-input:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+  z-index: 3;
+}
+.multivalue-input-group:focus-within .btn {
+  border-color: var(--bs-primary);
+}
+/* Ensure floating labels work properly with input groups in multivalue containers */
+.multivalue-input-group.form-floating:focus-within > label,
+.multivalue-input-group.form-floating.has-value > label {
+  opacity: 0.65;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+/* Ensure multivalue inputs behave like regular form-floating inputs */
+.multivalue-input-group.form-floating .multivalue-input:focus,
+.multivalue-input-group.form-floating.has-value .multivalue-input {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+/* Fix label positioning for input groups inside form-floating */
+.multivalue-input-group.form-floating > label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 1rem 0.75rem;
+  pointer-events: none;
+  border: 1px solid transparent;
+  transform-origin: 0 0;
+  transition:
+    opacity 0.1s ease-in-out,
+    transform 0.1s ease-in-out;
+  z-index: 2;
+}
+/* Ensure inputs have proper padding for floating labels */
+.multivalue-input-group.form-floating:focus-within .multivalue-input,
+.multivalue-input-group.form-floating.has-value .multivalue-input {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+/* Animation for adding/removing multivalue items */
+.multivalue-input-group {
+  animation: fadeInUp 0.3s ease-in-out;
+}
+/* Disabled state for multivalue containers */
+.multivalue-container .multivalue-input:disabled {
+  background-color: var(--bs-secondary-bg);
+  opacity: 0.65;
+}
+.multivalue-container .btn:disabled {
+  opacity: 0.65;
+  pointer-events: none;
+}
+/* Help text styling */
+.multivalue-container .text-muted {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.multivalue-container .text-muted code {
+  background-color: var(--bs-gray-100);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.8em;
+}
+/* Dark mode styles for multivalue */
+.dark-style .multivalue-container .text-muted code {
+  background-color: var(--bs-gray-800);
+}
+/* Responsive design for multivalue buttons */
+@media (max-width: 576px) {
+  .multivalue-input-group .btn {
+    min-width: 34px;
+    padding: 0.375rem 0.375rem;
+  }
+
+  .multivalue-input-group .btn i {
+    font-size: 14px;
+  }
+}
+/* Multivalue toggle button */
+.multivalue-toggle {
+  text-align: center;
+}
+.multivalue-toggle-btn {
+  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+}
+.multivalue-toggle-btn:hover {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: white;
+}
+.multivalue-toggle-btn .bx {
+  transition: transform 0.2s ease-in-out !important;
+}
+.multivalue-toggle-btn.expanded .bx {
+  transform: rotate(180deg);
+}
+/* Hide overflow when collapsed */
+.multivalue-inputs {
+  position: relative;
+}
+/* WCAG 1.4.11: these +/x buttons' border is their only shape cue;
+   var(--bs-border-color) (.18 = 1.77:1) fails 3:1 on the navy surface. */
+.dark-style .multivalue-input-group .btn-outline-success {
+  color: var(--bs-success);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.dark-style .multivalue-input-group .btn-outline-danger {
+  color: var(--bs-danger);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.setting-multivalue-list {
+  width: 100%;
+}
+.setting-multivalue-row .form-control {
+  min-width: 0;
+}
+.setting-multivalue-row .btn {
+  flex: 0 0 auto;
+}
+.setting-multivalue-row .btn i {
+  pointer-events: none;
+}
