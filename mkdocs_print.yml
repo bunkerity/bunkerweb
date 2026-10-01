@@ -6,6 +6,8 @@ copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</sc
 
 exclude_docs: |
   node_modules/**
+  AGENTS.md
+  CLAUDE.md
   de/**
   es/**
   fr/**
@@ -96,7 +98,8 @@ plugins:
         logo: docs/assets/social-logo.svg
   - mike:
       canonical_version: latest
-  - optimize
+  - optimize:
+      cache: false
   - print-site:
       add_table_of_contents: false
       add_cover_page: false

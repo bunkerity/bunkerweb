@@ -288,6 +288,12 @@ The UI reaches BunkerWeb through the API. Run it with the Scheduler, Worker, ded
 3. Env file at `/etc/bunkerweb/ui.env` (Linux packages)
 4. Built-in defaults
 
+## Drafts in the RAW editor
+
+The RAW editor of a service or of the global settings can keep a setting as a **draft**: the value is stored but not applied, and the effective value stays the inherited (global), template or default one. Put the cursor at the start of a `KEY=value` line and press `#` to toggle the draft state, or `Backspace` on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save; deleting a drafted line deletes the draft. The other editors show the effective value of a drafted setting and leave the draft untouched. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state, and the structural settings (`SERVER_NAME`, `MULTISITE`, `USE_TEMPLATE`) can never be drafts. This is separate from making the whole service a draft.
+
+Drafts created with 1.6.15 stay drafts after the upgrade. If the drafts cannot be read from the API, the RAW page refuses to open instead of showing the effective values. The API exposes the same state: `PUT /global_settings/config` accepts a `draft_settings` map (`true` drafts a key, `false` activates it, `null` deletes the draft), and `GET /global_settings` and `GET /services/{service}` return drafts with their stored value only when asked with `with_setting_drafts=true`.
+
 ## Configuration reference
 
 ### Runtime & time zone
@@ -501,6 +507,8 @@ Open **Configure → Templates** to browse, create, and manage reusable service 
 
 Since 1.7, `USE_TEMPLATE` accepts several templates per service, applied in the order given, with the last one winning on a conflicting setting — the Templates page is where those reusable building blocks are authored.
 
+Any template — a UI-authored one, or a copy of a plugin-owned or catalogue one — can be exported to a `bunkerweb-template/1` JSON file and imported back, from the gallery's Export/Import actions or `GET /templates/{id}/export` and `POST /templates/import` on the API. An import always lands as a plain UI template regardless of the exported template's original ownership; importing over an existing id needs an explicit "replace" confirmation and only ever replaces a UI-owned template. Once a catalogue template is installed, the gallery shows an **Update** action as soon as the catalogue's copy differs from the installed one — it previews what changed (settings, steps, and configs) before you apply it, the same catalogue-refresh cadence the Plugins page uses.
+
 ### Web cache management
 
 The **Web cache** page manages the NGINX response cache used by Reverse Proxy. It shows each instance's reporting state, on-disk entry count and size, the services whose effective `USE_PROXY_CACHE` value is enabled, and cache-status counters such as `HIT`, `MISS`, `BYPASS`, and `STALE` when the Metrics plugin reports them.
@@ -509,6 +517,53 @@ You can purge one absolute HTTP(S) URL or the complete cache. URL purges reconst
 
 !!! warning "A complete purge affects every cached service"
     `scope: "all"` clears the shared `proxycache` zone on every reachable instance. It does not target one service and does not trigger an NGINX reload. An unreachable instance is skipped and nothing is queued for it, so check the per-instance result before assuming a fleet-wide purge completed.
+
+### Home dashboard
+
+The **Home** page is the landing page after sign-in. Its header carries a **Reload** button, a date-range picker (last 7 days by default) that drives the trend chip and the blocked-requests timeline, and a **Get support** link.
+
+- **Status band**: the plan (Free or PRO, with the renewal date and licensed service count on PRO), the **System RAM** card and the share of requests blocked over the last 7 days, with a trend against the previous period of the selected range.
+- **Instances**, **Services**, **Upstreams** and **Certificates** tiles: instances up, down and loading (an instance in `failover` counts as down), services online and in draft, the number of upstream pools, and certificates expired or expiring within 30 days.
+- **Bans active**, **Blocked unique IPs**, **Scheduled jobs** and **Total requests** mini-tiles. The ban count comes from the database, so it does not drop to zero after an instance restart. A red banner appears above the page when a job failed on its last run.
+- Charts: blocked requests over the selected range, the HTTP status distribution, the top 10 blocked IPs, the top report reasons, a world map of blocked requests by country (with a link to the live [Threatmap](#threatmap)), blocked requests over time, and the BunkerWeb news feed. The heavy aggregates load after the page is shown, so a slow metrics backend delays the charts, not the page.
+
+The **System RAM** card reads the memory limit of the container the Web UI runs in when one is set, and the host's memory otherwise. Reclaimable page cache is not counted as used, the same way `docker stats` does it. Its colour depends only on the percentage used:
+
+| Used     | Colour  |
+| -------- | ------- |
+| < 70 %   | green   |
+| 70-85 %  | neutral |
+| 85-95 %  | warning |
+| >= 95 %  | danger  |
+
+The chart cards (except the top blocked IPs) and the news card can be hidden from their own menu. The choice is saved per account, so it follows you across browsers, and a **Restore hidden cards** button appears in the header only while at least one card is hidden.
+
+### Bans
+
+The **Bans** page lists every active ban. The list is read from the database, the source of truth described in [Persistence of bans and reports](advanced.md#persistence-of-bans-and-reports): a ban added from here, the API, `bwcli` or an automatic decision is stored first and then sent to the instances, and the `sync-bans` job reconciles the instances with the database every minute.
+
+- The header shows the active ban count, the bans expiring within the hour, the number of countries they come from, the permanent bans, the five most common reasons, and a chart of active bans per interval over the selected range. A re-ban rewrites a ban's start date, so that chart shows occupancy, not a history of ban events.
+- The table can be searched and filtered by ban date, scope (global or one service), end date and service, and exported to CSV or Excel.
+- **Add bans** takes one or more IP addresses, an end date or **Permanent**, a reason (`ui` by default) and a scope: every service, or one service picked from the list.
+- **Unban** removes the selected bans, each in its own scope. **Update duration** switches a ban to permanent, 1 hour, 24 hours, 1 week or a custom end date, and keeps its original reason.
+- Unban and duration changes apply to the rows you select, or to every ban matching the current filters.
+- Each row carries an **Investigate** button that opens the [CrowdSec](#crowdsec-investigation) page for that IP.
+
+Adding, removing and changing bans needs the write permission and a writable database; in read-only mode the buttons are disabled. The **Reports** page can also ban the offenders it lists.
+
+### CrowdSec investigation
+
+The **CrowdSec** page (`/crowdsec`, also reached from the **Investigate** button of a Bans or Reports row) shows what the CrowdSec engines connected to your instances know, and lets an administrator remove a decision at the source. It needs the `crowdsec` plugin enabled; each instance running it reports its connections.
+
+- **Connections**: one card per CrowdSec connection, with its instance, the services it covers, its mode, whether its decision sync is up to date or stale, the last successful sync and, when AppSec is used, the last AppSec observation. Instances that could not be read are listed with their error. The selected connection applies to everything below it.
+- **Active decisions**: the decisions currently held by the selected engine, filterable by IP, origin and scenario, 50 per page. This is live state read from CrowdSec, not a copy.
+- **Investigate an IP**: one view of an address across the selected engine's current decisions and alert evidence, BunkerWeb's own current bans and its recent reports for the services the connection covers, and the engine's allowlists. Each part is capped (200 decisions, 50 alerts, 50 reports) and says when it was truncated; a part that could not be read is shown as unavailable instead of empty. Reports carry the CrowdSec evidence captured at request time (source, remediation, scenario, service scope), which describes what happened then, not the current decision state.
+- **Allowlists**: the engine's allowlists and a check for one IP. The page only reads them; add or remove entries with `cscli` on the CrowdSec engine (CrowdSec 1.7 or later), or in the CrowdSec Console for Console-managed lists.
+
+Alerts, allowlists and decision removal need a dedicated CrowdSec machine account: set `CROWDSEC_MANAGEMENT_LOGIN` and `CROWDSEC_MANAGEMENT_PASSWORD` on the `crowdsec` plugin. Without them the page still lists connections and decisions through the bouncer key, and the other operations report that management credentials are not configured.
+
+!!! warning "Removing a decision affects every bouncer"
+    **Remove** deletes the selected decision on the CrowdSec engine itself, so it stops applying for every bouncer connected to that engine, not only BunkerWeb. It is restricted to administrators, needs a writable database and the write permission, and asks for an explicit confirmation naming the scope, target, type, scenario and origin. A removal does not lift a local BunkerWeb ban, another decision on a wider range, or an AppSec match, and instances may keep a cached decision until their next sync. Every removal sent to CrowdSec is logged with the user, the connection, the decision and the outcome. Through the API, removal needs the `crowdsec_delete` permission (see the [API reference](api.md#api-surface-capability-map)).
 
 ### Reports dashboard
 

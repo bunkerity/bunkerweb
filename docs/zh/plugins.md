@@ -28,6 +28,10 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 社区目录列出了来自两个固定 GitHub 仓库的最新发布版本：[`bunkerity/bunkerweb-plugins`](https://github.com/bunkerity/bunkerweb-plugins) 和 [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates)。这两个仓库本身就是目录。不存在单独的清单或发布者。BunkerWeb 会从发布归档中读取每个条目的 `plugin.json` 或 `template.json`，应用插件兼容性检查，并仅通过现有的上传路径安装所选条目。
 
+某个发行版本若没有针对自身版本线的兼容性条目，或其列出的最新版本早于实际运行的 BunkerWeb 版本，仍然可以安装——这是新 BunkerWeb 版本发布后、插件仓库尚未发布匹配条目之前的常见情况。低于所有已列出版本的发行版本仍会被拒绝，当前运行的 BunkerWeb 版本本身无法解析时的安装尝试同样会被拒绝。
+
+已从目录安装的插件一旦有更新版本上架，就会显示**更新**操作，以及**移除**操作。更新会用目录中的版本替换已安装的插件——即使是手动上传的插件——并丢弃新 `plugin.json` 不再声明的设置。以其他方式安装的插件（核心插件、PRO 插件，或共用同一 id 的手动外部上传）不受目录影响；请在其实际安装的位置进行更新或移除。模板在**模板**页面上的行为相同，提供**更新**操作，在应用前预览发生的变化——设置、步骤和配置文件。
+
 将 Web UI 环境变量 `USE_PLUGIN_CATALOG` 设置为 `no`，可禁用目录请求、隐藏两个目录区块并拒绝目录安装。`off`、`false` 和 `0` 同样可以禁用它。此开关不会移除任何已安装的内容。超过 24 小时的缓存列表仍然可见，但在刷新成功之前无法安装任何内容。
 
 !!! warning "目录信任模型"
@@ -40,6 +44,25 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 如果您想快速安装外部插件，可以使用 `EXTERNAL_PLUGIN_URLS` 设置。它接受一个以空格分隔的 URL 列表，每个 URL 指向一个包含一个或多个插件的压缩（zip 格式）存档。
 
 如果您想自动安装官方插件，可以使用以下值：`EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip`
+
+每个 URL 可以是 `https://`、`file:///`（指向调度器文件系统上已有的存档，用于气隙安装），或普通的 `http://`。普通 `http://` 已被弃用：它会记录一条警告，并将在 BunkerWeb 1.7.0 中被拒绝。下载大小限制为 50 MiB。要将某个 URL 固定到已知内容，请在其后附加存档的 SHA-256 摘要作为片段：
+
+```
+EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip#sha256=<64 位十六进制数字>
+```
+
+该片段永远不会发送到服务器。如果下载的字节与摘要不匹配，则不会安装该 URL 中的任何内容，且任务会失败。请在您信任的副本上使用 `sha256sum` 计算摘要。
+
+从 `EXTERNAL_PLUGIN_URLS` 中移除某个 URL 不会卸载其插件。请通过**插件**页面或使用 API 的 `DELETE /plugins/{id}` 来删除它们。
+
+服务模板具有相同的机制，即 `EXTERNAL_TEMPLATE_URLS`。每个 URL 对应一个模板：一个 `bunkerweb-template/1` JSON 包（**模板**页面导出的格式），或一个包含 `<id>/template.json` 及其 `<id>/configs/` 文件夹的 `.zip` 或 `.tar.gz` 存档，这正是 [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates) 仓库的目录结构。相较于插件，规则更为严格：
+
+- 仅接受 `https://` 和 `file:///`，绝不接受普通 `http://`；
+- 下载大小限制为 1 MiB，`#sha256=` 固定方式与插件相同；
+- 引用了此 BunkerWeb 版本没有的设置的模板将被整体拒绝；
+- 以这种方式安装的模板在 Web UI 中是只读的，该任务永远不会覆盖在 Web UI、通过 API 或由插件创建的模板；
+- 移除某个 URL 会删除其对应的模板，除非某个服务或全局设置仍在使用它。在这种情况下，该模板会被保留，并记录一条警告，一旦没有任何内容使用它，就会将其删除；
+- 如果某次运行中有 URL 下载失败，则该次运行不会删除任何模板。
 
 ### 手动
 
@@ -358,6 +381,7 @@ cd myplugin
 |  `settings`   |  是   |  字典  | 您的插件的设置列表。                                                        |
 |    `jobs`     |  否   |  列表  | 您的插件的作业列表。                                                        |
 |    `bwcli`    |  否   |  字典  | 将 CLI 命令名称映射到存储在插件 'bwcli' 目录中的文件，以公开 CLI 插件。     |
+| `extensions`  |  否   |  字典  | 可选的控制平面扩展：API 路由、数据库表、配置编译器和声明。参见[扩展](#extensions)。 |
 
 ### 执行顺序
 
@@ -439,6 +463,63 @@ cd myplugin
 
     `extensions` 仅在 Python 端校验：NGINX 运行时从不读取它。作业字段（`jobs[]`）同样仅限
     Python 端，因为是 Worker 负责调度它们。
+
+### 扩展 {#extensions}
+
+可选的 `extensions` 对象让插件不仅能扩展 NGINX 运行时，还能扩展控制平面。它包含下列键；任何其他键都会被忽略。若清单的 `extensions` 不包含 `api`、`db`、`config`、`activation` 或 `certificate_source` 中的任何一个，该清单会被拒绝。
+
+```json
+{
+  "id": "myplugin",
+  "extensions": {
+    "api": { "module": "api/router.py", "prefix": "/myplugin" },
+    "db": { "models": "db/models.py", "methods": "db/methods.py", "table_prefix": "bw_myplugin_" },
+    "activation": { "USE_MYPLUGIN": "no" }
+  }
+}
+```
+
+| 键 | 是否加载插件代码 | 用途 |
+| --- | :---: | --- |
+| `api` | 是 | 向 [API](api.md) 添加路由，挂载在 `/<插件 id>` 下。 |
+| `db` | 是 | 向中央数据库添加表，并可选地添加查询方法。 |
+| `config` | 是 | 在每次生成配置时，将存储的文档编译为设置和一个数据文件。 |
+| `activation` | 否 | 告诉 Web UI 哪些设置会为某个服务启用该插件。 |
+| `certificate_source` | 否 | 将该插件注册为证书清单中证书的所有者。 |
+| `downgrade` | 否 | 声明该插件支持的 BunkerWeb 版本，用于降级检查。 |
+
+模块路径（`module`、`models`、`methods`）必须是插件文件夹内的 `.py` 文件，以不含 `..` 的相对路径表示。
+
+!!! warning "扩展代码运行在控制平面内部"
+    `api`、`db` 和 `config` 会在 API、调度器和 worker 内部运行该插件的 Python 代码。核心插件和 PRO 插件是受信任的。除非在这些组件上设置了 `PLUGIN_API_EXTENSIONS_ALLOW_EXTERNAL=yes`，否则外部插件的 `api`、`db` 和 `config` 扩展会被跳过，并记录一条指明该插件的警告。即便如此，PRO 插件和外部插件也只有在其磁盘上的文件与插件安装时保存的校验和匹配时才会被加载；校验和不匹配或缺少记录会在导入其任何代码之前拒绝该扩展。`activation`、`certificate_source` 和 `downgrade` 不加载任何代码，且会为每个插件读取。
+
+#### `api`
+
+`module` 指定的文件必须暴露 `router = APIRouter(...)`（FastAPI）。API 会在启动时发现它，并将其挂载到 `/<插件 id>`；`prefix` 是可选的，若提供，必须等于 `/<插件 id>`。认证守卫和速率限制器会在路由器挂载时注入，因此该插件的每个路由都需要有效令牌，并计入速率限制，而插件无需声明二者中的任何一个。若插件的前缀与某个已存在的路由（如 `/instances` 这样的核心路由，或另一个插件）冲突，则该插件不会被挂载，API 会记录 `Refusing to mount plugin <id>: prefix /<id> collides with an existing router`。导入失败的插件会被记录并跳过；API 的其余部分继续运行。
+
+核心插件 `bunkernet`、`customcert`、`letsencrypt`、`selfsigned` 和 `workflows` 使用了这一机制，这就是为什么它们的路由会出现在[能力映射表](api.md#api-surface-capability-map)中各自的前缀下。
+
+#### `db`
+
+`models` 指定一个在共享 `Base` 上声明 SQLAlchemy 表的模块；`methods` 可选地指定一个包含数据库 mixin 的模块。表名必须以前缀 `bw_<插件 id>_` 命名，其中 id 中的 `-` 和 `.` 会被替换为 `_`。该前缀由 id 计算得出：`table_prefix` 是可选的，若提供，必须与之相等，注册了超出该前缀的表的模块会被拒绝。两个 id 归约为相同前缀的插件（`a-b` 和 `a_b`）都会被拒绝。
+
+#### `config`
+
+`module` 必须暴露 `compile_config(db, config, logger)`，该函数在每次生成配置时调用一次，并返回 `{"variables": {...}, "data": {...}}`。`variables` 会被合并到模板所看到的设置中。每个值必须是字符串，每个名称必须以插件 id 的大写形式（其中 `-` 和 `.` 替换为 `_`）加上 `_` 开头；与现有设置同名的名称必须是插件自身声明的设置。`data`（若存在）会以 JSON 形式写入 `/var/cache/bunkerweb/<插件 id>/config.json`，并随其余作业缓存一起下发到各实例。每个编译器都会在写入任何内容之前运行，任何错误都会中止整个生成过程：实例会继续提供其上一次有效的配置。
+
+#### `activation`
+
+可以是 `"always"`（表示该插件始终生效且没有开关），也可以是插件自身设置到其未激活值的映射，例如 `{"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"}`。只要列出的任一设置的值与其未激活值不同，该插件就被视为在某个服务上处于激活状态；Web UI 用它来按服务显示和切换插件。若映射中指定了插件未声明的设置，则整个映射会被忽略，此时 UI 会回退去查找 `USE_<插件 ID>` 设置。
+
+#### `certificate_source`
+
+`{"label": "Let's Encrypt", "renews": true}` 声明该插件可以在集中式证书清单中拥有证书。`label` 是为该来源显示的名称（默认为插件名称），`renews` 表示该来源是否自行续期其证书（默认 `false`）。已声明的来源会被添加到内置的 `letsencrypt`、`customcert` 和 `selfsigned` 之中；它们共同构成 `GET /certificates/sources` 返回的列表，证书只能使用该列表中的来源来创建、刷新或过滤。该列表会在每次调用时重新读取，因此新安装的来源无需重启任何内容即可被接受。该声明本身不会授予任何访问权限：插件仍需通过自己受保护的 API 路由或作业来写入证书。
+
+#### `downgrade`
+
+`{"min_version": "1.7.0", "max_version": "1.7.9"}` 声明了非核心插件（PRO、外部或通过 UI 安装的插件）所支持的 BunkerWeb 版本；两个边界都是可选的。`backup` 插件的降级检查会用到它：若某个插件的版本范围不包含目标版本，或某个非核心插件完全没有 `downgrade` 块，则会将降级限制为仅可恢复备份。核心插件不需要它。由于单独一个 `downgrade` 块不满足上面的规则，请将它与至少一个其他键一起声明。
+
+插件翻译不是 `extensions` 的键：参见[插件翻译](#plugin-translations)。
 
 ### CLI 命令
 
@@ -645,7 +726,7 @@ BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbo
 !!! warning "未知的键会被拒绝"
     任务条目只接受 `name`、`file`、`every`、`reload`、`async` 和 `regenerate`，不接受其他任何键。拼写错误的键（如 `"regenrate"`）会导致整个插件校验失败并被忽略，日志中会点名出错的那个键——这是故意的，这样一个拼写错误就不会悄无声息地禁用某个标志。
 
-### 插件页面
+### 插件页面 {#plugin-page}
 
 与 Web UI 相关的所有内容都位于 **ui** 子文件夹中，正如我们在[之前的结构部分](#structure)中看到的那样。
 
@@ -951,18 +1032,44 @@ plugin /
 
 在这种结构中，`user_auth.py` 包含 `user_auth` 蓝图，而 `user_auth.html` 是相关的模板，遵循了推荐的命名约定。
 
-### 插件翻译
+### 插件翻译 {#plugin-translations}
 
 插件可以附带自己的翻译目录，并将其合并到管理界面中——无论是在浏览器端（`t()`）还是服务器端（Jinja 模板中的 `_()`）。无需在 `plugin.json` 中声明，也无需构建步骤。浏览器端提供的目录 URL 带有文件指纹，因此每当已安装插件的目录发生变化时，浏览器缓存都会自动刷新。
 
-支持两种目录结构，按以下顺序查找：
+支持三种目录结构，按以下顺序检查：
 
-1. `ui/blueprints/static/locales/<lang>.json`，适用于带 Flask 蓝图的插件。
-2. `ui/static/locales/<lang>.json`，适用于简单的 `ui/template.html` 页面。
+1. 插件根目录下的 `locales/<lang>.json`，这是没有 UI 的插件唯一可用的结构。
+2. `ui/blueprints/static/locales/<lang>.json`，适用于带 Flask 蓝图的插件。
+3. `ui/static/locales/<lang>.json`，适用于简单的 `ui/template.html` 页面。
+
+插件可以同时提供根目录结构和一种 `ui/` 结构——根目录结构用于 `plugin.json` / `template.json` 元数据（见下文），`ui/` 结构用于页面文本——两者会被合并：在 `meta`、`settings` 和 `templates` 键上以根目录结构为准，在其他任何键上以 `ui/` 结构为准，只有一方提供的键则原样传递。只提供一种结构的行为与以前完全相同；如果没有理由拆分，也可以把页面文本放在那里。
 
 `en.json` 是必需的回退文件；其他语言文件均为可选。您目录中的每个顶层键**必须**是您的插件 ID，例如 `{"my_plugin": {"title": "..."}}`。任何其他顶层键都会被整体拒绝——不会被合并，也不只是冲突的叶子键——并记录一条命名您的插件及涉及键的警告；这正是为了防止一个插件的目录侵占或遮蔽另一个插件（或核心）的命名空间。在您自己的命名空间内，与现有值冲突的叶子键（核心的值，或先前加载的、与您插件 ID 完全相同的插件的值）会被丢弃并记录一条警告；您自己命名空间下的新叶子键则始终会被合并。包含 `.` 的插件 ID 无法拥有可访问的目录（`_()` 和 `t()` 都会按 `.` 拆分查找键），会被整体拒绝，并记录一条警告。
 
 服务器端的 `_()` 无法像浏览器端的 `t()` 那样插值 `{{var}}` 占位符。需要替换内容的字符串请在浏览器端使用 `t()`。
+
+#### 翻译插件元数据
+
+同一个目录还可以翻译您的 `plugin.json` 文本以及插件附带的模板。请将下列键放在您的插件 id 下：
+
+| 键 | 翻译内容 |
+| --- | --- |
+| `<id>.meta.name`、`<id>.meta.description` | `plugin.json` 中的 `name` 和 `description` |
+| `<id>.settings.<SETTING>.label`、`<id>.settings.<SETTING>.help` | 某个设置的 `label` 和 `help` |
+| `<id>.templates.<template>.name` | `templates/<template>.json` 的 `name` |
+| `<id>.templates.<template>.steps.<n>.title`、`<id>.templates.<template>.steps.<n>.subtitle` | 某个模板步骤，从 0 开始编号 |
+
+英文文本仍保留在 `plugin.json` 和 `templates/*.json` 中：这些键不需要 `en.json`。每个字符串会各自先回退到您自己的 `en.json`（如果其中有该键），再回退到 `plugin.json` 中的文本。不完整的目录永远不会显示原始键名。使用以下命令生成一个包含英文文本的骨架文件：
+
+```shell
+python3 misc/dev/i18n/plugin_meta_keys.py path/to/my_plugin > path/to/my_plugin/locales/fr.json
+```
+
+这些键仅在服务器端解析。它们不会随 `t()` 发送到浏览器，因此您的 JavaScript 无法使用它们。
+
+`pre_render()`（参见[插件页面](#plugin-page)）返回的小部件同样可以翻译。在 `title` 和 `subtitle` 旁添加 `title_i18n` 和 `subtitle_i18n`，其值为相对于您插件 id 的键。例如，`"title_i18n": "widgets.status.title"` 会读取 `<id>.widgets.status.title`。`title` 和 `subtitle` 仍作为回退。
+
+核心插件在 `src/common/core/<id>/locales/` 中附带这些目录，并有一个单元测试保持每种语言与清单的一致性。`src/common/settings.json` 中的设置没有插件目录，因此它们在核心目录中的 `general.settings.<SETTING>.label` 和 `.help` 下翻译。
 
 ### UI 插件支持的接口
 

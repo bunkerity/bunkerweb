@@ -12,6 +12,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     - 根路径：反向代理挂载子路径时设置 `API_ROOT_PATH`，确保 docs 和 OpenAPI 链接可用
     - 认证必需：Biscuit token、管理员 Basic 或 override Bearer token
     - IP 白名单默认是 RFC1918 范围（`API_WHITELIST_IPS`）；仅在上游已控制访问时禁用
+    - 可选的 `Host` 头白名单（`API_ALLOWED_HOSTS`），默认关闭
     - 速率限制默认开启；`/auth` 始终有自己的限制
 
 ## 安全清单
@@ -21,6 +22,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - ACL 范围：config、service、plugin 和 global settings 的**写**权限等同于管理员（其内容会原样渲染进 NGINX/Lua 配置，即代码执行）：只授予完全可信的用户。`instances_create` 和 `instances_update` 也一样，只是路径不同：对已注册实例的每次调用都会带上 `API_TOKEN` 管理员覆盖令牌，且 scheduler 会把生成的配置和缓存（含 TLS 私钥）推送到每个已注册实例。参见“权限与 ACL”一节。
 - 隐藏路径：反向代理时选择不易猜到的 `API_ROOT_PATH`，并在代理上同步。
 - 速率限制：保持启用，除非其他层有同等限制；`/auth` 始终限速。
+- Host 头：如果 API 只能通过已知名称访问，请在 `API_ALLOWED_HOSTS` 中列出这些名称，使携带其他 `Host` 的请求在认证之前就被拒绝。参见“Host 头白名单”一节。
 - TLS：在代理终止，或设置 `API_SSL_ENABLED=yes` 并提供证书/密钥路径。
 
 ## 运行方式
@@ -186,7 +188,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `configs`: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins`: `plugin_read`, `plugin_create`, `plugin_delete`
   - `cache`: `cache_read`, `cache_delete`
-  - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
+  - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`，另加用于 `/crowdsec` 路由的 `crowdsec_read` 和 `crowdsec_delete`（可用连接的 id 作为 `resource_id`，把授权限制到单个 CrowdSec 连接）
   - `jobs`: `job_read`, `job_run`
 - `resource_id` 通常是第二个路径段（如 `/services/{id}`）；"*" 表示全局访问。
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
@@ -340,6 +342,18 @@ TLS 信任也按实例存储：
 | `API_WHITELIST_ENABLED` | 切换 IP 白名单中间件    | `yes/no/on/off/true/false/0/1` | `yes`                 |
 | `API_WHITELIST_IPS`     | 空格/逗号分隔的 IP/CIDR | IP/CIDR                        | 代码中的 RFC1918 范围 |
 
+#### Host 头白名单
+
+| Setting             | 描述                                     | 接受的值                                       | 默认值        |
+| ------------------- | ---------------------------------------- | ----------------------------------------------- | ------------- |
+| `API_ALLOWED_HOSTS` | API 会响应的 `Host` 头取值；为空则禁用检查 | 空格/逗号分隔的主机名；通配符仅支持 `*` 或 `*.example.com` | 空（禁用） |
+
+设置后，`Host` 头不在列表中的请求会在任何路由或令牌检查之前收到 `400 Invalid host header`（纯文本）。唯一例外：当列表中有 `www.example.com` 但没有 `example.com` 时，针对 `example.com` 的请求会改为收到指向它的 `307` 重定向。scheduler 和各实例用来访问 API 的内部名称（`API_SERVER_NAME`，默认 `bwapi`）总会被加入列表，因此启用该检查不会切断控制平面。API 启动时会记录 `API Host header allowlist enabled: [...]`。通配符位置错误的条目，例如 `api.*.com` 或 `*example.com`，会禁用整个白名单而不是只忽略这一条，并且 API 会在 `ERROR` 级别记录 `Invalid API_ALLOWED_HOSTS entries [...] (wildcards must be like '*.example.com'); host allowlist NOT enabled`：修改该设置后请检查这条日志。
+
+#### 证书上传大小限制
+
+`POST /customcert/certificates/upload` 接受的请求体最大为 2 MiB，另加 64 KiB 的 multipart 开销。更大的请求会在解析上传内容之前就被拒绝，返回 `413` 和 `{"status": "error", "message": "Certificate upload exceeds the 2 MiB request limit"}`：先检查声明的 `Content-Length`，若请求体在流式传输过程中实际更大，也会以同样方式被截断拒绝。在这个总限额内，证书文件和私钥文件各自最大为 1 MiB，否则端点返回 `422`。该限制是固定的，没有对应设置；其他端点不受影响。
+
 #### 速率限制
 
 | Setting                          | 描述                                 | 接受的值                                                  | 默认值         |
@@ -442,9 +456,15 @@ TLS 信任也按实例存储：
   - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。封禁会先持久化，再发送给实例。
   - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。如果撤销无法持久化，API 会拒绝操作，因为未收到撤销的实例之后可能把该封禁重新带回集群。
   - `GET /bans/timeseries?start=...&end=...&bucket=hour`：`[start, end)` 各区间的活动封禁占用数量。`bw_bans` 对每个 `(ip, ban_scope, service_id)` 只保留一行，再次封禁会改写 `created_at`；因此这是时点占用计数，不是事件或创建历史。
+- **CrowdSec**（调查与决策管理，通过已注册实例的 `crowdsec` 插件转发）
+  - `GET /crowdsec`（需要 `crowdsec_read`）：已注册实例报告的每个 CrowdSec 连接，各带一个不透明的 `id`、其 `instance` 及所覆盖的服务，另加一个 `errors` 映射，列出无法读取的实例。标记为 `down` 的实例会在这里报告，而不会被查询。
+  - `GET /crowdsec/{connection}/decisions?ip=&origin=&scenario=&offset=&limit=`（需要 `crowdsec_read`）：直接从该 CrowdSec 引擎读取的活动决策，默认每页 50 条，最多 200 条。
+  - `GET /crowdsec/{connection}/ips/{ip}`（需要 `crowdsec_read`）：跨该引擎的决策与告警、该连接所覆盖服务的 BunkerWeb 自身 report 与封禁、以及该引擎的白名单，对一个 IP 进行综合调查。无法读取的部分会列在 `errors` 中，其余部分仍会返回。
+  - `GET /crowdsec/{connection}/alerts/{alert_id}`、`GET /crowdsec/{connection}/allowlists`、`GET /crowdsec/{connection}/allowlists/check?ip=`（需要 `crowdsec_read`）：告警证据和白名单。这些路由通过管理用的机器账号查询引擎，在设置 `CROWDSEC_MANAGEMENT_LOGIN` 和 `CROWDSEC_MANAGEMENT_PASSWORD` 之前会返回 `403`；决策查询只需要 bouncer key。
+  - `DELETE /crowdsec/{connection}/decisions/{decision_id}`（需要 `crowdsec_delete`，`ban_delete` 不包含该权限）：在 CrowdSec 引擎上移除一条决策。请求体 `{"scope": "Ip"|"Range", "value": "...", "decision_type": "..."}` 必须重新给出要移除的决策，若 scope 与 value 不匹配（范围缺少 `/`、IP 带了 `/`）则会被拒绝。该移除会应用到该引擎的每个 bouncer；每条到达引擎的移除操作都会记录调用者、连接、决策和结果。
 - **Plugins（UI 插件）**
   - `GET /plugins`: 列出插件；`with_data=true` 包含可用的打包字节。
-  - `POST /plugins/upload`: 从 `.zip`、`.tar.gz`、`.tar.xz` 安装 UI 插件。
+  - `POST /plugins/upload`: 从 `.zip`、`.tar.gz`、`.tar.xz` 安装 UI 插件。`replace=true` 会覆盖同 id 的现有插件，并丢弃新 `plugin.json` 不再声明的设置——只有通过 `ui` 安装的插件（上传或从目录安装）才能这样被替换；其他已存在的 id 会返回 `409`。目录更新插件正是通过这种方式实现的。
   - `DELETE /plugins/{id}`: 按 ID 删除插件。
   - `PUT /plugins/external`：批量替换数据库中的外部/PRO 插件，`delete_missing` 删除载荷未包含的插件；归档通过 JSON 以 base64 传输。
   - `GET /plugins/{id}/page`：返回插件 UI 页面数据的 `tar.gz`，无页面则返回 `404`。
@@ -467,7 +487,7 @@ TLS 信任也按实例存储：
   - `GET /system/readonly`：数据库是否处于只读/故障转移状态。
   - `POST /system/checked-changes`：确认变更跟踪标记已处理。
 - **用户**（Web UI 帐户，不是 API 调用方）
-  - `GET/POST /users`、`GET/PATCH /users/{username}`：帐户管理。
+  - `GET/POST /users`、`GET/PATCH /users/{username}`：帐户管理。除非提供 `roles`，`POST /users` 会创建 `reader`。
   - `GET/DELETE /users/{username}/sessions`、`POST /users/{username}/login`：会话列出、撤销和登录。
   - `POST /users/{username}/recovery-codes/refresh|use`：TOTP 恢复代码。
   - `POST /users/{username}/totp/use`：一次性消费 TOTP 计数器，防止相同代码在另一个 UI Worker 重放。拒绝表示重放防御生效，不是故障；调用方通过 `200` 响应中的 `consumed: false` 区分。
@@ -476,6 +496,8 @@ TLS 信任也按实例存储：
 - **模板**
   - `GET /templates`、`GET /templates/{id}`：列出/读取可复用服务模板。
   - `POST /templates`、`PATCH /templates/{id}`、`DELETE /templates/{id}`：创建、更新和删除模板。
+  - `GET /templates/{id}/export`：将任意模板（包括插件拥有的模板）导出为 `bunkerweb-template/1` 包——即 `POST /templates/import` 所需的请求体。归属关系不属于该包的一部分：导入结果始终归属 UI。
+  - `POST /templates/import`：从 `bunkerweb-template/1` 包创建模板；`replace=true` 会覆盖同 id 的现有 UI 模板（不加此参数则返回 `409`）。插件拥有或以其他方式受管理的模板永远不会以这种方式被替换，即使带 `replace=true` 也一样。
 - **资源组**
   - `GET /resource_groups`、`GET /resource_groups/{id}`、`GET /resource_groups/{id}/references`：列出/读取有类型的资源列表别名，并在删除前查看引用。
   - `POST /resource_groups`、`PATCH /resource_groups/{id}`、`DELETE /resource_groups/{id}`、`POST /resource_groups/{id}/clone`：管理资源组。

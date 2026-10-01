@@ -247,7 +247,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     | Setting                 | Default | Context | Multiple | Description                                                                    |
     | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
     | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
-    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
+    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). At most 50 MiB per URL; append `#sha256=<digest>` to pin content; plain `http://` is deprecated and will be refused in 1.7.0. |
 
 === "File Caching"
 

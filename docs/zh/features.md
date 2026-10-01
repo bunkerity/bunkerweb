@@ -926,8 +926,8 @@ bwcli plugin backup downgrade 1.6.14 --execute
 | ---- | -------- | ---- |
 | SQLite | ✅ 已测试 | 结构完全恢复为 1.6.14 所声明的样子，基线数据一行不丢。 |
 | PostgreSQL | ✅ 已测试 | 同上，另外会残留两个未使用的枚举类型，1.6.14 从不查看它们。 |
-| MariaDB | ❌ 从备份恢复 | 迁移中途中止（错误 1265 和 1553），留下一个混合结构。 |
-| MySQL | ❌ 从备份恢复 | 错误 1265 在此同样实测确认；第二个阻塞点是从 MariaDB 推断的，未在 MySQL 上实测。 |
+| MariaDB | ❌ 从备份恢复 | 迁移中途中止（错误 1553，外键所需的索引无法删除），留下一个混合结构。 |
+| MySQL | ❌ 从备份恢复 | 同样中止于错误 1553，已在 MySQL 8 上实测确认。 |
 
 全新安装的 1.7 不会打上任何 Alembic 版本戳——只有升级才会打戳——因此在这种安装上预检会报告 ⚠️
 *No Alembic revision is stamped*。这是警告而非拒绝：就地降级需要版本戳才能知道哪些迁移已经执行过，
@@ -940,6 +940,10 @@ bwcli plugin backup downgrade 1.6.14 --execute
     资源组，但不含 BunkerWeb 内置的那些——只要其中任何一张仍有内容就会拒绝。它数不了的部分，会在确认
     提示之前逐条读出：从幸存表上删除的列，以及因为从不为空而被排除的数据（请求指标、UI 偏好）。请读那份
     清单；对这些数据没有任何东西会替你拒绝。
+
+    单项设置草稿（在 RAW 编辑器中保存为草稿的值）会被拒绝，而不是丢失：1.6.14 没有草稿标志，会直接应用
+    它们，因此只要还有草稿，它的迁移就会拒绝，而预检会更早拒绝。回退前请先启用或删除这些草稿，或者以
+    保留草稿的 1.6.15 为目标。
 
 !!! tip "任何失败都会留下一个可启动的状态"
     `downgrade --execute` 会拒绝执行，除非同一目标版本上已有冻结锁、它自己重新跑的 preflight 结果干净、
@@ -1092,7 +1096,7 @@ STREAM 支持 :white_check_mark:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。                                                                  |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。           |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。          |
 
 !!! warning "误报"
     在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。
@@ -2004,6 +2008,41 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 以下各节将依次说明这些步骤。
 
+### IP 调查与决策移除
+
+在 Web 界面中打开 **附加页面 → CrowdSec**，查看各个已配置的连接、受影响的服务、本地 API 连通性和决策同步状态。CrowdSec 插件状态卡片以及报告和封禁页面中的 **调查 IP** 操作都会打开同一页面。调查链接会预先填入 IP 地址。当多个服务或实例使用 CrowdSec 时，请选择相应连接。
+
+调查结果汇总当前 CrowdSec 决策、可用的 CrowdSec 告警、保留的 BunkerWeb 报告和 BunkerWeb 本地封禁。当前决策与报告中捕获的证据分开展示。新的 CrowdSec 报告会保留可用的决策 ID、来源、场景、目标、处置措施和到期时间，即使相关决策已到期或被移除。AppSec 拒绝与 AppSec 故障策略导致的拒绝使用不同的来源标识。历史证据遵循现有的报告保留设置；旧报告和已从缓存中逐出的可选元数据可能没有额外详情。告警查看功能仅展示有限的事件元数据，不暴露原始请求正文、Cookie 或认证标头。
+
+本地报告和服务专属封禁仅限于所选连接的服务范围；BunkerWeb 全局封禁也会包含在结果中。如果无法再从实例已加载的配置中确定该范围，调查将停止，以免返回其他服务的证据。当本地 API 不可用但连接配置仍已加载时，保留的报告依然可以访问。
+
+**CrowdSec 允许列表** 部分展示引擎的原生允许列表、条目、备注、到期时间，以及列表由本地还是 CrowdSec Console 管理。IP 调查会检查引擎当前的允许列表状态，并显示匹配原因。读取和检查允许列表需要下文所述的管理凭据。界面会区分检查不可用和 IP 不在允许列表中这两种情况。允许列表例外适用于整个 CrowdSec 引擎，不会移除 BunkerWeb 本地封禁。CrowdSec 1.8.0 通过 LAPI 提供读取和检查操作；修改原生允许列表则需要在其主机上使用 `cscli`，或通过独立的 Console 管理权限完成。
+
+现有的 `CROWDSEC_API_KEY` 是 **bouncer 密钥**，支持读取决策，但不能移除决策或查看告警。要启用这些操作，请在相应的 CrowdSec 引擎上注册专用机器，并配置以下两个可选的多站点设置：
+
+- `CROWDSEC_MANAGEMENT_LOGIN`：专用机器的登录名。
+- `CROWDSEC_MANAGEMENT_PASSWORD`：该机器的密码。
+
+按照 CrowdSec 的[本地 API 认证流程](https://doc.crowdsec.net/docs/local_api/authentication/)注册机器，并妥善保管凭据。任一设置为空时，管理功能均不可用。内置引擎和外部引擎使用相同配置：请求经由所选 BunkerWeb 实例发送，因此内置本地 API 可以继续仅监听 localhost。管理操作的 HTTPS 请求使用 BunkerWeb 的 TLS 信任配置验证服务器证书，与 AppSec 的验证设置相互独立。
+
+**移除 CrowdSec 决策** 与解除 BunkerWeb 封禁是不同的操作。在 Web 界面中移除决策需要具有写入权限的管理员、已配置的管理凭据，并确认所选决策；API 不能处于只读模式。移除针对地址范围的决策会影响整个范围。在共享引擎上移除决策也会影响使用该决策的其他 bouncer。移除前会再次核对所选 ID、范围、目标和处置措施；其他决策和本地封禁会被保留。
+
+成功响应会确认决策已从本地 API 移除，并显示仍然匹配的决策。Bouncer 会在配置的流刷新或 live 模式缓存到期后获取变化；界面会将传播状态标记为待完成，而不会声称所有客户端都已获准访问。其他决策、本地封禁、新检测结果或 AppSec 规则仍可能阻止请求。移除结果会记录到日志中，同时包含已认证的操作者及所选连接和决策。
+
+公共 API 提供相同的操作：
+
+- `GET /crowdsec`：连接、同步状态和各实例的错误。
+- `GET /crowdsec/{connection_id}/decisions`：按 `ip`、`origin` 或 `scenario` 筛选；使用 `offset` 和 `limit` 分页（上限为 200）。
+- `GET /crowdsec/{connection_id}/ips/{ip}`：调查结果，最多包含 200 条决策、50 条告警和 50 份报告，并显示总数或上限，以及明确标记为不可用的部分。
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`：已过滤敏感数据的告警详情。
+- `GET /crowdsec/{connection_id}/allowlists`：原生允许列表，使用 `offset` 和 `limit` 分页；每个列表最多返回 200 个条目，同时显示完整的条目总数。
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`：当前是否匹配原生允许列表，以及匹配原因。
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`：在 JSON 请求体中包含所选的 `scope`、`value` 和 `decision_type`。
+
+请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。使用 `GET /crowdsec` 列出连接需要将权限授予 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
+
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
@@ -2542,6 +2581,30 @@ STREAM 支持 :white_check_mark:
 | `CUSTOM_SSL_KEY`           |        | multisite | 否   | **私钥路径：** 您的 SSL 私钥文件的完整路径。                                                |
 | `CUSTOM_SSL_CERT_DATA`     |        | multisite | 否   | **证书数据：** 以 base64 格式编码或以纯文本 PEM 格式表示的您的证书。                        |
 | `CUSTOM_SSL_KEY_DATA`      |        | multisite | 否   | **私钥数据：** 以 base64 格式编码或以纯文本 PEM 格式表示的您的私钥。                        |
+
+### 默认服务器证书
+
+**默认服务器**是响应不匹配任何已配置服务的请求的 block：未知的 SNI、连接到裸 IP 地址、没有服务处理的 `Host`。它唯一能展示的证书曾是 BunkerWeb 启动时生成的内部自签名证书——这就是为什么浏览器访问实例上一个未知主机名时会看到名称不匹配的警告。
+
+这四个全局设置替代了它。留空则保留内部证书。它的其他设置——TLS、响应头、错误页面——在保留的 `default-server` 服务上编辑，参见[配置 Default Server](#miscellaneous)。
+
+| 设置                            | 默认值 | 上下文 | 多个 | 描述                                                                                                                       |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_SERVER_SSL_CERT`      |         | global  | 否       | **默认服务器证书路径：** 用于响应不匹配任何已配置服务的请求所使用的证书或证书链的完整路径。仅在存在默认服务器 block 的地方生效：多站点模式（`MULTISITE=yes`），或单站点下的 `DISABLE_DEFAULT_SERVER=yes`。 |
+| `DEFAULT_SERVER_SSL_KEY`       |         | global  | 否       | **默认服务器密钥路径：** 对应私钥的完整路径。                                                              |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |         | global  | 否       | **默认服务器证书数据：** 与上面相同的证书，以 base64 或纯文本 PEM 格式提供。仅在路径设置为空时使用。仅在存在默认服务器 block 的地方生效：多站点模式（`MULTISITE=yes`），或单站点下的 `DISABLE_DEFAULT_SERVER=yes`。 |
+| `DEFAULT_SERVER_SSL_KEY_DATA`  |         | global  | 否       | **默认服务器密钥数据：** 与上面相同的私钥，以 base64 或纯文本 PEM 格式提供。仅在路径设置为空时使用。          |
+
+该覆盖设置是**最后**才被查询的，且只在默认服务器内部生效：任何自己解析出证书的服务——通过证书清单、`USE_CUSTOM_SSL`、Let's Encrypt 或自签名提供方——始终保留自己的证书。
+
+!!! warning "覆盖了你某个服务的证书会被拒绝"
+    默认服务器会响应*任意*主机名。如果它的证书同时覆盖了 `www.example.com`，客户端就可以用未知 SNI 打开连接，拿到该证书，然后在同一连接上复用 `Host: www.example.com`——这样一来，该服务从未授权的证书就可以被用于它（HTTP/2 连接合并）。因此 `custom-cert` job 会拒绝任何 SAN 或 Common Name 覆盖了已配置服务主机名（包括通配符）的证书，并记录被拒绝所针对的主机名。请使用不覆盖任何已配置服务主机名的证书，或改用 `USE_CUSTOM_SSL` 将其绑定到具体服务上。
+
+!!! info "被拒绝不会撤回已经在提供的证书"
+    无效的证书材料、不匹配的证书/密钥对、以及覆盖了服务主机名的证书都会让 job 明确失败，并保留此前已提供的证书，而不是让默认服务器变得没有证书。同理，证书即将过期时也只会发出警告。清空这两个设置即可移除覆盖，恢复使用内部证书。
+
+!!! tip "启用严格 SNI 时该设置失效"
+    当 `DISABLE_DEFAULT_SERVER_STRICT_SNI` 设置为 `yes` 时，未知 SNI 会在 TLS 握手阶段就被关闭，此时还未选择任何证书——因此这个覆盖设置永远不会被用到。如果你希望未知主机名也能收到你自己的证书，请保持该设置关闭。
 
 !!! warning "安全注意事项"
     使用自定义证书时，请确保您的私钥得到妥善保护并具有适当的权限。文件必须可由 BunkerWeb 调度器读取。
@@ -3239,30 +3302,57 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
 !!! tip "可复用的 gRPC 后端池"
     一个 `GRPC_HOST` 只指向单个后端。若要在多个后端之间做负载均衡，或在多个服务之间共用同一批后端，请在 **Upstreams** 页面（或通过 `/upstreams` API）声明一个 **gRPC 上游池**，并按路径附加到某个服务上——BunkerWeb 会替您把 `grpc://<池名>` 写入对应的 `GRPC_HOST`。请注意，在同一个服务上 gRPC 与反向代理的 `location` 共享同一个路径命名空间：同一路径不能被占用两次，无论由哪个插件提供服务。参见反向代理文档中的*可复用的上游池*一节。
 
-!!! tip "与 gRPC 后端之间的双向 TLS"
-    要向后端出示客户端证书，请在该服务上设置 `REVERSE_PROXY_SSL_CLIENT_CERT` 和 `REVERSE_PROXY_SSL_CLIENT_KEY`（或它们的 `_DATA` 变体）。该身份是有意与反向代理共享的：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证，BunkerWeb 会据此输出 `grpc_ssl_certificate`/`grpc_ssl_certificate_key`。参见反向代理文档中的*与上游之间的双向 TLS*。
+!!! tip "与 gRPC 后端的双向 TLS"
+    gRPC 拥有独立于反向代理的自有上游身份。对于 TLS 上游，请使用 `grpcs://` 并按需配置 `GRPC_SSL_SNI` 与 `GRPC_SSL_SNI_NAME`。要校验上游证书，请设置 `GRPC_SSL_VERIFY=yes`，并通过 `GRPC_SSL_TRUSTED_CERTIFICATE` 或 `_DATA` 提供 PEM CA 包，由 `_PRIORITY`（`file` 或 `data`）选择来源。`GRPC_SSL_VERIFY_DEPTH` 默认为 `1`。系统不会自动选择 CA 包：若没有已缓存的 CA，生成的配置会禁用验证，并附带说明如何配置的注释。CRL 是可选的（`GRPC_SSL_CRL` 或 `_DATA`），仅在启用验证且存在已缓存 CA 时才会应用。`GRPC_SSL_PROTOCOLS` 和 `GRPC_SSL_CIPHERS` 留空时不改变 NGINX 默认值。
 
-### 配置项
+    要启用双向 TLS，请设置 `GRPC_SSL_CLIENT_CERT` 和 `GRPC_SSL_CLIENT_KEY`，或其 `_DATA` 变体；`GRPC_SSL_CLIENT_CERT_PRIORITY` 用于选择证书对使用文件路径还是数据。两者都必须有效且匹配——BunkerWeb 会检查上游客户端证书是否与其私钥匹配；临时的文件读取失败会保留已缓存的 TLS 材料并报告任务失败，而清空设置或提供无效材料则会移除受影响的缓存。该身份归属于 gRPC；反向代理和 stream 各自独立使用 `REVERSE_PROXY_SSL_CLIENT_*`。共享的 `trusted-cert` 任务会将 gRPC 的 CA、CRL 和客户端证书对缓存到 reverseproxy 缓存目录中，并在材料发生变化时触发配置重新生成。不存在单独的 gRPC 证书任务。TLS 设置适用于整个服务，包括已挂载的上游池；它们不是按 location 生效的设置。参见反向代理文档中的*与上游的双向 TLS*。
 
-| 配置项                       | 默认值 | 上下文    | 可多值 | 说明                                                                                   |
-| ---------------------------- | ------ | --------- | ------ | -------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`   | multisite | 否     | **启用 gRPC：** 设置为 `yes` 以启用 gRPC 代理。                                        |
-| `GRPC_HOST`                  |        | multisite | 是     | **gRPC 上游：** `grpc_pass` 使用的值（例如 `grpc://service:50051` 或 `grpcs://...`）。 |
-| `GRPC_URL`                   | `/`    | multisite | 是     | **Location URL：** 将被代理到 gRPC 上游的路径。 以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。 可选地以 `~`、`~*`、`=` 或 `^~` 加一个空格作为前缀，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
-| `GRPC_CUSTOM_HOST`           |        | multisite | 否     | **自定义 Host 头：** 覆盖发送到上游的 `Host` 头。                                      |
-| `GRPC_HEADERS`               |        | multisite | 是     | **额外上游请求头：** 分号分隔的 `grpc_set_header` 值列表。                             |
-| `GRPC_HIDE_HEADERS`          |        | multisite | 是     | **隐藏响应头：** 空格分隔的 `grpc_hide_header` 值列表。                                |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`  | multisite | 否     | **拦截错误：** 启用/禁用 `grpc_intercept_errors`。                                     |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`  | multisite | 是     | **连接超时：** 与上游建立连接的超时时间。                                              |
-| `GRPC_READ_TIMEOUT`          | `60s`  | multisite | 是     | **读取超时：** 从上游读取数据的超时时间。                                              |
-| `GRPC_SEND_TIMEOUT`          | `60s`  | multisite | 是     | **发送超时：** 向上游发送数据的超时时间。                                              |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`  | multisite | 是     | **Socket Keepalive：** 启用/禁用与上游 socket 的 keepalive。                           |
-| `GRPC_SSL_SNI`               | `no`   | multisite | 否     | **SSL SNI：** 启用/禁用 TLS 上游的 SNI。                                               |
-| `GRPC_SSL_SNI_NAME`          |        | multisite | 否     | **SSL SNI 名称：** 当 `GRPC_SSL_SNI=yes` 时发送的 SNI 主机名。                         |
-| `GRPC_NEXT_UPSTREAM`         |        | multisite | 是     | **下一个上游条件：** `grpc_next_upstream` 的值。                                       |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |        | multisite | 是     | **下一个上游超时：** `grpc_next_upstream_timeout` 的值。                               |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |        | multisite | 是     | **下一个上游重试次数：** `grpc_next_upstream_tries` 的值。                             |
-| `GRPC_INCLUDES`              |        | multisite | 是     | **附加 include：** 在 gRPC `location` 块中追加的、以空格分隔的 include 文件列表。      |
+### 配置设置
+
+| Setting                                 | 默认值 | 上下文    | 多值 | 描述                                                                                                                              |
+| ---------------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_GRPC`                              | `no`   | multisite | 否   | **启用 gRPC：** 设置为 `yes` 以启用 gRPC 代理。                                                                                   |
+| `GRPC_HOST`                             |        | multisite | 是   | **gRPC 上游：** `grpc_pass` 使用的值（例如 `grpc://service:50051` 或 `grpcs://...`）。                                           |
+| `GRPC_URL`                              | `/`    | multisite | 是   | **Location URL：** 将被代理到 gRPC 上游的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地以 `~`、`~*`、`=` 或 `^~` 加一个空格作为前缀，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
+| `GRPC_CUSTOM_HOST`                      |        | multisite | 否   | **自定义 Host 头：** 覆盖发送到上游的 `Host` 头。                                                                                 |
+| `GRPC_HEADERS`                          |        | multisite | 是   | **上游请求头：** 分号分隔的 `grpc_set_header` 值；匹配的生成标头会被不区分大小写地替换。                                          |
+| `GRPC_HIDE_HEADERS`                     |        | multisite | 是   | **隐藏响应头：** 空格分隔的 `grpc_hide_header` 值列表。                                                                           |
+| `GRPC_HEADERS_CLIENT`                   |        | multisite | 是   | **客户端响应头：** 分号分隔的 `add_header` 值列表，发送给客户端。                                                                 |
+| `GRPC_PASS_HEADERS`                     |        | multisite | 是   | **透传响应头：** 空格分隔的 `grpc_pass_header` 值列表，用于转发默认被隐藏的标头。                                                 |
+| `GRPC_IGNORE_HEADERS`                   |        | multisite | 是   | **忽略的响应头：** 空格分隔的 `grpc_ignore_headers` 值列表，使 NGINX 不处理这些标头。                                             |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`   | multisite | 否   | **标头中使用下划线：** 启用/禁用 `underscores_in_headers`。该指令在服务器范围内与反向代理和 misc 插件共享：只要某个服务为其中一个 location 启用，就会对整个服务生效。 |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`  | multisite | 否   | **拦截错误：** 启用/禁用 `grpc_intercept_errors`。                                                                                |
+| `GRPC_BUFFER_SIZE`                      |        | multisite | 是   | **缓冲区大小：** `grpc_buffer_size` 的值（用于读取上游响应的缓冲区）。                                                            |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`  | multisite | 是   | **连接超时：** 与上游建立连接的超时时间。                                                                                         |
+| `GRPC_READ_TIMEOUT`                     | `60s`  | multisite | 是   | **读取超时：** 从上游读取数据的超时时间。                                                                                         |
+| `GRPC_SEND_TIMEOUT`                     | `60s`  | multisite | 是   | **发送超时：** 向上游发送数据的超时时间。                                                                                         |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`  | multisite | 是   | **Socket Keepalive：** 启用/禁用与上游 socket 的 keepalive。                                                                      |
+| `GRPC_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用/禁用 TLS 上游的 SNI。                                                                                          |
+| `GRPC_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当 `GRPC_SSL_SNI=yes` 时发送的 SNI 主机名。                                                                    |
+| `GRPC_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用/禁用对 gRPC 上游证书的验证。                                                                                  |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** CA 包的来源，`file` 或 `data`。                                                                            |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **受信任证书路径：** 调度器可读的 PEM CA 包路径（优先级 `file`）。                                                                |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **受信任证书数据：** 以 base64 或明文 PEM 形式提供的 CA 包（优先级 `data`）。                                                     |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游证书链中的验证深度。                                                                                       |
+| `GRPC_SSL_CLIENT_CERT_PRIORITY`         | `file` | multisite | 否   | **客户端证书优先级：** 客户端证书与私钥的来源，`file` 或 `data`。                                                                 |
+| `GRPC_SSL_CLIENT_CERT`                  |        | multisite | 否   | **客户端证书路径：** 用于双向 TLS 的、呈递给上游的 PEM 客户端证书（优先级 `file`）。                                              |
+| `GRPC_SSL_CLIENT_CERT_DATA`             |        | multisite | 否   | **客户端证书数据：** 以 base64 或明文 PEM 形式提供的客户端证书（优先级 `data`）。                                                 |
+| `GRPC_SSL_CLIENT_KEY`                   |        | multisite | 否   | **客户端私钥路径：** 与客户端证书匹配的 PEM 私钥（优先级 `file`）。不得加密。                                                     |
+| `GRPC_SSL_CLIENT_KEY_DATA`              |        | multisite | 否   | **客户端私钥数据：** 以 base64 或明文 PEM 形式提供的客户端私钥（优先级 `data`）。                                                 |
+| `GRPC_SSL_CRL`                          |        | multisite | 否   | **CRL 路径：** 验证上游时应用的 PEM 吊销列表；仅在 `GRPC_SSL_VERIFY=yes` 时应用。优先于 CRL 数据设置；路径已设置但文件缺失时视为错误，不会回退使用数据设置。 |
+| `GRPC_SSL_CRL_DATA`                     |        | multisite | 否   | **CRL 数据：** 以 base64 或明文 PEM 形式提供的吊销列表。仅在 CRL 路径为空时使用。                                                 |
+| `GRPC_SSL_PROTOCOLS`                    |        | multisite | 否   | **上游 SSL 协议：** 提供给上游的 TLS 版本。留空则保持 NGINX 默认值。                                                              |
+| `GRPC_SSL_CIPHERS`                      |        | multisite | 否   | **上游 SSL 加密套件：** 提供给上游的加密套件字符串。留空则保持 NGINX 默认值。                                                     |
+| `GRPC_NEXT_UPSTREAM`                    |        | multisite | 是   | **下一个上游条件：** `grpc_next_upstream` 的值。                                                                                  |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |        | multisite | 是   | **下一个上游超时：** `grpc_next_upstream_timeout` 的值。                                                                          |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |        | multisite | 是   | **下一个上游重试次数：** `grpc_next_upstream_tries` 的值。                                                                        |
+| `GRPC_AUTH_REQUEST`                     |        | multisite | 是   | **认证请求：** `auth_request` 的值，用于通过外部提供者进行认证。                                                                  |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |        | multisite | 是   | **认证请求登录 URL：** 当认证请求返回 401 时的重定向目标。支持片段（`#`）。                                                       |
+| `GRPC_AUTH_REQUEST_SET`                 |        | multisite | 是   | **认证请求 Set：** 分号分隔的 `auth_request_set` 值列表。                                                                         |
+| `GRPC_INCLUDES`                         |        | multisite | 是   | **附加 include：** 在 gRPC `location` 块中追加的、以空格分隔的 include 文件列表。                                                 |
+| `GRPC_MAX_CLIENT_SIZE`                  |        | multisite | 是   | **最大请求体大小：** 该 location 的 `client_max_body_size` 值（`0` 表示不限制）。留空时回退到服务级 `MAX_CLIENT_SIZE`。           |
+
+`GRPC_HOST`、`GRPC_URL`、`GRPC_HEADERS`、`GRPC_HIDE_HEADERS`、`GRPC_HEADERS_CLIENT`、`GRPC_PASS_HEADERS`、`GRPC_IGNORE_HEADERS`、`GRPC_BUFFER_SIZE`、`GRPC_CONNECT_TIMEOUT`、`GRPC_READ_TIMEOUT`、`GRPC_SEND_TIMEOUT`、`GRPC_SOCKET_KEEPALIVE`、`GRPC_NEXT_UPSTREAM{,_TIMEOUT,_TRIES}`、`GRPC_AUTH_REQUEST{,_SIGNIN_URL,_SET}`、`GRPC_INCLUDES` 和 `GRPC_MAX_CLIENT_SIZE` 均支持数字后缀，用于多个上游/location（`GRPC_HOST_2`、`GRPC_URL_2` 等）。`GRPC_HEADERS_CLIENT` 遵循 NGINX 的 `add_header` 语义（需要时追加 `always`）。认证登录 URL 仍支持片段（`#`）。ModSecurity 在 gRPC location 中仍保持禁用。
 
 !!! warning "gRPC Location 中的 ModSecurity"
     由于 ModSecurity 目前无法稳定支持 gRPC 流量模式，本插件生成的 gRPC `location` 块中会自动关闭 ModSecurity。
@@ -3321,7 +3411,7 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
     GRPC_HOST: "grpc://grpcbin:9000"
     GRPC_URL: "/"
     GRPC_HEADERS: "x-request-source bunkerweb;x-env production"
-    GRPC_NEXT_UPSTREAM: "error timeout unavailable"
+    GRPC_NEXT_UPSTREAM: "error timeout http_502"
     GRPC_NEXT_UPSTREAM_TIMEOUT: "15s"
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
@@ -4244,7 +4334,7 @@ STREAM 支持 :warning:
     应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
 
 !!! info "Redis 集成"
-    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。
+    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。在 Redis `maxmemory` 压力下，新报告会按工作进程缓冲，并在内存释放后同步，因此在 Redis 已满期间不会丢失被阻止请求的报告。
 
 !!! warning "性能注意事项"
     为 `METRICS_MAX_BLOCKED_REQUESTS` 或 `METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。
@@ -4563,7 +4653,7 @@ STREAM 支持 :warning:
     | 设置                    | 默认值 | 上下文 | 多选 | 描述                                                  |
     | ----------------------- | ------ | ------ | ---- | ----------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`  | global | no   | **匿名报告：** 向 BunkerWeb 维护者发送匿名使用报告。  |
-    | `EXTERNAL_PLUGIN_URLS`  |        | global | no   | **外部插件：** 用于下载外部插件的 URL（以空格分隔）。 |
+    | `EXTERNAL_PLUGIN_URLS`  |        | global | no   | **外部插件：** 用于下载外部插件的 URL（以空格分隔）。每个 URL 最多 50 MiB；追加 `#sha256=<digest>` 可固定内容；纯 `http://` 已弃用，1.7.0 正式版将拒绝使用。 |
 
 === "文件缓存"
 
@@ -5783,9 +5873,10 @@ STREAM 支持 :warning:
 下面的 `REVERSE_PROXY_SSL_VERIFY` 系列设置校验的是*后端的*证书。若还要向后端出示证书——即双向 TLS——请配置客户端证书对：
 
 - 使用 `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` 指定调度器可读的文件路径，或使用 `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` 直接给出 base64 或明文 PEM，由 `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY`（`file` 或 `data`）决定取哪一种。
-- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。
+- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。BunkerWeb 会校验 CA 证书包中的每一张证书，并检查上游客户端证书是否与其私钥匹配；临时的文件读取失败会保留已缓存的 TLS 材料并报告任务失败，而清空设置或提供无效材料则会移除受影响的缓存。
 - **两半都必须提供。** 只有证书而没有对应的私钥（或反之）会被拒绝，而不会只应用一半，因为 NGINX 要么需要这两条指令，要么一条都不要。
-- 该身份是**按服务生效的，并与 gRPC 和 stream 共享**：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证。在 stream 上下文中，它同时也是启用到后端的 TLS（`proxy_ssl on`）的开关，因此未配置客户端证书对的服务会保持其现有的明文行为。
+- 反向代理的客户端身份按服务生效，供其 HTTP 和 stream 反向代理使用。gRPC 拥有自己的身份，通过 `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` 或其 `_DATA` 对应项配置，由 `GRPC_SSL_CLIENT_CERT_PRIORITY` 选择来源。
+- 在 stream 上下文中，已缓存的客户端证书/私钥对、`REVERSE_PROXY_SSL_VERIFY=yes`、非空的协议或加密套件设置都会启用到后端的 TLS（`proxy_ssl on`）。未配置以上任何一项的服务会保持其现有的明文行为。仅设置 CA 路径或 SNI 不会启用 stream TLS。
 - 清空这些设置后，下一次运行会删除这些文件，双向 TLS 随之关闭。
 
 这与 `mtls` 插件无关，后者认证的是*连接到 BunkerWeb 的客户端*——方向正好相反。
@@ -5878,6 +5969,10 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | 否 | **客户端证书数据：** 直接以 base64 或 PEM 形式提供的客户端证书（例如通过 Web 界面）。 |
     | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | 否 | **客户端私钥路径：** 与客户端证书配对的 PEM 私钥路径，需可被调度器读取。 |
     | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | 否 | **客户端私钥数据：** 直接以 base64 或 PEM 形式提供的客户端私钥。条件允许时请优先使用文件路径：在此填入的私钥会作为设置值存储。 |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | 否 | **CRL 路径：** worker 可读的 PEM 证书吊销列表路径。优先于 `REVERSE_PROXY_SSL_CRL_DATA`；路径已设置但文件缺失时视为错误，不会回退使用数据；仅在启用上游证书验证时生效。 |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | 否 | **CRL 数据：** 以 base64 或明文 PEM 形式提供的证书吊销列表。仅在 `REVERSE_PROXY_SSL_CRL` 为空时使用。 |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | 否 | **上游 TLS 协议：** 提供给上游的 TLS 版本，以空格分隔，例如 `TLSv1.2 TLSv1.3`。留空则保持 NGINX 默认值。 |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | 否 | **上游 TLS 加密套件：** 提供给上游的 OpenSSL 加密套件字符串，例如 `HIGH:!MD5`。留空则保持 NGINX 默认值。 |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -5886,8 +5981,11 @@ STREAM 支持 :warning:
         - **必需：** 必须提供受信任证书；NGINX 对上游验证没有隐式的系统存储。要验证公共上游，请将路径指向系统 CA 包（例如 `/etc/ssl/certs/ca-certificates.crt`）。
         - **名称：** 默认针对从 `REVERSE_PROXY_HOST` 获取的主机进行检查。如果后端证书的 CN/SAN 不同，请将 `REVERSE_PROXY_SSL_SNI` 设置为 `yes`，并将 `REVERSE_PROXY_SSL_SNI_NAME` 设置为预期名称。
         - **故障安全：** 如果没有可用的有效受信任证书，则会为该服务器禁用验证，而不是中断每个上游连接。
+        - **吊销：** 将 `REVERSE_PROXY_SSL_CRL` 设为 PEM 吊销列表路径，或通过 `REVERSE_PROXY_SSL_CRL_DATA` 提供 base64/明文 PEM。两者都设置时路径优先，没有单独的 CRL 优先级设置。worker 会验证并分发该 CRL。仅当 `REVERSE_PROXY_SSL_VERIFY=yes` 且存在有效的已缓存受信任 CA 时，NGINX 才会应用它。
 
         这些设置按服务生效：一个服务的所有上游条目（`REVERSE_PROXY_HOST`、`REVERSE_PROXY_HOST_1`、……）共享相同的验证配置。
+
+        TLS 协议、加密套件和吊销设置同样按服务生效，覆盖该服务的所有反向代理 location 及其挂载的上游池，无法为单个池分别选择不同的 TLS 策略。
 
     !!! info "SNI 解释"
         服务器名称指示 (SNI) 是 TLS 的一个扩展，它允许客户端在握手过程中指定它试图连接的主机名。这使服务器能够在同一个 IP 地址和端口上呈现多个证书，从而允许从单个 IP 地址提供多个安全 (HTTPS) 网站，而无需所有这些网站都使用相同的证书。
@@ -5929,10 +6027,10 @@ STREAM 支持 :warning:
 
     | 设置                                   | 默认值    | 上下文    | 多选 | 描述                                                              |
     | -------------------------------------- | --------- | --------- | ---- | ----------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |           | multisite | 是   | **自定义标头：** 发送到后端的 HTTP 标头，用分号分隔。             |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | 是   | **自定义标头：** 发送到后端的 HTTP 标头，用分号分隔；匹配的生成标头（Host、转发的客户端信息、转发的 mTLS 标头、Upgrade/Connection 等）会被不区分大小写地替换，而不是重复添加。显式设为空值会抑制该标头。 |
     | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | 是   | **隐藏标头：** 从后端接收时向客户端隐藏的 HTTP 标头。             |
     | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | 是   | **客户端标头：** 发送给客户端的 HTTP 标头，用分号分隔。           |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | 否   | **标头中使用下划线：** 启用或禁用 `underscores_in_headers` 指令。 |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | 否   | **标头中使用下划线：** 启用或禁用 `underscores_in_headers` 指令。该指令在服务器范围内与 gRPC 和 misc 插件共享：只要某个服务为其中一个 location 启用，就会对整个服务生效。 |
 
     !!! warning "安全注意事项"
         使用反向代理功能时，请谨慎转发哪些标头到您的后端应用程序。某些标头可能会暴露有关您的基础架构的敏感信息或绕过安全控制。
@@ -6431,6 +6529,71 @@ CrowdSec 未检查该服务时，**CrowdSec 判定**为未知；已检查且无�
 
 通过 Web UI 的**工作流**页面或 `/workflows` API 端点管理。规则集中存储，编译为单个制品，通过常规配置推送分发到所有实例。
 
+## Security workflows
+
+STREAM 支持 :x:
+
+工作流插件在单项设置与 Lua 防护之间增加策略层：可附加到服务的可复用有序规则，每条规则由条件树和一个动作组成。
+
+规则能够表达单项设置无法独立表达的条件：
+
+> **如果**请求来自法国、访问 `/login`，**并且**每分钟超过 10 次请求，**则**显示 hCaptcha 挑战。
+
+工作流协调现有防护：`challenge` 将请求交给 Antibot，速率阈值复用 Limit 的计数机制。现有设置继续有效。
+
+### 规则如何计算
+
+每个服务按附加顺序计算工作流，工作流内按您安排的顺序计算规则。**第一条实际匹配的规则生效**，执行其唯一动作，后续规则不再计算。
+
+条件树由 `ALL` / `ANY` / `NOT` 节点组成：
+
+| 条件 | 匹配内容 |
+| ---- | -------- |
+| IP / CIDR | Real-IP 解析后的有效客户端 IP |
+| 国家 | GeoIP 数据库解析的 ISO 国家 |
+| ASN | 客户端 IP 的自治系统编号 |
+| URI | 规范化路径，支持精确、前缀或正则表达式 |
+| HTTP 方法 | 请求方法 |
+| 资源组 | 在其他页面维护的 IP、国家或 ASN 组，通过 ID 引用 |
+| CrowdSec 判定 | CrowdSec 的来源 (`appsec` 或 `lapi`) 及请求的处置 (`ban` 或 `captcha`) |
+
+条件采用三值逻辑：真、假，或所需信息不可用时的未知（例如 GeoIP 数据库缺失）。只有整棵树为真才匹配，所以数据库故障会停止匹配，而不会意外变成匹配。
+
+CrowdSec 未检查该服务时，**CrowdSec 判定**为未知；已检查且无异常的请求为假，两者均不匹配。需要工作流代替 CrowdSec 执行响应时，在服务上设 `CROWDSEC_DEFER_TO_WORKFLOWS=yes`：CrowdSec 交出判定，若没有任何规则匹配，仍原样执行其原判定。
+
+### 速率阈值是匹配条件
+
+规则可带阈值，它决定规则是否匹配，并不是“随后限速”。未超过阈值时继续计算下一条规则。
+
+因此可以用相同条件的两条有序规则表示“每分钟超过 10 次则返回 429，否则显示挑战”：第一条带阈值和阻断动作，第二条不带阈值。
+
+计数器按服务 + 规则 + 客户端 IP 隔离，不会影响 `LIMIT_REQ_*` 计数器。
+
+### 动作
+
+- **challenge**：显示指定 Antibot 提供者的挑战（`captcha`、`hcaptcha`、`turnstile` 等）。即使服务设置 `USE_ANTIBOT=no` 也有效，并覆盖 Antibot 的忽略列表；所需例外应放在规则条件中。服务必须已配置该提供者的凭据。
+- **block**：返回实例的拒绝状态码；用于限制速率的规则可返回 `429`。
+- **redirect**：用 301/302/303/307/308 将客户端重定向到固定 URL。
+
+### 检测模式
+
+`SECURITY_MODE=detect` 使用相同条件树、顺序和速率计数器，但不执行动作。原本会执行的动作记录在报告中，便于启用前用真实流量评估策略。
+
+### 失败行为
+
+尚未收到编译策略的实例（首次启动或推送未送达）记录一次错误，然后继续使用原有防护。控制平面无法编译的策略不会分发：放弃推送，各实例保留已有策略。规则存在期间不能删除它引用的资源组。
+
+### 正则表达式预算
+
+| 设置 | 默认值 | 上下文 | 多个 | 描述 |
+| ---- | ------ | ------ | ---- | ---- |
+| `WORKFLOWS_REGEX_BUDGET` | `512` | global | no | **正则表达式预算：** 所有工作流规则可编译的不同正则表达式总数上限。所有插件共享 NGINX 正则缓存，超过预算的规则会被禁用，避免悄然降低整个实例的性能。 |
+
+编译按排序后的工作流 ID 顺序消耗预算；中途耗尽时禁用剩余规则，不影响整个实例。此顺序是确定的，加载相同制品的实例会停用相同规则。
+
+### 管理工作流
+
+通过 Web UI 的**工作流**页面或 `/workflows` API 端点管理。规则集中存储，编译为单个制品，通过常规配置推送分发到所有实例。
 ## Security.txt
 
 STREAM 支持 :white_check_mark:
@@ -6843,16 +7006,28 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
     AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
     ```
 
+## Templates
+
+STREAM 支持 :white_check_mark:
+
+Templates 插件用于安装可复用的服务模板——一组设置、自定义配置和默认值，可以一步应用到某个服务上。模板可随 BunkerWeb 一同提供，也可以来自社区目录，或通过 Web UI 和 API 导出/导入；该插件唯一的设置在启动时直接从 URL 下载模板。
+
+### 配置项
+
+| 设置                      | 默认值 | 上下文 | 多选 | 描述                                                                                                                                                   |
+| ------------------------- | ------ | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `EXTERNAL_TEMPLATE_URLS`  |        | global | 否   | 以空格分隔的服务模板 URL 列表，用于下载并安装。每个 URL 对应一个模板：一个 `bunkerweb-template/1` JSON 包，或包含 `<id>/template.json` 及其配置的 `.zip`/`.tar.gz`。仅接受 `https://` 和 `file:///`，每个 URL 最大 1 MiB。在 URL 后追加 `#sha256=<digest>` 可固定其内容。移除 URL 后，对应模板会被删除，除非仍有服务在使用它。 |
+
 ## UI
 
 STREAM 支持 :x:
 
 Integrate easily the BunkerWeb UI.
 
-| 参数      | 默认值 | 上下文    | 可重复 | 描述                                         |
-| --------- | ------ | --------- | ------ | -------------------------------------------- |
-| `USE_UI`  | `no`   | multisite | 否     | Use UI                                       |
-| `UI_HOST` |        | global    | 否     | Address of the web UI used for initial setup |
+|  参数   |默认值| 上下文  |可重复|                    描述                    |
+|---------|------|---------|------|--------------------------------------------|
+|`USE_UI` |`no`  |multisite|否    |Use UI                                      |
+|`UI_HOST`|      |global   |否    |Address of the web UI used for initial setup|
 
 ## UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

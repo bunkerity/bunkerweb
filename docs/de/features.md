@@ -915,8 +915,8 @@ verzeichnet das Manifest, aus gemessenen Migrationsläufen auf echten Datenbanke
 | ------ | --------------------------- | ----- |
 | SQLite | ✅ getestet | Das Schema kommt exakt so zurück, wie 1.6.14 es deklariert, ohne eine einzige Basiszeile zu verlieren. |
 | PostgreSQL | ✅ getestet | Ebenso, plus zwei ungenutzte Enum-Typen, die zurückbleiben und die 1.6.14 nie ansieht. |
-| MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1265 und 1553) und hinterlässt ein hybrides Schema. |
-| MySQL | ❌ aus Backup wiederherstellen | Fehler 1265 wurde auch hier gemessen; der zweite Blocker ist aus MariaDB abgeleitet, nicht auf MySQL gemessen. |
+| MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1553, an einem Index, den ein Fremdschlüssel braucht) und hinterlässt ein hybrides Schema. |
+| MySQL | ❌ aus Backup wiederherstellen | Derselbe Abbruch, Fehler 1553, auch auf MySQL 8 gemessen. |
 
 Eine frisch installierte 1.7 hat keine gestempelte Alembic-Revision — nur ein Upgrade setzt einen Stempel —,
 und der Preflight meldet dort deshalb ⚠️ *No Alembic revision is stamped*. Das ist eine Warnung, keine
@@ -935,6 +935,11 @@ sind, die Wiederherstellung aus einem Backup nicht — und sie bleibt verfügbar
     Spalten, die aus überlebenden Tabellen entfernt werden, und die Daten, die ausgenommen sind,
     weil sie nie leer sind (Request-Metriken, UI-Einstellungen). Lesen Sie diese Liste; dafür
     verweigert nichts an Ihrer Stelle.
+
+    Einzelne Einstellungsentwürfe (im RAW-Editor als Entwurf gespeicherte Werte) werden verweigert statt
+    verloren: 1.6.14 kennt kein Entwurfs-Flag und würde sie anwenden, daher verweigert seine Migration,
+    solange einer existiert, und der Preflight verweigert schon vorher. Aktivieren oder löschen Sie sie
+    vor dem Downgrade, oder wählen Sie 1.6.15 als Ziel, das sie behält.
 
 !!! tip "Jeder Fehlschlag hinterlässt einen startfähigen Zustand"
     `downgrade --execute` verweigert den Dienst, solange nicht für dasselbe Ziel eine Stilllegung aktiv
@@ -1125,13 +1130,13 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 
 ### Konfigurationseinstellungen
 
-| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                      |
-| --------------------------- | ----------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                                 |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                              |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                       |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                           |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren.      |
+| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                 |
+| --------------------------- | ----------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                            |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                         |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                  |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.                                                      |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
 
 !!! warning "Falsch-Positive"
@@ -2061,6 +2066,41 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 
 Die folgenden Abschnitte führen diese Schritte im Detail durch.
 
+### Untersuchung und Entfernen von Entscheidungen
+
+Öffnen Sie **Zusätzliche Seiten → CrowdSec** in der Weboberfläche, um jede konfigurierte Verbindung, den betroffenen Dienst, die Erreichbarkeit der Local API und die Entscheidungssynchronisierung zu prüfen. Die Statuskarte des CrowdSec-Plugins und die Aktionen **IP untersuchen** unter Berichte und Sperren öffnen dieselbe Seite. Untersuchungslinks füllen die Adresse vorab aus. Wählen Sie die Verbindung aus, wenn mehrere Dienste oder Instanzen CrowdSec verwenden.
+
+Eine Untersuchung führt aktuelle CrowdSec-Entscheidungen, verfügbare CrowdSec-Alarme, aufbewahrte BunkerWeb-Berichte und lokale BunkerWeb-Sperren zusammen. Aktuelle Entscheidungen und die in Berichten erfassten Informationen werden getrennt angezeigt. Neue CrowdSec-Berichte bewahren verfügbare Entscheidungs-IDs, Ursprünge, Szenarien, Ziele, Gegenmaßnahmen und Ablaufzeiten auch nach Ablauf oder Entfernung der Entscheidungen auf. AppSec-Ablehnungen und Sperren aufgrund einer AppSec-Fehlerrichtlinie haben unterschiedliche Quellen. Historische Informationen unterliegen den bestehenden Einstellungen zur Berichtsaufbewahrung; ältere Berichte und aus dem Cache verdrängte optionale Metadaten enthalten möglicherweise keine weiteren Details. Die Alarmansicht zeigt begrenzte Ereignismetadaten, keine rohen Anfrageinhalte, Cookies oder Authentifizierungsheader.
+
+Lokale Berichte und dienstspezifische Sperren sind auf den Dienstbereich der ausgewählten Verbindung beschränkt; globale BunkerWeb-Sperren werden ebenfalls einbezogen. Lässt sich dieser Bereich nicht mehr aus der geladenen Instanzkonfiguration bestimmen, wird die Untersuchung abgebrochen, damit keine Daten anderer Dienste zurückgegeben werden. Aufbewahrte Berichte bleiben bei Ausfall der Local API zugänglich, solange die Verbindungskonfiguration noch geladen ist.
+
+Der Abschnitt **CrowdSec-Zulassungslisten** zeigt die nativen Listen der Engine, ihre Einträge, Kommentare, Ablaufzeiten und ob sie lokal oder über die CrowdSec Console verwaltet werden. IP-Untersuchungen prüfen den aktuellen Zulassungslistenstatus der Engine und zeigen den Grund einer Übereinstimmung an. Zum Lesen und Prüfen sind die unten beschriebenen Verwaltungszugangsdaten erforderlich. Eine nicht verfügbare Prüfung wird von einer IP unterschieden, die auf keiner Zulassungsliste steht. Ausnahmen gelten für die gesamte CrowdSec-Engine; lokale BunkerWeb-Sperren werden dadurch nicht entfernt. CrowdSec 1.8.0 stellt Lese- und Prüfoperationen über die LAPI bereit. Native Änderungen an Zulassungslisten erfordern dagegen `cscli` auf dem Host oder einen separaten Verwaltungszugang zur Console.
+
+Der bestehende Wert `CROWDSEC_API_KEY` ist ein **Bouncer-Schlüssel**: Er erlaubt das Lesen von Entscheidungen, jedoch weder deren Entfernung noch die Einsicht in Alarme. Registrieren Sie zum Aktivieren dieser Funktionen eine dedizierte Maschine bei der jeweiligen CrowdSec-Engine und konfigurieren Sie beide optionalen Multisite-Einstellungen:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: die Anmeldekennung der dedizierten Maschine.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: das Passwort dieser Maschine.
+
+Registrieren Sie die Maschine gemäß dem [Authentifizierungsverfahren der Local API](https://doc.crowdsec.net/docs/local_api/authentication/) von CrowdSec. Bewahren Sie die Zugangsdaten vertraulich auf. Bleibt eine der Einstellungen leer, sind die Verwaltungsfunktionen nicht verfügbar. Für integrierte und externe Engines gilt dieselbe Konfiguration: Anfragen werden über die ausgewählte BunkerWeb-Instanz gesendet, sodass eine integrierte Local API weiterhin auf localhost lauschen kann. HTTPS-Verwaltungsanfragen prüfen das Serverzertifikat anhand der TLS-Vertrauenskonfiguration von BunkerWeb, unabhängig von der AppSec-Verifizierungseinstellung.
+
+**CrowdSec-Entscheidung entfernen** ist eine andere Aktion als das Aufheben einer BunkerWeb-Sperre. Die Entfernung in der Weboberfläche erfordert einen Administrator mit Schreibzugriff, konfigurierte Verwaltungszugangsdaten und die Bestätigung der ausgewählten Entscheidung; die API darf sich nicht im schreibgeschützten Modus befinden. Das Entfernen einer Entscheidung für einen Adressbereich betrifft den gesamten Bereich. Auf einer gemeinsam genutzten Engine wirkt sich die Entfernung auch auf andere Bouncer aus, die diese Entscheidung beziehen. Ausgewählte ID, Geltungsbereich, Ziel und Gegenmaßnahme werden vor der Entfernung erneut geprüft; andere Entscheidungen und lokale Sperren bleiben erhalten.
+
+Eine erfolgreiche Antwort bestätigt die Entfernung in der Local API und zeigt verbleibende passende Entscheidungen an. Bouncer übernehmen die Änderung bei ihrer konfigurierten Stream-Aktualisierung oder nach Ablauf des Live-Caches. Die Oberfläche zeigt die Weitergabe als ausstehend an, ohne zu behaupten, dass bereits alle Clients zugelassen sind. Eine andere Entscheidung, eine lokale Sperre, eine neue Erkennung oder eine AppSec-Regel kann eine Anfrage weiterhin blockieren. Das Ergebnis der Entfernung wird mit dem authentifizierten Akteur sowie der ausgewählten Verbindung und Entscheidung protokolliert.
+
+Die öffentliche API bietet dieselben Operationen:
+
+- `GET /crowdsec`: Verbindungen, Synchronisierungsstatus und Fehler pro Instanz.
+- `GET /crowdsec/{connection_id}/decisions`: nach `ip`, `origin` oder `scenario` filtern; mit `offset` und `limit` paginieren (höchstens 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: Untersuchung mit bis zu 200 Entscheidungen, 50 Alarmen und 50 Berichten, einschließlich Gesamtzahlen oder Grenzen und ausdrücklich als nicht verfügbar gekennzeichneten Abschnitten.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: um sensible Daten bereinigte Alarmdetails.
+- `GET /crowdsec/{connection_id}/allowlists`: native Zulassungslisten mit Paginierung über `offset` und `limit`; bis zu 200 Einträge je Liste, mit Anzeige der vollständigen Eintragszahl.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: aktuelle Zugehörigkeit zu einer nativen Zulassungsliste und Grund der Übereinstimmung.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: die ausgewählten Werte für `scope`, `value` und `decision_type` im JSON-Anfragetext angeben.
+
+Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung `crowdsec_read` oder `crowdsec_delete` unter der bestehenden Ressource `bans`, entweder für eine zurückgegebene Verbindungs-ID oder für `*`. Zum Auflisten der Verbindungen mit `GET /crowdsec` ist die Berechtigung für `*` erforderlich. Eine gewöhnliche `ban_delete`-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.
+
+Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
+
 ### Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten
 
 === "Docker"
@@ -2599,6 +2639,30 @@ So funktioniert's:
 | `CUSTOM_SSL_KEY`           |          | multisite | nein     | Vollständiger Pfad zum privaten Schlüssel.                      |
 | `CUSTOM_SSL_CERT_DATA`     |          | multisite | nein     | Zertifikatsdaten (base64 oder Klartext-PEM).                    |
 | `CUSTOM_SSL_KEY_DATA`      |          | multisite | nein     | Daten des privaten Schlüssels (base64 oder Klartext-PEM).       |
+
+### Standardserver-Zertifikat
+
+Der **Standardserver** ist der Block, der Anfragen ohne passenden konfigurierten Dienst beantwortet: eine unbekannte SNI, eine Verbindung zu einer rohen IP-Adresse, ein `Host`, den niemand bedient. Das einzige Zertifikat, das er bisher präsentieren konnte, war das interne, beim Start generierte selbstsignierte Zertifikat – weshalb ein Browser, der einen unbekannten Hostnamen auf Ihrer Instanz erreicht, eine Namensabweichungswarnung sieht.
+
+Diese vier globalen Parameter ersetzen es. Leer lassen, um das interne Zertifikat zu behalten. Seine übrigen Einstellungen – TLS, Header, Fehlerseiten – werden am reservierten `default-server`-Dienst bearbeitet, siehe [Konfiguration des Standardservers](#miscellaneous).
+
+| Parameter                      | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                          |
+| :------------------------------ | :------- | :------ | :------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_SERVER_SSL_CERT`      |          | global  | nein     | Vollständiger Pfad zum Zertifikat (oder Bundle), das für Anfragen ohne passenden Dienst bereitgestellt wird. Wird nur dort bereitgestellt, wo ein Standardserver-Block existiert: Multisite-Modus (`MULTISITE=yes`) oder `DISABLE_DEFAULT_SERVER=yes` im Single-Site-Modus. |
+| `DEFAULT_SERVER_SSL_KEY`       |          | global  | nein     | Vollständiger Pfad zum passenden privaten Schlüssel.                                                                                  |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |          | global  | nein     | Dasselbe Zertifikat als base64 oder Klartext-PEM. Wird nur verwendet, wenn der Pfad-Parameter leer ist. Wird nur dort bereitgestellt, wo ein Standardserver-Block existiert: Multisite-Modus (`MULTISITE=yes`) oder `DISABLE_DEFAULT_SERVER=yes` im Single-Site-Modus. |
+| `DEFAULT_SERVER_SSL_KEY_DATA`  |          | global  | nein     | Derselbe private Schlüssel als base64 oder Klartext-PEM. Wird nur verwendet, wenn der Pfad-Parameter leer ist.                        |
+
+Die Überschreibung wird **zuletzt** konsultiert, und nur innerhalb des Standardservers: Ein Dienst, der sein eigenes Zertifikat auflöst – über das Zertifikatsinventar, `USE_CUSTOM_SSL`, Let's Encrypt oder den Self-Signed-Provider – behält dieses immer.
+
+!!! warning "Ein Zertifikat, das einen Ihrer Dienste abdeckt, wird abgelehnt"
+    Der Standardserver beantwortet *jeden* Hostnamen. Würde sein Zertifikat auch `www.example.com` abdecken, könnte ein Client eine Verbindung mit unbekannter SNI öffnen, dieses Zertifikat erhalten und dieselbe Verbindung dann für `Host: www.example.com` wiederverwenden – ein Zertifikat, das dieser Dienst nie autorisiert hat, nun für ihn nutzbar (HTTP/2-Connection-Coalescing). Der `custom-cert`-Job lehnt daher ein Zertifikat ab, dessen SANs oder Common Name einen Hostnamen eines konfigurierten Dienstes abdecken, Wildcards eingeschlossen, und protokolliert den Hostnamen, für den es abgelehnt wurde. Verwenden Sie ein Zertifikat, das keinen Hostnamen eines konfigurierten Dienstes abdeckt, oder binden Sie es stattdessen über `USE_CUSTOM_SSL` an den Dienst.
+
+!!! info "Eine Ablehnung entfernt nie, was bereits bereitgestellt wird"
+    Ungültiges Material, ein nicht zusammenpassendes Paar und ein abgedeckter Hostname lassen den Job jeweils laut fehlschlagen und belassen das zuvor bereitgestellte Zertifikat, statt den Standardserver auf nichts zu setzen. Der Ablauf löst aus demselben Grund nur eine Warnung aus. Das Leeren beider Parameter entfernt die Überschreibung und bringt das interne Zertifikat zurück.
+
+!!! tip "Wirkungslos bei striktem SNI"
+    Ist `DISABLE_DEFAULT_SERVER_STRICT_SNI` auf `yes` gesetzt, wird eine unbekannte SNI bereits während des TLS-Handshakes geschlossen, bevor ein Zertifikat gewählt wird – die Überschreibung wird also nie erreicht. Lassen Sie es deaktiviert, wenn unbekannte Hostnamen mit Ihrem eigenen Zertifikat beantwortet werden sollen.
 
 !!! warning "Sicherheit"
     Schützen Sie den privaten Schlüssel (angemessene Berechtigungen, nur vom BunkerWeb-Scheduler lesbar).
@@ -3300,30 +3364,57 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
 !!! tip "Wiederverwendbare Pools von gRPC-Backends"
     Ein `GRPC_HOST` zeigt auf ein einzelnes Backend. Um über mehrere Backends zu verteilen oder dieselben Backends zwischen Diensten zu teilen, deklarieren Sie einen **gRPC-Upstream-Pool** auf der Seite **Upstreams** (oder über die `/upstreams`-API) und hängen ihn an einen Dienst mit einem Pfad an — BunkerWeb schreibt dann `grpc://<pool>` in den passenden `GRPC_HOST` für Sie. Beachten Sie, dass gRPC- und Reverse-Proxy-`location` sich auf einem Dienst einen Pfad-Namensraum teilen: derselbe Pfad kann nicht zweimal belegt werden, gleich welches Plugin ihn bedient. Siehe den Abschnitt *Wiederverwendbare Upstreams* in der Reverse-Proxy-Dokumentation.
 
-!!! tip "Gegenseitiges TLS zum gRPC-Backend"
-    Um dem Backend ein Client-Zertifikat vorzulegen, setzen Sie `REVERSE_PROXY_SSL_CLIENT_CERT` und `REVERSE_PROXY_SSL_CLIENT_KEY` (oder ihre `_DATA`-Varianten) am Dienst. Die Identität wird bewusst mit dem Reverse Proxy geteilt: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt, und BunkerWeb gibt daraus `grpc_ssl_certificate`/`grpc_ssl_certificate_key` aus. Siehe *Gegenseitiges TLS zum Upstream* in der Reverse-Proxy-Dokumentation.
+!!! tip "Gegenseitiges TLS mit dem gRPC-Backend"
+    gRPC hat eine eigene Upstream-Identität, unabhängig vom Reverse Proxy. Verwenden Sie für TLS-Upstreams `grpcs://` und konfigurieren Sie bei Bedarf `GRPC_SSL_SNI` und `GRPC_SSL_SNI_NAME`. Um das Upstream-Zertifikat zu überprüfen, setzen Sie `GRPC_SSL_VERIFY=yes` und stellen Sie ein PEM-CA-Bundle über `GRPC_SSL_TRUSTED_CERTIFICATE` oder `_DATA` bereit, wobei `_PRIORITY` (`file` oder `data`) die Quelle wählt. `GRPC_SSL_VERIFY_DEPTH` ist standardmäßig `1`. Es wird kein CA-Bundle automatisch ausgewählt: ohne zwischengespeicherte CA deaktiviert die generierte Konfiguration die Überprüfung und enthält einen Kommentar zur Konfiguration. Eine CRL ist optional (`GRPC_SSL_CRL` oder `_DATA`) und wird nur angewendet, wenn Überprüfung und eine zwischengespeicherte CA vorhanden sind. `GRPC_SSL_PROTOCOLS` und `GRPC_SSL_CIPHERS` belassen die NGINX-Standardwerte, wenn sie leer sind.
+
+    Für gegenseitiges TLS setzen Sie `GRPC_SSL_CLIENT_CERT` und `GRPC_SSL_CLIENT_KEY` oder deren `_DATA`-Varianten; `GRPC_SSL_CLIENT_CERT_PRIORITY` wählt Dateipfade oder Daten für das Paar. Beide Hälften müssen gültig sein und zusammenpassen — BunkerWeb prüft, ob das Client-Zertifikat des Upstreams zu seinem Schlüssel passt; vorübergehende Lesefehler bei Dateien behalten das zwischengespeicherte TLS-Material und melden einen Job-Fehler, während gelöschte Einstellungen oder ungültiges Material den betroffenen Cache entfernen. Diese Identität gehört zu gRPC; Reverse Proxy und Stream verwenden unabhängig davon `REVERSE_PROXY_SSL_CLIENT_*`. Der gemeinsame `trusted-cert`-Job speichert die gRPC-CA, CRL und das Client-Paar im Reverseproxy-Cache-Verzeichnis zwischen und löst bei Materialänderungen eine Neugenerierung der Konfiguration aus. Es gibt keinen separaten gRPC-Zertifikatsjob. TLS-Einstellungen gelten für den gesamten Dienst einschließlich angehängter Upstream-Pools; sie sind keine Location-spezifischen Einstellungen. Siehe *Gegenseitiges TLS mit dem Upstream* in der Reverse-Proxy-Dokumentation.
 
 ### Konfigurationseinstellungen
 
-| Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |
-| ---------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                |
-| `GRPC_HOST`                  |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).            |
-| `GRPC_URL`                   | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional kann ein Präfix `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen den nginx-Location-Modifikator explizit setzen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt. |
-| `GRPC_CUSTOM_HOST`           |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                   |
-| `GRPC_HEADERS`               |          | multisite | ja       | **Zusätzliche Upstream-Header:** Semikolon-getrennte Liste von `grpc_set_header`-Werten.              |
-| `GRPC_HIDE_HEADERS`          |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.             |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                   |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                  |
-| `GRPC_READ_TIMEOUT`          | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                 |
-| `GRPC_SEND_TIMEOUT`          | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                             |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                           |
-| `GRPC_SSL_SNI`               | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                             |
-| `GRPC_SSL_SNI_NAME`          |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                               |
-| `GRPC_NEXT_UPSTREAM`         |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                         |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                     |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                      |
-| `GRPC_INCLUDES`              |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks. |
+| Setting                                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
+| ---------------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                              | `no`     | multisite | nein     | **gRPC aktivieren:** Auf `yes` setzen, um gRPC-Proxying zu aktivieren.                                                                     |
+| `GRPC_HOST`                             |          | multisite | ja       | **gRPC-Upstream:** Wert für `grpc_pass` (z. B. `grpc://service:50051` oder `grpcs://...`).                                                 |
+| `GRPC_URL`                              | `/`      | multisite | ja       | **Location-URL:** Pfad, der an das gRPC-Upstream weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional kann ein Präfix `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen den nginx-Location-Modifikator explizit setzen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt. |
+| `GRPC_CUSTOM_HOST`                      |          | multisite | nein     | **Eigener Host-Header:** Überschreibt den an das Upstream gesendeten `Host`-Header.                                                        |
+| `GRPC_HEADERS`                          |          | multisite | ja       | **Upstream-Header:** Semikolon-getrennte `grpc_set_header`-Werte; passende generierte Header werden ohne Berücksichtigung der Groß-/Kleinschreibung ersetzt. |
+| `GRPC_HIDE_HEADERS`                     |          | multisite | ja       | **Versteckte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_hide_header`-Werten.                                                  |
+| `GRPC_HEADERS_CLIENT`                   |          | multisite | ja       | **Client-Antwort-Header:** Semikolon-getrennte Liste von `add_header`-Werten, die an den Client gesendet werden.                           |
+| `GRPC_PASS_HEADERS`                     |          | multisite | ja       | **Durchgereichte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_pass_header`-Werten, um standardmäßig versteckte Header weiterzugeben. |
+| `GRPC_IGNORE_HEADERS`                   |          | multisite | ja       | **Ignorierte Antwort-Header:** Leerzeichen-getrennte Liste von `grpc_ignore_headers`-Werten, damit NGINX sie nicht verarbeitet.             |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`     | multisite | nein     | **Unterstriche in Headern erlauben:** Aktiviert/deaktiviert `underscores_in_headers`. Serverweit mit den Plugins Reverse Proxy und misc geteilt: aktiviert ein Dienst sie für eine Location, gilt sie für den gesamten Dienst. |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`    | multisite | nein     | **Fehler abfangen:** Aktiviert/deaktiviert `grpc_intercept_errors`.                                                                        |
+| `GRPC_BUFFER_SIZE`                      |          | multisite | ja       | **Puffergröße:** Wert für `grpc_buffer_size` (Puffer zum Lesen der Upstream-Antwort).                                                      |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`    | multisite | ja       | **Connect-Timeout:** Timeout für den Verbindungsaufbau zum Upstream.                                                                       |
+| `GRPC_READ_TIMEOUT`                     | `60s`    | multisite | ja       | **Read-Timeout:** Timeout für das Lesen vom Upstream.                                                                                      |
+| `GRPC_SEND_TIMEOUT`                     | `60s`    | multisite | ja       | **Send-Timeout:** Timeout für das Senden an das Upstream.                                                                                  |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`    | multisite | ja       | **Socket Keepalive:** Aktiviert/deaktiviert Keepalive auf Upstream-Sockets.                                                                |
+| `GRPC_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert/deaktiviert SNI für TLS-Upstreams.                                                                                  |
+| `GRPC_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL-SNI-Name:** SNI-Name, der gesendet wird, wenn `GRPC_SSL_SNI=yes`.                                                                    |
+| `GRPC_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL-Überprüfung:** Aktiviert/deaktiviert die Überprüfung des gRPC-Upstream-Zertifikats.                                                  |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle des CA-Bundles, `file` oder `data`.                                               |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen Zertifikats:** Pfad zu einem PEM-CA-Bundle, lesbar für den Scheduler (Priorität `file`).                     |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen Zertifikats:** CA-Bundle als Base64 oder Klartext-PEM (Priorität `data`).                                   |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL-Überprüfungstiefe:** Prüftiefe in der Upstream-Zertifikatskette.                                                                     |
+| `GRPC_SSL_CLIENT_CERT_PRIORITY`         | `file`   | multisite | nein     | **Priorität des Client-Zertifikats:** Quelle von Client-Zertifikat und -Schlüssel, `file` oder `data`.                                     |
+| `GRPC_SSL_CLIENT_CERT`                  |          | multisite | nein     | **Pfad des Client-Zertifikats:** PEM-Client-Zertifikat, das dem Upstream für gegenseitiges TLS präsentiert wird (Priorität `file`).        |
+| `GRPC_SSL_CLIENT_CERT_DATA`             |          | multisite | nein     | **Daten des Client-Zertifikats:** Client-Zertifikat als Base64 oder Klartext-PEM (Priorität `data`).                                       |
+| `GRPC_SSL_CLIENT_KEY`                   |          | multisite | nein     | **Pfad des Client-Schlüssels:** PEM-Privatschlüssel, der zum Client-Zertifikat passt (Priorität `file`). Er darf nicht verschlüsselt sein. |
+| `GRPC_SSL_CLIENT_KEY_DATA`              |          | multisite | nein     | **Daten des Client-Schlüssels:** Privater Client-Schlüssel als Base64 oder Klartext-PEM (Priorität `data`).                                |
+| `GRPC_SSL_CRL`                          |          | multisite | nein     | **CRL-Pfad:** PEM-Sperrliste, die bei der Überprüfung des Upstreams angewendet wird; wird nur angewendet, wenn `GRPC_SSL_VERIFY=yes` ist. Hat Vorrang vor der CRL-Daten-Einstellung; ein gesetzter, aber fehlender Pfad ist ein Fehler, die Daten-Einstellung wird nicht als Fallback verwendet. |
+| `GRPC_SSL_CRL_DATA`                     |          | multisite | nein     | **CRL-Daten:** Sperrliste als Base64 oder Klartext-PEM. Wird nur verwendet, wenn der CRL-Pfad leer ist.                                    |
+| `GRPC_SSL_PROTOCOLS`                    |          | multisite | nein     | **Upstream-SSL-Protokolle:** Dem Upstream angebotene TLS-Versionen. Leer belässt den NGINX-Standard.                                       |
+| `GRPC_SSL_CIPHERS`                      |          | multisite | nein     | **Upstream-SSL-Ciphers:** Dem Upstream angebotene Cipher-Suite-Zeichenkette. Leer belässt den NGINX-Standard.                              |
+| `GRPC_NEXT_UPSTREAM`                    |          | multisite | ja       | **Next-Upstream-Bedingungen:** Wert für `grpc_next_upstream`.                                                                              |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |          | multisite | ja       | **Next-Upstream-Timeout:** Wert für `grpc_next_upstream_timeout`.                                                                          |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |          | multisite | ja       | **Next-Upstream-Versuche:** Wert für `grpc_next_upstream_tries`.                                                                           |
+| `GRPC_AUTH_REQUEST`                     |          | multisite | ja       | **Auth Request:** Wert für `auth_request`, um über einen externen Provider zu authentifizieren.                                            |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |          | multisite | ja       | **Auth-Request-Signin-URL:** Weiterleitungsziel, wenn der Auth Request 401 zurückgibt. Fragmente (`#`) werden unterstützt.                 |
+| `GRPC_AUTH_REQUEST_SET`                 |          | multisite | ja       | **Auth Request Set:** Semikolon-getrennte Liste von `auth_request_set`-Werten.                                                             |
+| `GRPC_INCLUDES`                         |          | multisite | ja       | **Zusätzliche Includes:** Leerzeichen-getrennte Include-Dateien innerhalb des gRPC-`location`-Blocks.                                      |
+| `GRPC_MAX_CLIENT_SIZE`                  |          | multisite | ja       | **Maximale Body-Größe:** Wert für `client_max_body_size` in dieser Location (`0` für unbegrenzt). Fällt auf die dienstweite `MAX_CLIENT_SIZE` zurück. |
+
+`GRPC_HOST`, `GRPC_URL`, `GRPC_HEADERS`, `GRPC_HIDE_HEADERS`, `GRPC_HEADERS_CLIENT`, `GRPC_PASS_HEADERS`, `GRPC_IGNORE_HEADERS`, `GRPC_BUFFER_SIZE`, `GRPC_CONNECT_TIMEOUT`, `GRPC_READ_TIMEOUT`, `GRPC_SEND_TIMEOUT`, `GRPC_SOCKET_KEEPALIVE`, `GRPC_NEXT_UPSTREAM{,_TIMEOUT,_TRIES}`, `GRPC_AUTH_REQUEST{,_SIGNIN_URL,_SET}`, `GRPC_INCLUDES` und `GRPC_MAX_CLIENT_SIZE` unterstützen numerische Suffixe für mehrere Upstreams/Locations (`GRPC_HOST_2`, `GRPC_URL_2`, ...). `GRPC_HEADERS_CLIENT` folgt der NGINX-`add_header`-Semantik (bei Bedarf `always` anhängen). Auth-Signin-URLs unterstützen weiterhin Fragmente (`#`). ModSecurity bleibt in gRPC-Locations deaktiviert.
 
 !!! warning "ModSecurity in gRPC-Location-Blöcken"
     ModSecurity wird aktuell in den von diesem Plugin generierten gRPC-`location`-Blöcken automatisch deaktiviert, da ModSecurity gRPC-Verkehrsmuster nicht zuverlässig unterstützt.
@@ -3382,7 +3473,7 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
     GRPC_HOST: "grpc://grpcbin:9000"
     GRPC_URL: "/"
     GRPC_HEADERS: "x-request-source bunkerweb;x-env production"
-    GRPC_NEXT_UPSTREAM: "error timeout unavailable"
+    GRPC_NEXT_UPSTREAM: "error timeout http_502"
     GRPC_NEXT_UPSTREAM_TIMEOUT: "15s"
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
@@ -4306,7 +4397,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
+    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg. Unter Redis-`maxmemory`-Druck werden neue Berichte pro Worker gepuffert und synchronisiert, sobald Speicher frei wird, sodass Berichte über blockierte Anfragen nicht verloren gehen, während Redis voll ist.
 
 !!! warning "Leistungsüberlegungen"
     Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.
@@ -4634,7 +4725,7 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
     | Einstellung             | Standard | Kontext | Mehrfach | Beschreibung                                                                                  |
     | ----------------------- | -------- | ------- | -------- | --------------------------------------------------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`    | global  | nein     | **Anonyme Berichte:** Senden Sie anonyme Nutzungsberichte an die BunkerWeb-Maintainer.        |
-    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). |
+    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). Höchstens 50 MiB pro URL; `#sha256=<digest>` anhängen, um den Inhalt zu pinnen; einfaches `http://` ist veraltet und wird ab 1.7.0 final abgelehnt. |
 
 === "Datei-Caching"
 
@@ -5869,9 +5960,10 @@ Die Einstellungen unten richten ein `location` auf einen einzelnen Backend-Serve
 Die `REVERSE_PROXY_SSL_VERIFY`-Einstellungen unten prüfen das Zertifikat *des Backends*. Um dem Backend auch selbst ein Zertifikat vorzulegen — gegenseitiges TLS — setzen Sie das Client-Paar:
 
 - `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` für Dateipfade, die der Scheduler lesen kann, oder `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` für Base64- oder Klartext-PEM, ausgewählt über `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` oder `data`).
-- Das Paar wird mit OpenSSL validiert, zwischengespeichert und von demselben Job an jede Instanz verteilt, der auch die vertrauenswürdige CA behandelt, und dort mit Rechten nur für Eigentümer und Gruppe geschrieben.
+- Das Paar wird mit OpenSSL validiert, zwischengespeichert und von demselben Job an jede Instanz verteilt, der auch die vertrauenswürdige CA behandelt, und dort mit Rechten nur für Eigentümer und Gruppe geschrieben. BunkerWeb validiert jedes Zertifikat in einem CA-Bundle und prüft, ob das Client-Zertifikat des Upstreams zu seinem Schlüssel passt; vorübergehende Lesefehler bei Dateien behalten das zwischengespeicherte TLS-Material und melden einen Job-Fehler, während gelöschte Einstellungen oder ungültiges Material den betroffenen Cache entfernen.
 - **Beide Hälften sind erforderlich.** Ein Zertifikat ohne seinen Schlüssel (oder umgekehrt) wird abgelehnt statt halb angewendet, weil NGINX beide Direktiven braucht oder keine.
-- Die Identität gilt **pro Dienst und wird mit gRPC und Stream geteilt**: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt. Im Stream-Kontext ist dies zugleich das, was TLS zum Backend überhaupt erst aktiviert (`proxy_ssl on`), so dass ein Dienst ohne Client-Paar sein bisheriges Klartextverhalten behält.
+- Die Reverse-Proxy-Client-Identität gilt pro Dienst und wird von dessen HTTP- und Stream-Reverse-Proxys verwendet. gRPC hat eine eigene Identität, konfiguriert über `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` oder deren `_DATA`-Gegenstücke, ausgewählt über `GRPC_SSL_CLIENT_CERT_PRIORITY`.
+- Im Stream-Kontext aktiviert ein zwischengespeichertes Client-Zertifikat/Schlüssel-Paar, `REVERSE_PROXY_SSL_VERIFY=yes`, ein nicht leeres Protokoll- oder Cipher-Setting TLS zum Backend (`proxy_ssl on`). Ein Dienst ohne eines davon behält sein bisheriges Klartextverhalten. Nur einen CA-Pfad oder SNI zu setzen, aktiviert kein Stream-TLS.
 - Werden die Einstellungen geleert, entfernt der nächste Lauf die Dateien, womit gegenseitiges TLS wieder aus ist.
 
 Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich mit BunkerWeb verbinden* — die entgegengesetzte Richtung.
@@ -5964,6 +6056,10 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
     | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | nein | **Daten des Client-Zertifikats:** Client-Zertifikat direkt als Base64 oder PEM angegeben (z. B. über die Weboberfläche). |
     | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | nein | **Pfad des Client-Schlüssels:** Pfad zum privaten PEM-Schlüssel, der zum Client-Zertifikat passt, lesbar für den Scheduler. |
     | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | nein | **Daten des Client-Schlüssels:** Privater Client-Schlüssel direkt als Base64 oder PEM. Bevorzugen Sie nach Möglichkeit einen Dateipfad: ein hier gesetzter Schlüssel wird als Einstellungswert gespeichert. |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | nein | **CRL-Pfad:** Pfad zu einer PEM-Zertifikatssperrliste, die vom Worker lesbar ist. Hat Vorrang vor `REVERSE_PROXY_SSL_CRL_DATA`; ein gesetzter, aber fehlender Pfad ist ein Fehler, die Daten werden nicht als Fallback verwendet; wird nur angewendet, wenn die Upstream-Zertifikatsüberprüfung aktiviert ist. |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | nein | **CRL-Daten:** Zertifikatssperrliste als Base64 oder Klartext-PEM. Wird nur verwendet, wenn `REVERSE_PROXY_SSL_CRL` leer ist. |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | nein | **Upstream-TLS-Protokolle:** Durch Leerzeichen getrennte TLS-Versionen, die dem Upstream angeboten werden, z. B. `TLSv1.2 TLSv1.3`. Leer belässt den NGINX-Standard. |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | nein | **Upstream-TLS-Ciphers:** OpenSSL-Cipher-String, der dem Upstream angeboten wird, z. B. `HIGH:!MD5`. Leer belässt den NGINX-Standard. |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -5972,8 +6068,11 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
         - **Erforderlich:** ein vertrauenswürdiges Zertifikat ist Pflicht; NGINX hat keinen impliziten System-Speicher für die Upstream-Überprüfung. Um einen öffentlichen Upstream zu überprüfen, verweisen Sie den Pfad auf das System-CA-Bundle (z. B. `/etc/ssl/certs/ca-certificates.crt`).
         - **Name:** wird standardmäßig gegen den Host aus `REVERSE_PROXY_HOST` geprüft. Wenn der CN/SAN des Backend-Zertifikats abweicht, setzen Sie `REVERSE_PROXY_SSL_SNI` auf `yes` und `REVERSE_PROXY_SSL_SNI_NAME` auf den erwarteten Namen.
         - **Ausfallsicher:** Wenn kein gültiges vertrauenswürdiges Zertifikat verfügbar ist, wird die Überprüfung für diesen Server deaktiviert, anstatt jede Upstream-Verbindung zu unterbrechen.
+        - **Sperrung:** Setzen Sie `REVERSE_PROXY_SSL_CRL` auf einen PEM-Sperrlisten-Pfad, oder liefern Sie base64/Klartext-PEM über `REVERSE_PROXY_SSL_CRL_DATA`. Der Pfad gewinnt, wenn beide gesetzt sind; es gibt keine eigene CRL-Prioritätseinstellung. Der Worker validiert und verteilt die CRL. NGINX wendet sie nur an, wenn `REVERSE_PROXY_SSL_VERIFY=yes` ist und eine gültige zwischengespeicherte vertrauenswürdige CA verfügbar ist.
 
         Diese Einstellungen gelten pro Dienst: Alle Upstream-Einträge (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) teilen sich dieselbe Überprüfungskonfiguration.
+
+        TLS-Protokolle, Ciphers und Sperrungseinstellungen gelten ebenfalls pro Dienst, über alle seine Reverse-Proxy-Locations und angehängten Upstream-Pools hinweg. Sie können keine unterschiedlichen TLS-Richtlinien für einzelne Pools auswählen.
 
     !!! info "SNI erklärt"
         Server Name Indication (SNI) ist eine TLS-Erweiterung, die es einem Client ermöglicht, den Hostnamen anzugeben, mit dem er während des Handshake-Prozesses eine Verbindung herstellen möchte. Dies ermöglicht es Servern, mehrere Zertifikate auf derselben IP-Adresse und demselben Port zu präsentieren, sodass mehrere sichere (HTTPS-)Websites von einer einzigen IP-Adresse aus bedient werden können, ohne dass alle diese Websites dasselbe Zertifikat verwenden müssen.
@@ -6015,10 +6114,10 @@ Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich m
 
     | Einstellung                            | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                        |
     | -------------------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |           | multisite | ja       | **Benutzerdefinierte Header:** HTTP-Header, die durch Semikolons getrennt an das Backend gesendet werden.           |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | ja       | **Benutzerdefinierte Header:** HTTP-Header, die durch Semikolons getrennt an das Backend gesendet werden; passende generierte Header (Host, weitergegebene Client-Informationen, weitergegebene mTLS-Header, Upgrade/Connection, ...) werden dabei ohne Berücksichtigung der Groß-/Kleinschreibung ersetzt statt dupliziert. Ein explizit leerer Wert unterdrückt diesen Header. |
     | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | ja       | **Header ausblenden:** HTTP-Header, die vor Clients verborgen werden sollen, wenn sie vom Backend empfangen werden. |
     | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | ja       | **Client-Header:** HTTP-Header, die durch Semikolons getrennt an den Client gesendet werden.                        |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | nein     | **Unterstriche in Headern:** Aktiviert oder deaktiviert die `underscores_in_headers`-Direktive.                     |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | nein     | **Unterstriche in Headern:** Aktiviert oder deaktiviert die `underscores_in_headers`-Direktive. Serverweit mit den Plugins gRPC und misc geteilt: aktiviert ein Dienst sie für eine Location, gilt sie für den gesamten Dienst. |
 
     !!! warning "Sicherheitsüberlegungen"
         Seien Sie bei der Verwendung der Reverse-Proxy-Funktion vorsichtig, welche Header Sie an Ihre Backend-Anwendungen weiterleiten. Bestimmte Header können sensible Informationen über Ihre Infrastruktur preisgeben oder Sicherheitskontrollen umgehen.
@@ -6544,6 +6643,98 @@ Die Verwaltung erfolgt auf der **Workflows**-Seite der Web-UI oder über die API
 Regeln werden zentral gespeichert, in ein gemeinsames Artefakt kompiliert und mit dem üblichen
 Konfigurations-Push an alle Instanzen verteilt.
 
+## Security workflows
+
+STREAM-Unterstützung :x:
+
+Das Workflows-Plugin ergänzt eine Richtlinienebene zwischen einzelnen Einstellungen und Lua-Schutzfunktionen:
+wiederverwendbare, geordnete Regeln, die Sie Diensten zuweisen. Jede verbindet einen Bedingungsbaum
+mit genau einer Aktion.
+
+Eine Regel beantwortet Fragen, die einzelne Einstellungen allein nicht ausdrücken können:
+
+> **Wenn** eine Anfrage aus Frankreich kommt **und** `/login` aufruft **und** 10 Anfragen pro Minute
+> überschreitet, **dann** eine hCaptcha-Challenge anzeigen.
+
+Workflows **koordinieren** bestehende Schutzfunktionen. `challenge` übergibt die Anfrage an Antibot;
+ein Ratenschwellwert verwendet denselben Zählmechanismus wie Limit. Bestehende Einstellungen bleiben wirksam.
+
+### Auswertung einer Regel
+
+Für jeden Dienst werden Workflows in Zuordnungsreihenfolge ausgewertet, ihre Regeln in der von Ihnen
+festgelegten Reihenfolge. **Die erste tatsächlich zutreffende Regel gewinnt**, führt ihre einzelne
+Aktion aus und beendet die Auswertung.
+
+Bedingungen bilden einen Baum aus `ALL` / `ANY` / `NOT` über:
+
+| Bedingung | Prüft |
+| --------- | ----- |
+| IP / CIDR | Effektive Client-IP nach Real-IP-Auflösung |
+| Land | ISO-Land aus der GeoIP-Datenbank |
+| ASN | Nummer des autonomen Systems der Client-IP |
+| URI | Normalisierten Pfad: exakt, Präfix oder regulärer Ausdruck |
+| HTTP-Methode | Methode der Anfrage |
+| Ressourcengruppe | Anderswo gepflegte IP-, Länder- oder ASN-Gruppe, per ID referenziert |
+| CrowdSec-Urteil | Entscheidung über die Anfrage: Quelle (`appsec` oder `lapi`) und verlangte Maßnahme (`ban` oder `captcha`) |
+
+Bedingungen sind **dreiwertig**: wahr, falsch oder *unbekannt*, wenn benötigte Informationen fehlen,
+etwa eine GeoIP-Datenbank. Eine Regel trifft nur bei einem insgesamt wahren Baum zu. Ein Datenbankfehler
+lässt sie damit nicht mehr zutreffen, statt sie versehentlich passend zu machen.
+
+Eine **CrowdSec-Urteil**-Bedingung ist unentschieden, wenn CrowdSec den Dienst nicht bewertet hat,
+und falsch, wenn CrowdSec die Anfrage bewertet und nichts beanstandet hat. Das sind unterschiedliche
+Fälle; keiner trifft zu. Damit ein Workflow *anstelle* von CrowdSec antwortet, setzen Sie
+`CROWDSEC_DEFER_TO_WORKFLOWS=yes` auf dem Dienst. CrowdSec übergibt dann sein Urteil, statt es selbst
+anzuwenden; trifft keine Regel zu, wird es unverändert durchgesetzt.
+
+### Ratenschwellwerte entscheiden über den Treffer
+
+Eine Regel kann einen Schwellwert tragen. Dieser ist keine Aktion „Rate begrenzen“, sondern entscheidet,
+**ob die Regel überhaupt zutrifft**. Unterhalb des Schwellwerts wird die nächste Regel geprüft.
+
+Damit lässt sich „über 10 Anfragen pro Minute mit 429 antworten, sonst eine Challenge anzeigen“
+als zwei geordnete Regeln mit gleichen Bedingungen ausdrücken: zuerst mit Schwellwert und Blockierung,
+danach ohne Schwellwert.
+
+Der Zähler gilt je Dienst + Regel + Client-IP und beeinflusst die `LIMIT_REQ_*`-Zähler nicht.
+
+### Aktionen
+
+- **challenge** — einen bestimmten Antibot-Provider anzeigen (`captcha`, `hcaptcha`, `turnstile`, …).
+  Dies funktioniert auch bei `USE_ANTIBOT=no` und übergeht Antibots Ignorierlisten. Gewünschte
+  Ausnahmen gehören in die Regelbedingungen. Die Zugangsdaten des Providers müssen bereits im Dienst vorliegen.
+- **block** — mit dem Ablehnungsstatus der Instanz antworten, beziehungsweise `429` bei einer Regel zur Ratenbegrenzung.
+- **redirect** — den Client mit 301/302/303/307/308 an eine feste URL weiterleiten.
+
+### Erkennungsmodus
+
+`SECURITY_MODE=detect` verwendet dieselben Bäume, dieselbe Reihenfolge und dieselben Ratenzähler,
+setzt jedoch nichts durch. Die Aktion, die erfolgt *wäre*, wird in den Berichten gespeichert,
+sodass Sie eine Richtlinie vor der Aktivierung mit echtem Verkehr prüfen können.
+
+### Fehlerverhalten
+
+Hat eine Instanz noch keine kompilierte Richtlinie erhalten — beim ersten Start oder nach einem
+fehlgeschlagenen Push —, protokolliert sie einen Fehler und bedient den Verkehr mit ihren üblichen
+Schutzfunktionen. Eine auf der Control Plane nicht kompilierbare Richtlinie wird dagegen überhaupt
+nicht verteilt: Der Push wird abgebrochen und alle Instanzen behalten ihre bisherige Richtlinie.
+Das Löschen einer referenzierten Ressourcengruppe wird abgelehnt, solange die Regel existiert.
+
+### Regex-Budget
+
+| Einstellung | Standard | Kontext | Mehrfach | Beschreibung |
+| ----------- | -------- | ------- | -------- | ------------ |
+| `WORKFLOWS_REGEX_BUDGET` | `512` | global | nein | **Regex-Budget:** Maximale Anzahl verschiedener kompilierter regulärer Ausdrücke über alle Workflow-Regeln. NGINX teilt einen Regex-Cache zwischen allen Plugins. Regeln oberhalb dieses Budgets werden deaktiviert, statt unbemerkt die gesamte Instanz zu verlangsamen. |
+
+Die Kompilierung verarbeitet Workflows nach ID sortiert und verbraucht das Budget schrittweise.
+Wird es innerhalb eines Artefakts erschöpft, deaktiviert die Instanz die restlichen Regeln, nicht
+sich selbst. Durch die feste Reihenfolge deaktivieren zwei Instanzen mit demselben Artefakt dieselben Regeln.
+
+### Workflows verwalten
+
+Die Verwaltung erfolgt auf der **Workflows**-Seite der Web-UI oder über die API-Endpunkte `/workflows`.
+Regeln werden zentral gespeichert, in ein gemeinsames Artefakt kompiliert und mit dem üblichen
+Konfigurations-Push an alle Instanzen verteilt.
 ## Security.txt
 
 STREAM-Unterstützung :white_check_mark:
@@ -6938,16 +7129,28 @@ So funktioniert's:
     AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
     ```
 
+## Templates
+
+STREAM-Unterstützung :white_check_mark:
+
+Das Templates-Plugin installiert wiederverwendbare Dienstvorlagen — ein Bündel aus Settings, benutzerdefinierten Konfigurationen und Standardwerten, das sich in einem Schritt auf einen Dienst anwenden lässt. Vorlagen werden mit BunkerWeb ausgeliefert, stammen aus dem Community-Katalog, oder lassen sich über die Web-UI und die API exportieren und importieren; das einzige Setting dieses Plugins lädt Vorlagen beim Start direkt von einer URL herunter.
+
+### Konfigurationseinstellungen
+
+| Setting                  | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                       |
+| ------------------------- | -------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EXTERNAL_TEMPLATE_URLS`  |          | global  | Nein     | Leerzeichengetrennte Liste von Dienstvorlagen-URLs zum Herunterladen und Installieren. Jede URL ist eine Vorlage: ein `bunkerweb-template/1`-JSON-Paket, oder eine `.zip`/`.tar.gz`-Datei mit `<id>/template.json` und ihren Konfigurationen. Nur `https://` und `file:///` werden akzeptiert, höchstens 1 MiB pro URL. `#sha256=<digest>` an eine URL anhängen, um ihren Inhalt zu pinnen. Eine Vorlage, deren URL entfernt wird, wird gelöscht, außer ein Dienst nutzt sie noch. |
+
 ## UI
 
 STREAM-Unterstützung :x:
 
 Integrate easily the BunkerWeb UI.
 
-| Einstellung | Standardwert | Kontext   | Mehrfach | Beschreibung                                 |
-| ----------- | ------------ | --------- | -------- | -------------------------------------------- |
-| `USE_UI`    | `no`         | multisite | nein     | Use UI                                       |
-| `UI_HOST`   |              | global    | nein     | Address of the web UI used for initial setup |
+|Einstellung|Standardwert| Kontext |Mehrfach|                Beschreibung                |
+|-----------|------------|---------|--------|--------------------------------------------|
+|`USE_UI`   |`no`        |multisite|nein    |Use UI                                      |
+|`UI_HOST`  |            |global   |nein    |Address of the web UI used for initial setup|
 
 ## UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

@@ -566,6 +566,8 @@ Seit 1.7 akzeptiert `USE_TEMPLATE` mehrere Vorlagen pro Dienst in der angegebene
 Bei widersprüchlichen Einstellungen gewinnt die letzte Vorlage. Diese Bausteine erstellen Sie auf
 der Vorlagenseite.
 
+Jedes Template — ein in der UI erstelltes oder eine Kopie eines Plugin- oder Katalog-Templates — kann als `bunkerweb-template/1`-JSON-Datei exportiert und wieder importiert werden, über die Export-/Import-Aktionen der Galerie oder über `GET /templates/{id}/export` und `POST /templates/import` in der API. Ein Import landet unabhängig vom ursprünglichen Besitzer des exportierten Templates immer als einfaches UI-Template; das Importieren über eine bestehende ID hinweg erfordert eine explizite „Ersetzen"-Bestätigung und ersetzt ausschließlich ein UI-eigenes Template. Sobald ein Katalog-Template installiert ist, zeigt die Galerie eine **Aktualisieren**-Aktion, sobald sich die Kopie im Katalog von der installierten unterscheidet — sie zeigt vor der Anwendung eine Vorschau der Änderungen (Einstellungen, Schritte und Konfigurationen), im selben Katalog-Refresh-Rhythmus wie die Plugins-Seite.
+
 ### Web-Cache-Verwaltung {#web-cache-management}
 
 Die Seite **Web-Cache** verwaltet den NGINX-Antwortcache des Reverse Proxys. Sie zeigt den Meldestatus
@@ -582,6 +584,53 @@ des Dienstes an. Die API akzeptiert höchstens 100 URLs pro Anfrage.
     für einen Dienst, und löst keinen NGINX-Reload aus. Unerreichbare Instanzen werden übersprungen;
     es wird nichts für sie vorgemerkt. Prüfen Sie die Ergebnisse je Instanz, bevor Sie von einer
     vollständig geleerten Flotte ausgehen.
+
+### Home-Dashboard
+
+Die **Home**-Seite ist die Landingpage nach der Anmeldung. Ihr Header enthält eine Schaltfläche **Neu laden**, einen Datumsbereichs-Picker (standardmäßig die letzten 7 Tage), der den Trend-Chip und die Zeitachse der blockierten Anfragen steuert, sowie einen Link **Support erhalten**.
+
+- **Statusleiste**: der Plan (Free oder PRO, mit Verlängerungsdatum und lizenzierter Dienstanzahl bei PRO), die Karte **System-RAM** und der Anteil der in den letzten 7 Tagen blockierten Anfragen, mit einem Trend gegenüber dem vorherigen Zeitraum des gewählten Bereichs.
+- Kacheln **Instanzen**, **Dienste**, **Upstreams** und **Zertifikate**: Instanzen up, down und ladend (eine Instanz im Zustand `failover` zählt als down), Dienste online und im Entwurf, Anzahl der Upstream-Pools sowie Zertifikate, die abgelaufen sind oder innerhalb von 30 Tagen ablaufen.
+- Mini-Kacheln **Aktive Sperren**, **Blockierte eindeutige IPs**, **Geplante Jobs** und **Gesamtanfragen**. Die Sperrenzahl stammt aus der Datenbank und fällt daher nach einem Instanz-Neustart nicht auf null zurück. Ein rotes Banner erscheint oberhalb der Seite, wenn ein Job bei seinem letzten Lauf fehlgeschlagen ist.
+- Diagramme: blockierte Anfragen über den gewählten Bereich, die Verteilung der HTTP-Statuscodes, die Top 10 der blockierten IPs, die häufigsten Meldungsgründe, eine Weltkarte der blockierten Anfragen nach Land (mit einem Link zur live [Threatmap](#threatmap)), blockierte Anfragen über die Zeit und der BunkerWeb-Newsfeed. Die aufwendigen Aggregate laden, nachdem die Seite angezeigt wurde, sodass ein langsames Metrics-Backend die Diagramme verzögert, nicht die Seite.
+
+Die Karte **System-RAM** liest das Speicherlimit des Containers, in dem die Web-UI läuft, sofern eines gesetzt ist, andernfalls den Arbeitsspeicher des Hosts. Wiederverwendbarer Seiten-Cache zählt nicht als belegt, genauso wie `docker stats` es handhabt. Ihre Farbe hängt ausschließlich vom genutzten Prozentsatz ab:
+
+| Genutzt  | Farbe   |
+| -------- | ------- |
+| < 70 %   | grün    |
+| 70-85 %  | neutral |
+| 85-95 %  | Warnung |
+| >= 95 %  | Gefahr  |
+
+Die Diagrammkarten (außer den Top blockierten IPs) und die News-Karte können über ihr eigenes Menü ausgeblendet werden. Die Wahl wird pro Konto gespeichert, folgt Ihnen also über Browser hinweg, und eine Schaltfläche **Ausgeblendete Karten wiederherstellen** erscheint im Header nur, solange mindestens eine Karte ausgeblendet ist.
+
+### Sperren
+
+Die **Sperren**-Seite listet jede aktive Sperre auf. Die Liste wird aus der Datenbank gelesen, der in [Persistenz von Sperren und Berichten](advanced.md#persistence-of-bans-and-reports) beschriebenen Quelle der Wahrheit: Eine hier, über die API, `bwcli` oder eine automatische Entscheidung hinzugefügte Sperre wird zuerst gespeichert und dann an die Instanzen gesendet, und der Job `sync-bans` gleicht die Instanzen jede Minute mit der Datenbank ab.
+
+- Der Header zeigt die Anzahl aktiver Sperren, die innerhalb der Stunde ablaufenden Sperren, die Anzahl der Herkunftsländer, die permanenten Sperren, die fünf häufigsten Gründe sowie ein Diagramm der aktiven Sperren pro Intervall über den gewählten Bereich. Eine erneute Sperrung überschreibt das Startdatum einer Sperre, sodass dieses Diagramm eine Belegung zeigt, keine Historie von Sperrereignissen.
+- Die Tabelle kann nach Sperrdatum, Geltungsbereich (global oder ein Dienst), Enddatum und Dienst durchsucht und gefiltert sowie als CSV oder Excel exportiert werden.
+- **Sperren hinzufügen** nimmt eine oder mehrere IP-Adressen, ein Enddatum oder **Permanent**, einen Grund (standardmäßig `ui`) und einen Geltungsbereich entgegen: jeder Dienst, oder ein aus der Liste ausgewählter Dienst.
+- **Entsperren** entfernt die ausgewählten Sperren, jede in ihrem eigenen Geltungsbereich. **Dauer ändern** wandelt eine Sperre in permanent, 1 Stunde, 24 Stunden, 1 Woche oder ein individuelles Enddatum um und behält ihren ursprünglichen Grund bei.
+- Entsperren und Dauer-Änderungen gelten für die von Ihnen ausgewählten Zeilen oder für jede Sperre, die den aktuellen Filtern entspricht.
+- Jede Zeile trägt eine Schaltfläche **Untersuchen**, die die Seite [CrowdSec](#crowdsec-investigation) für diese IP öffnet.
+
+Das Hinzufügen, Entfernen und Ändern von Sperren erfordert die Schreibberechtigung und eine beschreibbare Datenbank; im Nur-Lese-Modus sind die Schaltflächen deaktiviert. Die **Berichte**-Seite kann ebenfalls die dort aufgeführten Verursacher sperren.
+
+### CrowdSec-Untersuchung
+
+Die **CrowdSec**-Seite (`/crowdsec`, auch über die Schaltfläche **Untersuchen** einer Sperren- oder Berichtszeile erreichbar) zeigt, was die mit Ihren Instanzen verbundenen CrowdSec-Engines wissen, und ermöglicht es einem Administrator, eine Entscheidung an der Quelle zu entfernen. Sie erfordert das aktivierte `crowdsec`-Plugin; jede Instanz, die es ausführt, meldet ihre Verbindungen.
+
+- **Verbindungen**: eine Karte pro CrowdSec-Verbindung, mit ihrer Instanz, den von ihr abgedeckten Diensten, ihrem Modus, ob ihre Entscheidungssynchronisierung aktuell oder veraltet ist, der letzten erfolgreichen Synchronisierung und, sofern AppSec verwendet wird, der letzten AppSec-Beobachtung. Instanzen, die nicht gelesen werden konnten, werden mit ihrem Fehler aufgeführt. Die ausgewählte Verbindung gilt für alles Folgende.
+- **Aktive Entscheidungen**: die derzeit von der ausgewählten Engine gehaltenen Entscheidungen, filterbar nach IP, Ursprung und Szenario, 50 pro Seite. Dies ist live von CrowdSec gelesener Zustand, keine Kopie.
+- **IP untersuchen**: eine Ansicht einer Adresse über die aktuellen Entscheidungen und Alarmbeweise der ausgewählten Engine, die eigenen aktuellen Sperren von BunkerWeb und seine aktuellen Meldungen für die von der Verbindung abgedeckten Dienste sowie die Allowlists der Engine hinweg. Jeder Teil ist begrenzt (200 Entscheidungen, 50 Alarme, 50 Meldungen) und gibt an, wann er gekürzt wurde; ein Teil, der nicht gelesen werden konnte, wird als nicht verfügbar statt leer angezeigt. Meldungen tragen die zum Zeitpunkt der Anfrage erfassten CrowdSec-Beweise (Quelle, Abhilfemaßnahme, Szenario, Dienst-Geltungsbereich), die beschreiben, was damals geschah, nicht den aktuellen Entscheidungszustand.
+- **Allowlists**: die Allowlists der Engine und eine Prüfung für eine IP. Die Seite liest sie nur; fügen Sie Einträge mit `cscli` auf der CrowdSec-Engine hinzu oder entfernen Sie sie (CrowdSec 1.7 oder neuer), oder in der CrowdSec-Konsole für von der Konsole verwaltete Listen.
+
+Alarme, Allowlists und das Entfernen von Entscheidungen erfordern ein dediziertes CrowdSec-Maschinenkonto: Setzen Sie `CROWDSEC_MANAGEMENT_LOGIN` und `CROWDSEC_MANAGEMENT_PASSWORD` auf dem `crowdsec`-Plugin. Ohne sie listet die Seite weiterhin Verbindungen und Entscheidungen über den Bouncer-Schlüssel auf, und die übrigen Operationen melden, dass keine Management-Zugangsdaten konfiguriert sind.
+
+!!! warning "Das Entfernen einer Entscheidung betrifft jeden Bouncer"
+    **Entfernen** löscht die ausgewählte Entscheidung direkt auf der CrowdSec-Engine, sodass sie für jeden mit dieser Engine verbundenen Bouncer nicht mehr gilt, nicht nur für BunkerWeb. Dies ist Administratoren vorbehalten, erfordert eine beschreibbare Datenbank und die Schreibberechtigung, und verlangt eine explizite Bestätigung, die Geltungsbereich, Ziel, Typ, Szenario und Ursprung nennt. Ein Entfernen hebt weder eine lokale BunkerWeb-Sperre noch eine andere Entscheidung über einen weiteren Bereich noch eine AppSec-Übereinstimmung auf, und Instanzen können bis zu ihrer nächsten Synchronisierung eine zwischengespeicherte Entscheidung behalten. Jedes an CrowdSec gesendete Entfernen wird mit Benutzer, Verbindung, Entscheidung und Ergebnis protokolliert. Über die API erfordert das Entfernen die Berechtigung `crowdsec_delete` (siehe die [API-Referenz](api.md#api-surface-capability-map)).
 
 ### Berichts-Dashboard {#reports-dashboard}
 

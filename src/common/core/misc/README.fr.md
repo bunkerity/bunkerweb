@@ -245,7 +245,7 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
     | Paramètre               | Défaut | Contexte | Multiple | Description                                                                                       |
     | ----------------------- | ------ | -------- | -------- | ------------------------------------------------------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`  | global   | no       | **Rapports anonymes :** Envoyer des rapports d'utilisation anonymes aux mainteneurs de BunkerWeb. |
-    | `EXTERNAL_PLUGIN_URLS`  |        | global   | no       | **Plugins externes :** URL pour télécharger des plugins externes (séparées par des espaces).      |
+    | `EXTERNAL_PLUGIN_URLS`  |        | global   | no       | **Plugins externes :** URL pour télécharger des plugins externes (séparées par des espaces). Au maximum 50 Mio par URL ; ajoutez `#sha256=<digest>` pour épingler le contenu ; le simple `http://` est déprécié et sera refusé en 1.7.0.      |
 
 === "Mise en cache des fichiers"
 

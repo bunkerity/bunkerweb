@@ -291,6 +291,10 @@ tags_metadata = [
     },
     {"name": "jobs", "description": "Operations related to scheduler jobs"},
     {
+        "name": "crowdsec",
+        "description": "CrowdSec investigation and decision removal, relayed through the instances' crowdsec plugin",
+    },
+    {
         "name": "redirects",
         "description": "Reusable HTTP redirect rules, attachable to several services at once",
     },

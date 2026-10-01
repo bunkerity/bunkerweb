@@ -1,0 +1,7 @@
+The Templates plugin lets you install reusable service templates — a bundle of settings, custom configs and default values you can apply to a service in one step. Templates ship with BunkerWeb, come from the community catalogue, or can be exported and imported through the web UI and the API; this plugin's only setting downloads templates straight from a URL at startup.
+
+### Configuration Settings
+
+| Setting                  | Default | Context | Multiple | Description                                                                                                                                                                                                                                                                     |
+| ------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EXTERNAL_TEMPLATE_URLS` |         | global  | No       | Space-separated list of service template URLs to download and install. Each URL is one template: a `bunkerweb-template/1` JSON package, or a `.zip`/`.tar.gz` holding `<id>/template.json` and its configs. Only `https://` and `file:///` are accepted, at most 1 MiB per URL. Append `#sha256=<digest>` to a URL to pin its content. A template whose URL is removed is deleted, unless a service still uses it. |

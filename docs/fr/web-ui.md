@@ -493,6 +493,8 @@ Le **Catalogue de modèles** communautaire propose des modèles préparés. Leur
 
 Depuis 1.7, `USE_TEMPLATE` accepte plusieurs modèles par service, appliqués dans l'ordre, le dernier l'emportant en cas de conflit.
 
+Tout modèle — qu'il soit créé dans l'UI ou une copie d'un modèle appartenant à un plugin ou au catalogue — peut être exporté vers un fichier JSON `bunkerweb-template/1` puis réimporté, depuis les actions Exporter/Importer de la galerie ou via `GET /templates/{id}/export` et `POST /templates/import` sur l'API. Un import atterrit toujours comme un simple modèle UI, quelle que soit la propriété d'origine du modèle exporté ; importer par-dessus un identifiant existant nécessite une confirmation explicite de « remplacement » et ne remplace jamais qu'un modèle appartenant à l'UI. Une fois qu'un modèle du catalogue est installé, la galerie affiche une action **Mettre à jour** dès que la copie du catalogue diffère de celle installée — elle prévisualise ce qui a changé (paramètres, étapes et configurations) avant de l'appliquer, selon la même cadence d'actualisation du catalogue que la page Plugins.
+
 ### Gestion du cache Web {#web-cache-management}
 
 La page **Cache Web** gère le cache de réponses NGINX de Reverse Proxy : état de remontée de chaque instance, nombre d'entrées et taille sur disque, services dont `USE_PROXY_CACHE` est effectivement activé, compteurs `HIT`, `MISS`, `BYPASS` et `STALE` lorsque Metrics les fournit.
@@ -501,6 +503,53 @@ Vous pouvez purger une URL HTTP(S) absolue ou le cache complet. La purge d'URL r
 
 !!! warning "Une purge complète concerne tous les services mis en cache"
     `scope: "all"` vide la zone partagée `proxycache` sur toutes les instances joignables, sans cibler un service ni recharger NGINX. Une instance injoignable est ignorée, sans mise en file différée : vérifiez les résultats par instance avant de considérer la purge de flotte comme complète.
+
+### Tableau de bord Accueil
+
+La page **Accueil** est la page d'atterrissage après connexion. Son en-tête comporte un bouton **Recharger**, un sélecteur de plage de dates (7 derniers jours par défaut) qui pilote la puce de tendance et la chronologie des requêtes bloquées, et un lien **Obtenir de l'aide**.
+
+- **Bandeau de statut** : le plan (Gratuit ou PRO, avec la date de renouvellement et le nombre de services sous licence pour PRO), la carte **RAM système** et la part des requêtes bloquées sur les 7 derniers jours, avec une tendance par rapport à la période précédente de la plage sélectionnée.
+- Tuiles **Instances**, **Services**, **Upstreams** et **Certificats** : instances actives, en panne et en chargement (une instance en `failover` compte comme en panne), services en ligne et en brouillon, nombre de pools upstream, et certificats expirés ou expirant dans les 30 jours.
+- Mini-tuiles **Bannissements actifs**, **IP uniques bloquées**, **Jobs planifiés** et **Requêtes totales**. Le nombre de bannissements provient de la base de données, il ne retombe donc pas à zéro après un redémarrage d'instance. Une bannière rouge apparaît en haut de la page lorsqu'un job a échoué lors de sa dernière exécution.
+- Graphiques : requêtes bloquées sur la plage sélectionnée, distribution des statuts HTTP, top 10 des IP bloquées, principaux motifs de signalement, une carte du monde des requêtes bloquées par pays (avec un lien vers la [Threatmap](#threatmap) en direct), requêtes bloquées dans le temps, et le flux d'actualités BunkerWeb. Les agrégats lourds se chargent après l'affichage de la page, si bien qu'un backend de métriques lent retarde les graphiques, pas la page.
+
+La carte **RAM système** lit la limite mémoire du conteneur dans lequel s'exécute l'UI web lorsqu'elle est définie, et la mémoire de l'hôte sinon. Le cache de pages récupérable n'est pas compté comme utilisé, de la même manière que `docker stats` le fait. Sa couleur dépend uniquement du pourcentage utilisé :
+
+| Utilisé  | Couleur       |
+| -------- | ------------- |
+| < 70 %   | vert          |
+| 70-85 %  | neutre        |
+| 85-95 %  | avertissement |
+| >= 95 %  | danger        |
+
+Les cartes de graphiques (sauf le top des IP bloquées) et la carte d'actualités peuvent être masquées depuis leur propre menu. Le choix est enregistré par compte, il vous suit donc d'un navigateur à l'autre, et un bouton **Restaurer les cartes masquées** apparaît dans l'en-tête uniquement tant qu'au moins une carte est masquée.
+
+### Bannissements
+
+La page **Bannissements** liste tous les bannissements actifs. La liste est lue depuis la base de données, la source de vérité décrite dans [Persistance des interdictions et des signalements](advanced.md#persistence-of-bans-and-reports) : un bannissement ajouté ici, depuis l'API, `bwcli` ou une décision automatique est d'abord stocké puis envoyé aux instances, et le job `sync-bans` réconcilie les instances avec la base de données chaque minute.
+
+- L'en-tête affiche le nombre de bannissements actifs, ceux expirant dans l'heure, le nombre de pays d'origine, les bannissements permanents, les cinq motifs les plus courants, et un graphique des bannissements actifs par intervalle sur la plage sélectionnée. Un rebannissement réécrit la date de début d'un bannissement, si bien que ce graphique montre une occupation, pas un historique d'événements.
+- Le tableau peut être recherché et filtré par date de bannissement, portée (globale ou un service), date de fin et service, et exporté en CSV ou Excel.
+- **Ajouter des bannissements** prend une ou plusieurs adresses IP, une date de fin ou **Permanent**, un motif (`ui` par défaut) et une portée : tous les services, ou un service choisi dans la liste.
+- **Débannir** retire les bannissements sélectionnés, chacun dans sa propre portée. **Modifier la durée** bascule un bannissement en permanent, 1 heure, 24 heures, 1 semaine ou une date de fin personnalisée, et conserve son motif d'origine.
+- Le débannissement et les modifications de durée s'appliquent aux lignes sélectionnées, ou à tous les bannissements correspondant aux filtres actuels.
+- Chaque ligne comporte un bouton **Investiguer** qui ouvre la page [CrowdSec](#crowdsec-investigation) pour cette IP.
+
+Ajouter, retirer et modifier des bannissements nécessite la permission d'écriture et une base de données inscriptible ; en mode lecture seule les boutons sont désactivés. La page **Rapports** peut également bannir les contrevenants qu'elle liste.
+
+### Investigation CrowdSec
+
+La page **CrowdSec** (`/crowdsec`, également accessible depuis le bouton **Investiguer** d'une ligne de Bannissements ou de Rapports) montre ce que savent les moteurs CrowdSec connectés à vos instances, et permet à un administrateur de retirer une décision à la source. Elle nécessite que le plugin `crowdsec` soit activé ; chaque instance qui l'exécute signale ses connexions.
+
+- **Connexions** : une carte par connexion CrowdSec, avec son instance, les services qu'elle couvre, son mode, si sa synchronisation des décisions est à jour ou périmée, la dernière synchronisation réussie et, lorsqu'AppSec est utilisé, la dernière observation AppSec. Les instances qui n'ont pas pu être lues sont listées avec leur erreur. La connexion sélectionnée s'applique à tout ce qui suit.
+- **Décisions actives** : les décisions actuellement détenues par le moteur sélectionné, filtrables par IP, origine et scénario, 50 par page. C'est un état en direct lu depuis CrowdSec, pas une copie.
+- **Investiguer une IP** : une vue unique d'une adresse à travers les décisions actuelles et les preuves d'alerte du moteur sélectionné, les bannissements actuels et les signalements récents de BunkerWeb pour les services couverts par la connexion, et les listes blanches du moteur. Chaque partie est plafonnée (200 décisions, 50 alertes, 50 signalements) et indique quand elle a été tronquée ; une partie qui n'a pas pu être lue est affichée comme indisponible plutôt que vide. Les signalements portent la preuve CrowdSec capturée au moment de la requête (source, remédiation, scénario, portée de service), qui décrit ce qui s'est passé alors, pas l'état actuel de la décision.
+- **Listes blanches** : les listes blanches du moteur et une vérification pour une IP. La page ne fait que les lire ; ajoutez ou retirez des entrées avec `cscli` sur le moteur CrowdSec (CrowdSec 1.7 ou ultérieur), ou dans la Console CrowdSec pour les listes gérées par la Console.
+
+Les alertes, les listes blanches et le retrait de décisions nécessitent un compte machine CrowdSec dédié : définissez `CROWDSEC_MANAGEMENT_LOGIN` et `CROWDSEC_MANAGEMENT_PASSWORD` sur le plugin `crowdsec`. Sans eux, la page continue de lister les connexions et les décisions via la clé de bouncer, et les autres opérations signalent que les identifiants de gestion ne sont pas configurés.
+
+!!! warning "Retirer une décision affecte tous les bouncers"
+    **Retirer** supprime la décision sélectionnée sur le moteur CrowdSec lui-même, si bien qu'elle cesse de s'appliquer pour tous les bouncers connectés à ce moteur, pas seulement BunkerWeb. Cette action est réservée aux administrateurs, nécessite une base de données inscriptible et la permission d'écriture, et demande une confirmation explicite nommant la portée, la cible, le type, le scénario et l'origine. Un retrait ne lève pas un bannissement BunkerWeb local, une autre décision sur une plage plus large, ou une correspondance AppSec, et les instances peuvent conserver une décision en cache jusqu'à leur prochaine synchronisation. Chaque retrait envoyé à CrowdSec est journalisé avec l'utilisateur, la connexion, la décision et le résultat. Via l'API, le retrait nécessite la permission `crowdsec_delete` (voir la [référence API](api.md#api-surface-capability-map)).
 
 ### Tableau de bord des rapports {#reports-dashboard}
 

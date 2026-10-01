@@ -254,7 +254,7 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 | Ajuste                  | Valor por defecto | Contexto | Múltiple | Descripción                                                                                   |
 | ----------------------- | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------- |
 | `SEND_ANONYMOUS_REPORT` | `yes`             | global   | no       | **Informes Anónimos:** Envíe informes de uso anónimos a los mantenedores de BunkerWeb.        |
-| `EXTERNAL_PLUGIN_URLS`  |                   | global   | no       | **Complementos Externos:** URL para descargar complementos externos (separados por espacios). |
+| `EXTERNAL_PLUGIN_URLS`  |                   | global   | no       | **Complementos Externos:** URL para descargar complementos externos (separados por espacios). Como máximo 50 MiB por URL; añade `#sha256=<digest>` para fijar el contenido; el `http://` simple está obsoleto y se rechazará en la versión final de 1.7.0. |
 
 === "Almacenamiento en Caché de Archivos"
 

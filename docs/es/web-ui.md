@@ -514,6 +514,8 @@ versión; una plantilla que nombre un ajuste desconocido se rechaza.
 Desde 1.7, `USE_TEMPLATE` acepta varias plantillas por servicio, aplicadas en orden; ante un
 conflicto gana la última. Esta página permite crear esos bloques reutilizables.
 
+Cualquier plantilla — creada en la UI, o una copia de una plantilla propiedad de un plugin o del catálogo — puede exportarse a un archivo JSON `bunkerweb-template/1` y volver a importarse, desde las acciones Exportar/Importar de la galería o mediante `GET /templates/{id}/export` y `POST /templates/import` en la API. Una importación siempre aterriza como una plantilla UI normal, sin importar la propiedad original de la plantilla exportada; importar sobre un id existente necesita una confirmación explícita de «reemplazar» y solo reemplaza una plantilla propiedad de la UI. Una vez instalada una plantilla del catálogo, la galería muestra una acción **Actualizar** en cuanto la copia del catálogo difiere de la instalada — previsualiza lo que cambió (ajustes, pasos y configuraciones) antes de aplicarlo, con la misma cadencia de actualización del catálogo que usa la página Plugins.
+
 ### Gestión de la caché web {#web-cache-management}
 
 **Web cache** gestiona la caché NGINX del proxy inverso. Muestra el estado de informe de cada
@@ -528,6 +530,53 @@ predeterminada. La API admite hasta 100 URLs por petición.
     `scope: "all"` vacía la zona compartida `proxycache` en cada instancia accesible. No se limita
     a un servicio ni recarga NGINX. Una instancia inaccesible se omite sin encolar trabajo:
     comprueba el resultado por instancia antes de dar por terminada la purga de toda la flota.
+
+### Panel de inicio
+
+La página **Inicio** es la página de aterrizaje tras iniciar sesión. Su cabecera incluye un botón **Recargar**, un selector de rango de fechas (los últimos 7 días por defecto) que controla el indicador de tendencia y la línea temporal de peticiones bloqueadas, y un enlace **Obtener soporte**.
+
+- **Banda de estado**: el plan (Gratis o PRO, con la fecha de renovación y el número de servicios licenciados en PRO), la tarjeta **RAM del sistema** y la proporción de peticiones bloqueadas en los últimos 7 días, con una tendencia respecto al periodo anterior del rango seleccionado.
+- Tarjetas de **Instancias**, **Servicios**, **Upstreams** y **Certificados**: instancias activas, caídas y cargando (una instancia en `failover` cuenta como caída), servicios en línea y en borrador, número de pools upstream, y certificados caducados o que caducan en 30 días.
+- Mini-tarjetas **Bloqueos activos**, **IPs únicas bloqueadas**, **Trabajos programados** y **Peticiones totales**. El recuento de bloqueos proviene de la base de datos, por lo que no cae a cero tras reiniciar una instancia. Aparece un banner rojo sobre la página cuando un trabajo falló en su última ejecución.
+- Gráficos: peticiones bloqueadas en el rango seleccionado, distribución de estados HTTP, las 10 IPs más bloqueadas, los principales motivos de informe, un mapa mundial de peticiones bloqueadas por país (con un enlace al [Mapa de amenazas](#threatmap) en vivo), peticiones bloqueadas a lo largo del tiempo, y el feed de noticias de BunkerWeb. Los agregados pesados se cargan después de mostrarse la página, de modo que un backend de métricas lento retrasa los gráficos, no la página.
+
+La tarjeta **RAM del sistema** lee el límite de memoria del contenedor en el que se ejecuta la UI web cuando hay uno definido, y la memoria del host en caso contrario. La caché de páginas reclamable no se cuenta como usada, igual que hace `docker stats`. Su color depende únicamente del porcentaje usado:
+
+| Usado    | Color   |
+| -------- | ------- |
+| < 70 %   | verde   |
+| 70-85 %  | neutro  |
+| 85-95 %  | aviso   |
+| >= 95 %  | peligro |
+
+Las tarjetas de gráficos (excepto las IPs más bloqueadas) y la tarjeta de noticias pueden ocultarse desde su propio menú. La elección se guarda por cuenta, por lo que te sigue entre navegadores, y un botón **Restaurar tarjetas ocultas** aparece en la cabecera solo mientras al menos una tarjeta esté oculta.
+
+### Bloqueos
+
+La página **Bloqueos** lista todos los bloqueos activos. La lista se lee de la base de datos, la fuente de verdad descrita en [Persistencia de bloqueos e informes](advanced.md#persistence-of-bans-and-reports): un bloqueo añadido aquí, desde la API, `bwcli` o una decisión automática se guarda primero y luego se envía a las instancias, y el trabajo `sync-bans` reconcilia las instancias con la base de datos cada minuto.
+
+- La cabecera muestra el número de bloqueos activos, los que caducan dentro de la hora, el número de países de origen, los bloqueos permanentes, los cinco motivos más comunes, y un gráfico de bloqueos activos por intervalo en el rango seleccionado. Un rebloqueo reescribe la fecha de inicio de un bloqueo, por lo que ese gráfico muestra ocupación, no un historial de eventos de bloqueo.
+- La tabla se puede buscar y filtrar por fecha de bloqueo, ámbito (global o un servicio), fecha de fin y servicio, y exportar a CSV o Excel.
+- **Añadir bloqueos** toma una o varias direcciones IP, una fecha de fin o **Permanente**, un motivo (`ui` por defecto) y un ámbito: todos los servicios, o uno elegido de la lista.
+- **Desbloquear** elimina los bloqueos seleccionados, cada uno en su propio ámbito. **Actualizar duración** cambia un bloqueo a permanente, 1 hora, 24 horas, 1 semana o una fecha de fin personalizada, y conserva su motivo original.
+- Los cambios de desbloqueo y duración se aplican a las filas seleccionadas, o a todos los bloqueos que coincidan con los filtros actuales.
+- Cada fila tiene un botón **Investigar** que abre la página [CrowdSec](#crowdsec-investigation) para esa IP.
+
+Añadir, eliminar y cambiar bloqueos requiere el permiso de escritura y una base de datos en la que se pueda escribir; en modo de solo lectura los botones están deshabilitados. La página **Informes** también puede bloquear a los infractores que lista.
+
+### Investigación CrowdSec
+
+La página **CrowdSec** (`/crowdsec`, también accesible desde el botón **Investigar** de una fila de Bloqueos o Informes) muestra lo que saben los motores CrowdSec conectados a tus instancias, y permite a un administrador eliminar una decisión en el origen. Requiere que el plugin `crowdsec` esté activado; cada instancia que lo ejecuta informa de sus conexiones.
+
+- **Conexiones**: una tarjeta por conexión CrowdSec, con su instancia, los servicios que cubre, su modo, si su sincronización de decisiones está al día o desactualizada, la última sincronización exitosa y, cuando se usa AppSec, la última observación de AppSec. Las instancias que no se pudieron leer se listan con su error. La conexión seleccionada se aplica a todo lo que sigue.
+- **Decisiones activas**: las decisiones actualmente mantenidas por el motor seleccionado, filtrables por IP, origen y escenario, 50 por página. Es un estado en vivo leído de CrowdSec, no una copia.
+- **Investigar una IP**: una vista única de una dirección a través de las decisiones actuales y las pruebas de alerta del motor seleccionado, los propios bloqueos actuales de BunkerWeb y sus informes recientes para los servicios que cubre la conexión, y las listas de confianza del motor. Cada parte tiene un límite (200 decisiones, 50 alertas, 50 informes) e indica cuándo se truncó; una parte que no pudo leerse se muestra como no disponible en lugar de vacía. Los informes llevan la evidencia de CrowdSec capturada en el momento de la petición (origen, remediación, escenario, ámbito de servicio), que describe lo que ocurrió entonces, no el estado actual de la decisión.
+- **Listas de confianza**: las listas de confianza del motor y una comprobación para una IP. La página solo las lee; añade o elimina entradas con `cscli` en el motor CrowdSec (CrowdSec 1.7 o posterior), o en la Consola de CrowdSec para las listas gestionadas por la Consola.
+
+Las alertas, las listas de confianza y la eliminación de decisiones requieren una cuenta de máquina CrowdSec dedicada: define `CROWDSEC_MANAGEMENT_LOGIN` y `CROWDSEC_MANAGEMENT_PASSWORD` en el plugin `crowdsec`. Sin ellas, la página sigue listando conexiones y decisiones a través de la clave de bouncer, y las demás operaciones informan de que las credenciales de gestión no están configuradas.
+
+!!! warning "Eliminar una decisión afecta a todos los bouncers"
+    **Eliminar** borra la decisión seleccionada en el propio motor CrowdSec, por lo que deja de aplicarse para todos los bouncers conectados a ese motor, no solo a BunkerWeb. Está restringido a administradores, requiere una base de datos en la que se pueda escribir y el permiso de escritura, y pide una confirmación explícita que nombre el ámbito, el objetivo, el tipo, el escenario y el origen. Una eliminación no levanta un bloqueo local de BunkerWeb, otra decisión sobre un rango más amplio, ni una coincidencia de AppSec, y las instancias pueden conservar una decisión en caché hasta su próxima sincronización. Cada eliminación enviada a CrowdSec se registra con el usuario, la conexión, la decisión y el resultado. A través de la API, la eliminación requiere el permiso `crowdsec_delete` (ver la [referencia de la API](api.md#api-surface-capability-map)).
 
 ### Panel de informes {#reports-dashboard}
 

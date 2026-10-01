@@ -12,6 +12,7 @@ La API de BunkerWeb es el plano de control para gestionar instancias, servicios,
     - Ruta raíz: define `API_ROOT_PATH` al usar reverse proxy en subruta para que docs y OpenAPI funcionen
     - Auth obligatoria: tokens Biscuit, Basic admin o un Bearer de override
     - Lista blanca IP por defecto a rangos RFC1918 (`API_WHITELIST_IPS`); desactiva solo si el upstream controla el acceso
+    - Lista blanca opcional de la cabecera `Host` (`API_ALLOWED_HOSTS`), desactivada por defecto
     - Rate limiting activado por defecto; `/auth` siempre tiene su propio límite
 
 ## Checklist de seguridad
@@ -21,6 +22,7 @@ La API de BunkerWeb es el plano de control para gestionar instancias, servicios,
 - Ámbitos de ACL: los permisos de **escritura** de config, service, plugin y global settings son equivalentes a admin (su contenido se renderiza tal cual como NGINX/Lua, es decir, ejecución de código): concédelos solo a usuarios de plena confianza. `instances_create` e `instances_update` también lo son, por otra vía: las llamadas a una instancia registrada llevan el override de admin `API_TOKEN`, y el scheduler envía la configuración generada y la caché (claves privadas TLS incluidas) a cada instancia registrada. Ver [Permisos y ACL](#permisos-y-acl).
 - Ocultar ruta: con reverse proxy, elige un `API_ROOT_PATH` poco obvio y refléjalo en el proxy.
 - Rate limiting: déjalo activado salvo que otra capa imponga límites equivalentes; `/auth` siempre está limitado.
+- Cabecera Host: si la API solo es accesible bajo nombres conocidos, lístalos en `API_ALLOWED_HOSTS` para que una solicitud con otro `Host` se rechace antes de la autenticación. Ver [Lista blanca de la cabecera Host](#host-header-allowlist).
 - TLS: termina en el proxy o usa `API_SSL_ENABLED=yes` con rutas de cert/clave.
 
 ## Ejecución
@@ -186,7 +188,7 @@ Elige el sabor que encaje con tu entorno.
   - `configs`: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins`: `plugin_read`, `plugin_create`, `plugin_delete`
   - `cache`: `cache_read`, `cache_delete`
-  - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`
+  - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`, más `crowdsec_read` y `crowdsec_delete` para las rutas `/crowdsec` (un permiso puede limitarse a una sola conexión CrowdSec usando su id como `resource_id`)
   - `jobs`: `job_read`, `job_run`
 - `resource_id` suele ser el segundo componente del path (ej. `/services/{id}`); "*" da acceso global.
 - Inicializa usuarios no admin y permisos con `API_ACL_BOOTSTRAP_FILE` o un `/var/lib/bunkerweb/api_acl_bootstrap.json` montado. Cada usuario admite una `password` en texto plano o un `password_hash`/`password_bcrypt` pre-hasheado (ver el consejo a continuación).
@@ -361,6 +363,18 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 | `API_WHITELIST_ENABLED` | Alternar middleware de lista blanca  | `yes/no/on/off/true/false/0/1` | `yes`                    |
 | `API_WHITELIST_IPS`     | IPs/CIDRs separadas por espacio/coma | IPs/CIDRs                      | Rangos RFC1918 en código |
 
+#### Lista blanca de la cabecera Host {#host-header-allowlist}
+
+| Setting             | Descripción                                                                  | Valores aceptados                                                                  | Predeterminado    |
+| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------ |
+| `API_ALLOWED_HOSTS` | Valores de la cabecera `Host` a los que responde la API; vacío desactiva el chequeo | Nombres de host separados por espacio/coma; un comodín solo como `*` o `*.example.com` | vacío (desactivado) |
+
+Cuando está definido, una solicitud cuya cabecera `Host` no esté en la lista recibe `400 Invalid host header` (texto plano) antes de cualquier chequeo de ruta o token. Una excepción: si `www.example.com` está en la lista pero `example.com` no, una solicitud a `example.com` recibe en su lugar una redirección `307` hacia él. El nombre interno que el scheduler y las instancias usan para alcanzar la API (`API_SERVER_NAME`, `bwapi` por defecto) se añade siempre a la lista, así que activar el chequeo no puede aislar el plano de control. La API registra `API Host header allowlist enabled: [...]` al iniciar. Una entrada con un comodín mal colocado, como `api.*.com` o `*example.com`, desactiva toda la lista blanca en vez de aplicar solo esa parte, y la API registra a nivel `ERROR` `Invalid API_ALLOWED_HOSTS entries [...] (wildcards must be like '*.example.com'); host allowlist NOT enabled`: comprueba esa línea tras cambiar el setting.
+
+#### Límite de tamaño para subir certificados
+
+`POST /customcert/certificates/upload` acepta un cuerpo de solicitud de como máximo 2 MiB más 64 KiB de overhead multipart. Una solicitud mayor se rechaza con `413` y `{"status": "error", "message": "Certificate upload exceeds the 2 MiB request limit"}` antes de analizar la subida: primero se comprueba el `Content-Length` declarado, y un cuerpo que resulte mayor mientras se transmite se corta de la misma forma. Dentro de ese límite, el archivo del certificado y el de la clave privada deben pesar como máximo 1 MiB cada uno, o el endpoint responde `422`. El límite es fijo y no tiene setting propio; no afecta a otros endpoints.
+
 #### Limitación
 
 | Setting                          | Descripción                                  | Valores aceptados                                         | Predeterminado |
@@ -463,9 +477,15 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `GET /bans/timeseries?start=...&end=...&bucket=hour`: ocupación de bloqueos activos por intervalo en `[start, end)`. `bw_bans` conserva una fila por `(ip, ban_scope, service_id)` y volver a bloquear reescribe `created_at`: mide ocupación en el tiempo, no un historial de eventos o creaciones.
   - `POST /bans` o `/bans/ban`: aplica uno o varios bans; la carga puede ser un objeto, un array o JSON como string. El ban se guarda y después se envía a las instancias.
   - `POST /bans/unban` o `DELETE /bans`: elimina bans globalmente o por servicio. Se rechaza una revocación que no pueda guardarse, ya que una instancia que no la recibió podría volver a enseñar el ban a la flota.
+- **CrowdSec** (investigación y gestión de decisiones, retransmitidas a través del plugin `crowdsec` de las instancias registradas)
+  - `GET /crowdsec` (requiere `crowdsec_read`): cada conexión CrowdSec que reportan las instancias registradas, con un `id` opaco, su `instance` y los servicios que cubre, más un mapa `errors` con cada instancia que no pudo leerse. Una instancia marcada como `down` se reporta ahí en vez de consultarse.
+  - `GET /crowdsec/{connection}/decisions?ip=&origin=&scenario=&offset=&limit=` (requiere `crowdsec_read`): las decisiones activas leídas directamente de ese motor CrowdSec, 50 por página por defecto y como máximo 200.
+  - `GET /crowdsec/{connection}/ips/{ip}` (requiere `crowdsec_read`): una IP investigada a través de las decisiones y alertas del motor, los reports y bans propios de BunkerWeb para los servicios que cubre la conexión, y las listas blancas del motor. Una parte que no pueda leerse se lista bajo `errors` y el resto se devuelve igualmente.
+  - `GET /crowdsec/{connection}/alerts/{alert_id}`, `GET /crowdsec/{connection}/allowlists`, `GET /crowdsec/{connection}/allowlists/check?ip=` (requieren `crowdsec_read`): evidencia de alertas y listas blancas. Estas rutas consultan el motor mediante una cuenta de máquina de gestión y responden `403` hasta que se definan `CROWDSEC_MANAGEMENT_LOGIN` y `CROWDSEC_MANAGEMENT_PASSWORD`; las decisiones solo necesitan la clave de bouncer.
+  - `DELETE /crowdsec/{connection}/decisions/{decision_id}` (requiere `crowdsec_delete`, que `ban_delete` no implica): elimina una decisión en el motor CrowdSec. El cuerpo `{"scope": "Ip"|"Range", "value": "...", "decision_type": "..."}` debe reafirmar la decisión que se elimina, y un scope que no coincida con el valor (un rango sin `/`, una IP con `/`) se rechaza. La eliminación se aplica a cada bouncer de ese motor; cada eliminación que llega al motor se registra con el llamante, la conexión, la decisión y el resultado.
 - **Plugins (UI)**
   - `GET /plugins`: lista plugins; `with_data=true` incluye los bytes del paquete cuando están disponibles.
-  - `POST /plugins/upload`: instala plugins de UI desde `.zip`, `.tar.gz`, `.tar.xz`.
+  - `POST /plugins/upload`: instala plugins de UI desde `.zip`, `.tar.gz`, `.tar.xz`. `replace=true` sobrescribe un plugin existente con el mismo id, descartando los settings que el nuevo `plugin.json` ya no declara — solo un plugin instalado vía `ui` (una subida o una instalación desde el catálogo) puede reemplazarse así; cualquier otro id existente responde `409`. Así es como el catálogo actualiza un plugin.
   - `PUT /plugins/external`: sustituye en bloque plugins externos/PRO en la base de datos (`delete_missing` elimina los omitidos); los archivos viajan en base64 sobre JSON.
   - `DELETE /plugins/{id}`: elimina un plugin por ID.
   - `GET /plugins/{id}/page`: datos de la página del plugin como `tar.gz`; `404` si no existe.
@@ -488,7 +508,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `GET /system/readonly`: indica si la base de datos está en solo lectura/failover.
   - `POST /system/checked-changes`: confirma indicadores de cambios procesados.
 - **Usuarios** (cuentas de la interfaz, no clientes de la API)
-  - `GET/POST /users`, `GET/PATCH /users/{username}`: gestión de cuentas.
+  - `GET/POST /users`, `GET/PATCH /users/{username}`: gestión de cuentas. `POST /users` crea un `reader` salvo que se indique `roles`.
   - `GET/DELETE /users/{username}/sessions`, `POST /users/{username}/login`: listado/revocación de sesiones e inicio de sesión.
   - `POST /users/{username}/recovery-codes/refresh|use`: códigos de recuperación TOTP.
   - `POST /users/{username}/totp/use`: consume un contador TOTP una sola vez para impedir repetir el código en otro worker de interfaz. Un rechazo es la defensa contra repetición, no un error: se distingue de una caída mediante `consumed: false` en la respuesta `200`.
@@ -497,6 +517,8 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 - **Plantillas**
   - `GET /templates`, `GET /templates/{id}`: lista u obtiene una plantilla reutilizable.
   - `POST /templates`, `PATCH /templates/{id}`, `DELETE /templates/{id}`: crea, modifica o elimina una plantilla.
+  - `GET /templates/{id}/export`: cualquier plantilla, incluida una propiedad de un plugin, como paquete `bunkerweb-template/1` — el cuerpo que espera `POST /templates/import`. La propiedad no forma parte del paquete: una importación siempre pertenece a la UI.
+  - `POST /templates/import`: crea una plantilla a partir de un paquete `bunkerweb-template/1`; `replace=true` sobrescribe una plantilla de UI existente con el mismo id (`409` sin ello). Una plantilla propiedad de un plugin o gestionada de otro modo nunca se reemplaza así, ni siquiera con `replace=true`.
 - **Grupos de recursos**
   - `GET /resource_groups`, `GET /resource_groups/{id}`, `GET /resource_groups/{id}/references`: lista u obtiene un alias reutilizable de recursos tipados y consulta sus referencias antes de eliminarlo.
   - `POST /resource_groups`, `PATCH /resource_groups/{id}`, `DELETE /resource_groups/{id}`, `POST /resource_groups/{id}/clone`: gestión de grupos.

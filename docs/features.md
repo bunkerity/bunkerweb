@@ -998,8 +998,8 @@ upgrade/downgrade runs on real databases:
 | ------ | ------------------ | --- |
 | SQLite | ✅ tested | The schema comes back exactly as 1.6.14 declares it, with no baseline row lost. |
 | PostgreSQL | ✅ tested | Same, plus two unused enum types left behind that 1.6.14 never looks at. |
-| MariaDB | ❌ restore from backup | The migration aborts partway (errors 1265 and 1553) and leaves a hybrid schema. |
-| MySQL | ❌ restore from backup | Error 1265 measured here too; the second blocker is inferred from MariaDB, not measured on MySQL. |
+| MariaDB | ❌ restore from backup | The migration aborts partway (error 1553, on an index a foreign key needs) and leaves a hybrid schema. |
+| MySQL | ❌ restore from backup | Same abort, error 1553, measured on MySQL 8 too. |
 
 A freshly installed 1.7 has no Alembic revision stamped — only an upgrade stamps one — so on such an
 installation the preflight reports ⚠️ *No Alembic revision is stamped*. That is a warning, not a refusal:
@@ -1016,6 +1016,10 @@ stays available.
     something. What it cannot count it reads out instead, right before the confirmation prompt:
     the columns dropped from tables that survive, and the data excluded because it is never empty
     (request metrics, UI preferences). Read that list; nothing refuses on your behalf for it.
+
+    Individual setting drafts (values saved as drafts in the RAW editor) are refused rather than lost:
+    1.6.14 has no draft flag and would apply them, so its migration refuses while any exists, and the
+    preflight refuses first. Activate or delete them before going back, or target 1.6.15, which keeps them.
 
 !!! tip "Every failure leaves something startable"
     `downgrade --execute` refuses unless a quiescence hold is in place for that same target, the
@@ -2149,6 +2153,41 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 3. Validate the link with the `/crowdsec/ping` API or the admin UI CrowdSec card.
 
 The detailed instructions below follow this sequence.
+
+### Investigation and decision removal
+
+Open **Extra Pages → CrowdSec** in the Web UI to inspect each configured connection, its affected service, Local API connectivity, and decision synchronization. The CrowdSec plugin status card and the **Investigate IP** actions in Reports and Bans open the same page. Investigation links prefill the address. Select the connection when several services or instances use CrowdSec.
+
+An investigation combines current CrowdSec decisions, available CrowdSec alerts, retained BunkerWeb reports, and local BunkerWeb bans. Current decisions and captured report evidence are displayed separately. New CrowdSec reports retain available decision IDs, origins, scenarios, targets, remediation, and expiry information after those decisions expire or are removed. AppSec rejections and denials caused by an AppSec failure policy have distinct sources. Historical evidence follows the existing report retention settings; old reports and evicted optional metadata may have no additional details. Alert inspection exposes bounded event metadata rather than raw request bodies, cookies, or authentication headers.
+
+Local reports and service-specific bans are restricted to the selected connection's service scope; global BunkerWeb bans are also included. If that scope can no longer be established from the instance's loaded configuration, investigation stops rather than returning other services' evidence. Retained reports remain accessible when the Local API is unavailable and the connection configuration is still loaded.
+
+The **CrowdSec allowlists** section displays native engine allowlists, their entries, comments, expiration dates, and whether they are managed locally or through the CrowdSec Console. IP investigations check the engine's current allowlist state and show its matching reason. Reading and checking allowlists requires the management credentials below. An unavailable check is shown separately from an IP that is not allowlisted. Allowlist exceptions apply to the whole CrowdSec engine; they do not remove local BunkerWeb bans. CrowdSec 1.8.0 exposes read/check operations through LAPI, while native allowlist writes require `cscli` on its host or separate Console management access.
+
+The existing `CROWDSEC_API_KEY` is a **bouncer key**: it supports reading decisions, but cannot remove them or inspect alerts. To enable those operations, register a dedicated machine on the relevant CrowdSec engine and configure both of these optional multisite settings:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: the dedicated machine's login.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: that machine's password.
+
+Register the machine using CrowdSec's [Local API authentication procedure](https://doc.crowdsec.net/docs/local_api/authentication/). Store the credentials privately. Leaving either setting empty keeps management unavailable. The same configuration applies to bundled and external engines: requests are sent through the selected BunkerWeb instance, so a bundled Local API can continue listening on localhost. Management HTTPS requests verify the server certificate using BunkerWeb's TLS trust configuration, independently of the AppSec verification setting.
+
+**Remove CrowdSec decision** is separate from BunkerWeb unban. Web UI removal requires an administrator with write access, configured management credentials, and confirmation of the selected decision; the API must not be in read-only mode. Removing a range affects the entire range. Removing a decision on a shared engine also affects the other bouncers that consume it. The selected ID, scope, target, and remediation are checked again before removal; other decisions and local bans are preserved.
+
+A successful response confirms removal at the Local API and displays remaining matching decisions. Bouncers pick up the change through their configured stream refresh or live cache expiry; the UI reports propagation as pending rather than claiming every client is already allowed. Another decision, a local ban, a new detection, or an AppSec rule can still block a request. Removal outcomes are logged with the authenticated actor and selected connection/decision.
+
+The public API exposes the same operations:
+
+- `GET /crowdsec`: connections, synchronization state, and per-instance errors.
+- `GET /crowdsec/{connection_id}/decisions`: filter by `ip`, `origin`, or `scenario`; paginate with `offset` and `limit` (maximum 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: investigation, including up to 200 decisions, 50 alerts, and 50 reports, with totals or limits and explicit unavailable sections.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: sanitized alert details.
+- `GET /crowdsec/{connection_id}/allowlists`: native allowlists, with `offset` and `limit` pagination; up to 200 entries per list, with the full entry count shown.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: current native allowlist membership and matching reason.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: include the selected `scope`, `value`, and `decision_type` in the JSON body.
+
+Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. Listing connections with `GET /crowdsec` requires the permission on `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
+
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
@@ -3435,29 +3474,56 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
     A `GRPC_HOST` points at a single backend. To balance across several backends, or to share the same backends between services, declare a **gRPC upstream pool** on the **Upstreams** page (or through the `/upstreams` API) and attach it to a service at a path — BunkerWeb then writes `grpc://<pool>` into the matching `GRPC_HOST` for you. Note that gRPC and reverse-proxy locations share one path namespace on a service: the same path cannot be claimed twice, whichever plugin serves it. See the *Reusable Upstreams* section of the Reverse Proxy documentation.
 
 !!! tip "Mutual TLS with the gRPC backend"
-    To present a client certificate to the backend, set `REVERSE_PROXY_SSL_CLIENT_CERT` and `REVERSE_PROXY_SSL_CLIENT_KEY` (or their `_DATA` variants) on the service. The identity is deliberately shared with the reverse proxy: one service authenticates to its backends with one certificate, whichever plugin proxies the traffic, and BunkerWeb emits `grpc_ssl_certificate`/`grpc_ssl_certificate_key` from it. See *Mutual TLS with the upstream* in the Reverse Proxy documentation.
+    gRPC has its own upstream identity, independent of the reverse proxy. For TLS upstreams, use `grpcs://` and configure `GRPC_SSL_SNI` and `GRPC_SSL_SNI_NAME` as needed. To verify the upstream certificate, set `GRPC_SSL_VERIFY=yes` and supply a PEM CA bundle using `GRPC_SSL_TRUSTED_CERTIFICATE` or `_DATA`, selecting the source with `_PRIORITY` (`file` or `data`). `GRPC_SSL_VERIFY_DEPTH` defaults to `1`. No CA bundle is selected automatically: without a cached CA, the generated configuration disables verification and includes a comment explaining how to configure it. A CRL is optional (`GRPC_SSL_CRL` or `_DATA`) and is applied only when verification and a cached CA are present. `GRPC_SSL_PROTOCOLS` and `GRPC_SSL_CIPHERS` leave NGINX defaults unchanged when empty.
+
+    For mutual TLS, set `GRPC_SSL_CLIENT_CERT` and `GRPC_SSL_CLIENT_KEY`, or their `_DATA` variants; `GRPC_SSL_CLIENT_CERT_PRIORITY` selects file paths or data for the pair. Both halves must be valid and match — BunkerWeb checks that the upstream client certificate matches its key; temporary file-read failures keep cached TLS material and report a job failure, while cleared settings or invalid material remove the affected cache. This identity belongs to gRPC; reverse proxy and stream use `REVERSE_PROXY_SSL_CLIENT_*` independently. The shared `trusted-cert` job caches the gRPC CA, CRL, and client pair in the reverseproxy cache directory and triggers configuration regeneration when material changes. There is no separate gRPC certificate job. TLS settings apply to the whole service, including attached upstream pools; they are not per-location settings. See *Mutual TLS with the upstream* in the Reverse Proxy documentation.
 
 ### Configuration Settings
 
-| Setting                      | Default | Context   | Multiple | Description                                                                                         |
-| ---------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `USE_GRPC`                   | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                              |
-| `GRPC_HOST`                  |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`). |
-| `GRPC_URL`                   | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value. |
-| `GRPC_CUSTOM_HOST`           |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                      |
-| `GRPC_HEADERS`               |         | multisite | yes      | **Extra Upstream Headers:** Semicolon-separated list of `grpc_set_header` values.                   |
-| `GRPC_HIDE_HEADERS`          |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                     |
-| `GRPC_INTERCEPT_ERRORS`      | `yes`   | multisite | no       | **Intercept Errors:** Enables/disables `grpc_intercept_errors`.                                     |
-| `GRPC_CONNECT_TIMEOUT`       | `60s`   | multisite | yes      | **Connect Timeout:** Timeout for establishing connection to upstream.                               |
-| `GRPC_READ_TIMEOUT`          | `60s`   | multisite | yes      | **Read Timeout:** Timeout for reading from upstream.                                                |
-| `GRPC_SEND_TIMEOUT`          | `60s`   | multisite | yes      | **Send Timeout:** Timeout for sending to upstream.                                                  |
-| `GRPC_SOCKET_KEEPALIVE`      | `off`   | multisite | yes      | **Socket Keepalive:** Enables/disables upstream socket keepalive.                                   |
-| `GRPC_SSL_SNI`               | `no`    | multisite | no       | **SSL SNI:** Enables/disables SNI for TLS upstreams.                                                |
-| `GRPC_SSL_SNI_NAME`          |         | multisite | no       | **SSL SNI Name:** SNI name to send when `GRPC_SSL_SNI=yes`.                                         |
-| `GRPC_NEXT_UPSTREAM`         |         | multisite | yes      | **Next Upstream Conditions:** Value for `grpc_next_upstream`.                                       |
-| `GRPC_NEXT_UPSTREAM_TIMEOUT` |         | multisite | yes      | **Next Upstream Timeout:** Value for `grpc_next_upstream_timeout`.                                  |
-| `GRPC_NEXT_UPSTREAM_TRIES`   |         | multisite | yes      | **Next Upstream Tries:** Value for `grpc_next_upstream_tries`.                                      |
-| `GRPC_INCLUDES`              |         | multisite | yes      | **Additional Includes:** Space-separated include files added inside the gRPC `location` block.      |
+| Setting                                 | Default | Context   | Multiple | Description                                                                                                                                |
+| ---------------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_GRPC`                              | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                                                                    |
+| `GRPC_HOST`                             |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`).                                       |
+| `GRPC_URL`                              | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value. |
+| `GRPC_CUSTOM_HOST`                      |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                                                            |
+| `GRPC_HEADERS`                          |         | multisite | yes      | **Upstream Headers:** Semicolon-separated `grpc_set_header` values; matching generated headers are replaced case-insensitively.           |
+| `GRPC_HIDE_HEADERS`                     |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                                                           |
+| `GRPC_HEADERS_CLIENT`                   |         | multisite | yes      | **Client Response Headers:** Semicolon-separated list of `add_header` values sent to the client.                                          |
+| `GRPC_PASS_HEADERS`                     |         | multisite | yes      | **Passed Response Headers:** Space-separated list of `grpc_pass_header` values, to forward headers NGINX hides by default.                |
+| `GRPC_IGNORE_HEADERS`                   |         | multisite | yes      | **Ignored Response Headers:** Space-separated list of `grpc_ignore_headers` values, to stop NGINX processing them.                        |
+| `GRPC_UNDERSCORES_IN_HEADERS`           | `no`    | multisite | no       | **Allow Underscores in Headers:** Enables/disables `underscores_in_headers`. Shared server-wide with the reverse proxy and misc plugins: any service enabling it for one location enables it for the whole service. |
+| `GRPC_INTERCEPT_ERRORS`                 | `yes`   | multisite | no       | **Intercept Errors:** Enables/disables `grpc_intercept_errors`.                                                                           |
+| `GRPC_BUFFER_SIZE`                      |         | multisite | yes      | **Buffer Size:** Value for `grpc_buffer_size` (buffer used to read the upstream response).                                                |
+| `GRPC_CONNECT_TIMEOUT`                  | `60s`   | multisite | yes      | **Connect Timeout:** Timeout for establishing connection to upstream.                                                                     |
+| `GRPC_READ_TIMEOUT`                     | `60s`   | multisite | yes      | **Read Timeout:** Timeout for reading from upstream.                                                                                      |
+| `GRPC_SEND_TIMEOUT`                     | `60s`   | multisite | yes      | **Send Timeout:** Timeout for sending to upstream.                                                                                        |
+| `GRPC_SOCKET_KEEPALIVE`                 | `off`   | multisite | yes      | **Socket Keepalive:** Enables/disables upstream socket keepalive.                                                                         |
+| `GRPC_SSL_SNI`                          | `no`    | multisite | no       | **SSL SNI:** Enables/disables SNI for TLS upstreams.                                                                                      |
+| `GRPC_SSL_SNI_NAME`                     |         | multisite | no       | **SSL SNI Name:** SNI name to send when `GRPC_SSL_SNI=yes`.                                                                               |
+| `GRPC_SSL_VERIFY`                       | `no`    | multisite | no       | **SSL Verify:** Enables/disables verification of the gRPC upstream certificate.                                                           |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Trusted Certificate Priority:** Source of the CA bundle, `file` or `data`.                                                              |
+| `GRPC_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **Trusted Certificate Path:** Path to a PEM CA bundle readable by the scheduler (priority `file`).                                        |
+| `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **Trusted Certificate Data:** CA bundle as base64 or plaintext PEM (priority `data`).                                                     |
+| `GRPC_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream certificate chain.                                                               |
+| `GRPC_SSL_CLIENT_CERT_PRIORITY`         | `file`  | multisite | no       | **Client Certificate Priority:** Source of the client certificate and key, `file` or `data`.                                              |
+| `GRPC_SSL_CLIENT_CERT`                  |         | multisite | no       | **Client Certificate Path:** PEM client certificate presented to the upstream for mutual TLS (priority `file`).                           |
+| `GRPC_SSL_CLIENT_CERT_DATA`             |         | multisite | no       | **Client Certificate Data:** Client certificate as base64 or plaintext PEM (priority `data`).                                             |
+| `GRPC_SSL_CLIENT_KEY`                   |         | multisite | no       | **Client Key Path:** PEM private key matching the client certificate (priority `file`). It must not be encrypted.                         |
+| `GRPC_SSL_CLIENT_KEY_DATA`              |         | multisite | no       | **Client Key Data:** Client private key as base64 or plaintext PEM (priority `data`).                                                     |
+| `GRPC_SSL_CRL`                          |         | multisite | no       | **CRL Path:** PEM revocation list applied when verifying the upstream; only applied when `GRPC_SSL_VERIFY=yes`. Takes precedence over the CRL data setting; a set but missing path is an error and the data setting is not used as a fallback. |
+| `GRPC_SSL_CRL_DATA`                     |         | multisite | no       | **CRL Data:** Revocation list as base64 or plaintext PEM. Used only when the CRL path is empty.                                           |
+| `GRPC_SSL_PROTOCOLS`                    |         | multisite | no       | **Upstream SSL Protocols:** TLS versions offered to the upstream. Empty keeps the NGINX default.                                          |
+| `GRPC_SSL_CIPHERS`                      |         | multisite | no       | **Upstream SSL Ciphers:** Cipher suite string offered to the upstream. Empty keeps the NGINX default.                                     |
+| `GRPC_NEXT_UPSTREAM`                    |         | multisite | yes      | **Next Upstream Conditions:** Value for `grpc_next_upstream`.                                                                             |
+| `GRPC_NEXT_UPSTREAM_TIMEOUT`            |         | multisite | yes      | **Next Upstream Timeout:** Value for `grpc_next_upstream_timeout`.                                                                        |
+| `GRPC_NEXT_UPSTREAM_TRIES`              |         | multisite | yes      | **Next Upstream Tries:** Value for `grpc_next_upstream_tries`.                                                                            |
+| `GRPC_AUTH_REQUEST`                     |         | multisite | yes      | **Auth Request:** Value for `auth_request`, to authenticate through an external provider.                                                 |
+| `GRPC_AUTH_REQUEST_SIGNIN_URL`          |         | multisite | yes      | **Auth Request Signin URL:** Redirect target when the auth request returns 401. Fragments (`#`) are supported.                            |
+| `GRPC_AUTH_REQUEST_SET`                 |         | multisite | yes      | **Auth Request Set:** Semicolon-separated list of `auth_request_set` values.                                                              |
+| `GRPC_INCLUDES`                         |         | multisite | yes      | **Additional Includes:** Space-separated include files added inside the gRPC `location` block.                                            |
+| `GRPC_MAX_CLIENT_SIZE`                  |         | multisite | yes      | **Maximum Body Size:** Value for `client_max_body_size` in this location (`0` for infinite). Falls back to the service `MAX_CLIENT_SIZE`. |
+
+`GRPC_HOST`, `GRPC_URL`, `GRPC_HEADERS`, `GRPC_HIDE_HEADERS`, `GRPC_HEADERS_CLIENT`, `GRPC_PASS_HEADERS`, `GRPC_IGNORE_HEADERS`, `GRPC_BUFFER_SIZE`, `GRPC_CONNECT_TIMEOUT`, `GRPC_READ_TIMEOUT`, `GRPC_SEND_TIMEOUT`, `GRPC_SOCKET_KEEPALIVE`, `GRPC_NEXT_UPSTREAM{,_TIMEOUT,_TRIES}`, `GRPC_AUTH_REQUEST{,_SIGNIN_URL,_SET}`, `GRPC_INCLUDES` and `GRPC_MAX_CLIENT_SIZE` support numeric suffixes for multiple upstreams/locations (`GRPC_HOST_2`, `GRPC_URL_2`, ...). `GRPC_HEADERS_CLIENT` uses NGINX `add_header` semantics (append `always` where required). Auth signin URLs retain fragment support (`#`). ModSecurity remains disabled in gRPC locations.
 
 !!! warning "ModSecurity on gRPC Locations"
     ModSecurity is currently disabled automatically inside gRPC `location` blocks generated by this plugin because ModSecurity does not reliably support gRPC traffic patterns.
@@ -3516,7 +3582,7 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
     GRPC_HOST: "grpc://grpcbin:9000"
     GRPC_URL: "/"
     GRPC_HEADERS: "x-request-source bunkerweb;x-env production"
-    GRPC_NEXT_UPSTREAM: "error timeout unavailable"
+    GRPC_NEXT_UPSTREAM: "error timeout http_502"
     GRPC_NEXT_UPSTREAM_TIMEOUT: "15s"
     GRPC_NEXT_UPSTREAM_TRIES: "3"
     ```
@@ -4759,7 +4825,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     | Setting                 | Default | Context | Multiple | Description                                                                    |
     | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
     | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
-    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
+    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). At most 50 MiB per URL; append `#sha256=<digest>` to pin content; plain `http://` is deprecated and will be refused in 1.7.0. |
 
 === "File Caching"
 
@@ -5980,9 +6046,10 @@ The settings below point a location at a single backend. When several backends s
 The `REVERSE_PROXY_SSL_VERIFY` settings below check *the backend's* certificate. To also present a certificate **to** the backend — mutual TLS — set the client pair:
 
 - `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` for file paths readable by the scheduler, or `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` for base64 or plaintext PEM, selected by `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` or `data`).
-- The pair is validated with OpenSSL, cached and distributed to every instance by the same job that handles the trusted CA, and written there with owner/group-only permissions.
+- The pair is validated with OpenSSL, cached and distributed to every instance by the same job that handles the trusted CA, and written there with owner/group-only permissions. BunkerWeb validates every certificate in a CA bundle and checks that the upstream client certificate matches its key; temporary file-read failures keep cached TLS material and report a job failure, while cleared settings or invalid material remove the affected cache.
 - **Both halves are required.** A certificate without its key (or the reverse) is refused rather than half-applied, because NGINX needs both directives or neither.
-- The identity is **per service, and shared with gRPC and stream**: one service authenticates to its backends with one certificate, whichever plugin proxies the traffic. In the stream context this is also what enables TLS to the backend at all (`proxy_ssl on`), so a service without a client pair keeps its current plaintext behaviour.
+- The reverse-proxy client identity is per service and is used by its HTTP and stream reverse proxies. gRPC has its own identity, configured with `GRPC_SSL_CLIENT_CERT` / `GRPC_SSL_CLIENT_KEY` or their `_DATA` counterparts, selected by `GRPC_SSL_CLIENT_CERT_PRIORITY`.
+- In the stream context, a cached client certificate/key pair, `REVERSE_PROXY_SSL_VERIFY=yes`, a nonempty protocol or cipher setting enables TLS to the backend (`proxy_ssl on`). A service without any of these keeps its existing plaintext behavior. Setting only a CA path or SNI does not enable stream TLS.
 - Clearing the settings removes the files on the next run, which turns mutual TLS back off.
 
 This is independent of the `mtls` plugin, which authenticates *clients connecting to BunkerWeb* — the opposite direction.
@@ -6075,6 +6142,10 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
     | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | no | **Client Certificate Data:** Client certificate supplied directly as base64 or PEM (e.g. via the web UI). |
     | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | no | **Client Key Path:** Path to the PEM private key matching the client certificate, readable by the scheduler. |
     | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | no | **Client Key Data:** Client private key supplied directly as base64 or PEM. Prefer a file path when possible: a key set here is stored as a setting value. |
+    | `REVERSE_PROXY_SSL_CRL` | | multisite | no | **CRL Path:** Path to a PEM certificate revocation list readable by the worker. Takes precedence over `REVERSE_PROXY_SSL_CRL_DATA`; a set but missing path is an error and data is not used as a fallback; applied only when upstream certificate verification is enabled. |
+    | `REVERSE_PROXY_SSL_CRL_DATA` | | multisite | no | **CRL Data:** Certificate revocation list supplied as base64 or plaintext PEM. Used only when `REVERSE_PROXY_SSL_CRL` is empty. |
+    | `REVERSE_PROXY_SSL_PROTOCOLS` | | multisite | no | **Upstream TLS Protocols:** Space-separated TLS versions offered to the upstream, for example `TLSv1.2 TLSv1.3`. Empty keeps the NGINX default. |
+    | `REVERSE_PROXY_SSL_CIPHERS` | | multisite | no | **Upstream TLS Ciphers:** OpenSSL cipher string offered to the upstream, for example `HIGH:!MD5`. Empty keeps the NGINX default. |
 
     !!! info "Certificate Verification"
         When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
@@ -6083,8 +6154,11 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
         - **Required:** a trusted certificate is mandatory; NGINX has no implicit system store for upstream verification. To verify a public upstream, point the path at the system CA bundle (e.g. `/etc/ssl/certs/ca-certificates.crt`).
         - **Name:** checked against the host from `REVERSE_PROXY_HOST` by default. If the backend certificate's CN/SAN differs, set `REVERSE_PROXY_SSL_SNI` to `yes` and `REVERSE_PROXY_SSL_SNI_NAME` to the expected name.
         - **Fail-safe:** if no valid trusted certificate is available, verification is disabled for that server rather than breaking every upstream connection.
+        - **Revocation:** Set `REVERSE_PROXY_SSL_CRL` to a PEM revocation-list path, or supply base64/plaintext PEM through `REVERSE_PROXY_SSL_CRL_DATA`. The path wins when both are set; there is no CRL priority setting. The worker validates and distributes the CRL. NGINX applies it only when `REVERSE_PROXY_SSL_VERIFY=yes` and a valid cached trusted CA is available.
 
         These settings apply per service: all upstream entries (`REVERSE_PROXY_HOST`, `REVERSE_PROXY_HOST_1`, ...) share the same verification configuration.
+
+        TLS protocols, ciphers and revocation settings also apply per service, across all its reverse-proxy locations and attached upstream pools. They cannot select different TLS policies for individual pools.
 
     !!! info "SNI Explained"
         Server Name Indication (SNI) is a TLS extension that allows a client to specify the hostname it is attempting to connect to during the handshake process. This enables servers to present multiple certificates on the same IP address and port, allowing multiple secure (HTTPS) websites to be served from a single IP address without requiring all those sites to use the same certificate.
@@ -6126,10 +6200,10 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
 
     | Setting                                | Default   | Context   | Multiple | Description                                                                           |
     | -------------------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |           | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons; matching generated headers (Host, forwarded client information, forwarded mTLS headers, Upgrade/Connection, ...) are replaced case-insensitively instead of duplicated. An explicit empty value suppresses that header. |
     | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | yes      | **Hide Headers:** HTTP headers to hide from clients when received from the backend.   |
     | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. Shared server-wide with the gRPC and misc plugins: any service enabling it for one location enables it for the whole service. |
 
     !!! warning "Security Considerations"
         When using the reverse proxy feature, be cautious about what headers you forward to your backend applications. Certain headers might expose sensitive information about your infrastructure or bypass security controls.
@@ -7040,16 +7114,28 @@ Follow these steps to configure and use the SSL feature:
     AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
     ```
 
+## Templates
+
+STREAM support :white_check_mark:
+
+The Templates plugin lets you install reusable service templates — a bundle of settings, custom configs and default values you can apply to a service in one step. Templates ship with BunkerWeb, come from the community catalogue, or can be exported and imported through the web UI and the API; this plugin's only setting downloads templates straight from a URL at startup.
+
+### Configuration Settings
+
+| Setting                  | Default | Context | Multiple | Description                                                                                                                                                                                                                                                                     |
+| ------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EXTERNAL_TEMPLATE_URLS` |         | global  | No       | Space-separated list of service template URLs to download and install. Each URL is one template: a `bunkerweb-template/1` JSON package, or a `.zip`/`.tar.gz` holding `<id>/template.json` and its configs. Only `https://` and `file:///` are accepted, at most 1 MiB per URL. Append `#sha256=<digest>` to a URL to pin its content. A template whose URL is removed is deleted, unless a service still uses it. |
+
 ## UI
 
 STREAM support :x:
 
 Integrate easily the BunkerWeb UI.
 
-| Setting   | Default | Context   | Multiple | Description                                  |
-| --------- | ------- | --------- | -------- | -------------------------------------------- |
-| `USE_UI`  | `no`    | multisite | no       | Use UI                                       |
-| `UI_HOST` |         | global    | no       | Address of the web UI used for initial setup |
+| Setting |Default| Context |Multiple|                Description                 |
+|---------|-------|---------|--------|--------------------------------------------|
+|`USE_UI` |`no`   |multisite|no      |Use UI                                      |
+|`UI_HOST`|       |global   |no      |Address of the web UI used for initial setup|
 
 ## UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

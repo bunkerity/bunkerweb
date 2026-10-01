@@ -28,6 +28,10 @@ La page **Plugins** sépare l'installation de l'activation :
 
 Le catalogue communautaire liste les dernières versions publiées depuis deux dépôts GitHub fixes : [`bunkerity/bunkerweb-plugins`](https://github.com/bunkerity/bunkerweb-plugins) et [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates). Les dépôts eux-mêmes constituent le catalogue. Il n'existe pas de manifeste ni de producteur séparé. BunkerWeb lit le `plugin.json` ou le `template.json` de chaque élément depuis l'archive de la version publiée, applique le filtre de compatibilité des plugins, et n'installe que l'élément sélectionné via le chemin d'upload existant.
 
+Une version de plugin sans entrée de compatibilité pour sa propre ligne, ou dont la version la plus récente listée est antérieure à la version de BunkerWeb réellement exécutée, reste installable — c'est le cas courant juste après une nouvelle version de BunkerWeb, avant que le dépôt du plugin n'ait publié une entrée correspondante. Une version inférieure à toutes celles listées reste refusée, tout comme une tentative d'installation lorsque la version de BunkerWeb en cours d'exécution ne peut pas elle-même être analysée.
+
+Un plugin déjà installé depuis le catalogue affiche une action **Mettre à jour** dès qu'une version plus récente est listée, ainsi qu'une action **Supprimer**. La mise à jour remplace le plugin installé — même s'il a été téléversé manuellement — par la version du catalogue, et supprime les paramètres que le nouveau `plugin.json` ne déclare plus. Un plugin installé d'une autre manière (un plugin cœur ou PRO, ou un téléversement externe manuel partageant le même identifiant) n'est pas touché par le catalogue ; mettez-le à jour ou supprimez-le depuis l'endroit où il a réellement été installé. Les modèles se comportent de la même manière sur la page **Modèles**, avec une action **Mettre à jour** qui prévisualise ce qui a changé — paramètres, étapes et configurations — avant de l'appliquer.
+
 Définissez la variable d'environnement de l'UI web `USE_PLUGIN_CATALOG=no` pour désactiver les requêtes vers le catalogue, masquer les deux sections du catalogue et refuser les installations depuis le catalogue. `off`, `false` et `0` la désactivent également. Cet interrupteur ne supprime rien de ce qui est déjà installé. Un listing en cache vieux de plus de 24 heures reste visible mais ne peut rien installer tant qu'une actualisation n'a pas réussi.
 
 !!! warning "Modèle de confiance du catalogue"
@@ -40,6 +44,25 @@ Définissez la variable d'environnement de l'UI web `USE_PLUGIN_CATALOG=no` pour
 Si vous souhaitez installer rapidement des plugins externes, vous pouvez utiliser ce `EXTERNAL_PLUGIN_URLS` paramètre. Il prend une liste d'URL séparées par des espaces, chacune pointant vers une archive compressée (format zip) contenant un ou plusieurs plugins.
 
 Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.11.zip`
+
+Chaque URL peut être en `https://`, en `file:///` pour une archive déjà présente sur le système de fichiers du planificateur (installations en air-gap), ou en simple `http://`. Le simple `http://` est déprécié : il journalise un avertissement et sera refusé dans BunkerWeb 1.7.0. Un téléchargement est limité à 50 Mio. Pour épingler une URL à un contenu connu, ajoutez l'empreinte SHA-256 de l'archive sous forme de fragment :
+
+```
+EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip#sha256=<64 chiffres hexadécimaux>
+```
+
+Le fragment n'est jamais envoyé au serveur. Si les octets téléchargés ne correspondent pas à l'empreinte, rien n'est installé depuis cette URL et la tâche échoue. Calculez l'empreinte avec `sha256sum` sur une copie de confiance.
+
+Supprimer une URL de `EXTERNAL_PLUGIN_URLS` ne désinstalle pas ses plugins. Supprimez-les depuis la page **Plugins** ou avec `DELETE /plugins/{id}` sur l'API.
+
+Les modèles de service disposent du même mécanisme, avec `EXTERNAL_TEMPLATE_URLS`. Chaque URL correspond à un modèle : un paquet JSON `bunkerweb-template/1` (le format que la page **Modèles** exporte), ou une archive `.zip` ou `.tar.gz` contenant `<id>/template.json` et son dossier `<id>/configs/`, qui est la structure du dépôt [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates). Les règles sont plus strictes que pour les plugins :
+
+- seuls `https://` et `file:///` sont acceptés, jamais le simple `http://` ;
+- un téléchargement est limité à 1 Mio, et l'épinglage `#sha256=` fonctionne de la même manière ;
+- un modèle qui fait référence à un paramètre que cette version de BunkerWeb ne possède pas est refusé dans son intégralité ;
+- les modèles installés de cette manière sont en lecture seule dans l'UI web, et la tâche n'écrase jamais un modèle créé dans l'UI web, via l'API, ou par un plugin ;
+- la suppression d'une URL supprime son modèle, sauf si un service ou les paramètres globaux l'utilisent encore. Dans ce cas, le modèle est conservé, un avertissement est journalisé, et il est supprimé dès que plus rien ne l'utilise ;
+- si une URL échoue à se télécharger pendant une exécution, aucun modèle n'est supprimé pendant cette exécution.
 
 ### Manuelle
 
@@ -358,6 +381,7 @@ Voici le détail des champs :
 |  `settings`   |     oui     | Dict  | Liste des paramètres de votre plugin.                                                                                                 |
 |    `jobs`     |     Non     | liste | Liste des jobs de votre plugin.                                                                                                       |
 |    `bwcli`    |     Non     | dict  | Associer les noms de commandes CLI aux fichiers stockés dans le répertoire 'bwcli' du plugin pour exposer les plugins CLI.            |
+| `extensions`  |     Non     | dict  | Extensions optionnelles du plan de contrôle : routes API, tables de base de données, compilateur de configuration et déclarations. Voir [Extensions](#extensions). |
 
 ### Ordre d'exécution
 
@@ -441,6 +465,63 @@ Les tâches lourdes principales sont `backup-data`, `bunkernet-register`, `bunke
 
     `extensions` n'est validé que côté Python : le runtime NGINX ne le lit jamais. Les champs de
     job (`jobs[]`) sont également réservés à Python car c'est le Worker qui les distribue.
+
+### Extensions {#extensions}
+
+L'objet optionnel `extensions` permet à un plugin d'étendre le plan de contrôle, pas seulement le runtime NGINX. Il contient les clés ci-dessous ; toute autre clé est ignorée. Un manifeste dont `extensions` ne contient aucune des clés `api`, `db`, `config`, `activation` ou `certificate_source` est refusé.
+
+```json
+{
+  "id": "myplugin",
+  "extensions": {
+    "api": { "module": "api/router.py", "prefix": "/myplugin" },
+    "db": { "models": "db/models.py", "methods": "db/methods.py", "table_prefix": "bw_myplugin_" },
+    "activation": { "USE_MYPLUGIN": "no" }
+  }
+}
+```
+
+| Clé | Charge du code de plugin | Objectif |
+| --- | :---: | --- |
+| `api` | oui | Ajoute des routes à l'[API](api.md), montées sur `/<id du plugin>`. |
+| `db` | oui | Ajoute des tables à la base de données centrale, et éventuellement des méthodes de requête. |
+| `config` | oui | Compile les documents stockés en paramètres et un fichier de données à chaque génération de configuration. |
+| `activation` | non | Indique à l'UI web quels paramètres activent le plugin pour un service. |
+| `certificate_source` | non | Enregistre le plugin comme propriétaire de certificats dans l'inventaire des certificats. |
+| `downgrade` | non | Déclare les versions de BunkerWeb prises en charge par le plugin, pour la vérification de rétrogradation. |
+
+Les chemins de module (`module`, `models`, `methods`) doivent être des fichiers `.py` situés à l'intérieur du dossier du plugin, exprimés comme un chemin relatif sans `..`.
+
+!!! warning "Le code d'extension s'exécute au sein du plan de contrôle"
+    `api`, `db` et `config` exécutent le code Python du plugin au sein de l'API, du planificateur et des workers. Les plugins cœur et PRO sont de confiance. Les extensions `api`, `db` et `config` d'un plugin externe sont ignorées, avec un avertissement nommant le plugin, sauf si `PLUGIN_API_EXTENSIONS_ALLOW_EXTERNAL=yes` est défini sur ces composants. Même dans ce cas, les plugins PRO et externes ne sont chargés que lorsque leurs fichiers sur disque correspondent à l'empreinte enregistrée au moment de l'installation du plugin ; une différence ou un enregistrement manquant refuse l'extension avant que le moindre de ses codes ne soit importé. `activation`, `certificate_source` et `downgrade` ne chargent aucun code et sont lus pour chaque plugin.
+
+#### `api`
+
+Le fichier nommé par `module` doit exposer `router = APIRouter(...)` (FastAPI). L'API le découvre au démarrage et le monte sur `/<id du plugin>` ; `prefix` est facultatif et, s'il est présent, doit être égal à `/<id du plugin>`. Le garde d'authentification et le limiteur de débit sont injectés au moment du montage du routeur, si bien que chaque route du plugin exige un jeton valide et compte dans la limite de débit sans que le plugin n'ait à déclarer ni l'un ni l'autre. Un plugin dont le préfixe entre en collision avec une route déjà existante (une route cœur comme `/instances`, ou un autre plugin) n'est pas monté, et l'API journalise `Refusing to mount plugin <id>: prefix /<id> collides with an existing router`. Un plugin dont l'import échoue est journalisé puis écarté ; le reste de l'API continue de fonctionner.
+
+Les plugins cœur `bunkernet`, `customcert`, `letsencrypt`, `selfsigned` et `workflows` utilisent ce mécanisme, ce qui explique que leurs routes apparaissent sous leur propre préfixe dans la [carte des capacités](api.md#api-surface-capability-map).
+
+#### `db`
+
+`models` nomme un module déclarant des tables SQLAlchemy sur le `Base` partagé ; `methods` nomme éventuellement un module contenant un mixin de base de données. Les tables doivent être nommées avec le préfixe `bw_<id du plugin>_`, les caractères `-` et `.` de l'identifiant étant remplacés par `_`. Le préfixe est calculé à partir de l'identifiant : `table_prefix` est facultatif et, s'il est présent, doit lui être égal, et un module qui enregistre une table en dehors de ce préfixe est refusé. Deux plugins dont les identifiants se réduisent au même préfixe (`a-b` et `a_b`) sont tous deux refusés.
+
+#### `config`
+
+`module` doit exposer `compile_config(db, config, logger)`, appelée une fois par génération de configuration et renvoyant `{"variables": {...}, "data": {...}}`. `variables` est fusionné dans les paramètres que voient les templates. Chaque valeur doit être une chaîne, et chaque nom doit commencer par l'identifiant du plugin en majuscules (avec `-` et `.` remplacés par `_`) suivi de `_` ; un nom qui correspond à un paramètre existant doit être un paramètre que le plugin lui-même déclare. `data`, lorsqu'il est présent, est écrit en JSON dans `/var/cache/bunkerweb/<id du plugin>/config.json` et livré aux instances avec le reste du cache de tâches. Chaque compilateur s'exécute avant que quoi que ce soit ne soit écrit, et toute erreur interrompt toute la génération : les instances continuent de servir leur dernière configuration valide.
+
+#### `activation`
+
+Soit `"always"`, pour un plugin toujours appliqué et sans interrupteur, soit une correspondance entre les paramètres propres du plugin et leur valeur inactive, telle que `{"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"}`. Le plugin est considéré comme actif sur un service dès qu'un paramètre listé diffère de sa valeur inactive ; l'UI web s'en sert pour afficher et basculer les plugins par service. Une correspondance nommant un paramètre que le plugin ne déclare pas est ignorée dans son intégralité, et l'UI se rabat sur la recherche d'un paramètre `USE_<ID DU PLUGIN>`.
+
+#### `certificate_source`
+
+`{"label": "Let's Encrypt", "renews": true}` déclare que le plugin peut posséder des certificats dans l'inventaire centralisé des certificats. `label` est le nom affiché pour la source (le nom du plugin par défaut) et `renews` indique si la source renouvelle elle-même ses certificats (`false` par défaut). Les sources déclarées s'ajoutent aux sources intégrées `letsencrypt`, `customcert` et `selfsigned` ; ensemble elles forment la liste renvoyée par `GET /certificates/sources`, et un certificat ne peut être créé, rafraîchi ou filtré qu'avec une source de cette liste. La liste est relue à chaque appel, si bien qu'une source nouvellement installée est acceptée sans rien redémarrer. La déclaration n'accorde aucun accès par elle-même : le plugin continue d'écrire les certificats via ses propres routes API ou tâches protégées.
+
+#### `downgrade`
+
+`{"min_version": "1.7.0", "max_version": "1.7.9"}` indique les versions de BunkerWeb prises en charge par un plugin non-cœur (PRO, externe ou installé via l'UI) ; les deux bornes sont facultatives. La vérification de rétrogradation du plugin `backup` s'en sert : un plugin dont la plage exclut la version cible, ou un plugin non-cœur sans bloc `downgrade` du tout, limite la rétrogradation à une restauration. Les plugins cœur n'en ont pas besoin. Comme un bloc `downgrade` seul ne satisfait pas la règle ci-dessus, déclarez-le à côté d'au moins une des autres clés.
+
+Les traductions de plugins ne sont pas une clé `extensions` : voir [Traductions des plugins](#plugin-translations).
 
 ### Commandes CLI
 
@@ -647,7 +728,7 @@ Livrer le cache suffit tant que les instances lisent vos fichiers à l'**exécut
 !!! warning "Les clés inconnues sont refusées"
     Les entrées de job acceptent `name`, `file`, `every`, `reload`, `async` et `regenerate`, et rien d'autre. Une clé mal orthographiée (`"regenrate"`) fait échouer la validation de tout le plugin et le fait ignorer, la clé fautive étant nommée dans les journaux — délibérément, pour qu'une faute de frappe ne puisse pas désactiver silencieusement un indicateur.
 
-### Page du plugin
+### Page du plugin {#plugin-page}
 
 Tout ce qui concerne l'interface utilisateur web se trouve dans le sous-dossier **ui** comme nous l'avons vu dans la [section précédente sur la structure.](#structure).
 
@@ -953,18 +1034,44 @@ plugin /
 
 Dans cette structure, `user_auth.py` contient le `user_auth` blueprint et `user_auth.html` est le modèle associé, en respectant les conventions de nommage recommandées.
 
-### Traductions des plugins
+### Traductions des plugins {#plugin-translations}
 
 Un plugin peut fournir son propre catalogue de traduction et le faire fusionner dans l'UI d'administration, à la fois dans le navigateur (`t()`) et côté serveur (`_()` dans un template Jinja). Aucune déclaration dans `plugin.json` ni aucune étape de build n'est nécessaire. L'URL du catalogue servie au navigateur porte une empreinte de fichier, si bien que les caches du navigateur se rafraîchissent automatiquement dès que le catalogue d'un plugin installé change.
 
-Deux emplacements sont pris en charge, dans cet ordre :
+Trois emplacements sont pris en charge, vérifiés dans cet ordre :
 
-1. `ui/blueprints/static/locales/<lang>.json` pour un plugin avec un blueprint Flask.
-2. `ui/static/locales/<lang>.json` pour une simple page `ui/template.html`.
+1. `locales/<lang>.json` à la racine du plugin, le seul emplacement disponible pour un plugin sans UI.
+2. `ui/blueprints/static/locales/<lang>.json` pour un plugin avec un blueprint Flask.
+3. `ui/static/locales/<lang>.json` pour une simple page `ui/template.html`.
+
+Un plugin peut fournir l'emplacement racine et un emplacement `ui/` à la fois — celui à la racine pour les métadonnées `plugin.json` / `template.json` (voir ci-dessous), celui en `ui/` pour les chaînes de page — et les deux sont fusionnés : l'emplacement racine l'emporte sur les clés `meta`, `settings` et `templates`, l'emplacement `ui/` l'emporte sur toute autre clé, et une clé fournie par un seul côté passe telle quelle. Ne fournir qu'un seul emplacement fonctionne toujours exactement comme avant ; placez-y aussi vos chaînes de page si vous n'avez aucune raison de les séparer.
 
 `en.json` est le fallback obligatoire ; tout autre fichier de langue est facultatif. Chaque clé de premier niveau de votre catalogue DOIT être votre identifiant de plugin, par exemple `{"my_plugin": {"title": "..."}}`. Toute autre clé de premier niveau est intégralement refusée — non fusionnée, pas seulement la feuille en collision — avec un seul avertissement nommant votre plugin et la ou les clés en cause ; c'est ce qui empêche le catalogue d'un plugin de s'approprier ou de masquer l'espace de noms d'un autre plugin (ou du cœur). À l'intérieur de votre propre espace de noms, une feuille qui entre en collision avec une valeur existante (celle du cœur, ou celle d'un plugin chargé plus tôt et partageant exactement votre identifiant de plugin) est abandonnée avec un avertissement ; une nouvelle feuille sous votre propre espace de noms fusionne toujours. Un identifiant de plugin contenant un `.` ne peut pas avoir de catalogue accessible (`_()` comme `t()` découpent une clé de recherche sur `.`) et est intégralement refusé, avec un avertissement.
 
 Le `_()` côté serveur ne peut pas interpoler les paramètres `{{var}}` comme le fait le `t()` du navigateur. Utilisez `t()` côté navigateur pour les chaînes nécessitant une substitution.
+
+#### Traduire les métadonnées du plugin
+
+Le même catalogue peut traduire le texte de votre `plugin.json` et des templates fournis par votre plugin. Placez ces clés sous votre identifiant de plugin :
+
+| Clé | Traduit |
+| --- | --- |
+| `<id>.meta.name`, `<id>.meta.description` | `name` et `description` dans `plugin.json` |
+| `<id>.settings.<SETTING>.label`, `<id>.settings.<SETTING>.help` | le `label` et le `help` d'un paramètre |
+| `<id>.templates.<template>.name` | le `name` de `templates/<template>.json` |
+| `<id>.templates.<template>.steps.<n>.title`, `<id>.templates.<template>.steps.<n>.subtitle` | une étape de template, numérotée à partir de 0 |
+
+Le texte anglais reste dans `plugin.json` et `templates/*.json` : vous n'avez pas besoin d'un `en.json` pour ces clés. Chaque chaîne retombe individuellement sur son propre `en.json` si elle y possède la clé, puis sur le texte de `plugin.json`. Un catalogue partiel n'affiche jamais de clé brute. Générez un squelette contenant le texte anglais avec :
+
+```shell
+python3 misc/dev/i18n/plugin_meta_keys.py path/to/my_plugin > path/to/my_plugin/locales/fr.json
+```
+
+Ces clés ne sont résolues que côté serveur. Elles ne sont pas envoyées au navigateur avec `t()`, elles ne sont donc pas disponibles pour votre JavaScript.
+
+Les widgets renvoyés par votre `pre_render()` (voir [Page du plugin](#plugin-page)) peuvent aussi être traduits. Ajoutez `title_i18n` et `subtitle_i18n` à côté de `title` et `subtitle`, contenant une clé relative à votre identifiant de plugin. Par exemple, `"title_i18n": "widgets.status.title"` lit `<id>.widgets.status.title`. `title` et `subtitle` restent le fallback.
+
+Les plugins cœur fournissent ces catalogues dans `src/common/core/<id>/locales/`, et un test unitaire maintient chaque langue à parité avec le manifeste. Les paramètres de `src/common/settings.json` n'ont pas de dossier de plugin, ils sont donc traduits dans les catalogues cœur sous `general.settings.<SETTING>.label` et `.help`.
 
 ### Surface prise en charge des plugins UI
 
