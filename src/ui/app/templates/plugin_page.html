@@ -26,7 +26,10 @@
             <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
                 {% if plugin['type'] == 'core' %}
                     {% set plugin_endpoint = "/features" %}
-                    {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['id']) %}
+                    {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['name'] | lower | replace("'", '') | replace('.', '') | replace(' ', '-')) %}
+                {% elif plugin['type'] == 'pro' %}
+                    {% set plugin_endpoint = "/features" %}
+                    {% set plugin_fragment = '#' + (plugin['name'] | lower | replace("'", '') | replace('.', '') | replace(' ', '-')) + '-pro' %}
                 {% else %}
                     {% set plugin_endpoint = "/plugins" %}
                     {% set plugin_fragment = "" %}
