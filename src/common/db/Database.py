@@ -1821,6 +1821,19 @@ class Database:
             return False, ""
         return True, ""
 
+    def _warn_shared_server_names(self, config: Dict[str, Any]) -> None:
+        """Warn when two services of the incoming config declare the same server name (nginx serves only the first)."""
+        services = config.get("SERVER_NAME", "")
+        if isinstance(services, str):
+            services = services.split()
+        owners: Dict[str, str] = {}
+        for service in dict.fromkeys(s for s in services if s):
+            names = config.get(f"{service}_SERVER_NAME") or service
+            for name in dict.fromkeys(names.split() if isinstance(names, str) else names):
+                owner = owners.setdefault(name, service)
+                if owner != service:
+                    self.logger.warning(f"Server name {name} is used by both services {owner} and {service}, nginx will only serve it for one of them")
+
     def save_config(
         self,
         config: Dict[str, Any],
@@ -2032,6 +2045,9 @@ class Database:
                 return changed_plugins
 
             self.logger.debug(f"Saving config for method {method}")
+
+            if method not in ("ui", "api") and not skip_service_management:
+                self._warn_shared_server_names(config)
 
             # When the autoconf disable_cleanup flag is on, precompute the set of existing
             # autoconf services missing from the incoming SERVER_NAME so the services_settings
