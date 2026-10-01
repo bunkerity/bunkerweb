@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2026 OWASP Foundation.  All Rights Reserved.
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -13,31 +13,28 @@
  *
  */
 
-#include <ctime>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <list>
+#include <utility>
 
-#include "modsecurity/modsecurity.h"
-#include "src/utils/string.h"
+#ifndef SRC_VARIABLES_MULTIPART_FILE_NAME_LANGUAGE_H_
+#define SRC_VARIABLES_MULTIPART_FILE_NAME_LANGUAGE_H_
 
-#ifndef SRC_UTILS_DECODE_H_
-#define SRC_UTILS_DECODE_H_
-
+#include "src/variables/variable.h"
 
 namespace modsecurity {
-namespace utils {
+
+class Transaction;
+namespace variables {
 
 
-bool urldecode_nonstrict_inplace(std::string &val,
-    int &invalid_count);
-bool urldecode_nonstrict_inplace_ext(std::string &val,
-    bool plus_to_space,
-    int &invalid_count);
-std::string uri_decode(const std::string & sSrc);
+DEFINE_VARIABLE_DICT(MultiPartFileNameLanguage, MULTIPART_FILENAME_LANGUAGE,
+    m_variableMultipartFileNameLanguage)
 
 
-}  // namespace utils
+}  // namespace variables
 }  // namespace modsecurity
 
-#endif  // SRC_UTILS_DECODE_H_
+#endif  // SRC_VARIABLES_MULTIPART_FILE_NAME_LANGUAGE_H_

@@ -740,5 +740,54 @@
       "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
       "SecRule ARGS \"@rx 🍍\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing XML parsing to ARGS with On, more nodes than SecArgumentsLimit allows",
+    "resource": "libxml2",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Type": "text/xml",
+        "Content-Length": "50"
+      },
+      "uri": "/?q=xml",
+      "method": "POST",
+      "body": [
+        "<pizza>",
+        "<has>pineapple</has><has>a</has><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a><a>b</a>",
+        "</pizza>"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecParseXmlIntoArgs On",
+      "SecArgumentsLimit 10",
+      "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500011,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+      "SecRule ARGS \"@rx a\" \"id:500013,phase:2,t:none,t:lowercase,log,deny,status:403\""
+    ]
   }
 ]

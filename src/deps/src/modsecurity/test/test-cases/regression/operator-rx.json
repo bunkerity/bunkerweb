@@ -130,7 +130,7 @@
       ]
     },
     "expected": {
-      "debug_log": "Error with regular expression",
+      "parser_error": "Rules error. File: operator-rx.json. Line: 2. Column: 36. Invalid regular expression: a\\(b",
       "http_code": 200
     },
     "rules": [
@@ -283,6 +283,189 @@
       "SecPcreMatchLimit 2",
       "SecRule ARGS:rxtest \"@rx (w+)+$\" \"id:1,phase:1,pass,t:trim,block\"",
       "SecRule TX:MSC_PCRE_LIMITS_EXCEEDED \"@streq 1\" \"id:2,phase:1,pass,t:trim,block\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx inicialization with PCRE ERROR",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/?probe=wwwwwwwwwwwwwwwwwwwwwowwwwwwwwwww",
+      "method": "GET",
+      "body": []
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "parser_error": "Rules error. File: operator-rx.json. Line: 3. Column: 18. Invalid regular expression: \\("
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecPcreMatchLimit 2",
+      "SecRule ARGS:probe \"@rx (\" \"id:4001,phase:1,pass\"",
+      "SecRule MSC_PCRE_ERROR \"@streq 1\" \"id:4002,phase:1,deny,status:409\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with invalid macro-expanded pattern",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/?patt=%28",
+      "method": "POST",
+      "body": [
+        "subject=wwww"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Error with regular expression: \"\\(\"",
+      "http_code": 409
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:subject \"@rx %{ARGS:patt}\" \"id:4001,phase:2,pass\"",
+      "SecRule MSC_PCRE_ERROR \"@streq 1\" \"id:4002,phase:2,deny,status:409\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with invalid macro-expanded pattern - no error",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/?patt=%28",
+      "method": "POST",
+      "body": [
+        "subject=wwww"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Error with regular expression: \"\\(\"",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:subject \"@rx %{ARGS:patt}\" \"id:4001,phase:2,pass\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Operator :: @rx with valid macro-expanded pattern",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri": "/?patt=%28a%7cb%29",
+      "method": "POST",
+      "body": [
+        "subject=a"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS:subject \"@rx %{ARGS:patt}\" \"id:4001,phase:2,deny\""
     ]
   }
 ]

@@ -199,8 +199,11 @@ VARIABLE_MULTIPART_BOUNDARY_WHITESPACE    (?i:MULTIPART_BOUNDARY_WHITESPACE)
 VARIABLE_MULTIPART_CRLF_LF_LINES          (?i:MULTIPART_CRLF_LF_LINES)
 VARIABLE_MULTIPART_DATA_AFTER             (?i:MULTIPART_DATA_AFTER)
 VARIABLE_MULTIPART_DATA_BEFORE            (?i:MULTIPART_DATA_BEFORE)
+VARIABLE_MULTIPART_DUPLICATE_PART_HEADER  (?i:MULTIPART_DUPLICATE_PART_HEADER)
 VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED    (?i:MULTIPART_FILE_LIMIT_EXCEEDED)
 VARIABLE_MULTIPART_FILENAME               (?i:MULTIPART_FILENAME)
+VARIABLE_MULTIPART_FILENAME_CHARSET       (?i:MULTIPART_FILENAME_CHARSET)
+VARIABLE_MULTIPART_FILENAME_LANGUAGE      (?i:MULTIPART_FILENAME_LANGUAGE)
 VARIABLE_MULTIPART_HEADER_FOLDING         (?i:MULTIPART_HEADER_FOLDING)
 VARIABLE_MULTIPART_INVALID_HEADER_FOLDING (?i:MULTIPART_INVALID_HEADER_FOLDING)
 VARIABLE_MULTIPART_INVALID_PART           (?i:MULTIPART_INVALID_PART)
@@ -442,10 +445,24 @@ DOUBLE_QUOTE_BUT_SCAPED                 (")
 COMMA_BUT_SCAPED                        (,)
 FREE_TEXT_QUOTE_MACRO_EXPANSION                 (([^%'])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][']|[^\\]([\\][\\])+[\\]['])+
 FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION          ((([^"%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\]["]|[^\\]([\\][\\])+[\\]["])+
+
+/* An escaped quote at the very start of a fresh token has no preceding
+ * character to serve as the "not a backslash" anchor the alternatives
+ * above rely on. That happens right after a %{VARIABLE} macro closes
+ * (the closing '}' is consumed by its own rule, in EXPECTING_ACTION_PREDICATE_VARIABLE,
+ * and is not available to the next token) and at the very start of a
+ * quoted value (or, for the unquoted/comma-terminated action-predicate
+ * form, right at the start too). These macros cover that leading-escape
+ * case: an odd run of backslashes (1, 3, 5, ...) before the quote still
+ * escapes it, matching the pairing convention used by the alternatives
+ * above. */
+FREE_TEXT_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE          [\\]([\\][\\])*[']{FREE_TEXT_QUOTE_MACRO_EXPANSION}?
+FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE   [\\]([\\][\\])*["]{FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION}?
 FREE_TEXT_EQUALS_MACRO_EXPANSION                ((([^",=%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][=]|[^\\]([\\][\\])+[\\][=])+
 FREE_TEXT_EQUALS_QUOTE_MACRO_EXPANSION          ((([^'",=%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][=]|[^\\][\\][']|[^\\]([\\][\\])+[\\][=])+
 FREE_TEXT_COMMA_MACRO_EXPANSION                 (([^%,])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][,]|[^\\]([\\][\\])+[\\][,])+
 FREE_TEXT_COMMA_DOUBLE_QUOTE_MACRO_EXPANSION    ((([^,"%])|([%][^{]))|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\]["]|[^\\]([\\][\\])+[\\]["])+
+FREE_TEXT_COMMA_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE   [\\]([\\][\\])*["]{FREE_TEXT_COMMA_DOUBLE_QUOTE_MACRO_EXPANSION}?
 
 FREE_TEXT_SPACE_MACRO_EXPANSION         (([^% ])|([^\\][\\][%][{])|([^\\]([\\][\\])+[\\][%][{])|[^\\][\\][ ]|[^\\]([\\][\\])+[\\][ ])+
 START_MACRO_VARIABLE                    (\%\{)
@@ -677,17 +694,20 @@ EQUALS_MINUS                            (?i:=\-)
 
 <ACTION_PREDICATE_ENDS_WITH_QUOTE>{
 [']                                                  { BEGIN(EXPECTING_ACTIONS_ENDS_WITH_DOUBLE_QUOTE); yyless(yyleng); }
+{FREE_TEXT_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE}     { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 {FREE_TEXT_QUOTE_MACRO_EXPANSION}                    { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 }
 
 <ACTION_PREDICATE_ENDS_WITH_DOUBLE_QUOTE>{
 ["]                                                  { BEGIN(EXPECTING_ACTIONS_ENDS_WITH_DOUBLE_QUOTE); yyless(yyleng); }
+{FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE} { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 {FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION}             { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 }
 
 <ACTION_PREDICATE_ENDS_WITH_COMMA_OR_DOUBLE_QUOTE>{
 [,]                                                  { yyless(0); BEGIN(EXPECTING_ACTIONS_ENDS_WITH_DOUBLE_QUOTE); }
 ["]                                                  { yyless(0); BEGIN(EXPECTING_ACTIONS_ENDS_WITH_DOUBLE_QUOTE);}
+{FREE_TEXT_COMMA_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE} { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 {FREE_TEXT_COMMA_DOUBLE_QUOTE_MACRO_EXPANSION}       { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 }
 
@@ -931,9 +951,14 @@ EQUALS_MINUS                            (?i:=\-)
 {VARIABLE_MULTIPART_CRLF_LF_LINES}          { return p::make_VARIABLE_MULTIPART_CRLF_LF_LINES(*driver.loc.back()); }
 {VARIABLE_MULTIPART_DATA_AFTER}             { return p::make_VARIABLE_MULTIPART_DATA_AFTER(*driver.loc.back()); }
 {VARIABLE_MULTIPART_DATA_BEFORE}            { return p::make_VARIABLE_MULTIPART_DATA_BEFORE(*driver.loc.back()); }
+{VARIABLE_MULTIPART_DUPLICATE_PART_HEADER}  { return p::make_VARIABLE_MULTIPART_DUPLICATE_PART_HEADER(*driver.loc.back()); }
 {VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED}    { return p::make_VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED(*driver.loc.back()); }
 {VARIABLE_MULTIPART_FILENAME}[:.]           { BEGINX(EXPECTING_VAR_PARAMETER); return p::make_VARIABLE_MULTIPART_FILENAME(*driver.loc.back()); }
 {VARIABLE_MULTIPART_FILENAME}               { return p::make_VARIABLE_MULTIPART_FILENAME(*driver.loc.back()); }
+{VARIABLE_MULTIPART_FILENAME_CHARSET}[:.]   { BEGINX(EXPECTING_VAR_PARAMETER); return p::make_VARIABLE_MULTIPART_FILENAME_CHARSET(*driver.loc.back()); }
+{VARIABLE_MULTIPART_FILENAME_CHARSET}       { return p::make_VARIABLE_MULTIPART_FILENAME_CHARSET(*driver.loc.back()); }
+{VARIABLE_MULTIPART_FILENAME_LANGUAGE}[:.]  { BEGINX(EXPECTING_VAR_PARAMETER); return p::make_VARIABLE_MULTIPART_FILENAME_LANGUAGE(*driver.loc.back()); }
+{VARIABLE_MULTIPART_FILENAME_LANGUAGE}      { return p::make_VARIABLE_MULTIPART_FILENAME_LANGUAGE(*driver.loc.back()); }
 {VARIABLE_MULTIPART_HEADER_FOLDING}         { return p::make_VARIABLE_MULTIPART_HEADER_FOLDING(*driver.loc.back()); }
 {VARIABLE_MULTIPART_HEADER_FOLDING}         { return p::make_VARIABLE_MULTIPART_HEADER_FOLDING(*driver.loc.back()); }
 {VARIABLE_MULTIPART_INVALID_HEADER_FOLDING} { return p::make_VARIABLE_MULTIPART_INVALID_HEADER_FOLDING(*driver.loc.back()); }
@@ -1158,6 +1183,7 @@ EQUALS_MINUS                            (?i:=\-)
 
 <NO_OP_INFORMED_ENDS_WITH_QUOTE>{
 ["]                                             { BEGIN(TRANSACTION_FROM_OPERATOR_PARAMETERS_TO_ACTIONS); }
+{FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE} { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 {FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION}        { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 }
 
@@ -1172,6 +1198,7 @@ EQUALS_MINUS                            (?i:=\-)
 
 <EXPECTING_PARAMETER_ENDS_WITH_QUOTE>{
 ["]                                             { BEGIN(TRANSACTION_FROM_OPERATOR_PARAMETERS_TO_ACTIONS); }
+{FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION_LEADING_ESCAPE} { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 {FREE_TEXT_DOUBLE_QUOTE_MACRO_EXPANSION}        { return p::make_FREE_TEXT_QUOTE_MACRO_EXPANSION(yytext, *driver.loc.back()); }
 }
 
