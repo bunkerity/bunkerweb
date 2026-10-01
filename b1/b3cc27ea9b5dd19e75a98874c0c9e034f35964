@@ -1,0 +1,318 @@
+docs/es/features.md
+  s_60e8abfe4dfe14::t_7558b452581624 7181-7192
+  s_7275754f4f7c24::t_3976cf18e703b9 928-929,948-951
+  s_60e8abfe4dfe14::t_2b2582ea3ed60a 4764
+  s_204f5e1036d6b1::t_884b97cee6f508 1149,1393,2086-2119,3396,3398-3400,3402-3445,3504,4438,6000,6002-6003,6096-6099,6108,6112-6113,6154,6157,7199-7202
+  s_ba557eaff1ef9a::t_bfd8e6ba68ed56 2660-2683
+  s_204f5e1036d6b1::t_ec6a3a776cd86d 6680-6768
+  s_7275754f4f7c24::t_56e32a7e107b31 952,2120,3272,7401
+docs/features.md
+  s_7275754f4f7c24::t_3976cf18e703b9 1001-1002,1020-1022
+  s_204f5e1036d6b1::t_884b97cee6f508 2157-2191,3477-3479,3483-3526,3585,6049,6051-6052,6145-6148,6157,6161-6162,6203,6206,7135-7138
+  s_60e8abfe4dfe14::t_fd284920135b7f 7117-7127
+  s_60e8abfe4dfe14::t_26de6c716b91f2 4828
+  s_7275754f4f7c24::t_36b35e490763c4 1023,7128
+src/common/README.es.md
+  s_204f5e1036d6b1::t_4597db5ecd53ef 80-81
+src/common/core/misc/README.zh.md
+  s_60e8abfe4dfe14::t_8bae58700fb1b7 250
+src/common/core/misc/README.fr.md
+  s_60e8abfe4dfe14::t_a9087a53485113 248
+src/common/core/misc/README.md
+  s_60e8abfe4dfe14::t_dd56e5c93cdec4 250
+src/common/README.fr.md
+  s_204f5e1036d6b1::t_36e14671e4c677 80-81
+docs/fr/web-ui.md
+  s_e3241353387257::t_bd4ce6b1243d03 496-497
+  s_e3241353387257::t_97df2fbe422747 507-552
+  s_795e2ccdb6801b::t_2e29e728afcaf5 553
+src/api/app/main.py
+  s_0a5adf8a41809a::t_4dc34acc74bded 294-296
+  s_0a5adf8a41809a::t_b417ed0c71b64e 293
+src/common/core/misc/README.es.md
+  s_60e8abfe4dfe14::t_306c5ea497e604 257
+docs/es/web-ui.md
+  s_e3241353387257::t_cf346c489d1d57 517-518
+  s_e3241353387257::t_6d3310a9c657c9 534-579
+  s_8450019ca36ca1::t_b592aab3069271 580
+docs/plugins.md
+  s_373c9ba97f823a::t_7dc65f4bc3d007 1054
+  s_74c5ef21e15b70::t_c05f80c75a04ea 1048,1050-1052,1060-1081
+  s_e3241353387257::t_19fcd4f0b70c1f 34-37
+  s_0a5adf8a41809a::t_49f7d33a42390f 505,515
+  s_beb5941dd6dcfb::t_4e034b2ea1b48f 51-69
+  s_0a5adf8a41809a::t_8a17b6ab9501d4 527
+  s_0a5adf8a41809a::t_d68ae9ec96a968 390,474-503,506-514,516-526,528-529
+  s_8450019ca36ca1::t_c244cb8b9906a7 504,530,1053,1082
+docs/de/features.md
+  s_204f5e1036d6b1::t_884b97cee6f508 1133-1139,2069-2102,3367-3370,3374-3417,3476,4400,5963,5965-5966,6059-6062,6071,6075-6076,6117,6120,7150-7153
+  s_204f5e1036d6b1::t_ec6a3a776cd86d 6646-6737
+  s_ba557eaff1ef9a::t_bfd8e6ba68ed56 2643-2666
+  s_7275754f4f7c24::t_3976cf18e703b9 918-919,939-942
+  s_60e8abfe4dfe14::t_1f4d7dffc71ed4 7132-7142
+  s_60e8abfe4dfe14::t_c432765e07f282 4728
+  s_7275754f4f7c24::t_64f3d210807554 943,2103,7143
+src/common/README.md
+  s_204f5e1036d6b1::t_6e56e18a34f97a 80-81
+docs/de/plugins.md
+  s_e3241353387257::t_6396bf477ae32a 383
+  s_e3241353387257::t_109c99d440f835 468-524
+  s_e3241353387257::t_1245e39136463c 1050-1071
+  s_e3241353387257::t_4a726fcaa49310 48-66
+  s_e3241353387257::t_516834f2722fe7 1034,1038,1040-1044
+  s_e3241353387257::t_47964fa49bc62a 730
+  s_e3241353387257::t_de328c84efabd0 31-34
+  s_795e2ccdb6801b::t_206938d46b9a28 1072
+docs/zh/web-ui.md
+  s_60e8abfe4dfe14::t_5fd32c88e02fab 510
+  s_e3241353387257::t_3198a1c29bc669 492-493
+  s_e3241353387257::t_22d654e5ca18c9 503-509,511-548
+  s_60e8abfe4dfe14::t_bc28f0a28628d5 560
+  s_ca05435d07af44::t_ff24a0228c9ac5 549
+docs/de/api.md
+  s_60e8abfe4dfe14::t_5046307a47af3d 343-354
+  s_60e8abfe4dfe14::t_4f79e39c5f62b4 15
+  s_60e8abfe4dfe14::t_f407b606a37876 191
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 496
+  s_60e8abfe4dfe14::t_0e2d5b8883d920 25
+  s_60e8abfe4dfe14::t_666026056de3bc 462-467,470
+  s_60e8abfe4dfe14::t_bd7bbf472174e6 505-506
+docs/api.md
+  s_e3241353387257::t_7d775acc2df179 496-497
+  s_0a5adf8a41809a::t_afc7091665277a 349
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 487
+  s_0a5adf8a41809a::t_b289496930bad9 191,458-461
+  s_e3241353387257::t_46fb97556e2327 465
+  s_0a5adf8a41809a::t_8a17b6ab9501d4 462
+  s_0a5adf8a41809a::t_12473f94981f7e 457
+  s_e98d1c2a8770ca::t_96aabea87de04d 15,25,343-348,350-354
+src/common/core/misc/README.de.md
+  s_60e8abfe4dfe14::t_f5d8cc590dcb4e 259
+docs/fr/features.md
+  s_204f5e1036d6b1::t_884b97cee6f508 1125-1131,1707,1997-2031,3275-3277,3281-3324,3383,4286,5784,5786-5787,5880-5883,5892,5896-5897,5938,5941,6895-6898
+  s_ba557eaff1ef9a::t_bfd8e6ba68ed56 2569-2592
+  s_204f5e1036d6b1::t_ec6a3a776cd86d 6426-6490
+  s_60e8abfe4dfe14::t_ea96d76da0c74a 6877-6887
+  s_60e8abfe4dfe14::t_ce5d48a989e699 4603
+  s_7275754f4f7c24::t_3976cf18e703b9 909-910,930-933
+  s_7275754f4f7c24::t_550f05e676e168 934,6888
+docs/zh/api.md
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 490
+  s_60e8abfe4dfe14::t_16aa6ab54e5ad3 499-500
+  s_60e8abfe4dfe14::t_da9586c7a0506e 191
+  s_60e8abfe4dfe14::t_fe42b11e48502f 25
+  s_60e8abfe4dfe14::t_5a95acdc9f21bd 15
+  s_60e8abfe4dfe14::t_e650db0ca7758b 459-464,467
+  s_60e8abfe4dfe14::t_275dc92f05239c 345-356
+src/common/core/templates/README.zh.md
+  s_60e8abfe4dfe14::t_be24d0adcda72e 1-7
+src/common/core/templates/README.es.md
+  s_60e8abfe4dfe14::t_5f794f8652f637 1-7
+docs/es/plugins.md
+  s_e3241353387257::t_b107b4d55e1a5a 1053-1074
+  s_e3241353387257::t_7d1bf7c3bbc607 48-66
+  s_e3241353387257::t_ae3bdb9d498bad 1037,1041,1043-1047
+  s_e3241353387257::t_2f6b7c753d0452 731
+  s_e3241353387257::t_e37a7ef5249580 469-525
+  s_e3241353387257::t_1434256c3758e7 31-34
+  s_e3241353387257::t_a84011ac5df88b 384
+  s_8450019ca36ca1::t_30f46cf837f26b 1075
+CHANGELOG.md
+  s_7275754f4f7c24::t_3976cf18e703b9 5
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 275-283
+  s_795e2ccdb6801b::t_39b01902161577 7
+  s_60e8abfe4dfe14::t_77bbaa78f6a8ab 269-272
+  s_e3241353387257::t_7c1d6eb0c69743 223-259,261-268
+  s_da815a19aabbab::t_667fb45a1763a7 273
+  s_e3241353387257::t_a4621b5e369854 260
+  s_da815a19aabbab::t_505852a1b92dfb 274
+src/common/README.zh.md
+  s_204f5e1036d6b1::t_2f79a759fe411e 82-83
+src/common/core/templates/README.fr.md
+  s_60e8abfe4dfe14::t_2c3c39cdccb1ff 1-7
+docs/fr/plugins.md
+  s_e3241353387257::t_e93af8fd1111f7 384
+  s_e3241353387257::t_1b6de627761a06 48-66
+  s_e3241353387257::t_3e68f015e714df 469-525
+  s_e3241353387257::t_9803aa3099b62f 1053-1074
+  s_e3241353387257::t_9d0c3380ca4af3 1037,1041,1043-1047
+  s_e3241353387257::t_016f961dab2289 731
+  s_e3241353387257::t_5b97e18d2ea3c9 31-34
+  s_8450019ca36ca1::t_21f8407e15fcc1 1075
+docs/fr/api.md
+  s_60e8abfe4dfe14::t_63bda5a4d8c52e 345-356
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 490
+  s_60e8abfe4dfe14::t_eaaf82b951777b 459-464,467
+  s_60e8abfe4dfe14::t_6a1d84e56b6e08 499-500
+  s_60e8abfe4dfe14::t_40d823cc739094 191
+  s_60e8abfe4dfe14::t_a78ffd62c8af64 25
+  s_60e8abfe4dfe14::t_f1d55b06975aea 15
+src/common/README.de.md
+  s_204f5e1036d6b1::t_6426e0064f0a34 80-81
+src/common/core/templates/README.de.md
+  s_60e8abfe4dfe14::t_bb335bdf3e7aff 1-7
+docs/zh/plugins.md
+  s_e3241353387257::t_603c0b15c3f3db 467-523
+  s_e3241353387257::t_baff7e64300c81 31-34
+  s_e3241353387257::t_84a829cfa3c30a 729
+  s_e3241353387257::t_a0b39e3e34dd5e 48-66
+  s_e3241353387257::t_407b344316d84b 384
+  s_e3241353387257::t_31fa0a3fc97101 1051-1072
+  s_e3241353387257::t_58be6fd7baec30 1035,1039,1041-1045
+  s_8450019ca36ca1::t_5f274eda5e26d9 1073
+mkdocs_print.yml
+  s_ba557eaff1ef9a::t_621b5e1a785040 102
+  s_ba557eaff1ef9a::t_a8dd43c7389e29 9-10
+  s_ba557eaff1ef9a::t_df91f5296fe278 101
+src/common/core/templates/README.md
+  s_60e8abfe4dfe14::t_d41a1f642ca2cc 1-7
+docs/de/web-ui.md
+  s_e3241353387257::t_d2ce827c776db2 569-570
+  s_e3241353387257::t_06312be95f7c68 588-633
+  s_8450019ca36ca1::t_7314f7a533a95b 634
+docs/web-ui.md
+  s_0a5adf8a41809a::t_65e5837a71e033 521-538,540-547,549-565
+  s_0a5adf8a41809a::t_b09e8119075aa1 539,548
+  s_e3241353387257::t_a6e465eac3eb80 510
+  s_7275754f4f7c24::t_3976cf18e703b9 291-294,296
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 295
+  s_0a5adf8a41809a::t_8a17b6ab9501d4 566
+  s_e98d1c2a8770ca::t_d0ed907ccd1432 511,567
+docs/zh/features.md
+  s_60e8abfe4dfe14::t_833f576a948f32 4656
+  s_7275754f4f7c24::t_3976cf18e703b9 929-930,944-946
+  s_204f5e1036d6b1::t_ec6a3a776cd86d 6532-6596
+  s_ba557eaff1ef9a::t_bfd8e6ba68ed56 2585-2608
+  s_60e8abfe4dfe14::t_1a8f4d8be5f719 7009-7019
+  s_204f5e1036d6b1::t_884b97cee6f508 1099,2011-2045,3305-3306,3308,3310-3355,3414,4337,5876,5878-5879,5972-5975,5984,5988-5989,6030,6033,7027-7030
+  s_7275754f4f7c24::t_7dd64d1e4806a7 947,7020
+docs/es/api.md
+  s_60e8abfe4dfe14::t_cae94f9abd3dd2 480
+  s_e98d1c2a8770ca::t_0b2a15192d0d95 511
+  s_60e8abfe4dfe14::t_589475bf47087c 366-377
+  s_60e8abfe4dfe14::t_23666a7634a910 191
+  s_60e8abfe4dfe14::t_b37ca742922ca3 25
+  s_60e8abfe4dfe14::t_76a2e529430227 481-485,488
+  s_60e8abfe4dfe14::t_a5a84f3ef39d4e 520-521
+  s_60e8abfe4dfe14::t_18c1aa054c8ce1 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b1b3cc27ea9b5dd19e75a98874c0c9e034f35964",
+  "prompts": {},
+  "sessions": {
+    "s_0a5adf8a41809a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af2f2ef9-db17-4b49-a13b-6caa6dd98394",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_204f5e1036d6b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddbe62ef-e819-40eb-8281-9ab899835056",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_373c9ba97f823a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9b7ddb0-fc4e-4af5-943e-6d3c1c478a8b",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_60e8abfe4dfe14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "28f18788-77e9-4b16-9ae2-4f76f457567a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7275754f4f7c24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07c9ce59-ab0a-48bd-b0dc-de29f4a00575",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_74c5ef21e15b70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94be8a57-8248-412d-a9b2-ce6d2fe94352",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8450019ca36ca1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9500c3f2-67e8-4548-a818-aab1916a39c8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba557eaff1ef9a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d255-30d8-7ea2-b51c-e71bb2aee084",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_beb5941dd6dcfb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6ef538d-bd64-4bb6-acbb-684f21a1c93d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca05435d07af44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06005abd-6979-4317-af58-12b4f9b0427a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da815a19aabbab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31bdda4a-70e8-45f3-8b09-692458f5a8cd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e3241353387257": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddac6bce-d837-4315-b1a1-54d4e9e1df14",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e98d1c2a8770ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "77336564-4ea3-469e-88f8-53730df5a6d6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
