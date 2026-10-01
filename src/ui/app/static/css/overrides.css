@@ -6,6 +6,12 @@
 :root,
 [data-bs-theme="light"] {
   --bs-bw-green: #2eac68;
+  /* H5/M5: white text on the raw brand green fails AA (2.91:1, both themes -- --bs-bw-green
+     is not redefined per theme). Darkened variant for any fill that carries white/light text;
+     plain green-on-page text usages keep --bs-bw-green unchanged. Literal hex, not
+     color-mix(): Chromium serializes a color-mix() computed value as a CSS Color 4 color()
+     function, which qa-ui/audit.js's rgb()-only parser cannot read for verification. */
+  --bs-bw-green-contrast: #22814e; /* var(--bs-bw-green) mixed 25% toward black */
   --bs-bw-blue: #0b5577;
   --bs-primary: #0b354a;
   --bs-secondary: #35728e;
@@ -21,7 +27,11 @@
   --bs-body-line-height: 1.47;
   --bw-fg-1: #384551;
   --bw-fg-2: #646e78;
-  --bw-fg-3: #8b9197;
+  /* M4: light theme -- #8b9197 measured 2.93-3.18:1 across the ~65 uses of this token
+     (sidebar footer, breadcrumb parents/subtitles, /home status-band eyebrows/meta,
+     and .text-muted/.text-body-secondary below, which duplicated this exact hex). Dark's
+     --bw-fg-3 (#9caeb7, further down) already passes and is untouched. */
+  --bw-fg-3: #686d71;
   --bw-fg-4: #aeb4b9;
   --bw-bg-card: #ffffff;
   --bw-bg-subtle: #eef0f3;
@@ -46,6 +56,10 @@
 }
 
 [data-bs-theme="dark"] {
+  /* FIX-E sweep: core.css's --bs-code-color (#e83e8c) is not redefined per theme, so <code>
+     text measures 3.58-4.02:1 on the dark card (--bw-bg-card #133044). Lightened variant
+     passes AA (5.85:1) while staying recognisably the same pink. */
+  --bs-code-color: #ff7fb8;
   --bw-fg-1: #d7dee3;
   --bw-fg-2: #b1c0ca;
   --bw-fg-3: #9caeb7;
@@ -102,6 +116,19 @@ body {
   color: inherit;
 }
 
+/* M4: core.css's `.menu-header-text` color (#a7acb2, sidebar section labels: Overview/
+   Configure/Operate/System/Plugins Pages) measures 2.29:1 on white. This app never sets
+   `data-bs-theme="light"` (light is the unscoped default, `data-bs-theme="dark"` is the only
+   attribute value it ever writes), so darken unconditionally here and restore the original
+   value -- already AA on navy (6.09:1) -- for dark specifically below. */
+.menu-header .menu-header-text {
+  color: #6d7074;
+}
+.dark-style .menu-header .menu-header-text,
+[data-bs-theme="dark"] .menu-header .menu-header-text {
+  color: #a7acb2;
+}
+
 .tooltip {
   --bs-tooltip-zindex: 1101;
 }
@@ -123,6 +150,18 @@ body {
 .btn-secondary:hover {
   background-color: var(--bs-secondary) !important;
   border-color: var(--bs-secondary) !important;
+}
+
+/* M4: DataTables Buttons stamps its own default .btn-secondary on every toolbar button as soon
+   as it renders, before the app's own cleanup runs (dataTableInit.js's post-init pass only
+   catches .toggle-filters; the auto-refresh button's own cleanup is a draw.dt handler that
+   waits for the first AJAX load, e.g. bans.js:1256) -- .btn-secondary's filled bg stacks under
+   .btn-outline-primary's own (already theme-aware) border/text colour for as long as that
+   takes, 2.43:1 in light mode. Neutralise the fill whenever both land on one element so the
+   intended outline-primary look always wins, cleanup race or not. */
+.btn-outline-primary.btn-secondary {
+  background-color: transparent;
+  border-color: var(--bs-primary);
 }
 .btn-check:focus + .btn-secondary,
 .btn-secondary:focus,
@@ -160,6 +199,23 @@ body {
   color: var(--bs-secondary);
   border-color: var(--bs-secondary);
 }
+
+/* M2: `--bs-secondary` (#35728e) is not redefined for dark theme -- it stays tuned for a
+   white background, so any plain-text/outline use (this button's rest state, `.text-secondary`)
+   drops to ~2.6:1 on the navy body. `--bs-secondary-text-emphasis` IS redefined per theme
+   (further down in this file) and exists for exactly this text-vs-fill split; every fill use
+   of `--bs-secondary` (solid buttons, badges, this button's own hover/active state) is
+   untouched, since white text on the raw colour still passes there. */
+.dark-style .btn-outline-secondary,
+[data-bs-theme="dark"] .btn-outline-secondary {
+  color: var(--bs-secondary-text-emphasis);
+  border-color: var(--bs-secondary-text-emphasis);
+}
+.dark-style .text-secondary,
+[data-bs-theme="dark"] .text-secondary {
+  color: var(--bs-secondary-text-emphasis) !important;
+}
+
 .btn-outline-secondary:hover {
   background-color: var(--bs-secondary) !important;
   border-color: var(--bs-secondary) !important;
@@ -213,6 +269,44 @@ body {
   background-color: var(--bs-secondary);
 }
 
+/* H4: core.css defines two `.alert-success/-info/-warning/-danger` blocks -- an earlier one
+   driven by the theme-aware `--bs-alert-color`/`--bs-alert-bg` vars (already correct: they
+   resolve to the `-text-emphasis`/`-bg-subtle` pair, which IS redefined per theme, further up
+   in this file), and a later one that hardcodes the raw bg-label palette as flat
+   background-color/color/border-color. Equal specificity, later wins, so every alert() render
+   used the raw pastel-on-vivid pair (1.7-1.9:1) in both themes, since that pastel bg never
+   changes per theme either. Redeclare the literal properties (loaded after core.css) to hand
+   the win back to the var-driven, theme-aware pair; alert-icon/btn-close/hr keep the vivid
+   accent, they are decorative, not text. */
+.alert-success,
+.alert-info,
+.alert-warning,
+.alert-danger {
+  color: var(--bs-alert-color);
+  background-color: var(--bs-alert-bg);
+  border-color: var(--bs-alert-border-color);
+}
+
+/* H5: this custom Bootstrap build ships no `.text-<variant>-emphasis` utilities (only the
+   `-text-emphasis` CSS vars survive, used above for alerts). The plugin metric cards
+   (plugin_page.html, driven by each plugin's ui/actions.py subtitle_color/svg_color fields)
+   render `.text-danger`/`.text-success`/`.text-warning`/`.text-info` directly -- the RAW
+   variant colour, which fails AA against the card background in one theme or the other (e.g.
+   danger 3.5-3.9:1 in both; success/warning/info ~1.7-2.1:1 in light). Add the emphasis
+   utilities so the actions.py colour fields can opt into the already-theme-aware pair instead. */
+.text-danger-emphasis {
+  color: var(--bs-danger-text-emphasis) !important;
+}
+.text-success-emphasis {
+  color: var(--bs-success-text-emphasis) !important;
+}
+.text-warning-emphasis {
+  color: var(--bs-warning-text-emphasis) !important;
+}
+.text-info-emphasis {
+  color: var(--bs-info-text-emphasis) !important;
+}
+
 .list-group-item-secondary {
   border-color: var(--bs-secondary);
   color: var(--bs-secondary) !important;
@@ -244,6 +338,24 @@ button.list-group-item-secondary.active {
   color: var(--bs-secondary) !important;
 }
 
+/* M3: core.css's `.bg-label-success/-info/-warning/-danger` pair the vivid variant colour
+   (text) with its own pale tint (background) -- 1.58-1.83:1, in both themes, since that
+   background never changes per theme. Reuse core.css's own light `-text-emphasis` hex
+   directly (not the CSS var: it flips to a pale, dark-bg-tuned shade in dark mode, which
+   would fail against this bg just as badly). */
+.bg-label-success {
+  color: #2d5816 !important;
+}
+.bg-label-info {
+  color: #014e5e !important;
+}
+.bg-label-warning {
+  color: #664400 !important;
+}
+.bg-label-danger {
+  color: #66190c !important;
+}
+
 @keyframes colorPhase {
   0% {
     box-shadow: 0 1px 20px 1px var(--bs-primary); /* Primary shadow */
@@ -260,15 +372,19 @@ button.list-group-item-secondary.active {
   background: transparent var(--bs-btn-close-bg) center/1em auto no-repeat;
 }
 
+/* M4: light theme only -- was a hardcoded #8b9197 (2.93-3.18:1 against white/off-white:
+   sidebar footer, breadcrumb parents, card subtitles, timestamps), which duplicated --bw-fg-3
+   above instead of referencing it; both are fixed together now. Dark's `.dark-style` override
+   further down (#9caeb7 on navy) already passes. */
 .text-muted {
-  color: #8b9197 !important;
+  color: var(--bw-fg-3) !important;
 }
 
 /* Bootstrap 5.3 utility missing from the bundled core.css build: without it the
    toast timestamps ("just now") inherit the header's category color (e.g. danger
    red) instead of rendering muted */
 .text-body-secondary {
-  color: #8b9197 !important;
+  color: var(--bw-fg-3) !important;
 }
 
 .raw-template-editor {
@@ -467,6 +583,20 @@ button.list-group-item-secondary.active {
   border-left: 0.25rem solid rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.55);
 }
 
+/* RAW setting drafts stay editable and read distinct from method-locked rows: muted, with a
+   `#` drawn in the padding settings-raw.js reserves (never written into the text). */
+.raw-config-editor .ace_marker-layer .raw-draft-line {
+  position: absolute;
+  backdrop-filter: grayscale(0.65);
+}
+
+.raw-config-editor .ace_marker-layer .raw-draft-line::before {
+  content: "#";
+  position: absolute;
+  left: 4px;
+  color: var(--bs-secondary-color);
+}
+
 .ace_gutter-cell.raw-disabled-gutter {
   color: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.9) !important;
   font-weight: 600;
@@ -618,13 +748,15 @@ button.list-group-item-secondary.active {
 }
 
 .btn-pro-now {
-  background-color: var(--bs-bw-green); /* Initial background color */
+  background-color: var(
+    --bs-bw-green-contrast
+  ); /* Initial background color; M5 AA fix */
   color: #fff;
 }
 
 .btn-pro-now:hover {
   background-color: var(
-    --bs-bw-green
+    --bs-bw-green-contrast
   ) !important; /* Keep the primary color on hover */
 }
 
@@ -737,7 +869,14 @@ button.list-group-item-secondary.active {
 }
 
 .bg-bw-green {
-  background-color: var(--bs-bw-green);
+  /* M5: home/loading/starting PRO banner -- white text on this fill needs the AA-safe shade. */
+  background-color: var(--bs-bw-green-contrast);
+}
+
+/* M5: the banner's "here" link is white at 80% opacity, which drops back under 4.5:1 even
+   against the darkened fill above -- full white to match its sibling text-white text. */
+.bg-bw-green .text-white-80 {
+  color: #fff !important;
 }
 
 /* .pro-icon {
@@ -872,11 +1011,25 @@ table.table.dataTable > tbody > tr.selected:hover > td {
   color: var(--bs-secondary) !important;
 }
 
+/* M2: same fix as .btn-outline-secondary/.text-secondary above -- --bs-secondary/--bs-danger
+   are not redefined per theme, so the multivalue "show more"/"hide" pill (.btn-text-secondary)
+   and its danger sibling drop to ~2.6:1/~3.9:1 on the navy body. The -text-emphasis variables
+   are already redefined per theme for exactly this. */
+.dark-style .btn-text-secondary,
+[data-bs-theme="dark"] .btn-text-secondary {
+  color: var(--bs-secondary-text-emphasis) !important;
+}
+
 .btn-text-danger,
 .btn-text-danger.disabled,
 .btn-text-danger:hover {
   color: var(--bs-danger) !important;
   border: none;
+}
+
+.dark-style .btn-text-danger,
+[data-bs-theme="dark"] .btn-text-danger {
+  color: var(--bs-danger-text-emphasis) !important;
 }
 
 .col.form-floating > .form-control-sm,
@@ -1000,6 +1153,54 @@ a.badge:hover {
   bottom: 2.1rem !important;
   left: 1.5rem !important;
   z-index: 1080;
+}
+
+/* M20: this trigger is `position: fixed`, so whatever page content happens to render
+   at its fixed viewport spot -- the read-only banner, a metadata row -- sits behind it
+   permanently, not just while scrolling past it. Shrinking it to an icon-only FAB at
+   phone width cuts its footprint (and so the odds of covering something) without
+   touching the desktop/tablet bar or the expanded menu, which reuses the same `.btn`
+   class and must keep its own labels -- `> button` keeps this scoped to the trigger. */
+@media (max-width: 575.98px) {
+  #floating-modes-menu > button {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+  }
+  #floating-modes-menu > button span.don-jose {
+    display: none;
+  }
+
+  /* M20 round 2 (QA-UI-5): the shrunk trigger above still occupies a fixed x:36-84px
+     rectangle (bottom-left), which /services/<svc>'s template note renders straight into.
+     That rectangle's horizontal position never moves with scroll, so indenting the note past
+     it removes the overlap regardless of page height -- unlike padding the page, which only
+     changes content BELOW the note. Scoped to the note itself, not the whole card: the
+     picker/chips above it render clear of the trigger's band already. */
+  #service-template-note {
+    padding-left: 3rem;
+  }
+}
+
+/* QA-UI-5 item 7: the flag, text and chevron of the language selector touch with no gap in
+   RTL. `.me-2` (core.css) and the `.dropdown-toggle::after` chevron (core.css) are both
+   PHYSICAL margins (`margin-right`/`margin-left`), so in `dir="rtl"` -- where this
+   `d-flex` row lays its children out right-to-left -- the gap they reserve lands on the
+   element's now-outward side instead of the side that actually faces the next element.
+   Scoped to this one widget's own children, not a global logical-property pass: core.css
+   bakes the same physical-margin pattern across ~60 utility classes app-wide, and fixing
+   that everywhere without measuring every affected page first is a separate, much larger
+   change (see the QA-UI-5 report's RTL finding) -- not this item's ask. */
+/* rtl:ignore */
+html[dir="rtl"] #language-dropdown img#current-lang-flag {
+  margin-right: 0 !important;
+  margin-left: 0.5rem !important;
+}
+
+/* rtl:ignore */
+html[dir="rtl"] #language-dropdown.dropdown-toggle::after {
+  margin-left: 0;
+  margin-right: 0.8em;
 }
 
 .setting-highlight {
@@ -1332,22 +1533,31 @@ a.courier-prime:hover {
   height: 100vh;
 }
 
+/* H5/M23: this extended named-colour palette is used only via the `subtitle_color`/
+   `svg_color` fields of core plugins' ui/actions.py (rendered as `text-<name>` by
+   plugin_page.html), so it is fixed here rather than in every plugin file. None of these
+   were redefined per theme; several pass in one theme and fail badly in the other against
+   the plugin metric card background (#fff light / #133044 dark -- see the [data-bs-theme]
+   overrides below `.text-teal`). orange/amber/emerald fail light (1.7-2.5:1), pass dark:
+   darken the light default, restore the vivid shade for dark. */
 .text-orange {
-  color: #ff7f50;
+  color: #a65334;
 }
 
 .text-amber {
-  color: #ffbf00;
+  color: #806000;
 }
 
 .text-emerald {
-  color: #50c878;
+  color: #308048;
 }
 
 .text-pink {
   color: #ff69b4;
 }
 
+/* purple/maroon pass light (9.4-11:1), fail dark (1.25-1.45:1): lightened dark-only
+   variants below `.text-teal`, base stays the light-safe vivid shade. */
 .text-purple {
   color: #800080;
 }
@@ -1368,8 +1578,10 @@ a.courier-prime:hover {
   color: #ff007f;
 }
 
+/* olive fails both themes (4.2:1 light, 3.3:1 dark): darken the light default too, lighten
+   further for dark below `.text-teal`. */
 .text-olive {
-  color: #808000;
+  color: #6d6d00;
 }
 
 .text-lime {
@@ -1395,9 +1607,36 @@ a.courier-prime:hover {
 .text-maroon {
   color: #800000;
 }
+/* dark-only lightened variant for maroon is below `.text-teal`, with purple/olive. */
 
 .text-teal {
   color: #20c997;
+}
+
+/* Per-theme restores/fixes for the extended palette above (H5/M23). */
+.dark-style .text-orange,
+[data-bs-theme="dark"] .text-orange {
+  color: #ff7f50;
+}
+.dark-style .text-amber,
+[data-bs-theme="dark"] .text-amber {
+  color: #ffbf00;
+}
+.dark-style .text-emerald,
+[data-bs-theme="dark"] .text-emerald {
+  color: #50c878;
+}
+.dark-style .text-olive,
+[data-bs-theme="dark"] .text-olive {
+  color: #a6a640;
+}
+.dark-style .text-purple,
+[data-bs-theme="dark"] .text-purple {
+  color: #c680c6;
+}
+.dark-style .text-maroon,
+[data-bs-theme="dark"] .text-maroon {
+  color: #cc9999;
 }
 
 .blur-overlay {
@@ -2798,6 +3037,15 @@ span.cursor-pointer ~ .reset-setting {
   color: var(--bs-emphasis-color) !important;
 }
 
+/* H3: `--bs-primary` is remapped to #fff in dark mode (this file's dark [data-bs-theme]
+   block above), so Bootstrap's `.text-bg-primary` utility (white text + primary-colour fill)
+   renders white-on-white. logs.html's "All sources (live)" pill is the only user today. */
+.dark-style .text-bg-primary,
+[data-bs-theme="dark"] .text-bg-primary {
+  background-color: var(--bs-bw-blue) !important;
+  color: #fff !important;
+}
+
 /* The `.border-*-subtle` utility group was dropped from this custom Bootstrap
    build (only the `--bs-*-border-subtle` tokens survived). Restore the one
    variant the ported pages use, mirroring core.css's `.bg-light-subtle`
@@ -3027,6 +3275,14 @@ div.dt-button-background {
   color: #9caeb7 !important;
 }
 
+/* M23: core.css's `.form-text` help-text colour (#646e78) is theme-invariant -- 5.19:1 on
+   white, 2.64:1 on the dark card (e.g. #service-template-note on /services/<svc>). --bw-fg-2's
+   own dark value already passes here (7.3:1). */
+.dark-style .form-text,
+[data-bs-theme="dark"] .form-text {
+  color: var(--bw-fg-2);
+}
+
 .dark-style .sticky-card {
   background-color: rgba(12, 40, 58, 0.95) !important;
 }
@@ -3044,7 +3300,11 @@ div.dt-button-background {
 }
 
 .dark-style .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
-  color: #07354a !important;
+  /* H1: this color was tuned for the solid #fff fill below, but overrides.css:4390-4398's
+     later, higher-specificity rule (`[data-bs-theme="dark"] ... .menu-link:not(.menu-toggle)`)
+     now wins for background-color and paints a translucent navy-tinted wash instead --
+     leaving this near-navy text at 1.04:1 on it. Match the other dark sidebar links (#fff). */
+  color: #fff !important;
   background-color: #fff !important;
 }
 
@@ -3055,6 +3315,20 @@ div.dt-button-background {
 .dark-style .btn-outline-primary {
   color: var(--bs-primary);
   border-color: var(--bs-primary);
+}
+
+/* Q6 LOW: theme-default.css's active fill (#0b354a) is nearly the same dark navy as the page
+   background in dark mode, so an active outline button (the range-picker preset, for example)
+   read as unstyled. #0a4b69 is the same brighter accent .nav-pills/.dropdown-item already use
+   for "active" in dark mode. */
+.dark-style .btn-check:checked + .btn-outline-primary,
+.dark-style .btn-check:active + .btn-outline-primary,
+.dark-style .btn-outline-primary:active,
+.dark-style .btn-outline-primary.active,
+.dark-style .btn-outline-primary.dropdown-toggle.show {
+  color: #fff !important;
+  background-color: #0a4b69 !important;
+  border-color: #0a4b69 !important;
 }
 
 html:not([dir="rtl"]).dark-style .border-primary,
@@ -3127,10 +3401,6 @@ html[dir="rtl"].dark-style .border-primary {
 
 .dark-style .bg-label-secondary {
   color: #000 !important;
-}
-
-.dark-style .bg-bw-green {
-  background-color: var(--bs-bw-green);
 }
 
 .dark-style .apexcharts-text {
@@ -3598,7 +3868,11 @@ code.bad-behavior-event__value {
 @media (max-width: 576px) {
   .step-item {
     flex-direction: column;
-    align-items: stretch;
+    /* Bootstrap's `.align-items-center`/`.flex-wrap` utilities on this same element
+       are `!important` and win over a plain override; both need to be beaten here or
+       the column layout below never takes effect. */
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
   }
 
   .step-item .step-item-handle {
@@ -3609,6 +3883,23 @@ code.bad-behavior-event__value {
   .step-item .step-item-move-group {
     justify-content: center;
   }
+}
+
+/* M20: a long setting key (e.g. LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT) never
+   truncates -- flex items default to a min-width equal to their own content, so the
+   name's row just grows past its card and off the phone screen instead of ellipsing.
+   `.text-truncate` also needs to sit on the text-bearing element itself: it was put on
+   the icon+text flex wrapper, where `overflow: hidden` clips the label but there is no
+   inline text of its own to put an ellipsis on. */
+.step-item .flex-grow-1.text-truncate,
+.step-item .flex-grow-1.text-truncate > .text-truncate {
+  min-width: 0;
+}
+.step-item .step-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .setting-selector-results {
@@ -4319,6 +4610,19 @@ code.bad-behavior-event__value {
   border-color: var(--bw-border);
 }
 
+/* /whats-new: the accordion component (release notes panel) never got a dark theme -- it
+   ships hardcoded light-mode hex on --bs-accordion-* (core.css's own light --bw-fg-1/2
+   values, copied verbatim), so the panel stays white while its .text-muted dates already
+   read dark-tuned --bs-secondary-text-emphasis, 2.29:1 on the still-white bg. */
+[data-bs-theme="dark"] .accordion {
+  --bs-accordion-color: var(--bw-fg-2);
+  --bs-accordion-bg: var(--bw-bg-card);
+  --bs-accordion-border-color: var(--bw-border);
+  --bs-accordion-btn-color: var(--bw-fg-1);
+  --bs-accordion-active-color: var(--bw-fg-1);
+  --bs-accordion-active-bg: var(--bw-bg-card);
+}
+
 [data-bs-theme="dark"] .card-header .card-title {
   color: var(--bw-fg-1);
 }
@@ -4551,6 +4855,45 @@ code.bad-behavior-event__value {
   color: #8ce0a8;
 }
 
+/* --- H9: at phone width the icon row (PRO chip, help, notifications, onboarding, news,
+   language, theme, user menu) is wider than #layout-navbar itself; nothing clips or
+   scrolls it, so Profile/Logout become permanently off-screen. Make the row its own
+   horizontally-scrollable strip instead, so every control stays reachable by a swipe. */
+@media (max-width: 575.98px) {
+  #navbar-collapse {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #navbar-collapse::-webkit-scrollbar {
+    display: none;
+  }
+  #navbar-collapse > ul.navbar-nav {
+    flex-shrink: 0;
+  }
+}
+
+/* N-M1: .range-picker is a Bootstrap .btn-group (display: inline-flex, no wrap), so its 4-5
+   preset buttons stay on one rigid line -- translated labels (fr "Personnalisé") push that
+   line past 390px width, scrolling the whole page-head-actions row sideways. Let the group
+   wrap its own buttons at phone width instead of overflowing the viewport. */
+@media (max-width: 575.98px) {
+  .range-picker.btn-group {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .range-picker.btn-group > .btn {
+    flex: 0 0 auto;
+    /* Q6 LOW: Bootstrap's .btn-group border-collapse (-1px margin-left, square radius except on
+       the group's true first/last child) assumes one row. Wrapped onto several, the button that
+       starts each new row still carries that negative margin and a missing radius -- pulled
+       under the row above and square where a row edge should be rounded. Every button gets its
+       own full radius and margin back so each wrapped row reads as a clean, separate group. */
+    margin-left: 0 !important;
+    border-radius: var(--bs-btn-border-radius, 0.375rem) !important;
+  }
+}
+
 /* --- Template card presentation (kit tplCard, configure.js:1317-1333). */
 .bw-tpl-icon {
   font-size: 22px;
@@ -4598,12 +4941,17 @@ code.bad-behavior-event__value {
   background: rgba(11, 53, 74, 0.08);
 }
 .tpl-badge-plugin {
-  color: var(--bs-bw-green);
+  /* M4: raw --bs-bw-green on its own pale tint is 2.64:1. --bs-bw-green-contrast (25% toward
+     black, M5's fix elsewhere) only clears 4.41:1 against this badge's paler bg -- one-off
+     mix at 35% (matching the sibling badges' own bespoke hex, not a shared token) for margin. */
+  color: #1e7044;
   border-color: rgba(46, 172, 104, 0.32);
   background: rgba(46, 172, 104, 0.1);
 }
 .tpl-badge-feature {
-  color: #a86400;
+  /* M4: #a86400 on its own pale tint is 4.26:1 -- the app's own warning-text-emphasis token
+     already passes here and already flips per theme, replacing this one-off hex. */
+  color: var(--bs-warning-text-emphasis);
   border-color: rgba(255, 171, 0, 0.45);
   background: rgba(255, 171, 0, 0.14);
 }
@@ -4788,3 +5136,33 @@ code.bad-behavior-event__value {
 .release-notes code {
   overflow-wrap: anywhere;
 }
+
+/* Code editor and map never mirror under dir=rtl (source code and geography read left-to-right). */
+.ace_editor,
+.leaflet-container {
+  direction: ltr;
+}
+
+/* flatpickr has no RTL support: flatpickr-locale.js tags the calendar `bw-rtl` under dir=rtl. Physical
+   properties on purpose, hence the ignore block (rtlcss would flip them back in the rtl sheet). */
+/* rtl:begin:ignore */
+.flatpickr-calendar.bw-rtl {
+  direction: rtl;
+}
+.flatpickr-calendar.bw-rtl
+  .flatpickr-months
+  .flatpickr-prev-month.flatpickr-prev-month {
+  left: auto;
+  right: 0;
+}
+.flatpickr-calendar.bw-rtl
+  .flatpickr-months
+  .flatpickr-next-month.flatpickr-next-month {
+  right: auto;
+  left: 0;
+}
+.flatpickr-calendar.bw-rtl .flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-calendar.bw-rtl .flatpickr-months .flatpickr-next-month svg {
+  transform: scaleX(-1);
+}
+/* rtl:end:ignore */

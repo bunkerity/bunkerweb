@@ -4,5 +4,24 @@
   "description": "Fake core plugin for internal templates.",
   "version": "1.0",
   "stream": "yes",
-  "settings": {}
+  "settings": {
+    "EXTERNAL_TEMPLATE_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of service template URLs to download and install, separated with spaces. Each URL is one template: a bunkerweb-template/1 JSON package, or a .zip or .tar.gz holding <id>/template.json and its configs. Only https:// and file:/// are accepted, at most 1 MiB. Append #sha256=<digest> to a URL to pin its content. A template whose URL is removed is deleted unless a service still uses it.",
+      "id": "external-template-urls",
+      "label": "External template URLs",
+      "regex": "^ *(?:(?:https:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=\\(\\)!?&\\/$]+(?: +(?:https:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=\\(\\)!?&\\/$]+)*)? *$",
+      "type": "multivalue"
+    }
+  },
+  "jobs": [
+    {
+      "name": "download-templates",
+      "file": "download-templates.py",
+      "every": "once",
+      "reload": false,
+      "async": true
+    }
+  ]
 }

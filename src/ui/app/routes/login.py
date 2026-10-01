@@ -1,16 +1,20 @@
 from datetime import datetime
 from os import getenv
+from secrets import token_urlsafe
 
 from bcrypt import checkpw
-from flask import Blueprint, current_app, flash as flask_flash, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
+from flask_babel import force_locale
 from flask_login import current_user, login_user
+from markupsafe import Markup
 
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.i18n import translated
+from app.lang_config import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGE_CODES, babel_locale
 from app.routes.preferences import dismissed_notices
 from app.routes.utils import cors_required
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, LOGIN_NOTICES, flash, _sanitize_internal_next
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, LOGIN_NOTICES, MAX_PASSWORD_BYTES, flash, gen_password_hash, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 from app.models.models import UiUsers
 from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
@@ -20,6 +24,13 @@ login = Blueprint("login", __name__)
 # Deliberately identical for every passkey failure: telling "unknown credential" apart from "bad
 # signature" would leak whether an account exists.
 GENERIC_PASSKEY_ERROR = "Couldn't sign you in with a passkey, please try again"
+
+# A valid bcrypt hash nothing will ever match, so an unknown username still pays bcrypt's cost
+# before the login route answers. Without it, `checkpw` is skipped entirely for a nonexistent
+# username (Python's `and` short-circuits on `user_data` being falsy) and the response comes back
+# far faster than for a real username with a wrong password -- a timing oracle independent of, and
+# left standing by, the response-body fix below (security, 2026-09-25).
+_DUMMY_PASSWORD_HASH = gen_password_hash(token_urlsafe(32)).decode("utf-8")
 
 
 def _safe_next() -> str:
@@ -121,20 +132,46 @@ def login_page():
     elif current_user.is_authenticated:  # type: ignore
         return redirect(url_for("home.home_page"))
 
+    # /logout's own `Clear-Site-Data: "cookies"` header wipes any session write made on that
+    # SAME response before this redirect is ever followed, so the language the user was just
+    # seeing cannot travel as a session key -- it rides in the URL instead, like `reason` does.
+    # Only for a request that has not already picked one this page load (a failed-login POST
+    # resubmit, or `/set_language` from the selector, both write this key themselves). This only
+    # keeps the pick for the next request: this one already rendered in it, because
+    # `resolve_locale` reads the same hint (Q6-M2).
+    lang_hint = request.args.get("lang", "")
+    if lang_hint in SUPPORTED_LANGUAGE_CODES and "language" not in session:
+        session["language"] = lang_hint
+
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
         LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
-        user_data = API_CLIENT.get_user_for_auth(request.form["username"])
-        if (
-            user_data
-            and user_data["username"] == request.form["username"]
-            and checkpw(request.form["password"].encode("utf-8"), user_data["password"].encode("utf-8"))
-        ):
+        try:
+            user_data = API_CLIENT.get_user_for_auth(request.form["username"])
+        except (ApiClientError, ApiUnavailableError):
+            # `get_user_for_auth` raises on an unknown username (the API 404s) instead of
+            # returning None; uncaught, that reached the client as a bare 500 -- a response
+            # distinguishable from the "wrong password" branch below, and so a username oracle.
+            # Treated the same as "no such user" from here on.
+            user_data = None
+
+        password_hash = (user_data or {}).get("password") or _DUMMY_PASSWORD_HASH
+        password_bytes = request.form["password"].encode("utf-8")
+        password_matches = checkpw(password_bytes[:MAX_PASSWORD_BYTES], password_hash.encode("utf-8")) and len(password_bytes) <= MAX_PASSWORD_BYTES
+
+        if user_data and user_data["username"] == request.form["username"] and password_matches:
             ui_user = _user_from_auth_data(user_data)
 
+            # An explicit, not-yet-saved language pick made on the (anonymous) login page —
+            # `/set_language` is the only writer of this session key, so its presence is the sole
+            # signal the user actually touched the selector. Read it before `_establish_session`
+            # clears the session; anything else (the form's hidden default, an Accept-Language
+            # guess) must not overwrite the user's stored preference (H11).
+            picked_language = session.get("language")
+
             if not _establish_session(ui_user, user_data, mfa_done=False, remember_me=_remember_me_requested()):
-                flask_flash("Couldn't log you in, please try again", "error")
+                flash(translated("login.flash.couldn_t_log_please_try_again") or "Couldn't log you in, please try again", "error", save=False)
                 return render_template("login.html", error="Couldn't log you in, please try again")
 
             login_user_data = {
@@ -143,8 +180,12 @@ def login_page():
                 "totp_secret": user_data.get("totp_secret"),
                 "method": user_data.get("method", "manual"),
                 "theme": request.form.get("theme", "light"),
-                "language": request.form.get("language", "en"),
             }
+            if picked_language in SUPPORTED_LANGUAGE_CODES:
+                login_user_data["language"] = picked_language
+                # The session no longer carries the pick, so the locale of everything translated for
+                # the rest of this request (the MFA reminder below) comes from the logged-in user (M19).
+                ui_user.language = picked_language
 
             try:
                 API_CLIENT.update_user(current_user.get_id(), **login_user_data)
@@ -159,16 +200,25 @@ def login_page():
             # MFA state stays visible in the profile and in the guided walkthrough.
             if not user_data.get("totp_secret") and not user_data.get("webauthn_credentials_count"):
                 if not dismissed_notices(ui_user.username).get("mfa"):
-                    dismiss_label = translated("notice.dismiss_mfa") or "Don't remind me again"
+                    # This request's locale was resolved before `login_user`, from Accept-Language in
+                    # a fresh browser, and Flask-Babel caches it: speak the user's own language (Q6-M3).
+                    language = ui_user.language if ui_user.language in SUPPORTED_LANGUAGE_CODES else DEFAULT_LANGUAGE
+                    with force_locale(babel_locale(language)):
+                        dismiss_label = translated("notice.dismiss_mfa") or "Don't remind me again"
+                        profile_url = url_for("profile.profile_page", _anchor="security")
+                        mfa_message = translated("notice.enable_mfa", url=profile_url) or (
+                            f'Please enable two-factor authentication to secure your account <a href="{profile_url}">here</a>'
+                        )
+                    # The catalog string carries its own link; the catalogs ship with the UI, so it is
+                    # trusted markup (flash() escapes anything that is not `Markup`).
                     flash(
-                        f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>'
-                        f' <a href="#" class="alert-link" data-dismiss-notice="mfa">{dismiss_label}</a>',
+                        Markup('{} <a href="#" class="alert-link" data-dismiss-notice="mfa">{}</a>').format(Markup(mfa_message), dismiss_label),
                         "warning",
                     )
 
             return redirect(url_for("loading", next=_safe_next()))
         else:
-            flask_flash("Invalid username or password", "error")
+            flash(translated("login.flash.invalid_username_password") or "Invalid username or password", "error", save=False)
             fail = True
 
     kwargs = {

@@ -94,6 +94,8 @@
     {% endif %}
     {{ alert(message="Assignments organise the central inventory; TLS deployment remains controlled by each service's certificate settings.", message_key="certificates.assignment_notice", variant="info", icon="bx-info-circle", role=none, classes="mb-4") }}
     <textarea id="certificates-data" hidden readonly>{{ certificate_context | tojson }}</textarea>
+    {# What the server refused on the last modal post, for js/components/form-retry.js (M28). #}
+    <textarea id="form-retry" hidden readonly>{{ form_retry | default({}) | tojson }}</textarea>
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
@@ -212,7 +214,7 @@
                                 data-status="{{ certificate.status }}"
                                 data-services="{{ certificate.attachments | map(attribute='service_id') | join(' ') }}">
                                 <td>
-                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label="Show details for " ~ certificate.name, classes="certificate-toggle p-0") }}
+                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label=_("aria.label.show_details", name=certificate.name), classes="certificate-toggle p-0") }}
                                 </td>
                                 <td>
                                     <div class="fw-semibold">{{ certificate.name }}</div>
@@ -248,7 +250,7 @@
                                         {% endif %}
                                         {{ button(label="", variant="outline-secondary", size="sm", icon="bx-download", icon_only=true, aria_label="Download public chain", tag="a", href=certificates_url ~ "/" ~ certificate.id ~ "/download/chain") }}
                                         {% if certificate.source != "letsencrypt" %}
-                                            {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete certificate", disabled=readonly or certificate.attachments, classes="certificate-delete") }}
+                                            {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_certificate'), disabled=readonly or certificate.attachments, classes="certificate-delete") }}
                                         {% endif %}
                                     </div>
                                 </td>
@@ -257,7 +259,7 @@
                                 <td colspan="9">
                                     <div class="row g-3 py-2">
                                         <div class="col-12 col-xl-7">
-                                            <section class="certificate-detail-panel h-100" aria-label="Certificate public details">
+                                            <section class="certificate-detail-panel h-100" aria-label="{{ _('aria.label.certificate_public_details') }}">
                                                 {% if certificate.is_orphan %}
                                                     {% call alert(title="ACME account missing", title_key="certificates.orphan_title", variant="warning", icon="bx-error-circle", role=none, classes="mb-3") %}
                                                         <p class="mb-2">{{ _("certificates.orphan_help") }}</p>
@@ -298,7 +300,7 @@
                                             </section>
                                         </div>
                                         <div class="col-12 col-xl-5">
-                                            <section class="certificate-detail-panel h-100" aria-label="Certificate inventory assignments">
+                                            <section class="certificate-detail-panel h-100" aria-label="{{ _('aria.label.certificate_inventory_assignments') }}">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <div>
                                                         <h6 class="mb-1">{{ _("certificates.assignments") }}</h6>
@@ -345,7 +347,7 @@
     {% endcall %}
 
     {% call modal(id="certificate-selfsigned-modal", title_key="certificates.new_selfsigned", title="New self-signed certificate", size="lg") %}
-        <form method="post" action="{{ certificates_url }}/create">
+        <form method="post" action="{{ certificates_url }}/create" data-form-retry="certificate-selfsigned">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="source" value="selfsigned" />
             <div class="modal-body">{{ selfsigned_form_fields(services) }}</div>
@@ -357,7 +359,7 @@
     {% endcall %}
 
     {% call modal(id="certificate-acme-modal", title_key="certificates.schedule_acme", title="Schedule ACME issuance", size="lg") %}
-        <form method="post" action="{{ certificates_url }}/create">
+        <form method="post" action="{{ certificates_url }}/create" data-form-retry="certificate-letsencrypt">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="source" value="letsencrypt" />
             <div class="modal-body">
@@ -375,7 +377,8 @@
         <form method="post"
               action="{{ certificates_url }}/upload"
               enctype="multipart/form-data"
-              id="certificate-upload-form">
+              id="certificate-upload-form"
+              data-form-retry="certificate-upload">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <div class="modal-body">
                 <div class="row g-3 mb-3">
@@ -412,7 +415,7 @@
     {% endcall %}
 
     {% call modal(id="certificate-edit-modal", title_key="certificates.edit_metadata", title="Edit certificate metadata") %}
-        <form method="post" action="{{ certificates_url }}/update">
+        <form method="post" action="{{ certificates_url }}/update" data-form-retry="certificate-edit">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="certificate_id" id="certificate-edit-id" />
             <div class="modal-body">
@@ -434,7 +437,7 @@
     {% endcall %}
 
     {% call modal(id="certificate-attach-modal", title_key="certificates.attach", title="Assign certificate") %}
-        <form method="post" action="{{ certificates_url }}/attach">
+        <form method="post" action="{{ certificates_url }}/attach" data-form-retry="certificate-attach">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="certificate_id" id="certificate-attach-id" />
             <div class="modal-body">
@@ -481,4 +484,5 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/components/file-upload.js') }}" nonce="{{ script_nonce }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/certificates.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/components/form-retry.js') }}" nonce="{{ script_nonce }}" defer></script>
 {% endblock %}

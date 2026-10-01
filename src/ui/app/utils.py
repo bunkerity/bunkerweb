@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from defusedcsv.csv import _escape as _defusedcsv_escape, writer as _defusedcsv_writer
 from flask import current_app, flash as flask_flash, session
 from flask_login import current_user
+from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
@@ -493,9 +494,16 @@ LOGIN_NOTICES = {
 }
 
 
-def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
-    if i18n_key:
-        message = f'<span data-i18n="{i18n_key}">{message}</span>'
+def flash(message: Union[str, Markup], category: str = "success", *, save: bool = True) -> None:
+    # flash.html and sidebar-notifications.html render the stored message with `|safe`, and it
+    # cannot be escaped there instead: the session cannot carry the `Markup` type to the next
+    # request, so there trusted markup and request data look alike. Escape here, while the type
+    # still says which is which: a `str` is escaped, a `Markup` (built with
+    # `Markup(...).format(...)`, which escapes its arguments) is kept as intended markup.
+    message = escape(message)
+    # Stored as a plain `str`: Flask-Session's msgspec encoder refuses any `str` subclass
+    # ("Encoding objects of type Markup is unsupported"), which 500s every request that flashes.
+    message = str(message)
 
     if category != "success":
         flask_flash(message, category)

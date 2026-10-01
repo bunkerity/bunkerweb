@@ -718,9 +718,10 @@ def test_admin_shell_uses_design_system_fonts_theme_and_boxicons():
     for asset in ("Public_sans.css", "DonJose.css", "Courier_Prime.css", "boxicons.min.css"):
         assert asset in base
     assert 'data-bs-theme="{{ theme }}"' in base
-    assert 'aria-label="Toggle navigation"' in navbar
+    # Q6-M5: these two were hardcoded English aria-labels; now routed through i18n.
+    assert 'aria-label="{{ _("navbar.aria.toggle_navigation") }}"' in navbar
     assert 'id="admin-nav-search"' in navbar
-    assert 'aria-label="Close navigation"' in menu
+    assert 'aria-label="{{ _("navbar.aria.close_navigation") }}"' in menu
     assert "fontawesome" not in (base + menu + navbar).lower()
 
 

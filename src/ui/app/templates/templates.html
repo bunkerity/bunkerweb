@@ -5,6 +5,7 @@
 {% from "components/modal.html" import modal %}
 {% from "components/alert.html" import alert %}
 {% from "components/button.html" import button %}
+{% from "components/checkbox.html" import checkbox %}
 {% from "components/selected-list.html" import selected_list %}
 {% from "components/page-head.html" import page_head %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
@@ -26,6 +27,11 @@
                 <i class="bx bx-trash bx-xs me-1"></i><span>{{ _("templates.gallery.delete_selected") }}</span>
                 <span id="templates-selected-count" class="badge rounded-pill bg-label-danger ms-1 d-none">0</span>
             </button>
+        {% endif %}
+        {# Admin only, like a catalogue install: an imported template's configs become NGINX
+           configuration (routes/templates.py `templates_import`). #}
+        {% if not is_readonly and user_admin %}
+            {{ button(id="templates-import-btn", label="Import template", i18n_key="button.import_template", size="sm", icon="bx-import", variant="outline-primary", modal_target="modal-import-template") }}
         {% endif %}
         <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') }}"{% endif %}>
             <a role="button"
@@ -58,10 +64,15 @@
                 {% set overflow_badges = tag_badges.overflow %}
                 {# Card title is the SHORT humanized id (kit tplCard anatomy); the long
                    template_data.name sentence becomes the muted description below. Core
-                   ids carry an i18n key; custom ids fall back to the capitalized id with
-                   no translation (gettext echoes missing keys, so we never look one up). #}
+                   ids carry an i18n key; a plugin-provided id falls back to the capitalized
+                   id, its plugin catalog holding the long description instead (below). A
+                   truly custom (UI-created) template has no plugin catalog to describe it --
+                   template_data.name IS its only human-facing text, so it belongs in the
+                   title, not buried as a "description" under the meaningless slug id (L14). #}
                 {% set core_names = {"low": "Low security", "medium": "Medium security", "high": "High security", "api": "API", "ui": "Web UI"} %}
                 {% set is_core_name = template in core_names %}
+                {% set is_custom_template = not is_core_name and not template_data.plugin_id %}
+                {% set template_title = _("templates.name." ~ template) if is_core_name else (template_data.name if is_custom_template else template|replace('-', ' ')|replace('_', ' ')|title) %}
                 {# Keyword-map template id/name to a boxicon (presentation only, kit tplCard). #}
                 {% set tid = (template ~ ' ' ~ template_data.name) | lower %}
                 {% set tpl_icon = 'bx-collection' %}
@@ -80,14 +91,15 @@
                                        type="checkbox"
                                        data-template-id="{{ template }}"
                                        id="template-check-{{ template }}"
-                                       aria-label="Select template {{ template }}" />
+                                       aria-label="{{ _('aria.label.select_template', name=template) }}" />
                             </div>
                             <i class="bx {{ tpl_icon }} bw-tpl-icon flex-shrink-0" aria-hidden="true"></i>
-                            <h6 class="bw-tpl-title mb-0 flex-grow-1">{{ _("templates.name." ~ template) if is_core_name else template|capitalize }}</h6>
+                            <h6 class="bw-tpl-title mb-0 flex-grow-1">{{ template_title }}</h6>
                             <span class="tag-chip flex-shrink-0">{{ usage_count }}&nbsp;<span>{{ _("templates.gallery.svc_suffix") }}</span></span>
                         </div>
                         <div class="bw-tpl-body">
-                            <p class="bw-tpl-desc mb-3" title="{{ template_data.name }}">{{ template_data.name }}</p>
+                            {% set template_description = (template|replace('-', ' ')|replace('_', ' ')|title) if is_custom_template else plugin_text(template_data.plugin_id, 'templates.' ~ template ~ '.name', template_data.name) %}
+                            <p class="bw-tpl-desc mb-3" title="{{ template_description }}">{{ template_description }}</p>
                             {% if visible_badges %}
                                 <div class="d-flex flex-wrap gap-1 mb-3">
                                     {% for tag in visible_badges %}
@@ -104,7 +116,17 @@
                                 </div>
                             {% endif %}
                             <div class="d-flex gap-2 flex-wrap align-items-center">
-                                {% set is_view = template_data.method != 'ui' or is_readonly %}
+                                {# Managed = the API refuses to change or delete it (`template_owner`):
+                                   another method wrote it, or a plugin owns it -- a UI-uploaded
+                                   plugin's templates carry method "ui" too, so the owner is named.
+                                   plugin_id wins whenever it is set (matching template_edit.html's
+                                   own readonly_method_plugin/readonly_method split) -- a bundled
+                                   template can carry plugin_id with a non-"ui" method too, and the
+                                   editor already names the plugin in that case. #}
+                                {% set is_managed = template_data.method != 'ui' or template_data.plugin_id %}
+                                {% set managed_by_plugin = template_data.plugin_id %}
+                                {% set managed_by = managed_by_plugin if managed_by_plugin else template_data.method %}
+                                {% set is_view = is_managed or is_readonly %}
                                 <a role="button"
                                    class="btn btn-primary btn-sm don-jose"
                                    href="{{ url_for('services.services_service_page', service='new', template=template) }}">
@@ -125,17 +147,30 @@
                                            href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
                                            data-bs-toggle="tooltip"
                                            data-bs-placement="bottom"
-                                           data-bs-original-title="{{ _("tooltip.link.clone_template", template=template) }}">
+                                           data-bs-original-title="{{ _("tooltip.link.clone_template", template=template) }}"
+                                           aria-label="{{ _("tooltip.link.clone_template", template=template) }}">
                                             <i class="bx bx-copy-alt bx-xs"></i>
                                         </a>
                                     </div>
-                                    {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
+                                    <a role="button"
+                                       class="btn btn-sm bw-icon-btn"
+                                       href="{{ url_for('templates.templates_export', template_id=template) }}"
+                                       download
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="bottom"
+                                       data-bs-original-title="{{ _("tooltip.link.export_template", template=template) }}"
+                                       aria-label="{{ _("tooltip.link.export_template", template=template) }}">
+                                        <i class="bx bx-export bx-xs" aria-hidden="true"></i>
+                                    </a>
+                                    {% set managed_tooltip_key = 'tooltip.disabled_by_plugin' if managed_by_plugin else 'tooltip.disabled_by_method' %}
+                                    {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else (managed_tooltip_key if is_managed else 'tooltip.button.delete_template')) %}
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="bottom"
-                                         data-bs-original-title="{{ _(delete_tooltip_key, name=template, method=template_data['method']) }}">
+                                         data-bs-original-title="{{ _(delete_tooltip_key, name=template, method=managed_by, plugin=managed_by_plugin) }}">
                                         <button type="button"
                                                 data-template-id="{{ template }}"
-                                                class="btn btn-sm bw-icon-btn bw-icon-btn-danger delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
+                                                class="btn btn-sm bw-icon-btn bw-icon-btn-danger delete-template{% if is_managed %} disabled{% endif %}"
+                                                aria-label="{{ _(delete_tooltip_key, name=template, method=managed_by, plugin=managed_by_plugin) }}">
                                             <i class="bx bx-trash bx-xs"></i>
                                         </button>
                                     </div>
@@ -160,6 +195,16 @@
                                 {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary") }}
                             </div>
                             <p class="text-muted small mb-2">{{ item.description }}</p>
+                            {# C4 states, from `template_state`: a template has no version, so
+                               "update" means the installed content differs from the listed one.
+                               `managed` is one a plugin owns or another method wrote. #}
+                            {% if item.state == "installed" %}
+                                <div class="small text-success mb-2">{{ _("templates.catalog.state_installed") }}</div>
+                            {% elif item.state == "update" %}
+                                <div class="small text-primary mb-2">{{ _("templates.catalog.state_update") }}</div>
+                            {% elif item.state == "managed" %}
+                                <div class="small text-muted mb-2">{{ _("templates.catalog.state_managed", owner=item.managed_by) }}</div>
+                            {% endif %}
                             {# A template.json carries no version of its own, and the repository
                                publishes no compatibility data -- the only version in play is the
                                release tag the whole listing came from, shown once in the notice
@@ -186,14 +231,41 @@
                                        target="_blank"
                                        rel="noopener noreferrer">{{ _("plugins.catalog.learn_more") }}</a>
                                 {% endif %}
-                                {% if not is_readonly and user_admin and item.compatible and not catalog_stale %}
-                                    <button type="button"
-                                            class="btn btn-sm btn-primary ms-auto templates-catalog-install"
-                                            data-template-id="{{ item.id }}">
-                                        <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
-                                    </button>
+                                {% if not is_readonly and user_admin %}
+                                    <div class="ms-auto d-flex align-items-center gap-2">
+                                        {% if item.state == "available" and item.compatible and not catalog_stale %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary templates-catalog-install"
+                                                    data-template-id="{{ item.id }}">
+                                                <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
+                                            </button>
+                                        {% endif %}
+                                        {# Update opens the diff preview below; the route re-runs every gate
+                                           and refuses unless the pair it rebuilds is the one previewed. #}
+                                        {% if item.state == "update" and item.compatible and not catalog_stale %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modal-catalog-template-update-{{ item.id }}">
+                                                <i class="bx bx-refresh bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.update") }}
+                                            </button>
+                                        {% endif %}
+                                        {# Remove is the gallery card's own delete (`.delete-template`,
+                                           templates.js): same modal, same /templates/delete, which the
+                                           API refuses while a service still uses the template. #}
+                                        {% if item.state in ("installed", "update") %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger delete-template"
+                                                    data-template-id="{{ item.id }}">
+                                                <i class="bx bx-trash bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.remove") }}
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
                             </div>
+                            {% if item.state == "installed" and item.diff is none %}
+                                <p class="text-muted small mt-2 mb-0">{{ _("templates.catalog.update_preview_unknown") }}</p>
+                            {% endif %}
                         </div>
                     {% endcall %}
                 </div>
@@ -238,6 +310,108 @@
                 </div>
             </form>
         {% endcall %}
+        {% if user_admin %}
+            {# Posted by templates.js (the route is @cors_required and answers JSON), so a refusal is
+               shown in #template-import-error and the modal stays open with the file still chosen. #}
+            {% call modal(id="modal-import-template", title_key="modal.title.import_template", title="Import a template") %}
+                <form id="template-import-form"
+                      action="{{ url_for('templates.templates_import') }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <label class="form-label" for="template-import-file">{{ _("form.label.template_file") }}</label>
+                        <input type="file"
+                               id="template-import-file"
+                               name="template_file"
+                               class="form-control"
+                               accept=".json,.zip,.tar,.tgz,.gz,.xz,application/json,application/zip,application/gzip,application/x-tar,application/x-xz"
+                               aria-describedby="template-import-help"
+                               required />
+                        <div id="template-import-help" class="form-text">{{ _("modal.body.import_template_help") }}</div>
+                        {{ checkbox(id="template-import-replace", name="replace", value="yes", label="Replace the template with the same id", i18n_key="form.checkbox.replace_existing_template", classes="mt-3") }}
+                        <div class="alert alert-warning small mt-2 mb-0" role="note">{{ _("modal.body.import_template_replace_warning") }}</div>
+                        <div id="template-import-error" class="alert alert-danger mt-3 mb-0 d-none" role="alert"></div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        {{ button(id="template-import-submit", label="Import template", i18n_key="button.import_template", variant="outline-primary", type="submit", icon="bx-import", classes="me-2") }}
+                        {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="button", dismiss="modal") }}
+                    </div>
+                </form>
+            {% endcall %}
+            {# The C4 update confirmation: every change the replacement makes to the template, and
+               the services that pick it up at their next generation. `confirm` names the previewed
+               pair; the route rebuilds both and refuses if either moved since this was rendered.
+               Posted by templates.js, so a refusal lands in the modal's own alert. #}
+            {% for item in catalog_items if item.state == "update" and item.compatible and not catalog_stale %}
+                {% set diff = item.diff %}
+                {% set users = template_users.get(item.id, []) %}
+                {% call modal(id="modal-catalog-template-update-" ~ item.id, title_key="templates.catalog.update_title", title="Update a community template", size="lg") %}
+                    <form class="template-catalog-update-form"
+                          action="{{ url_for('templates.templates_catalog_update') }}"
+                          method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" name="id" value="{{ item.id }}" />
+                            <input type="hidden" name="confirm" value="{{ item.confirm }}" />
+                            <p>{{ _("templates.catalog.update_confirm", id=item.id, tag=catalog_tag) }}</p>
+                            {% if diff.name %}
+                                <p class="small mb-2">{{ _("templates.catalog.diff.name", old=diff.name[0], new=diff.name[1]) }}</p>
+                            {% endif %}
+                            {% for part in ("settings_added", "settings_changed", "settings_removed") if diff[part] %}
+                                <h6 class="small fw-semibold mb-1">{{ _("templates.catalog.diff." ~ part) }}</h6>
+                                <ul class="small mb-2">
+                                    {% for change in diff[part] %}
+                                        <li>
+                                            <code>{{ change[0] }}</code>:
+                                            {% if part == "settings_changed" %}
+                                                <code class="text-break">{{ change[1] }}</code> → <code class="text-break">{{ change[2] }}</code>
+                                            {% else %}
+                                                <code class="text-break">{{ change[1] }}</code>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endfor %}
+                            {% for part in ("steps_added", "steps_changed", "steps_removed", "configs_added", "configs_changed", "configs_removed") if diff[part] %}
+                                <h6 class="small fw-semibold mb-1">{{ _("templates.catalog.diff." ~ part) }}</h6>
+                                <ul class="small mb-2">
+                                    {% for name in diff[part] %}
+                                        <li>
+                                            {% if part.startswith("configs") %}
+                                                <code>{{ name }}</code>
+                                            {% else %}
+                                                {{ name }}
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endfor %}
+                            <div class="alert alert-warning small mb-0" role="alert">
+                                {% if users %}
+                                    {{ _("templates.catalog.update_services") }}
+                                    <ul class="mb-0 mt-2">
+                                        {% for service in users %}
+                                            <li>
+                                                <code>{{ service }}</code>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    {{ _("templates.catalog.update_no_services") }}
+                                {% endif %}
+                            </div>
+                            <div class="template-catalog-update-error alert alert-danger mt-3 mb-0 d-none"
+                                 role="alert"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            {{ button(label="Update", i18n_key="plugins.catalog.update", variant="primary", type="submit", icon="bx-refresh", classes="me-2") }}
+                            {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="button", dismiss="modal") }}
+                        </div>
+                    </form>
+                {% endcall %}
+            {% endfor %}
+        {% endif %}
     {% endif %}
     <!-- / Content -->
 {% endblock %}

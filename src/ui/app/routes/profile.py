@@ -9,6 +9,7 @@ from app.models.totp import totp as TOTP
 from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
 
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, revoke_sessions
 
@@ -75,6 +76,17 @@ def _list_credentials() -> list:
 
 def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Union[str, bool]], None, None], int]:
     db_sessions = API_CLIENT.get_user_sessions(current_user.username, session.get("session_id"))
+    # A session idle for longer than its lifetime has expired from the store, and no request ever
+    # closes its row: last_activity is refreshed on every request, so such a row is dead (N-M2).
+    # Naive values are read as local time, like _fmt_dt below does.
+    cutoff = datetime.now().astimezone() - current_app.config["PERMANENT_SESSION_LIFETIME"]
+
+    def _live(db_session: dict) -> bool:
+        with suppress(Exception):
+            return db_session["id"] == session.get("session_id") or datetime.fromisoformat(db_session["last_activity"]).astimezone() >= cutoff
+        return True
+
+    db_sessions = [db_session for db_session in db_sessions if _live(db_session)]
     total_sessions = len(db_sessions)
     if "session_id" not in session:
         total_sessions += 1
@@ -177,27 +189,37 @@ def get_sessions():
 @login_required
 def totp_refresh():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
     if not bool(current_user.totp_secret):
-        return handle_error("Two-factor authentication is not enabled.", "profile")
+        return handle_error(translated("profile.flash.two_factor_authentication_not_enabled") or "Two-factor authentication is not enabled.", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/totp-refresh.", redirect_url="profile")
+    verify_data_in_form(
+        data={"password": None},
+        err_message=translated("profile.flash.missing_current_password_parameter_profile_totp")
+        or "Missing current password parameter on /profile/totp-refresh.",
+        redirect_url="profile",
+    )
 
     if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
+        return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
 
     try:
         API_CLIENT.refresh_recovery_codes(current_user.get_id(), totp_recovery_codes)
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't refresh the recovery codes: {e.message}", "profile")
+        return handle_error(
+            translated("profile.flash.couldn_t_refresh_recovery_codes", message=e.message) or f"Couldn't refresh the recovery codes: {e.message}", "profile"
+        )
 
     session["totp_refreshed"] = True
     session["decrypted_recovery_codes"] = totp_recovery_codes
 
-    flash("The recovery codes have been successfully refreshed. The old ones are no longer valid.")
+    flash(
+        translated("profile.flash.recovery_codes_have_successfully_refreshed_old")
+        or "The recovery codes have been successfully refreshed. The old ones are no longer valid."
+    )
     return redirect(url_for("profile.profile_page") + "#security")
 
 
@@ -205,17 +227,26 @@ def totp_refresh():
 @login_required
 def totp_disable():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
     if not bool(current_user.totp_secret):
-        return handle_error("Two-factor authentication is not enabled.", "profile")
+        return handle_error(translated("profile.flash.two_factor_authentication_not_enabled") or "Two-factor authentication is not enabled.", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/totp-disable.", redirect_url="profile")
+    verify_data_in_form(
+        data={"password": None},
+        err_message=translated("profile.flash.missing_current_password_parameter_profile_totp_2")
+        or "Missing current password parameter on /profile/totp-disable.",
+        redirect_url="profile",
+    )
 
     if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
+        return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
-    verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
+    verify_data_in_form(
+        data={"totp_token": None},
+        err_message=translated("profile.flash.missing_totp_token_parameter_profile_totp") or "Missing totp token parameter on /profile/totp-enable.",
+        redirect_url="profile",
+    )
 
     # No candidate is in flight here — TOTP is already enabled — so this checks the *enrolled*
     # secret. Passing None says that outright; the old `session.get("tmp_totp_secret", "")` reached
@@ -223,7 +254,7 @@ def totp_disable():
     if not TOTP.verify_totp(request.form["totp_token"], totp_secret=None, user=current_user) and not TOTP.verify_recovery_code(
         request.form["totp_token"], user=current_user
     ):
-        return handle_error("The totp token is invalid.", "profile")
+        return handle_error(translated("profile.flash.totp_token_invalid") or "The totp token is invalid.", "profile")
 
     try:
         API_CLIENT.update_user(
@@ -234,11 +265,15 @@ def totp_disable():
             language=current_user.language,
         )
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't disable the two-factor authentication: {e.message}", "profile")
+        return handle_error(
+            translated("profile.flash.couldn_t_disable_two_factor_authentication", message=e.message)
+            or f"Couldn't disable the two-factor authentication: {e.message}",
+            "profile",
+        )
 
     session["mfa_validated"] = False
 
-    flash("The two-factor authentication has been successfully disabled.")
+    flash(translated("profile.flash.two_factor_authentication_has_successfully_disabled") or "The two-factor authentication has been successfully disabled.")
     return redirect(url_for("profile.profile_page") + "#security")
 
 
@@ -246,28 +281,41 @@ def totp_disable():
 @login_required
 def totp_enable():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
     if bool(current_user.totp_secret):
-        return handle_error("Two-factor authentication is already enabled.", "profile")
+        return handle_error(translated("profile.flash.two_factor_authentication_already_enabled") or "Two-factor authentication is already enabled.", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/totp-enable.", redirect_url="profile")
-    verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
+    verify_data_in_form(
+        data={"password": None},
+        err_message=translated("profile.flash.missing_current_password_parameter_profile_totp_3")
+        or "Missing current password parameter on /profile/totp-enable.",
+        redirect_url="profile",
+    )
+    verify_data_in_form(
+        data={"totp_token": None},
+        err_message=translated("profile.flash.missing_totp_token_parameter_profile_totp") or "Missing totp token parameter on /profile/totp-enable.",
+        redirect_url="profile",
+    )
 
     if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
+        return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
     candidate = _stored_totp_candidate()
     if not candidate:
         # Nothing in flight: the session was cleared, or this POST never had a matching render.
         # Saying so beats falling through to `verify_totp`, which would treat an empty secret as
         # "check the enrolled one" and look up a secret that does not exist yet.
-        return handle_error("The two-factor enrolment expired. Reload the page and scan the new QR code.", "profile")
+        return handle_error(
+            translated("profile.flash.two_factor_enrolment_expired_reload_page")
+            or "The two-factor enrolment expired. Reload the page and scan the new QR code.",
+            "profile",
+        )
 
     if not TOTP.verify_totp(request.form["totp_token"], totp_secret=candidate, user=current_user) and not TOTP.verify_recovery_code(
         request.form["totp_token"], user=current_user
     ):
-        return handle_error("The totp token is invalid.", "profile")
+        return handle_error(translated("profile.flash.totp_token_invalid") or "The totp token is invalid.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
     totp_secret = _discard_totp_candidate()
@@ -282,13 +330,17 @@ def totp_enable():
             language=current_user.language,
         )
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't enable the two-factor authentication: {e.message}", "profile")
+        return handle_error(
+            translated("profile.flash.couldn_t_enable_two_factor_authentication", message=e.message)
+            or f"Couldn't enable the two-factor authentication: {e.message}",
+            "profile",
+        )
 
     session["mfa_validated"] = True
     session["totp_refreshed"] = True
     session["decrypted_recovery_codes"] = totp_recovery_codes
 
-    flash("The two-factor authentication has been successfully enabled.")
+    flash(translated("profile.flash.two_factor_authentication_has_successfully_enabled") or "The two-factor authentication has been successfully enabled.")
     return redirect(url_for("profile.profile_page") + "#security")
 
 
@@ -296,7 +348,7 @@ def totp_enable():
 @login_required
 def edit_profile():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
     user_data = {
         "username": current_user.get_id(),
@@ -308,42 +360,67 @@ def edit_profile():
     }
 
     if "username" in request.form:
-        verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/edit.", redirect_url="profile")
+        verify_data_in_form(
+            data={"password": None},
+            err_message=translated("profile.flash.missing_current_password_parameter_profile_edit") or "Missing current password parameter on /profile/edit.",
+            redirect_url="profile",
+        )
 
         if not current_user.check_password(request.form["password"]):
-            return handle_error("The current password is incorrect.", "profile")
+            return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
-        verify_data_in_form(data={"email": None}, err_message="Missing email parameter on /profile/edit.", redirect_url="profile")
+        verify_data_in_form(
+            data={"email": None},
+            err_message=translated("profile.flash.missing_email_parameter_profile_edit") or "Missing email parameter on /profile/edit.",
+            redirect_url="profile",
+        )
 
-        if request.form["email"] and request.form["email"] != current_user.email:
+        # An EMPTY field is a change too: it clears the address. The old `request.form["email"] and`
+        # gate skipped it and then reported "successfully updated" with the address still stored
+        # (QA-UI M16). Cleared as "", not None: the users API skips a None field on PATCH.
+        if request.form["email"] != (current_user.email or ""):
             if len(request.form["email"]) > 256:
-                return handle_error("The email is too long. It must be less than 256 characters.", "profile")
-            user_data["email"] = request.form["email"] or None
+                return handle_error(
+                    translated("profile.flash.email_too_long_must_less_than") or "The email is too long. It must be less than 256 characters.", "profile"
+                )
+            user_data["email"] = request.form["email"]
 
         if request.form["username"] and request.form["username"] != current_user.get_id():
             if len(request.form["username"]) > 256:
-                return handle_error("The username is too long. It must be less than 256 characters.", "profile")
+                return handle_error(
+                    translated("profile.flash.username_too_long_must_less_than") or "The username is too long. It must be less than 256 characters.", "profile"
+                )
             user_data["username"] = request.form["username"]
 
         if request.form["email"] == (current_user.email or "") and request.form["username"] == current_user.get_id():
-            return handle_error("The username and email are the same as the current ones.", "profile")
+            return handle_error(
+                translated("profile.flash.username_email_are_same_current_ones") or "The username and email are the same as the current ones.", "profile"
+            )
     elif "new_password" in request.form:
-        verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/edit.", redirect_url="profile")
+        verify_data_in_form(
+            data={"password": None},
+            err_message=translated("profile.flash.missing_current_password_parameter_profile_edit") or "Missing current password parameter on /profile/edit.",
+            redirect_url="profile",
+        )
 
         if not current_user.check_password(request.form["password"]):
-            return handle_error("The current password is incorrect.", "profile")
+            return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
         verify_data_in_form(
             data={"new_password_confirm": None},
-            err_message="Missing new password confirm parameter on /profile/edit.",
+            err_message=translated("profile.flash.missing_new_password_confirm_parameter_profile")
+            or "Missing new password confirm parameter on /profile/edit.",
             redirect_url="profile",
         )
 
         if request.form["new_password"] != request.form["new_password_confirm"]:
-            return handle_error("The passwords do not match the confirm password.", "profile")
+            return handle_error(
+                translated("profile.flash.passwords_do_not_match_confirm_password") or "The passwords do not match the confirm password.", "profile"
+            )
         elif not USER_PASSWORD_RX.match(request.form["new_password"]):
             return handle_error(
-                "The new password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                translated("profile.flash.new_password_not_strong_enough_must")
+                or "The new password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
                 "profile",
             )
         elif password_exceeds_bcrypt_limit(request.form["new_password"]):
@@ -352,12 +429,13 @@ def edit_profile():
                 f"{len(request.form['new_password'].encode('utf-8'))} bytes, over bcrypt's {MAX_PASSWORD_BYTES}-byte limit."
             )
             return handle_error(
-                f"The new password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
+                translated("profile.flash.new_password_too_long_must_not", MAX_PASSWORD_BYTES=MAX_PASSWORD_BYTES)
+                or f"The new password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
                 "accented or emoji characters count as several bytes each.",
                 "profile",
             )
         elif current_user.check_password(request.form["new_password"]):
-            return handle_error("The new password is the same as the current one.", "profile")
+            return handle_error(translated("profile.flash.new_password_same_current_one") or "The new password is the same as the current one.", "profile")
 
         user_data["password"] = gen_password_hash(request.form["new_password"])
     elif "theme" in request.form:
@@ -367,36 +445,48 @@ def edit_profile():
         # third value (which would be an Alembic revision on four dialects for a comfort
         # setting). The browser writes the freshly resolved value through POST /set_theme.
         if request.form["theme"] not in ("dark", "light", "system"):
-            return handle_error("The theme is invalid.", "profile")
+            return handle_error(translated("profile.flash.theme_invalid") or "The theme is invalid.", "profile")
 
         theme_mode = request.form["theme"]
         if theme_mode == "system":
             try:
                 API_CLIENT.update_user_preferences(current_user.get_id(), THEME_MODE_KEY, {"mode": "system"})
             except (ApiClientError, ApiUnavailableError) as e:
-                return handle_error(f"Couldn't update the {current_user.get_id()} user: {e.message}", "profile")
+                return handle_error(
+                    translated("profile.flash.couldn_t_update_user", value=current_user.get_id(), message=e.message)
+                    or f"Couldn't update the {current_user.get_id()} user: {e.message}",
+                    "profile",
+                )
             session.pop(PREFERENCE_SESSION_KEYS[THEME_MODE_KEY], None)
             # Same confirmation every other branch gives: the column is deliberately left
             # holding the last resolved value, but from the user's side the profile did change.
-            flash("The profile has been successfully updated.")
+            flash(translated("profile.flash.profile_has_successfully_updated") or "The profile has been successfully updated.")
             return redirect(url_for("profile.profile_page"))
 
         user_data["theme"] = theme_mode
         try:
             API_CLIENT.update_user_preferences(current_user.get_id(), THEME_MODE_KEY, {"mode": theme_mode})
         except (ApiClientError, ApiUnavailableError) as e:
-            return handle_error(f"Couldn't update the {current_user.get_id()} user: {e.message}", "profile")
+            return handle_error(
+                translated("profile.flash.couldn_t_update_user", value=current_user.get_id(), message=e.message)
+                or f"Couldn't update the {current_user.get_id()} user: {e.message}",
+                "profile",
+            )
         session.pop(PREFERENCE_SESSION_KEYS[THEME_MODE_KEY], None)
     else:
-        return handle_error("No fields were updated.", "profile")
+        return handle_error(translated("profile.flash.no_fields_updated") or "No fields were updated.", "profile")
 
     try:
         api_data = {k: (v.decode("utf-8") if isinstance(v, bytes) else v) for k, v in user_data.items()}
         API_CLIENT.update_user(api_data.pop("username"), **api_data, old_username=current_user.get_id())
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't update the {current_user.get_id()} user: {e.message}", "profile")
+        return handle_error(
+            translated("profile.flash.couldn_t_update_user", value=current_user.get_id(), message=e.message)
+            or f"Couldn't update the {current_user.get_id()} user: {e.message}",
+            "profile",
+        )
 
-    flash("The profile has been successfully updated.")
+    flash(translated("profile.flash.profile_has_successfully_updated") or "The profile has been successfully updated.")
 
     if "new_password" in request.form:
         # A password change has to take the user's other sessions with it. Without this, someone who
@@ -424,7 +514,8 @@ def edit_profile():
             # The password change itself stands either way; it already succeeded above.
             LOGGER.error(f"Couldn't revoke the other sessions after the password change: {err}")
             flash(
-                "Your password was changed, but your other sessions could not be revoked. "
+                translated("profile.flash.password_changed_but_other_sessions_could")
+                or "Your password was changed, but your other sessions could not be revoked. "
                 'Use "Wipe other sessions" below and check the list of active sessions.',
                 "error",
             )
@@ -452,12 +543,17 @@ def edit_profile():
 @login_required
 def wipe_old_sessions():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
-    verify_data_in_form(data={"password": None}, err_message="Missing current password parameter on /profile/wipe-other-sessions.", redirect_url="profile")
+    verify_data_in_form(
+        data={"password": None},
+        err_message=translated("profile.flash.missing_current_password_parameter_profile_wipe")
+        or "Missing current password parameter on /profile/wipe-other-sessions.",
+        redirect_url="profile",
+    )
 
     if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
+        return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
     try:
         other_ids = [db_session["id"] for db_session in API_CLIENT.get_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
@@ -465,12 +561,14 @@ def wipe_old_sessions():
         # here must abort rather than leave sessions deleted server-side but still presentable.
         err = revoke_sessions(other_ids)
         if err:
-            return handle_error(f"Couldn't revoke the other sessions: {err}", "profile")
+            return handle_error(translated("profile.flash.couldn_t_revoke_other_sessions", err=err) or f"Couldn't revoke the other sessions: {err}", "profile")
         API_CLIENT.delete_user_sessions(current_user.username, keep_session_id=session.get("session_id"))
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't wipe the other sessions: {e.message}", "profile")
+        return handle_error(
+            translated("profile.flash.couldn_t_wipe_other_sessions", message=e.message) or f"Couldn't wipe the other sessions: {e.message}", "profile"
+        )
 
-    flash("The other sessions have been successfully wiped.")
+    flash(translated("profile.flash.other_sessions_have_successfully_wiped") or "The other sessions have been successfully wiped.")
     return redirect(url_for("profile.profile_page") + "#sessions")
 
 
@@ -539,7 +637,7 @@ def webauthn_register_verify():
     session["mfa_validated"] = True
 
     LOGGER.info(f"User {current_user.get_id()} registered a new passkey ({name})")
-    flash("The passkey has been successfully registered.")
+    flash(translated("profile.flash.passkey_has_successfully_registered") or "The passkey has been successfully registered.")
     return jsonify({"redirect": url_for("profile.profile_page") + "#security"})
 
 
@@ -547,20 +645,24 @@ def webauthn_register_verify():
 @login_required
 def webauthn_rename():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
-    verify_data_in_form(data={"credential_id": None, "name": None}, err_message="Missing parameters on /profile/webauthn/rename.", redirect_url="profile")
+    verify_data_in_form(
+        data={"credential_id": None, "name": None},
+        err_message=translated("profile.flash.missing_parameters_profile_webauthn_rename") or "Missing parameters on /profile/webauthn/rename.",
+        redirect_url="profile",
+    )
 
     name = request.form["name"].strip()[:256]
     if not name:
-        return handle_error("The passkey name cannot be empty.", "profile")
+        return handle_error(translated("profile.flash.passkey_name_cannot_empty") or "The passkey name cannot be empty.", "profile")
 
     try:
         API_CLIENT.update_user_webauthn_credential(current_user.get_id(), request.form["credential_id"], name=name)
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't rename the passkey: {e.message}", "profile")
+        return handle_error(translated("profile.flash.couldn_t_rename_passkey", message=e.message) or f"Couldn't rename the passkey: {e.message}", "profile")
 
-    flash("The passkey has been successfully renamed.")
+    flash(translated("profile.flash.passkey_has_successfully_renamed") or "The passkey has been successfully renamed.")
     return redirect(url_for("profile.profile_page") + "#security")
 
 
@@ -568,17 +670,21 @@ def webauthn_rename():
 @login_required
 def webauthn_delete():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "profile")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "profile")
 
-    verify_data_in_form(data={"credential_id": None, "password": None}, err_message="Missing parameters on /profile/webauthn/delete.", redirect_url="profile")
+    verify_data_in_form(
+        data={"credential_id": None, "password": None},
+        err_message=translated("profile.flash.missing_parameters_profile_webauthn_delete") or "Missing parameters on /profile/webauthn/delete.",
+        redirect_url="profile",
+    )
 
     if not current_user.check_password(request.form["password"]):
-        return handle_error("The current password is incorrect.", "profile")
+        return handle_error(translated("profile.flash.current_password_incorrect") or "The current password is incorrect.", "profile")
 
     try:
         API_CLIENT.delete_user_webauthn_credential(current_user.get_id(), request.form["credential_id"])
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't delete the passkey: {e.message}", "profile")
+        return handle_error(translated("profile.flash.couldn_t_delete_passkey", message=e.message) or f"Couldn't delete the passkey: {e.message}", "profile")
 
-    flash("The passkey has been successfully deleted.")
+    flash(translated("profile.flash.passkey_has_successfully_deleted") or "The passkey has been successfully deleted.")
     return redirect(url_for("profile.profile_page") + "#security")

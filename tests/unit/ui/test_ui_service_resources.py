@@ -116,6 +116,7 @@ def _render_band(
     # is_editable_method("default") is False unless allow_default is passed -- a stub that
     # returned True would certify a gate that is wrong on every templateless service.
     env.globals["is_editable_method"] = is_editable_method
+    env.globals["plugin_text"] = lambda plugin_id, key, fallback="": fallback  # i18n.py helper, English-only here
     return env.get_template("models/service_resources_band.html").render(
         service_id=service_id,
         attachments=attachments,
@@ -772,7 +773,7 @@ def test_the_template_picker_js_cannot_write_use_template_unguarded():
 
     # All four server-side refusals reach the dialog, each keyed to the rule it mirrors:
     # location_conflict's two halves, and _upstream_conflict's two stream sub-rules.
-    for key in ("conflict.inline", "conflict.resource", "conflict.stream", "conflict.stream_inline"):
+    for key in ("conflict.inline", "conflict.resource_redirect", "conflict.resource_upstream", "conflict.stream", "conflict.stream_inline"):
         assert f'"service.resources.{key}"' in source
 
     # The stream branch's inline check is reverse-proxy-only: upstreams.py:137 passes

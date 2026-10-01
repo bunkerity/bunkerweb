@@ -71,6 +71,10 @@ def _save(monkeypatch, *, edit_service_return, stored=None, posted_extra=None, c
     api.get_templates.return_value = {}
 
     bw_config = Mock()
+
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.check_variables.side_effect = check_variables_side_effect or (lambda variables, *args, **kwargs: variables)
     bw_config.edit_service.return_value = edit_service_return
 
@@ -167,11 +171,70 @@ def test_a_value_only_canonicalized_by_the_gate_is_not_mistaken_for_a_refusal(mo
     assert not any(f["type"] == "warning" for f in flashed), flashed
 
 
+def test_a_save_whose_only_change_was_refused_is_not_reported_as_saved(monkeypatch):
+    """QA-UI M15, service-settings half (global_settings.py:111-118 fixes the same shape on the
+    global-settings save): TEST_SETTING=not-a-valid-value was refused and reverted to what is
+    already stored, nothing else changed, and the save used to still answer "Configuration saved
+    for service app.example.com, but 1 value(s) were refused." plus "The Scheduler will attempt
+    to apply the changes." for a save that stored nothing."""
+
+    def revert_test_setting(variables, config, to_check, *, refused=None, **kwargs):
+        if refused is not None:
+            refused.append("Variable TEST_SETTING is not valid.")
+        variables = dict(variables)
+        variables["TEST_SETTING"] = config["TEST_SETTING"]["value"]
+        return variables
+
+    api = Mock()
+    api.get_service.return_value = {
+        "SERVER_NAME": {"value": "app.example.com", "method": "ui"},
+        # USE_UI stored at the same value posted below, so it is not itself a real change --
+        # only TEST_SETTING is, and it gets refused.
+        "USE_UI": {"value": "no", "method": "ui"},
+        "TEST_SETTING": {"value": "old-value", "method": "ui"},
+    }
+    api.get_configs.return_value = []
+    api.get_templates.return_value = {}
+
+    bw_config = Mock()
+    bw_config.get_plugins_settings.return_value = {}
+    bw_config.check_variables.side_effect = revert_test_setting
+    bw_config.edit_service.return_value = ("Configuration for app.example.com has been edited.", 0)
+
+    data = _FakeData(TO_FLASH=[])
+    monkeypatch.setattr(MODULE, "API_CLIENT", api)
+    monkeypatch.setattr(MODULE, "BW_CONFIG", bw_config)
+    monkeypatch.setattr(MODULE, "DATA", data)
+    monkeypatch.setattr(MODULE, "wait_applying", lambda: None)
+
+    posted = {"SERVER_NAME": "app.example.com", "USE_UI": "no", "TEST_SETTING": "not-a-valid-value"}
+    MODULE.update_service("app.example.com", posted, False, "easy", "", {})
+
+    flashed = list(data["TO_FLASH"])
+    assert not bw_config.edit_service.called, "nothing changed, yet the save was sent"
+    assert any(f["type"] == "error" and f["content"] == "The service app.example.com was not saved: every changed value was refused." for f in flashed), flashed
+    assert not any("saved, but" in f["content"] or "will attempt to apply" in f["content"] for f in flashed), flashed
+
+
 def test_a_clean_save_is_still_flashed_success(monkeypatch):
     flashed = _save(monkeypatch, edit_service_return=("Configuration for app.example.com has been edited.", 0))
 
     assert any(f["type"] == "success" and "saved for service" in f["content"] for f in flashed), flashed
     assert not any(f["type"] == "warning" for f in flashed), flashed
+
+
+def test_a_clean_save_flashes_the_exact_pre_restructure_english(monkeypatch):
+    """FIX-QA5-I18N-3: `update_service`'s `refused_count == 0` branch now composes this message as
+    its own `translated(...) or f"..."` call, replacing what used to be one unconditional
+    f-string. No Babel app is wired up in this harness, so `translated()` returns `None` and the
+    fallback runs -- pinned here byte-identical to the pre-restructure text
+    (`operation = f"Configuration successfully {verb} for service {server_name}."`, unchanged by
+    the restructure since only the `refused_count` branch below it was rewritten). The
+    `refused_count > 0` branch is already pinned exactly by
+    `test_a_prior_flash_in_the_same_request_never_pollutes_the_refusal_count` above."""
+    flashed = _save(monkeypatch, edit_service_return=("Configuration for app.example.com has been edited.", 0))
+
+    assert any(f["type"] == "success" and f["content"] == "Configuration successfully saved for service app.example.com." for f in flashed), flashed
 
 
 def test_the_read_only_refusal_is_still_flashed_error(monkeypatch):
@@ -205,6 +268,10 @@ def test_a_prior_flash_in_the_same_request_never_pollutes_the_refusal_count(monk
     api.get_templates.return_value = {}
 
     bw_config = Mock()
+
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.check_variables.side_effect = refuse_one_value
     bw_config.edit_service.return_value = ("Configuration for app.example.com has been edited.", 0)
 
@@ -223,8 +290,8 @@ def test_a_prior_flash_in_the_same_request_never_pollutes_the_refusal_count(monk
     assert bw_config.edit_service.called, "edit_service was never reached -- this test proves nothing"
     flashed = list(data["TO_FLASH"])
     assert not any(f["type"] == "success" and "saved for service" in f["content"] for f in flashed), flashed
-    # Exactly one refusal was reported for THIS call -- "1 value(s)", not 2 (the prior flash) or 0.
+    # Exactly one refusal was reported for THIS call -- "1 values", not 2 (the prior flash) or 0.
     # Exact wording pinned: "successfully" dropped and joined with ", but" once a value was refused.
     assert any(
-        f["type"] == "warning" and f["content"] == "Configuration saved for service app.example.com, but 1 value(s) were refused." for f in flashed
+        f["type"] == "warning" and f["content"] == "Configuration saved for service app.example.com, but 1 values were refused." for f in flashed
     ), flashed

@@ -35,7 +35,6 @@ def test_the_filters_that_were_broken_now_read_data_value():
     expected = {
         "jobs.js": ("day", "hour", "week", "once"),
         "instances.js": ("up", "down", "loading", "static", "container", "pod"),
-        "plugins.js": ("pro", "external", "ui", "core"),
         # `type` and `security_mode` left this list when the services table moved to `serverSide`
         # (Perf Lot C): the pane options and their counts come from `/services/fetch`, which
         # filters on the stored value — asserted in `test_services_fetch.py`. Their badges still

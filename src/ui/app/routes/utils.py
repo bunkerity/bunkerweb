@@ -1,9 +1,10 @@
 from base64 import b64encode
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from io import BytesIO
 from time import sleep, time
+from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response, g, has_request_context, redirect, request, url_for
@@ -12,6 +13,7 @@ from regex import compile as re_compile
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG
+from app.i18n import translated
 from app.utils import LOGGER, flash
 
 from common_utils import get_redis_client as get_common_redis_client  # type: ignore
@@ -73,7 +75,7 @@ def verify_data_in_form(
     data: Optional[Dict[str, Union[Tuple, Any]]] = None, err_message: str = "", redirect_url: str = "", next: bool = False
 ) -> Union[bool, Response]:
     if not request.form:
-        return handle_error("Invalid request", redirect_url, next, "error")
+        return handle_error(translated("utils.flash.invalid_request") or "Invalid request", redirect_url, next, "error")
 
     LOGGER.debug(f"Verifying data in form: {data}")
     LOGGER.debug(f"Request form: {request.form}")
@@ -81,7 +83,7 @@ def verify_data_in_form(
     # Loop on each key in data
     for key, values in (data or {}).items():
         if key not in request.form:
-            return handle_error(f"Missing {key} in form", redirect_url, next, "error")
+            return handle_error(translated("utils.flash.missing_form", key=key) or f"Missing {key} in form", redirect_url, next, "error")
 
         # Case we want to only check if key is in form, we can skip the values check by setting values to falsy value
         if not values:
@@ -171,7 +173,7 @@ def cors_required(f):
 
         # Check for CORS mode or AJAX request
         if fetch_mode != "cors" and (not x_requested_with or x_requested_with.lower() != "xmlhttprequest"):
-            return Response("CORS or AJAX request required", status=403)
+            return Response(translated("flash.cors_or_ajax_request_required") or "CORS or AJAX request required", status=403)
 
         return f(*args, **kwargs)
 
@@ -237,7 +239,7 @@ def get_redis_client():
     )
 
     if use_redis and not redis_client and has_request_context():
-        flash("Couldn't connect to redis", "error")
+        flash(translated("utils.flash.couldn_t_connect_redis") or "Couldn't connect to redis", "error")
 
     if has_request_context():
         g.bw_redis_client = redis_client
@@ -278,6 +280,92 @@ def session_storage_due(session: Any, lifetime_seconds: float, now: Optional[flo
 
     session[SESSION_LAST_STORED_KEY] = now
     return True
+
+
+# The session cookie is named per request, not per worker. Behind a proxy (X-Forwarded-For set)
+# it is a `__Host-` cookie, which the browser only accepts over HTTPS with `Secure`; a direct
+# http://host:7000 visit cannot use that prefix at all, so it gets the plain name. This used to be
+# decided once per worker, in before_request, on the worker's first request -- but flask-session
+# opens the session *before* before_request runs, so the first request of every fresh worker was
+# read under the default name, came up anonymous, and its response overwrote the user's cookie
+# with an empty session: a logout on every gunicorn max_requests recycle (H10). It also let the
+# first request of a worker choose the name for every user of that worker.
+PROXIED_SESSION_COOKIE = "__Host-bw_ui_session"
+DIRECT_SESSION_COOKIE = "bw_ui_session"
+
+
+def session_cookie_for(environ: Dict[str, Any]) -> Tuple[str, bool]:
+    """The (name, secure) pair of the session cookie for the request described by ``environ``."""
+    if environ.get("HTTP_X_FORWARDED_FOR") is not None:
+        return PROXIED_SESSION_COOKIE, True
+    return DIRECT_SESSION_COOKIE, False
+
+
+def bind_session_cookie_per_request(interface: Any) -> None:
+    """Make a flask-session interface read and write the per-request cookie of `session_cookie_for`.
+
+    flask-session 0.8 reads the cookie in ``open_session`` straight from
+    ``app.config["SESSION_COOKIE_NAME"]``, a key every thread of the worker shares, so it is handed
+    a view of the request whose only cookie is this request's session id under that configured name.
+    ``save_session`` goes through ``get_cookie_name``/``get_cookie_secure``, overridden here.
+    """
+    open_session = interface.open_session
+
+    def _open_session(flask_app, req):
+        name, _ = session_cookie_for(req.environ)
+        return open_session(flask_app, SimpleNamespace(cookies={flask_app.config["SESSION_COOKIE_NAME"]: req.cookies.get(name)}))
+
+    interface.open_session = _open_session
+    interface.get_cookie_name = lambda flask_app: session_cookie_for(request.environ)[0]
+    interface.get_cookie_secure = lambda flask_app: session_cookie_for(request.environ)[1]
+
+
+def chain_session_fallback(primary: Any, fallback: Any) -> None:
+    """Let a flask-session interface find the sessions another backend holds, and move them over.
+
+    A session missing from ``primary`` is read from ``fallback``; any write to ``primary`` drops the
+    fallback copy, and any delete hits both, so a logout can never leave a live copy behind to be
+    read back. Used with Redis as primary and the file store as fallback: an upgrade from file
+    sessions, or a worker that booted before the scheduler stored ``USE_REDIS`` (H18), then costs
+    nobody their session when Redis takes over.
+    """
+    retrieve, upsert, delete = primary._retrieve_session_data, primary._upsert_session, primary._delete_session
+
+    def _fallback_id(store_id: str) -> str:
+        return fallback._get_store_id(store_id[len(primary.key_prefix) :])  # noqa: E203
+
+    def _retrieve(store_id):
+        data = retrieve(store_id)
+        return fallback._retrieve_session_data(_fallback_id(store_id)) if data is None else data
+
+    def _upsert(session_lifetime, session, store_id):
+        upsert(session_lifetime, session, store_id)
+        fallback._delete_session(_fallback_id(store_id))
+
+    def _delete(store_id):
+        delete(store_id)
+        fallback._delete_session(_fallback_id(store_id))
+
+    primary._retrieve_session_data, primary._upsert_session, primary._delete_session = _retrieve, _upsert, _delete
+
+
+# A session with nobody logged in carries only what the login page needs: its form's CSRF token and a
+# language picked there. Flask-WTF refuses that token after an hour (WTF_CSRF_TIME_LIMIT's default),
+# so keeping the session longer keeps nothing usable -- it only let anyone who can reach /login fill
+# the non-evicting broker with 12 h keys, one per request (H17).
+ANONYMOUS_SESSION_SECONDS = 3600
+
+
+def cap_anonymous_session_lifetime(interface: Any) -> None:
+    """Store a session that no user is logged into (no Flask-Login `_user_id`) for an hour at most."""
+    upsert = interface._upsert_session
+
+    def _upsert(session_lifetime, session, store_id):
+        if "_user_id" not in session:
+            session_lifetime = min(session_lifetime, timedelta(seconds=ANONYMOUS_SESSION_SECONDS))
+        upsert(session_lifetime, session, store_id)
+
+    interface._upsert_session = _upsert
 
 
 def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:

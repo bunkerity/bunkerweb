@@ -1,7 +1,8 @@
-from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import flash, is_readonly_request
 
@@ -20,16 +21,16 @@ def web_cache_page():
     try:
         web_cache_status = API_CLIENT.get_web_cache_status()
     except (ApiClientError, ApiUnavailableError) as e:
-        flash(f"Error fetching web cache status: {e.message}", "error")
+        flash(translated("web_cache.flash.error_fetching_web_cache_status", message=e.message) or f"Error fetching web cache status: {e.message}", "error")
     try:
         web_cache_metrics = API_CLIENT.get_web_cache_metrics()
     except (ApiClientError, ApiUnavailableError) as e:
-        flash(f"Error fetching web cache metrics: {e.message}", "error")
+        flash(translated("web_cache.flash.error_fetching_web_cache_metrics", message=e.message) or f"Error fetching web cache metrics: {e.message}", "error")
 
     try:
         instances = API_CLIENT.get_instances()
     except (ApiClientError, ApiUnavailableError):
-        flash("Error fetching instances", "error")
+        flash(translated("flash.error_fetching_instances") or "Error fetching instances", "error")
         instances = []
 
     status_instances = web_cache_status.get("instances", web_cache_status)
@@ -98,16 +99,16 @@ def web_cache_page():
 @login_required
 def web_cache_purge():
     if API_CLIENT.readonly:
-        return Response("Database is in read-only mode", status=403)
+        return Response(translated("flash.database_read_only_mode") or "Database is in read-only mode", status=403)
     if is_readonly_request(API_CLIENT.readonly):
-        return Response("You do not have the write permission", status=403)
+        return Response(translated("flash.do_not_have_write_permission") or "You do not have the write permission", status=403)
 
     scope = request.form.get("scope", "all")
     urls = None
     if scope == "url":
         raw = (request.form.get("url") or "").strip()
         if not raw:
-            flask_flash("A URL is required to purge by URL", "error")
+            flash(translated("web_cache.flash.url_required_purge_by_url") or "A URL is required to purge by URL", "error", save=False)
             return redirect(url_for("web_cache.web_cache_page"))
         item = {"url": raw}
         key = (request.form.get("key") or "").strip()
@@ -119,16 +120,30 @@ def web_cache_purge():
         result = API_CLIENT.purge_web_cache(scope=scope, urls=urls)
         result_summary = result.get("summary", {})
         if result.get("status") == "partial":
-            flask_flash(
-                "Web cache purged on "
-                f"{result_summary.get('succeeded', 0)} instance(s); "
-                f"{result_summary.get('failed', 0)} failed and "
-                f"{result_summary.get('skipped', 0)} unreachable instance(s) were skipped (nothing was queued).",
+            flash(
+                translated(
+                    "web_cache.flash.web_cache_purged_instance_failed_unreachable",
+                    value=result_summary.get("succeeded", 0),
+                    value2=result_summary.get("failed", 0),
+                    value3=result_summary.get("skipped", 0),
+                )
+                or "Web cache purged. "
+                f"Instances purged: {result_summary.get('succeeded', 0)}, "
+                f"failed: {result_summary.get('failed', 0)}, "
+                f"unreachable and skipped: {result_summary.get('skipped', 0)} (nothing was queued).",
                 "warning",
+                save=False,
             )
         else:
-            flask_flash("Web cache purged" + (f" for {urls[0]['url']}" if urls else " (all entries)"), "success")
+            # `flash()`, not `flask_flash(..., "success")`: the wrapper omits the category for
+            # "success" so Flask defaults it to "message" -- `flash.html` looks up `flash.<category>`,
+            # and there is no `flash.success` key (M24). Passing "success" straight through echoed
+            # the raw key as the toast header.
+            if urls:
+                flash(translated("web_cache.flash.purged_for_url", url=urls[0]["url"]) or f"Web cache purged for {urls[0]['url']}")
+            else:
+                flash(translated("web_cache.flash.purged_all_entries") or "Web cache purged (all entries)")
     except (ApiClientError, ApiUnavailableError) as e:
-        flask_flash(f"Error purging web cache: {e.message}", "error")
+        flash(translated("web_cache.flash.error_purging_web_cache", message=e.message) or f"Error purging web cache: {e.message}", "error", save=False)
 
     return redirect(url_for("web_cache.web_cache_page"))

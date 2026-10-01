@@ -19,32 +19,32 @@
         <div class="row g-2 align-items-end upstream-server-row mb-2">
             <div class="col-md-4">
                 <label class="form-label small">{{ _("upstreams.server_host") }}</label>
-                <input class="form-control form-control-sm" name="server_host" maxlength="256" placeholder="10.0.0.1:8080" />
+                <input class="form-control form-control-sm" name="server_host" maxlength="256" placeholder="10.0.0.1:8080" pattern="{{ server_pattern }}" aria-label="{{ _('upstreams.server_host') }}" />
             </div>
             <div class="col-md-2">
                 <label class="form-label small">{{ _("upstreams.server_weight") }}</label>
-                <input class="form-control form-control-sm" type="number" name="server_weight" min="1" max="1000" value="1" />
+                <input class="form-control form-control-sm" type="number" name="server_weight" min="1" max="1000" value="1" aria-label="{{ _('upstreams.server_weight') }}" />
             </div>
             <div class="col-md-2">
                 <label class="form-label small">{{ _("upstreams.server_max_fails") }}</label>
-                <input class="form-control form-control-sm" type="number" name="server_max_fails" min="0" max="1000" value="1" />
+                <input class="form-control form-control-sm" type="number" name="server_max_fails" min="0" max="1000" value="1" aria-label="{{ _('upstreams.server_max_fails') }}" />
             </div>
             <div class="col-md-2">
                 <label class="form-label small">{{ _("upstreams.server_fail_timeout") }}</label>
-                <input class="form-control form-control-sm" name="server_fail_timeout" maxlength="16" value="10s" />
+                <input class="form-control form-control-sm" name="server_fail_timeout" maxlength="16" value="10s" pattern="{{ fail_timeout_pattern }}" aria-label="{{ _('upstreams.server_fail_timeout') }}" />
             </div>
             <div class="col-md-1">
                 <label class="form-label small">{{ _("upstreams.server_role") }}</label>
                 {# A select rather than checkboxes: every row must submit a value or the
                    parallel form lists shift onto the wrong server. #}
-                <select class="form-select form-select-sm" name="server_role">
+                <select class="form-select form-select-sm" name="server_role" aria-label="{{ _('upstreams.server_role') }}">
                     <option value="primary">{{ _("upstreams.role.primary") }}</option>
                     <option value="backup">{{ _("upstreams.role.backup") }}</option>
                     <option value="down">{{ _("upstreams.role.down") }}</option>
                 </select>
             </div>
             <div class="col-md-1 text-end">
-                <button type="button" class="btn btn-outline-danger btn-sm upstream-server-remove" aria-label="Remove this server">
+                <button type="button" class="btn btn-outline-danger btn-sm upstream-server-remove" aria-label="{{ _('aria.label.remove_this_server') }}">
                     <i class="bx bx-trash" aria-hidden="true"></i>
                 </button>
             </div>
@@ -59,7 +59,8 @@
                        id="{{ prefix }}-name"
                        name="name"
                        maxlength="64"
-                       pattern="[A-Za-z0-9_-]+"
+                       pattern="{{ name_pattern }}"
+                       title="{{ _('upstreams.name_help') }}"
                        required />
                 <div class="form-text">{{ _("upstreams.name_help") }}</div>
             </div>
@@ -185,7 +186,7 @@
                                                             <input type="hidden" name="match_path" value="{{ attachment.match_path }}" />
                                                             <button type="submit"
                                                                     class="btn btn-link btn-sm p-0 lh-1 text-reset"
-                                                                    aria-label="Detach {{ pool.name }} from {{ attachment.service_id }}">
+                                                                    aria-label="{{ _('aria.label.detach_from_service', name=pool.name, service=attachment.service_id) }}">
                                                                 <i class="bx bx-x" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -199,9 +200,9 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ pool.name ~ " to a service", classes="upstream-attach", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label="Edit " ~ pool.name, classes="upstream-edit", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ pool.name, classes="upstream-delete", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label=_('tooltip.button.attach_upstream', name=pool.name), classes="upstream-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label=_('tooltip.button.edit_upstream', name=pool.name), classes="upstream-edit", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_upstream', name=pool.name), classes="upstream-delete", disabled=readonly) }}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -215,7 +216,7 @@
 
     {# The page JS reads the pools from here instead of re-parsing the table, so an edit modal
        is populated from the same values the API returned. #}
-    <input type="hidden" id="upstreams-data" value="{{ upstreams | tojson }}" />
+    <input type="hidden" id="upstreams-data" value='{{ upstreams | tojson }}' />
     <template id="upstream-server-template">{{ server_row() }}</template>
 
     {% call modal(id="upstream-create-modal", title_key="upstreams.new", title="New upstream", size="lg") %}

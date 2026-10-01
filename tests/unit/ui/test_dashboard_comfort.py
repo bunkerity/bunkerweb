@@ -554,7 +554,7 @@ class TestProfileThemeBranch:
         """Writing "system" into bw_ui_users.theme is the migration this design exists to avoid."""
         source = (UI / "app" / "routes" / "profile.py").read_text(encoding="utf-8")
         start = source.index('elif "theme" in request.form:')
-        end = source.index('    else:\n        return handle_error("No fields were updated.')
+        end = source.index('    else:\n        return handle_error(translated("profile.flash.no_fields_updated")')
         block = source[start:end]
         assert 'if theme_mode == "system":' in block
         assert block.index('if theme_mode == "system":') < block.index('user_data["theme"] = theme_mode')

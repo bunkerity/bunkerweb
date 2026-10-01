@@ -7,6 +7,7 @@ from io import BytesIO, StringIO
 from functools import lru_cache
 from itertools import chain
 from json import dumps, loads
+from os import getenv
 from time import time
 from typing import Any, Dict, List, Optional, Set, Tuple
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
@@ -15,6 +16,7 @@ from regex import search, sub
 
 from common_utils import split_templates  # type: ignore
 from default_server import (  # type: ignore
+    DEFAULT_SERVER_ID,
     DEFAULT_SERVER_PLUGINS,
     DEFAULT_SERVER_RESERVED_MESSAGE,
     DEFAULT_SERVER_SERVER_TYPE_MESSAGE,
@@ -29,7 +31,23 @@ from service_classification import MODE_REDIRECT_ONLY, MODE_STANDARD, SERVICE_MO
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.i18n import translated
+from app.models.secret_settings import redact_secrets, restore_secrets, secret_setting_names
 from app.models.save_scope import control_keys, restore_unowned_settings, templates_unchanged
+from app.raw_drafts import (
+    RAW_DRAFT_SETTINGS,
+    RAW_PRESENT_SETTINGS,
+    STRUCTURAL_SETTINGS,
+    RawDraftSettingsError,
+    draft_edits_discarded,
+    draft_state_changes,
+    drafted_settings,
+    existing_draft_keys,
+    freeze_draft_edits,
+    locked_draft_change,
+    metadata_raw_only,
+    parse_raw_draft_settings,
+)
 from app.models.service_attachments import (
     attached_ids,
     failed_families,
@@ -68,6 +86,26 @@ services = Blueprint("services", __name__)
 
 ZIP_ALLOWED_MEMBERS = frozenset({"services_export.env", "configs_export.json"})
 ZIP_MAX_UNCOMPRESSED_BYTES = 20 * 1024 * 1024  # 20 MB aggregate cap guards against zip bombs.
+
+# Settings that identify THIS service's own certificate/domain, so cloning must never carry them
+# onto the new one (QA-UI N-M3): SELF_SIGNED_SSL_SUBJ is a literal `/CN=.../` string, not derived
+# from the clone's own SERVER_NAME, so copying it verbatim baked the SOURCE's domain into the
+# clone's self-signed cert. CUSTOM_SSL_CERT(_DATA)/CUSTOM_SSL_KEY(_DATA) are the source's actual
+# certificate/private key (a path or the file content) -- copying those would serve the clone
+# under a hostname the certificate was never issued for, sharing the same private key besides.
+CLONE_EXCLUDED_SETTINGS = frozenset(
+    {
+        "SERVER_NAME",
+        "OLD_SERVER_NAME",
+        "IS_DRAFT",
+        "USE_UI",
+        "SELF_SIGNED_SSL_SUBJ",
+        "CUSTOM_SSL_CERT",
+        "CUSTOM_SSL_KEY",
+        "CUSTOM_SSL_CERT_DATA",
+        "CUSTOM_SSL_KEY_DATA",
+    }
+)
 
 
 def _configs_list_to_dict(configs_list):
@@ -117,14 +155,14 @@ def services_page():
     try:
         services_list = API_CLIENT.get_services(with_drafts=True)
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch services from the API.", "error")
+        flash(translated("services.flash.could_not_fetch_services_api") or "Could not fetch services from the API.", "error")
         services_list = []
 
     services_with_configs: List[str] = []
     try:
         api_configs = API_CLIENT.get_configs(with_drafts=True, with_data=False)
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch custom configurations from the API.", "error")
+        flash(translated("services.flash.could_not_fetch_custom_configurations_api") or "Could not fetch custom configurations from the API.", "error")
         api_configs = []
 
     seen_service_ids = set()
@@ -228,6 +266,9 @@ def _reserved_default_server(service: str) -> bool:
 # `clone: False` on each: the flag drives the "differs from the source" highlight, and a value the
 # page reset is not something the operator changed.
 _CLONE_RESET: Tuple[Tuple[str, str], ...] = (("SERVER_NAME", ""), ("USE_UI", "no"), (SERVICE_MODE_SETTING, MODE_STANDARD))
+
+
+_CLONE_RESET_KEYS = frozenset(key for key, _ in _CLONE_RESET)
 
 
 def neutralize_clone(db_config: Dict[str, Any]) -> Dict[str, Any]:
@@ -631,30 +672,30 @@ def services_redirect():
 @login_required
 def services_convert():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "services")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "services")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
     verify_data_in_form(
         data={"services": None},
-        err_message="Missing services parameter on /services/convert.",
+        err_message=translated("services.flash.missing_services_parameter_services_convert") or "Missing services parameter on /services/convert.",
         redirect_url="services",
         next=True,
     )
     verify_data_in_form(
         data={"convert_to": None},
-        err_message="Missing convert_to parameter on /services/convert.",
+        err_message=translated("services.flash.missing_convert_parameter_services_convert") or "Missing convert_to parameter on /services/convert.",
         redirect_url="services",
         next=True,
     )
 
     services = [s for s in request.form["services"].split(",") if s.strip()]
     if not services:
-        return handle_error("No services selected.", "services", True)
+        return handle_error(translated("services.flash.no_services_selected") or "No services selected.", "services", True)
 
     convert_to = request.form["convert_to"]
     if convert_to not in ("online", "draft"):
-        return handle_error("Invalid convert_to parameter.", "services", True)
+        return handle_error(translated("flash.invalid_convert_parameter") or "Invalid convert_to parameter.", "services", True)
     DATA.load_from_file()
 
     def convert_services(services: List[str], convert_to: str):
@@ -684,15 +725,38 @@ def services_convert():
                 services_to_convert.add(db_service["id"])
 
         for non_editable_service in non_editable_services:
-            DATA["TO_FLASH"].append({"content": f"Service {non_editable_service} is not a UI/API service and will not be converted.", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("services.flash.service_not_ui_api_service_will", non_editable_service=non_editable_service)
+                    or f"Service {non_editable_service} is not a UI/API service and will not be converted.",
+                    "type": "error",
+                }
+            )
 
         for non_convertible_service in non_convertible_services:
             DATA["TO_FLASH"].append(
-                {"content": f"Service {non_convertible_service} is already a {convert_to} service and will not be converted.", "type": "error"}
+                {
+                    "content": translated(
+                        (
+                            "services.flash.service_already_draft_will_not_converted"
+                            if convert_to == "draft"
+                            else "services.flash.service_already_online_will_not_converted"
+                        ),
+                        non_convertible_service=non_convertible_service,
+                    )
+                    or f"Service {non_convertible_service} is already a {convert_to} service and will not be converted.",
+                    "type": "error",
+                }
             )
 
         if not services_to_convert:
-            DATA["TO_FLASH"].append({"content": "All selected services could not be found, are not UI/API services or are already converted.", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("services.flash.all_selected_services_could_not_found")
+                    or "All selected services could not be found, are not UI/API services or are already converted.",
+                    "type": "error",
+                }
+            )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
@@ -706,7 +770,16 @@ def services_convert():
             DATA["TO_FLASH"].append({"content": str(e), "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}", "type": "success"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "services.flash.converted_services_draft" if convert_to == "draft" else "services.flash.converted_services_online",
+                    names=", ".join(services_to_convert),
+                )
+                or f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}",
+                "type": "success",
+            }
+        )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -746,11 +819,13 @@ def services_mode_convert(service: str):
     # a user the page told "you cannot write" is not a dim, it is a hole. Closing the two older
     # routes' version of the same gap is not this lane's change.
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "services")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
     if is_readonly_request(API_CLIENT.readonly):
         # Split from the check above on purpose: the database is fine here, the permission is not,
         # and one message for both sends an operator looking at the wrong thing.
-        return handle_error("You do not have the permission to change a service's mode", "services")
+        return handle_error(
+            translated("services.flash.do_not_have_permission_change_service") or "You do not have the permission to change a service's mode", "services"
+        )
 
     # The return value is load-bearing: `verify_data_in_form` RETURNS a Response, it does not
     # abort (routes/utils.py:74-93). Discarding it -- which the two older sibling routes do -- lets
@@ -758,7 +833,8 @@ def services_mode_convert(service: str):
     # so the `err_message` right below would never reach anyone.
     invalid = verify_data_in_form(
         data={"mode": None},
-        err_message=f"Missing mode parameter on /services/{service}/mode.",
+        err_message=translated("services.flash.missing_mode_parameter_services_mode", service=service)
+        or f"Missing mode parameter on /services/{service}/mode.",
         redirect_url="services",
         next=True,
     )
@@ -767,13 +843,15 @@ def services_mode_convert(service: str):
 
     mode = request.form["mode"]
     if mode not in (MODE_STANDARD, MODE_REDIRECT_ONLY):
-        return handle_error("Invalid mode parameter.", "services", True)
+        return handle_error(translated("services.flash.invalid_mode_parameter") or "Invalid mode parameter.", "services", True)
 
     # Same refusal as the API's, said here so the operator gets it on the page they clicked from
     # rather than as a 403 body. The reserved default server is the block that answers requests
     # matching no service: it is neither billed nor exemptible, so it has no mode to declare.
     if _reserved_default_server(service):
-        return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services", True)
+        return handle_error(
+            translated("services.flash.default_server_reserved", default_server_id=DEFAULT_SERVER_ID) or DEFAULT_SERVER_RESERVED_MESSAGE, "services", True
+        )
 
     DATA.load_from_file()
 
@@ -788,7 +866,16 @@ def services_mode_convert(service: str):
             DATA["TO_FLASH"].append({"content": getattr(e, "message", None) or str(e), "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f'Service {service} is now declared "{mode}".', "type": "success"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "services.flash.service_now_declared_redirect_only" if mode == MODE_REDIRECT_ONLY else "services.flash.service_now_declared_standard",
+                    service=service,
+                )
+                or f'Service {service} is now declared "{mode}".',
+                "type": "success",
+            }
+        )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -807,19 +894,19 @@ def services_mode_convert(service: str):
 @login_required
 def services_delete():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "services")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "services")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
     verify_data_in_form(
         data={"services": None},
-        err_message="Missing services parameter on /services/delete.",
+        err_message=translated("services.flash.missing_services_parameter_services_delete") or "Missing services parameter on /services/delete.",
         redirect_url="services",
         next=True,
     )
     services = [s for s in request.form["services"].split(",") if s.strip()]
     if not services:
-        return handle_error("No services selected.", "services", True)
+        return handle_error(translated("services.flash.no_services_selected") or "No services selected.", "services", True)
     DATA.load_from_file()
 
     def delete_services(services: List[str]):
@@ -840,13 +927,11 @@ def services_delete():
                 if not can_delete_service(db_service):
                     non_deletable_services.add(db_service["id"])
                     if is_reserved_default_server(db_service):
-                        non_deletable_reasons[db_service["id"]] = (
-                            "the reserved default server, which answers requests matching no service and cannot be removed"
-                        )
+                        non_deletable_reasons[db_service["id"]] = "services.flash.service_will_not_deleted_reserved"
                     elif db_service["method"] == "autoconf":
-                        non_deletable_reasons[db_service["id"]] = "online autoconf service (convert it to draft first)"
+                        non_deletable_reasons[db_service["id"]] = "services.flash.service_will_not_deleted_autoconf"
                     else:
-                        non_deletable_reasons[db_service["id"]] = "not a UI/API service"
+                        non_deletable_reasons[db_service["id"]] = "services.flash.service_will_not_deleted"
                     continue
                 if not db_service["is_draft"]:
                     all_drafts = False
@@ -855,11 +940,24 @@ def services_delete():
                     autoconf_drafts_to_delete.add(db_service["id"])
 
         for non_deletable_service in non_deletable_services:
-            reason = non_deletable_reasons.get(non_deletable_service, "not a UI/API service")
-            DATA["TO_FLASH"].append({"content": f"Service {non_deletable_service} is {reason} and will not be deleted.", "type": "error"})
+            # One whole sentence per reason: the reason is part of the translation, never interpolated.
+            reason_key = non_deletable_reasons.get(non_deletable_service, "services.flash.service_will_not_deleted")
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(reason_key, non_deletable_service=non_deletable_service)
+                    or f"Service {non_deletable_service} is not a UI/API service and will not be deleted.",
+                    "type": "error",
+                }
+            )
 
         if not services_to_delete:
-            DATA["TO_FLASH"].append({"content": "All selected services could not be found or are not UI/API services.", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("services.flash.all_selected_services_could_not_found_2")
+                    or "All selected services could not be found or are not UI/API services.",
+                    "type": "error",
+                }
+            )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
@@ -867,7 +965,13 @@ def services_delete():
             try:
                 API_CLIENT.delete_service(service_id)
             except (ApiClientError, ApiUnavailableError) as e:
-                DATA["TO_FLASH"].append({"content": f"Failed to delete drafted autoconf service {service_id}: {e.message}", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": translated("services.flash.failed_delete_drafted_autoconf_service", service_id=service_id, message=e.message)
+                        or f"Failed to delete drafted autoconf service {service_id}: {e.message}",
+                        "type": "error",
+                    }
+                )
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
@@ -884,7 +988,15 @@ def services_delete():
             DATA["TO_FLASH"].append({"content": ret, "type": "error"})
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
-        DATA["TO_FLASH"].append({"content": f"Deleted service{'s' if len(services_to_delete) > 1 else ''}: {', '.join(services_to_delete)}", "type": "success"})
+        deleted_names = ", ".join(services_to_delete)
+        if len(services_to_delete) > 1:
+            DATA["TO_FLASH"].append(
+                {"content": translated("services.flash.services_deleted", services=deleted_names) or f"Deleted services: {deleted_names}", "type": "success"}
+            )
+        else:
+            DATA["TO_FLASH"].append(
+                {"content": translated("services.flash.service_deleted", services=deleted_names) or f"Deleted service: {deleted_names}", "type": "success"}
+            )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -908,6 +1020,13 @@ def build_service_attachments(service: str) -> dict:
     return get_service_attachments(API_CLIENT, "" if service == "new" else service)
 
 
+# One whole sentence per family: the noun is part of the translation, never interpolated.
+_FETCH_FAILED_KEYS = {
+    "upstream": "services.flash.could_not_fetch_attached_upstreams",
+    "certificate": "services.flash.could_not_fetch_attached_certificates",
+    "redirect": "services.flash.could_not_fetch_attached_redirects",
+    "workflow": "services.flash.could_not_fetch_attached_workflows",
+}
 _DETACH_METHODS = {
     "upstream": "detach_upstream",
     "certificate": "detach_certificate",
@@ -944,15 +1063,15 @@ def services_resource_detach(service: str):
 
     try:
         detach_service_resource(service, family, resource_id, match_path)
-        flash(f"Detached the {family} from {service}.", "success")
+        flash(translated("services.flash.resource_detached", service=service) or f"Detached the {family} from {service}.", "success")
     except PermissionError as exc:
         # The helper raises one of two reasons -- read-only database, or a session without the
         # `write` permission -- so carry its message instead of naming only the first.
-        flash(f"Cannot detach: {exc}", "error")
+        flash(translated("services.flash.resource_detach_refused", error=str(exc)) or f"Cannot detach: {exc}", "error")
     except ValueError:
-        flash("Unknown resource type.", "error")
+        flash(translated("services.flash.resource_unknown_family") or "Unknown resource type.", "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not detach: {exc.message}", "error")
+        flash(translated("services.flash.resource_detach_failed", error=exc.message) or f"Could not detach: {exc.message}", "error")
 
     return redirect(url_for("services.services_service_page", service=service))
 
@@ -997,15 +1116,15 @@ def services_resource_attach(service: str):
 
     try:
         attach_service_resource(service, family, resource_id, match_path=match_path, primary=primary)
-        flash(f"Attached the {family} to {service}.", "success")
+        flash(translated("services.flash.resource_attached", service=service) or f"Attached the {family} to {service}.", "success")
     except PermissionError as exc:
         # The helper raises one of two reasons -- read-only database, or a session without the
         # `write` permission -- so carry its message instead of naming only the first.
-        flash(f"Cannot attach: {exc}", "error")
+        flash(translated("services.flash.resource_attach_refused", error=str(exc)) or f"Cannot attach: {exc}", "error")
     except ValueError:
-        flash("Unknown resource type.", "error")
+        flash(translated("services.flash.resource_unknown_family") or "Unknown resource type.", "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not attach: {exc.message}", "error")
+        flash(translated("services.flash.resource_attach_failed", error=exc.message) or f"Could not attach: {exc.message}", "error")
 
     return redirect(url_for("services.services_service_page", service=service))
 
@@ -1358,17 +1477,37 @@ def update_service(
     file_setting_names: Dict[str, str],
     *,
     scope: Optional[Set[str]] = None,
+    draft_settings: Optional[Dict[str, Optional[bool]]] = None,
 ):
+    """Save one service. ``draft_settings`` is the RAW editor's setting-draft map, keyed
+    ``<service>_<KEY>`` under the name this save leaves the service with (app/raw_drafts.py), and
+    None for every other pane."""
     wait_applying()
 
+    # Drafts a non-RAW clone carries over as drafts; keyed bare until the new name is known.
+    cloned_drafts: Dict[str, bool] = {}
+    if clone and service == "new" and draft_settings is None:
+        clone_drafts = drafted_settings(API_CLIENT.get_service(clone, full=True, methods=True, with_drafts=True, with_setting_drafts=True))
+        for key, metadata in clone_drafts.items():
+            if key in _CLONE_RESET_KEYS:
+                continue
+            variables[key] = metadata.get("value", "")
+            cloned_drafts[key] = True
+
+    clone_source: Dict[str, Any] = {}
+    clone_drafted: Dict[str, Any] = {}
     if clone and service == "new":
         cloned_service_config = {k: v for k, v in API_CLIENT.get_service(clone, full=True, methods=False, with_drafts=True).items()}
         clone_prefix = f"{clone}_"
+        clone_source = {key.removeprefix(clone_prefix): value for key, value in cloned_service_config.items()}
+        # The RAW page renders the SOURCE's retained drafts, and the new service has none of its own yet.
+        if draft_settings is not None:
+            clone_drafted = drafted_settings(API_CLIENT.get_service(clone, full=True, methods=True, with_drafts=True, with_setting_drafts=True))
 
         for key, value in cloned_service_config.items():
             # Strip the clone service prefix from keys so they are recognized as valid setting names
             stripped_key = key.removeprefix(clone_prefix)
-            if stripped_key in variables or stripped_key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
+            if stripped_key in variables or stripped_key in CLONE_EXCLUDED_SETTINGS:
                 continue
 
             variables[stripped_key] = value
@@ -1378,6 +1517,22 @@ def update_service(
         db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
     else:
         db_config = API_CLIENT.get_global_settings(full=True, methods=True)
+
+    # The same service with its RAW-editor setting drafts in it: `db_config` holds only the
+    # effective values those drafts leave in place. A new service has none of its own.
+    draft_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True, with_setting_drafts=True) if service != "new" else {}
+    drafted = drafted_settings(draft_config)
+
+    # The pages render a stored secret as a placeholder (models/secret_settings.py): one posted back
+    # untouched means "keep it". Swapped back before anything compares, against what the page was
+    # rendered from -- the clone SOURCE on /services/new?clone=, else the stored config.
+    # The RAW page renders a draft's retained value, so a placeholder there restores from the draft.
+    variables = restore_secrets(
+        variables,
+        clone_source or db_config,
+        secret_setting_names(BW_CONFIG.get_plugins_settings()),
+        (clone_drafted or drafted) if draft_settings is not None else {},
+    )
 
     service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
     override_method = service_method if is_editable_method(service_method) else "ui"
@@ -1422,7 +1577,8 @@ def update_service(
                     DATA["TO_FLASH"].append(
                         {
                             "content": (
-                                f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
+                                translated("services.flash.template_custom_config_cannot_edited_because", key=key, value=db_custom_config["method"])
+                                or f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
                             ),
                             "type": "error",
                         }
@@ -1518,11 +1674,25 @@ def update_service(
             preserve_suffixed=mode == "template",
         )
 
+    discarded_draft_edits = set()
+    draft_target = (variables.get("SERVER_NAME", "").split() or [old_server_name.split()[0] if old_server_name.split() else service])[0]
+    if draft_settings is None:
+        discarded_draft_edits = freeze_draft_edits(variables, drafted, db_config)
+    elif error := locked_draft_change(draft_settings, draft_config, lambda key: key.removeprefix(f"{draft_target}_")):
+        DATA["TO_FLASH"].append({"content": error, "type": "error"})
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+        return
+    draft_state_changed = any(
+        draft_state_changes(desired, draft_config.get(key.removeprefix(f"{draft_target}_"))) for key, desired in (draft_settings or {}).items()
+    )
+
     variables_to_check = variables.copy()
     has_file_name_changes = False
 
     for variable, value in variables.items():
-        if value == db_config.get(variable, {"value": None})["value"]:
+        # The RAW editor posts a draft's retained value, so that is what "unchanged" means for it.
+        baseline = (drafted.get(variable) if draft_settings is not None else None) or db_config.get(variable, {"value": None})
+        if value == baseline["value"]:
             del variables_to_check[variable]
 
     for setting_name, file_name in file_setting_names.items():
@@ -1547,6 +1717,10 @@ def update_service(
     refused: List[str] = []
     variables = BW_CONFIG.check_variables(variables, db_config, variables_to_check, new=service == "new", threaded=True, refused=refused)
     refused_count = len(refused)
+    # Same shape as global_settings.py's own `changed_variables`: check_variables canonicalizes
+    # or reverts a refused key to its stored value instead of dropping it, so `variables_to_check`
+    # alone (what was POSTED) cannot say whether anything actually changed after the check ran.
+    changed_variables = {key: value for key, value in variables.items() if key in variables_to_check and value != db_config.get(key, {}).get("value")}
 
     no_removed_settings = True
     blacklist = get_blacklisted_settings()
@@ -1555,11 +1729,55 @@ def update_service(
             no_removed_settings = False
             break
 
-    if no_removed_settings and service != "new" and was_draft == is_draft and not variables_to_check and not configs_changed and not has_file_name_changes:
+    if (
+        no_removed_settings
+        and service != "new"
+        and was_draft == is_draft
+        and not variables_to_check
+        and not draft_state_changed
+        and not configs_changed
+        and not has_file_name_changes
+    ):
+        draft_notice = f" {draft_edits_discarded()}" if discarded_draft_edits else ""
         DATA["TO_FLASH"].append(
             {
-                "content": f"The service {service} was not edited because no values{' or custom configs' if mode in ('easy', 'template') else ''} were changed.",
+                "content": (
+                    translated(
+                        (
+                            "services.flash.service_not_edited_because_no_values_or_configs"
+                            if mode in ("easy", "template")
+                            else "services.flash.service_not_edited_because_no_values"
+                        ),
+                        service=service,
+                    )
+                    or f"The service {service} was not edited because no values{' or custom configs' if mode in ('easy', 'template') else ''} were changed."
+                )
+                + draft_notice,
                 "type": "warning",
+            }
+        )
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+        return
+
+    # Posted, then refused -- and nothing else changed (QA-UI M15, service-settings half:
+    # global_settings.py:111-118 fixes the same shape for the global-settings save). The check
+    # above looks at what was POSTED, so it let this through, and the save used to end on
+    # "Configuration successfully saved..., but 1 value(s) were refused." plus "The Scheduler
+    # will attempt to apply the changes." for a save that stored nothing.
+    if (
+        refused_count
+        and not changed_variables
+        and no_removed_settings
+        and service != "new"
+        and was_draft == is_draft
+        and not configs_changed
+        and not has_file_name_changes
+    ):
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated("services.flash.service_not_saved_every_changed_value", service=service)
+                or f"The service {service} was not saved: every changed value was refused.",
+                "type": "error",
             }
         )
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -1567,7 +1785,10 @@ def update_service(
 
     if "SERVER_NAME" not in variables:
         if service == "new":
-            DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
+            # The route refuses a creation that posts no name before this task is queued, so a
+            # new service reaches here only when `check_variables` DROPPED the posted name
+            # (invalid, already in use) -- and it has already said why. Adding "the server name
+            # was not provided" on top told the operator the opposite of what happened (QA H6).
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
         variables["SERVER_NAME"] = old_server_name
@@ -1609,9 +1830,14 @@ def update_service(
             configs_changed = True
         final_custom_configs[target_key] = target_data
 
+    if cloned_drafts:
+        draft_settings = {f"{new_server_name}_{key}": state for key, state in cloned_drafts.items()}
+
     if service == "new":
         old_server_name = variables["SERVER_NAME"]
-        operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names)
+        operation, error = BW_CONFIG.new_service(
+            variables, is_draft=is_draft, override_method=override_method, file_name_map=file_setting_names, draft_settings=draft_settings
+        )
     else:
         operation, error = BW_CONFIG.edit_service(
             old_server_name,
@@ -1620,6 +1846,7 @@ def update_service(
             is_draft=is_draft,
             override_method=override_method,
             file_name_map=file_setting_names,
+            draft_settings=draft_settings,
         )
 
     # Save custom configs after the service edit so the new service id exists. A rename that the
@@ -1660,7 +1887,12 @@ def update_service(
             if message := (saved or {}).get("message"):
                 DATA["TO_FLASH"].append({"content": message, "type": "warning"})
         except Exception as e:
-            DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("flash.error_occurred_while_saving_custom_configs", e=e) or f"An error occurred while saving the custom configs: {e}",
+                    "type": "error",
+                }
+            )
         skipped_config_changes = False
     else:
         # Reachable only when the gate above refused a rename -- the `if`'s first conjunct is
@@ -1672,25 +1904,57 @@ def update_service(
         skipped_config_changes = submitted_config_changes
 
     if operation.endswith("already exists."):
-        DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
+        # `models/config.py` builds this refusal in English ("Service <name> already exists."): translate it here.
+        clash = operation.removeprefix("Service ").removesuffix(" already exists.")
+        DATA["TO_FLASH"].append({"content": translated("services.flash.service_already_exists", service=clash) or operation, "type": "warning"})
         operation = None
     elif not error:
-        operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
+        server_name = variables["SERVER_NAME"].split(" ")[0]
+        if refused_count:
+            if service == "new":
+                operation = (
+                    translated("services.flash.configuration_created_with_refusals", service=server_name, refused_count=refused_count)
+                    or f"Configuration created for service {server_name}, but {refused_count} values were refused."
+                )
+            else:
+                operation = (
+                    translated("services.flash.configuration_saved_with_refusals", service=server_name, refused_count=refused_count)
+                    or f"Configuration saved for service {server_name}, but {refused_count} values were refused."
+                )
+        else:
+            if service == "new":
+                operation = (
+                    translated("services.flash.configuration_created", service=server_name) or f"Configuration successfully created for service {server_name}."
+                )
+            else:
+                operation = (
+                    translated("services.flash.configuration_saved", service=server_name) or f"Configuration successfully saved for service {server_name}."
+                )
 
     if operation:
         if error:
             DATA["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
-            if refused_count:
-                operation = f"{operation.replace('successfully ', '', 1).removesuffix('.')}, but {refused_count} value(s) were refused."
-                DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
-            else:
-                DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-            DATA["TO_FLASH"].append({"content": "The Scheduler will attempt to apply the changes.", "type": "success", "save": False})
+            DATA["TO_FLASH"].append({"content": operation, "type": "warning" if refused_count else "success"})
+            if discarded_draft_edits:
+                DATA["TO_FLASH"].append({"content": draft_edits_discarded(), "type": "warning"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("flash.scheduler_will_attempt_apply_changes") or "The Scheduler will attempt to apply the changes.",
+                    "type": "success",
+                    "save": False,
+                }
+            )
 
     if skipped_config_changes:
         # After the refusal, not before it: the operator reads the cause, then its consequence.
-        DATA["TO_FLASH"].append({"content": "The custom configs were not saved because the rename was refused.", "type": "warning"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated("services.flash.custom_configs_not_saved_because_rename")
+                or "The custom configs were not saved because the rename was refused.",
+                "type": "warning",
+            }
+        )
 
     DATA["RELOADING"] = False
 
@@ -1746,22 +2010,23 @@ def services_service_page(service: str):
     try:
         services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
     except Exception:
-        flash("Could not fetch services configuration.", "error")
+        flash(translated("services.flash.could_not_fetch_services_configuration") or "Could not fetch services configuration.", "error")
         services = []
     service_exists = service in services
 
     if service != "new" and not service_exists:
+        flash(translated("flash.service_does_not_exist", service=service) or f"Service {service} does not exist.", "error")
         return redirect(url_for("services.services_page"))
 
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "services")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
         # Same reason as the global settings page: the `is_readonly` handed to `postable_shelf_scope`
         # below only applies in `compose` mode on an EXISTING service. `easy`/`advanced`/`raw`, and
         # every save of "new", keep `scope=None`, so without this a session without `write` creates
         # and edits services at will.
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "services")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
         DATA.load_from_file()
 
@@ -1775,6 +2040,15 @@ def services_service_page(service: str):
         mode = resolve_save_mode(request.args.get("mode"), "easy")
         clone = request.args.get("clone", "")
 
+        # Setting drafts travel as two JSON lists the RAW editor posts beside its values; any
+        # other pane posting them is refused rather than silently drafting keys it never showed.
+        # A RAW post without them changes no draft state, like every other pane.
+        raw_draft_value = variables.pop(RAW_DRAFT_SETTINGS, None)
+        raw_present_value = variables.pop(RAW_PRESENT_SETTINGS, None)
+        if mode != "raw" and (raw_draft_value is not None or raw_present_value is not None):
+            return handle_error(metadata_raw_only(), "services")
+
+        draft_settings = None
         if mode == "raw":
             server_name = variables.get("SERVER_NAME", variables.get("OLD_SERVER_NAME", "")).split(" ")[0]
             for variable, value in variables.copy().items():
@@ -1783,6 +2057,28 @@ def services_service_page(service: str):
             for variable in variables.copy():
                 if variable.startswith(f"{server_name}_"):
                     variables[variable.replace(f"{server_name}_", "", 1)] = variables.pop(variable)
+
+            # Keyed under the name the save leaves the service with, which is what save_config
+            # sees once a rename has been applied in place (config_save._sc_apply_service_rename).
+            draft_target = (variables.get("SERVER_NAME", "").split() or [service if service != "new" else ""])[0]
+            draft_source = clone if service == "new" else service
+            if draft_target and (raw_draft_value is not None or raw_present_value is not None):
+                try:
+                    saved_drafts = (
+                        API_CLIENT.get_service(draft_source, full=True, methods=True, with_drafts=True, with_setting_drafts=True) if draft_source else {}
+                    )
+                    draft_settings = parse_raw_draft_settings(
+                        raw_draft_value,
+                        posted_keys=set(variables),
+                        service=draft_target,
+                        present_value=raw_present_value,
+                        existing_draft_keys=existing_draft_keys(saved_drafts),
+                        settings=BW_CONFIG.get_plugins_settings(),
+                    )
+                except (ApiClientError, ApiUnavailableError):
+                    return handle_error(translated("services.flash.could_not_fetch_service_api") or "Could not fetch service from the API.", "services")
+                except RawDraftSettingsError as error:
+                    return handle_error(str(error), "services")
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
@@ -1798,7 +2094,7 @@ def services_service_page(service: str):
             try:
                 scope_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
             except (ApiClientError, ApiUnavailableError):
-                return handle_error("Could not fetch service from the API.", "services")
+                return handle_error(translated("services.flash.could_not_fetch_service_api") or "Could not fetch service from the API.", "services")
             try:
                 metadata = API_CLIENT.get_metadata()
             except (ApiClientError, ApiUnavailableError):
@@ -1829,7 +2125,18 @@ def services_service_page(service: str):
         # caught only incidentally, by `models/config.py`'s "already exists" check, which depends on
         # the reserved row being in the roster -- and in single-site it is not.
         if service == "new" and is_default_server(posted_name):
-            return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
+            return handle_error(
+                translated("services.flash.default_server_reserved", default_server_id=DEFAULT_SERVER_ID) or DEFAULT_SERVER_RESERVED_MESSAGE, "services"
+            )
+
+        # Refused HERE rather than in the queued task: the task runs without a request, so it
+        # cannot translate, and the operator would first be shown "Creating configuration for
+        # service ..." for a service that was never going to exist. The form marks the field
+        # `required`, so only a hand-made POST gets this far.
+        if service == "new" and not variables.get("SERVER_NAME", "").strip():
+            return handle_error(
+                translated("services.flash.server_name_missing") or "The service was not created because the server name was not provided.", "services"
+            )
 
         # Id ONLY here, on purpose -- mirrors the API's own PATCH gate (api/app/routers/services.py,
         # the `is_default_server(target)` block below its rename handling). Inertness is decided by
@@ -1846,7 +2153,10 @@ def services_service_page(service: str):
             # Refused, not ignored: the reserved id never reaches either roster loop, so a stored
             # SERVER_TYPE would show on the page and switch nothing.
             if "SERVER_TYPE" in variables:
-                return handle_error(DEFAULT_SERVER_SERVER_TYPE_MESSAGE, "services")
+                return handle_error(
+                    translated("services.flash.default_server_type_refused", default_server_id=DEFAULT_SERVER_ID) or DEFAULT_SERVER_SERVER_TYPE_MESSAGE,
+                    "services",
+                )
             # The rename refusal the API has had since DS-B (api/app/routers/services.py), missing
             # here. This page does NOT save through that router -- `update_service` goes to
             # `BW_CONFIG.edit_service` -> `save_config` -- and a posted SERVER_NAME re-keys the whole
@@ -1858,7 +2168,9 @@ def services_service_page(service: str):
             # rename, since it is a real service and the only way back from a roster `http.conf`
             # already dropped it from by name.
             if posted_name and posted_name != service and _reserved_default_server(service):
-                return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
+                return handle_error(
+                    translated("services.flash.default_server_reserved", default_server_id=DEFAULT_SERVER_ID) or DEFAULT_SERVER_RESERVED_MESSAGE, "services"
+                )
             try:
                 merged = BW_CONFIG.get_config(methods=False, with_drafts=True) | {f"{service}_{key}": value for key, value in variables.items()}
             except Exception:  # nosec B110 - a config the API cannot serve is reported by the save itself
@@ -1871,7 +2183,9 @@ def services_service_page(service: str):
                 return handle_error(refusal, "services")
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope)
+        CONFIG_TASKS_EXECUTOR.submit(
+            update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope, draft_settings=draft_settings
+        )
 
         new_service = False
         if service == "new":
@@ -1916,7 +2230,7 @@ def services_service_page(service: str):
     try:
         db_templates = API_CLIENT.get_templates()
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch templates from the API.", "error")
+        flash(translated("services.flash.could_not_fetch_templates_api") or "Could not fetch templates from the API.", "error")
         db_templates = {}
 
     inject_template_dom_ids(db_templates)
@@ -1924,7 +2238,7 @@ def services_service_page(service: str):
     try:
         db_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch custom configs from the API.", "error")
+        flash(translated("services.flash.could_not_fetch_custom_configs_api") or "Could not fetch custom configs from the API.", "error")
         db_custom_configs = {}
 
     clone = None
@@ -1933,14 +2247,14 @@ def services_service_page(service: str):
         try:
             db_config = API_CLIENT.get_global_settings(full=True, methods=True)
         except (ApiClientError, ApiUnavailableError):
-            flash("Could not fetch global settings from the API.", "error")
+            flash(translated("flash.could_not_fetch_global_settings_api") or "Could not fetch global settings from the API.", "error")
             db_config = {}
 
         if clone:
             try:
                 clone_service_data = API_CLIENT.get_service(clone, full=True, methods=True, with_drafts=True)
             except (ApiClientError, ApiUnavailableError):
-                flash(f"Could not fetch service {clone} for cloning.", "error")
+                flash(translated("services.flash.could_not_fetch_service_cloning", clone=clone) or f"Could not fetch service {clone} for cloning.", "error")
                 clone_service_data = {}
 
             for key, setting in clone_service_data.items():
@@ -1954,8 +2268,26 @@ def services_service_page(service: str):
         try:
             db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
         except (ApiClientError, ApiUnavailableError):
-            flash(f"Could not fetch service {service} from the API.", "error")
+            flash(translated("services.flash.could_not_fetch_service_api_2", service=service) or f"Could not fetch service {service} from the API.", "error")
             db_config = {}
+
+    # The RAW pane shows setting drafts with their retained value over the same snapshot the
+    # compose pane renders (for a clone: already neutralised), so a RAW save of a clone carries
+    # the source's drafts over. A new service has no drafts of its own.
+    raw_draft_source = clone if service == "new" else service
+    try:
+        source_drafts = (
+            drafted_settings(API_CLIENT.get_service(raw_draft_source, full=True, methods=True, with_drafts=True, with_setting_drafts=True))
+            if raw_draft_source
+            else {}
+        )
+    except (ApiClientError, ApiUnavailableError):
+        # Fail closed: the effective values alone would make a RAW save clobber a retained draft.
+        return handle_error(
+            translated("services.flash.could_not_fetch_service_api_2", service=raw_draft_source) or f"Could not fetch service {raw_draft_source} from the API.",
+            "services",
+        )
+    raw_draft_config = db_config | {key: value for key, value in source_drafts.items() if not (clone and key in _CLONE_RESET_KEYS)}
 
     attachments = build_service_attachments(service)
 
@@ -1985,13 +2317,16 @@ def services_service_page(service: str):
                 attach_candidates[family] = [row for row in rows if row.get("id") not in already]
 
     for family in failed_families(attachments):
-        flash(f"Could not fetch attached {family}s for this service.", "error")
+        flash(translated(_FETCH_FAILED_KEYS[family]) or f"Could not fetch attached {family}s for this service.", "error")
 
     service_id = "" if service == "new" else service
     default_server = _reserved_default_server(service_id)
     return render_template(
         "service_settings.html",
-        config=db_config,
+        # Secrets as a placeholder, restored by update_service -- the two always go together.
+        config=redact_secrets(db_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
+        raw_draft_config=redact_secrets(raw_draft_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
+        raw_draft_control_keys=sorted(STRUCTURAL_SETTINGS),
         templates=db_templates,
         configs=db_custom_configs,
         clone=clone,
@@ -2026,6 +2361,13 @@ def services_service_page(service: str):
         # the shelf reads a falsy `allowed_plugins` as "no allowlist".
         default_server=default_server,
         allowed_plugins=DEFAULT_SERVER_PLUGINS if default_server else None,
+        # /services/new checks the name in the browser against the SAME regex `check_variables`
+        # applies on save, so a refusal keeps the form instead of costing the operator every
+        # field they filled in (QA H6). Empty -- no browser check -- where the save would not
+        # check it either.
+        server_name_regex=(
+            BW_CONFIG.get_settings().get("SERVER_NAME", {}).get("regex", "") if service == "new" and getenv("IGNORE_REGEX_CHECK", "no").lower() != "yes" else ""
+        ),
     )
 
 
@@ -2045,34 +2387,34 @@ def services_plugin_page(service: str, plugin: str):
     plugin_data = resolve_plugin(plugin, BW_CONFIG.get_plugins())
     if not plugin_data:
         LOGGER.warning(f"Plugin not found on the service plugin page: {plugin!r}")
-        return handle_error("Plugin not found", "services")
+        return handle_error(translated("flash.plugin_not_found") or "Plugin not found", "services")
 
     # The reserved default server exposes a curated subset (utils/default_server.py). The shelf
     # already hides the rest, and this closes the direct URL: a page that saved settings the default
     # server block never renders would be a form that silently does nothing.
     if _reserved_default_server(service) and plugin not in DEFAULT_SERVER_PLUGINS:
         LOGGER.warning(f"Plugin {plugin!r} is not part of the default server subset")
-        return handle_error("This plugin does not apply to the default server", "services")
+        return handle_error(translated("services.flash.plugin_does_not_apply_default_server") or "This plugin does not apply to the default server", "services")
 
     try:
         db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
     except (ApiClientError, ApiUnavailableError):
         LOGGER.warning(f"Could not fetch service from the API on the service plugin page: {service!r}")
-        return handle_error("Could not fetch service from the API.", "services")
+        return handle_error(translated("services.flash.could_not_fetch_service_api") or "Could not fetch service from the API.", "services")
     if not db_config:
         LOGGER.warning(f"Service not found on the service plugin page: {service!r}")
-        return handle_error("Service not found", "services")
+        return handle_error(translated("services.flash.service_not_found") or "Service not found", "services")
 
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "services")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
         # Same as the global plugin page: the empty scope below suppresses DELETIONS only
         # (`restore_unowned_settings`, models/save_scope.py:155, only ever ADDS stored keys back),
         # so every posted value still reached `update_service`. `IS_DRAFT` never touches the scope
         # at all -- it is popped below and passed positionally -- so without this gate a forged
         # POST from a session without `write` could take a live service offline.
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "services")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
         DATA.load_from_file()
         variables = request.form.to_dict().copy()
@@ -2128,7 +2470,7 @@ def services_plugin_page(service: str, plugin: str):
         "plugin_settings_page.html",
         plugin=plugin,
         plugin_data=plugin_data | {"id": plugin},
-        config=db_config,
+        config=redact_secrets(db_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
         service_id=service,
         clone=None,
         # A purpose-built body for this plugin, or None for the generic grid. GET only -- the
@@ -2151,23 +2493,23 @@ def services_template_page(service: str, template: str):
         db_templates = API_CLIENT.get_templates()
     except (ApiClientError, ApiUnavailableError):
         LOGGER.warning("Could not fetch templates from the API on the service template page.")
-        return handle_error("Could not fetch templates from the API.", "services")
+        return handle_error(translated("services.flash.could_not_fetch_templates_api") or "Could not fetch templates from the API.", "services")
 
     # `template` is a raw URL path segment -- resolve it by membership before anything else and
     # never interpolate it into a flash message (flashes render with |safe). See resolve_template.
     template_data = resolve_template(template, db_templates)
     if not template_data:
         LOGGER.warning(f"Template not found on the service template page: {template!r}")
-        return handle_error("Template not found", "services")
+        return handle_error(translated("services.flash.template_not_found") or "Template not found", "services")
 
     try:
         db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)
     except (ApiClientError, ApiUnavailableError):
         LOGGER.warning(f"Could not fetch service from the API on the service template page: {service!r}")
-        return handle_error("Could not fetch service from the API.", "services")
+        return handle_error(translated("services.flash.could_not_fetch_service_api") or "Could not fetch service from the API.", "services")
     if not db_config:
         LOGGER.warning(f"Service not found on the service template page: {service!r}")
-        return handle_error("Service not found", "services")
+        return handle_error(translated("services.flash.service_not_found") or "Service not found", "services")
 
     template_method = db_config.get("USE_TEMPLATE", {}).get("method", "ui")
     selected_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
@@ -2181,14 +2523,14 @@ def services_template_page(service: str, template: str):
 
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "services")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
         # Same as the global plugin page: the empty scope below suppresses DELETIONS only
         # (`restore_unowned_settings`, models/save_scope.py:155, only ever ADDS stored keys back),
         # so every posted value still reached `update_service`. `IS_DRAFT` never touches the scope
         # at all -- it is popped below and passed positionally -- so without this gate a forged
         # POST from a session without `write` could take a live service offline.
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "services")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
         DATA.load_from_file()
         variables = request.form.to_dict().copy()
@@ -2240,13 +2582,13 @@ def services_template_page(service: str, template: str):
     try:
         db_custom_configs = _configs_list_to_dict(API_CLIENT.get_configs(with_drafts=True, with_data=True))
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch custom configs from the API.", "error")
+        flash(translated("services.flash.could_not_fetch_custom_configs_api") or "Could not fetch custom configs from the API.", "error")
         db_custom_configs = {}
 
     # service_settings.html:5-8 sets these four with {% set %}; this page does not go through it.
     return render_template(
         "template_settings_page.html",
-        config=db_config,
+        config=redact_secrets(db_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
         templates={template: template_data},
         configs=db_custom_configs,
         service_id=service,
@@ -2263,7 +2605,7 @@ def services_template_page(service: str, template: str):
 def services_service_export():
     services = request.args.get("services", "").split(",")
     if not services:
-        return handle_error("No services selected.", "services", True)
+        return handle_error(translated("services.flash.no_services_selected") or "No services selected.", "services", True)
 
     include_configs = request.args.get("include_configs", "").lower() in ("1", "yes", "true", "on")
 
@@ -2285,7 +2627,7 @@ def services_service_export():
         env_lines = list(chain.from_iterable(futures))
 
     if not env_lines:
-        return handle_error("No services to export.", "services", True)
+        return handle_error(translated("services.flash.no_services_export") or "No services to export.", "services", True)
 
     env_bytes = "".join(env_lines).encode("utf-8")
 
@@ -2296,7 +2638,9 @@ def services_service_export():
     try:
         db_configs = API_CLIENT.get_configs(with_drafts=True, with_data=True)
     except (ApiClientError, ApiUnavailableError):
-        return handle_error("Could not fetch custom configurations from the API.", "services", True)
+        return handle_error(
+            translated("services.flash.could_not_fetch_custom_configurations_api") or "Could not fetch custom configurations from the API.", "services", True
+        )
     configs_payload: List[Dict] = []
     for db_config_row in db_configs:
         service_id = db_config_row.get("service") or None
@@ -2340,13 +2684,13 @@ def services_service_export():
 @login_required
 def services_service_import():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "services")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "services")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "services")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
     services_file = request.files.get("services_file")
     if not services_file or not services_file.filename:
-        return handle_error("No services file uploaded.", "services", True)
+        return handle_error(translated("services.flash.no_services_file_uploaded") or "No services file uploaded.", "services", True)
 
     raw_bytes = services_file.read()
     is_zip = raw_bytes.startswith(b"PK\x03\x04") or (services_file.filename or "").lower().endswith(".zip")
@@ -2362,33 +2706,53 @@ def services_service_import():
                 entries = {zinfo.filename: zinfo for zinfo in zip_file.infolist() if zinfo.filename in ZIP_ALLOWED_MEMBERS}
                 if not entries:
                     return handle_error(
-                        "The uploaded archive must contain services_export.env and/or configs_export.json.",
+                        translated("services.flash.uploaded_archive_must_contain_services_export")
+                        or "The uploaded archive must contain services_export.env and/or configs_export.json.",
                         "services",
                         True,
                     )
                 total_uncompressed = sum(zinfo.file_size for zinfo in entries.values())
                 if total_uncompressed > ZIP_MAX_UNCOMPRESSED_BYTES or any(zinfo.file_size > ZIP_MAX_UNCOMPRESSED_BYTES for zinfo in entries.values()):
-                    return handle_error("Refusing to extract the archive: uncompressed size exceeds the safety limit.", "services", True)
+                    return handle_error(
+                        translated("services.flash.refusing_extract_archive_uncompressed_size_exceeds")
+                        or "Refusing to extract the archive: uncompressed size exceeds the safety limit.",
+                        "services",
+                        True,
+                    )
                 env_zinfo = entries.get("services_export.env")
                 if env_zinfo is not None:
                     try:
                         env_content = zip_file.read(env_zinfo).decode("utf-8")
                     except UnicodeDecodeError:
-                        return handle_error("Invalid encoding for services_export.env inside the archive.", "services", True)
+                        return handle_error(
+                            translated("services.flash.invalid_encoding_services_export_env_inside")
+                            or "Invalid encoding for services_export.env inside the archive.",
+                            "services",
+                            True,
+                        )
                 json_zinfo = entries.get("configs_export.json")
                 if json_zinfo is not None:
                     try:
                         configs_raw = zip_file.read(json_zinfo).decode("utf-8")
                     except UnicodeDecodeError:
-                        return handle_error("Invalid encoding for configs_export.json inside the archive.", "services", True)
+                        return handle_error(
+                            translated("services.flash.invalid_encoding_configs_export_json_inside")
+                            or "Invalid encoding for configs_export.json inside the archive.",
+                            "services",
+                            True,
+                        )
                     parsed_configs, configs_parse_errors = parse_configs_export(configs_raw)
         except zipfile.BadZipFile:
-            return handle_error("Uploaded file is not a valid zip archive.", "services", True)
+            return handle_error(
+                translated("services.flash.uploaded_file_not_valid_zip_archive") or "Uploaded file is not a valid zip archive.", "services", True
+            )
     else:
         try:
             env_content = raw_bytes.decode("utf-8")
         except UnicodeDecodeError:
-            return handle_error("Invalid file encoding. Please upload a UTF-8 file.", "services", True)
+            return handle_error(
+                translated("services.flash.invalid_file_encoding_please_upload_utf") or "Invalid file encoding. Please upload a UTF-8 file.", "services", True
+            )
 
     services_map: Dict[str, Dict[str, str]] = {}
     parse_errors: List[str] = []
@@ -2396,7 +2760,11 @@ def services_service_import():
         services_map, parse_errors = parse_services_export(env_content)
 
     if not services_map and not parsed_configs and not configs_parse_errors:
-        return handle_error("No services or custom configurations found in the import file.", "services", True)
+        return handle_error(
+            translated("services.flash.no_services_custom_configurations_found_import") or "No services or custom configurations found in the import file.",
+            "services",
+            True,
+        )
 
     overwrite_configs = request.form.get("overwrite_configs", "no") == "yes"
 
@@ -2412,7 +2780,7 @@ def services_service_import():
         wait_applying()
 
         for error in parse_errors:
-            DATA["TO_FLASH"].append({"content": f"Import warning: {error}", "type": "error"})
+            DATA["TO_FLASH"].append({"content": translated("flash.import_warning", error=error) or f"Import warning: {error}", "type": "error"})
 
         existing_services = {service["id"] for service in API_CLIENT.get_services(with_drafts=True)}
         base_config = API_CLIENT.get_global_settings(full=True, methods=True)
@@ -2448,11 +2816,35 @@ def services_service_import():
             created.append(server_name.split(" ")[0])
 
         if created:
-            DATA["TO_FLASH"].append({"content": f"Imported service{'s' if len(created) > 1 else ''}: {', '.join(created)}", "type": "success"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(
+                        "services.flash.imported_services" if len(created) > 1 else "services.flash.imported_service", names=", ".join(created)
+                    )
+                    or f"Imported service{'s' if len(created) > 1 else ''}: {', '.join(created)}",
+                    "type": "success",
+                }
+            )
         if skipped:
-            DATA["TO_FLASH"].append({"content": f"Skipped existing service{'s' if len(skipped) > 1 else ''}: {', '.join(skipped)}", "type": "warning"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(
+                        "services.flash.skipped_existing_services" if len(skipped) > 1 else "services.flash.skipped_existing_service", names=", ".join(skipped)
+                    )
+                    or f"Skipped existing service{'s' if len(skipped) > 1 else ''}: {', '.join(skipped)}",
+                    "type": "warning",
+                }
+            )
         if failed:
-            DATA["TO_FLASH"].append({"content": f"Failed to import service{'s' if len(failed) > 1 else ''}: {', '.join(failed)}", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(
+                        "services.flash.failed_import_services" if len(failed) > 1 else "services.flash.failed_import_service", names=", ".join(failed)
+                    )
+                    or f"Failed to import service{'s' if len(failed) > 1 else ''}: {', '.join(failed)}",
+                    "type": "error",
+                }
+            )
 
         configs_results = None
         if parsed_configs or configs_parse_errors:

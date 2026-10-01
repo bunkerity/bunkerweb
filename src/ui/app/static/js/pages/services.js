@@ -85,7 +85,9 @@ $(document).ready(function () {
     // the one line that says what it answers — otherwise "default-server" in a list of real domains
     // reads like a service somebody created by mistake.
     if (!(row && row.reserved)) return link + candidate;
-    return `${link}<small class="text-muted d-block" data-i18n="service.default_server.explainer">${escapeAttr(
+    // `text-wrap` + max-width: the table is `nowrap`, and Responsive measures this sentence on ONE line
+    // (933px) as the Name column's minimum, which folded every data column away (Q8 F-2).
+    return `${link}<small class="text-muted d-block text-wrap" style="max-width: 24rem" data-i18n="service.default_server.explainer">${escapeAttr(
       t(
         "service.default_server.explainer",
         "Answers requests that match no configured service: unknown hostnames, raw IP access. Configure its certificate, TLS, headers and error pages here.",
@@ -245,6 +247,7 @@ $(document).ready(function () {
              data-bs-original-title="${t(deleteKey, "Delete service {{name}}", { name: id, method: method })}"
              data-i18n="${deleteKey}" data-i18n-options='${deleteOptions}'>
           <button type="button" data-service-id="${safeId}"
+                  aria-label="${t(deleteKey, "Delete service {{name}}", { name: id, method: method })}"
                   class="icon-btn danger delete-service${canDelete ? "" : " disabled"}"><i class="bx bx-trash"></i></button>
         </div>
       </div>`;
@@ -292,16 +295,27 @@ $(document).ready(function () {
     });
 
     const convertModal = $("#modal-convert-services");
+    const alertKey = `modal.body.confirm_${
+      services.length > 1 ? "services" : "service"
+    }_conversion_${conversionType}`;
     convertModal
       .find(".alert")
       .text(
-        `Are you sure you want to convert the selected service${
-          services.length > 1 ? "s" : ""
-        } to ${conversionType}?`,
+        t(
+          alertKey,
+          `Are you sure you want to convert the selected service${
+            services.length > 1 ? "s" : ""
+          } to ${conversionType}?`,
+        ),
       );
     convertModal
       .find("button[type=submit]")
-      .text(`Convert to ${conversionType}`);
+      .text(
+        t(
+          `button.convert_to_${conversionType}`,
+          `Convert to ${conversionType}`,
+        ),
+      );
     $("#convertion-type").val(conversionType);
 
     const modalInstance = new bootstrap.Modal(convertModal);
@@ -317,13 +331,19 @@ $(document).ready(function () {
     });
 
     const deleteModal = $("#modal-delete-services");
-    deleteModal
-      .find(".alert")
-      .text(
-        `Are you sure you want to delete the selected service${
-          services.length > 1 ? "s" : ""
-        }?`,
-      );
+    // N-M5: this always overwrote the template's translated default
+    // (`modal.body.services_deletion_confirmation`) with an English literal. That key has no
+    // `_plural` suffix because 19 locale catalogs already translate it under this exact name
+    // (fix lanes never rename a key), so it is kept as the plural form and a new singular key
+    // covers the one-service case -- the plural/singular pattern `templates.js` already uses.
+    const alertTextKey =
+      services.length > 1
+        ? "modal.body.services_deletion_confirmation"
+        : "modal.body.service_deletion_confirmation";
+    const defaultAlertText = `Are you sure you want to delete the selected service${
+      services.length > 1 ? "s" : ""
+    }?`;
+    deleteModal.find(".alert").text(t(alertTextKey, defaultAlertText));
     const modalInstance = new bootstrap.Modal(deleteModal);
     modalInstance.show();
   };
@@ -453,15 +473,26 @@ $(document).ready(function () {
       buttons: [
         {
           extend: "convert_services",
-          text: '<span class="tf-icons bx bx-globe bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> online</span>',
+          text: `<span class="tf-icons bx bx-globe bx-18px me-2"></span><span data-i18n="button.convert_to_online">${t(
+            "button.convert_to_online",
+            "Convert to online",
+          )}</span>`,
+          attr: { "data-convert-to": "online" },
         },
         {
           extend: "convert_services",
-          text: '<span class="tf-icons bx bx-file-blank bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> draft</span>',
+          text: `<span class="tf-icons bx bx-file-blank bx-18px me-2"></span><span data-i18n="button.convert_to_draft">${t(
+            "button.convert_to_draft",
+            "Convert to draft",
+          )}</span>`,
+          attr: { "data-convert-to": "draft" },
         },
         {
           extend: "export_services",
-          text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+          text: `<span class="tf-icons bx bx-export bx-18px me-2"></span><span data-i18n="button.export">${t(
+            "button.export",
+            "Export",
+          )}</span>`,
         },
         {
           extend: "delete_services",
@@ -559,7 +590,8 @@ $(document).ready(function () {
       actionLock = true;
       $(".dt-button-background").click();
 
-      const conversionType = $(node).text().trim().split(" ")[2];
+      const conversionType =
+        $(node).data("convert-to") || $(node).text().trim().split(" ")[2];
       const services = getSelectedServices();
       if (services.length === 0) {
         actionLock = false;
@@ -687,6 +719,8 @@ $(document).ready(function () {
     columnVisibilityCondition: (column) => column > 2 && column < 9,
     dataTableOptions: {
       columnDefs: [
+        // Priorities keep the select box, Name, Actions, Type and Method visible longest; the
+        // other columns fold into the child row first (Q8 F-2).
         {
           orderable: false,
           className: "dtr-control",
@@ -695,10 +729,12 @@ $(document).ready(function () {
         {
           orderable: false,
           render: DataTable.render.select(),
+          responsivePriority: 1,
           targets: 1,
         },
         {
           orderable: false,
+          responsivePriority: 2,
           targets: -1,
           // `display` only: the row object must never reach the search index or the sort
           // comparator. Both run on the server now, but a client-side copy of either would still
@@ -708,8 +744,13 @@ $(document).ready(function () {
         },
         {
           targets: 2,
+          responsivePriority: 1,
           render: (data, type, row) =>
             type === "display" ? renderName(data, row) : data,
+        },
+        {
+          targets: 4,
+          responsivePriority: 4,
         },
         {
           targets: [7, 8],
@@ -730,6 +771,7 @@ $(document).ready(function () {
             combiner: "or",
             orderable: false,
           },
+          responsivePriority: 3,
           targets: 3,
           render: (data, type, row) =>
             type === "display" ? renderType(data, row.name) : data,

@@ -31,12 +31,12 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="{{ prefix }}-from-path">{{ _("redirects.from_path") }}</label>
-                <input class="form-control" id="{{ prefix }}-from-path" name="from_path" maxlength="256" value="/" required />
+                <input class="form-control" id="{{ prefix }}-from-path" name="from_path" maxlength="256" value="/" pattern="{{ from_path_pattern }}" title="{{ _('redirects.err.invalid_from_path') }}" required />
                 <div class="form-text">{{ _("redirects.from_path_help") }}</div>
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="{{ prefix }}-to-url">{{ _("redirects.to_url") }}</label>
-                <input class="form-control" id="{{ prefix }}-to-url" name="to_url" maxlength="512" placeholder="https://example.com" required />
+                <input class="form-control" id="{{ prefix }}-to-url" name="to_url" maxlength="512" placeholder="https://example.com" pattern="{{ to_url_pattern }}" title="{{ _('redirects.err.invalid_to_url') }}" required />
             </div>
             <div class="col-12">
                 <label class="form-label" for="{{ prefix }}-description">{{ _("table.header.description") }}</label>
@@ -120,7 +120,7 @@
                                                             <input type="hidden" name="service_id" value="{{ service_id }}" />
                                                             <button type="submit"
                                                                     class="btn btn-link btn-sm p-0 lh-1 text-reset"
-                                                                    aria-label="Detach {{ rule.name }} from {{ service_id }}">
+                                                                    aria-label="{{ _('aria.label.detach_from_service', name=rule.name, service=service_id) }}">
                                                                 <i class="bx bx-x" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -134,9 +134,9 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ rule.name ~ " to a service", classes="redirect-attach", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label="Edit " ~ rule.name, classes="redirect-edit", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ rule.name, classes="redirect-delete", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label=_('tooltip.button.attach_redirect', name=rule.name), classes="redirect-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label=_('tooltip.button.edit_redirect', name=rule.name), classes="redirect-edit", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_redirect', name=rule.name), classes="redirect-delete", disabled=readonly) }}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -150,7 +150,7 @@
 
     {# The page JS reads the rules from here instead of re-parsing the table, so an edit modal
        is populated from the same values the API returned. #}
-    <input type="hidden" id="redirects-data" value="{{ redirects | tojson }}" />
+    <input type="hidden" id="redirects-data" value='{{ redirects | tojson }}' />
 
     {% call modal(id="redirect-create-modal", title_key="redirects.new", title="New redirect", size="lg") %}
         <form method="post" action="{{ redirects_url }}/create">

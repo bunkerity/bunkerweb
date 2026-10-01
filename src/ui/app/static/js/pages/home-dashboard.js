@@ -75,12 +75,17 @@
         data: counts,
       },
     ];
+    // Q6 LOW: `[]` falls back to the browser's own locale, not the UI's chosen language --
+    // wrong on an ar page for an en-locale browser (and every other language/browser mismatch).
     const categories = buckets.map((bucketEpoch) =>
-      new Date(bucketEpoch * 1000).toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-      }),
+      new Date(bucketEpoch * 1000).toLocaleDateString(
+        document.documentElement.lang || "en",
+        {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+        },
+      ),
     );
 
     if (timeseriesChart) {

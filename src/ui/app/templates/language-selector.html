@@ -24,8 +24,8 @@
             <input id="language-search"
                    type="text"
                    class="form-control border-0 border-primary border-bottom shadow-none"
-                   placeholder="Search..."
-                   aria-label="Search...">
+                   placeholder="{{ _("form.placeholder.search") }}"
+                   aria-label="{{ _("form.placeholder.search") }}">
         </div>
         {% for lang in supported_languages %}
             <li class="nav-item" data-lang="{{ lang.code }}">

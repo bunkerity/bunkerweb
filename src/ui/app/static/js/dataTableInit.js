@@ -705,10 +705,12 @@ function initializeDataTable(config) {
         pageCount > 0 &&
         selectedCount < filteredCount
       ) {
-        const msgKey = "datatable.bulk_select_page";
-        const actionKey = "datatable.bulk_select_all_filtered";
-        const msgOpts = { count: selectedOnPage, entity: entityName };
-        const actionOpts = { count: filteredCount, entity: entityName };
+        // One whole sentence per entity (datatable.bulk_select.<entity>.*): the noun is part of the
+        // translation, never interpolated from English.
+        const msgKey = `datatable.bulk_select.${entityName}.page_${selectedOnPage === 1 ? "one" : "other"}`;
+        const actionKey = `datatable.bulk_select.${entityName}.all_filtered`;
+        const msgOpts = { count: selectedOnPage };
+        const actionOpts = { count: filteredCount };
         $msg
           .attr("data-i18n", msgKey)
           .attr("data-i18n-options", JSON.stringify(msgOpts))
@@ -735,9 +737,9 @@ function initializeDataTable(config) {
       }
 
       if (selectedCount >= filteredCount && filteredCount > 0) {
-        const msgKey = "datatable.bulk_select_all_done";
+        const msgKey = `datatable.bulk_select.${entityName}.all_done`;
         const actionKey = "datatable.bulk_select_clear";
-        const msgOpts = { count: filteredCount, entity: entityName };
+        const msgOpts = { count: filteredCount };
         $msg
           .attr("data-i18n", msgKey)
           .attr("data-i18n-options", JSON.stringify(msgOpts))
@@ -841,6 +843,7 @@ function configureI18n(t, entityName) {
     processing: translate("datatable.processing", "Processing..."),
     search: translate("datatable.search", "Search:"),
     select: {
+      aria: { rowCheckbox: translate("datatable.select_row", "Select row") },
       rows: {
         _: translate(
           `datatable.select_rows_${entityName}_plural`,
@@ -855,6 +858,10 @@ function configureI18n(t, entityName) {
           "Selected 1 entry",
         ),
       },
+    },
+    // DataTables' pane search box reads its title from the searchBuilder namespace.
+    searchBuilder: {
+      searchTitle: translate("searchpane.search_title", "Search: {name}"),
     },
     searchPanes: {
       emptyPanes: translate("searchpane.empty", "No search panes available"),

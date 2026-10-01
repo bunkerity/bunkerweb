@@ -99,7 +99,7 @@
           })();
             </script>
         {% endif %}
-        {% set page_title_fallback = (current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title %}
+        {% set page_title_fallback = page_title or ((current_endpoint or "") | replace('-', ' ') | replace('_', ' ') | title) %}
         <title>
             {% if page_title_fallback %}{{ page_title_fallback }} -&nbsp;{% endif %}
         BunkerWeb UI</title>
@@ -113,10 +113,10 @@
               href="{{ url_for('static', filename='favicon.ico') }}" />
         <!-- Preload critical CSS -->
         <link rel="preload"
-              href="{{ url_for('static', filename='css/core.css') }}"
+              href="{{ url_for('static', filename=rtl_sheet('css/core.css')) }}"
               as="style" />
         <link rel="preload"
-              href="{{ url_for('static', filename='css/theme-default.css') }}"
+              href="{{ url_for('static', filename=rtl_sheet('css/theme-default.css')) }}"
               as="style" />
         <link rel="preload"
               href="{{ url_for('static', filename='css/main.css') }}"
@@ -137,16 +137,16 @@
               nonce="{{ style_nonce }}" />
         <!-- Core CSS -->
         <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/core.css') }}"
+              href="{{ url_for('static', filename=rtl_sheet('css/core.css')) }}"
               nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/theme-default.css') }}"
+              href="{{ url_for('static', filename=rtl_sheet('css/theme-default.css')) }}"
               nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
               href="{{ url_for('static', filename='css/main.css') }}"
               nonce="{{ style_nonce }}" />
         <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/overrides.css') }}"
+              href="{{ url_for('static', filename=rtl_sheet('css/overrides.css')) }}"
               nonce="{{ style_nonce }}" />
         <!-- Vendors CSS -->
         <link rel="stylesheet"
@@ -180,7 +180,13 @@
         <input type="hidden" id="user-read-only" value="{{ user_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
         <input type="hidden" id="language" value="{{ language }}" />
-        <textarea id="supported-languages-json" class="visually-hidden">{{ (supported_languages or {})|tojson }}</textarea>
+        {# L1: a visually-hidden <textarea> is still readable and focusable by a screen reader. A
+           hidden input carries the same JSON with no accessibility surface, same single-quoted
+           tojson pattern as FIX-A (tojson escapes ' but not ", so " -- json's own delimiter --
+           would break a double-quoted attribute). #}
+        <input type="hidden"
+               id="supported-languages-json"
+               value='{{ (supported_languages or {})|tojson }}' />
         <input type="hidden"
                id="bw-logo"
                value="{{ url_for('static', filename='img/logo-menu.png') }}" />

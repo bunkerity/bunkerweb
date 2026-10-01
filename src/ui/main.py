@@ -24,9 +24,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from app.models.plugin_activation import is_plugin_active_for_service
 from app.models.safe_session_cache import SafeFileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, LoginManager, login_required, logout_user
+from markupsafe import Markup
 from flask_session import Session
+from flask_session.cachelib import CacheLibSessionInterface
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
@@ -35,12 +37,14 @@ from common_utils import is_newer_version_available  # type: ignore
 from jobs import JOB_DEFERRAL_PREFIX  # type: ignore
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
-from app.models.biscuit import BiscuitMiddleware
+from app.models.biscuit import BiscuitMiddleware, render_error_page
 from app.models.plugin_catalog import catalog_enabled, fetch_catalog
 from app.models.reverse_proxied import ReverseProxied
 
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.html_pattern import v_safe_pattern
+from app.static_assets import version_static_urls
 from app.models.models import AnonymousUser, UiUsers
 from app.utils import (
     BISCUIT_PUBLIC_KEY_FILE,
@@ -68,7 +72,7 @@ from app.utils import (
     stop,
     restart_workers,
 )
-from app.i18n import browser_catalog, init_i18n, plugin_catalog_fingerprint, translated
+from app.i18n import browser_catalog, init_i18n, plugin_catalog_fingerprint, resolve_page_title, translated
 from app.lang_config import SUPPORTED_LANGUAGES
 
 from app.routes.about import about
@@ -115,7 +119,13 @@ from app.routes.support import support
 from app.routes.templates import templates as templates_bp
 from app.routes.upstreams import upstreams
 from app.routes.workflows import workflows
-from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
+from app.routes.utils import (
+    bind_session_cookie_per_request,
+    cap_anonymous_session_lifetime,
+    chain_session_fallback,
+    get_redis_client as get_ui_redis_client,
+    session_storage_due,
+)
 
 BLUEPRINTS = (
     about,
@@ -196,10 +206,13 @@ _periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix=
 _user_access_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-access")
 _config_tasks_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-config")
 
-_cookie_config_lock = Lock()
-_cookie_config_detected = False
-
 _SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
+
+# Steady-state cadence for `update_github_metadata` (unchanged from before N-M4), and how soon a
+# failed refresh retries: doubling from the floor back up to the steady state, so a transient
+# outage recovers in well under an hour instead of waiting for the next full hourly gate.
+GITHUB_METADATA_REFRESH_SECONDS = 3600
+GITHUB_METADATA_RETRY_FLOOR_SECONDS = 60
 _session_cleanup_last_run = 0.0
 
 _restart_workers_lock = Lock()
@@ -617,6 +630,7 @@ def refresh_app_context():
 # Flask app
 app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
 app.logger = LOGGER
+version_static_urls(app)
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
@@ -677,7 +691,8 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    # Secure by default — auto-detection in before_request may downgrade if no proxy detected
+    # Only the key flask-session's open_session reads the session id under; the real cookie name and
+    # Secure flag are chosen per request, see bind_session_cookie_per_request below.
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
 
@@ -738,6 +753,10 @@ with app.app_context():
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
     session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
 
+    # Also kept when Redis is the backend: the fallback store below, and the periodic cleanup of
+    # the files it still holds.
+    app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
+
     # Same helper the routes use, so the worker ends up with one memoised client and one
     # connection pool instead of a session pool plus a per-request one.
     redis_client = get_ui_redis_client()
@@ -753,9 +772,15 @@ with app.app_context():
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
         LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
-        app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+    if redis_client:
+        # Sessions written by a file-backed worker -- an install upgraded from file sessions, or a
+        # worker that booted before the scheduler stored USE_REDIS (H18) -- are read from the files
+        # and moved to Redis on their next write, instead of every user being logged out at once.
+        chain_session_fallback(app.session_interface, CacheLibSessionInterface(client=app.config["SESSION_CACHELIB"]))
+    bind_session_cookie_per_request(app.session_interface)
+    cap_anonymous_session_lifetime(app.session_interface)
 
     # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
     # every request, so an untouched session is rewritten to the store even for a static
@@ -775,6 +800,10 @@ with app.app_context():
     login_manager.init_app(app)
     login_manager.login_view = "login.login_page"
     login_manager.anonymous_user = AnonymousUser
+    # No "Please log in to access this page." flash: it told a visitor already on the login page to
+    # log in, and it was the only thing a cookieless hit on a protected URL wrote to its session --
+    # one 12 h key in the non-evicting broker per request (H17).
+    login_manager.login_message = None
 
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
@@ -782,7 +811,9 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = ["crowdsec"]
+    # CrowdSec has its own `menu.html` entry (Overview group) like every other core page, so it
+    # is not seeded into the generic Extra Pages fallback -- that would render it a second time.
+    app.config["EXTRA_PAGES"] = []
 
     # Templates name a *page* by its short name — `url_for("bans")` means `bans.bans_page` — which
     # is why this exists at all. But an endpoint that is already fully qualified and is not a page
@@ -806,7 +837,8 @@ with app.app_context():
             return None
 
         candidates = [endpoint]
-        if endpoint not in ENDPOINTS_WITHOUT_A_PAGE_SUFFIX and not endpoint.endswith("_page"):
+        # A dotted endpoint is already qualified (`plugins.install_catalog_plugin`): the page form of it can never build.
+        if endpoint not in ENDPOINTS_WITHOUT_A_PAGE_SUFFIX and not endpoint.endswith("_page") and "." not in endpoint:
             candidates.insert(0, f"{endpoint}.{endpoint}_page")
 
         for candidate in candidates:
@@ -845,6 +877,7 @@ with app.app_context():
         return str(val)
 
     app.jinja_env.filters["to_iso"] = to_iso
+    app.jinja_env.filters["v_safe_pattern"] = v_safe_pattern
 
     app.jinja_env.globals.update(
         get_multiples=get_multiples,
@@ -873,7 +906,11 @@ with app.app_context():
 @app.context_processor
 def inject_variables():
     app_env = getattr(g, "_env", {}).copy()
-    for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
+    # Plugin context processors feed plugin pages, which all require a login. On an anonymous
+    # render (a 404 page, the login page) they only cost API calls and wrote per-user caches into
+    # a fresh session: a stored session per anonymous hit, the H17 pattern (letsencrypt's orphan
+    # check stamp).
+    for hook in app.config["CONTEXT_PROCESSOR_HOOKS"] if current_user.is_authenticated else ():
         try:
             resp = hook()
             if resp:
@@ -943,6 +980,14 @@ def inject_variables():
     app_env["extra_styles"] = extra_styles
     app_env["custom_css"] = custom_css
     app_env["i18n_catalog_version"] = f"{app_env.get('bw_version', '')}.{plugin_catalog_fingerprint()}"
+    static_folder = getattr(app, "static_folder", None)
+    if static_folder:
+        from app.i18n import locale_code
+        from app.static_assets import static_fingerprint
+
+        core_catalog_fingerprint = static_fingerprint(static_folder, f"locales/{locale_code()}.json")
+        if core_catalog_fingerprint:
+            app_env["i18n_catalog_version"] += f".{core_catalog_fingerprint}"
 
     g._env = app_env
 
@@ -1002,15 +1047,31 @@ def load_user(username):
             and session.get("mfa_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
-<div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+            flash(
+                Markup(
+                    "{}\n"
+                    '<div class="mt-2 pt-2 border-top border-white">\n'
+                    "    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>{}</a>\n"
+                    "</div>"
+                ).format(
+                    translated("main.flash.two_factor_no_recovery_codes")
+                    or "The two-factor authentication is enabled but no recovery codes are available, please refresh them:",
+                    url_for("profile.profile_page"),
+                    translated("link.here") or "here",
+                ),
                 "error",
+                save=False,
             )
 
     return ui_user
+
+
+@app.errorhandler(404)
+def handle_not_found(error):
+    # A missing asset is not a page: an <img> or a <script> gets the plain 404, not a full render.
+    if is_static_path(request.path):
+        return error
+    return render_error_page(404)
 
 
 @app.errorhandler(CSRFError)
@@ -1068,14 +1129,30 @@ def update_github_metadata():
     # Fail-soft is right for the *refresh*; it is not right for installing. That is what the
     # `fetched_at` stamp and the staleness gate in the install routes are for: a listing that
     # has not been confirmed for 24h stops being installable even though it stays on screen.
+    failed = False
     for key, fetch in (("LATEST_VERSION", get_latest_stable_release), ("GITHUB_STARS", get_github_stars), ("PLUGIN_CATALOG", fetch_catalog)):
         try:
             value = fetch()
         except BaseException as e:  # noqa: B036 - a background refresh must never take a worker down
             LOGGER.debug(f"Couldn't refresh {key} from GitHub: {e}")
+            failed = True
             continue
         if value:
             DATA[key] = value
+
+    # Retry sooner than the steady hourly gate after a failure, with a bounded backoff (floor to
+    # the hourly ceiling), and say so once -- on the transition into the failing state, not on
+    # every subsequent retry, which would turn a real air-gapped deployment's steady state back
+    # into the noise the module docstring above avoids.
+    already_backed_off = "GITHUB_METADATA_NEXT_RETRY_SECONDS" in DATA
+    if failed:
+        if not already_backed_off:
+            LOGGER.warning("Couldn't refresh the GitHub metadata (version/stars/plugin catalog); retrying sooner with a bounded backoff.")
+            DATA["GITHUB_METADATA_NEXT_RETRY_SECONDS"] = GITHUB_METADATA_RETRY_FLOOR_SECONDS
+        else:
+            DATA["GITHUB_METADATA_NEXT_RETRY_SECONDS"] = min(DATA["GITHUB_METADATA_NEXT_RETRY_SECONDS"] * 2, GITHUB_METADATA_REFRESH_SECONDS)
+    elif already_backed_off:
+        del DATA["GITHUB_METADATA_NEXT_RETRY_SECONDS"]
 
 
 def check_api_readonly_state():
@@ -1102,14 +1179,10 @@ def _delete_session_store_entry(sid: str) -> None:
         return
     interface = app.session_interface
     try:
-        client = getattr(interface, "client", None)
-        key_prefix = getattr(interface, "key_prefix", None)
-        if client is not None and key_prefix is not None:
-            client.delete(f"{key_prefix}{sid}")
-            return
-        cache = getattr(interface, "cache", None)
-        if cache is not None:
-            cache.delete(sid)
+        # Through the interface, not its client: the store id carries the key prefix (the file
+        # cache used to be handed the bare sid, a key that never exists), and with Redis the
+        # delete must also reach the file fallback, see chain_session_fallback.
+        interface._delete_session(interface._get_store_id(sid))
     except Exception:
         LOGGER.exception("Failed to delete session store entry during rotation/expiry")
 
@@ -1151,9 +1224,16 @@ def _enforce_session_lifetime() -> bool:
     if absolute_seconds > 0 and (now - creation_date).total_seconds() > absolute_seconds:
         LOGGER.info("UI session for user %s exceeded SESSION_ABSOLUTE_HOURS, forcing logout", current_user.get_id())
         old_sid = getattr(session, "sid", None)
+        username, db_session_id = current_user.get_id(), session.get("session_id")
         logout_user()
         session.clear()
         _delete_session_store_entry(old_sid)
+        # Close its Sessions-list row too, as logout.py does (N-M2); a failure only leaves a stale row.
+        if db_session_id:
+            try:
+                API_CLIENT.delete_user_session(username, db_session_id)
+            except (ApiClientError, ApiUnavailableError) as e:
+                LOGGER.error(f"Couldn't close the session row: {e.message}")
         return True
 
     rolling_seconds = app.config.get("SESSION_ROLLING_SECONDS", 0)
@@ -1197,6 +1277,11 @@ def _host_allowed(host: str, allowed: list) -> bool:
 # otherwise — never trusted verbatim.
 _REQUEST_ID_RE = re_compile(r"[A-Za-z0-9._-]{1,64}")
 
+# What a session that passed the password but not yet the second factor may reach: the /totp page,
+# every request it makes (the code form, the security-key ceremony, the language selector in its top
+# bar), and the way out. Anything else is sent back to /totp.
+MFA_PENDING_ENDPOINTS = frozenset({"totp.totp_page", "totp.totp_webauthn_options", "totp.totp_webauthn_verify", "set_language", "logout.logout_page"})
+
 
 @app.before_request
 def before_request():
@@ -1228,21 +1313,6 @@ def before_request():
     metadata = None
     g.script_nonce = token_urlsafe(32)
 
-    # Auto-detect cookie config once on the first real request using double-checked locking.
-    # The proxy status never changes during a process's lifetime, so detecting once is correct.
-    global _cookie_config_detected
-    if not _cookie_config_detected:
-        with _cookie_config_lock:
-            if not _cookie_config_detected:
-                if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
-                    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-                    app.config["SESSION_COOKIE_SECURE"] = True
-                else:
-                    app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    app.config["SESSION_COOKIE_DOMAIN"] = None
-                _cookie_config_detected = True
-
     if not is_static_path(request.path):
         try:
             metadata = API_CLIENT.get_metadata()
@@ -1256,21 +1326,29 @@ def before_request():
                 LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
             else:
                 safe_reload_plugins()
-                # Reset the flag BEFORE sending SIGHUP so new workers see it cleared
-                err = API_CLIENT.checked_changes(changes=["ui_plugins"], value=False)
-                if err:
+                # Reset the flag BEFORE sending SIGHUP so new workers see it cleared. The API client
+                # raises on failure and returns the response body on success: testing that body for
+                # truth read every success as an error and never restarted the workers.
+                try:
+                    API_CLIENT.checked_changes(changes=["ui_plugins"], value=False)
+                except Exception as err:
                     LOGGER.error(f"Couldn't reset reload_ui_plugins flag: {err}, skipping worker restart to prevent loop")
                 else:
                     schedule_restart_workers()
 
         # Stamped before the fetch is submitted, not after: a slow or failing refresh must not let
-        # every request in the meantime queue another one.
-        if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
+        # every request in the meantime queue another one. The gate itself shortens after a
+        # failure (see `update_github_metadata`'s bounded backoff) instead of always waiting the
+        # full hour, so a transient outage does not leave the catalogue/star count empty that long.
+        if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(
+            seconds=DATA.get("GITHUB_METADATA_NEXT_RETRY_SECONDS", GITHUB_METADATA_REFRESH_SECONDS)
+        ):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_github_metadata)
 
-        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
-        if app.config.get("SESSION_TYPE") == "cachelib":
+        # Periodic expired session file cleanup (_prune is disabled via threshold=0); with Redis as the
+        # backend the files are the fallback store, and still need it.
+        if app.config.get("SESSION_CACHELIB") is not None:
             global _session_cleanup_last_run
             now_ts = time()
             if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
@@ -1281,7 +1359,11 @@ def before_request():
         check_api_readonly_state()
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DATA.get("READONLY_MODE", False) and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash(
+                translated("main.flash.database_connection_read_only_mode_no") or "Database connection is in read-only mode : no modifications possible.",
+                "error",
+                save=False,
+            )
 
         if current_user.is_authenticated:
             passed = True
@@ -1315,7 +1397,7 @@ def before_request():
             # factor bolted onto it -- and unlike TOTP it has no recovery codes, so gating password
             # logins on it would lock a user out for good the day they lose the device. A passkey
             # holder who has TOTP enabled can still satisfy this gate with their key, on /totp.
-            if not session.get("mfa_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
+            if not session.get("mfa_validated", False) and bool(current_user.totp_secret) and request.endpoint not in MFA_PENDING_ENDPOINTS:
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
@@ -1338,11 +1420,12 @@ def before_request():
             if not passed:
                 return logout_page(), 403
 
-    current_endpoint = request.path.split("/")[-1]
+    current_endpoint, page_title = resolve_page_title(request.path)
     theme_value = current_user.theme if current_user.is_authenticated else "dark"
     language_value = current_user.language if current_user.is_authenticated else "en"
     base_env = dict(
         current_endpoint=current_endpoint,
+        page_title=page_title,
         script_nonce=g.script_nonce,
         supported_languages=SUPPORTED_LANGUAGES,
         theme=theme_value,
@@ -1353,9 +1436,18 @@ def before_request():
         theme_mode=theme_value,
         dismissed_notices={},
         hidden_home_cards=[],
+        # `metadata` is already fetched above for every non-static path, login included.
+        # Without this, `inject_variables`'s `i18n_catalog_version` read a `bw_version` this
+        # branch never set and fell back to "", shipping the login catalog script as
+        # `?v=.<fingerprint>` -- a real BunkerWeb upgrade that left the plugin catalogue
+        # untouched would never bust a browser's cached copy of it (QA-UI-5 item 7).
+        bw_version=metadata.get("version", "unknown"),
     )
 
-    if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
+    # Anonymous requests get the neutral env too: everything below caches per-user state in the
+    # session, and doing that for a visitor with no account wrote a 12 h session into the
+    # non-evicting broker for every cookieless hit, /healthcheck probes included (H17).
+    if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")) or not current_user.is_authenticated:
         g._env = base_env
     else:
         if not metadata:
@@ -1387,30 +1479,45 @@ def before_request():
                 except (ApiClientError, ApiUnavailableError):
                     LOGGER.warning("Failed to fetch the last push-configs run from API in before_request.")
 
-            if changes_ongoing and last_push_configs_failed:
+            # A failover without NGINX's error output is not an NGINX failover: the scheduler used to
+            # raise the flag for an unreachable instance, with an empty message (M18).
+            nginx_failover = bool(metadata.get("failover", False) and str(metadata.get("failover_message") or "").strip())
+            if nginx_failover:
+                # Wins over "changes ongoing": push-configs keeps retrying (and the *_changed flags stay set) while a
+                # refused config is in place, and NGINX's own text is what the operator needs.
+                flash(
+                    Markup("<p class='p-0 m-0 fst-italic'>{}</p>").format(
+                        translated("main.flash.failover_configuration_error")
+                        or "The last changes could not be applied because it creates a configuration error on NGINX, please check "
+                        "BunkerWeb's logs for more information. The configuration fell back to the last working one."
+                    ),
+                    "error",
+                    save=False,
+                )
+                # The failover message is NGINX's own error output, which quotes user-supplied
+                # configuration: markup around it, but the message itself is escaped.
+                flash(
+                    Markup(
+                        "<div class='d-flex flex-column'>\n"
+                        "                        <h6 class='fw-bold mb-1'>{}</h6>\n"
+                        "                        <p class='p-0 m-0 fst-italic'>{}</p>\n"
+                        "                    </div>"
+                    ).format(translated("main.flash.failover_message") or "Failover Message:", metadata.get("failover_message", "")),
+                    "error",
+                    save=False,
+                )
+            elif changes_ongoing and last_push_configs_failed:
                 message = translated("flash.last_configuration_change_failed") or "Your last configuration change could not be applied."
                 details = translated("flash.check_jobs_for_details") or "Check the Jobs page for details."
-                flash(f"{message} <a class='alert-link' href='{url_for('jobs.jobs_page')}'>{details}</a>", "error", save=False)
+                flash(Markup("{} <a class='alert-link' href='{}'>{}</a>").format(message, url_for("jobs.jobs_page"), details), "error", save=False)
             elif changes_ongoing and last_push_configs_deferred:
                 # Success=True with a deferred: -prefixed error (src/common/utils/jobs.py) -- the config is pending, not
                 # broken, so this is a distinct "warning" flash rather than the "error" one above (PO ruling 2026-09-02).
                 message = translated("flash.configuration_pending_instance") or "Configuration not applied yet — waiting for an instance to come up."
                 details = translated("flash.check_jobs_for_details") or "Check the Jobs page for details."
-                flash(f"{message} <a class='alert-link' href='{url_for('jobs.jobs_page')}'>{details}</a>", "warning", save=False)
-            elif not changes_ongoing and metadata.get("failover", False):
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
-                    "error",
-                )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
-                        <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata.get('failover_message', '')}</p>
-                    </div>""",
-                    "error",
-                )
-            elif not changes_ongoing and not metadata.get("failover", False) and DATA.get("CONFIG_CHANGED", False):
-                flash("The last changes have been applied successfully.")
+                flash(Markup("{} <a class='alert-link' href='{}'>{}</a>").format(message, url_for("jobs.jobs_page"), details), "warning", save=False)
+            elif not changes_ongoing and not nginx_failover and DATA.get("CONFIG_CHANGED", False):
+                flash(translated("main.flash.last_changes_have_applied_successfully") or "The last changes have been applied successfully.")
                 DATA["CONFIG_CHANGED"] = False
 
         # Determine if this is a CORS or AJAX request
@@ -1441,10 +1548,10 @@ def before_request():
                 pro_overlapped = billable_service_count() > metadata["pro_services"]
                 if pro_overlapped and current_endpoint != "pro":
                     flash(
-                        "You have more services than allowed by your pro license. "
+                        translated("main.flash.have_more_services_than_allowed_by")
+                        or "You have more services than allowed by your pro license. "
                         "Upgrade your license or move some services to draft mode to unlock your pro license.",
                         "pro",
-                        i18n_key="flash.pro_services_exceeded",
                         save=False,  # transient toast; keep it out of the notification history
                     )
 
@@ -1530,6 +1637,7 @@ def before_request():
 
         data = dict(
             current_endpoint=current_endpoint,
+            page_title=page_title,
             script_nonce=g.script_nonce,
             bw_version=bw_version,
             latest_version=DATA.get("LATEST_VERSION", "unknown"),
@@ -1723,7 +1831,9 @@ def teardown_request(teardown):
 
     with suppress(AssertionError, RuntimeError):
         if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
-            _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
+            # The real user object, not the `current_user` proxy: the executor thread has no request
+            # context, where the proxy resolves to None and mark_user_access returned silently (M17).
+            _user_access_executor.submit(mark_user_access, current_user._get_current_object(), session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
@@ -1845,7 +1955,7 @@ def check_reloading():
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash(translated("main.flash.forced_status_reloaded") or "Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})

@@ -29,6 +29,16 @@ const translate = (key, fallback, options) => {
   return key;
 };
 
+// The id rule a NEW template must follow -- the same pattern as TEMPLATE_ID_PATTERN in
+// src/common/db/db_methods/templates.py, which the API enforces (a test pins the two equal). An id
+// is a layer of USE_TEMPLATE, split on " ", so "bad id!" was saved and could never be applied.
+const TEMPLATE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,255}$/;
+const templateIdRuleMessage = () =>
+  translate(
+    "template.editor.validation_id_invalid",
+    "Template ID may only contain letters, digits, dots, hyphens and underscores, and must start with a letter or a digit.",
+  );
+
 const normalizeViewMode = (value) =>
   typeof value === "string" && value.trim().toLowerCase() === "raw"
     ? "raw"
@@ -3416,8 +3426,17 @@ const createStepCard = ({
   addSettingBtn.className =
     "btn btn-sm btn-outline-primary step-settings-add d-flex align-items-center justify-content-center gap-1 w-100";
   addSettingBtn.disabled = true;
+  addSettingBtn.setAttribute(
+    "aria-label",
+    translate("template.editor.button_add_setting", "Add setting"),
+  );
+  addSettingBtn.setAttribute(
+    "data-i18n-aria-label",
+    "template.editor.button_add_setting",
+  );
   const addSettingIcon = document.createElement("i");
   addSettingIcon.className = "bx bx-plus";
+  addSettingIcon.setAttribute("aria-hidden", "true");
   addSettingBtn.append(addSettingIcon);
 
   const handleAddSetting = () => {
@@ -3484,8 +3503,17 @@ const createStepCard = ({
   addConfigBtn.className =
     "btn btn-sm btn-outline-primary step-configs-add d-flex align-items-center justify-content-center gap-1 w-100";
   addConfigBtn.disabled = true;
+  addConfigBtn.setAttribute(
+    "aria-label",
+    translate("template.editor.button_add_config", "Add config"),
+  );
+  addConfigBtn.setAttribute(
+    "data-i18n-aria-label",
+    "template.editor.button_add_config",
+  );
   const addConfigIcon = document.createElement("i");
   addConfigIcon.className = "bx bx-plus";
+  addConfigIcon.setAttribute("aria-hidden", "true");
   addConfigBtn.append(addConfigIcon);
 
   const handleAddConfig = () => {
@@ -3600,6 +3628,15 @@ const buildEasyPayload = ({ validate = true } = {}) => {
       "Template ID is required.",
     );
     registerError(message, () => {
+      if (dom.templateIdInput) dom.templateIdInput.classList.add("is-invalid");
+    });
+  } else if (
+    validate &&
+    ctx.editorMode !== "edit" &&
+    !TEMPLATE_ID_PATTERN.test(templateId)
+  ) {
+    // Creation only, like the API: an id stored before the rule existed stays editable.
+    registerError(templateIdRuleMessage(), () => {
       if (dom.templateIdInput) dom.templateIdInput.classList.add("is-invalid");
     });
   } else if (dom.templateIdInput) {
@@ -3952,7 +3989,15 @@ const buildPayloadFromRawObject = (raw, { validate = true } = {}) => {
   }
 
   const rawId = typeof raw.id === "string" ? raw.id.trim() : "";
-  if (rawId) {
+  if (
+    rawId &&
+    validate &&
+    ctx.editorMode !== "edit" &&
+    !TEMPLATE_ID_PATTERN.test(rawId)
+  ) {
+    payload.id = rawId;
+    registerError(templateIdRuleMessage());
+  } else if (rawId) {
     payload.id = rawId;
   } else if (ctx.editorMode === "edit") {
     payload.id = ctx.templateId || "";
@@ -5034,6 +5079,34 @@ const initEventListeners = () => {
   }
 };
 
+/* The summary panel's created/updated <time> elements render the server's raw ISO
+   timestamp as their text (template_edit.html) -- there is no i18n-aware date formatter
+   on the Python side. Format them with the browser's own Intl via toLocaleString, the
+   same "no dependency, use the platform" approach already used elsewhere (utils.js's
+   formatDate, reports-overview.js). The datetime attribute keeps the raw ISO value. */
+const formatSummaryDates = () => {
+  document
+    .querySelectorAll("#summary-created-value, #summary-updated-value")
+    .forEach((el) => {
+      const raw = el.getAttribute("datetime") || "";
+      // Q6 LOW: the API's timestamp is naive UTC (no offset/zone designator). `new Date()`
+      // reads a bare "YYYY-MM-DDTHH:MM:SS" as *local* time, so Europe/Paris showed it 2 hours
+      // early. Force UTC when no zone is present.
+      const iso = /[Zz]|[+-]\d\d:?\d\d$/.test(raw) ? raw : `${raw}Z`;
+      const parsed = new Date(iso);
+      if (Number.isNaN(parsed.getTime())) return;
+      // Q6 LOW: `undefined` used the browser's own locale, not the UI's chosen language --
+      // wrong on a fr page for an en-locale browser and vice versa.
+      el.textContent = parsed.toLocaleString(
+        document.documentElement.lang || "en",
+        {
+          dateStyle: "medium",
+          timeStyle: "short",
+        },
+      );
+    });
+};
+
 const initTemplateEditor = () => {
   if (!dom.form) return;
   setupThemeSync();
@@ -5042,6 +5115,7 @@ const initTemplateEditor = () => {
   refreshConfigEditorThemes();
   initEventListeners();
   initializeViewMode();
+  formatSummaryDates();
 };
 
 initTemplateEditor();

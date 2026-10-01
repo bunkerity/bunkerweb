@@ -120,17 +120,17 @@ $(document).ready(function () {
     renderSelectedConfigs("#selected-configs-convert", configs);
 
     const alertText = t(
-      "modal.body.confirm_configs_conversion_to",
+      `modal.body.confirm_${
+        configs.length > 1 ? "configs" : "config"
+      }_conversion_${conversionType}`,
       `Are you sure you want to convert the selected config${
         configs.length > 1 ? "s" : ""
       } to ${conversionType}?`,
-      { state: conversionType },
     );
     convertModal.find(".alert").text(alertText);
     const buttonLabel = t(
-      "button.convert_configs_to",
+      `button.convert_to_${conversionType}`,
       `Convert to ${conversionType}`,
-      { state: conversionType },
     );
     convertModal.find("button[type=submit]").text(buttonLabel);
     $("#conversion-type").val(conversionType);
@@ -152,10 +152,13 @@ $(document).ready(function () {
 
     const modalInstance = new bootstrap.Modal(delete_modal[0]);
 
+    // Not the shared `delete_confirmation_alert(_plural)` (M25): that key says "instance",
+    // wrong here. `confirm_configs_deletion_alert(_plural)` already exists and says the right
+    // thing -- it just was not the key this modal asked for.
     const alertTextKey =
       configs.length > 1
-        ? "modal.body.delete_confirmation_alert_plural"
-        : "modal.body.delete_confirmation_alert";
+        ? "modal.body.confirm_configs_deletion_alert_plural"
+        : "modal.body.confirm_configs_deletion_alert";
     delete_modal
       .find(".alert")
       .text(
@@ -225,23 +228,13 @@ $(document).ready(function () {
         "Columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
+      // L2: the header is already server-translated (native i18n Lot D dropped the client-side
+      // `data-i18n` attribute this used to look for), so every column landed in the "not found"
+      // branch and logged a console warning on load. The header text is the translation.
       columnText: function (dt, idx, title) {
         const headerCell = dt.column(idx).header();
-        const $header = $(headerCell);
-        const $translatableElement = $header.find("[data-i18n]");
-        let i18nKey = $translatableElement.data("i18n");
-        let translatedTitle = title;
-        if (i18nKey) {
-          translatedTitle = t(i18nKey, title);
-        } else {
-          translatedTitle = $header.text().trim() || title;
-          console.warn(
-            `ColVis: No data-i18n key found for column index ${idx}, using header text or title: '${translatedTitle}'`,
-          );
-        }
-        return `${idx + 1}. <span data-i18n="${
-          i18nKey || ""
-        }">${translatedTitle}</span>`;
+        const translatedTitle = $(headerCell).text().trim() || title;
+        return `${idx + 1}. <span>${translatedTitle}</span>`;
       },
     },
     {
@@ -301,17 +294,26 @@ $(document).ready(function () {
       buttons: [
         {
           extend: "convert_configs",
-          text: '<span class="tf-icons bx bx-globe bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> online</span>',
+          text: `<span class="tf-icons bx bx-globe bx-18px me-2"></span><span data-i18n="button.convert_to_online">${t(
+            "button.convert_to_online",
+            "Convert to online",
+          )}</span>`,
           attr: { "data-convert-to": "online" },
         },
         {
           extend: "convert_configs",
-          text: '<span class="tf-icons bx bx-file-blank bx-18px me-2"></span>Convert to<span class="d-none d-md-inline"> draft</span>',
+          text: `<span class="tf-icons bx bx-file-blank bx-18px me-2"></span><span data-i18n="button.convert_to_draft">${t(
+            "button.convert_to_draft",
+            "Convert to draft",
+          )}</span>`,
           attr: { "data-convert-to": "draft" },
         },
         {
           extend: "export_configs",
-          text: '<span class="tf-icons bx bx-export bx-18px me-2"></span>Export',
+          text: `<span class="tf-icons bx bx-export bx-18px me-2"></span><span data-i18n="button.export">${t(
+            "button.export",
+            "Export",
+          )}</span>`,
         },
         {
           extend: "delete_configs",

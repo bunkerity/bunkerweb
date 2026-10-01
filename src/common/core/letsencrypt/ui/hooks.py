@@ -5,7 +5,7 @@ from time import time
 from typing import Dict, List
 
 from flask import request, session, url_for
-from markupsafe import escape
+from markupsafe import Markup, escape
 
 COLUMNS_PREFERENCES_DEFAULTS = {
     "3": True,
@@ -39,6 +39,13 @@ def _flash_new_orphans(orphans: List[Dict[str, str]]) -> None:
     except Exception:
         return
 
+    try:
+        from app.i18n import translated  # type: ignore
+    except Exception:
+
+        def translated(*_args, **_kwargs):  # type: ignore
+            return None
+
     notified = set(session.get(_ORPHAN_NOTIFIED_KEY, []))
     current = {orphan.get("cert_name", "") for orphan in orphans if orphan.get("cert_name")}
     for orphan in orphans:
@@ -48,14 +55,25 @@ def _flash_new_orphans(orphans: List[Dict[str, str]]) -> None:
         safe_cert = escape(cert_name)
         safe_account = escape(orphan.get("account", ""))
         certificates_url = escape(url_for("certificates.certificates_page"))
-        message = (
+        link_text = translated("letsencrypt.flash.open_certificates_to_inspect") or "Open Certificates to inspect"
+        # `flash()` (`app/utils.py`) escapes any plain `str` it receives, which would turn the
+        # `<strong>`/`<code>`/`<a>` markup below into visible text. `safe_cert`/`safe_account`/
+        # `certificates_url` are already escaped, so wrapping the finished text in `Markup(...)`
+        # marks it trusted without escaping it a second time.
+        text = translated(
+            "letsencrypt.flash.orphan_certificate",
+            cert_name=safe_cert,
+            account=safe_account,
+            certificates_url=certificates_url,
+            link_text=link_text,
+        ) or (
             f"Let's Encrypt: orphan certificate <strong>{safe_cert}</strong> "
             f"references missing ACME account <code>{safe_account}</code>. "
             "Renewals are blocked until the provider state is repaired. "
-            f'<a href="{certificates_url}">Open Certificates to inspect</a>.'
+            f'<a href="{certificates_url}">{link_text}</a>.'
         )
         with suppress(Exception):
-            flash(message, "warning", save=True)
+            flash(Markup(text), "warning", save=True)
 
     if current != notified:
         session[_ORPHAN_NOTIFIED_KEY] = list(current)

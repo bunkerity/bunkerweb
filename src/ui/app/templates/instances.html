@@ -3,16 +3,17 @@
 {% from "components/table-toolbar.html" import table_toolbar %}
 {% from "components/status.html" import status %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/copy-button.html" import copy_button %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
@@ -191,11 +192,13 @@
                                         data-bs-original-title="{{ _("tooltip.button.ping_instance", hostname=instance['hostname']) }}">
                                     <i class="bx bx-bell" aria-hidden="true"></i>
                                 </button>
+                                {# Reload and Stop change the instance: same write gate as Enroll and Delete (H16). #}
+                                {% set write_tooltip_key = ('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') if is_readonly else none %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{{ _("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.reload_instance", hostname=instance['hostname']) }}">
+                                     data-bs-original-title="{{ _(write_tooltip_key or ("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.reload_instance"), hostname=instance['hostname']) }}">
                                     <button type="button"
-                                            class="icon-btn reload-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            class="icon-btn reload-instance{% if instance.status != 'up' or is_readonly %} disabled{% endif %}"
                                             aria-label="{{ _("tooltip.button.reload_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
                                         <i class="bx bx-refresh" aria-hidden="true"></i>
@@ -203,9 +206,9 @@
                                 </div>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{{ _("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.stop_instance", hostname=instance['hostname']) }}">
+                                     data-bs-original-title="{{ _(write_tooltip_key or ("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.stop_instance"), hostname=instance['hostname']) }}">
                                     <button type="button"
-                                            class="icon-btn stop-instance{% if instance.status != 'up' %} disabled{% endif %}"
+                                            class="icon-btn stop-instance{% if instance.status != 'up' or is_readonly %} disabled{% endif %}"
                                             aria-label="{{ _("tooltip.button.stop_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
                                         <i class="bx bx-stop" aria-hidden="true"></i>
@@ -307,7 +310,9 @@
                                 data-bs-dismiss="modal"
                                 aria-label="{{ _("aria.label.close") }}"></button>
                     </div>
-                    <form action="{{ url_for("instances") }}/new" method="POST">
+                    <form action="{{ url_for("instances") }}/new"
+                          method="POST"
+                          data-form-retry="instance-create">
                         <div class="modal-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="mb-3">
@@ -329,7 +334,7 @@
                                         </li>
                                         <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            <span>{{ _("form.help.hostname_special_chars") }}<code class="d-inline ms-1 me-1">/</code> and <code class="d-inline ms-1 me-1">:</code> are allowed in protocol/port.</span>
+                                            <span>{{ _("form.help.hostname_special_chars") }}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -424,15 +429,24 @@
                         <p class="mb-2">{{ _("modal.body.enroll_description") }}</p>
                         <div class="mb-3">
                             <label class="form-label fw-medium" for="enroll-code">{{ _("form.label.enrollment_code") }}</label>
-                            <input type="text" class="form-control" id="enroll-code" readonly />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="enroll-code" readonly />
+                                {{ copy_button(target="#enroll-code", variant="addon") }}
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-medium" for="enroll-docker">{{ _("form.label.enroll_oneliner_docker") }}</label>
-                            <textarea class="form-control font-monospace" id="enroll-docker" rows="3" readonly></textarea>
+                            <div class="input-group">
+                                <textarea class="form-control font-monospace" id="enroll-docker" rows="3" readonly></textarea>
+                                {{ copy_button(target="#enroll-docker", variant="addon") }}
+                            </div>
                         </div>
                         <div class="mb-1">
                             <label class="form-label fw-medium" for="enroll-linux">{{ _("form.label.enroll_oneliner_linux") }}</label>
-                            <textarea class="form-control font-monospace" id="enroll-linux" rows="3" readonly></textarea>
+                            <div class="input-group">
+                                <textarea class="form-control font-monospace" id="enroll-linux" rows="3" readonly></textarea>
+                                {{ copy_button(target="#enroll-linux", variant="addon") }}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer justify-content-center">
@@ -444,10 +458,15 @@
                 </div>
             </div>
         </div>
+        {# What the server refused on the last create, for js/components/form-retry.js (M22). #}
+        <textarea id="form-retry" hidden>{{ form_retry | default({}) | tojson }}</textarea>
     {% endif %}
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}
+    <script src="{{ url_for('static', filename='js/components/copy-button.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
@@ -464,4 +483,7 @@
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='js/components/form-retry.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

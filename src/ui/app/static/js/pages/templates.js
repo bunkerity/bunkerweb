@@ -33,11 +33,13 @@ $(document).ready(function () {
       },
     );
 
-    // Use plural/singular i18n key for alert
+    // Use plural/singular i18n key for alert. Not the shared `delete_confirmation_alert(_plural)`
+    // (M25): that key is hard-coded to say "instance", which was never wrong on `/instances` but
+    // is wrong everywhere else it got reused -- including here.
     const alertTextKey =
       templateIds.length > 1
-        ? "modal.body.delete_confirmation_alert_plural"
-        : "modal.body.delete_confirmation_alert";
+        ? "modal.body.confirm_templates_deletion_alert_plural"
+        : "modal.body.confirm_templates_deletion_alert";
     const defaultAlertText = `Are you sure you want to delete the selected template${
       templateIds.length > 1 ? "s" : ""
     }?`;
@@ -148,6 +150,58 @@ $(document).ready(function () {
       // eslint-disable-next-line no-alert
       alert(err.message);
     }
+  });
+
+  // Template import. JSON in, JSON out (the route is @cors_required), so a refusal -- a bad id,
+  // an archive path outside its one folder, an oversized file, an existing id without "replace"
+  // -- lands in the modal's own alert and the modal stays open with the file still chosen.
+  const postModalForm = async (form, $error, submit, fallback) => {
+    $error.addClass("d-none").text("");
+    if (submit) submit.disabled = true;
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        body: new FormData(form),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || fallback);
+      window.location.reload();
+    } catch (err) {
+      $error.text(err.message).removeClass("d-none");
+      if (submit) submit.disabled = false;
+    }
+  };
+
+  $("#template-import-form").on("submit", function (event) {
+    event.preventDefault();
+    postModalForm(
+      this,
+      $("#template-import-error"),
+      document.querySelector("#template-import-submit"),
+      t("templates.import.failed", "The template could not be imported."),
+    );
+  });
+
+  // Catalogue update (C4): the same JSON round trip, from the diff preview's own modal. A refusal
+  // -- the listing or the template changed since the preview, a managed template, a name clash --
+  // stays in that modal.
+  $(".template-catalog-update-form").on("submit", function (event) {
+    event.preventDefault();
+    postModalForm(
+      this,
+      $(this).find(".template-catalog-update-error"),
+      this.querySelector("button[type=submit]"),
+      t(
+        "templates.catalog.update_failed",
+        "The template could not be updated.",
+      ),
+    );
+  });
+
+  $("#modal-import-template").on("hidden.bs.modal", function () {
+    $("#template-import-error").addClass("d-none").text("");
   });
 
   $deleteSelected.on("click", function () {

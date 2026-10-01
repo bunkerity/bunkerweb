@@ -30,6 +30,7 @@ JS = REPO / "src" / "ui" / "app" / "static" / "js"
 
 # `(relative path, literal): catalog key or mechanism that replaces this English default`.
 CATALOG_FALLBACKS = {
+    ("components/recovery-code.js", "Copy failed"): "tooltip.copy_failed via i18next.t() fallback variable",
     ("components/secret-field.js", "Hide value"): "aria.label.hide_value via t() fallback variable",
     ("components/secret-field.js", "Reveal value"): "aria.label.reveal_value via t() fallback variable",
     ("main.js", "No items found."): "status.no_search_results fallback",
@@ -37,8 +38,16 @@ CATALOG_FALLBACKS = {
     ("modules/setting_controls.js", "Select options"): "template.editor.multiselect_placeholder via setContent()",
     ("modules/setting_controls.js", "{{count}} selected"): "template.editor.multiselect_summary via setContent()",
     ("modules/setting_controls.js", "No items found."): "status.no_search_results via setContent()",
-    ("modules/setting_controls.js", "One value per line.{{separatorNote}}"): "template.editor.multivalue_helper via setContent()",
+    ("modules/setting_controls.js", "One value per line."): "template.editor.multivalue_helper via setContent()",
+    ("pages/service-resources.js", "Detach this certificate from {{service}}?"): "service.resources.confirm_detach_certificate via DETACH_CONFIRM",
+    ("pages/service-resources.js", "Detach this redirect from {{service}}?"): "service.resources.confirm_detach_redirect via DETACH_CONFIRM",
+    ("pages/service-resources.js", "Detach this upstream from {{service}}?"): "service.resources.confirm_detach_upstream via DETACH_CONFIRM",
+    ("pages/service-resources.js", "Detach this workflow from {{service}}?"): "service.resources.confirm_detach_workflow via DETACH_CONFIRM",
+    ("pages/service-resources.js", "Detach this template from {{service}}?"): "service.resources.confirm_detach_template via DETACH_CONFIRM",
+    ("pages/service-resources.js", "Detach this resource from {{service}}?"): "service.resources.confirm_detach via DETACH_CONFIRM",
     ("modules/setting_controls.js", "Add value"): "template.editor.multivalue_add via setContent()",
+    ("modules/setting_controls.js", "Hide value"): "aria.label.hide_value via t() fallback variable",
+    ("modules/setting_controls.js", "Reveal value"): "aria.label.reveal_value via t() fallback variable",
     ("pages/bans.js", "The date and time when the Ban was created"): "tooltip.table.bans.date via data-i18n and applyTranslations()",
     ("pages/bans.js", "The banned IP address"): "tooltip.table.bans.ip_address via data-i18n and applyTranslations()",
     ("pages/bans.js", "The banned IP country"): "tooltip.table.bans.country via data-i18n and applyTranslations()",

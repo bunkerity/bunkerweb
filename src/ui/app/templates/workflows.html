@@ -81,7 +81,7 @@
                                                             <input type="hidden" name="service_id" value="{{ service_id }}" />
                                                             <button type="submit"
                                                                     class="btn btn-link btn-sm p-0 lh-1 text-reset"
-                                                                    aria-label="Detach {{ flow.name }} from {{ service_id }}">
+                                                                    aria-label="{{ _('aria.label.detach_from_service', name=flow.name, service=service_id) }}">
                                                                 <i class="bx bx-x" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -95,11 +95,11 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label="Edit the rules of " ~ flow.name, classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-rename", icon_only=true, aria_label="Edit the name and description of " ~ flow.name, classes="workflow-edit", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label="Attach " ~ flow.name ~ " to a service", classes="workflow-attach", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label="Clone " ~ flow.name, classes="workflow-clone", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete " ~ flow.name, classes="workflow-delete", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label=_('tooltip.button.edit_workflow_rules', name=flow.name), classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-rename", icon_only=true, aria_label=_('tooltip.button.edit_workflow_details', name=flow.name), classes="workflow-edit", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label=_('tooltip.button.attach_workflow', name=flow.name), classes="workflow-attach", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label=_('tooltip.button.clone_workflow', name=flow.name), classes="workflow-clone", disabled=readonly) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_workflow', name=flow.name), classes="workflow-delete", disabled=readonly) }}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -112,7 +112,7 @@
     {% endcall %}
 
     {# The page JS reads the rows from here instead of re-parsing the table. #}
-    <input type="hidden" id="workflows-data" value="{{ workflows | tojson }}" />
+    <input type="hidden" id="workflows-data" value='{{ workflows | tojson }}' />
 
     {% call modal(id="workflow-create-modal", title_key="workflows.new", title="New workflow", size="lg") %}
         <form method="post" action="{{ workflows_url }}/create">

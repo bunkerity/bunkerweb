@@ -6,13 +6,27 @@ from flask_login import login_required
 
 from common_utils import parse_host  # type: ignore
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA
+from app.i18n import LocaleThreadPoolExecutor, translated
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.form_retry import keep_form, take_form_retry
 from app.utils import flash, is_readonly_request, is_ui_api_method
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
 
 instances = Blueprint("instances", __name__)
+
+# One whole sentence per action: the verb is part of the translation, never interpolated.
+MISSING_PARAMETER_KEYS = {
+    "ping": "instances.flash.missing_instances_parameter_instances_ping",
+    "reload": "instances.flash.missing_instances_parameter_instances_reload",
+    "stop": "instances.flash.missing_instances_parameter_instances_stop",
+    "delete": "instances.flash.missing_instances_parameter_instances_delete",
+}
+NO_METHOD_KEYS = {
+    "reload": "instances.flash.instance_does_not_have_reload_method",
+    "stop": "instances.flash.instance_does_not_have_stop_method",
+}
 
 ACTIONS = {
     "reload": {"present": "Reloading", "past": "Reloaded"},
@@ -27,28 +41,28 @@ def instances_page():
     try:
         instances_list = BW_INSTANCES_UTILS.get_instances()
     except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch instances from the API.", "error")
+        flash(translated("instances.flash.could_not_fetch_instances_api") or "Could not fetch instances from the API.", "error")
         instances_list = []
 
-    return render_template("instances.html", instances=instances_list)
+    return render_template("instances.html", instances=instances_list, form_retry=take_form_retry())
 
 
 @instances.route("/instances/new", methods=["POST"])
 @login_required
 def instances_new():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "instances")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "instances")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "instances")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "instances")
     verify_data_in_form(
         data={"hostname": None},
-        err_message="Missing instance hostname parameter on /instances/new.",
+        err_message=translated("instances.flash.missing_instance_hostname_parameter_instances_new") or "Missing instance hostname parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
     verify_data_in_form(
         data={"name": None},
-        err_message="Missing instance name parameter on /instances/new.",
+        err_message=translated("instances.flash.missing_instance_name_parameter_instances_new") or "Missing instance name parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
@@ -61,11 +75,17 @@ def instances_new():
     )
 
     # Parse provided hostname, optional scheme and port (robustly)
+    # Every refusal below keeps the modal's input for the page to reopen it with (QA-UI M22):
+    # the form posts natively, and the redirect used to come back with the modal closed and empty.
+    def refuse(message: str):
+        keep_form("instance-create", message)
+        return handle_error(message, "instances", True)
+
     raw_input = request.form["hostname"].strip()
     try:
         scheme, hostname, provided_port = parse_host(raw_input)
     except ValueError as e:
-        return handle_error(f"{e}.", "instances", True)
+        return refuse(f"{e}.")
     explicit_scheme = bool(scheme)
     scheme_https = scheme == "https"
 
@@ -103,14 +123,17 @@ def instances_new():
 
     for db_instance in BW_INSTANCES_UTILS.get_instances():
         if db_instance.hostname == instance["hostname"]:
-            return handle_error(f"The hostname {instance['hostname']} is already in use.", "instances", True)
+            return refuse(
+                translated("instances.flash.hostname_already_in_use", hostname=instance["hostname"])
+                or f"The hostname {instance['hostname']} is already in use."
+            )
 
     try:
         API_CLIENT.create_instance(**instance)
     except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't create the instance: {e.message}", "instances", True)
+        return refuse(translated("instances.flash.could_not_create_instance", message=e.message) or f"Couldn't create the instance: {e.message}")
 
-    flash(f"Instance {instance['hostname']} created successfully.")
+    flash(translated("instances.flash.instance_created_successfully", value=instance["hostname"]) or f"Instance {instance['hostname']} created successfully.")
 
     return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
 
@@ -167,19 +190,23 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
     # other three actions mutate the instances and stay behind both gates.
     if action != "ping":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "instances")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "instances")
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "instances")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "instances")
 
     verify_data_in_form(
         data={"instances": None},
-        err_message=f"Missing instances parameter on /instances/{action}.",
+        err_message=translated(MISSING_PARAMETER_KEYS[action]) or f"Missing instances parameter on /instances/{action}.",
         redirect_url="instances",
         next=True,
     )
     instances = request.form["instances"].split(",")
     if not instances:
-        return handle_error(f"No instance{'s' if len(instances) > 1 else ''} selected.", "instances", True)
+        return handle_error(
+            translated("instances.flash.no_instance_selected") or "No instance selected.",
+            "instances",
+            True,
+        )
     DATA.load_from_file()
 
     if action == "ping":
@@ -219,13 +246,21 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
                 delete_instances.add(instance["hostname"])
 
         for non_deletable_instance in non_deletable_instances:
-            flash(f"Instance {non_deletable_instance} is not a UI/API instance and will not be deleted.", "error")
+            flash(
+                translated("instances.flash.instance_not_ui_api_instance_will", non_deletable_instance=non_deletable_instance)
+                or f"Instance {non_deletable_instance} is not a UI/API instance and will not be deleted.",
+                "error",
+            )
 
         if not delete_instances:
             return handle_error(
                 (
-                    f"{'All selected instances' if len(instances) > 1 else 'Selected instance'} could not be found or "
-                    f"{'are not UI/API instances' if len(instances) > 1 else 'is not a UI/API instance'}."
+                    translated("instances.flash.could_not_found_other" if len(instances) > 1 else "instances.flash.could_not_found_one")
+                    or (
+                        "All selected instances could not be found or are not UI/API instances."
+                        if len(instances) > 1
+                        else "Selected instance could not be found or is not a UI/API instance."
+                    )
                 ),
                 "instances",
                 True,
@@ -234,31 +269,63 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         try:
             API_CLIENT.delete_instances(list(delete_instances))
         except (ApiClientError, ApiUnavailableError) as e:
-            return handle_error(f"Couldn't delete the instance{'s' if len(delete_instances) > 1 else ''}: {e.message}", "instances", True)
-        flash(f"Instance{'s' if len(delete_instances) > 1 else ''} {', '.join(delete_instances)} Deleted successfully.")
+            return handle_error(
+                translated(
+                    "instances.flash.couldn_t_delete_instances" if len(delete_instances) > 1 else "instances.flash.couldn_t_delete_instance", message=e.message
+                )
+                or f"Couldn't delete the instance{'s' if len(delete_instances) > 1 else ''}: {e.message}",
+                "instances",
+                True,
+            )
+        instance_names = ", ".join(delete_instances)
+        if len(delete_instances) > 1:
+            flash(translated("instances.flash.instances_deleted", instance=instance_names) or f"Instances {instance_names} Deleted successfully.")
+        else:
+            flash(translated("instances.flash.instance_deleted", instance=instance_names) or f"Instance {instance_names} Deleted successfully.")
     else:
 
         def execute_action(instance):
             ret = Instance.from_hostname(instance, API_CLIENT)
             if not ret:
-                DATA["TO_FLASH"].append({"content": f"The instance {instance} does not exist.", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": translated("instances.flash.instance_does_not_exist", instance=instance) or f"The instance {instance} does not exist.",
+                        "type": "error",
+                    }
+                )
                 return
 
             method = getattr(ret, action, None)
             if method is None or not callable(method):
-                DATA["TO_FLASH"].append({"content": f"The instance {instance} does not have a {action} method.", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": translated(NO_METHOD_KEYS[action], instance=instance) or f"The instance {instance} does not have a {action} method.",
+                        "type": "error",
+                    }
+                )
                 return
 
             ret = method()
             if str(ret).startswith("Can't"):
                 DATA["TO_FLASH"].append({"content": ret, "type": "error"})
                 return
-            DATA["TO_FLASH"].append({"content": f"Instance {instance} {ACTIONS[action]['past']} successfully.", "type": "success"})
+            message = (
+                translated("instances.flash.instance_reloaded", instance=instance)
+                if action == "reload"
+                else translated("instances.flash.instance_stopped", instance=instance)
+            )
+            DATA["TO_FLASH"].append(
+                {
+                    "content": message or f"Instance {instance} {ACTIONS[action]['past']} successfully.",
+                    "type": "success",
+                }
+            )
 
         def execute_actions(instances):
             DATA["RELOADING"] = True
             DATA["LAST_RELOAD"] = time()
-            with ThreadPoolExecutor() as executor:
+            # Nested pool: LocaleThreadPoolExecutor hands this task's forced locale to each flash.
+            with LocaleThreadPoolExecutor() as executor:
                 executor.map(execute_action, instances)
             DATA["RELOADING"] = False
 

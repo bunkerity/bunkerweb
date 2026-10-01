@@ -1,11 +1,11 @@
-{% from 'macros/docs_link.html' import docs_url %}
+{% from 'macros/docs_link.html' import docs_url with context %}
 {% from 'components/search.html' import search %}
 <!-- Navbar -->
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
     <button type="button"
             class="layout-menu-toggle btn btn-sm btn-outline-secondary btn-icon me-3"
-            aria-label="Toggle navigation"
+            aria-label="{{ _("navbar.aria.toggle_navigation") }}"
             aria-controls="layout-menu">
         <i class="bx bx-menu bx-md d-xl-none" aria-hidden="true"></i>
         <i class="bx bx-chevrons-left bx-sm d-none d-xl-inline" aria-hidden="true"></i>
@@ -75,7 +75,7 @@
                         class="bw-topbar-btn"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
-                        aria-label="Help">
+                        aria-label="{{ _("navbar.aria.help") }}">
                     <i class="bx bx-help-circle" aria-hidden="true"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -113,7 +113,7 @@
                 <button id="notifications-button"
                         type="button"
                         class="bw-topbar-btn"
-                        aria-label="Notifications"
+                        aria-label="{{ _("navbar.aria.notifications") }}"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#side-offcanvas-notifications"
                         aria-controls="side-offcanvas-notifications">
@@ -148,7 +148,7 @@
                 <button id="news-button"
                         type="button"
                         class="bw-topbar-btn"
-                        aria-label="News"
+                        aria-label="{{ _("navbar.aria.news") }}"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#side-offcanvas-news"
                         aria-controls="side-offcanvas-news">
@@ -176,6 +176,7 @@
                                class="form-check-input"
                                type="checkbox"
                                role="switch"
+                               aria-label="{{ _("aria.label.toggle_theme") }}"
                                data-root-url="{{ url_for('profile') }}"
                                {% if theme == "dark" %}checked{% endif %} />
                     </div>
@@ -191,7 +192,7 @@
                    href="javascript:void(0);"
                    data-bs-toggle="dropdown"
                    data-tour="user-menu"
-                   aria-label="Open user menu"
+                   aria-label="{{ _("aria.label.open_user_menu") }}"
                    aria-expanded="false">
                     <div class="avatar avatar-online">
                         <img src="{{ avatar_url }}"

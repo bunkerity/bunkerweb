@@ -21,6 +21,10 @@ $(document).ready(function () {
     : [];
   const emptyState = document.getElementById("plugin-grid-empty");
   const searchInput = document.getElementById("plugin-search");
+  const catalogGrid = document.getElementById("plugin-catalog-grid");
+  const catalogCards = catalogGrid
+    ? Array.from(catalogGrid.querySelectorAll(".plugin-card-wrapper"))
+    : [];
   let activeFilter = "all";
 
   const matchesFilter = (card, filter) => {
@@ -66,6 +70,7 @@ $(document).ready(function () {
       core: 0,
       community: 0,
       pro: 0,
+      catalog: catalogCards.length,
     };
     cards.forEach((card) => {
       counts.all += 1;
@@ -235,16 +240,21 @@ $(document).ready(function () {
       success: function () {
         progressBar.addClass("bg-success");
         $("#add-plugins-submit").removeClass("disabled");
-        fileItem.append('<span class="text-success ms-2">Uploaded</span>');
+        fileItem.append(
+          `<span class="text-success ms-2">${t("status.uploaded", "Uploaded")}</span>`,
+        );
       },
-      error: function () {
+      error: function (xhr) {
         progressBar.addClass("bg-danger");
-        fileItem.append('<span class="text-danger ms-2">Failed</span>');
+        fileItem.append(
+          `<span class="text-danger ms-2">${t("status.failed", "Failed")}</span>`,
+        );
         alert(
-          t(
-            "alert.plugin_upload_failed",
-            "An error occurred while uploading the plugin archive. Please try again.",
-          ),
+          xhr.responseJSON?.message ||
+            t(
+              "alert.plugin_upload_failed",
+              "An error occurred while uploading the plugin archive. Please try again.",
+            ),
         );
       },
     });
@@ -268,7 +278,9 @@ $(document).ready(function () {
     dragArea.find("i").addClass("text-primary");
   });
   fileInput.on("change", function () {
-    const files = this.files;
+    const files = Array.from(this.files);
+    // Clear the input now: picking the same file again after a failed upload fires no `change` otherwise.
+    this.value = "";
     for (let i = 0; i < files.length; i++) {
       setTimeout(() => {
         const file = files[i];

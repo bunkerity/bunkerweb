@@ -68,6 +68,7 @@ SETTINGS = {
         "multiselect": [{"id": v, "label": v, "value": v} for v in ("SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3")],
     },
     "SERVER_NAME": {"type": "text", "regex": "^.*$", "context": "multisite"},
+    "WORKER_CONNECTIONS": {"type": "text", "regex": r"^\d+$", "context": "global"},
 }
 
 
@@ -80,6 +81,7 @@ def _stored_config() -> dict:
     return {
         "SERVER_NAME": {"value": "", "global": True, "method": "scheduler", "default": "", "template": None},
         "SSL_PROTOCOLS": {"value": "TLSv1.2 TLSv1.3", "global": True, "method": "ui", "default": "TLSv1.2 TLSv1.3", "template": None},
+        "WORKER_CONNECTIONS": {"value": "4096", "global": True, "method": "default", "default": "4096", "template": None},
     }
 
 
@@ -113,11 +115,36 @@ def test_a_backend_refusal_matching_neither_prefix_is_flashed_error():
 
 def test_a_value_the_regex_gate_reverted_ends_on_a_warning_not_a_success():
     """An emptied multiselect: no client gate, rejected by the real regex, restored to the stored
-    value by `check_variables` -- and now reported through the caller-owned `refused` list."""
-    flashed = _save({"SSL_PROTOCOLS": ""}, edit_global_conf_return=("Global settings successfully saved.", 0))
+    value by `check_variables` -- and now reported through the caller-owned `refused` list. Saved
+    next to a change that WAS accepted, so something really is stored."""
+    flashed = _save({"SSL_PROTOCOLS": "", "WORKER_CONNECTIONS": "2048"}, edit_global_conf_return=("Global settings successfully saved.", 0))
 
-    assert ("warning", "Global settings saved, but 1 value(s) were refused.") in flashed, flashed
+    assert ("warning", "Global settings saved, but 1 values were refused.") in flashed, flashed
     assert not any(t == "success" and content.startswith("Global settings successfully saved.") for t, content in flashed), flashed
+
+
+def test_a_save_whose_only_change_was_refused_is_not_reported_as_saved():
+    """QA-UI M15: WORKER_CONNECTIONS=abc was refused, nothing else changed, and the save still
+    answered "Global settings saved, but 1 values were refused." plus "The Scheduler will
+    attempt to apply the changes." -- for a save that stored nothing."""
+    edit_global_conf = Mock(return_value=("Global settings successfully saved.", 0))
+    stored = _stored_config()
+    data = _FakeData(TO_FLASH=[])
+    config = Config.__new__(Config)
+    config._Config__data = data
+    config._Config__ignore_regex_check = False
+    config.get_plugins_settings = lambda: SETTINGS
+    config.get_config = lambda **kwargs: deepcopy(stored)
+    config.edit_global_conf = edit_global_conf
+
+    with patch.object(MODULE, "BW_CONFIG", config), patch.object(MODULE, "DATA", data), patch.object(MODULE, "wait_applying", lambda: None):
+        # The page posts every rendered key: the stored SSL_PROTOCOLS comes back unchanged.
+        MODULE.update_global_config({"WORKER_CONNECTIONS": "abc", "SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"}, False, {}, scope=None)
+
+    flashed = [(entry["type"], entry["content"]) for entry in data["TO_FLASH"]]
+    assert not edit_global_conf.called, "nothing changed, yet the save was sent"
+    assert ("error", "The global settings were not saved: every changed value was refused.") in flashed, flashed
+    assert not any("saved, but" in content or "will attempt to apply" in content for _, content in flashed), flashed
 
 
 def test_a_clean_save_is_still_flashed_success():

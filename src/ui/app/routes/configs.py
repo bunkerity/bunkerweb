@@ -13,6 +13,7 @@ from common_utils import bytes_hash  # type: ignore
 from custom_configs_validation import NAME_RX  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.i18n import translated
 from app.utils import flash, is_editable_method, is_readonly_request
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
@@ -58,7 +59,9 @@ def parse_configs_export(content: str) -> Tuple[List[Dict], List[str]]:
     try:
         payload = loads(content)
     except JSONDecodeError as exc:
-        return [], [f"File is not valid JSON: {exc.msg}"]
+        # Where, not the parser's own wording ("Expecting property name enclosed in double
+        # quotes" read as noise in a toast, QA-UI M28).
+        return [], [f"The file is not valid JSON (line {exc.lineno}, column {exc.colno})."]
 
     if not isinstance(payload, dict):
         return [], ["Export payload must be a JSON object with a 'configs' array."]
@@ -214,21 +217,55 @@ def apply_imported_configs(parsed_configs: List[Dict], overwrite: bool, parse_er
 def flash_import_results(results: Dict[str, List[str]]) -> None:
     """Append flash entries summarizing an apply_imported_configs run."""
     for error in results.get("parse_errors", []):
-        DATA["TO_FLASH"].append({"content": f"Import warning: {error}", "type": "error"})
+        DATA["TO_FLASH"].append({"content": translated("flash.import_warning", error=error) or f"Import warning: {error}", "type": "error"})
     created = results.get("created", [])
     overwritten = results.get("overwritten", [])
     skipped = results.get("skipped", [])
     failed = results.get("failed", [])
     if created:
-        DATA["TO_FLASH"].append({"content": f"Imported custom configuration{'s' if len(created) > 1 else ''}: {', '.join(created)}", "type": "success"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "configs.flash.imported_custom_configuration_other" if len(created) > 1 else "configs.flash.imported_custom_configuration_one",
+                    names=", ".join(created),
+                )
+                or f"Imported custom configuration{'s' if len(created) > 1 else ''}: {', '.join(created)}",
+                "type": "success",
+            }
+        )
     if overwritten:
         DATA["TO_FLASH"].append(
-            {"content": f"Overwrote custom configuration{'s' if len(overwritten) > 1 else ''}: {', '.join(overwritten)}", "type": "success"}
+            {
+                "content": translated(
+                    "configs.flash.overwrote_custom_configuration_other" if len(overwritten) > 1 else "configs.flash.overwrote_custom_configuration_one",
+                    names=", ".join(overwritten),
+                )
+                or f"Overwrote custom configuration{'s' if len(overwritten) > 1 else ''}: {', '.join(overwritten)}",
+                "type": "success",
+            }
         )
     if skipped:
-        DATA["TO_FLASH"].append({"content": f"Skipped custom configuration{'s' if len(skipped) > 1 else ''}: {', '.join(skipped)}", "type": "warning"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "configs.flash.skipped_custom_configuration_other" if len(skipped) > 1 else "configs.flash.skipped_custom_configuration_one",
+                    names=", ".join(skipped),
+                )
+                or f"Skipped custom configuration{'s' if len(skipped) > 1 else ''}: {', '.join(skipped)}",
+                "type": "warning",
+            }
+        )
     if failed:
-        DATA["TO_FLASH"].append({"content": f"Failed to import custom configuration{'s' if len(failed) > 1 else ''}: {', '.join(failed)}", "type": "error"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "configs.flash.failed_import_custom_configuration_other" if len(failed) > 1 else "configs.flash.failed_import_custom_configuration_one",
+                    names=", ".join(failed),
+                )
+                or f"Failed to import custom configuration{'s' if len(failed) > 1 else ''}: {', '.join(failed)}",
+                "type": "error",
+            }
+        )
 
 
 def _use_modsecurity_global_crs() -> bool:
@@ -268,34 +305,36 @@ def configs_convert():
     # Split into two checks on purpose, as `services_mode_convert` does: one message for both causes
     # sends an operator looking at the wrong thing.
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "configs")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "configs")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "configs")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
     verify_data_in_form(
         data={"configs": None},
-        err_message="Missing configs parameter on /configs/convert.",
+        err_message=translated("configs.flash.missing_configs_parameter_configs_convert") or "Missing configs parameter on /configs/convert.",
         redirect_url="configs",
         next=True,
     )
     verify_data_in_form(
         data={"convert_to": None},
-        err_message="Missing convert_to parameter on /configs/convert.",
+        err_message=translated("configs.flash.missing_convert_parameter_configs_convert") or "Missing convert_to parameter on /configs/convert.",
         redirect_url="configs",
         next=True,
     )
 
     raw_configs = request.form["configs"]
     if not raw_configs:
-        return handle_error("No configs selected.", "configs", True)
+        return handle_error(translated("configs.flash.no_configs_selected") or "No configs selected.", "configs", True)
     try:
         configs = loads(raw_configs)
     except JSONDecodeError:
-        return handle_error("Invalid configs parameter on /configs/convert.", "configs", True)
+        return handle_error(
+            translated("configs.flash.invalid_configs_parameter_configs_convert") or "Invalid configs parameter on /configs/convert.", "configs", True
+        )
 
     convert_to = request.form["convert_to"]
     if convert_to not in ("online", "draft"):
-        return handle_error("Invalid convert_to parameter.", "configs", True)
+        return handle_error(translated("flash.invalid_convert_parameter") or "Invalid convert_to parameter.", "configs", True)
     DATA.load_from_file()
 
     def convert_configs(configs: List[Dict[str, str]], convert_to: str):
@@ -334,20 +373,45 @@ def configs_convert():
 
         for non_editable_config in non_editable_configs:
             DATA["TO_FLASH"].append(
-                {"content": f"Custom config {non_editable_config} is not a UI/API custom config and will not be converted.", "type": "error"}
+                {
+                    "content": translated("configs.flash.custom_config_not_ui_api_custom", non_editable_config=non_editable_config)
+                    or f"Custom config {non_editable_config} is not a UI/API custom config and will not be converted.",
+                    "type": "error",
+                }
             )
 
         for non_convertible_config in non_convertible_configs:
             DATA["TO_FLASH"].append(
-                {"content": f"Custom config {non_convertible_config} is already a {convert_to} config and will not be converted.", "type": "error"}
+                {
+                    "content": translated(
+                        (
+                            "configs.flash.custom_config_already_draft_will_not"
+                            if convert_to == "draft"
+                            else "configs.flash.custom_config_already_online_will_not"
+                        ),
+                        non_convertible_config=non_convertible_config,
+                    )
+                    or f"Custom config {non_convertible_config} is already a {convert_to} config and will not be converted.",
+                    "type": "error",
+                }
             )
 
         for missing_config in missing_configs:
-            DATA["TO_FLASH"].append({"content": f"Custom config {missing_config} could not be found.", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("configs.flash.custom_config_could_not_found", missing_config=missing_config)
+                    or f"Custom config {missing_config} could not be found.",
+                    "type": "error",
+                }
+            )
 
         if not configs_to_convert:
             DATA["TO_FLASH"].append(
-                {"content": "All selected custom configs could not be found, are not UI/API custom configs or are already converted.", "type": "error"}
+                {
+                    "content": translated("configs.flash.all_selected_custom_configs_could_not")
+                    or "All selected custom configs could not be found, are not UI/API custom configs or are already converted.",
+                    "type": "error",
+                }
             )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
@@ -364,12 +428,27 @@ def configs_convert():
                     is_draft=convert_to == "draft",
                 )
             except Exception as e:
-                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": translated("flash.error_occurred_while_saving_custom_configs", e=e)
+                        or f"An error occurred while saving the custom configs: {e}",
+                        "type": "error",
+                    }
+                )
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
-        converted_labels = [f"{config[1]}/{config[2]}{f' for service {config[0]}' if config[0] else ''}" for config in configs_to_convert]
-        DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" configs: {', '.join(converted_labels)}", "type": "success"})
+        converted_labels = [f"{config[1]}/{config[2]}{f' ({config[0]})' if config[0] else ''}" for config in configs_to_convert]
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "configs.flash.converted_configs_draft" if convert_to == "draft" else "configs.flash.converted_configs_online",
+                    names=", ".join(converted_labels),
+                )
+                or f"Converted to \"{convert_to.title()}\" configs: {', '.join(converted_labels)}",
+                "type": "success",
+            }
+        )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -388,23 +467,25 @@ def configs_convert():
 @login_required
 def configs_delete():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "configs")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "configs")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "configs")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
     verify_data_in_form(
         data={"configs": None},
-        err_message="Missing configs parameter on /configs/delete.",
+        err_message=translated("configs.flash.missing_configs_parameter_configs_delete") or "Missing configs parameter on /configs/delete.",
         redirect_url="configs",
         next=True,
     )
     configs = request.form["configs"]
     if not configs:
-        return handle_error("No configs selected.", "configs", True)
+        return handle_error(translated("configs.flash.no_configs_selected") or "No configs selected.", "configs", True)
     try:
         configs = loads(configs)
     except JSONDecodeError:
-        return handle_error("Invalid configs parameter on /configs/delete.", "configs", True)
+        return handle_error(
+            translated("configs.flash.invalid_configs_parameter_configs_delete") or "Invalid configs parameter on /configs/delete.", "configs", True
+        )
     DATA.load_from_file()
 
     def delete_configs(configs: List[Dict[str, str]]):
@@ -416,7 +497,13 @@ def configs_delete():
         try:
             resp = API_CLIENT.delete_configs(configs)
         except Exception as e:
-            DATA["TO_FLASH"].append({"content": f"An error occurred while deleting the custom configs: {e}", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("configs.flash.error_occurred_while_deleting_custom_configs", e=e)
+                    or f"An error occurred while deleting the custom configs: {e}",
+                    "type": "error",
+                }
+            )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
@@ -426,17 +513,32 @@ def configs_delete():
         for skipped_config in skipped:
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"Custom config {skipped_config} is not a UI/API custom config and will not be deleted.",
+                    "content": translated("configs.flash.custom_config_not_ui_api_custom_2", skipped_config=skipped_config)
+                    or f"Custom config {skipped_config} is not a UI/API custom config and will not be deleted.",
                     "type": "error",
                 }
             )
 
         if not deleted:
-            DATA["TO_FLASH"].append({"content": "All selected custom configs could not be found or are not UI/API custom configs.", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("configs.flash.all_selected_custom_configs_could_not_2")
+                    or "All selected custom configs could not be found or are not UI/API custom configs.",
+                    "type": "error",
+                }
+            )
             DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
             return
 
-        DATA["TO_FLASH"].append({"content": f"Deleted config{'s' if len(deleted) > 1 else ''}: {', '.join(sorted(deleted))}", "type": "success"})
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(
+                    "configs.flash.deleted_config_other" if len(deleted) > 1 else "configs.flash.deleted_config_one", names=", ".join(sorted(deleted))
+                )
+                or f"Deleted config{'s' if len(deleted) > 1 else ''}: {', '.join(sorted(deleted))}",
+                "type": "success",
+            }
+        )
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
@@ -456,44 +558,50 @@ def configs_delete():
 def configs_new():
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "configs")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "configs")
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "configs")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
         verify_data_in_form(
             data={"service": None},
-            err_message="Missing service parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_service_parameter_configs_new") or "Missing service parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if service != "global" and service not in services:
-            return handle_error(f"Service {service} does not exist.", "configs.configs_new", True)
+            return handle_error(
+                translated("flash.service_does_not_exist", service=service) or f"Service {service} does not exist.", "configs.configs_new", True
+            )
 
         verify_data_in_form(
             data={"type": None},
-            err_message="Missing type parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_type_parameter_configs_new") or "Missing type parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         config_type = request.form["type"]
         if config_type not in CONFIG_TYPES:
-            return handle_error("Invalid type parameter on /configs/new.", "configs.configs_new", True)
+            return handle_error(
+                translated("configs.flash.invalid_type_parameter_configs_new") or "Invalid type parameter on /configs/new.", "configs.configs_new", True
+            )
 
         verify_data_in_form(
             data={"name": None},
-            err_message="Missing name parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_name_parameter_configs_new") or "Missing name parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         config_name = request.form["name"]
         if not match(CONFIG_NAME_RX, config_name):
-            return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
+            return handle_error(
+                translated("configs.flash.invalid_name_parameter_configs_new") or "Invalid name parameter on /configs/new.", "configs.configs_new", True
+            )
 
         verify_data_in_form(
             data={"value": None},
-            err_message="Missing value parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_value_parameter_configs_new") or "Missing value parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
@@ -534,17 +642,35 @@ def configs_new():
                 if "already exists" in error_msg:
                     DATA["TO_FLASH"].append(
                         {
-                            "content": f"Config {config_type}/{config_name}{' for service ' + service if service else ''} already exists",
+                            "content": translated(
+                                "configs.flash.config_already_exists_service" if service else "configs.flash.config_already_exists",
+                                config_type=config_type,
+                                config_name=config_name,
+                                service=service,
+                            )
+                            or f"Config {config_type}/{config_name}{' for service ' + service if service else ''} already exists",
                             "type": "error",
                         }
                     )
                     DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                     return
-                DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error_msg}", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {
+                        "content": translated("configs.flash.error_occurred_while_saving_custom_configs", error_msg=error_msg)
+                        or f"An error occurred while saving the custom configs: {error_msg}",
+                        "type": "error",
+                    }
+                )
                 return
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"Created custom configuration {config_type}/{config_name}{' for service ' + service if service else ''}",
+                    "content": translated(
+                        "configs.flash.created_custom_configuration_service" if service else "configs.flash.created_custom_configuration",
+                        config_type=config_type,
+                        config_name=config_name,
+                        service=service,
+                    )
+                    or f"Created custom configuration {config_type}/{config_name}{' for service ' + service if service else ''}",
                     "type": "success",
                 }
             )
@@ -568,10 +694,18 @@ def configs_new():
     is_draft = "no"
 
     if clone:
-        config_service, config_type, config_name = clone.split("/")
-        db_custom_config = API_CLIENT.get_config_item(config_service if config_service != "global" else None, config_type, config_name, with_data=True)
-        clone = db_custom_config.get("data", "")
-        is_draft = "yes" if db_custom_config.get("is_draft") else "no"
+        clone_parts = clone.split("/")
+        db_custom_config = None
+        if len(clone_parts) == 3:
+            config_service, config_type, config_name = clone_parts
+            db_custom_config = API_CLIENT.get_config_item(config_service if config_service != "global" else None, config_type, config_name, with_data=True)
+        if not db_custom_config:
+            flash(translated("configs.flash.config_does_not_exist", clone=clone) or f"Config {clone} does not exist.", "error")
+            config_service = config_type = config_name = ""
+            clone = ""
+        else:
+            clone = db_custom_config.get("data", "")
+            is_draft = "yes" if db_custom_config.get("is_draft") else "no"
 
     return render_template(
         "config_edit.html",
@@ -596,68 +730,95 @@ def configs_edit(service: str, config_type: str, name: str):
 
     db_config = API_CLIENT.get_config_item(service, config_type, name, with_data=True)
     if not db_config:
-        return handle_error(f"Config {config_type}/{name}{' for service ' + service if service else ''} does not exist.", "configs", True)
+        # LOW (Q6): `value` used to carry a raw, never-translated " for service X" fragment into
+        # an otherwise fully translated sentence (a de user saw "... existiert nicht." with an
+        # English tail). The fragment itself is now translated too.
+        return handle_error(
+            translated(
+                "configs.flash.config_does_not_exist_service" if service else "configs.flash.config_does_not_exist_2",
+                config_type=config_type,
+                name=name,
+                service=service,
+            )
+            or f"Config {config_type}/{name}{f' for service {service}' if service else ''} does not exist.",
+            "configs",
+            True,
+        )
     is_draft = "yes" if db_config.get("is_draft") else "no"
 
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "configs")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "configs")
         if is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "configs")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
         if not db_config["template"] and not is_editable_method(db_config["method"]):
             return handle_error(
-                f"Config {config_type}/{name}{' for service ' + service if service else ''} is not a UI/API custom config and cannot be edited.",
+                translated(
+                    "configs.flash.config_not_ui_api_custom_config_service" if service else "configs.flash.config_not_ui_api_custom_config",
+                    config_type=config_type,
+                    name=name,
+                    service=service,
+                )
+                or f"Config {config_type}/{name}{' for service ' + service if service else ''} is not a UI/API custom config and cannot be edited.",
                 "configs",
                 True,
             )
 
         verify_data_in_form(
             data={"service": None},
-            err_message="Missing service parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_service_parameter_configs_new") or "Missing service parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         new_service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if new_service != "global" and new_service not in services:
-            return handle_error(f"Service {new_service} does not exist.", "configs.configs_new", True)
+            return handle_error(
+                translated("configs.flash.service_does_not_exist", new_service=new_service) or f"Service {new_service} does not exist.",
+                "configs.configs_new",
+                True,
+            )
 
         if new_service == "global":
             new_service = None
 
         verify_data_in_form(
             data={"type": None},
-            err_message="Missing type parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_type_parameter_configs_new") or "Missing type parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         new_type = request.form["type"]
         if new_type not in CONFIG_TYPES:
-            return handle_error("Invalid type parameter on /configs/new.", "configs.configs_new", True)
+            return handle_error(
+                translated("configs.flash.invalid_type_parameter_configs_new") or "Invalid type parameter on /configs/new.", "configs.configs_new", True
+            )
         new_type = new_type.lower()
 
         verify_data_in_form(
             data={"name": None},
-            err_message="Missing name parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_name_parameter_configs_new") or "Missing name parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
         new_name = secure_filename(request.form["name"])
         if not match(CONFIG_NAME_RX, new_name):
-            return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
+            return handle_error(
+                translated("configs.flash.invalid_name_parameter_configs_new") or "Invalid name parameter on /configs/new.", "configs.configs_new", True
+            )
 
         # Forbid renaming template-based configs (content can still be edited)
         if db_config.get("template") and new_name != name:
             return handle_error(
-                "Renaming a template-based custom config is not allowed.",
+                translated("configs.flash.renaming_template_based_custom_config_not") or "Renaming a template-based custom config is not allowed.",
                 "configs",
                 True,
             )
 
         verify_data_in_form(
             data={"value": None},
-            err_message="Missing value parameter on /configs/new.",
+            err_message=translated("configs.flash.missing_value_parameter_configs_new") or "Missing value parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
@@ -675,7 +836,7 @@ def configs_edit(service: str, config_type: str, name: str):
             and db_config.get("is_draft", False) == new_is_draft
         )
         if no_changes:
-            return handle_error("No values were changed.", "configs", True)
+            return handle_error(translated("configs.flash.no_values_changed") or "No values were changed.", "configs", True)
 
         try:
             API_CLIENT.update_config(
@@ -684,9 +845,17 @@ def configs_edit(service: str, config_type: str, name: str):
                 name,
                 body={"service": new_service, "type": new_type, "name": new_name, "data": config_value, "is_draft": new_is_draft},
             )
-            flash(f"Saved custom configuration {new_type}/{new_name}{' for service ' + new_service if new_service else ''}")
+            flash(
+                translated(
+                    "configs.flash.saved_custom_configuration_service" if new_service else "configs.flash.saved_custom_configuration",
+                    new_type=new_type,
+                    new_name=new_name,
+                    service=new_service,
+                )
+                or f"Saved custom configuration {new_type}/{new_name}{' for service ' + new_service if new_service else ''}"
+            )
         except Exception as e:
-            flash(f"An error occurred while saving the custom configs: {e}", "error")
+            flash(translated("flash.error_occurred_while_saving_custom_configs", e=e) or f"An error occurred while saving the custom configs: {e}", "error")
 
         return redirect(
             url_for(
@@ -723,41 +892,64 @@ def configs_export():
         try:
             decoded = loads(selection_raw)
         except JSONDecodeError:
-            return handle_error("Invalid configs parameter on /configs/export.", "configs", True)
+            return handle_error(
+                translated("configs.flash.invalid_configs_parameter_configs_export") or "Invalid configs parameter on /configs/export.", "configs", True
+            )
         if not isinstance(decoded, list) or not decoded:
-            return handle_error("Invalid configs parameter on /configs/export.", "configs", True)
+            return handle_error(
+                translated("configs.flash.invalid_configs_parameter_configs_export") or "Invalid configs parameter on /configs/export.", "configs", True
+            )
         selection = []
         for entry in decoded:
             if not isinstance(entry, dict):
-                return handle_error("Invalid configs parameter on /configs/export.", "configs", True)
+                return handle_error(
+                    translated("configs.flash.invalid_configs_parameter_configs_export") or "Invalid configs parameter on /configs/export.", "configs", True
+                )
             entry_service = entry.get("service")
             entry_type = entry.get("type")
             entry_name = entry.get("name")
             if not isinstance(entry_type, str) or not isinstance(entry_name, str):
-                return handle_error("Invalid configs parameter on /configs/export.", "configs", True)
+                return handle_error(
+                    translated("configs.flash.invalid_configs_parameter_configs_export") or "Invalid configs parameter on /configs/export.", "configs", True
+                )
             normalized_service: Optional[str]
             if entry_service in (None, "", "global"):
                 normalized_service = None
             elif isinstance(entry_service, str):
                 normalized_service = entry_service
             else:
-                return handle_error("Invalid configs parameter on /configs/export.", "configs", True)
+                return handle_error(
+                    translated("configs.flash.invalid_configs_parameter_configs_export") or "Invalid configs parameter on /configs/export.", "configs", True
+                )
             selection.append((normalized_service, entry_type.strip().replace("-", "_").lower(), entry_name))
 
     try:
         db_configs = API_CLIENT.get_configs(with_drafts=True, with_data=True)
     except Exception as fetch_err:
-        return handle_error(f"Could not fetch custom configurations from the API: {fetch_err}", "configs", True)
+        return handle_error(
+            translated("configs.flash.could_not_fetch_custom_configurations_api", fetch_err=fetch_err)
+            or f"Could not fetch custom configurations from the API: {fetch_err}",
+            "configs",
+            True,
+        )
     exported: List[Dict] = []
     selection_set = set(selection) if selection else None
 
     for db_config in db_configs:
-        if db_config.get("template"):
+        # A template-provided config is left out of a whole-inventory export (it is the template's,
+        # not the operator's), but one the operator SELECTED is exported: skipping it too turned
+        # Export on a template row into "No custom configurations to export." (QA-UI M29). Its
+        # round trip is harmless -- the import skips data identical to the template's.
+        if db_config.get("template") and selection_set is None:
             continue
-        service_id = db_config.get("service_id") or None
+        # The API names the column `service` ("global" for a global config), as the import path reads it.
+        service_id = db_config.get("service") or None
+        if service_id in ("global", ""):
+            service_id = None
         config_type = db_config["type"]
         config_name = db_config["name"]
-        if selection_set is not None and (service_id, config_type, config_name) not in selection_set:
+        # Normalised like the selection: template-provided rows carry the hyphenated type.
+        if selection_set is not None and (service_id, config_type.strip().replace("-", "_").lower(), config_name) not in selection_set:
             continue
         raw_data = db_config.get("data", b"") or b""
         if isinstance(raw_data, bytes):
@@ -778,7 +970,7 @@ def configs_export():
         )
 
     if not exported:
-        return handle_error("No custom configurations to export.", "configs", True)
+        return handle_error(translated("configs.flash.no_custom_configurations_export") or "No custom configurations to export.", "configs", True)
 
     payload = {
         "version": EXPORT_FORMAT_VERSION,
@@ -795,26 +987,30 @@ def configs_export():
 @login_required
 def configs_import():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "configs")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "configs")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "configs")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
     configs_file = request.files.get("configs_file")
     if not configs_file or not configs_file.filename:
-        return handle_error("No custom configurations file uploaded.", "configs", True)
+        return handle_error(translated("configs.flash.no_custom_configurations_file_uploaded") or "No custom configurations file uploaded.", "configs", True)
 
     try:
         content = configs_file.read().decode("utf-8")
     except UnicodeDecodeError:
-        return handle_error("Invalid file encoding. Please upload a UTF-8 JSON file.", "configs", True)
+        return handle_error(
+            translated("configs.flash.invalid_file_encoding_please_upload_utf") or "Invalid file encoding. Please upload a UTF-8 JSON file.", "configs", True
+        )
 
     parsed_configs, parse_errors = parse_configs_export(content)
     if not parsed_configs and parse_errors:
         for error in parse_errors:
-            flash(f"Import error: {error}", "error")
+            flash(translated("configs.flash.import_error", error=error) or f"Import error: {error}", "error")
         return redirect(url_for("configs.configs_page"))
     if not parsed_configs:
-        return handle_error("No custom configurations found in the import file.", "configs", True)
+        return handle_error(
+            translated("configs.flash.no_custom_configurations_found_import_file") or "No custom configurations found in the import file.", "configs", True
+        )
 
     overwrite = request.form.get("overwrite", "no") == "yes"
     DATA.load_from_file()

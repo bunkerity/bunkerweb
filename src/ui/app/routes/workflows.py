@@ -5,6 +5,7 @@ from default_server import is_reserved_default_server  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.routes.utils import cors_required
 from app.utils import flash, is_readonly_request
 
@@ -19,11 +20,11 @@ def _redirect():
 
 def _readonly():
     if API_CLIENT.readonly:
-        flash("Database is in read-only mode", "error")
+        flash(translated("flash.database_read_only_mode") or "Database is in read-only mode", "error")
         return True
     if is_readonly_request(API_CLIENT.readonly):
         # Two causes, two messages: the database is fine here, the session's permission is not.
-        flash("You do not have the write permission", "error")
+        flash(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "error")
         return True
     return False
 
@@ -31,7 +32,9 @@ def _readonly():
 def _services():
     values = list(dict.fromkeys(value.strip() for value in request.form.getlist("service_ids") if value.strip()))
     if len(values) > MAX_SERVICES:
-        raise ValueError(f"A workflow cannot be attached to more than {MAX_SERVICES} services")
+        raise ValueError(
+            translated("workflows.flash.too_many_services", value=MAX_SERVICES) or f"A workflow cannot be attached to more than {MAX_SERVICES} services"
+        )
     return values
 
 
@@ -42,14 +45,14 @@ def _identity(*, required=True):
     if name:
         payload["name"] = name
     elif required:
-        raise ValueError("The workflow name is required")
+        raise ValueError(translated("workflows.flash.name_required") or "The workflow name is required")
 
     # Keyed on presence, not truthiness: the edit modal always submits the textarea, so an
     # emptied description must reach the API as "" instead of being silently dropped.
     if "description" in request.form or required:
         description = (request.form.get("description") or "").strip()
         if len(description) > 4000:
-            raise ValueError("The description cannot exceed 4000 characters")
+            raise ValueError(translated("flash.description_too_long") or "The description cannot exceed 4000 characters")
         payload["description"] = description
     return payload
 
@@ -62,7 +65,7 @@ def workflows_page():
         rows = result.get("workflows", [])
         total = result.get("total", len(rows))
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch workflows: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_fetch_workflows", message=exc.message) or f"Could not fetch workflows: {exc.message}", "error")
         rows, total = [], 0
 
     try:
@@ -70,7 +73,11 @@ def workflows_page():
         # workflow assignment target (DS-B4 handoff item 4 / criticos-DS-B optional 8).
         services = [service for service in API_CLIENT.get_services(with_drafts=True) if not is_reserved_default_server(service)]
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch services for workflow assignments: {exc.message}", "error")
+        flash(
+            translated("workflows.flash.could_not_fetch_services_workflow_assignments", message=exc.message)
+            or f"Could not fetch services for workflow assignments: {exc.message}",
+            "error",
+        )
         services = []
 
     return render_template("workflows.html", workflows=rows, total=total, truncated=total > len(rows), services=services)
@@ -82,7 +89,7 @@ def workflows_editor(workflow_id):
     try:
         workflow = API_CLIENT.get_workflow(workflow_id)
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_fetch_workflow", message=exc.message) or f"Could not fetch the workflow: {exc.message}", "error")
         return _redirect()
 
     try:
@@ -90,7 +97,7 @@ def workflows_editor(workflow_id):
         # build a reference the validator would refuse.
         groups = API_CLIENT.get_resource_groups()
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch resource groups: {exc.message}", "error")
+        flash(translated("flash.could_not_fetch_resource_groups", message=exc.message) or f"Could not fetch resource groups: {exc.message}", "error")
         groups = {}
 
     return render_template("workflow_editor.html", workflow=workflow, groups=groups)
@@ -105,11 +112,11 @@ def workflows_create():
         payload = _identity()
         payload["service_ids"] = _services()
         API_CLIENT.create_workflow(**payload)
-        flash(f"Workflow {payload['name']} created successfully")
+        flash(translated("workflows.flash.workflow_created_successfully", value=payload["name"]) or f"Workflow {payload['name']} created successfully")
     except ValueError as exc:
         flash(str(exc), "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not create the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_create_workflow", message=exc.message) or f"Could not create the workflow: {exc.message}", "error")
     return _redirect()
 
 
@@ -120,15 +127,15 @@ def workflows_update():
         return _redirect()
     workflow_id = (request.form.get("workflow_id") or "").strip()
     if not workflow_id:
-        flash("The workflow is required", "error")
+        flash(translated("workflows.flash.workflow_required") or "The workflow is required", "error")
         return _redirect()
     try:
         API_CLIENT.update_workflow(workflow_id, **_identity(required=False))
-        flash("Workflow updated successfully")
+        flash(translated("workflows.flash.workflow_updated_successfully") or "Workflow updated successfully")
     except ValueError as exc:
         flash(str(exc), "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not update the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_update_workflow", message=exc.message) or f"Could not update the workflow: {exc.message}", "error")
     return _redirect()
 
 
@@ -140,13 +147,13 @@ def workflows_clone():
     workflow_id = (request.form.get("workflow_id") or "").strip()
     name = (request.form.get("name") or "").strip()
     if not workflow_id or not name:
-        flash("The workflow and the new name are required", "error")
+        flash(translated("workflows.flash.workflow_new_name_are_required") or "The workflow and the new name are required", "error")
         return _redirect()
     try:
         API_CLIENT.clone_workflow(workflow_id, name)
-        flash(f"Workflow cloned as {name}")
+        flash(translated("workflows.flash.workflow_cloned", name=name) or f"Workflow cloned as {name}")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not clone the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_clone_workflow", message=exc.message) or f"Could not clone the workflow: {exc.message}", "error")
     return _redirect()
 
 
@@ -157,15 +164,15 @@ def workflows_delete():
         return _redirect()
     workflow_id = (request.form.get("workflow_id") or "").strip()
     if not workflow_id:
-        flash("The workflow is required", "error")
+        flash(translated("workflows.flash.workflow_required") or "The workflow is required", "error")
         return _redirect()
     try:
         API_CLIENT.delete_workflow(workflow_id)
-        flash("Workflow deleted successfully")
+        flash(translated("workflows.flash.workflow_deleted_successfully") or "Workflow deleted successfully")
     except (ApiClientError, ApiUnavailableError) as exc:
         # A workflow still attached to a service is refused by the API on purpose: detaching
         # is the operator's decision, not a side effect of a delete.
-        flash(f"Could not delete the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_delete_workflow", message=exc.message) or f"Could not delete the workflow: {exc.message}", "error")
     return _redirect()
 
 
@@ -177,7 +184,7 @@ def workflows_attach():
     workflow_id = (request.form.get("workflow_id") or "").strip()
     try:
         if not workflow_id:
-            raise ValueError("The workflow is required")
+            raise ValueError(translated("workflows.flash.workflow_required") or "The workflow is required")
         service_ids = _services()
         workflow = API_CLIENT.get_workflow(workflow_id)
         attached = set(workflow.get("services", []))
@@ -187,16 +194,18 @@ def workflows_attach():
         # "deselect everything" and silently unprotect every service the workflow covered.
         offered = set((request.form.get("offered_service_ids") or "").split())
         if not offered:
-            raise ValueError("The service list could not be read; reopen the page and try again")
+            raise ValueError(
+                translated("workflows.flash.service_list_not_read_reopen_page") or "The service list could not be read; reopen the page and try again"
+            )
         for service_id in sorted(selected - attached):
             API_CLIENT.attach_workflow(workflow_id, service_id)
         for service_id in sorted((attached - selected) & offered):
             API_CLIENT.detach_workflow(workflow_id, service_id)
-        flash(f"Workflow services updated ({len(selected)} attached)")
+        flash(translated("workflows.flash.workflow_services_updated_attached", len=len(selected)) or f"Workflow services updated ({len(selected)} attached)")
     except ValueError as exc:
         flash(str(exc), "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not attach the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_attach_workflow", message=exc.message) or f"Could not attach the workflow: {exc.message}", "error")
     return _redirect()
 
 
@@ -208,13 +217,13 @@ def workflows_detach():
     workflow_id = (request.form.get("workflow_id") or "").strip()
     service_id = (request.form.get("service_id") or "").strip()
     if not workflow_id or not service_id:
-        flash("The workflow and the service are required", "error")
+        flash(translated("workflows.flash.workflow_service_are_required") or "The workflow and the service are required", "error")
         return _redirect()
     try:
         API_CLIENT.detach_workflow(workflow_id, service_id)
-        flash("Workflow detached successfully")
+        flash(translated("workflows.flash.workflow_detached_successfully") or "Workflow detached successfully")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not detach the workflow: {exc.message}", "error")
+        flash(translated("workflows.flash.could_not_detach_workflow", message=exc.message) or f"Could not detach the workflow: {exc.message}", "error")
     return _redirect()
 
 

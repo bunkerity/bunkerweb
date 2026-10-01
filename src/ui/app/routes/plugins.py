@@ -10,7 +10,7 @@ from shutil import move, rmtree
 from sys import modules as sys_modules, path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
@@ -37,6 +37,7 @@ from app.dependencies import (
     PRO_PLUGINS_PATH,
 )
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.i18n import translated
 from app.models.plugin_catalog import (
     SOURCES,
     build_catalog_view,
@@ -48,6 +49,7 @@ from app.models.plugin_catalog import (
     item_compatible,
     read_cached,
     repack_plugin,
+    replaceable,
     verify_digest,
 )
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR, get_activation_map, is_plugin_active
@@ -112,7 +114,14 @@ def catalog_context(kind: str) -> dict:
         installed = BW_CONFIG.get_plugins(with_settings=False) if kind == "plugins" else API_CLIENT.get_templates()
     with suppress(Exception):
         bw_version = API_CLIENT.get_metadata().get("version", "unknown")
-    return build_catalog_view(kind, DATA.get("PLUGIN_CATALOG"), installed, bw_version)
+    view = build_catalog_view(kind, DATA.get("PLUGIN_CATALOG"), installed, bw_version)
+    # The update preview needs the installed settings, which are 95% of the plugin payload, so
+    # they are fetched only when some card actually offers an update. On failure the preview
+    # stays unknown and the card offers no Update button.
+    if kind == "plugins" and any(item.get("state") == "update" for item in view["catalog_items"]):
+        with suppress(Exception):
+            view = build_catalog_view(kind, DATA.get("PLUGIN_CATALOG"), BW_CONFIG.get_plugins(), bw_version)
+    return view
 
 
 # Same three neutralizing headers the API sets on an icon response: the bytes are
@@ -155,14 +164,14 @@ def plugin_icon(plugin: str):
 @login_required
 def delete_plugin():
     if API_CLIENT.readonly:
-        return Response("Database is in read-only mode", 403)
+        return Response(translated("flash.database_read_only_mode") or "Database is in read-only mode", 403)
 
     if not current_user.admin:
-        return Response("Plugin management is restricted to administrators", 403)
+        return Response(translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", 403)
 
     verify_data_in_form(
         data={"plugins": None},
-        err_message="Missing plugins parameter on /plugins/delete.",
+        err_message=translated("plugins.flash.missing_plugins_parameter_plugins_delete") or "Missing plugins parameter on /plugins/delete.",
         redirect_url="plugins",
         next=True,
     )
@@ -178,16 +187,30 @@ def delete_plugin():
             for plugin in plugins:
                 try:
                     API_CLIENT.delete_plugin(plugin)
-                    DATA["TO_FLASH"].append({"content": f"Deleted plugin {plugin} successfully", "type": "success"})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.deleted_plugin_successfully", plugin=plugin) or f"Deleted plugin {plugin} successfully",
+                            "type": "success",
+                        }
+                    )
                     deleted_plugins.append(plugin)
                 except ApiClientError as e:
                     if "not found" in e.message.lower() or "does not exist" in e.message.lower():
-                        message = f"Plugin with id {plugin} not found"
+                        message = translated("plugins.flash.plugin_not_found", plugin=plugin) or f"Plugin with id {plugin} not found"
                     else:
-                        message = f"Couldn't delete plugin {plugin} in database: {e.message}"
+                        message = (
+                            translated("plugins.flash.couldn_t_delete_plugin_in_database", plugin=plugin, message=e.message)
+                            or f"Couldn't delete plugin {plugin} in database: {e.message}"
+                        )
                     DATA["TO_FLASH"].append({"content": message, "type": "error"})
                 except ApiUnavailableError as e:
-                    DATA["TO_FLASH"].append({"content": f"Couldn't delete plugin {plugin}: {e.message}", "type": "error"})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.couldn_t_delete_plugin", plugin=plugin, message=e.message)
+                            or f"Couldn't delete plugin {plugin}: {e.message}",
+                            "type": "error",
+                        }
+                    )
 
             if deleted_plugins:
                 with suppress(ApiClientError, ApiUnavailableError):
@@ -210,14 +233,14 @@ def delete_plugin():
 @login_required
 def enable_plugin():
     if API_CLIENT.readonly:
-        return Response("Database is in read-only mode", 403)
+        return Response(translated("flash.database_read_only_mode") or "Database is in read-only mode", 403)
 
     if not current_user.admin:
-        return Response("Plugin management is restricted to administrators", 403)
+        return Response(translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", 403)
 
     verify_data_in_form(
         data={"plugin": None, "enabled": None},
-        err_message="Missing plugin or enabled parameter on /plugins/enable.",
+        err_message=translated("plugins.flash.missing_plugin_enabled_parameter_plugins_enable") or "Missing plugin or enabled parameter on /plugins/enable.",
         redirect_url="plugins",
         next=True,
     )
@@ -241,17 +264,36 @@ def enable_plugin():
             API_CLIENT.set_plugin_enabled(plugin, enabled)
             with suppress(ApiClientError, ApiUnavailableError):
                 API_CLIENT.checked_changes(["config"], plugins_changes=[plugin], value=True)
-            state = "enabled" if enabled else "disabled"
-            DATA["TO_FLASH"].append({"content": f"Plugin {plugin} {state} successfully", "type": "success"})
+            if enabled:
+                message = translated("plugins.flash.plugin_enabled", plugin=plugin) or f"Plugin {plugin} enabled successfully"
+            else:
+                message = translated("plugins.flash.plugin_disabled", plugin=plugin) or f"Plugin {plugin} disabled successfully"
+            DATA["TO_FLASH"].append(
+                {
+                    "content": message,
+                    "type": "success",
+                }
+            )
         except (ApiClientError, ApiUnavailableError) as e:
-            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e.message}", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("plugins.flash.couldn_t_update_plugin", plugin=plugin, message=e.message)
+                    or f"Couldn't update plugin {plugin}: {e.message}",
+                    "type": "error",
+                }
+            )
         except Exception as e:
             # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
             # futures are never retrieved, so anything uncaught here vanishes with no log and no
             # flash while the user waits on /loading for the 60s watchdog in main.py. The `finally`
             # below clears RELOADING, but only this arm tells the operator what went wrong.
             LOGGER.exception(f"Failed to toggle plugin {plugin!r}")
-            DATA["TO_FLASH"].append({"content": f"Couldn't update plugin {plugin}: {e}", "type": "error"})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("plugins.flash.couldn_t_update_plugin_2", plugin=plugin, e=e) or f"Couldn't update plugin {plugin}: {e}",
+                    "type": "error",
+                }
+            )
         finally:
             DATA["RELOADING"] = False
 
@@ -443,23 +485,27 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 @login_required
 def plugins_refresh():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "plugins")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "plugins")
 
     if not current_user.admin:
-        return handle_error("Plugin management is restricted to administrators", "plugins")
+        return handle_error(
+            translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", "plugins"
+        )
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
     verify_data_in_form(
         data={"csrf_token": None},
-        err_message="Missing csrf_token parameter on /plugins.",
+        err_message=translated("plugins.flash.missing_csrf_token_parameter_plugins") or "Missing csrf_token parameter on /plugins.",
         redirect_url="plugins",
         next=True,
     )
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
-        return handle_error("Please upload new plugins to reload plugins", "plugins", True)
+        return handle_error(
+            translated("plugins.flash.please_upload_new_plugins_reload_plugins") or "Please upload new plugins to reload plugins", "plugins", True
+        )
     DATA.load_from_file()
 
     errors = 0
@@ -486,11 +532,17 @@ def plugins_refresh():
                         except KeyError:
                             is_dir = True
                         safe_zip_extractall(zip_file, str(temp_folder_path))
-                except BadZipFile:
+                except (BadZipFile, ValueError):  # ValueError: traversal or past the expansion budget
                     errors += 1
                     message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.check_logs_more_details", message=message) or f"{message}, check logs for more details",
+                            "type": "error",
+                            "save": False,
+                        }
+                    )
             else:
                 try:
                     with tar_open(str(tmp_ui_path.joinpath(file)), errorlevel=2) as tar_file:
@@ -499,21 +551,50 @@ def plugins_refresh():
                         except KeyError:
                             is_dir = True
                         safe_tar_extractall(tar_file, str(temp_folder_path))
+                except ValueError:  # traversal or past the expansion budget, refused before writing
+                    errors += 1
+                    message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
+                    LOGGER.exception(message)
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.check_logs_more_details", message=message) or f"{message}, check logs for more details",
+                            "type": "error",
+                            "save": False,
+                        }
+                    )
                 except ReadError:
                     errors += 1
                     message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.check_logs_more_details", message=message) or f"{message}, check logs for more details",
+                            "type": "error",
+                            "save": False,
+                        }
+                    )
                 except CompressionError:
                     errors += 1
                     message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.check_logs_more_details", message=message) or f"{message}, check logs for more details",
+                            "type": "error",
+                            "save": False,
+                        }
+                    )
                 except HeaderError:
                     errors += 1
                     message = f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})"
                     LOGGER.exception(message)
-                    DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.check_logs_more_details", message=message) or f"{message}, check logs for more details",
+                            "type": "error",
+                            "save": False,
+                        }
+                    )
 
             if is_dir:
                 dirs = [d for d in listdir(str(temp_folder_path)) if temp_folder_path.joinpath(d).is_dir()]
@@ -542,7 +623,8 @@ def plugins_refresh():
                 errors += 1
                 DATA["TO_FLASH"].append(
                     {
-                        "content": f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
+                        "content": translated("plugins.flash.invalid_plugin_name_can_only_contain", temp_folder_name=temp_folder_name)
+                        or f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
                         "type": "error",
                         "save": False,
                     }
@@ -567,7 +649,8 @@ def plugins_refresh():
             errors += 1
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
+                    "content": translated("plugins.flash.not_valid_plugin_plugin_json_file", file=file, value=folder_name or temp_folder_name)
+                    or f"{file} is not a valid plugin (plugin.json file is missing) ({folder_name or temp_folder_name})",
                     "type": "error",
                     "save": False,
                 }
@@ -576,7 +659,16 @@ def plugins_refresh():
             errors += 1
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
+                    "content": translated(
+                        "plugins.flash.file_plugin_json_not_valid_line",
+                        file=file,
+                        msg=e.msg,
+                        lineno=e.lineno,
+                        colno=e.colno,
+                        pos=e.pos,
+                        value=folder_name or temp_folder_name,
+                    )
+                    or f"The file plugin.json in {file} is not valid ({e.msg}: line {e.lineno} column {e.colno} (char {e.pos})) ({folder_name or temp_folder_name})",
                     "type": "error",
                     "save": False,
                 }
@@ -585,14 +677,24 @@ def plugins_refresh():
             errors += 1
             DATA["TO_FLASH"].append(
                 {
-                    "content": f"The file plugin.json is missing one or more of the following keys: <i>{', '.join(PLUGIN_KEYS)}</i> ({folder_name or temp_folder_name})",
+                    "content": translated(
+                        "plugins.flash.file_plugin_json_missing_one_more", value=", ".join(PLUGIN_KEYS), value2=folder_name or temp_folder_name
+                    )
+                    or f"The file plugin.json is missing one or more of the following keys: {', '.join(PLUGIN_KEYS)} ({folder_name or temp_folder_name})",
                     "type": "error",
                     "save": False,
                 }
             )
         except FileExistsError:
             errors += 1
-            DATA["TO_FLASH"].append({"content": f"A plugin named {folder_name} already exists", "type": "error", "save": False})
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("plugins.flash.plugin_named_already_exists", folder_name=folder_name)
+                    or f"A plugin named {folder_name} already exists",
+                    "type": "error",
+                    "save": False,
+                }
+            )
         except (TarError, OSError) as e:
             errors += 1
             DATA["TO_FLASH"].append({"content": str(e), "type": "error", "save": False})
@@ -609,7 +711,9 @@ def plugins_refresh():
         plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
         for plugin in plugins:
             if plugin in new_plugins_ids:
-                DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {"content": translated("plugins.flash.plugin_already_exists", plugin=plugin) or f"Plugin {plugin} already exists", "type": "error"}
+                )
                 del new_plugins[new_plugins_ids.index(plugin)]
 
         if not new_plugins:
@@ -629,15 +733,31 @@ def plugins_refresh():
                 created = result.get("created", [])
                 errors = result.get("errors", [])
                 if created:
-                    DATA["TO_FLASH"].append({"content": f"Plugins uploaded successfully: {', '.join(created)}", "type": "success"})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.plugins_uploaded_successfully", value=", ".join(created))
+                            or f"Plugins uploaded successfully: {', '.join(created)}",
+                            "type": "success",
+                        }
+                    )
                 for error in errors:
-                    DATA["TO_FLASH"].append({"content": f"Plugin upload error ({error.get('file', '?')}): {error.get('error', 'unknown')}", "type": "error"})
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": translated("plugins.flash.plugin_upload_error", value=error.get("file", "?"), value2=error.get("error", "unknown"))
+                            or f"Plugin upload error ({error.get('file', '?')}): {error.get('error', 'unknown')}",
+                            "type": "error",
+                        }
+                    )
                 if not created and not errors:
-                    DATA["TO_FLASH"].append({"content": "Plugins uploaded successfully", "type": "success"})
+                    DATA["TO_FLASH"].append(
+                        {"content": translated("plugins.flash.plugins_uploaded_successfully_2") or "Plugins uploaded successfully", "type": "success"}
+                    )
             except (ApiClientError, ApiUnavailableError) as e:
-                DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins via API: {e}", "type": "error"})
+                DATA["TO_FLASH"].append(
+                    {"content": translated("plugins.flash.couldn_t_update_ui_plugins_via", e=e) or f"Couldn't update ui plugins via API: {e}", "type": "error"}
+                )
         else:
-            DATA["TO_FLASH"].append({"content": "No plugin data to upload", "type": "error"})
+            DATA["TO_FLASH"].append({"content": translated("plugins.flash.no_plugin_data_upload") or "No plugin data to upload", "type": "error"})
 
         DATA["RELOADING"] = False
 
@@ -671,37 +791,44 @@ def upload_plugin():
         file_name = Path(secure_filename(uploaded_file.filename)).name
         folder_name = file_name.rsplit(".", 2)[0]
 
-        with BytesIO(uploaded_file.read()) as plugin_file:
-            plugin_file.seek(0, 0)
-            plugins = []
-            if uploaded_file.filename.endswith(".zip"):
-                with ZipFile(plugin_file) as zip_file:
-                    for file in zip_file.namelist():
-                        if file.endswith("plugin.json"):
-                            plugins.append(basename(dirname(file)))
-                    if len(plugins) > 1:
-                        for file in zip_file.namelist():
-                            if isabs(file) or ".." in file:
-                                return {"status": "ko"}, 422
-
-                        safe_zip_extractall(zip_file, str(tmp_ui_path) + "/")
-            else:
-                with tar_open(fileobj=plugin_file) as tar_file:
-                    for file in tar_file.getnames():
-                        if file.endswith("plugin.json"):
-                            plugins.append(basename(dirname(file)))
-                    if len(plugins) > 1:
-                        for member in tar_file.getmembers():
-                            if isabs(member.name) or ".." in member.name:
-                                return {"status": "ko"}, 422
-
-                        safe_tar_extractall(tar_file, str(tmp_ui_path) + "/")
-
-            if len(plugins) <= 1:
+        # A file that only LOOKS like an archive (right extension, wrong bytes) raised straight out
+        # of the route: a 500 with a traceback in the log and a bare "Failed" in the page (QA-UI M27).
+        try:
+            with BytesIO(uploaded_file.read()) as plugin_file:
                 plugin_file.seek(0, 0)
-                # deepcode ignore PT: The folder name is being sanitized before
-                tmp_ui_path.joinpath(file_name).write_bytes(plugin_file.read())
-                return {"status": "ok"}, 201
+                plugins = []
+                if uploaded_file.filename.endswith(".zip"):
+                    with ZipFile(plugin_file) as zip_file:
+                        for file in zip_file.namelist():
+                            if file.endswith("plugin.json"):
+                                plugins.append(basename(dirname(file)))
+                        if len(plugins) > 1:
+                            for file in zip_file.namelist():
+                                if isabs(file) or ".." in file:
+                                    return {"status": "ko"}, 422
+
+                            safe_zip_extractall(zip_file, str(tmp_ui_path) + "/")
+                else:
+                    with tar_open(fileobj=plugin_file) as tar_file:
+                        for file in tar_file.getnames():
+                            if file.endswith("plugin.json"):
+                                plugins.append(basename(dirname(file)))
+                        if len(plugins) > 1:
+                            for member in tar_file.getmembers():
+                                if isabs(member.name) or ".." in member.name:
+                                    return {"status": "ko"}, 422
+
+                            safe_tar_extractall(tar_file, str(tmp_ui_path) + "/")
+
+                if len(plugins) <= 1:
+                    plugin_file.seek(0, 0)
+                    # deepcode ignore PT: The folder name is being sanitized before
+                    tmp_ui_path.joinpath(file_name).write_bytes(plugin_file.read())
+                    return {"status": "ok"}, 201
+        except (BadZipFile, TarError, EOFError, ValueError) as exc:  # ValueError: safe_*_extractall refusals
+            LOGGER.warning(f"Refused the uploaded plugin archive {file_name!r}: {exc}")
+            message = translated("plugins.flash.invalid_archive") or "The file is not a valid plugin archive (.zip, .tar.gz or .tar.xz)."
+            return {"status": "ko", "message": message}, 422
 
         for plugin in plugins:
             if tmp_ui_path.joinpath(folder_name, plugin).exists():
@@ -717,6 +844,204 @@ def upload_plugin():
     return {"status": "ok"}, 201
 
 
+class _Refusal(Exception):
+    """A catalogue action refused before anything was submitted; the message is flashed."""
+
+
+def _catalog_refusal() -> Optional[Response]:
+    """The three refusals every catalogue action makes before any lookup, let alone any network
+    call, so a direct POST that never rendered the page is refused with no side effect at all."""
+    if not catalog_enabled():
+        return handle_error(translated("plugins.flash.community_catalogue_disabled") or "The community catalogue is disabled", "plugins", True)
+    if API_CLIENT.readonly:
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "plugins", True)
+    if not current_user.admin:
+        return handle_error(
+            translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", "plugins", True
+        )
+    return None
+
+
+def _checked_catalog_item(plugin_id: str) -> Tuple[dict, str, str]:
+    """``(item, tag, digest)`` for one listed plugin, or ``_Refusal``. Shared by install and update.
+
+    Everything comes from the server-side cached listing; the request contributes only the id.
+    """
+    cached = DATA.get("PLUGIN_CATALOG")
+    item, section = find_item(cached, "plugins", plugin_id)
+    if not item or not section:
+        raise _Refusal(f"No catalogue entry named {plugin_id}")
+
+    # C5: the hourly refresh gates whether a FETCH happens and keeps the old value on failure --
+    # right for a star count, wrong for a supply-chain listing. Without this, a yanked vulnerable
+    # item stays installable forever whenever fetches keep failing. Checked here, at install time,
+    # against the value right now: a page left open overnight must not carry a stale install
+    # token. It is also what bounds the recorded-digest promise below.
+    _, fetched_at = read_cached(cached)
+    if is_stale(fetched_at):
+        raise _Refusal("The catalogue is out of date and cannot be installed from; wait for the next refresh")
+
+    tag = section.get("tag")
+    digest = section.get("sha256")
+    if not tag or not digest:
+        raise _Refusal(f"The cached catalogue entry for {plugin_id} is incomplete; wait for the next refresh")
+
+    # C6: `bw_version` in main.py is a local of the request-context builder, unreachable from here,
+    # so the route makes its own call -- and it FAILS CLOSED. An unreachable API is not permission
+    # to skip a version check.
+    try:
+        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
+    except (ApiClientError, ApiUnavailableError) as e:
+        raise _Refusal(f"Couldn't determine the BunkerWeb version, refusing to install: {e.message}") from e
+
+    if not item_compatible("plugins", bw_version, item):
+        if item.get("supported"):
+            raise _Refusal(f"Release {item.get('version') or '?'} of {plugin_id} declares support for {', '.join(item['supported'])}; this is {bw_version}")
+        # No entry is compatible under the PO rule, so an empty list refuses only because the
+        # running version itself could not be parsed -- our fault, not the plugin's.
+        raise _Refusal(
+            translated("plugins.catalog.flash.version_unreadable", id=plugin_id, current=bw_version)
+            or f"Couldn't read the BunkerWeb version ({bw_version}), so the compatibility of {plugin_id} cannot be checked; nothing was installed"
+        )
+    return item, tag, digest
+
+
+def _installed_plugins() -> dict:
+    try:
+        return BW_CONFIG.get_plugins(with_settings=False)
+    except (ApiClientError, ApiUnavailableError) as e:
+        raise _Refusal(f"Couldn't list installed plugins: {e.message}") from e
+
+
+# One whole sentence per plugin type: the type word is part of the translation, never interpolated.
+_MANAGED_OUTSIDE_KEYS = {
+    "core": "plugins.flash.managed_outside_catalogue_core",
+    "external": "plugins.flash.managed_outside_catalogue_external",
+    "pro": "plugins.flash.managed_outside_catalogue_pro",
+    "ui": "plugins.flash.managed_outside_catalogue_ui",
+}
+
+
+def _catalog_job(plugin_id: str, tag: str, digest: str, *, replace: bool, done: str):
+    """Download, verify, repack and upload one catalogue plugin. Runs on CONFIG_TASKS_EXECUTOR.
+
+    ``replace`` is the only difference between an install and an update: the API then overwrites
+    the existing ``ui`` row (and refuses any other kind of row with 409). ``done`` is the success
+    flash.
+    """
+    action = "update" if replace else "install"
+    # One whole sentence per action: the verb is part of the translation, never interpolated.
+    keys = (
+        {
+            "refused": "plugins.flash.refused_update",
+            "incomplete": "plugins.flash.update_did_not_complete",
+            "failed": "plugins.flash.couldn_t_update_catalogue",
+            "failed_unexpected": "plugins.flash.couldn_t_update_catalogue_2",
+        }
+        if replace
+        else {
+            "refused": "plugins.flash.refused_install",
+            "incomplete": "plugins.flash.install_did_not_complete",
+            "failed": "plugins.flash.couldn_t_install_catalogue",
+            "failed_unexpected": "plugins.flash.couldn_t_install_catalogue_2",
+        }
+    )
+    wait_applying()
+    try:
+        # AT THE PINNED TAG, never at "latest": re-resolving here would let a release
+        # published between listing and clicking install something nobody saw.
+        try:
+            archive = fetch_archive(SOURCES["plugins"]["repo"], tag)
+        except ValueError as e:
+            DATA["TO_FLASH"].append(
+                {"content": translated("plugins.flash.refused_download", plugin_id=plugin_id, e=e) or f"Refused to download {plugin_id}: {e}", "type": "error"}
+            )
+            return
+        except RequestException as e:
+            DATA["TO_FLASH"].append(
+                {"content": translated("plugins.flash.couldn_t_download", plugin_id=plugin_id, e=e) or f"Couldn't download {plugin_id}: {e}", "type": "error"}
+            )
+            return
+
+        # THE gate. On the exact bytes received, in memory, before anything is unpacked. A git
+        # tag is not immutable -- it can be force-moved, and codeload will then serve different
+        # bytes for the same URL -- so this is what makes "the bytes listed" and "the bytes
+        # installed" the same claim. On mismatch: abort, no retry, and the cached listing is
+        # NOT invalidated. A silent re-fetch-and-retry turns tampering into a loop that
+        # eventually wins. A human decides. For an update it is also what makes the settings
+        # preview the operator confirmed true: that list was read from these same bytes.
+        if not verify_digest(archive, digest):
+            LOGGER.error(f"Archive digest mismatch installing {plugin_id} from {tag}: expected {digest}")
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated("plugins.flash.archive_no_longer_matches_what_catalogue", tag=tag, plugin_id=plugin_id)
+                    or f"The {tag} archive no longer matches what the catalogue listed. Nothing was installed for {plugin_id}.",
+                    "type": "error",
+                }
+            )
+            return
+
+        # Only now that the bytes are trusted. Both install branches in this router loop over
+        # every plugin.json they find, so the nine-plugin release archive is never handed over
+        # -- what goes up is a tarball holding exactly this one folder, its member names
+        # rewritten under the id.
+        payload, problem = repack_plugin(archive, plugin_id)
+        if problem or payload is None:
+            LOGGER.error(f"Rejected catalogue archive for {plugin_id}: {problem}")
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(keys["refused"], plugin_id=plugin_id, problem=problem) or f"Refused to {action} {plugin_id}: {problem}",
+                    "type": "error",
+                }
+            )
+            return
+
+        files = [("files", (f"{plugin_id}.tar.gz", BytesIO(payload), "application/gzip"))]
+        result = API_CLIENT.upload_plugins(files, method="ui", replace=True) if replace else API_CLIENT.upload_plugins(files, method="ui")
+
+        # C4: the router appends the id to `created` even when the DB layer skipped the write
+        # (`_uep_sync_plugin_row` returns (True, False), the loop continues, and
+        # update_external_plugins still returns ""). So the response is checked, not trusted.
+        # Equality, not membership: that single assertion catches a silent skip, an archive
+        # that installed something extra, and an id that was not ours.
+        created = sorted(result.get("created") or [])
+        errors = result.get("errors") or []
+        if created != [plugin_id] or errors:
+            detail = "; ".join(f"{e.get('file', '?')}: {e.get('error', 'unknown')}" for e in errors) or f"the API reported {created or 'nothing'} as installed"
+            DATA["TO_FLASH"].append(
+                {
+                    "content": translated(keys["incomplete"], plugin_id=plugin_id, detail=detail)
+                    or f"{action.capitalize()} of {plugin_id} did not complete: {detail}",
+                    "type": "error",
+                }
+            )
+            return
+
+        DATA["TO_FLASH"].append({"content": done, "type": "success"})
+        with suppress(ApiClientError, ApiUnavailableError):
+            API_CLIENT.checked_changes(["config"], plugins_changes=[plugin_id], value=True)
+    except (ApiClientError, ApiUnavailableError) as e:
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(keys["failed"], plugin_id=plugin_id, message=e.message) or f"Couldn't {action} {plugin_id}: {e.message}",
+                "type": "error",
+            }
+        )
+    except Exception as e:
+        # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
+        # futures are never retrieved, so anything uncaught here vanishes with no log and no
+        # flash while the user waits on /loading for the 60s watchdog in main.py.
+        LOGGER.exception(f"Failed to {action} catalogue plugin {plugin_id!r}")
+        DATA["TO_FLASH"].append(
+            {
+                "content": translated(keys["failed_unexpected"], plugin_id=plugin_id, e=e) or f"Couldn't {action} {plugin_id}: {e}",
+                "type": "error",
+            }
+        )
+    finally:
+        DATA["RELOADING"] = False
+
+
 @plugins.route("/plugins/catalog/install", methods=["POST"])
 @login_required
 def install_catalog_plugin():
@@ -727,149 +1052,123 @@ def install_catalog_plugin():
     listing -- honouring a client-supplied URL, tag or hash would hand the browser precisely the
     power a pinned source exists to remove.
 
-    The order of the checks below is the security design, not a style choice. In particular the
-    archive is only unpacked AFTER its bytes are shown to be the ones that were listed, and what
-    reaches the installer is a tarball we build containing that one plugin -- never the release
-    archive, which holds nine.
+    The order of the checks is the security design, not a style choice. In particular the archive
+    is only unpacked AFTER its bytes are shown to be the ones that were listed, and what reaches
+    the installer is a tarball we build containing that one plugin -- never the release archive,
+    which holds nine.
     """
-    # Gates first, before any lookup and long before any network call, so a direct POST that never
-    # rendered the page is refused with no side effect at all.
-    if not catalog_enabled():
-        return handle_error("The community catalogue is disabled", "plugins", True)
-    if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "plugins", True)
-    if not current_user.admin:
-        return handle_error("Plugin management is restricted to administrators", "plugins", True)
+    refusal = _catalog_refusal()
+    if refusal:
+        return refusal
 
     verify_data_in_form(
         data={"csrf_token": None, "id": None},
-        err_message="Missing id parameter on /plugins/catalog/install.",
+        err_message=translated("plugins.flash.missing_id_parameter_plugins_catalog_install") or "Missing id parameter on /plugins/catalog/install.",
         redirect_url="plugins",
         next=True,
     )
     DATA.load_from_file()
 
     plugin_id = request.form["id"].strip()
-    cached = DATA.get("PLUGIN_CATALOG")
-    item, section = find_item(cached, "plugins", plugin_id)
-    if not item or not section:
-        return handle_error(f"No catalogue entry named {plugin_id}", "plugins", True)
-
-    # C5: the hourly refresh gates whether a FETCH happens and keeps the old value on failure --
-    # right for a star count, wrong for a supply-chain listing. Without this, a yanked vulnerable
-    # item stays installable forever whenever fetches keep failing. Checked here, at install time,
-    # against the value right now: a page left open overnight must not carry a stale install
-    # token. It is also what bounds the recorded-digest promise below.
-    _, fetched_at = read_cached(cached)
-    if is_stale(fetched_at):
-        return handle_error("The catalogue is out of date and cannot be installed from; wait for the next refresh", "plugins", True)
-
-    tag = section.get("tag")
-    digest = section.get("sha256")
-    if not tag or not digest:
-        return handle_error(f"The cached catalogue entry for {plugin_id} is incomplete; wait for the next refresh", "plugins", True)
-
-    # C6: `bw_version` in main.py is a local of the request-context builder, unreachable from here,
-    # so the route makes its own call -- and it FAILS CLOSED. An unreachable API is not permission
-    # to skip a version check.
     try:
-        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
-    except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't determine the BunkerWeb version, refusing to install: {e.message}", "plugins", True)
-
-    if not item_compatible("plugins", bw_version, item):
-        supported = ", ".join(item.get("supported") or []) or "no BunkerWeb version"
-        return handle_error(
-            f"Release {item.get('version') or '?'} of {plugin_id} declares support for {supported}; this is {bw_version}",
-            "plugins",
-            True,
-        )
-
-    # Up-front collision check against EVERY plugin type, not just `ui` -- the API's own check is
-    # `_type="ui"` only, so a core or scheduler id is invisible to it. This is a courtesy check
-    # that produces a good message; the authoritative one is the `created` assertion after the
-    # upload, which also covers the race this cannot.
-    try:
-        installed = BW_CONFIG.get_plugins(with_settings=False)
-    except (ApiClientError, ApiUnavailableError) as e:
-        return handle_error(f"Couldn't list installed plugins: {e.message}", "plugins", True)
-    if collides_with_installed(plugin_id, installed):
-        return handle_error(f"A plugin with id {plugin_id} is already installed", "plugins", True)
-
-    def install():
-        wait_applying()
-        try:
-            # AT THE PINNED TAG, never at "latest": re-resolving here would let a release
-            # published between listing and clicking install something nobody saw.
-            try:
-                archive = fetch_archive(SOURCES["plugins"]["repo"], tag)
-            except ValueError as e:
-                DATA["TO_FLASH"].append({"content": f"Refused to download {plugin_id}: {e}", "type": "error"})
-                return
-            except RequestException as e:
-                DATA["TO_FLASH"].append({"content": f"Couldn't download {plugin_id}: {e}", "type": "error"})
-                return
-
-            # THE gate. On the exact bytes received, in memory, before anything is unpacked. A git
-            # tag is not immutable -- it can be force-moved, and codeload will then serve different
-            # bytes for the same URL -- so this is what makes "the bytes listed" and "the bytes
-            # installed" the same claim. On mismatch: abort, no retry, and the cached listing is
-            # NOT invalidated. A silent re-fetch-and-retry turns tampering into a loop that
-            # eventually wins. A human decides.
-            if not verify_digest(archive, digest):
-                LOGGER.error(f"Archive digest mismatch installing {plugin_id} from {tag}: expected {digest}")
-                DATA["TO_FLASH"].append(
-                    {
-                        "content": f"The {tag} archive no longer matches what the catalogue listed. Nothing was installed for {plugin_id}.",
-                        "type": "error",
-                    }
-                )
-                return
-
-            # Only now that the bytes are trusted. Both install branches in this router loop over
-            # every plugin.json they find, so the nine-plugin release archive is never handed over
-            # -- what goes up is a tarball holding exactly this one folder, its member names
-            # rewritten under the id.
-            payload, problem = repack_plugin(archive, plugin_id)
-            if problem or payload is None:
-                LOGGER.error(f"Rejected catalogue archive for {plugin_id}: {problem}")
-                DATA["TO_FLASH"].append({"content": f"Refused to install {plugin_id}: {problem}", "type": "error"})
-                return
-
-            result = API_CLIENT.upload_plugins([("files", (f"{plugin_id}.tar.gz", BytesIO(payload), "application/gzip"))], method="ui")
-
-            # C4: the router appends the id to `created` even when the DB layer skipped the write
-            # (`_uep_sync_plugin_row` returns (True, False), the loop continues, and
-            # update_external_plugins still returns ""). So the response is checked, not trusted.
-            # Equality, not membership: that single assertion catches a silent skip, an archive
-            # that installed something extra, and an id that was not ours.
-            created = sorted(result.get("created") or [])
-            errors = result.get("errors") or []
-            if created != [plugin_id] or errors:
-                detail = (
-                    "; ".join(f"{e.get('file', '?')}: {e.get('error', 'unknown')}" for e in errors) or f"the API reported {created or 'nothing'} as installed"
-                )
-                DATA["TO_FLASH"].append({"content": f"Install of {plugin_id} did not complete: {detail}", "type": "error"})
-                return
-
-            DATA["TO_FLASH"].append({"content": f"Plugin {plugin_id} installed successfully", "type": "success"})
-            with suppress(ApiClientError, ApiUnavailableError):
-                API_CLIENT.checked_changes(["config"], plugins_changes=[plugin_id], value=True)
-        except (ApiClientError, ApiUnavailableError) as e:
-            DATA["TO_FLASH"].append({"content": f"Couldn't install {plugin_id}: {e.message}", "type": "error"})
-        except Exception as e:
-            # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
-            # futures are never retrieved, so anything uncaught here vanishes with no log and no
-            # flash while the user waits on /loading for the 60s watchdog in main.py.
-            LOGGER.exception(f"Failed to install catalogue plugin {plugin_id!r}")
-            DATA["TO_FLASH"].append({"content": f"Couldn't install {plugin_id}: {e}", "type": "error"})
-        finally:
-            DATA["RELOADING"] = False
+        _, tag, digest = _checked_catalog_item(plugin_id)
+        # Up-front collision check against EVERY plugin type, not just `ui` -- the API's own
+        # check is `_type="ui"` only, so a core or scheduler id is invisible to it. This is a
+        # courtesy check that produces a good message; the authoritative one is the `created`
+        # assertion after the upload, which also covers the race this cannot.
+        if collides_with_installed(plugin_id, _installed_plugins()):
+            raise _Refusal(translated("plugins.flash.already_installed", plugin_id=plugin_id) or f"A plugin with id {plugin_id} is already installed")
+    except _Refusal as e:
+        return handle_error(str(e), "plugins", True)
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
-    CONFIG_TASKS_EXECUTOR.submit(install)
+    CONFIG_TASKS_EXECUTOR.submit(
+        _catalog_job,
+        plugin_id,
+        tag,
+        digest,
+        replace=False,
+        done=translated("plugins.flash.installed_successfully", plugin_id=plugin_id) or f"Plugin {plugin_id} installed successfully",
+    )
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Installing plugin: {plugin_id}"))
+
+
+@plugins.route("/plugins/catalog/update", methods=["POST"])
+@login_required
+def update_catalog_plugin():
+    """Replace an installed catalogue plugin with the listed release (design-catalog.md §2.2, C3).
+
+    The install chain, plus what only an update needs:
+
+    * ``version`` is the listed version the operator confirmed in the update modal, which named
+      the replaced plugin and its version and listed the settings the update deletes. A listing
+      refreshed since then is refused: the operator reviewed a preview of other bytes.
+    * the listing must carry the new version's setting ids -- the preview was built from them.
+      A listing cached before they were recorded waits for the next refresh.
+    * the installed row must be one the catalogue owns (``ui`` type, ``ui`` method). The API
+      refuses anything else too; this refusal is the one with a readable message.
+
+    The DB then prunes the settings the new plugin.json dropped, with every value set for them
+    (``_uep_prune_removed_settings``). Removal is not a separate route: the card's Remove button
+    is the existing ``/plugins/delete``.
+    """
+    refusal = _catalog_refusal()
+    if refusal:
+        return refusal
+
+    verify_data_in_form(
+        data={"csrf_token": None, "id": None, "version": None},
+        err_message=translated("plugins.flash.missing_id_version_parameter_plugins_catalog") or "Missing id or version parameter on /plugins/catalog/update.",
+        redirect_url="plugins",
+        next=True,
+    )
+    DATA.load_from_file()
+
+    plugin_id = request.form["id"].strip()
+    confirmed = request.form["version"].strip()
+    try:
+        item, tag, digest = _checked_catalog_item(plugin_id)
+        version = item.get("version") or ""
+        if not confirmed or confirmed != version:
+            raise _Refusal(
+                translated("plugins.flash.catalogue_entry_changed", plugin_id=plugin_id)
+                or f"The catalogue entry for {plugin_id} changed since the update was confirmed; review the update again"
+            )
+        if not isinstance(item.get("settings"), list):
+            raise _Refusal(
+                translated("plugins.flash.catalogue_entry_predates_updates", plugin_id=plugin_id)
+                or f"The cached catalogue entry for {plugin_id} predates updates; wait for the next refresh"
+            )
+        row = _installed_plugins().get(plugin_id)
+        if row is None:
+            raise _Refusal(
+                translated("plugins.flash.not_installed_install_from_catalogue", plugin_id=plugin_id)
+                or f"Plugin {plugin_id} is not installed; install it from the catalogue instead"
+            )
+        if not replaceable(row):
+            raise _Refusal(
+                translated(_MANAGED_OUTSIDE_KEYS.get(row.get("type"), "plugins.flash.managed_outside_catalogue"), plugin_id=plugin_id)
+                or f"Plugin {plugin_id} is managed outside the catalogue and cannot be updated from it"
+            )
+        if row.get("version") == version:
+            raise _Refusal(
+                translated("plugins.flash.already_at_version", plugin_id=plugin_id, version=version) or f"Plugin {plugin_id} is already at version {version}"
+            )
+    except _Refusal as e:
+        return handle_error(str(e), "plugins", True)
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
+    CONFIG_TASKS_EXECUTOR.submit(
+        _catalog_job,
+        plugin_id,
+        tag,
+        digest,
+        replace=True,
+        done=translated("plugins.flash.updated_to_version", plugin_id=plugin_id, version=version) or f"Plugin {plugin_id} updated to version {version}",
+    )
+
+    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Updating plugin: {plugin_id}"))
 
 
 @plugins.route("/plugins/<string:plugin>", methods=["GET", "POST"])
@@ -878,7 +1177,11 @@ def custom_plugin_page(plugin: str):
     rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
 
     if not PLUGIN_NAME_RX.match(plugin):
-        return handle_error("Invalid plugin id, (must be between 4 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
+        return handle_error(
+            translated("plugins.flash.invalid_plugin_id_must_between_4")
+            or "Invalid plugin id, (must be between 4 and 64 characters, only letters, numbers, underscores and hyphens)",
+            "plugins",
+        )
 
     if request.method == "POST":
         if not current_user.admin:

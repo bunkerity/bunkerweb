@@ -19,10 +19,46 @@ $(function () {
       ? i18next.t(key, options)
       : interpolate(options.defaultValue || "", options);
 
+  // One whole sentence per family, each with its own English default.
+  const DETACH_CONFIRM = {
+    certificate: {
+      key: "service.resources.confirm_detach_certificate",
+      text: "Detach this certificate from {{service}}?",
+    },
+    redirect: {
+      key: "service.resources.confirm_detach_redirect",
+      text: "Detach this redirect from {{service}}?",
+    },
+    upstream: {
+      key: "service.resources.confirm_detach_upstream",
+      text: "Detach this upstream from {{service}}?",
+    },
+    workflow: {
+      key: "service.resources.confirm_detach_workflow",
+      text: "Detach this workflow from {{service}}?",
+    },
+    template: {
+      key: "service.resources.confirm_detach_template",
+      text: "Detach this template from {{service}}?",
+    },
+    resource: {
+      key: "service.resources.confirm_detach",
+      text: "Detach this resource from {{service}}?",
+    },
+  };
+
   band.on("click", ".detach-resource", function () {
     const button = $(this);
     const family = button.data("family");
-    if (!window.confirm(`Detach this ${family} from ${serviceId}?`)) return;
+    // One whole sentence per family: the noun phrase (with its article) is part of the
+    // translation, so gender and case never depend on a word spliced in from another key.
+    const detach = DETACH_CONFIRM[family] || DETACH_CONFIRM.resource;
+    if (
+      !window.confirm(
+        t(detach.key, { service: serviceId, defaultValue: detach.text }),
+      )
+    )
+      return;
 
     $("<form>", {
       method: "POST",
@@ -400,14 +436,20 @@ $(function () {
           "{{service}} already serves {{path}} through its own {{family}} settings. Clear those settings for {{path}}, or use a different path.",
       });
     }
-    return t("service.resources.conflict.resource", {
-      service: serviceId,
-      path: path,
-      kind: claim.kind,
-      name: claim.name,
-      defaultValue:
-        "{{service}} already serves {{path}} through the {{kind}} “{{name}}”. Detach “{{name}}”, or give one of them a different path.",
-    });
+    return t(
+      claim.kind === "redirect"
+        ? "service.resources.conflict.resource_redirect"
+        : "service.resources.conflict.resource_upstream",
+      {
+        service: serviceId,
+        path: path,
+        name: claim.name,
+        defaultValue:
+          claim.kind === "redirect"
+            ? "{{service}} already serves {{path}} through the redirect “{{name}}”. Detach “{{name}}”, or give one of them a different path."
+            : "{{service}} already serves {{path}} through the upstream “{{name}}”. Detach “{{name}}”, or give one of them a different path.",
+      },
+    );
   }
 
   function evaluateConflicts() {

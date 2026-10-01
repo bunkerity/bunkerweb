@@ -10,7 +10,7 @@
         </a>
         <button type="button"
                 class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none border-0 bg-transparent"
-                aria-label="Close navigation"
+                aria-label="{{ _("navbar.aria.close_navigation") }}"
                 aria-controls="layout-menu">
             <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"
                aria-hidden="true"></i>
@@ -27,6 +27,7 @@
             "certificates": {"url": url_for('certificates'), "icon": "bx-certification"},
             "reports": {"url": url_for('reports'), "icon": "bxs-flag-checkered"},
             "threatmap": {"url": url_for('threatmap.threatmap_page'), "icon": "bx-map-alt"},
+            "crowdsec": {"url": url_for('crowdsec.crowdsec_page'), "icon": "bx-radar"},
         }},
         {"header": "configure", "items": {
             "global-settings": {"url": url_for('global_settings'), "icon": "bx-cog"},
@@ -57,6 +58,7 @@
                     <a href="{{ item['url'] }}"
                        class="menu-link"
                        data-tour="nav-{{ endpoint }}"
+                       title="{{ _("navigation." ~ endpoint | replace('-', '_')) }}"
                        {% if is_active %}aria-current="page"{% endif %}>
                         <i class="menu-icon tf-icons bx {{ item['icon'] }}" aria-hidden="true"></i>
                         <div class="text-truncate">{{ _("navigation." ~ endpoint | replace('-', '_')) }}</div>
@@ -108,7 +110,9 @@
             }
         } %}
         {% set extra_plugin_lookup = {} %}
-        {% for _pid, _pdata in plugins.items() %}
+        {% for _pid, _pdata_raw in plugins.items() %}
+            {# The records are keyed by id and carry none: keep it, the name is translated by id. #}
+            {% set _pdata = dict(_pdata_raw, id=_pid) %}
             {% set _ = extra_plugin_lookup.update({_pid: _pdata}) %}
             {% set _ = extra_plugin_lookup.update({_pid | lower: _pdata}) %}
             {% set _ = extra_plugin_lookup.update({_pid | replace('-', '_') | lower: _pdata}) %}
@@ -128,7 +132,8 @@
                         data-bs-toggle="collapse"
                         data-bs-target="#extraPagesCollapse"
                         aria-expanded="true"
-                        aria-controls="extraPagesCollapse">
+                        aria-controls="extraPagesCollapse"
+                        aria-label="{{ _("aria.label.toggle_section", name=_("navigation.extra_pages")) }}">
                     <i class="bx bx-chevron-right chevron-icon chevron-rotate" aria-hidden="true"></i>
                 </button>
             </li>
@@ -147,7 +152,7 @@
  width="20px"
  height="17.2px">') |safe }}
                                     <div class="text-truncate pe-2{% if extra_plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
-                                        {{ extra_plugin_data['name'] }}
+                                        {{ plugin_text(extra_plugin_data['id'], 'meta.name', extra_plugin_data['name']) }}
                                     </div>
                                 {% else %}
                                     <i class="menu-icon tf-icons bx bx-extension" aria-hidden="true"></i>
@@ -167,7 +172,8 @@
                     data-bs-toggle="collapse"
                     data-bs-target="#pluginsCollapse"
                     aria-expanded="true"
-                    aria-controls="pluginsCollapse">
+                    aria-controls="pluginsCollapse"
+                    aria-label="{{ _("aria.label.toggle_section", name=_("navigation.plugins_pages")) }}">
                 <i class="bx bx-chevron-right chevron-icon chevron-rotate" aria-hidden="true"></i>
             </button>
         </li>
@@ -188,7 +194,7 @@
  width="20px"
  height="17.2px">') |safe }}
                                 <div class="text-truncate pe-2{% if plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
-                                    {{ plugin_data['name'] }}
+                                    {{ plugin_text(plugin, 'meta.name', plugin_data['name']) }}
                                 </div>
                             </a>
                         </li>

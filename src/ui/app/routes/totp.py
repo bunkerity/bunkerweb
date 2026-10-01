@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.models.totp import totp as TOTP
 from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
 from app.routes.utils import cors_required, flash, handle_error, verify_data_in_form
@@ -37,12 +38,14 @@ def totp_page():
     has_credentials = bool(getattr(current_user, "webauthn_credentials_count", 0))
 
     if request.method == "POST":
-        verify_data_in_form(data={"totp_token": None}, err_message="No token provided on /totp.", redirect_url="totp")
+        verify_data_in_form(
+            data={"totp_token": None}, err_message=translated("totp.flash.no_token_provided_totp") or "No token provided on /totp.", redirect_url="totp"
+        )
 
         if not TOTP.verify_totp(request.form["totp_token"], user=current_user):
             recovery_code = TOTP.verify_recovery_code(request.form["totp_token"], user=current_user)
             if not recovery_code:
-                return handle_error("The token is invalid.", "totp")
+                return handle_error(translated("totp.flash.token_invalid") or "The token is invalid.", "totp")
             # The database is the only store that can spend a code. Try to spend it first, and read
             # the refusal: 409 is the API saying the database is read-only, and a valid recovery code
             # then keeps the login available without being consumed, exactly like a TOTP code
@@ -53,13 +56,23 @@ def totp_page():
                 API_CLIENT.use_recovery_code(current_user.get_id(), recovery_code)
             except ApiClientError as e:
                 if e.status_code != 409:
-                    return handle_error("An error occurred while using the recovery code.", "totp")
+                    return handle_error(
+                        translated("totp.flash.error_occurred_while_using_recovery_code") or "An error occurred while using the recovery code.", "totp"
+                    )
                 LOGGER.warning("Database is read-only, recovery code accepted without being consumed")
-                flash("The database is read-only, the recovery code you used stays valid.", "warning")
+                flash(
+                    translated("totp.flash.database_read_only_recovery_code_used") or "The database is read-only, the recovery code you used stays valid.",
+                    "warning",
+                )
             except ApiUnavailableError:
-                return handle_error("An error occurred while using the recovery code.", "totp")
+                return handle_error(
+                    translated("totp.flash.error_occurred_while_using_recovery_code") or "An error occurred while using the recovery code.", "totp"
+                )
             else:
-                flash(f"You've used one of your recovery codes. You have {len(current_user.list_recovery_codes)} left.")
+                flash(
+                    translated("totp.flash.ve_used_one_recovery_codes_have", len=len(current_user.list_recovery_codes))
+                    or f"You've used one of your recovery codes. You have {len(current_user.list_recovery_codes)} left."
+                )
 
         session["mfa_validated"] = True
         try:

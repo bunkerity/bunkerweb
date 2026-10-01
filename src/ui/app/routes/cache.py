@@ -1,11 +1,12 @@
 from io import BytesIO
 from json import JSONDecodeError, loads
 
-from flask import Blueprint, Response, flash as flask_flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, Response, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from app.dependencies import API_CLIENT, BW_CONFIG
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import flash, is_readonly_request
 
@@ -23,7 +24,7 @@ def cache_page():
     try:
         caches = API_CLIENT.get_cache_files()
     except (ApiClientError, ApiUnavailableError) as e:
-        flash(f"Error fetching cache files: {e.message}", "error")
+        flash(translated("cache.flash.error_fetching_cache_files", message=e.message) or f"Error fetching cache files: {e.message}", "error")
         caches = []
 
     return render_template(
@@ -56,14 +57,24 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
         return render_template("cache_view.html", cache_file=cache_content)
     except ApiClientError as e:
         if e.status_code == 404:
-            flask_flash(
-                f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{', service ' + service if service != 'global' else ''} not found", "error"
+            # One whole sentence with and without the service: a translated fragment is still a fragment.
+            flash(
+                translated(
+                    "cache.flash.cache_file_job_plugin_not_found_service" if service != "global" else "cache.flash.cache_file_job_plugin_not_found",
+                    file_name=file_name,
+                    job_name=job_name,
+                    plugin_id=plugin_id,
+                    service=service,
+                )
+                or f"Cache file {file_name} from job {job_name}, plugin {plugin_id}{f', service {service}' if service != 'global' else ''} not found",
+                "error",
+                save=False,
             )
             return redirect(url_for("cache.cache_page"))
-        flask_flash(f"Error fetching cache file: {e.message}", "error")
+        flash(translated("cache.flash.error_fetching_cache_file", message=e.message) or f"Error fetching cache file: {e.message}", "error", save=False)
         return redirect(url_for("cache.cache_page"))
     except ApiUnavailableError as e:
-        flask_flash(f"API unavailable: {e.message}", "error")
+        flash(translated("cache.flash.api_unavailable", message=e.message) or f"API unavailable: {e.message}", "error", save=False)
         return redirect(url_for("cache.cache_page"))
 
 
@@ -71,17 +82,17 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
 @login_required
 def cache_delete_bulk():
     if API_CLIENT.readonly:
-        return Response("Database is in read-only mode", status=403)
+        return Response(translated("flash.database_read_only_mode") or "Database is in read-only mode", status=403)
     if is_readonly_request(API_CLIENT.readonly):
-        return Response("You do not have the write permission", status=403)
+        return Response(translated("flash.do_not_have_write_permission") or "You do not have the write permission", status=403)
 
     try:
         cache_files = loads(request.form.get("cache_files", "[]"))
     except JSONDecodeError:
-        return Response("Invalid cache files parameter", status=400)
+        return Response(translated("cache.flash.invalid_cache_files_parameter") or "Invalid cache files parameter", status=400)
 
     if not cache_files:
-        return Response("No cache files selected", status=400)
+        return Response(translated("cache.flash.no_cache_files_selected") or "No cache files selected", status=400)
 
     try:
         result = API_CLIENT.delete_cache_files(cache_files)
@@ -89,10 +100,23 @@ def cache_delete_bulk():
         errors = result.get("errors", [])
 
         if errors:
-            flask_flash(f"Deleted {deleted_count} files with {len(errors)} errors: {'; '.join(errors)}", "warning")
+            flash(
+                translated("cache.flash.deleted_files_errors", deleted_count=deleted_count, len=len(errors), value="; ".join(errors))
+                or f"Deleted {deleted_count} files with {len(errors)} errors: {'; '.join(errors)}",
+                "warning",
+                save=False,
+            )
         else:
-            flask_flash(f"Successfully deleted {deleted_count} cache file{'s' if deleted_count != 1 else ''}", "success")
+            # `flash()`, not `flask_flash(..., "success")`: see the identical fix in
+            # `routes/web_cache.py` (M24) -- there is no `flash.success` catalog key.
+            flash(
+                translated(
+                    "cache.flash.successfully_deleted_cache_file" if deleted_count == 1 else "cache.flash.successfully_deleted_cache_files",
+                    deleted_count=deleted_count,
+                )
+                or f"Successfully deleted {deleted_count} cache file{'s' if deleted_count != 1 else ''}"
+            )
     except (ApiClientError, ApiUnavailableError) as e:
-        flask_flash(f"Error deleting cache files: {e.message}", "error")
+        flash(translated("cache.flash.error_deleting_cache_files", message=e.message) or f"Error deleting cache files: {e.message}", "error", save=False)
 
     return redirect(url_for("cache.cache_page"))

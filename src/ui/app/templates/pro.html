@@ -60,11 +60,20 @@
                                         <span>{{ _("pro.status.pro_version") }}</span> / {{ badge(text="EXPIRED", i18n_key="pro.status.expired", variant="warning") }}
                                     {% elif pro_status == "suspended" %}
                                         <span>{{ _("pro.status.pro_version") }}</span> / {{ badge(text="SUSPENDED", i18n_key="pro.status.suspended", variant="danger") }}
+                                    {% elif license_key_state == "invalid" %}
+                                        <span>{{ _("pro.status.free_version") }}</span> / {{ badge(text="INVALID KEY", i18n_key="pro.status.invalid", variant="danger") }}
                                     {% else %}
                                         <span>{{ _("pro.status.free_version") }}</span>
                                     {% endif %}
                                 {% endif %}
                             </h4>
+                            {# What the last license check said about the STORED key (routes/pro.py), so a
+                               rejected key is not shown as a plain "FREE" (M34). #}
+                            {% if license_key_state == "invalid" %}
+                                <div class="mb-2 small text-danger">{{ _("pro.status.invalid_key") }}</div>
+                            {% elif license_key_state == "pending" %}
+                                <div class="mb-2 small text-muted">{{ _("pro.status.pending_key") }}</div>
+                            {% endif %}
                             <h5 class="mt-2 mb-2 courier-prime fw-medium{% if is_overlapped %} text-decoration-line-through{% endif %}"
                                 >
                                 {{ _("pro.status.services_count", online_services=online_services, pro_services=pro_services) }}
@@ -122,16 +131,16 @@
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 don-jose mb-0">
-                                <i class="bx bx-gift me-1" aria-hidden="true"></i><span class="text-primary shine">Free Trial</span>
+                                <i class="bx bx-gift me-1" aria-hidden="true"></i><span class="text-primary shine">{{ _("pro.trial.title") }}</span>
                             </h5>
                         </div>
                     </div>
                     <div class="card-body position-relative d-flex flex-column justify-content-center align-items-center text-center courier-prime">
-                        <p class="fw-semibold mb-3">Test <span class="text-primary">BunkerWeb PRO</span> free for <strong>30 days</strong>.</p>
+                        <p class="fw-semibold mb-3">{{ _("pro.trial.description") }}</p>
                         <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
                            class="btn btn-primary text-uppercase don-jose"
                            target="_blank"
-                           rel="noopener">Start Free Trial</a>
+                           rel="noopener">{{ _("pro.trial.cta") }}</a>
                     </div>
                 {% endcall %}
             </div>
@@ -254,6 +263,9 @@
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/flatpickr-locale.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/pro.js') }}"

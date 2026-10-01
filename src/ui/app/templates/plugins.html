@@ -63,7 +63,8 @@
         {% for plugin, plugin_data in plugins.items() if plugin_data %}
             {% set ptype = plugin_data.get('type', 'core') %}
             {% set tier = 'core' if ptype == 'core' else ('pro' if ptype == 'pro' else 'community') %}
-            {% set pname = plugin_data.get('name', plugin) %}
+            {% set pname = plugin_text(plugin, 'meta.name', plugin_data.get('name', plugin)) %}
+            {% set pdescription = plugin_text(plugin, 'meta.description', plugin_data.get('description', '')) %}
             {% set pmethod = plugin_data.get('method', 'manual') %}
             {% set has_page = plugin_data.get('page') %}
             {% set is_core = (ptype == 'core') %}
@@ -91,7 +92,7 @@
                  data-type="{{ ptype }}"
                  data-enabled="{{ 'true' if state_on else 'false' }}"
                  data-name="{{ pname|lower }}"
-                 data-description="{{ plugin_data.get('description', '')|lower }}">
+                 data-description="{{ pdescription|lower }}">
                 {% call card(classes="h-100 p-3 d-flex flex-column") %}
                     <div class="d-flex align-items-center gap-2 mb-2">
                         {# Resolution order: the curated brand pair (both navy + -white variants ship,
@@ -127,7 +128,7 @@
                             {% endif %}
                         </span>
                     </div>
-                    <p class="text-muted small mb-3" style="min-height: 40px">{{ plugin_data.get('description', '') }}</p>
+                    <p class="text-muted small mb-3" style="min-height: 40px">{{ pdescription }}</p>
                     <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
                         <div class="plugin-state">
                             {% if is_core and is_always %}
@@ -152,7 +153,7 @@
                                                data-plugin="{{ plugin }}"
                                                {% if state_on %}checked{% endif %}
                                                {% if is_readonly or not user_admin %}disabled{% endif %}
-                                               aria-label="Toggle {{ pname }}" />
+                                               aria-label="{{ _("aria.label.toggle_item", name=pname) }}" />
                                         <span class="small plugin-switch-label"
                                               >{{ _('plugins.marketplace.enabled' if state_on else 'plugins.marketplace.disabled') }}</span>
                                     </label>
@@ -166,7 +167,8 @@
                                         data-plugin-id="{{ plugin }}"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="top"
-                                        data-bs-original-title="{{ _("tooltip.button.delete_plugin", name=pname) }}">
+                                        data-bs-original-title="{{ _("tooltip.button.delete_plugin", name=pname) }}"
+                                        aria-label="{{ _("tooltip.button.delete_plugin", name=pname) }}">
                                     <i class="bx bx-trash bx-xs" aria-hidden="true"></i>
                                 </button>
                             {% endif %}
@@ -189,7 +191,8 @@
                                    href="{{ url_for('global_settings.global_settings_page') }}#shelf-row-{{ plugin }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
-                                   data-bs-original-title="{{ _("tooltip.link.manage_activation", name=pname) }}">
+                                   data-bs-original-title="{{ _("tooltip.link.manage_activation", name=pname) }}"
+                                   aria-label="{{ _("tooltip.link.manage_activation", name=pname) }}">
                                     <i class="bx bx-toggle-left bx-xs" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -199,7 +202,8 @@
                                    href="{{ url_for('plugins') }}/{{ plugin }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
-                                   data-bs-original-title="{{ _("tooltip.link.access_plugin_page", name=pname) }}">
+                                   data-bs-original-title="{{ _("tooltip.link.access_plugin_page", name=pname) }}"
+                                   aria-label="{{ _("tooltip.link.access_plugin_page", name=pname) }}">
                                     <i class="bx bx-cog bx-xs" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -231,17 +235,29 @@
                             <div class="small text-muted mb-2">
                                 <span>{{ _("plugins.catalog.version", version=item.version) }}</span>
                             </div>
+                            {# C3 states, from `plugin_state`: what is installed under this id and
+                               whether the card may act on it. `managed` is anything the catalogue did
+                               not write (core, pro, EXTERNAL_PLUGIN_URLS, a mounted folder). #}
+                            {% if item.state == "installed" %}
+                                <div class="small text-success mb-2">{{ _("plugins.catalog.state_installed", version=item.installed_version) }}</div>
+                            {% elif item.state == "update" %}
+                                <div class="small text-primary mb-2">
+                                    {{ _("plugins.catalog.state_update", installed=item.installed_version, version=item.version) }}
+                                </div>
+                            {% elif item.state == "managed" %}
+                                <div class="small text-muted mb-2">{{ _({"core": "plugins.catalog.state_managed_core", "external": "plugins.catalog.state_managed_external", "pro": "plugins.catalog.state_managed_pro", "ui": "plugins.catalog.state_managed_ui"}.get(item.installed_type, "plugins.catalog.state_managed")) }}</div>
+                            {% endif %}
                             {# `supported` is what the plugins repository's own COMPATIBILITY.json
-                               declares for this release line. It is empty for every current
-                               release, so this alert is what the operator actually sees -- which
-                               is the point: an unexplained empty page generates a support ticket,
-                               a card that says upstream has not declared 1.7 support does not. #}
+                               declares for this release line. Under the PO rule (2026-09-25, see
+                               `item_compatible`) no entry, a listed version or a newer build is
+                               compatible, so a card is refused either because every listed version
+                               excludes this build, or because the running version is unreadable. #}
                             {% if not item.compatible %}
                                 <div class="alert alert-warning py-1 px-2 small mb-2" role="alert">
                                     {% if item.supported %}
                                         {{ _("plugins.catalog.incompatible_declared", supported=item.supported | join(", "), current=item.bw_version) }}
                                     {% else %}
-                                        {{ _("plugins.catalog.incompatible", current=item.bw_version) }}
+                                        {{ _("plugins.catalog.version_unknown", current=item.bw_version) }}
                                     {% endif %}
                                 </div>
                             {% endif %}
@@ -252,18 +268,43 @@
                                        target="_blank"
                                        rel="noopener noreferrer">{{ _("plugins.catalog.learn_more") }}</a>
                                 {% endif %}
-                                {% if not is_readonly and user_admin and item.compatible and not catalog_stale %}
-                                    <form action="{{ url_for('plugins.install_catalog_plugin') }}"
-                                          method="POST"
-                                          class="ms-auto">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                        <input type="hidden" name="id" value="{{ item.id }}" />
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
-                                        </button>
-                                    </form>
+                                {% if not is_readonly and user_admin %}
+                                    <div class="ms-auto d-flex align-items-center gap-2">
+                                        {% if item.state == "available" and item.compatible and not catalog_stale %}
+                                            <form action="{{ url_for('plugins.install_catalog_plugin') }}"
+                                                  method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                                <input type="hidden" name="id" value="{{ item.id }}" />
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        {# Update opens the confirmation below; it is offered only with a
+                                           known preview. The same gates run again in the route. #}
+                                        {% if item.state == "update" and item.compatible and not catalog_stale and item.removed_settings is not none %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modal-catalog-update-{{ item.id }}">
+                                                <i class="bx bx-refresh bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.update") }}
+                                            </button>
+                                        {% endif %}
+                                        {# Remove is the installed card's own delete (`.delete-plugin`,
+                                           plugins-grid.js): same modal, same /plugins/delete. #}
+                                        {% if item.state in ("installed", "update") %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger delete-plugin"
+                                                    data-plugin-id="{{ item.id }}">
+                                                <i class="bx bx-trash bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.remove") }}
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
                             </div>
+                            {% if item.state == "update" and item.removed_settings is none %}
+                                <p class="text-muted small mt-2 mb-0">{{ _("plugins.catalog.update_preview_unknown") }}</p>
+                            {% endif %}
                         </div>
                     {% endcall %}
                 </div>
@@ -314,6 +355,41 @@
                 </div>
             </form>
         {% endcall %}
+        {# The C3 update confirmation (design Q2): it names the plugin and the version it replaces,
+           and lists the settings the DB deletes with every value set for them. `version` goes back
+           to the route, which refuses if the listing moved since this was rendered. #}
+        {% for item in catalog_items if item.state == "update" and item.removed_settings is not none %}
+            {% call modal(id="modal-catalog-update-" ~ item.id, title_key="plugins.catalog.update_title", title="Update a community plugin", size="lg") %}
+                <form action="{{ url_for('plugins.update_catalog_plugin') }}" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="id" value="{{ item.id }}" />
+                        <input type="hidden" name="version" value="{{ item.version }}" />
+                        <p>
+                            {{ _("plugins.catalog.update_confirm", name=item.name, id=item.id, installed=item.installed_version, version=item.version) }}
+                        </p>
+                        {% if item.removed_settings %}
+                            <div class="alert alert-warning mb-0" role="alert">
+                                {{ _("plugins.catalog.update_removed_settings", version=item.version) }}
+                                <ul class="mb-0 mt-2">
+                                    {% for setting in item.removed_settings %}
+                                        <li>
+                                            <code>{{ setting }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0">{{ _("plugins.catalog.update_no_removed_settings") }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        {{ button(label="Update", i18n_key="plugins.catalog.update", variant="primary", type="submit", classes="me-2") }}
+                        {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", type="reset", dismiss="modal") }}
+                    </div>
+                </form>
+            {% endcall %}
+        {% endfor %}
         {% call modal(id="modal-delete-plugins", title_key="modal.title.confirm_deletion", title="Confirm deletion", size="lg") %}
             <form action="{{ url_for("plugins") }}/delete" method="POST">
                 <div class="modal-body">

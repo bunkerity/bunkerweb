@@ -272,6 +272,48 @@
     if (liveEl) liveEl.textContent = message;
   }
 
+  /* say() only reaches assistive tech (.wf-sr is visually hidden) -- a sighted operator got
+     no confirmation at all that Save worked. Same visible bs-toast every other editor page
+     (config_edit.js, template-settings-page.js) appends to base.html's shared
+     #feedback-toast-container; this file has no jQuery, so it's built with plain DOM calls. */
+  function toastSuccess(message) {
+    var container = document.getElementById("feedback-toast-container");
+    if (!container || !window.bootstrap || !bootstrap.Toast) return;
+    var isLight =
+      document.documentElement.getAttribute("data-bs-theme") !== "dark";
+    var el = document.createElement("div");
+    el.className =
+      "bs-toast toast fade " +
+      (isLight ? "bg-white" : "bg-dark") +
+      " border border-success";
+    el.setAttribute("role", "alert");
+    el.setAttribute("aria-live", "polite");
+    el.setAttribute("aria-atomic", "true");
+    el.setAttribute("data-bs-delay", "5000");
+    el.innerHTML =
+      '<div class="toast-header d-flex align-items-center text-success-emphasis">' +
+      '<i class="d-block h-auto rounded tf-icons bx bx-xs bx-check bx-tada me-2"></i>' +
+      '<span class="fw-medium me-auto">' +
+      esc(translate("status.success", "Success")) +
+      "</span>" +
+      '<small class="text-body-secondary">' +
+      esc(translate("flash.time.just_now", "just now")) +
+      "</small>" +
+      '<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="' +
+      esc(translate("aria.label.close", "Close")) +
+      '"></button>' +
+      "</div>" +
+      '<div class="toast-body">' +
+      esc(message) +
+      "</div>";
+    container.appendChild(el);
+    var instance = new bootstrap.Toast(el);
+    el.addEventListener("hidden.bs.toast", function () {
+      el.remove();
+    });
+    instance.show();
+  }
+
   // ---- view model ------------------------------------------------------------------
 
   function key(node) {
@@ -677,11 +719,10 @@
           esc(
             translate(
               "workflows.tree.noGroupHolds",
-              "no group holds {{kind}} entries",
-              { kind: node.kind },
+              "No resource group holds entries of this kind.",
             ),
           ) +
-          " entries</span>";
+          "</span>";
       return (
         '<div class="bw-flow-vals" data-wf-group="' +
         node._k +
@@ -1227,15 +1268,25 @@
       (open ? "true" : "false") +
       '"' +
       ' title="' +
-      (open
-        ? translate("workflows.aria.collapse", "Collapse")
-        : translate("workflows.aria.expand", "Expand")) +
-      ' rule" aria-label="' +
-      (open
-        ? translate("workflows.aria.collapse", "Collapse")
-        : translate("workflows.aria.expand", "Expand")) +
-      " rule " +
-      position +
+      esc(
+        open
+          ? translate("workflows.aria.collapseRule", "Collapse rule {{n}}", {
+              n: position,
+            })
+          : translate("workflows.aria.expandRule", "Expand rule {{n}}", {
+              n: position,
+            }),
+      ) +
+      '" aria-label="' +
+      esc(
+        open
+          ? translate("workflows.aria.collapseRule", "Collapse rule {{n}}", {
+              n: position,
+            })
+          : translate("workflows.aria.expandRule", "Expand rule {{n}}", {
+              n: position,
+            }),
+      ) +
       '">' +
       '<i class="bx bx-chevron-down bw-flow-caret" aria-hidden="true"></i></button>';
     var tools = STATE.readonly
@@ -1253,10 +1304,12 @@
         ' title="' +
         esc(translate("workflows.aria.moveUp", "Move up — runs earlier")) +
         '" aria-label="' +
-        esc(translate("workflows.aria.moveRule", "Move rule")) +
-        " " +
-        position +
-        ' up"><i class="bx bx-up-arrow-alt" aria-hidden="true"></i></button>' +
+        esc(
+          translate("workflows.aria.moveRuleUp", "Move rule {{n}} up", {
+            n: position,
+          }),
+        ) +
+        '"><i class="bx bx-up-arrow-alt" aria-hidden="true"></i></button>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-move="down:' +
         esc(rule.id) +
         '"' +
@@ -1264,17 +1317,25 @@
         ' title="' +
         esc(translate("workflows.aria.moveDown", "Move down — runs later")) +
         '" aria-label="' +
-        esc(translate("workflows.aria.moveRule", "Move rule")) +
-        " " +
-        position +
-        ' down"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i></button>' +
+        esc(
+          translate("workflows.aria.moveRuleDown", "Move rule {{n}} down", {
+            n: position,
+          }),
+        ) +
+        '"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i></button>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
         esc(rule.id) +
         '" aria-haspopup="menu" title="' +
         esc(translate("workflows.aria.more", "More")) +
         '"' +
-        ' aria-label="More actions for rule ' +
-        position +
+        ' aria-label="' +
+        esc(
+          translate(
+            "workflows.aria.moreActionsForRule",
+            "More actions for rule {{n}}",
+            { n: position },
+          ),
+        ) +
         '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>' +
         caret;
 
@@ -1322,12 +1383,18 @@
       '" data-wf-node="' +
       esc(path) +
       '" tabindex="-1"' +
-      ' aria-label="Rule ' +
-      position +
-      " of " +
-      STATE.rules.length +
-      " — " +
-      esc(rule.name || "untitled") +
+      ' aria-label="' +
+      esc(
+        translate(
+          "workflows.aria.ruleCard",
+          "Rule {{n}} of {{total}} — {{name}}",
+          {
+            n: position,
+            total: STATE.rules.length,
+            name: rule.name || translate("workflows.untitled", "Untitled rule"),
+          },
+        ),
+      ) +
       '">' +
       head +
       body +
@@ -2056,6 +2123,17 @@
   }
 
   function panelHtml() {
+    if (STATE.loadFailed)
+      return (
+        '<div class="alert alert-danger" role="alert">' +
+        esc(
+          translate(
+            "workflows.err.load",
+            "The stored rules could not be read. Saving is disabled so they are not overwritten; reload the page.",
+          ),
+        ) +
+        "</div>"
+      );
     if (!STATE.errorList.length) return warningsHtml();
     var count = STATE.errorList.length;
     return (
@@ -2255,29 +2333,44 @@
     touch('[data-wf-rule="' + CSS.escape(id) + '"]');
     // The announcement names the consequence, not the mechanic: position alone does not tell
     // an operator which rule now shadows which.
-    var where =
+    // Two whole sentences, each one key per variant: no word is ever spliced into the other.
+    var afterName = (STATE.rules[to - 1] && STATE.rules[to - 1].name) || "";
+    var consequence =
       to === 0
-        ? translate("workflows.say.runsFirst", "first")
+        ? translate("workflows.say.runsFirst", "It now runs first.")
         : to === total - 1
-          ? translate("workflows.say.runsLast", "last")
-          : translate("workflows.say.runsAfter", "after {{name}}", {
-              name:
-                (STATE.rules[to - 1].name || "").trim() ||
-                translate("workflows.say.ruleAbove", "the rule above"),
-            });
-    say(
-      translate(
-        "workflows.say.moved",
-        "{{name}} moved to position {{to}} of {{total}}{{how}}. It now runs {{where}}.",
-        {
-          name: ruleLabel(moved),
-          to: to + 1,
-          total: total,
-          how: how ? " — " + translate("workflows.say.via." + how, how) : "",
-          where: where,
-        },
-      ),
-    );
+          ? translate("workflows.say.runsLast", "It now runs last.")
+          : afterName.trim()
+            ? translate(
+                "workflows.say.runsAfter",
+                "It now runs after {{name}}.",
+                {
+                  name: afterName.trim(),
+                },
+              )
+            : translate(
+                "workflows.say.runsAfterAbove",
+                "It now runs after the rule above.",
+              );
+    var movement =
+      how === "drag"
+        ? translate(
+            "workflows.say.movedDrag",
+            "{{name}} dragged to position {{to}} of {{total}}.",
+            { name: ruleLabel(moved), to: to + 1, total: total },
+          )
+        : how === "keyboard"
+          ? translate(
+              "workflows.say.movedKeyboard",
+              "{{name}} moved with the keyboard to position {{to}} of {{total}}.",
+              { name: ruleLabel(moved), to: to + 1, total: total },
+            )
+          : translate(
+              "workflows.say.moved",
+              "{{name}} moved to position {{to}} of {{total}}.",
+              { name: ruleLabel(moved), to: to + 1, total: total },
+            );
+    say(movement + " " + consequence);
   }
 
   /* Canvas: the "+" on a connector adds a rule at that slot rather than at the end, because
@@ -2640,6 +2733,10 @@
 
   function save() {
     var button = document.getElementById("wf-save");
+    if (STATE.loadFailed) {
+      button.disabled = true;
+      return;
+    }
     button.disabled = true;
     post(document.getElementById("wf-save-url").value, {
       definition: serialize(),
@@ -2653,12 +2750,12 @@
           markSaved();
           panelEl.innerHTML = "";
           button.disabled = false;
-          say(
-            translate(
-              "workflows.say.saved",
-              "Rules saved and pushed to the attached services.",
-            ),
+          var savedMessage = translate(
+            "workflows.say.saved",
+            "Rules saved and pushed to the attached services.",
           );
+          say(savedMessage);
+          toastSuccess(savedMessage);
           validate();
           return;
         }
@@ -2839,15 +2936,35 @@
         "workflows.test.out_no_match",
         "No rule matched. The request continues to the rest of the security stack.",
       );
-    return translate(
-      "workflows.test.out_match",
-      "{{workflow}} · {{rule}} matched and {{action}} the request.",
-      {
-        workflow: outcome.workflow_name || "",
-        rule: outcome.rule_name || outcome.rule_id,
-        action: outcome.action ? outcome.action.type : "",
-      },
-    );
+    var matched = {
+      workflow: outcome.workflow_name || "",
+      rule: outcome.rule_name || outcome.rule_id,
+    };
+    var matchType = outcome.action ? outcome.action.type : "";
+    // One whole sentence per action: the verb is part of the translation, never interpolated.
+    return matchType === "block"
+      ? translate(
+          "workflows.test.out_match_block",
+          "{{workflow}} · {{rule}} matched and blocked the request.",
+          matched,
+        )
+      : matchType === "redirect"
+        ? translate(
+            "workflows.test.out_match_redirect",
+            "{{workflow}} · {{rule}} matched and redirected the request.",
+            matched,
+          )
+        : matchType === "challenge"
+          ? translate(
+              "workflows.test.out_match_challenge",
+              "{{workflow}} · {{rule}} matched and challenged the request.",
+              matched,
+            )
+          : translate(
+              "workflows.test.out_match",
+              "{{workflow}} · {{rule}} matched.",
+              matched,
+            );
   }
 
   var ASSUMPTION_TEXT = {
@@ -3254,11 +3371,20 @@
               : { type: "block" };
         touch();
         say(
-          translate(
-            "workflows.say.actionChanged",
-            "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
-            { type: type },
-          ),
+          type === "redirect"
+            ? translate(
+                "workflows.say.actionChangedRedirect",
+                "Action changed to redirect. It is still the only action, and it still stops evaluation.",
+              )
+            : type === "challenge"
+              ? translate(
+                  "workflows.say.actionChangedChallenge",
+                  "Action changed to challenge. It is still the only action, and it still stops evaluation.",
+                )
+              : translate(
+                  "workflows.say.actionChangedBlock",
+                  "Action changed to block. It is still the only action, and it still stops evaluation.",
+                ),
         );
         return;
       }
@@ -3329,8 +3455,8 @@
             say(
               translate(
                 "workflows.say.valuesDropped",
-                "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
-                { type: target.value, count: had },
+                "Condition changed. Values that could not carry over: {{count}}.",
+                { count: had },
               ),
             );
         }
@@ -3707,12 +3833,24 @@
       STATE.groups = {};
     }
 
-    var definition = { rules: [] };
+    /* An unreadable stored definition must never become an empty ladder: saving that would
+       overwrite the stored rules with nothing. Lock the editor and block Save instead. */
+    var definition = null;
     try {
       definition = JSON.parse(
         document.getElementById("wf-definition").value || "{}",
       );
     } catch (error) {
+      definition = null;
+    }
+    if (
+      !definition ||
+      typeof definition !== "object" ||
+      Array.isArray(definition) ||
+      (definition.rules !== undefined && !Array.isArray(definition.rules))
+    ) {
+      STATE.loadFailed = true;
+      STATE.readonly = true;
       definition = { rules: [] };
     }
     STATE.rules = (definition.rules || []).map(fromSchemaRule);
@@ -3738,6 +3876,8 @@
     }
 
     render();
+    // The panel is otherwise only painted after a validation, which never runs here.
+    if (STATE.loadFailed) paint();
     wireLadder(ladderEl);
     wireMenus();
 
@@ -3797,7 +3937,12 @@
       });
     }
     var saveButton = document.getElementById("wf-save");
-    if (saveButton) saveButton.addEventListener("click", save);
+    if (saveButton) {
+      if (STATE.loadFailed) saveButton.disabled = true;
+      saveButton.addEventListener("click", save);
+    }
+    // Rules added on top of an unreadable definition could never be saved.
+    if (addButton && STATE.loadFailed) addButton.disabled = true;
 
     var testUrl = document.getElementById("wf-test-url");
     STATE.workflowId = testUrl

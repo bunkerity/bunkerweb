@@ -5,25 +5,48 @@ from default_server import is_reserved_default_server  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.utils import flash, is_readonly_request
 
 redirects = Blueprint("redirects", __name__)
 
 STATUS_CODES = ("301", "302", "303", "307", "308")
 MAX_SERVICES = 100
+# The redirect plugin's REDIRECT_FROM / REDIRECT_TO regexes, rewritten so a browser accepts them as an
+# HTML `pattern` (compiled with the `v` flag, which rejects an unescaped `{`, `}` or `-` in a class and
+# then silently skips the check). tests/unit/ui/test_attachable_form_patterns.py keeps them in step.
+FROM_PATH_PATTERN = r"^(?!(?:~\*|~|\^~|=)$)(?:(?:~\*|~|\^~|=) )?[^\s;\{\}]+$"
+TO_URL_PATTERN = r"^https?:\/\/[\-\w@:%.+~#=]+[\-\w\(\)!@:%+.~#?&\/=$]*$"
+# The API names the redirect plugin setting that refused a value; the operator only knows the form field.
+INVALID_FIELD_MESSAGES = {
+    "REDIRECT_FROM": ("redirects.err.invalid_from_path", "The source path is not valid: it cannot contain spaces, semicolons or braces."),
+    "REDIRECT_TO": ("redirects.err.invalid_to_url", "The target must be a full http:// or https:// URL."),
+}
 
 
-def _redirect():
-    return redirect(url_for("redirects.redirects_page"))
+def _redirect(**params):
+    # `retry="create"`/`retry="edit"` tells the page to reopen that modal with the operator's input.
+    return redirect(url_for("redirects.redirects_page", **params))
+
+
+def _flash_api_error(operation: str, message: str):
+    setting = message.removeprefix("Invalid value for ").split(":", 1)[0] if message.startswith("Invalid value for ") else ""
+    if setting in INVALID_FIELD_MESSAGES:
+        key, text = INVALID_FIELD_MESSAGES[setting]
+        flash(translated(key) or text, "error")
+    else:
+        # One whole sentence per operation: the verb is part of the translation, never interpolated.
+        key = "redirects.flash.could_not_create" if operation == "create" else "redirects.flash.could_not_update"
+        flash(translated(key, message=message) or f"Could not {operation} the redirect: {message}", "error")
 
 
 def _readonly():
     if API_CLIENT.readonly:
-        flash("Database is in read-only mode", "error")
+        flash(translated("flash.database_read_only_mode") or "Database is in read-only mode", "error")
         return True
     if is_readonly_request(API_CLIENT.readonly):
         # Two causes, two messages: the database is fine here, the session's permission is not.
-        flash("You do not have the write permission", "error")
+        flash(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "error")
         return True
     return False
 
@@ -31,7 +54,9 @@ def _readonly():
 def _services():
     values = list(dict.fromkeys(value.strip() for value in request.form.getlist("service_ids") if value.strip()))
     if len(values) > MAX_SERVICES:
-        raise ValueError(f"A redirect cannot be attached to more than {MAX_SERVICES} services")
+        raise ValueError(
+            translated("redirects.flash.too_many_services", value=MAX_SERVICES) or f"A redirect cannot be attached to more than {MAX_SERVICES} services"
+        )
     return values
 
 
@@ -46,13 +71,13 @@ def _rule(*, required=True):
     if name:
         rule["name"] = name
     elif required:
-        raise ValueError("The redirect name is required")
+        raise ValueError(translated("redirects.flash.name_required") or "The redirect name is required")
 
     to_url = (request.form.get("to_url") or "").strip()
     if to_url:
         rule["to_url"] = to_url
     elif required:
-        raise ValueError("The redirect target is required")
+        raise ValueError(translated("redirects.flash.target_required") or "The redirect target is required")
 
     from_path = (request.form.get("from_path") or "").strip()
     if from_path:
@@ -63,7 +88,10 @@ def _rule(*, required=True):
     status_code = (request.form.get("status_code") or "").strip()
     if status_code:
         if status_code not in STATUS_CODES:
-            raise ValueError(f"The status code must be one of {', '.join(STATUS_CODES)}")
+            raise ValueError(
+                translated("redirects.flash.status_code_must_be_one_of", value=", ".join(STATUS_CODES))
+                or f"The status code must be one of {', '.join(STATUS_CODES)}"
+            )
         rule["status_code"] = status_code
     elif required:
         rule["status_code"] = "301"
@@ -73,7 +101,7 @@ def _rule(*, required=True):
     if "description" in request.form or required:
         description = (request.form.get("description") or "").strip()
         if len(description) > 4000:
-            raise ValueError("The description cannot exceed 4000 characters")
+            raise ValueError(translated("flash.description_too_long") or "The description cannot exceed 4000 characters")
         rule["description"] = description
 
     # An unchecked checkbox submits nothing, so its absence is a real "no" on both create and
@@ -90,7 +118,7 @@ def redirects_page():
         redirect_rows = result.get("redirects", [])
         total = result.get("total", len(redirect_rows))
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch redirects: {exc.message}", "error")
+        flash(translated("redirects.flash.could_not_fetch_redirects", message=exc.message) or f"Could not fetch redirects: {exc.message}", "error")
         redirect_rows, total = [], 0
 
     try:
@@ -98,7 +126,11 @@ def redirects_page():
         # assignment target (DS-B4 handoff item 4 / criticos-DS-B optional 8).
         services = [service for service in API_CLIENT.get_services(with_drafts=True) if not is_reserved_default_server(service)]
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not fetch services for redirect assignments: {exc.message}", "error")
+        flash(
+            translated("redirects.flash.could_not_fetch_services_redirect_assignments", message=exc.message)
+            or f"Could not fetch services for redirect assignments: {exc.message}",
+            "error",
+        )
         services = []
 
     return render_template(
@@ -108,6 +140,8 @@ def redirects_page():
         truncated=total > len(redirect_rows),
         services=services,
         status_codes=STATUS_CODES,
+        from_path_pattern=FROM_PATH_PATTERN,
+        to_url_pattern=TO_URL_PATTERN,
     )
 
 
@@ -120,11 +154,13 @@ def redirects_create():
         payload = _rule()
         payload["service_ids"] = _services()
         API_CLIENT.create_redirect(**payload)
-        flash(f"Redirect {payload['name']} created successfully")
+        flash(translated("redirects.flash.redirect_created_successfully", value=payload["name"]) or f"Redirect {payload['name']} created successfully")
     except ValueError as exc:
         flash(str(exc), "error")
+        return _redirect(retry="create")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not create the redirect: {exc.message}", "error")
+        _flash_api_error("create", exc.message)
+        return _redirect(retry="create")
     return _redirect()
 
 
@@ -135,15 +171,17 @@ def redirects_update():
         return _redirect()
     redirect_id = (request.form.get("redirect_id") or "").strip()
     if not redirect_id:
-        flash("The redirect is required", "error")
+        flash(translated("redirects.flash.redirect_required") or "The redirect is required", "error")
         return _redirect()
     try:
         API_CLIENT.update_redirect(redirect_id, **_rule(required=False))
-        flash("Redirect updated successfully")
+        flash(translated("redirects.flash.redirect_updated_successfully") or "Redirect updated successfully")
     except ValueError as exc:
         flash(str(exc), "error")
+        return _redirect(retry="edit")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not update the redirect: {exc.message}", "error")
+        _flash_api_error("update", exc.message)
+        return _redirect(retry="edit")
     return _redirect()
 
 
@@ -154,15 +192,15 @@ def redirects_delete():
         return _redirect()
     redirect_id = (request.form.get("redirect_id") or "").strip()
     if not redirect_id:
-        flash("The redirect is required", "error")
+        flash(translated("redirects.flash.redirect_required") or "The redirect is required", "error")
         return _redirect()
     try:
         API_CLIENT.delete_redirect(redirect_id)
-        flash("Redirect deleted successfully")
+        flash(translated("redirects.flash.redirect_deleted_successfully") or "Redirect deleted successfully")
     except (ApiClientError, ApiUnavailableError) as exc:
         # A redirect still attached to a service is refused by the API on purpose: detaching
         # is the operator's decision, not a side effect of a delete.
-        flash(f"Could not delete the redirect: {exc.message}", "error")
+        flash(translated("redirects.flash.could_not_delete_redirect", message=exc.message) or f"Could not delete the redirect: {exc.message}", "error")
     return _redirect()
 
 
@@ -174,17 +212,17 @@ def redirects_attach():
     redirect_id = (request.form.get("redirect_id") or "").strip()
     try:
         if not redirect_id:
-            raise ValueError("The redirect is required")
+            raise ValueError(translated("redirects.flash.redirect_required") or "The redirect is required")
         service_ids = _services()
         if not service_ids:
-            raise ValueError("At least one service is required")
+            raise ValueError(translated("redirects.flash.at_least_one_service_required") or "At least one service is required")
         for service_id in service_ids:
             API_CLIENT.attach_redirect(redirect_id, service_id)
-        flash(f"Redirect attached to {len(service_ids)} service(s)")
+        flash(translated("redirects.flash.redirect_attached_service", len=len(service_ids)) or f"Redirect attached. Services: {len(service_ids)}")
     except ValueError as exc:
         flash(str(exc), "error")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not attach the redirect: {exc.message}", "error")
+        flash(translated("redirects.flash.could_not_attach_redirect", message=exc.message) or f"Could not attach the redirect: {exc.message}", "error")
     return _redirect()
 
 
@@ -196,11 +234,11 @@ def redirects_detach():
     redirect_id = (request.form.get("redirect_id") or "").strip()
     service_id = (request.form.get("service_id") or "").strip()
     if not redirect_id or not service_id:
-        flash("The redirect and the service are required", "error")
+        flash(translated("redirects.flash.redirect_service_are_required") or "The redirect and the service are required", "error")
         return _redirect()
     try:
         API_CLIENT.detach_redirect(redirect_id, service_id)
-        flash("Redirect detached successfully")
+        flash(translated("redirects.flash.redirect_detached_successfully") or "Redirect detached successfully")
     except (ApiClientError, ApiUnavailableError) as exc:
-        flash(f"Could not detach the redirect: {exc.message}", "error")
+        flash(translated("redirects.flash.could_not_detach_redirect", message=exc.message) or f"Could not detach the redirect: {exc.message}", "error")
     return _redirect()

@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required
 
 from app.dependencies import API_CLIENT, BW_INSTANCES_UTILS
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.system_memory import memory_state, read_memory
 from app.utils import LOGGER, flash
@@ -72,7 +73,7 @@ def home_page():
     try:
         services = API_CLIENT.get_services(with_drafts=True)
     except (ApiClientError, ApiUnavailableError) as e:
-        flash(f"Error fetching services: {e.message}", "error")
+        flash(translated("home.flash.error_fetching_services", message=e.message) or f"Error fetching services: {e.message}", "error")
         services = []
 
     # Onboarding / "Getting started" signal -- richest untapped source is the metadata

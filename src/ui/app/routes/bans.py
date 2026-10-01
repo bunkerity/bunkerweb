@@ -375,7 +375,10 @@ def bans_fetch():
     def format_ban(ban):
         # Defensive: some bans may lack some fields
         return {
-            "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
+            # Offset-aware, like `start_date`/`end_date` in `_collect_all_bans`: a naive ISO string is
+            # read by the browser as ITS local time, so the column was shifted by the viewer's UTC
+            # offset whenever the UI container's clock (UTC) and the browser's zone differ.
+            "date": datetime.fromtimestamp(floor(ban.get("date", 0))).astimezone().isoformat() if ban.get("date") else "N/A",
             "ip": escape(str(ban.get("ip", "N/A"))),
             "country": escape(str(ban.get("country", "N/A"))),
             "reason": escape(str(ban.get("reason", "N/A"))),
@@ -464,11 +467,13 @@ def bans_fetch():
     for code, counts in pane_counts["country"].items():
         str_code = str(code)
         country_code = str_code.lower()
-        is_unknown = str_code in ("unknown", "local", "n/a")
+        # An IP the GeoIP lookup found nothing for is stored with an EMPTY country, not "unknown":
+        # without it here the pane asked for `/img/flags/.svg` and labelled the row "— ."
+        is_unknown = str_code.lower() in ("", "none", "unknown", "local", "n/a")
         flag_code = "zz" if is_unknown else country_code
         # Show both the alpha-2 code and the translated country name so users can search by either
         code_text = "N/A" if is_unknown else str_code.upper()
-        i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
+        i18n_key = "not_applicable" if is_unknown else str_code.upper()
         fallback_name = "N/A" if is_unknown else str_code
         search_panes_options["country"].append(
             {
@@ -498,7 +503,10 @@ def bans_fetch():
     # Special handling for service searchpane options
     search_panes_options["service"] = []
     for name, counts in pane_counts["service"].items():
-        display_name = "default server" if (not name or name == "_") else escape(str(name))
+        # "_" is where `service_filter` and the pane counts above file every GLOBAL ban (and a
+        # service ban with no service), and the table row renders a global ban as "All services".
+        # Labelling this entry "default server" put global bans under a service they never target.
+        display_name = '<span data-i18n="scope.all_services">All services</span>' if (not name or name == "_") else escape(str(name))
         search_panes_options["service"].append(
             {
                 "label": display_name,
@@ -748,14 +756,14 @@ def _api_unban(ip: str, service, ban_scope: str) -> str:
 def bans_ban():
     # Check database state
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "bans")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "bans")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "bans")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":
         if request.form.get("source") != "reports":
-            return handle_error("Invalid filtered ban source.", "bans", True)
+            return handle_error(translated("bans.flash.invalid_filtered_ban_source") or "Invalid filtered ban source.", "bans", True)
         bans, skipped_challenges = _get_filtered_report_bans(request.form)
         if skipped_challenges:
             flash(
@@ -766,16 +774,16 @@ def bans_ban():
     elif selection_mode == "explicit":
         raw_bans = request.form.get("bans", "")
         if not raw_bans:
-            return handle_error("No bans.", "bans", True)
+            return handle_error(translated("bans.flash.no_bans") or "No bans.", "bans", True)
         try:
             bans = loads(raw_bans)
         except JSONDecodeError:
-            return handle_error("Invalid bans parameter on /bans/ban.", "bans", True)
+            return handle_error(translated("bans.flash.invalid_bans_parameter_bans_ban") or "Invalid bans parameter on /bans/ban.", "bans", True)
     else:
-        return handle_error("Invalid ban selection mode.", "bans", True)
+        return handle_error(translated("bans.flash.invalid_ban_selection_mode") or "Invalid ban selection mode.", "bans", True)
 
     if not bans:
-        return handle_error("No matching reports.", "bans", True)
+        return handle_error(translated("bans.flash.no_matching_reports") or "No matching reports.", "bans", True)
 
     for ban in bans:
         # Validate ban structure
@@ -794,7 +802,7 @@ def bans_ban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(translated("bans.flash.invalid_ip", ip=escape(ip)) or f"Invalid IP address: {escape(ip)}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=ip) or f"Invalid IP address: {ip}", "error")
             continue
 
         # Check for permanent ban
@@ -826,14 +834,14 @@ def bans_ban():
 def bans_unban():
     # Check database state
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "bans")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "bans")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "bans")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":
         if request.form.get("source") != "bans":
-            return handle_error("Invalid filtered unban source.", "bans", True)
+            return handle_error(translated("bans.flash.invalid_filtered_unban_source") or "Invalid filtered unban source.", "bans", True)
         unbans = [
             {
                 "ip": ban.get("ip"),
@@ -845,16 +853,16 @@ def bans_unban():
     elif selection_mode == "explicit":
         raw_unbans = request.form.get("ips", "")
         if not raw_unbans:
-            return handle_error("No bans.", "bans", True)
+            return handle_error(translated("bans.flash.no_bans") or "No bans.", "bans", True)
         try:
             unbans = loads(raw_unbans)
         except JSONDecodeError:
-            return handle_error("Invalid ips parameter on /bans/unban.", "bans", True)
+            return handle_error(translated("bans.flash.invalid_ips_parameter_bans_unban") or "Invalid ips parameter on /bans/unban.", "bans", True)
     else:
-        return handle_error("Invalid unban selection mode.", "bans", True)
+        return handle_error(translated("bans.flash.invalid_unban_selection_mode") or "Invalid unban selection mode.", "bans", True)
 
     if not unbans:
-        return handle_error("No matching bans.", "bans", True)
+        return handle_error(translated("bans.flash.no_matching_bans") or "No matching bans.", "bans", True)
 
     for unban in unbans:
         # Validate unban structure
@@ -870,7 +878,7 @@ def bans_unban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(translated("bans.flash.invalid_ip", ip=escape(str(ip))) or f"Invalid IP address: {escape(str(ip))}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=str(ip)) or f"Invalid IP address: {ip}", "error")
             continue
 
         # Normalize Web UI and default services to global scope
@@ -895,14 +903,14 @@ def bans_unban():
 def bans_update_duration():
     # Check database state
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "bans")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "bans")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "bans")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "bans")
 
     selection_mode = request.form.get("selection_mode", "explicit")
     if selection_mode == "filtered":
         if request.form.get("source") != "bans":
-            return handle_error("Invalid filtered duration source.", "bans", True)
+            return handle_error(translated("bans.flash.invalid_filtered_duration_source") or "Invalid filtered duration source.", "bans", True)
         duration = request.form.get("duration", "")
         updates = [
             {
@@ -918,16 +926,18 @@ def bans_update_duration():
     elif selection_mode == "explicit":
         raw_updates = request.form.get("updates", "")
         if not raw_updates:
-            return handle_error("No updates.", "bans", True)
+            return handle_error(translated("bans.flash.no_updates") or "No updates.", "bans", True)
         try:
             updates = loads(raw_updates)
         except JSONDecodeError:
-            return handle_error("Invalid updates parameter on /bans/update_duration.", "bans", True)
+            return handle_error(
+                translated("bans.flash.invalid_updates_parameter_bans_update_duration") or "Invalid updates parameter on /bans/update_duration.", "bans", True
+            )
     else:
-        return handle_error("Invalid duration selection mode.", "bans", True)
+        return handle_error(translated("bans.flash.invalid_duration_selection_mode") or "Invalid duration selection mode.", "bans", True)
 
     if not updates:
-        return handle_error("No matching bans.", "bans", True)
+        return handle_error(translated("bans.flash.no_matching_bans") or "No matching bans.", "bans", True)
 
     # Fetch the stored bans to keep each one's original reason across the duration change
     known_bans = {}
@@ -950,14 +960,14 @@ def bans_update_duration():
         service = update.get("service", "")
 
         if duration not in ("permanent", "1h", "24h", "1w", "custom"):
-            flash(translated("bans.flash.invalid_duration", duration=escape(str(duration))) or f"Invalid ban duration: {escape(str(duration))}", "error")
+            flash(translated("bans.flash.invalid_duration", duration=str(duration)) or f"Invalid ban duration: {duration}", "error")
             continue
 
         # Validate IP address
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(translated("bans.flash.invalid_ip", ip=escape(ip)) or f"Invalid IP address: {escape(ip)}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=ip) or f"Invalid IP address: {ip}", "error")
             continue
 
         # Calculate new expiration time based on duration
@@ -970,26 +980,44 @@ def bans_update_duration():
         elif duration == "1w":
             new_exp = 604800
         elif duration == "custom":
-            custom_exp = update.get("custom_exp", None)
-            if custom_exp is not None:
+            # `end_date` is authoritative when present: bans.js sends both fields, but it
+            # pre-clamps `custom_exp` with `Math.max(0, ...)`, so a past date and a genuinely
+            # zero-length one are indistinguishable by the time `custom_exp` alone reaches here.
+            # `exp == 0` is the sentinel this route uses for a PERMANENT ban a few lines up, so
+            # trusting the clamped value would silently turn a past custom date into one.
+            custom_end_date = update.get("end_date")
+            if custom_end_date:
                 try:
-                    new_exp = max(0, int(custom_exp))
+                    end_dt = datetime.fromisoformat(custom_end_date)
+                    if end_dt.tzinfo is None:
+                        end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
+                    remaining = end_dt.timestamp() - time()
                 except (TypeError, ValueError):
-                    flash(translated("bans.flash.invalid_custom_duration", ip=escape(ip)) or f"Invalid custom ban duration for {escape(ip)}", "error")
+                    flash(translated("bans.flash.invalid_custom_end_date", ip=ip) or f"Invalid custom ban end date for {ip}", "error")
                     continue
+                if remaining <= 0:
+                    flash(
+                        translated("bans.flash.custom_end_date_in_past", ip=ip) or f"The custom ban end date for {ip} must be in the future",
+                        "error",
+                    )
+                    continue
+                new_exp = int(remaining)
             else:
-                custom_end_date = update.get("end_date")
-                if custom_end_date:
+                custom_exp = update.get("custom_exp", None)
+                if custom_exp is not None:
                     try:
-                        end_dt = datetime.fromisoformat(custom_end_date)
-                        if end_dt.tzinfo is None:
-                            end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
-                        new_exp = max(0, int(end_dt.timestamp() - time()))
+                        new_exp = int(custom_exp)
                     except (TypeError, ValueError):
-                        flash(translated("bans.flash.invalid_custom_end_date", ip=escape(ip)) or f"Invalid custom ban end date for {escape(ip)}", "error")
+                        flash(translated("bans.flash.invalid_custom_duration", ip=ip) or f"Invalid custom ban duration for {ip}", "error")
+                        continue
+                    if new_exp <= 0:
+                        flash(
+                            translated("bans.flash.custom_end_date_in_past", ip=ip) or f"The custom ban end date for {ip} must be in the future",
+                            "error",
+                        )
                         continue
                 else:
-                    flash(translated("bans.flash.missing_custom_end_date", ip=escape(ip)) or f"Missing custom ban end date for {escape(ip)}", "error")
+                    flash(translated("bans.flash.missing_custom_end_date", ip=ip) or f"Missing custom ban end date for {ip}", "error")
                     continue
 
         # Validate service name for service-specific bans

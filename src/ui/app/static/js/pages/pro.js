@@ -5,5 +5,6 @@ $(document).ready(function () {
   // Initialize Flatpickr with altInput and altFormat
   $flatpickrDate.flatpickr({
     inline: true,
+    ...window.bwFlatpickr.options(),
   });
 });

@@ -7,7 +7,9 @@ from flask_login import login_required
 from default_server import is_reserved_default_server  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.models.secret_settings import SECRET_PLACEHOLDER
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
 from app.utils import billable_service_count, flash, is_readonly_request
 
@@ -42,6 +44,7 @@ def pro_page():
     # Convert current date to UTC and normalize to midnight for daily comparison
     current_day_utc = datetime.now().astimezone().astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     pro_expires_in = "Unknown"
+    pro_expire_date = ""
     if metadata["pro_expire"]:
         # Ensure pro_expire is timezone-aware UTC
         pro_expire = metadata["pro_expire"]
@@ -51,10 +54,26 @@ def pro_page():
             pro_expire = pro_expire.replace(tzinfo=timezone.utc)
         else:
             pro_expire = pro_expire.astimezone(timezone.utc)
+        # L4: `pro_expire` was never passed to the template, so its date-picker input fell back
+        # to Jinja's Undefined and flatpickr warned trying to parse it. Feed it a real ISO date.
+        pro_expire_date = pro_expire.date().isoformat()
 
         exp = (pro_expire - current_day_utc).total_seconds()
         remain = ("Unknown", "Unknown") if exp <= 0 else get_remain(exp)
         pro_expires_in = remain[0]
+
+    license_key = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("PRO_LICENSE_KEY",)).get("PRO_LICENSE_KEY", "")
+    # What the last license check concluded about THIS key. The job records the key it checked
+    # (`pro_license`) next to the verdict (`pro_status`, "invalid" when the server rejects it), so
+    # a verdict about another key -- or no check yet -- is "pending", not "invalid" (M34).
+    if not license_key:
+        license_key_state = "unset"
+    elif metadata.get("pro_license") != license_key.strip():
+        license_key_state = "pending"
+    elif metadata.get("pro_status") in ("active", "expired", "suspended"):
+        license_key_state = "checked"
+    else:
+        license_key_state = "invalid"
 
     return render_template(
         "pro.html",
@@ -62,9 +81,10 @@ def pro_page():
         billable_services=billable_services,
         draft_services=draft_services,
         pro_expires_in=pro_expires_in,
-        pro_license_key=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("PRO_LICENSE_KEY",)).get(
-            "PRO_LICENSE_KEY", ""
-        ),
+        pro_expire=pro_expire_date,
+        # Never the key itself: it would be in the page source (M35). See models/secret_settings.py.
+        pro_license_key=SECRET_PLACEHOLDER if license_key else "",
+        license_key_state=license_key_state,
     )
 
 
@@ -72,19 +92,23 @@ def pro_page():
 @login_required
 def pro_key():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "pro")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "pro")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "pro")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "pro")
 
     verify_data_in_form(
         data={"PRO_LICENSE_KEY": None},
-        err_message="Missing license key parameter on /pro/key.",
+        err_message=translated("pro.flash.missing_license_key_parameter_pro_key") or "Missing license key parameter on /pro/key.",
         redirect_url="pro",
         next=True,
     )
     license_key = request.form["PRO_LICENSE_KEY"]
     if not license_key:
-        return handle_error("Invalid license key", "pro")
+        return handle_error(translated("pro.flash.invalid_license_key") or "Invalid license key", "pro")
+    # The page renders the stored key as a placeholder: posting it back untouched changes nothing.
+    if license_key == SECRET_PLACEHOLDER:
+        flash(translated("pro.flash.license_key_same_current_one") or "The license key is the same as the current one.", "warning")
+        return redirect(url_for("pro.pro_page"))
 
     global_config = BW_CONFIG.get_config(global_only=True, methods=False)
     global_config_methods = BW_CONFIG.get_config(global_only=True, methods=True)
@@ -103,7 +127,7 @@ def pro_key():
     refused_count = len(refused)
 
     if not variables:
-        flash("The license key is the same as the current one.", "warning")
+        flash(translated("pro.flash.license_key_same_current_one") or "The license key is the same as the current one.", "warning")
         return redirect(url_for("pro.pro_page"))
 
     DATA.load_from_file()
@@ -114,7 +138,7 @@ def pro_key():
         operation, error = BW_CONFIG.edit_global_conf(variables, check_changes=True)
 
         if not error:
-            operation = "The PRO license key was updated successfully."
+            operation = translated("pro.flash.license_key_updated_successfully") or "The PRO license key was updated successfully."
 
         if operation:
             if error:
@@ -127,12 +151,17 @@ def pro_key():
                     # just went to edit_global_conf is byte-identical to what was already there.
                     # Neither "the key was updated" nor "the Scheduler will apply changes and
                     # download PRO plugins" is true; say only what happened.
-                    operation = "The PRO license key was not updated: the value was refused."
+                    operation = translated("pro.flash.license_key_not_updated_refused") or "The PRO license key was not updated: the value was refused."
                     DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
                 else:
                     DATA["TO_FLASH"].append({"content": operation, "type": "success"})
                     DATA["TO_FLASH"].append(
-                        {"content": "The Scheduler will attempt to apply the changes and download the PRO plugins.", "type": "success", "save": False}
+                        {
+                            "content": translated("pro.flash.scheduler_will_attempt_apply_changes_download")
+                            or "The Scheduler will attempt to apply the changes and download the PRO plugins.",
+                            "type": "success",
+                            "save": False,
+                        }
                     )
 
         DATA["RELOADING"] = False
@@ -145,7 +174,7 @@ def pro_key():
             "PRO_LOADING": True,
         }
     )
-    flash("Checking license key.")
+    flash(translated("pro.flash.checking_license_key") or "Checking license key.")
     CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables, refused_count)
     return redirect(
         url_for(
@@ -160,9 +189,9 @@ def pro_key():
 @login_required
 def force_check():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "pro")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "pro")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "pro")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "pro")
 
     try:
         API_CLIENT.update_metadata({"last_pro_check": None})
@@ -170,7 +199,7 @@ def force_check():
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(e.message, "pro")
 
-    flash("A new check for PRO plugins has been scheduled.", "success")
+    flash(translated("pro.flash.new_check_pro_plugins_has_scheduled") or "A new check for PRO plugins has been scheduled.", "success")
     DATA["PRO_LOADING"] = True
     return redirect(url_for("pro.pro_page"))
 
@@ -179,9 +208,9 @@ def force_check():
 @login_required
 def force_update():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "pro")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "pro")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "pro")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "pro")
 
     try:
         API_CLIENT.update_metadata({"force_pro_update": True})
@@ -190,7 +219,7 @@ def force_update():
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(e.message, "pro")
 
-    flash("A forced update of PRO plugins has been scheduled.", "success")
+    flash(translated("pro.flash.forced_update_pro_plugins_has_scheduled") or "A forced update of PRO plugins has been scheduled.", "success")
     DATA["PRO_LOADING"] = True
     return redirect(url_for("pro.pro_page"))
 
@@ -199,20 +228,16 @@ def force_update():
 @login_required
 def refresh_ui():
     if API_CLIENT.readonly:
-        return handle_error("Database is in read-only mode", "pro")
+        return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "pro")
     if is_readonly_request(API_CLIENT.readonly):
-        return handle_error("You do not have the write permission", "pro")
+        return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "pro")
 
-    # safe_reload_plugins() latches on IS_RELOADING_PLUGINS and only ever clears it on
-    # worker import, so a UI that already reloaded once since boot would consume the flag
-    # without re-extracting anything. Clear the latch so this stays an explicit escape hatch.
-    DATA.load_from_file()
-    DATA["IS_RELOADING_PLUGINS"] = False
-
+    # safe_reload_plugins()'s own finally clears IS_RELOADING_PLUGINS after every reload
+    # (dependencies.py), so this is just the DB-side trigger; no manual latch clear needed.
     try:
         API_CLIENT.checked_changes(["ui_plugins"], value=True)
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(e.message, "pro")
 
-    flash("The web UI will reload its PRO plugins shortly.", "success")
+    flash(translated("pro.flash.web_ui_will_reload_pro_plugins") or "The web UI will reload its PRO plugins shortly.", "success")
     return redirect(url_for("pro.pro_page"))

@@ -9,7 +9,7 @@
 {% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/groups.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/groups.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
@@ -61,7 +61,7 @@
                                 data-group-id="{{ group.id }}"
                                 data-references-url="{{ resource_groups_url }}/{{ group.id }}/references">
                                 <td>
-                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label="Show details for @" ~ group.name, classes="resource-group-toggle p-0") }}
+                                    {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label=_("aria.label.show_details", name="@" ~ group.name), classes="resource-group-toggle p-0") }}
                                 </td>
                                 <td>
                                     <code>@{{ group.name }}</code>
@@ -69,21 +69,21 @@
                                     {% set values_n = group.entries | length %}
                                     {% set usages_n = group.usage_count or 0 %}
                                     <small class="d-block text-muted resource-group-meta"
-                                           >{{ _("resource_groups.meta_line", kinds=kinds_n, values=values_n, usages=usages_n) }}</small>
+                                           >{{ _("resource_groups.meta_kinds_plural" if kinds_n != 1 else "resource_groups.meta_kinds", count=kinds_n) }} · {{ _("resource_groups.meta_values_plural" if values_n != 1 else "resource_groups.meta_values", count=values_n) }} · {{ _("resource_groups.meta_usages_plural" if usages_n != 1 else "resource_groups.meta_usages", count=usages_n) }}</small>
                                 </td>
                                 <td class="resource-group-description text-wrap">{{ group.description or "—" }}</td>
                                 <td>
                                     <div class="d-flex flex-wrap gap-1">
                                         {% for kind in resource_kinds %}
                                             {% set kind_entries = group.entries | selectattr("kind", "equalto", kind) | list %}
-                                            {% if kind_entries %}{{ badge(text=kind, variant="secondary", icon=kind_icons.get(kind, "bx-layer"), classes="resource-kind-badge") }}{% endif %}
+                                            {% if kind_entries %}{{ badge(text=kind, i18n_key="resource_groups.kind_label." ~ kind, variant="secondary", icon=kind_icons.get(kind, "bx-layer"), classes="resource-kind-badge") }}{% endif %}
                                         {% endfor %}
                                     </div>
                                 </td>
                                 <td>{{ group.entries | length }}</td>
                                 <td>
                                     {% if group.usage_count %}
-                                        {{ button(label=group.usage_count ~ " reference" ~ ("s" if group.usage_count != 1 else ""), variant="link", size="sm", icon="bx-link", classes="resource-group-usage p-0") }}
+                                        {{ button(label=_("resource_groups.reference_count_plural" if group.usage_count != 1 else "resource_groups.reference_count", count=group.usage_count), variant="link", size="sm", icon="bx-link", classes="resource-group-usage p-0") }}
                                     {% else %}
                                         {{ badge(text="0 references", variant="secondary", icon="bx-unlink") }}
                                     {% endif %}
@@ -100,7 +100,7 @@
                                         {% if editable %}
                                             {{ button(label="", variant="outline-primary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label="Edit @" ~ group.name, disabled=readonly, classes="resource-group-edit") }}
                                         {% endif %}
-                                        {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label="Clone @" ~ group.name, disabled=readonly, classes="resource-group-clone") }}
+                                        {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label=_("aria.label.clone_item", name="@" ~ group.name), disabled=readonly, classes="resource-group-clone") }}
                                         {% if editable %}
                                             {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label="Delete @" ~ group.name, disabled=readonly, classes="resource-group-delete") }}
                                         {% endif %}
@@ -115,9 +115,10 @@
                                             {% if kind_entries %}
                                                 <div class="col-12 col-xl-6">
                                                     <section class="resource-kind-panel h-100" aria-label="{{ kind }} entries">
+                                                        {% set kind_entry_count = kind_entries | length %}
                                                         <div class="d-flex align-items-center justify-content-between mb-2">
-                                                            {{ badge(text=kind, variant="primary", icon=kind_icons.get(kind, "bx-layer")) }}
-                                                            <span class="text-muted small">{{ kind_entries | length }} value{{ "s" if kind_entries | length != 1 else "" }}</span>
+                                                            {{ badge(text=kind, i18n_key="resource_groups.kind_label." ~ kind, variant="primary", icon=kind_icons.get(kind, "bx-layer")) }}
+                                                            <span class="text-muted small">{{ _("resource_groups.meta_values_plural" if kind_entry_count != 1 else "resource_groups.meta_values", count=kind_entry_count) }}</span>
                                                         </div>
                                                         <ol class="resource-entry-list mb-0">
                                                             {% for entry in kind_entries %}
@@ -152,7 +153,10 @@
     {% endcall %}
 
     {% call modal(id="resource-group-editor", title_key="resource_groups.editor_title", title="Resource group", size="xl") %}
-        <form method="post" action="{{ resource_groups_url }}/save" id="resource-group-form">
+        <form method="post"
+              action="{{ resource_groups_url }}/save"
+              id="resource-group-form"
+              data-form-retry="resource-group">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="group_id" id="resource-group-id" />
             <textarea name="entries" id="resource-group-entries" hidden>[]</textarea>
@@ -167,7 +171,7 @@
                                    id="resource-group-alias"
                                    name="alias"
                                    maxlength="64"
-                                   pattern="[A-Za-z0-9_-]+"
+                                   pattern="[A-Za-z0-9_\-]+"
                                    required />
                         </div>
                         <div class="form-text">{{ _("resource_groups.alias_help") }}</div>
@@ -207,7 +211,7 @@
                         <div class="col-md-3">
                             <label class="form-label" for="resource-group-bulk-kind">{{ _("resource_groups.kind") }}</label>
                             <select class="form-select" id="resource-group-bulk-kind">
-                                {% for kind in resource_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
+                                {% for kind in resource_kinds %}<option value="{{ kind }}">{{ _("resource_groups.kind_label." ~ kind) }}</option>{% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -237,7 +241,10 @@
     {% endcall %}
 
     {% call modal(id="resource-group-clone-modal", title_key="resource_groups.clone", title="Clone resource group") %}
-        <form method="post" action="{{ resource_groups_url }}/clone" id="resource-group-clone-form">
+        <form method="post"
+              action="{{ resource_groups_url }}/clone"
+              id="resource-group-clone-form"
+              data-form-retry="resource-group-clone">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="source_id" id="resource-group-clone-source" />
             <div class="modal-body">
@@ -250,7 +257,7 @@
                            id="resource-group-clone-alias"
                            name="alias"
                            maxlength="64"
-                           pattern="[A-Za-z0-9_-]+"
+                           pattern="[A-Za-z0-9_\-]+"
                            required />
                 </div>
             </div>
@@ -298,7 +305,7 @@
             <td>
                 <label class="visually-hidden">Kind</label>
                 <select class="form-select form-select-sm resource-entry-kind">
-                    {% for kind in resource_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
+                    {% for kind in resource_kinds %}<option value="{{ kind }}">{{ _("resource_groups.kind_label." ~ kind) }}</option>{% endfor %}
                 </select>
             </td>
             <td>
@@ -318,7 +325,10 @@
             </td>
         </tr>
     </template>
+    {# What the server refused on the last save or clone, for js/components/form-retry.js (M28). #}
+    <textarea id="form-retry" hidden>{{ form_retry | default({}) | tojson }}</textarea>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/groups.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/components/form-retry.js') }}" nonce="{{ script_nonce }}" defer></script>
 {% endblock %}

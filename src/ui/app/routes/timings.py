@@ -6,6 +6,7 @@ from flask_login import login_required
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
+from app.i18n import translated
 from app.utils import flash
 
 timings = Blueprint("timings", __name__)
@@ -83,12 +84,12 @@ def timings_page():
         # The instance fetch below tells them apart without a second guess.
         unreachable = True
     except ApiClientError as e:
-        flash(f"Error fetching plugin timings: {e.message}", "error")
+        flash(translated("timings.flash.error_fetching_plugin_timings", message=e.message) or f"Error fetching plugin timings: {e.message}", "error")
 
     try:
         instances = API_CLIENT.get_instances()
     except (ApiClientError, ApiUnavailableError):
-        flash("Error fetching instances", "error")
+        flash(translated("flash.error_fetching_instances") or "Error fetching instances", "error")
         instances = []
 
     rows, request_total = _rows(payload.get("timings"))

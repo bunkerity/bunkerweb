@@ -11,6 +11,8 @@ from flask import Blueprint, Response, render_template, request, send_file
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
+from app.i18n import translated
+
 logs = Blueprint("logs", __name__)
 
 LOGS_PATH = Path(sep, "var", "log", "bunkerweb")
@@ -88,10 +90,10 @@ def logs_page():
     current_file = secure_filename(request.args.get("file", ""))
 
     if current_file and current_file not in all_files:
-        return Response("No such file", 404)
+        return Response(translated("logs.flash.no_such_file") or "No such file", 404)
 
     if isabs(current_file) or ".." in current_file:
-        return Response("Invalid file path", 400)
+        return Response(translated("logs.flash.invalid_file_path") or "Invalid file path", 400)
 
     raw_logs = (
         "Select a log file to view its contents"
@@ -105,7 +107,7 @@ def logs_page():
     if current_file:
         file_path = _resolve_log_path(current_file, files)
         if file_path is None or not file_path.is_file():
-            return Response("No such file", 404)
+            return Response(translated("logs.flash.no_such_file") or "No such file", 404)
 
         # Count lines without holding the whole file in memory (avoids OOM on
         # very large logs — only one line is resident at a time).
@@ -151,7 +153,7 @@ def download_log():
 
     file_path = _resolve_log_path(current_file, files)
     if file_path is None or not file_path.is_file():
-        return Response("No such file", 404)
+        return Response(translated("logs.flash.no_such_file") or "No such file", 404)
 
     return send_file(
         file_path,

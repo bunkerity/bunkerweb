@@ -7,16 +7,18 @@ from os import environ, getenv
 from re import escape, match
 from time import sleep
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
 
 # from app.models.totp import totp as TOTP
 
-from default_server import DEFAULT_SERVER_RESERVED_MESSAGE, is_default_server  # type: ignore
+from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_RESERVED_MESSAGE, is_default_server  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA
+from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import (
+    flash,
     LOGGER,
     MAX_PASSWORD_BYTES,
     USER_PASSWORD_RX,
@@ -127,7 +129,7 @@ def setup_page():
 
     if request.method == "POST":
         if API_CLIENT.readonly:
-            return handle_error("Database is in read-only mode", "setup")
+            return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "setup")
         # The wizard has no `@login_required`, and for the anonymous first install that is the
         # whole point -- there is no session to hold a permission. But the branch above only
         # bounces an ANONYMOUS caller to the login page when an admin already exists and no UI
@@ -135,7 +137,7 @@ def setup_page():
         # the global config and creates a service. Guarded on `is_authenticated` so the first
         # install is untouched and only a real session is asked for `write`.
         if current_user.is_authenticated and is_readonly_request(API_CLIENT.readonly):
-            return handle_error("You do not have the write permission", "setup")
+            return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "setup")
 
         required_keys = ["theme"]
         if not ui_reverse_proxy:
@@ -172,7 +174,11 @@ def setup_page():
             )  # TODO: add "2fa_code" back when TOTP is implemented in setup wizard
 
         if not any(key in request.form for key in required_keys):
-            return handle_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
+            return handle_error(
+                translated("setup.flash.missing_either_one_following_parameters", value=", ".join(required_keys))
+                or f"Missing either one of the following parameters: {', '.join(required_keys)}.",
+                "setup",
+            )
 
         if not pro_license_key and request.form.get("pro_license_key", ""):
             global_config = BW_CONFIG.get_config(global_only=True)
@@ -180,14 +186,20 @@ def setup_page():
 
         if not admin_user:
             if len(request.form["admin_username"]) > 256:
-                return handle_error("The admin username is too long. It must be less than 256 characters.", "setup")
+                return handle_error(
+                    translated("setup.flash.admin_username_too_long_must_less") or "The admin username is too long. It must be less than 256 characters.",
+                    "setup",
+                )
             elif len(request.form["admin_email"]) > 256:
-                return handle_error("The admin email is too long. It must be less than 256 characters.", "setup")
+                return handle_error(
+                    translated("setup.flash.admin_email_too_long_must_less") or "The admin email is too long. It must be less than 256 characters.", "setup"
+                )
             elif request.form["admin_password"] != request.form["admin_password_check"]:
-                return handle_error("The passwords do not match.", "setup")
+                return handle_error(translated("setup.flash.passwords_do_not_match") or "The passwords do not match.", "setup")
             elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
                 return handle_error(
-                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                    translated("setup.flash.admin_password_not_strong_enough_must")
+                    or "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
                     "setup",
                 )
             elif password_exceeds_bcrypt_limit(request.form["admin_password"]):
@@ -196,7 +208,8 @@ def setup_page():
                     f"over bcrypt's {MAX_PASSWORD_BYTES}-byte limit."
                 )
                 return handle_error(
-                    f"The admin password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
+                    translated("setup.flash.admin_password_too_long_must_not", MAX_PASSWORD_BYTES=MAX_PASSWORD_BYTES)
+                    or f"The admin password is too long. It must not exceed {MAX_PASSWORD_BYTES} bytes (bcrypt's hard limit); "
                     "accented or emoji characters count as several bytes each.",
                     "setup",
                 )
@@ -225,9 +238,14 @@ def setup_page():
                     admin=True,
                 )
             except (ApiClientError, ApiUnavailableError) as e:
-                return handle_error(f"Couldn't create the admin user: {e.message}", "setup", False, "error")
+                return handle_error(
+                    translated("setup.flash.couldn_t_create_admin_user", message=e.message) or f"Couldn't create the admin user: {e.message}",
+                    "setup",
+                    False,
+                    "error",
+                )
 
-            flash("The admin user was created successfully")
+            flash(translated("setup.flash.admin_user_created_successfully") or "The admin user was created successfully", save=False)
 
         if not ui_reverse_proxy:
             # Third create surface with no reserved-id refusal (routes/services.py and the API's
@@ -235,18 +253,28 @@ def setup_page():
             # right below catches the collision only incidentally, and only once the reserved row
             # is actually in the roster it reads (`db_config`), which single-site never has.
             if is_default_server(request.form["server_name"]):
-                return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "setup")
+                return handle_error(
+                    translated("services.flash.default_server_reserved", default_server_id=DEFAULT_SERVER_ID) or DEFAULT_SERVER_RESERVED_MESSAGE, "setup"
+                )
 
             server_names = db_config["SERVER_NAME"].split()
             if request.form["server_name"] in server_names:
-                return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
+                return handle_error(
+                    translated("setup.flash.hostname_already_use", value=request.form["server_name"])
+                    or f"The hostname {request.form['server_name']} is already in use.",
+                    "setup",
+                )
             else:
                 for server_name in server_names:
                     if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split():
-                        return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
+                        return handle_error(
+                            translated("setup.flash.hostname_already_use", value=request.form["server_name"])
+                            or f"The hostname {request.form['server_name']} is already in use.",
+                            "setup",
+                        )
 
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
-                return handle_error("The hostname is not valid.", "setup")
+                return handle_error(translated("setup.flash.hostname_not_valid") or "The hostname is not valid.", "setup")
 
             base_config = {
                 "SERVER_NAME": request.form["server_name"],
@@ -300,7 +328,11 @@ def setup_page():
                             bool(request.form.get("custom_ssl_key_data", "")),
                         ]
                     ):
-                        return handle_error("When using a custom SSL certificate, you must set both the certificate and the key.", "setup")
+                        return handle_error(
+                            translated("setup.flash.when_using_custom_ssl_certificate_must")
+                            or "When using a custom SSL certificate, you must set both the certificate and the key.",
+                            "setup",
+                        )
 
                     config.update(
                         {
@@ -321,11 +353,21 @@ def setup_page():
 
             operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
             if error:
-                return handle_error(f"Couldn't create the new service: {operation}", "setup", False, "error")
+                return handle_error(
+                    translated("setup.flash.couldn_t_create_new_service", operation=operation) or f"Couldn't create the new service: {operation}",
+                    "setup",
+                    False,
+                    "error",
+                )
 
             operation, error = BW_CONFIG.edit_service(request.form["server_name"], config | base_config, check_changes=False)
             if error:
-                return handle_error(f"Couldn't edit the new service: {operation}", "setup", False, "error")
+                return handle_error(
+                    translated("setup.flash.couldn_t_edit_new_service", operation=operation) or f"Couldn't edit the new service: {operation}",
+                    "setup",
+                    False,
+                    "error",
+                )
 
             try:
                 API_CLIENT.checked_changes(["config", "custom_configs"], plugins_changes="all", value=True)
