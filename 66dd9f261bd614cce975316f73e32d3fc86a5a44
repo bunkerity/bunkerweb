@@ -1,0 +1,39 @@
+CHANGELOG.md
+  s_4600783926e6d7::t_900bbf83b0d98f 20
+src/ui/app/static/js/dataTableInit.js
+  s_489c9dc1e1ff4f::t_193890534c4532 186,334-358
+src/ui/app/static/js/pages/reports.js
+  s_51e147f829f70b::t_199f8113ceddf3 694,2042-2043,2084,2089,2104,2106,2110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "66dd9f261bd614cce975316f73e32d3fc86a5a44",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_489c9dc1e1ff4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5a9ce8b4-d5c8-4f7a-bc48-5ab387149955",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_51e147f829f70b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24b77853-b14d-4c1d-a592-2681e9a0f60e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

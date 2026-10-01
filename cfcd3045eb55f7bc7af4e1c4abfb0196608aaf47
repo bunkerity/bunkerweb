@@ -1,0 +1,65 @@
+CHANGELOG.md
+  s_4600783926e6d7::t_53d9be083401b7 19
+src/ui/app/static/locales/ar.json
+  s_489c9dc1e1ff4f::t_ef5033b7c3ac6d 62,981,1004
+src/ui/app/static/locales/bn.json
+  s_489c9dc1e1ff4f::t_590d47d058dddb 62,981,1004
+src/ui/app/static/locales/br.json
+  s_489c9dc1e1ff4f::t_5fc66cb96001c1 62,981,1004
+src/ui/app/static/locales/de.json
+  s_489c9dc1e1ff4f::t_43377fc77703f9 62,982,1005
+src/ui/app/static/locales/en.json
+  s_489c9dc1e1ff4f::t_62fef6d3b1b8bd 62,982,1005
+src/ui/app/static/locales/es.json
+  s_489c9dc1e1ff4f::t_d7b7e31ea10169 62,982,1005
+src/ui/app/static/locales/fr.json
+  s_489c9dc1e1ff4f::t_d87e69a74ac935 62,982,1005
+src/ui/app/static/locales/hi.json
+  s_489c9dc1e1ff4f::t_d3b476dd64309b 62,981,1004
+src/ui/app/static/locales/id.json
+  s_489c9dc1e1ff4f::t_a15d4591931118 62,981,1004
+src/ui/app/static/locales/it.json
+  s_489c9dc1e1ff4f::t_40caf5859910e1 62,981,1004
+src/ui/app/static/locales/ko.json
+  s_489c9dc1e1ff4f::t_23c38ee87e86ce 62,981,1004
+src/ui/app/static/locales/pl.json
+  s_489c9dc1e1ff4f::t_78904f1f2f3bac 62,981,1004
+src/ui/app/static/locales/pt.json
+  s_489c9dc1e1ff4f::t_c551825bb7ca0f 62,981,1004
+src/ui/app/static/locales/ru.json
+  s_489c9dc1e1ff4f::t_d89f8b75c0e698 62,981,1004
+src/ui/app/static/locales/tl.json
+  s_489c9dc1e1ff4f::t_cea9191baaecda 62,981,1004
+src/ui/app/static/locales/tr.json
+  s_489c9dc1e1ff4f::t_5cca8e1f9dfc03 62,981,1004
+src/ui/app/static/locales/tw.json
+  s_489c9dc1e1ff4f::t_4d3015dec4c8a1 62,981,1004
+src/ui/app/static/locales/ur.json
+  s_489c9dc1e1ff4f::t_9148739d16f642 62,981,1004
+src/ui/app/static/locales/zh.json
+  s_489c9dc1e1ff4f::t_1867eb8f90bf93 62,982,1005
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cfcd3045eb55f7bc7af4e1c4abfb0196608aaf47",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_489c9dc1e1ff4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5a9ce8b4-d5c8-4f7a-bc48-5ab387149955",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

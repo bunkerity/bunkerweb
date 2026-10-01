@@ -1,0 +1,128 @@
+src/common/core/realip/jobs/realip-download.py
+  s_4a18cf257edac1::t_ff883431ccaf12 21,147-149,155,165,182-183,191,197-198,208
+  s_4a18cf257edac1::t_75366c8706cb6b 8,151
+src/common/core/whitelist/plugin.json
+  s_2e644e4c169867::t_9262ffdc5782ea 94
+src/common/core/blacklist/README.md
+  s_2e644e4c169867::t_a986f6e0f284fe 66-68
+src/common/core/greylist/README.md
+  s_2e644e4c169867::t_a986f6e0f284fe 46-48
+src/common/core/blacklist/README.es.md
+  s_2e644e4c169867::t_a986f6e0f284fe 66-68
+src/common/core/realip/README.de.md
+  s_2e644e4c169867::t_a986f6e0f284fe 35-37,117-126
+  s_2e644e4c169867::t_aee2d70b9ad5eb 127-128
+docs/features.md
+  s_2e644e4c169867::t_2cf919ee4fdb9b 1106-1108,2706-2708,6481-6482
+  s_2e644e4c169867::t_9262ffdc5782ea 4963-4965
+  s_4a18cf257edac1::t_d1889c9866da5a 5046-5054
+  s_4a18cf257edac1::t_5b6922aecc0bf7 5055-5057,6483
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_4a18cf257edac1::t_ff883431ccaf12 22,182-184,190,200,217-218,226-233,239-240
+  s_4a18cf257edac1::t_75366c8706cb6b 8,186
+src/common/core/realip/plugin.json
+  s_2e644e4c169867::t_9262ffdc5782ea 56
+src/common/core/whitelist/README.fr.md
+  s_2e644e4c169867::t_a986f6e0f284fe 45-47
+docs/de/features.md
+  s_2e644e4c169867::t_2cf919ee4fdb9b 1093-1095,2647-2649,6389-6390
+  s_4a18cf257edac1::t_d1889c9866da5a 4974-4982
+  s_2e644e4c169867::t_a986f6e0f284fe 4891-4892
+  s_4a18cf257edac1::t_f5f3c3d9dfe375 4893,4983-4985,6391
+src/common/core/whitelist/README.zh.md
+  s_2e644e4c169867::t_a986f6e0f284fe 45-47
+src/common/core/whitelist/README.de.md
+  s_2e644e4c169867::t_a986f6e0f284fe 45-47
+src/common/utils/common_utils.py
+  s_7301341af51202::t_2c2101e61b8dec 9,36-37,930-1052
+  s_7301341af51202::t_b7732310f17560 1053-1055
+src/common/core/greylist/plugin.json
+  s_2e644e4c169867::t_9262ffdc5782ea 94
+CHANGELOG.md
+  s_2e644e4c169867::t_76ca194acf1038 8-9
+src/common/core/realip/README.fr.md
+  s_2e644e4c169867::t_a986f6e0f284fe 35-37,117-126
+  s_2e644e4c169867::t_ea46dc4a8121dd 127-128
+src/common/core/greylist/README.fr.md
+  s_2e644e4c169867::t_a986f6e0f284fe 46-48
+src/common/core/blacklist/README.de.md
+  s_2e644e4c169867::t_a986f6e0f284fe 66-68
+src/common/core/greylist/README.zh.md
+  s_2e644e4c169867::t_a986f6e0f284fe 46-48
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_4a18cf257edac1::t_31b8c4cdbb13a9 22,238-240,246,256,273-274,282-289,295-296
+  s_4a18cf257edac1::t_75366c8706cb6b 8,242
+docs/fr/features.md
+  s_2e644e4c169867::t_a986f6e0f284fe 4830-4831
+  s_2e644e4c169867::t_2cf919ee4fdb9b 1074-1076,2609-2611,6285-6286
+  s_4a18cf257edac1::t_d1889c9866da5a 4913-4921
+  s_4a18cf257edac1::t_e831395266c3d2 4832,4922-4924,6287
+docs/es/features.md
+  s_4a18cf257edac1::t_d1889c9866da5a 5028-5036
+  s_2e644e4c169867::t_2cf919ee4fdb9b 1102-1104,2690-2692,6466-6467
+  s_2e644e4c169867::t_a986f6e0f284fe 4945-4946
+  s_4a18cf257edac1::t_48189a60ed0c4c 4947,5037-5039,6468
+src/common/core/realip/README.es.md
+  s_2e644e4c169867::t_a986f6e0f284fe 37-39,119-128
+  s_2e644e4c169867::t_0452af4bb15535 129-130
+src/common/core/realip/README.zh.md
+  s_2e644e4c169867::t_a986f6e0f284fe 37-39,119-128
+  s_2e644e4c169867::t_979e17256647c2 129-130
+src/common/core/blacklist/README.zh.md
+  s_2e644e4c169867::t_a986f6e0f284fe 66-68
+src/common/core/greylist/README.es.md
+  s_2e644e4c169867::t_a986f6e0f284fe 46-48
+src/common/core/blacklist/plugin.json
+  s_2e644e4c169867::t_9262ffdc5782ea 190,235
+src/common/core/whitelist/README.md
+  s_2e644e4c169867::t_a986f6e0f284fe 45-47
+src/common/core/realip/README.md
+  s_2e644e4c169867::t_a986f6e0f284fe 119-130
+  s_2e644e4c169867::t_9262ffdc5782ea 37-39
+src/common/core/whitelist/README.es.md
+  s_2e644e4c169867::t_a986f6e0f284fe 45-47
+src/common/core/greylist/jobs/greylist-download.py
+  s_4a18cf257edac1::t_75366c8706cb6b 8,186
+  s_4a18cf257edac1::t_ff883431ccaf12 22,182-184,190,200,217-218,226-233,239-240
+src/common/core/blacklist/README.fr.md
+  s_2e644e4c169867::t_a986f6e0f284fe 66-68
+src/common/core/greylist/README.de.md
+  s_2e644e4c169867::t_a986f6e0f284fe 46-48
+docs/zh/features.md
+  s_4a18cf257edac1::t_d1889c9866da5a 5038-5046
+  s_2e644e4c169867::t_a986f6e0f284fe 4955-4956
+  s_2e644e4c169867::t_2cf919ee4fdb9b 1108-1110,2700-2702,6474-6475
+  s_4a18cf257edac1::t_48e15aeec13697 4957,5047-5049,6476
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f8f88cc4f640c3aee4e4be88c252f8639cc51f9f",
+  "prompts": {},
+  "sessions": {
+    "s_2e644e4c169867": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0e8a2-8034-75b2-94da-2bf158ecc5d9",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4a18cf257edac1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5ebb3a6-341d-4350-b694-26d0e6d8f94c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7301341af51202": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9bbf4d71-4cc4-40d7-b367-d85a05f8150a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
