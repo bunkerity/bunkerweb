@@ -591,3 +591,28 @@ class TestTheAutoconfCallerIsWarnedNotRefused(TestTheConfigPutIsGatedTheSameWay)
         assert response.status_code == 200
         writable_db.save_config.assert_called_once()
         logger.error.assert_not_called()
+
+
+class TestSettingDraftsTravelThroughThePut:
+    """The UI has no database access in 1.7, so the RAW editor's draft map reaches
+    ``save_config`` only through ``PUT /global_settings/config``. Additive: a caller that sends
+    no map -- autoconf, every older client -- saves exactly as before."""
+
+    def _put(self, **kwargs):
+        return ROUTER.save_config(schemas.SaveConfigRequest(config={"MULTISITE": "no", "USE_GZIP": "yes"}, method="ui", **kwargs))
+
+    def test_the_draft_map_reaches_save_config(self, writable_db):
+        response = self._put(draft_settings={"USE_GZIP": True, "USE_CORS": None, "USE_BROTLI": False})
+
+        assert response.status_code == 200, response.content
+        assert writable_db.save_config.call_args.kwargs["draft_settings"] == {"USE_GZIP": True, "USE_CORS": None, "USE_BROTLI": False}
+
+    def test_no_map_means_no_draft_changes(self, writable_db):
+        self._put()
+
+        assert writable_db.save_config.call_args.kwargs["draft_settings"] is None
+
+    @pytest.mark.parametrize("state", ("yes", "no", 1, "true"))
+    def test_a_state_that_is_not_a_boolean_or_null_is_refused(self, state):
+        with pytest.raises(ValueError):
+            schemas.SaveConfigRequest(config={}, method="ui", draft_settings={"USE_GZIP": state})

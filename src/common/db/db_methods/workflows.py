@@ -250,14 +250,19 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
         fallback = {
             row.setting_id: row.value
             for row in session.execute(
-                select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(required), Global_values.suffix == 0)
+                select(Global_values.setting_id, Global_values.value).where(
+                    Global_values.setting_id.in_(required), Global_values.suffix == 0, Global_values.is_draft == False  # noqa: E712
+                )
             )
         }
         per_service = {
             (row.service_id, row.setting_id): row.value
             for row in session.execute(
                 select(Services_settings.service_id, Services_settings.setting_id, Services_settings.value).where(
-                    Services_settings.service_id.in_(service_ids), Services_settings.setting_id.in_(required), Services_settings.suffix == 0
+                    Services_settings.service_id.in_(service_ids),
+                    Services_settings.setting_id.in_(required),
+                    Services_settings.suffix == 0,
+                    Services_settings.is_draft == False,  # noqa: E712
                 )
             )
         }
@@ -297,14 +302,19 @@ class DatabaseWorkflowsMixin(DatabaseMixinBase):
         fallback = {
             row.setting_id: row.value
             for row in session.execute(
-                select(Global_values.setting_id, Global_values.value).where(Global_values.setting_id.in_(wanted), Global_values.suffix == 0)
+                select(Global_values.setting_id, Global_values.value).where(
+                    Global_values.setting_id.in_(wanted), Global_values.suffix == 0, Global_values.is_draft == False  # noqa: E712
+                )
             )
         }
         per_service = {
             row.setting_id: row.value
             for row in session.execute(
                 select(Services_settings.setting_id, Services_settings.value).where(
-                    Services_settings.service_id == service_id, Services_settings.setting_id.in_(wanted), Services_settings.suffix == 0
+                    Services_settings.service_id == service_id,
+                    Services_settings.setting_id.in_(wanted),
+                    Services_settings.suffix == 0,
+                    Services_settings.is_draft == False,  # noqa: E712
                 )
             )
         }

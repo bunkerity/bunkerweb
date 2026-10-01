@@ -85,6 +85,76 @@ $(document).ready(() => {
     };
   };
 
+  // Parse env-style raw config into ordered {key, value, start, end} entries (start/end are the
+  // entry's first and last editor rows). A physical line begins a new entry only when the token
+  // before its first "=" is a known setting key; any other line is a continuation that is folded
+  // back into the current value -- but ONLY when the current key is multiline capable, so
+  // ordinary single-line settings can never absorb stray lines. Split once on the first "="
+  // (indexOf, not split) so base64 "==" padding and "=" inside values survive untouched. Shared by
+  // the save, the draft toggle and the draft highlight so all three agree on where a setting is.
+  const parseRawSettings = (rawText, { isKnownSettingKey, isMultilineKey }) => {
+    const entries = [];
+    if (!rawText) return entries;
+    let current = null;
+    const flush = () => {
+      if (!current) return;
+      // Single-line values keep the historical trim(); multiline (file)
+      // values are preserved verbatim because PEM/base64 are byte-sensitive.
+      if (!isMultilineKey(current.key)) current.value = current.value.trim();
+      entries.push(current);
+      current = null;
+    };
+    rawText
+      .replace(/\r\n?/g, "\n")
+      .split("\n")
+      .forEach((line, row) => {
+        const eq = line.indexOf("=");
+        const candidateKey = eq === -1 ? null : line.slice(0, eq).trim();
+        if (candidateKey !== null && isKnownSettingKey(candidateKey)) {
+          flush();
+          current = {
+            key: candidateKey,
+            value: line.slice(eq + 1),
+            start: row,
+            end: row,
+          };
+        } else if (current && isMultilineKey(current.key)) {
+          current.value += "\n" + line;
+          current.end = row;
+        }
+        // Otherwise: a stray/blank/comment line under a single-line setting,
+        // or content before the first key -> ignore (generated config never
+        // produces these).
+      });
+    flush();
+    return entries;
+  };
+
+  // RAW-editor setting drafts: the keys whose value is stored but not applied. Seeded from the
+  // server (#raw-draft-settings), toggled with `#` / Backspace at the start of a line, posted
+  // with the save as RAW_DRAFT_SETTINGS. Absent on a page without the raw pane.
+  const $rawDraftSettings = $("#raw-draft-settings");
+  const rawDraftSettings = new Set(
+    (() => {
+      try {
+        return JSON.parse($rawDraftSettings.val() || "[]");
+      } catch (_e) {
+        return [];
+      }
+    })(),
+  );
+  // The keys that describe the service or the database rather than configure it, never drafts:
+  // app/raw_drafts.py STRUCTURAL_SETTINGS, emitted by the template so there is one list.
+  const RAW_DRAFT_CONTROL_KEYS = new Set(
+    (() => {
+      try {
+        return JSON.parse($rawDraftSettings.attr("data-control-keys") || "[]");
+      } catch (_e) {
+        return [];
+      }
+    })(),
+  );
+
   const isOverrideNonGlobalEnabled = () =>
     ($("#override-non-global-settings").val() || "no")
       .toString()
@@ -164,46 +234,8 @@ $(document).ready(() => {
     // CUSTOM_SSL_CERT_DATA / CUSTOM_SSL_KEY_DATA / *_TRUSTED_CERTIFICATE_DATA).
     // The parser below uses it so a PEM/base64 block is reassembled instead of
     // being shattered into bogus variables on save (issue #3651).
-    const { isKnownSettingKey, isMultilineKey } = makeRawKeyPredicates();
-
-    // Parse env-style raw config into ordered [key, value] pairs. A physical
-    // line begins a new pair only when the token before its first "=" is a
-    // known setting key; any other line is a continuation that is folded back
-    // into the current value — but ONLY when the current key is multiline
-    // capable, so ordinary single-line settings can never absorb stray lines.
-    // Split once on the first "=" (indexOf, not split) so base64 "==" padding
-    // and "=" inside values survive untouched.
-    const parseRawConfig = (rawText) => {
-      const pairs = [];
-      if (!rawText) return pairs;
-      let current = null;
-      const flush = () => {
-        if (!current) return;
-        // Single-line values keep the historical trim(); multiline (file)
-        // values are preserved verbatim because PEM/base64 are byte-sensitive.
-        if (!isMultilineKey(current.key)) current.value = current.value.trim();
-        pairs.push(current);
-        current = null;
-      };
-      rawText
-        .replace(/\r\n?/g, "\n")
-        .split("\n")
-        .forEach((line) => {
-          const eq = line.indexOf("=");
-          const candidateKey = eq === -1 ? null : line.slice(0, eq).trim();
-          if (candidateKey !== null && isKnownSettingKey(candidateKey)) {
-            flush();
-            current = { key: candidateKey, value: line.slice(eq + 1) };
-          } else if (current && isMultilineKey(current.key)) {
-            current.value += "\n" + line;
-          }
-          // Otherwise: a stray/blank/comment line under a single-line setting,
-          // or content before the first key -> ignore (generated config never
-          // produces these).
-        });
-      flush();
-      return pairs;
-    };
+    const predicates = makeRawKeyPredicates();
+    const parseRawConfig = (rawText) => parseRawSettings(rawText, predicates);
 
     // Helper to fold a raw config blob into a {key: value} object.
     const parseConfig = (selector) => {
@@ -227,7 +259,23 @@ $(document).ready(() => {
     const rawConfigSource = rawEditor
       ? rawEditor.getValue()
       : $("#raw-config").val();
-    parseRawConfig(rawConfigSource).forEach(({ key, value }) => {
+    const rawEntries = parseRawConfig(rawConfigSource);
+    // Which lines the editor holds, and which of those are drafts. A saved draft missing from
+    // the first list is a line the operator deleted, which the server turns into a row deletion.
+    if ($rawDraftSettings.length) {
+      const presentKeys = [...new Set(rawEntries.map(({ key }) => key))];
+      appendHiddenInput(
+        form,
+        "RAW_PRESENT_SETTINGS",
+        JSON.stringify(presentKeys),
+      );
+      appendHiddenInput(
+        form,
+        "RAW_DRAFT_SETTINGS",
+        JSON.stringify(presentKeys.filter((key) => rawDraftSettings.has(key))),
+      );
+    }
+    rawEntries.forEach(({ key, value }) => {
       if (!key) return;
       if (key === "IS_DRAFT") {
         skippedKeys.add(key);
@@ -517,6 +565,61 @@ $(document).ready(() => {
     editor.on("change", refreshDisabledIndicators);
   };
 
+  // `#` at the start of a setting's first line toggles its draft state, Backspace there activates
+  // a draft. The `#` is never written into the text -- it would become part of the key -- so the
+  // state lives in `rawDraftSettings` and is drawn as a marker (css: .raw-draft-line).
+  const setupRawDraftActions = (editor) => {
+    if (!$rawDraftSettings.length) return;
+    editor.renderer.setPadding(24);
+    const predicates = makeRawKeyPredicates();
+    const locked = new Set(
+      ($("#raw-config-disabled").val() || "")
+        .split(/\r?\n/)
+        .map((line) => line.split("::")[0].trim())
+        .filter(Boolean),
+    );
+    let markers = [];
+    const refresh = () => {
+      markers.forEach((id) => editor.session.removeMarker(id));
+      markers = parseRawSettings(editor.getValue(), predicates)
+        .filter((entry) => rawDraftSettings.has(entry.key))
+        .map((entry) =>
+          editor.session.addMarker(
+            new AceRange(entry.start, 0, entry.end, Infinity),
+            "raw-draft-line",
+            "fullLine",
+            true,
+          ),
+        );
+    };
+    editor.commands.on("exec", (event) => {
+      if (
+        editor.getReadOnly() ||
+        !editor.selection.isEmpty() ||
+        editor.getCursorPosition().column !== 0
+      )
+        return;
+      const row = editor.getCursorPosition().row;
+      const entry = parseRawSettings(editor.getValue(), predicates).find(
+        (candidate) => candidate.start === row,
+      );
+      if (!entry) return;
+      const toggle =
+        event.command.name === "insertstring" && event.args === "#";
+      const activate =
+        event.command.name === "backspace" && rawDraftSettings.has(entry.key);
+      if (!toggle && !activate) return;
+      event.preventDefault();
+      if (locked.has(entry.key) || RAW_DRAFT_CONTROL_KEYS.has(entry.key))
+        return;
+      if (rawDraftSettings.has(entry.key)) rawDraftSettings.delete(entry.key);
+      else rawDraftSettings.add(entry.key);
+      refresh();
+    });
+    editor.on("change", refresh);
+    refresh();
+  };
+
   $(".ace-editor").each(function () {
     const $editorElement = $(this);
     const sourceSelector = $editorElement.data("source");
@@ -667,6 +770,7 @@ $(document).ready(() => {
       editor.on("change", syncDraftFromEditor);
 
       setupRawDisabledHighlight(editor);
+      setupRawDraftActions(editor);
     }
 
     if ($source && $source.length && $source.is("textarea, input")) {

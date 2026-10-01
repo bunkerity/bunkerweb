@@ -324,6 +324,40 @@ def check_irrepresentable(counts: Dict[str, Optional[int]], classes: Optional[Di
     return Check("irrepresentable_data", IN_PLACE, "No 1.7-only rows found", data)
 
 
+def check_setting_drafts(counts: Dict[str, Optional[int]], row: Optional[dict], target: str) -> Check:
+    """Individual setting drafts against a target that may not have the draft flag.
+
+    A draft keeps its value in place with `is_draft = 1` and is never rendered. A target without
+    the flag would render it, so 1.6.15~rc3's `downgrade()` refuses while a draft row exists; the
+    preflight refuses the same way instead of letting the migration fail halfway. The manifest row
+    says whether the path runs that revision (`setting_drafts`: "refused") or stops above it
+    ("kept"); a row that does not say is unproven.
+    """
+    policy = (row or {}).get("setting_drafts")
+    data = {"counts": counts, "setting_drafts": policy}
+    total = sum(count for count in counts.values() if count)
+    summary = ", ".join(f"{name}={count}" for name, count in sorted(counts.items()) if count)
+
+    if policy == "kept":
+        return Check("setting_drafts", IN_PLACE, f"{target} keeps individual setting drafts" + (f" ({summary})" if total else ""), data)
+    if any(count is None for count in counts.values()):
+        unknown = ", ".join(sorted(name for name, count in counts.items() if count is None))
+        return Check("setting_drafts", RESTORE_ONLY, f"Could not count the setting drafts in {unknown}: whether {target} would activate them is unknown", data)
+    if not total:
+        return Check("setting_drafts", IN_PLACE, "No individual setting drafts", data)
+    if policy == "refused":
+        return Check(
+            "setting_drafts",
+            REFUSE,
+            f"{total} individual setting draft(s) ({summary}) that {target} has no draft flag for: its migration refuses rather than activate them."
+            " Activate or delete them in the RAW editor first, or downgrade to 1.6.15, which keeps them",
+            data,
+        )
+    return Check(
+        "setting_drafts", RESTORE_ONLY, f"{total} individual setting draft(s) ({summary}) and the manifest does not say whether {target} keeps them", data
+    )
+
+
 def check_plugins(plugins: List[dict]) -> Check:
     """Plugins whose declared API range excludes the target, and plugins with no manifest.
 
@@ -525,6 +559,30 @@ def count_irrepresentable(db) -> Dict[str, Optional[int]]:
     except BaseException as e:
         LOGGER.debug(f"Could not count the 1.7-only rows: {e}")
         for table in IRREPRESENTABLE_TABLES + ("bw_resources", "bw_resource_groups"):
+            counts.setdefault(table, None)
+    return counts
+
+
+SETTING_DRAFT_TABLES = ("bw_global_values", "bw_services_settings")
+
+
+def count_setting_drafts(db) -> Dict[str, Optional[int]]:
+    """Draft rows per table. A table without the column holds no draft (a real zero); a failed
+    count maps to None."""
+    counts: Dict[str, Optional[int]] = {}
+    try:
+        inspector = sa.inspect(db.sql_engine)
+        with db.sql_engine.connect() as conn:
+            for table in SETTING_DRAFT_TABLES:
+                if not inspector.has_table(table) or "is_draft" not in {column["name"] for column in inspector.get_columns(table)}:
+                    counts[table] = 0
+                    continue
+                counts[table] = int(
+                    conn.execute(sa.text(f"SELECT COUNT(*) FROM {table} WHERE is_draft = :draft"), {"draft": True}).scalar_one()
+                )  # noqa: S608 - fixed module constant
+    except BaseException as e:
+        LOGGER.debug(f"Could not count the setting drafts: {e}")
+        for table in SETTING_DRAFT_TABLES:
             counts.setdefault(table, None)
     return counts
 
@@ -893,6 +951,7 @@ def _preflight(target: str, db, backup_dir: Path, now: datetime, client) -> dict
         check_disk(database_size(db, engine), free_space(backup_dir), backup_dir.as_posix()),
         check_backup(newest, now),
         check_irrepresentable(count_irrepresentable(db), loss_classes(manifest)),
+        check_setting_drafts(count_setting_drafts(db), manifest_row(manifest, installed, target, engine), target),
         check_plugins(scan_plugins(target)),
         check_writers(broker_state(client=client)),
     ]

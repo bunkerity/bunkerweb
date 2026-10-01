@@ -501,3 +501,67 @@ class TestOpeningTheDatabaseWithoutWriting:
 
     def test_the_driver_map_covers_every_engine_the_product_supports(self):
         assert set(downgrade.RECOMMENDED_DRIVERS) >= {"postgresql", "mysql", "mariadb"}, "RECOMMENDED_DRIVERS lost an engine"
+
+
+class TestSettingDrafts:
+    """Individual setting drafts (`is_draft` on bw_global_values / bw_services_settings) against a
+    target that has no draft flag.
+
+    1.6.15~rc3's `downgrade()` refuses while a draft row exists -- dropping the flag would silently
+    activate the retained value -- so the 1.6.14 path fails mid-migration and the executor falls
+    back to its own backup. The preflight has to refuse first, and only where the path really runs
+    that revision: 1.6.15 keeps the flag, so drafts are no reason to refuse it. Which is which is
+    the manifest's `setting_drafts`, never a version comparison.
+    """
+
+    REFUSED = {"setting_drafts": "refused"}
+    KEPT = {"setting_drafts": "kept"}
+    NONE = {"bw_global_values": 0, "bw_services_settings": 0}
+    SOME = {"bw_global_values": 2, "bw_services_settings": 1}
+
+    def test_no_drafts_never_blocks(self):
+        assert downgrade.check_setting_drafts(self.NONE, self.REFUSED, "1.6.14").verdict == IN_PLACE
+
+    def test_drafts_refuse_a_target_that_drops_the_flag(self):
+        check = downgrade.check_setting_drafts(self.SOME, self.REFUSED, "1.6.14")
+        assert check.verdict == REFUSE
+        assert "3" in check.detail and "1.6.15" in check.detail, "the operator must be told how many, and the target that keeps them"
+
+    def test_drafts_survive_a_target_that_keeps_the_flag(self):
+        assert downgrade.check_setting_drafts(self.SOME, self.KEPT, "1.6.15").verdict == IN_PLACE
+
+    def test_a_row_that_does_not_say_is_unproven(self):
+        """Silence in the manifest is not permission: rc3's refusal may or may not be on the path."""
+        assert downgrade.check_setting_drafts(self.SOME, {}, "1.6.13").verdict == RESTORE_ONLY
+        assert downgrade.check_setting_drafts(self.SOME, None, "1.6.13").verdict == RESTORE_ONLY
+
+    def test_an_uncounted_table_degrades_unless_the_target_keeps_them(self):
+        unknown = {"bw_global_values": None, "bw_services_settings": 0}
+        assert downgrade.check_setting_drafts(unknown, self.REFUSED, "1.6.14").verdict == RESTORE_ONLY
+        assert downgrade.check_setting_drafts(unknown, self.KEPT, "1.6.15").verdict == IN_PLACE
+
+    def test_every_shipped_row_says_what_it_does_to_drafts(self):
+        """The 1.6.14 path runs 1.6.15~rc3's downgrade(), the 1.6.15 path stops above it."""
+        manifest = downgrade.load_manifest()
+        for row in manifest["releases"]:
+            expected = "refused" if row["to"] == "1.6.14" else "kept"
+            assert row.get("setting_drafts") == expected, f"{row['to']}-{row['engine']}"
+
+    def test_real_draft_rows_are_counted(self, db):
+        """The counting query on a real engine, with drafts the 1.7 save path itself wrote."""
+        from fixtures.seed import make_core_plugin, make_general_settings  # noqa: PLC0415
+
+        settings = {"ALPHA": {"id": "alpha", "context": "multisite", "default": "no", "help": "h", "label": "L", "regex": "^.*$", "type": "text"}}
+        db.init_tables([make_general_settings(), make_core_plugin("alpha", settings=settings)])
+        db.initialize_db("1.7.0", "Docker")
+        assert downgrade.count_setting_drafts(db) == self.NONE
+
+        config = {"MULTISITE": "yes", "SERVER_NAME": "app.example.com", "app.example.com_SERVER_NAME": "app.example.com"}
+        assert isinstance(db.save_config(config | {"ALPHA": "yes", "app.example.com_ALPHA": "on"}, "ui", draft_settings={"ALPHA": True}), set)
+        assert downgrade.count_setting_drafts(db) == {"bw_global_values": 1, "bw_services_settings": 0}
+        assert downgrade.check_setting_drafts(downgrade.count_setting_drafts(db), self.REFUSED, "1.6.14").verdict == REFUSE
+
+    def test_the_preflight_asks_it(self, db, tmp_path, monkeypatch):
+        monkeypatch.setenv("CELERY_BROKER_URL", "")
+        names = [check["name"] for check in downgrade.preflight("1.6.14", db=db, backup_dir=tmp_path, now=NOW)["checks"]]
+        assert "setting_drafts" in names

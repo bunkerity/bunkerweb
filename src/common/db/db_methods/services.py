@@ -44,8 +44,19 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                 )
                 .select_from(Services)
                 .outerjoin(template_alias, (Services.id == template_alias.service_id) & (template_alias.setting_id == "USE_TEMPLATE"))
-                .outerjoin(security_mode_alias, (Services.id == security_mode_alias.service_id) & (security_mode_alias.setting_id == "SECURITY_MODE"))
-                .outerjoin(server_type_alias, (Services.id == server_type_alias.service_id) & (server_type_alias.setting_id == "SERVER_TYPE"))
+                # A RAW-editor setting draft is not what the service runs with: report the effective value.
+                .outerjoin(
+                    security_mode_alias,
+                    (Services.id == security_mode_alias.service_id)
+                    & (security_mode_alias.setting_id == "SECURITY_MODE")
+                    & (security_mode_alias.is_draft == False),  # noqa: E712
+                )
+                .outerjoin(
+                    server_type_alias,
+                    (Services.id == server_type_alias.service_id)
+                    & (server_type_alias.setting_id == "SERVER_TYPE")
+                    & (server_type_alias.is_draft == False),  # noqa: E712
+                )
             )
 
             if not with_drafts:
@@ -58,7 +69,7 @@ class DatabaseServicesMixin(DatabaseMixinBase):
             service_ports: Dict[str, List[str]] = {}
             for row in session.execute(
                 select(Services_settings.service_id, Services_settings.value)
-                .where(Services_settings.setting_id == HTTPS_PORT_SETTING)
+                .where(Services_settings.setting_id == HTTPS_PORT_SETTING, Services_settings.is_draft == False)  # noqa: E712
                 .order_by(Services_settings.service_id, Services_settings.suffix)
             ).all():
                 if row.value:
@@ -67,7 +78,9 @@ class DatabaseServicesMixin(DatabaseMixinBase):
             global_ports = [
                 row.value
                 for row in session.execute(
-                    select(Global_values.value).where(Global_values.setting_id == HTTPS_PORT_SETTING).order_by(Global_values.suffix)
+                    select(Global_values.value)
+                    .where(Global_values.setting_id == HTTPS_PORT_SETTING, Global_values.is_draft == False)  # noqa: E712
+                    .order_by(Global_values.suffix)
                 ).all()
                 if row.value
             ]
@@ -83,7 +96,9 @@ class DatabaseServicesMixin(DatabaseMixinBase):
             # the opposite of what the generator does. One query for the whole call, not per service.
             inherited = dict(
                 session.execute(
-                    select(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE")))
+                    select(Global_values.setting_id, Global_values.value).filter(
+                        Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE")), Global_values.is_draft == False  # noqa: E712
+                    )
                 ).all()
             )
 

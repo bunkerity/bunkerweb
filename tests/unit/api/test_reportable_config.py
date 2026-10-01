@@ -315,3 +315,31 @@ class TestInheritedPortLists:
 
         assert "app_HTTP_PORT_1" not in conf
         assert "app_staging_HTTP_PORT_1" not in conf
+
+
+class TestSettingDraftsAreOptIn:
+    """RAW-editor setting drafts are visible only to a caller that asks: every other reader --
+    and the UI hands these snapshots back to ``save_config`` -- gets the effective value."""
+
+    @pytest.mark.parametrize("full", (True, False))
+    def test_the_global_read_is_effective_by_default(self, global_db, full):
+        GLOBAL_SETTINGS.read_global_settings(full=full, methods=True)
+
+        assert global_db.get_config.call_args.kwargs["with_setting_drafts"] is False
+
+    @pytest.mark.parametrize("full", (True, False))
+    def test_the_global_read_forwards_the_flag(self, global_db, full):
+        GLOBAL_SETTINGS.read_global_settings(full=full, methods=True, with_setting_drafts=True)
+
+        assert global_db.get_config.call_args.kwargs["with_setting_drafts"] is True
+
+    @pytest.mark.parametrize("full", (True, False))
+    def test_the_service_read_forwards_the_flag(self, service_db, full):
+        SERVICES.get_service(SERVICE, full=full, methods=True, with_setting_drafts=True)
+
+        assert service_db.get_config.call_args.kwargs["with_setting_drafts"] is True
+
+    def test_the_service_read_is_effective_by_default(self, service_db):
+        SERVICES.get_service(SERVICE, full=True, methods=True)
+
+        assert service_db.get_config.call_args.kwargs["with_setting_drafts"] is False

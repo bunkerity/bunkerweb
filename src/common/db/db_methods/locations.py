@@ -38,15 +38,18 @@ def inline_family_paths(session, service_id: str, trigger: Any, path_setting: Op
     A suffix counts only when a trigger setting is non-empty — the exact condition each template
     loops on — so a blanked-out rule never blocks a resource. A family with several triggers is
     served by *any* of them, matching the template's ``or``. Service values shadow global ones,
-    matching multisite inheritance.
+    matching multisite inheritance. A RAW-editor setting draft is never rendered, so it claims
+    no path either.
     """
     triggers = (trigger,) if isinstance(trigger, str) else tuple(trigger)
     wanted = triggers + ((path_setting,) if path_setting else ())
     by_suffix: Dict[int, Dict[str, str]] = {}
     for scope in (
-        select(Global_values.setting_id, Global_values.value, Global_values.suffix).where(Global_values.setting_id.in_(wanted)),
+        select(Global_values.setting_id, Global_values.value, Global_values.suffix).where(
+            Global_values.setting_id.in_(wanted), Global_values.is_draft == False  # noqa: E712
+        ),
         select(Services_settings.setting_id, Services_settings.value, Services_settings.suffix).where(
-            Services_settings.service_id == service_id, Services_settings.setting_id.in_(wanted)
+            Services_settings.service_id == service_id, Services_settings.setting_id.in_(wanted), Services_settings.is_draft == False  # noqa: E712
         ),
     ):
         for row in session.execute(scope):
@@ -142,7 +145,9 @@ def stored_service_setting(session, service_id: str, setting_id: str) -> Optiona
     has to tell "this service overrides the global" apart from "this service follows it".
     """
     value = session.execute(
-        select(Services_settings.value).where(Services_settings.service_id == service_id, Services_settings.setting_id == setting_id).limit(1)
+        select(Services_settings.value)
+        .where(Services_settings.service_id == service_id, Services_settings.setting_id == setting_id, Services_settings.is_draft == False)  # noqa: E712
+        .limit(1)
     ).scalar_one_or_none()
     return value or None
 
@@ -151,7 +156,9 @@ def service_setting(session, service_id: str, setting_id: str, default: str = ""
     """One service's effective value for a setting, falling back to the global one."""
     value = stored_service_setting(session, service_id, setting_id)
     if value is None:
-        value = session.execute(select(Global_values.value).where(Global_values.setting_id == setting_id).limit(1)).scalar_one_or_none()
+        value = session.execute(
+            select(Global_values.value).where(Global_values.setting_id == setting_id, Global_values.is_draft == False).limit(1)  # noqa: E712
+        ).scalar_one_or_none()
     return value or default
 
 

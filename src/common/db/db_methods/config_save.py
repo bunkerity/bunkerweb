@@ -67,6 +67,32 @@ class _SaveConfigContext:
     # row only for keys in this set. Empty means the scheduler never touches ui/api rows
     # (the incoming config is treated as default-filled, not user-declared).
     explicit_keys: frozenset = field(default_factory=frozenset)
+    # RAW-editor setting-draft states keyed like the config (``KEY`` or ``<service>_KEY``):
+    # True drafts the row, False activates it, None deletes a drafted row. Empty for every other
+    # caller, which then never sees a drafted row at all -- see _draft_intent.
+    draft_settings: Dict[str, Optional[bool]] = field(default_factory=dict)
+
+
+# Keys that shape the roster or the database itself; a draft of one would mean nothing. Same set
+# as 1.6.15 (Database.py `protected_draft_setting_ids`).
+PROTECTED_DRAFT_SETTINGS = frozenset({"SERVER_NAME", "MULTISITE", "IS_DRAFT", "USE_TEMPLATE", "DATABASE_URI"})
+
+
+def _draft_intent(ctx: "_SaveConfigContext", full_key: str, setting_id: str, row_is_draft: bool) -> Tuple[Optional[str], bool, Optional[bool]]:
+    """What a save does with the setting-draft state of one key: ``(action, desired, explicit)``.
+
+    ``action`` is ``"delete"`` (the map says None and the row is a draft), ``"skip"`` (leave the key
+    alone: None on a non-draft row, or a drafted row the caller sent no state for) or None
+    (process the key normally, persisting ``desired``). A drafted row is opaque to any save that
+    does not address it explicitly: the composition editor, the API and the scheduler post the
+    EFFECTIVE value back, and that must neither rewrite nor activate the retained draft.
+    """
+    explicit = None if setting_id in PROTECTED_DRAFT_SETTINGS else ctx.draft_settings.get(full_key)
+    if explicit is None and setting_id not in PROTECTED_DRAFT_SETTINGS and full_key in ctx.draft_settings:
+        return ("delete" if row_is_draft else "skip"), False, None
+    if row_is_draft and explicit is None:
+        return "skip", True, None
+    return None, bool(explicit), explicit
 
 
 def _is_reserved(service: Any) -> bool:
@@ -373,6 +399,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
         retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
@@ -396,6 +423,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                                      misleading: it does not restrict input to global
                                      settings, it only disables the service-management
                                      side-effects.
+            draft_settings: RAW-editor setting-draft states keyed by the unprefixed global
+                            setting id or the full ``<service>_<setting>`` key. ``True``
+                            drafts the row (stored, never rendered), ``False`` activates it,
+                            ``None`` deletes an existing draft row. Absent keys keep their
+                            state, and a drafted row is left untouched by a save that does not
+                            address it here.
             retry_on_conflict: Recompute and save once more when the flush hits a unique
                                violation because another writer inserted the same rows
                                between our read and our flush. Set False on the retry
@@ -450,6 +483,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             method=method,
             normalized_file_names=normalized_file_names,
             explicit_keys=frozenset(explicit_keys or ()),
+            draft_settings={k: v for k, v in (draft_settings or {}).items() if isinstance(k, str) and (v is None or isinstance(v, bool))},
         )
 
         with self._db_session() as session:
@@ -686,6 +720,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     if ret_service_template_change:
                         service_template_change = True
 
+            self._sc_delete_absent_drafts(session, ctx, to_delete, changed_plugins)
+
             if changed_services:
                 changed_plugins = set(plugin.id for plugin in session.execute(select(Plugins.id)).all())
 
@@ -765,6 +801,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 skip_service_management=skip_service_management,
                 disable_cleanup=disable_cleanup,
                 explicit_keys=explicit_keys,
+                draft_settings=draft_settings,
                 retry_on_conflict=False,
             )
 
@@ -934,10 +971,16 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # which is not in EDITABLE_METHODS, so global_method_total is still an exact-match count there.
         cleanup_methods = EDITABLE_METHODS if ctx.method in EDITABLE_METHODS else {ctx.method}
         for db_global_config in session.scalars(select(Global_values).filter(Global_values.method.in_(cleanup_methods))).all():
-            global_method_total += 1
             key = db_global_config.setting_id
             if db_global_config.suffix:
                 key = f"{key}_{db_global_config.suffix}"
+
+            # A drafted row is never in an effective-config payload, so absence cannot mean
+            # deletion for it; a key the draft map addresses is handled by the settings pass.
+            # Neither counts toward the wipe guard below.
+            if db_global_config.is_draft or key in ctx.draft_settings:
+                continue
+            global_method_total += 1
 
             try:
                 # Check if the setting should be deleted based on key presence
@@ -1020,10 +1063,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # so they can be re-published when the orchestration object returns.
             if db_service_config.service_id in drafted_service_ids:
                 continue
-            service_method_total[db_service_config.service_id] += 1
             key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
             if db_service_config.suffix:
                 key = f"{key}_{db_service_config.suffix}"
+
+            # Same guard as the global cleanup: a composition save never deletes a setting draft.
+            if db_service_config.is_draft or key in ctx.draft_settings:
+                continue
+            service_method_total[db_service_config.service_id] += 1
 
             try:
                 # Check if the setting should be deleted based on key presence
@@ -1444,6 +1491,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 Services_settings.value,
                 Services_settings.file_name,
                 Services_settings.method,
+                Services_settings.is_draft,
             )
         ).all()
         ctx.existing_service_settings_dict = {
@@ -1451,6 +1499,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 "value": self._empty_if_none(s.value),
                 "file_name": self._empty_if_none(s.file_name),
                 "method": s.method,
+                "is_draft": bool(s.is_draft),
             }
             for s in existing_service_settings
         }
@@ -1548,6 +1597,21 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     local_changed_services = True
 
             service_setting = ctx.existing_service_settings_dict.get((server_name, key, suffix))
+            full_key = f"{server_name}_{original_key}"
+            method_can_update = bool(
+                service_setting
+                and self._methods_are_compatible(
+                    ctx.method,
+                    service_setting["method"],
+                    allow_scheduler_override=_scheduler_can_override(ctx, full_key, value),
+                )
+            )
+            draft_action, desired_is_draft, explicit_draft = _draft_intent(ctx, full_key, key, bool(service_setting and service_setting["is_draft"]))
+            if draft_action == "delete" and method_can_update:
+                local_to_delete.append({"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}})
+                local_changed_plugins.add(setting["plugin_id"])
+            if draft_action:
+                continue
             current_file_name = service_setting["file_name"] if service_setting else ""
             value_changed = bool(service_setting and service_setting["value"] != value)
             should_update_value = (
@@ -1556,12 +1620,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 # own escalation: autoconf adopts a row another method owns, which no other
                 # method may do.
                 value_changed
-                and self._methods_are_compatible(
-                    ctx.method,
-                    service_setting["method"],
-                    allow_scheduler_override=_scheduler_can_override(ctx, f"{server_name}_{original_key}", value),
-                )
+                and method_can_update
             ) or (bool(service_setting) and ctx.method == "autoconf" and service_setting["method"] != "autoconf")
+            state_changed = bool(explicit_draft is not None and method_can_update and desired_is_draft != service_setting["is_draft"])
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting["type"], original_key, value_changed, current_file_name)
 
             template_setting_default = None
@@ -1596,6 +1657,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 # A member of an ANCHORLESS slot is persisted even at its default value: dropping
                 # it would make the whole user-declared all-default slot vanish.
                 drop_as_default = _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member
+            # A draft is kept whatever its value: "equal to the default" is exactly what drafting a
+            # never-set line stores, and dropping it would lose the draft.
+            if desired_is_draft:
+                is_spurious_default_sibling = drop_as_default = False
             # A default-valued sibling of a slot that stays alive on its own (an anchor member, or a
             # template defining the slot) is round-trip material, not user intent: drop it, and clear
             # any stale row, so the field stays editable in the UI. The slot itself survives.
@@ -1636,6 +1701,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         file_name=target_file_name if setting["type"] == "file" else None,
                         suffix=suffix,
                         method=ctx.method,
+                        is_draft=desired_is_draft,
                     )
                 )
                 # Update Services.last_update
@@ -1648,14 +1714,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 )
                 if key == "SERVER_NAME":
                     local_changed_services = True
-            elif should_update_value or file_name_changed:
-                if should_update_value:
+            elif should_update_value or file_name_changed or state_changed:
+                if should_update_value or state_changed:
                     local_changed_plugins.add(setting["plugin_id"])
 
                 # Editing a value back down to its default removes the row, defaults being implicit
                 # -- except for a member of an anchorless slot, where removing the last rows would
                 # vanish the whole user-declared slot; persist the default instead.
-                if should_update_value and drop_as_default:
+                if (should_update_value or state_changed) and drop_as_default:
                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                     local_to_delete.append(
                         {
@@ -1674,6 +1740,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     "value": self._empty_if_none(value),
                     "method": ctx.method,
                 }
+                if state_changed:
+                    setting_values["is_draft"] = desired_is_draft
                 if setting["type"] == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 local_to_update.extend(
@@ -1753,8 +1821,24 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             )
 
             global_value = session.execute(
-                select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
+                select(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
+                .filter_by(setting_id=key, suffix=suffix)
+                .limit(1)
             ).first()
+            method_can_update = bool(
+                global_value
+                and self._methods_are_compatible(
+                    ctx.method,
+                    global_value.method,
+                    allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
+                )
+            )
+            draft_action, desired_is_draft, explicit_draft = _draft_intent(ctx, original_key, key, bool(global_value and global_value.is_draft))
+            if draft_action == "delete" and method_can_update:
+                local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                local_changed_plugins.add(setting["plugin_id"])
+            if draft_action:
+                continue
             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
             value_changed = bool(global_value and global_value.value != value)
             should_update_value = (
@@ -1763,12 +1847,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 # own escalation: autoconf adopts a row another method owns, which no other
                 # method may do.
                 value_changed
-                and self._methods_are_compatible(
-                    ctx.method,
-                    global_value.method,
-                    allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
-                )
+                and method_can_update
             ) or (bool(global_value) and ctx.method == "autoconf" and global_value.method != "autoconf")
+            state_changed = bool(explicit_draft is not None and method_can_update and desired_is_draft != bool(global_value.is_draft))
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting["type"], original_key, value_changed, current_file_name)
 
             template_setting_default = None
@@ -1777,8 +1858,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 local_service_template_change = True
 
             is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)
-            # Same rule as the per-service pass, on the global settings page.
-            if is_spurious_default_sibling:
+            # Same rule as the per-service pass, on the global settings page; a draft is kept whatever its value.
+            if is_spurious_default_sibling and not desired_is_draft:
                 if global_value and self._methods_are_compatible(
                     ctx.method,
                     global_value.method,
@@ -1793,7 +1874,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             if not global_value:
                 # A member of an ANCHORLESS slot is persisted even at its default value, else the
                 # whole user-declared all-default slot would never materialise.
-                if _check_value(ctx, key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
+                if (
+                    _check_value(ctx, key, value, setting, template_setting_default, suffix, True)
+                    and not is_anchorless_multiple_member
+                    and not desired_is_draft
+                ):
                     continue
 
                 self.logger.debug(f"Adding global setting {key}")
@@ -1805,15 +1890,21 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         file_name=target_file_name if setting["type"] == "file" else None,
                         suffix=suffix,
                         method=ctx.method,
+                        is_draft=desired_is_draft,
                     )
                 )
-            elif should_update_value or file_name_changed:
-                if should_update_value:
+            elif should_update_value or file_name_changed or state_changed:
+                if should_update_value or state_changed:
                     local_changed_plugins.add(setting["plugin_id"])
 
                 # Editing back down to the default removes the row -- except for a member of an
                 # anchorless slot, where that would vanish the whole user-declared slot.
-                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
+                if (
+                    (should_update_value or state_changed)
+                    and _check_value(ctx, key, value, setting, template_setting_default, suffix, True)
+                    and not is_anchorless_multiple_member
+                    and not desired_is_draft
+                ):
                     self.logger.debug(f"Removing global setting {key}")
                     local_to_delete.append(
                         {
@@ -1828,6 +1919,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     "value": self._empty_if_none(value),
                     "method": ctx.method,
                 }
+                if state_changed:
+                    setting_values["is_draft"] = desired_is_draft
                 if setting["type"] == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 local_to_update.append(
@@ -1978,19 +2071,28 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             )
 
             global_value = session.execute(
-                select(Global_values.value, Global_values.file_name, Global_values.method).filter_by(setting_id=key, suffix=suffix).limit(1)
+                select(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
+                .filter_by(setting_id=key, suffix=suffix)
+                .limit(1)
             ).first()
-            current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
-            value_changed = bool(global_value and global_value.value != value)
-            should_update_value = bool(
+            method_can_update = bool(
                 global_value
                 and self._methods_are_compatible(
                     ctx.method,
                     global_value.method,
                     allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
                 )
-                and value_changed
             )
+            draft_action, desired_is_draft, explicit_draft = _draft_intent(ctx, original_key, key, bool(global_value and global_value.is_draft))
+            if draft_action == "delete" and method_can_update:
+                to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                changed_plugins.add(setting.plugin_id)
+            if draft_action:
+                continue
+            current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
+            value_changed = bool(global_value and global_value.value != value)
+            should_update_value = method_can_update and value_changed
+            state_changed = bool(explicit_draft is not None and method_can_update and desired_is_draft != bool(global_value.is_draft))
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting.type, original_key, value_changed, current_file_name)
 
             if ctx.template:
@@ -2004,7 +2106,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             if not global_value:
                 # An anchorless slot's default member must be persisted, else the whole slot vanishes.
-                if value == nm_default and not nm_is_anchorless:
+                if value == nm_default and not nm_is_anchorless and not desired_is_draft:
                     continue
 
                 self.logger.debug(f"Adding global setting {key}")
@@ -2016,13 +2118,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         file_name=target_file_name if setting.type == "file" else None,
                         suffix=suffix,
                         method=ctx.method,
+                        is_draft=desired_is_draft,
                     )
                 )
-            elif should_update_value or file_name_changed:
-                if should_update_value:
+            elif should_update_value or file_name_changed or state_changed:
+                if should_update_value or state_changed:
                     changed_plugins.add(setting.plugin_id)
 
-                if should_update_value and value == nm_default and not nm_is_anchorless:
+                if (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft:
                     self.logger.debug(f"Removing global setting {key}")
                     to_delete.append(
                         {
@@ -2037,6 +2140,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     "value": self._empty_if_none(value),
                     "method": ctx.method,
                 }
+                if state_changed:
+                    setting_values["is_draft"] = desired_is_draft
                 if setting.type == "file" and (file_name_changed or value_changed):
                     setting_values["file_name"] = target_file_name
                 to_update.append(
@@ -2053,3 +2158,30 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 _log_ownership_refusal(self.logger, ctx, f"global setting {key}", global_value.method)
 
         return changed_services, service_template_change
+
+    def _sc_delete_absent_drafts(self, session, ctx: _SaveConfigContext, to_delete: List[Any], changed_plugins: Set[str]) -> None:
+        """save_config phase: honour ``None`` states for drafted rows the payload no longer carries.
+
+        Removing a drafted line from the RAW editor posts no value for it, only ``None`` in the
+        draft map, so the settings passes above never see the key. True/False states always ride
+        along with their posted value and are handled there.
+        """
+        deletions = {key for key, state in ctx.draft_settings.items() if state is None}
+        if not deletions:
+            return
+
+        for model, key_of in (
+            (Global_values, lambda row: row.setting_id),
+            (Services_settings, lambda row: f"{row.service_id}_{row.setting_id}"),
+        ):
+            for row in session.scalars(select(model).filter(model.is_draft == True)).all():  # noqa: E712
+                row_key = key_of(row) + (f"_{row.suffix}" if row.suffix else "")
+                if row_key not in deletions or row.setting_id in PROTECTED_DRAFT_SETTINGS:
+                    continue
+                if not self._methods_are_compatible(ctx.method, row.method, allow_scheduler_override=_scheduler_can_override(ctx, row_key, row.value)):
+                    continue
+                row_filter = {"setting_id": row.setting_id, "suffix": row.suffix}
+                if model is Services_settings:
+                    row_filter["service_id"] = row.service_id
+                to_delete.append({"model": model, "filter": row_filter})
+                changed_plugins.add(session.execute(select(Settings.plugin_id).filter_by(id=row.setting_id)).scalar())

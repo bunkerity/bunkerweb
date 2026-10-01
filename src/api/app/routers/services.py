@@ -204,7 +204,7 @@ def list_services(with_drafts: bool = True) -> JSONResponse:
 
 
 @router.get("/{service}", dependencies=[Depends(guard)])
-def get_service(service: str, full: bool = False, methods: bool = True, with_drafts: bool = True) -> JSONResponse:
+def get_service(service: str, full: bool = False, methods: bool = True, with_drafts: bool = True, with_setting_drafts: bool = False) -> JSONResponse:
     """Get configuration for a specific service.
 
     Args:
@@ -212,6 +212,8 @@ def get_service(service: str, full: bool = False, methods: bool = True, with_dra
         full: Return complete configuration including defaults
         methods: Include method metadata for each setting
         with_drafts: Include draft services when computing templates
+        with_setting_drafts: Return RAW-editor setting drafts with their stored value instead of
+            the effective one
     """
     db = get_db()
     # Check existence
@@ -220,14 +222,16 @@ def get_service(service: str, full: bool = False, methods: bool = True, with_dra
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
 
     if full:
-        conf = db.get_config(methods=methods, with_drafts=with_drafts, service=service)
+        conf = db.get_config(methods=methods, with_drafts=with_drafts, service=service, with_setting_drafts=with_setting_drafts)
         return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
     # DEV-2b4: `get_config(methods=True)` then reduce, NOT `get_non_default_settings`: the latter reports
     # stored rows only, so a service whose template supplies a value was answered with the global
     # value the generator was about to discard. See `reportable_config`.
     # DEV-2b5: `service=` so the reduction can tell an inherited port list from a declared one.
-    conf = reportable_config(db.get_config(methods=True, with_drafts=with_drafts, service=service), methods=methods, service=service)
+    conf = reportable_config(
+        db.get_config(methods=True, with_drafts=with_drafts, service=service, with_setting_drafts=with_setting_drafts), methods=methods, service=service
+    )
     return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
 

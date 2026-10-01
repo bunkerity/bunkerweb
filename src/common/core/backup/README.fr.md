@@ -86,8 +86,8 @@ manifeste enregistre, d'après des exécutions de migration mesurées sur de vra
 | ------ | --------------- | -------- |
 | SQLite | ✅ testé | Le schéma revient exactement à celui que déclare 1.6.14, sans perdre une seule ligne de base. |
 | PostgreSQL | ✅ testé | Idem, plus deux types enum inutilisés laissés en place, que 1.6.14 ne regarde jamais. |
-| MariaDB | ❌ restauration depuis une sauvegarde | La migration s'interrompt en cours de route (erreurs 1265 et 1553) et laisse un schéma hybride. |
-| MySQL | ❌ restauration depuis une sauvegarde | L'erreur 1265 y a été mesurée aussi ; le second blocage est déduit de MariaDB, pas mesuré sur MySQL. |
+| MariaDB | ❌ restauration depuis une sauvegarde | La migration s'interrompt en cours de route (erreur 1553, sur un index dont une clé étrangère a besoin) et laisse un schéma hybride. |
+| MySQL | ❌ restauration depuis une sauvegarde | Même interruption, erreur 1553, mesurée aussi sur MySQL 8. |
 
 Une installation 1.7 neuve n'a aucune révision Alembic estampillée — seule une mise à niveau en pose une —
 et le préflight y affiche donc ⚠️ *No Alembic revision is stamped*. C'est un avertissement, pas un refus :
@@ -106,6 +106,11 @@ depuis une sauvegarde non, et elle reste disponible.
     les colonnes supprimées de tables qui survivent, et les données exclues parce qu'elles ne sont
     jamais vides (métriques de requêtes, préférences d'UI). Lisez cette liste : rien ne refuse à
     votre place pour ces données-là.
+
+    Les brouillons de paramètres (valeurs enregistrées en brouillon dans l'éditeur RAW) sont refusés
+    plutôt que perdus : 1.6.14 n'a pas d'indicateur de brouillon et les appliquerait, donc sa migration
+    refuse tant qu'il en reste un, et la pré-vérification refuse avant elle. Activez-les ou supprimez-les
+    avant de revenir en arrière, ou visez 1.6.15, qui les conserve.
 
 !!! tip "Chaque échec laisse un état démarrable"
     `downgrade --execute` refuse tant qu'un gel n'est pas en place pour cette même cible, que le

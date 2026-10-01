@@ -85,8 +85,8 @@ upgrade/downgrade runs on real databases:
 | ------ | ------------------ | --- |
 | SQLite | ✅ tested | The schema comes back exactly as 1.6.14 declares it, with no baseline row lost. |
 | PostgreSQL | ✅ tested | Same, plus two unused enum types left behind that 1.6.14 never looks at. |
-| MariaDB | ❌ restore from backup | The migration aborts partway (errors 1265 and 1553) and leaves a hybrid schema. |
-| MySQL | ❌ restore from backup | Error 1265 measured here too; the second blocker is inferred from MariaDB, not measured on MySQL. |
+| MariaDB | ❌ restore from backup | The migration aborts partway (error 1553, on an index a foreign key needs) and leaves a hybrid schema. |
+| MySQL | ❌ restore from backup | Same abort, error 1553, measured on MySQL 8 too. |
 
 A freshly installed 1.7 has no Alembic revision stamped — only an upgrade stamps one — so on such an
 installation the preflight reports ⚠️ *No Alembic revision is stamped*. That is a warning, not a refusal:
@@ -103,6 +103,10 @@ stays available.
     something. What it cannot count it reads out instead, right before the confirmation prompt:
     the columns dropped from tables that survive, and the data excluded because it is never empty
     (request metrics, UI preferences). Read that list; nothing refuses on your behalf for it.
+
+    Individual setting drafts (values saved as drafts in the RAW editor) are refused rather than lost:
+    1.6.14 has no draft flag and would apply them, so its migration refuses while any exists, and the
+    preflight refuses first. Activate or delete them before going back, or target 1.6.15, which keeps them.
 
 !!! tip "Every failure leaves something startable"
     `downgrade --execute` refuses unless a quiescence hold is in place for that same target, the

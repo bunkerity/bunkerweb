@@ -86,8 +86,8 @@ verzeichnet das Manifest, aus gemessenen Migrationsläufen auf echten Datenbanke
 | ------ | --------------------------- | ----- |
 | SQLite | ✅ getestet | Das Schema kommt exakt so zurück, wie 1.6.14 es deklariert, ohne eine einzige Basiszeile zu verlieren. |
 | PostgreSQL | ✅ getestet | Ebenso, plus zwei ungenutzte Enum-Typen, die zurückbleiben und die 1.6.14 nie ansieht. |
-| MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1265 und 1553) und hinterlässt ein hybrides Schema. |
-| MySQL | ❌ aus Backup wiederherstellen | Fehler 1265 wurde auch hier gemessen; der zweite Blocker ist aus MariaDB abgeleitet, nicht auf MySQL gemessen. |
+| MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1553, an einem Index, den ein Fremdschlüssel braucht) und hinterlässt ein hybrides Schema. |
+| MySQL | ❌ aus Backup wiederherstellen | Derselbe Abbruch, Fehler 1553, auch auf MySQL 8 gemessen. |
 
 Eine frisch installierte 1.7 hat keine gestempelte Alembic-Revision — nur ein Upgrade setzt einen Stempel —,
 und der Preflight meldet dort deshalb ⚠️ *No Alembic revision is stamped*. Das ist eine Warnung, keine
@@ -106,6 +106,11 @@ sind, die Wiederherstellung aus einem Backup nicht — und sie bleibt verfügbar
     Spalten, die aus überlebenden Tabellen entfernt werden, und die Daten, die ausgenommen sind,
     weil sie nie leer sind (Request-Metriken, UI-Einstellungen). Lesen Sie diese Liste; dafür
     verweigert nichts an Ihrer Stelle.
+
+    Einzelne Einstellungsentwürfe (im RAW-Editor als Entwurf gespeicherte Werte) werden verweigert statt
+    verloren: 1.6.14 kennt kein Entwurfs-Flag und würde sie anwenden, daher verweigert seine Migration,
+    solange einer existiert, und der Preflight verweigert schon vorher. Aktivieren oder löschen Sie sie
+    vor dem Downgrade, oder wählen Sie 1.6.15 als Ziel, das sie behält.
 
 !!! tip "Jeder Fehlschlag hinterlässt einen startfähigen Zustand"
     `downgrade --execute` verweigert den Dienst, solange nicht für dasselbe Ziel eine Stilllegung aktiv

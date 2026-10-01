@@ -63,6 +63,7 @@ def read_global_settings(
     with_drafts: bool = False,
     filtered_settings: Optional[List[str]] = Query(None),
     global_only: bool = True,
+    with_setting_drafts: bool = False,
 ) -> JSONResponse:
     """Read the current global settings.
 
@@ -72,6 +73,8 @@ def read_global_settings(
         with_drafts: Include draft services when computing settings
         filtered_settings: Only return these setting IDs
         global_only: If False, include per-service settings
+        with_setting_drafts: Return RAW-editor setting drafts with their stored value (and
+            `is_draft: true` when `methods`) instead of the effective value they leave in place
     """
     db = get_db()
     fs = tuple(filtered_settings) if filtered_settings else None
@@ -81,6 +84,7 @@ def read_global_settings(
             methods=methods,
             with_drafts=with_drafts,
             filtered_settings=fs,
+            with_setting_drafts=with_setting_drafts,
         )
     else:
         # `get_config(methods=True)` then reduce, NOT `get_non_default_settings`: the latter reports
@@ -92,6 +96,7 @@ def read_global_settings(
                 methods=True,
                 with_drafts=with_drafts,
                 filtered_settings=fs,
+                with_setting_drafts=with_setting_drafts,
             ),
             methods=methods,
         )
@@ -197,7 +202,7 @@ def save_config(req: SaveConfigRequest) -> JSONResponse:
             else:
                 return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
 
-    ret = db.save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
+    ret = db.save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup, draft_settings=req.draft_settings)
     if isinstance(ret, str):
         code = 400 if "read-only" in ret.lower() or "resource group" in ret.lower() else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})

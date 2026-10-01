@@ -107,8 +107,15 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
         service: Optional[str] = None,
         original_config: Optional[Dict[str, Any]] = None,
         original_multisite: Optional[Set[str]] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
-        """Get the config from the database"""
+        """Get the config from the database.
+
+        ``with_setting_drafts`` adds the RAW-editor setting drafts (``is_draft`` rows) with their
+        retained value and ``"is_draft": True``. Only the RAW editor asks for them: everything that
+        renders or reports the effective configuration reads without, so a drafted key falls back
+        to its inherited, template or default value.
+        """
         filtered_settings = set(filtered_settings or [])
 
         if filtered_settings and not global_only:
@@ -117,6 +124,10 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
         with self._db_session() as session:
             config = original_config or {}
             multisite = original_multisite or set()
+            # The effective global map, kept apart from ``config`` because the latter may expose a
+            # global draft to the RAW editor: services must inherit the effective value, never a
+            # draft's retained one.
+            effective_global_config = {key: value for key, value in config.items() if isinstance(value, dict) and value.get("global", True)}
 
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
@@ -142,6 +153,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
+                    Global_values.is_draft,
                 )
                 .select_from(j)
                 .order_by(Settings.order, Global_values.suffix)
@@ -149,6 +161,8 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
             if filtered_settings:
                 stmt = stmt.where(Settings.id.in_(filtered_settings))
+            if not with_setting_drafts:
+                stmt = stmt.where(Global_values.is_draft == False)  # noqa: E712
 
             # Execute the query and fetch all results
             results = session.execute(stmt).fetchall()
@@ -163,6 +177,10 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     "default": self._empty_if_none(global_value.default),
                     "template": None,
                 }
+                if global_value.is_draft:
+                    config[setting_id]["is_draft"] = True
+                else:
+                    effective_global_config[setting_id] = config[setting_id]
 
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
@@ -194,7 +212,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
                 # Pre-build multisite defaults mapping for efficient lookup
                 # Share the same dictionary objects instead of creating copies
-                multisite_defaults = {key: config[key] for key in multisite if key in config}
+                multisite_defaults = {key: effective_global_config[key] for key in multisite if key in effective_global_config}
 
                 # The port lists are the one family this materialisation must NOT copy when the
                 # caller asked for the non-default settings alone. A service REPLACES the global
@@ -238,6 +256,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                         Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     )
                     .select_from(j)
                     .order_by(Services.id, Settings.order, Services_settings.suffix)
@@ -245,6 +264,8 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
                 if not with_drafts:
                     stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+                if not with_setting_drafts:
+                    stmt = stmt.where(Services_settings.is_draft == False)  # noqa: E712
 
                 if filtered_settings:
                     stmt = stmt.where(Settings.id.in_(filtered_settings))
@@ -267,9 +288,13 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                         "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
-                        "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
+                        "default": self._empty_if_none(effective_global_config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
                         "template": None,
                     }
+                    if result.is_draft:
+                        config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")][
+                            "is_draft"
+                        ] = True
             else:
                 # The reserved default server is a MULTISITE-only feature (PO ruling 2026-09-06): it
                 # is the per-service materialisation above that gives its row meaning, and in
@@ -343,8 +368,9 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         *,
         service: Optional[str] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
-        """Get the config from the database"""
+        """Get the config from the database. ``with_setting_drafts``: see get_non_default_settings."""
         filtered_settings = set(filtered_settings or [])
 
         if filtered_settings and not global_only:
@@ -385,6 +411,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
             service=service,
             original_config=config,
             original_multisite=multisite,
+            with_setting_drafts=with_setting_drafts,
         )
 
         template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]

@@ -7,6 +7,7 @@ from pydantic import (
     model_validator,
     RootModel,
     BeforeValidator,
+    StrictBool,
 )
 from typing import Optional, List, Dict, Union, Literal, Annotated, Any
 from urllib.parse import urlsplit
@@ -726,6 +727,14 @@ class SaveConfigRequest(BaseModel):
     disable_cleanup: bool = Field(
         False,
         description="Whether to cleanup or convert to draft any existing services not in the provided config dict",
+    )
+    # StrictBool: lax pydantic would read "yes"/"no" as a draft state, and a typo must not draft a setting.
+    draft_settings: Optional[Dict[str, Optional[StrictBool]]] = Field(
+        None,
+        description=(
+            "RAW-editor setting drafts, keyed like `config` (`KEY` or `<service>_KEY`): true stores the value as a draft that is "
+            "never applied, false activates it, null deletes a drafted row. Omitted keys keep their state."
+        ),
     )
 
     @field_validator("method")

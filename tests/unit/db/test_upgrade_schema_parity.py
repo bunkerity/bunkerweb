@@ -351,6 +351,28 @@ def test_every_column_the_model_declares_exists_after_the_upgrade(upgraded_and_f
     assert not missing, "columns the model declares that an upgraded database never gets:\n  " + "\n  ".join(missing)
 
 
+def test_an_upgraded_database_has_no_column_a_fresh_one_lacks(upgraded_and_fresh):
+    """The other direction, and the one that hid the 1.6.15 setting drafts.
+
+    A migration can add a column that the model never declares — or a model can drop one without a
+    `drop_column`. The ORM does not map it, so every query still works on both installs, but the
+    upgraded one carries data the code no longer understands: 1.6.15-rc3 added
+    `bw_global_values.is_draft` / `bw_services_settings.is_draft`, 1.7 shipped without them in the
+    model, and every upgraded draft value silently went live. Reflection against reflection, so an
+    extra column is real drift and never a dialect quirk.
+    """
+    upgraded, fresh = upgraded_and_fresh
+
+    extra = []
+    for table, upgraded_columns in sorted(upgraded["columns"].items()):
+        fresh_columns = fresh["columns"].get(table)
+        if fresh_columns is None:
+            continue  # a leftover table is not a column question
+        extra += [f"{table}.{column}" for column in sorted(upgraded_columns) if column not in fresh_columns]
+
+    assert not extra, "columns an upgraded database carries that a fresh one does not:\n  " + "\n  ".join(extra)
+
+
 def test_column_types_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh):
     """Only columns present on both sides — an absent one is the test above, and reporting it here
     too would bury a type mismatch under a list of things that are simply missing.
@@ -652,7 +674,7 @@ def test_enum_labels_match_between_an_upgraded_and_a_fresh_database(upgraded_and
     constraint or a VARCHAR, so a value the model added has to be migrated in with
     `ALTER TYPE ... ADD VALUE` and can be forgotten.
 
-    `postgresql_versions/404a6ed42a31_..._1_7_0_beta.py` (renamed `_1_7_0_alpha` by the regeneration) does exactly that for `web_cache`,
+    `postgresql_versions/7b979831b042_..._1_7_0_alpha.py` does exactly that for `web_cache`,
     `resource_groups` and `certificates`. The migration *not raising* is only half the answer; this
     is the other half. Note the label check passing here says nothing about PostgreSQL 11 or older,
     where `ADD VALUE` cannot run inside a transaction at all — the compose pins `postgres:16`.

@@ -87,8 +87,8 @@ ejecuciones de migración medidas sobre bases de datos reales:
 | ----- | --------------------- | ------- |
 | SQLite | ✅ probado | El esquema vuelve exactamente al que declara 1.6.14, sin perder ninguna fila de base. |
 | PostgreSQL | ✅ probado | Igual, más dos tipos enum sin usar que quedan atrás y que 1.6.14 nunca consulta. |
-| MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a medio camino (errores 1265 y 1553) y deja un esquema híbrido. |
-| MySQL | ❌ restaurar desde copia de seguridad | El error 1265 también se midió aquí; el segundo bloqueo se infiere de MariaDB, no se midió en MySQL. |
+| MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a medio camino (error 1553, en un índice que necesita una clave foránea) y deja un esquema híbrido. |
+| MySQL | ❌ restaurar desde copia de seguridad | La misma interrupción, error 1553, medida también en MySQL 8. |
 
 Una instalación 1.7 recién creada no tiene ninguna revisión de Alembic sellada — solo una actualización la
 sella — así que allí el preflight informa ⚠️ *No Alembic revision is stamped*. Es un aviso, no un rechazo:
@@ -106,6 +106,11 @@ una copia de seguridad no, y sigue disponible.
     algo. Lo que no puede contar lo enumera justo antes de la confirmación: las columnas eliminadas
     de tablas que sobreviven, y los datos excluidos por no estar nunca vacíos (métricas de
     peticiones, preferencias de la UI). Lee esa lista: para eso nada rechaza en tu lugar.
+
+    Los borradores de ajustes (valores guardados como borrador en el editor RAW) se rechazan en lugar
+    de perderse: 1.6.14 no tiene indicador de borrador y los aplicaría, así que su migración rechaza
+    mientras quede alguno, y la comprobación previa rechaza antes. Actívalos o bórralos antes de volver
+    atrás, o apunta a 1.6.15, que los conserva.
 
 !!! tip "Cada fallo deja algo que puede arrancar"
     `downgrade --execute` rechaza mientras no haya un bloqueo activo para ese mismo destino, el

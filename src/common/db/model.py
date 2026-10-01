@@ -187,6 +187,8 @@ class Global_values(Base):
     file_name: Mapped[Optional[str]] = mapped_column(String(512), nullable=True, default=None)
     suffix: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
     method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
+    # A RAW-editor setting draft: the value is kept but never rendered (the inherited or default one applies).
+    is_draft: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     setting: Mapped["Settings"] = relationship("Settings", back_populates="global_value")
 
@@ -217,6 +219,8 @@ class Services_settings(Base):
     file_name: Mapped[Optional[str]] = mapped_column(String(512), nullable=True, default=None)
     suffix: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
     method: Mapped[str] = mapped_column(METHODS_ENUM, nullable=False)
+    # Same RAW-editor setting draft as Global_values.is_draft; independent of Services.is_draft.
+    is_draft: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     service: Mapped["Services"] = relationship("Services", back_populates="settings")
     setting: Mapped["Settings"] = relationship("Settings", back_populates="services")

@@ -125,7 +125,7 @@ class TestItTracksTheProduct:
         head, target = row["alembic"]["from_revision"], row["alembic"]["to_revision"]
         assert head in chain, f"{row['engine']}: from_revision {head} is not in the migration chain"
         assert target in chain, f"{row['engine']}: to_revision {target} is not in the migration chain"
-        assert chain[head][1].name.endswith("_upgrade_to_version_1_7_0_beta.py")
+        assert chain[head][1].name.endswith("_upgrade_to_version_1_7_0_alpha.py")
         assert chain[target][1].name.endswith(f"_upgrade_to_version_{row['to'].replace('.', '_')}.py")
 
     @pytest.mark.parametrize("row", ROWS, ids=lambda r: f"{r['to']}-{r['engine']}")

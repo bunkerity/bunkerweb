@@ -85,19 +85,47 @@ def _receiver(func):
     return func.value.id if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name) else None
 
 
-def _literal(node):
+def _literal(node, env=None):
+    """A string constant, or a loop variable `_walk` has bound to one."""
+    if isinstance(node, ast.Name) and env:
+        return env.get(node.id)
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
 
 
-def _walk(node, table, columns, dropped):
-    """`table` is the `batch_alter_table` a `batch_op.*` call is bound to, threaded down the tree."""
+def _loop_values(node, bindings):
+    """The strings a `for` iterates over: a literal tuple/list, or a name bound to one -- or to a
+    comprehension over one, like 1.6.15~rc3's `tables = [table for table in (...) if <column exists>]`.
+    The comprehension's filter is ignored on purpose: it only narrows what an already-migrated
+    database still has to drop, and the declared set is what the operator loses."""
+    if isinstance(node, ast.Name):
+        node = bindings.get(node.id)
+    if isinstance(node, ast.ListComp) and len(node.generators) == 1:
+        node = node.generators[0].iter
+    if isinstance(node, (ast.Tuple, ast.List)):
+        values = [_literal(element) for element in node.elts]
+        return values if all(values) else None
+    return None
+
+
+def _walk(node, table, columns, dropped, env=None, bindings=None):
+    """`table` is the `batch_alter_table` a `batch_op.*` call is bound to, threaded down the tree.
+    `env` binds loop variables to the literal each iteration sees; `bindings` maps the function's
+    plain `name = <expr>` assignments, which is where a loop's iterable may live."""
+    env, bindings = env or {}, bindings or {}
+    if isinstance(node, ast.For) and isinstance(node.target, ast.Name):
+        values = _loop_values(node.iter, bindings)
+        if values:
+            for value in values:
+                for child in node.body:
+                    _walk(child, table, columns, dropped, {**env, node.target.id: value}, bindings)
+            return
     if isinstance(node, ast.With):
         for item in node.items:
             call = item.context_expr
             if isinstance(call, ast.Call) and _attr(call.func) == "batch_alter_table" and call.args:
-                table = _literal(call.args[0]) or table
+                table = _literal(call.args[0], env) or table
     if isinstance(node, ast.Call):
-        name, args = _attr(node.func), [_literal(arg) for arg in node.args]
+        name, args = _attr(node.func), [_literal(arg, env) for arg in node.args]
         if name == "drop_table" and args and args[0]:
             dropped.add(args[0])
         elif name == "drop_column":
@@ -107,7 +135,7 @@ def _walk(node, table, columns, dropped):
             elif args and args[0] and table:
                 columns.setdefault(table, set()).add(args[0])
     for child in ast.iter_child_nodes(node):
-        _walk(child, table, columns, dropped)
+        _walk(child, table, columns, dropped, env, bindings)
 
 
 def downgrade_column_drops(engine):
@@ -130,7 +158,12 @@ def downgrade_column_drops(engine):
     for revision in executed:
         tree = ast.parse(links[revision][1].read_text(encoding="utf-8"))
         body = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "downgrade")
-        _walk(body, None, columns, dropped)
+        bindings = {
+            node.targets[0].id: node.value
+            for node in ast.walk(body)
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+        }
+        _walk(body, None, columns, dropped, bindings=bindings)
     return {table: sorted(names) for table, names in columns.items() if table not in dropped}
 
 
