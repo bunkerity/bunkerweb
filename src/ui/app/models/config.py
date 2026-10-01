@@ -374,7 +374,7 @@ class Config:
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
             for k in config.copy():
-                if k.startswith(old_server_name_splitted[0]):
+                if k.startswith(f"{old_server_name_splitted[0]}_"):
                     config.pop(k)
 
         rename = None
