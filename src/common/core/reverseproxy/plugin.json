@@ -100,7 +100,7 @@
       "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -121,7 +121,7 @@
       "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -386,7 +386,7 @@
       "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401). NGINX variables such as $scheme, $host and $request_uri are supported.",
       "id": "reverse-proxy-auth-request-signin-url",
       "label": "Auth request signin URL",
-      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[\\-\\w@:%.+~#=$]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[\\-\\w@:%.+~#=$][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -396,7 +396,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^(?![;\\s])(;?\\s*(\\$[a-z_\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:\\$[a-z_\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)\\$[a-z_\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -483,7 +483,7 @@
       "help": "HTTP methods that should trigger a cache operation.",
       "id": "proxy-cache-methods",
       "label": "Reverse proxy cache methods",
-      "regex": "^(?! )( ?[A-Z]{3,})+$",
+      "regex": "^[A-Z]{3,}( [A-Z]{3,})*$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {

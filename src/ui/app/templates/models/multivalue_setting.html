@@ -105,7 +105,7 @@
               steps page validates it explicitly via $input.attr("pattern") in its own
               .plugin-setting loop, where the narrow regex would permanently block Save.
               check_variables strips the tokens the same way before its server-side check. #}
-           {% if setting_data.get('regex') and not resource_kind %}pattern="{{ setting_data['regex'] }}"{% endif %}>
+           {% if setting_data.get('regex') | v_safe_pattern and not resource_kind %}pattern="{{ setting_data['regex'] | v_safe_pattern }}"{% endif %}>
     <div class="multivalue-inputs d-flex flex-wrap align-items-center gap-2">
         {% for value in setting_values %}
             <div class="multivalue-input-group{% if value %} has-value{% endif %}">

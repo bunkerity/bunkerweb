@@ -1,10 +1,11 @@
 """Self-signed generation survives a cache tree swap between cached files."""
 
 import shutil
+from ipaddress import ip_address
 from pathlib import Path
 from tempfile import TemporaryDirectory as _TemporaryDirectory
 from types import SimpleNamespace
-from typing import Tuple
+from typing import List, Tuple
 
 ROOT = Path(__file__).resolve().parents[3]
 JOB_SOURCE = ROOT / "src" / "common" / "core" / "selfsigned" / "jobs" / "self-signed.py"
@@ -12,7 +13,7 @@ JOB_SOURCE = ROOT / "src" / "common" / "core" / "selfsigned" / "jobs" / "self-si
 
 def test_generated_files_are_cached_even_if_the_cache_tree_is_swapped(tmp_path):
     source = JOB_SOURCE.read_text(encoding="utf-8")
-    start = source.index("def generate_cert(")
+    start = source.index("DEFAULT_SUBJ =")
     end = source.index("\n\nstatus = 0", start)
     cache_root = tmp_path / "cache"
 
@@ -54,6 +55,8 @@ def test_generated_files_are_cached_even_if_the_cache_tree_is_swapped(tmp_path):
         "Path": Path,
         "sep": str(tmp_path),
         "TemporaryDirectory": lambda **kwargs: _TemporaryDirectory(prefix=kwargs.get("prefix"), dir=tmp_path),
+        "List": List,
+        "ip_address": ip_address,
         "Tuple": Tuple,
         "getenv": lambda _key, default="": default,
         "multisite": False,
@@ -62,7 +65,7 @@ def test_generated_files_are_cached_even_if_the_cache_tree_is_swapped(tmp_path):
     }
     exec(compile(source[start:end], str(JOB_SOURCE), "exec"), env)  # noqa: S102
 
-    result = env["generate_cert"]("www.example.com", "365", "/CN=www.example.com/", cache_root)
+    result = env["generate_cert"]("www.example.com", "365", "/CN=www.example.com/", cache_root, ["www.example.com"])
 
     assert result == (True, 1)
     assert job.results == [("cert.pem", True), ("key.pem", True)]
@@ -74,7 +77,7 @@ def test_generated_files_are_cached_even_if_the_cache_tree_is_swapped(tmp_path):
 
 def test_regenerated_files_replace_existing_cache_files(tmp_path):
     source = JOB_SOURCE.read_text(encoding="utf-8")
-    start = source.index("def generate_cert(")
+    start = source.index("DEFAULT_SUBJ =")
     end = source.index("\n\nstatus = 0", start)
     cache_root = tmp_path / "cache"
     server_path = cache_root / "www.example.com"
@@ -112,6 +115,8 @@ def test_regenerated_files_replace_existing_cache_files(tmp_path):
         "Path": Path,
         "sep": str(tmp_path),
         "TemporaryDirectory": lambda **kwargs: _TemporaryDirectory(prefix=kwargs.get("prefix"), dir=tmp_path),
+        "List": List,
+        "ip_address": ip_address,
         "Tuple": Tuple,
         "getenv": lambda _key, default="": default,
         "multisite": False,
@@ -120,7 +125,7 @@ def test_regenerated_files_replace_existing_cache_files(tmp_path):
     }
     exec(compile(source[start:end], str(JOB_SOURCE), "exec"), env)  # noqa: S102
 
-    result = env["generate_cert"]("www.example.com", "365", "/CN=www.example.com/", cache_root)
+    result = env["generate_cert"]("www.example.com", "365", "/CN=www.example.com/", cache_root, ["www.example.com"])
 
     assert result == (True, 1)
     assert job.calls == [

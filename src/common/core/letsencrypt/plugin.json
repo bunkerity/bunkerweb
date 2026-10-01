@@ -29,7 +29,7 @@
       "help": "Email used for Let's Encrypt notification and in certificate.",
       "id": "email-lets-encrypt",
       "label": "Email Let's Encrypt",
-      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
+      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n][^@ \\t\\r\\n.]*\\.[^@ \\t\\r\\n]+)?$",
       "type": "text"
     },
     "LETS_ENCRYPT_SERVER": {
@@ -345,7 +345,7 @@
       "help": "Configuration item that will be added to the credentials.ini file for the DNS provider for DNS challenges. Write it as the key, whitespace, then the value (e.g. 'cloudflare_api_token 123456'); do not quote the key. The value can also be base64 encoded, or the whole item can be a base64 encoded json object.",
       "id": "lets-encrypt-dns-credential-item",
       "label": "Credential Item",
-      "regex": "^.*",
+      "regex": "^.*$",
       "type": "password",
       "multiple": "lets-encrypt-dns-credential-item"
     },

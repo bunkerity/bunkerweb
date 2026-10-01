@@ -49,7 +49,7 @@
       "help": "List of headers to send to gRPC upstream separated with semicolons (values for grpc_set_header directive).",
       "id": "grpc-headers",
       "label": "gRPC headers",
-      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "grpc"
@@ -70,7 +70,7 @@
       "help": "List of headers to send to client separated with semicolons (values for add_header directive).",
       "id": "grpc-headers-client",
       "label": "gRPC headers-client",
-      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)[\\w\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "grpc"
@@ -339,7 +339,7 @@
       "help": "Redirect clients to sign-in URL when using GRPC_AUTH_REQUEST (used when auth_request call returned 401). NGINX variables such as $scheme, $host and $request_uri are supported.",
       "id": "grpc-auth-request-signin-url",
       "label": "Auth request signin URL",
-      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[#\\-\\w@:%.+~#=$]+[#\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/[#\\-\\w@:%.+~#=$][#\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "grpc"
     },
@@ -349,7 +349,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "grpc-auth-request-set",
       "label": "gRPC auth request set",
-      "regex": "^(?![;\\s])(;?\\s*(\\$[a-z_\\-]+)\\s+[^;\\s{}#\\r\\n][^;{}#\\r\\n]*)*$",
+      "regex": "^(?:\\$[a-z_\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*(?:(?:;\\s*|[\\r\\n]\\s*)\\$[a-z_\\-]+\\s+[^;\\s{}#][^;{}#\\r\\n]*)*)?$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "grpc"

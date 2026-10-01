@@ -248,6 +248,12 @@ function start() {
         fi
     done
 
+    # An unclean stop (SIGKILL, crash) leaves the internal API socket behind, and nginx refuses to bind over it.
+    # Only when no nginx is alive: removing the path under a running nginx would cut its internal API off.
+    if ! { [ -f /var/run/bunkerweb/nginx.pid ] && kill -0 "$(cat /var/run/bunkerweb/nginx.pid 2>/dev/null)" 2>/dev/null; }; then
+        rm -f /var/run/bunkerweb/api-internal.sock
+    fi
+
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
     if [ "$(uname)" = "FreeBSD" ]; then

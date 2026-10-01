@@ -161,6 +161,9 @@ for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
 	fi
 done
 
+# An unclean stop (SIGKILL, host crash) leaves the internal API socket behind, and nginx refuses to bind over it
+rm -f /var/run/bunkerweb/api-internal.sock
+
 # start nginx
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &

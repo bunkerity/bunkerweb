@@ -511,11 +511,31 @@ def _push_all(api_caller: ApiCaller, instances) -> bool:
     return ok
 
 
-def _trigger_reload(api_caller: ApiCaller) -> bool:
+def _trigger_reload(api_caller: ApiCaller) -> tuple[bool, dict]:
+    """Reload every instance. Returns ``(all_ok, {host: answer})``; an unreachable instance has no answer."""
     test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
     LOGGER.info(f"Reloading {len(api_caller.apis)} instance(s) (test={test}) ...")
-    sent, _ = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)
-    return bool(sent)
+    sent, responses = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT, response=True)
+    return bool(sent), responses or {}
+
+
+def _record_failover(db: Database, responses: dict) -> None:
+    """Feed the UI's NGINX failover banner from what the instances answered to a reload.
+
+    A reachable instance that refused (config check failed, ...) raises the flag with NGINX's own
+    output. A clean answer clears it. No answer at all -- every instance unreachable -- leaves it
+    alone: an outage is not a failover (M18) and must not erase an earlier real refusal.
+    """
+    refused = {host: str((resp or {}).get("msg") or "reload refused") for host, resp in responses.items() if (resp or {}).get("status") != "success"}
+    if refused:
+        payload = {"failover": True, "failover_message": "\n".join(f"{host} - {msg}" for host, msg in sorted(refused.items()))}
+    elif responses:
+        payload = {"failover": False, "failover_message": ""}
+    else:
+        return
+    err = db.set_metadata(payload)
+    if err:
+        LOGGER.error(f"Failed to record the failover state: {err}")
 
 
 def _snapshot_failover() -> Path | None:
@@ -550,7 +570,7 @@ def _restore_from_snapshot(snapshot: Path, api_caller: ApiCaller, instances) -> 
     if not ok:
         LOGGER.error("Failed to ship failover snapshot to instances")
         return False
-    return _trigger_reload(api_caller)
+    return _trigger_reload(api_caller)[0]
 
 
 def _mark_failover(db: Database, instances) -> None:
@@ -646,7 +666,8 @@ try:
     if not push_ok:
         LOGGER.error("One or more artifact pushes failed (see per-instance logs above)")
 
-    reload_ok = _trigger_reload(api_caller)
+    reload_ok, reload_responses = _trigger_reload(api_caller)
+    _record_failover(db, reload_responses)
     if reload_ok:
         LOGGER.info("Push and reload completed successfully")
         # Only here. Gating on the exit code instead would acknowledge four paths that reach

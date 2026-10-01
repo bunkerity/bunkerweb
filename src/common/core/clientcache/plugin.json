@@ -20,7 +20,7 @@
       "help": "List of file extensions, separated with pipes that should be cached.",
       "id": "client-cache-extensions",
       "label": "Extensions that should be cached by the client",
-      "regex": "^(?!\\|)(\\|?[a-z0-9]+)+$",
+      "regex": "^[a-z0-9]+(\\|[a-z0-9]+)*$",
       "type": "multivalue",
       "separator": "|"
     },

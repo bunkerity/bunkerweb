@@ -227,6 +227,23 @@ def install_plugin(plugin_path: Path, db, preview: bool = True, force: bool = Fa
     return True
 
 
+def invalid_key_already_checked(pro_license_key: str, db_metadata: dict, current_date: datetime) -> bool:
+    """Whether this exact key was already refused today, so the live `/pro/status` probe can be skipped.
+
+    A refused key never reached `db.set_metadata`, so every run (boot, reload, manual) probed the API again.
+    A refusal (403) or a rate limit (429) is now recorded (key, `last_pro_check`); a changed key or a new UTC day
+    probes again, which is how a key that was renewed on the panel is noticed.
+    """
+    last_check = db_metadata.get("last_pro_check")
+    if not pro_license_key or db_metadata.get("is_pro") or not last_check:
+        return False
+    if db_metadata.get("pro_license") != pro_license_key:
+        return False
+    # MariaDB returns a naive datetime (stored as UTC)
+    last_check = last_check.replace(tzinfo=timezone.utc) if last_check.tzinfo is None else last_check.astimezone(timezone.utc)
+    return last_check.date() == current_date.astimezone(timezone.utc).date()
+
+
 def _billable_service_number(db=None) -> int:
     """Number of services that consume a PRO quota slot.
 
@@ -300,6 +317,10 @@ try:
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
 
+    if not force_update and invalid_key_already_checked(pro_license_key, db_metadata, current_date):
+        LOGGER.info("Skipping the check for BunkerWeb Pro license (this key was already refused today)")
+        sys_exit(0)
+
     if pro_license_key and not force_update:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
@@ -327,10 +348,23 @@ try:
             if clean:
                 clean_pro_plugins(db)
             else:
+                # The API answers a bad key with a 403 (JSON, or the edge's HTML page): for a key that never was
+                # PRO that is the verdict. A key that was PRO keeps its state (an access problem, not a verdict).
+                if not db_metadata["is_pro"]:
+                    err = db.set_metadata(default_metadata | metadata | {"last_pro_check": current_date})
+                    if err:
+                        LOGGER.error(f"Failed to record the refused BunkerWeb Pro license: {err}")
+                        sys_exit(2)
                 LOGGER.warning("Skipping the check for BunkerWeb Pro license...")
                 sys_exit(0)
         elif resp.status_code == 429:
             LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro license, please try again later")
+            if not db_metadata["is_pro"]:
+                # Not a verdict: keep pro_status, only remember the attempt so the same key is not probed again today
+                err = db.set_metadata({"pro_license": pro_license_key, "last_pro_check": current_date})
+                if err:
+                    LOGGER.error(f"Failed to record the rate-limited BunkerWeb Pro check: {err}")
+                    sys_exit(2)
             sys_exit(0)
         elif resp.status_code == 500:
             LOGGER.error("An error occurred with the remote server while checking BunkerWeb Pro license, please try again later")
