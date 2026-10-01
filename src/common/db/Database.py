@@ -5604,60 +5604,47 @@ class Database:
             ret_data["data"] = blob
         return ret_data
 
-    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
-        """Get jobs cache files."""
+    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "", data_job_name: str = "") -> List[Dict[str, Any]]:
+        """Get jobs cache files, filtered in the database. With data_job_name, only that job's rows carry their data."""
         with self._db_session() as session:
-            filters = {}
-            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum]
+            entities = [
+                Jobs_cache.id,
+                Jobs_cache.job_name,
+                Jobs_cache.service_id,
+                Jobs_cache.file_name,
+                Jobs_cache.last_update,
+                Jobs_cache.checksum,
+                Jobs.plugin_id,
+            ]
             if with_data:
-                entities.extend([Jobs_cache.id, Jobs_cache.data])
-            query = session.query(Jobs_cache).with_entities(*entities)
+                # One query for every row, so paired files (CA and CRL, manifest and archive) come from the same read.
+                data = Jobs_cache.data if not data_job_name else case((Jobs_cache.job_name == data_job_name, Jobs_cache.data), else_=None)
+                entities.append(data.label("data"))
+            query = session.query(Jobs_cache).with_entities(*entities).join(Jobs, Jobs.name == Jobs_cache.job_name)
 
             if job_name:
-                query = query.filter_by(job_name=job_name)
-                filters["name"] = job_name
-
-            db_cache = query.all()
-
-            if not db_cache:
-                return []
-
+                query = query.filter(Jobs_cache.job_name == job_name)
             if plugin_id:
-                filters["plugin_id"] = plugin_id
-
-            query = session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id)
-
-            if filters:
-                query = query.filter_by(**filters)
-
-            jobs = {}
-            for job in query:
-                jobs[job.name] = job.plugin_id
-
-            if not jobs:
-                return []
+                query = query.filter(Jobs.plugin_id == plugin_id)
 
             cache_files = []
-            for cache in db_cache:
-                if cache.job_name not in jobs:
-                    continue
-                cache_files.append(
-                    {
-                        "plugin_id": jobs[cache.job_name],
-                        "job_name": cache.job_name,
-                        "service_id": cache.service_id,
-                        "file_name": cache.file_name,
-                        "last_update": cache.last_update if cache.last_update is not None else "Never",
-                        "checksum": cache.checksum,
-                    }
-                )
-                if with_data:
-                    cache_files[-1]["data"] = self._blob_load(
+            for cache in query.all():
+                cache_file = {
+                    "plugin_id": cache.plugin_id,
+                    "job_name": cache.job_name,
+                    "service_id": cache.service_id,
+                    "file_name": cache.file_name,
+                    "last_update": cache.last_update if cache.last_update is not None else "Never",
+                    "checksum": cache.checksum,
+                }
+                if with_data and (not data_job_name or cache.job_name == data_job_name):
+                    cache_file["data"] = self._blob_load(
                         session,
                         f"bw_jobs_cache:{cache.id}",
                         cache.data,
                         lambda cache_id=cache.id: session.query(Jobs_cache.data).filter_by(id=cache_id).scalar(),
                     )
+                cache_files.append(cache_file)
 
             return cache_files
 
